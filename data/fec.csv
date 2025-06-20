@@ -1,0 +1,446 @@
+JournalCode	JournalLib	EcritureNum	EcritureDate	CompteNum	CompteLib	CompAuxNum	CompAuxLib	PieceRef	PieceDate	EcritureLib	Debit	Credit	EcritureLet	DateLet	ValidDate	Montantdevise	Idevise
+HA	Journal d'achat	1	20210509	455000001	Associés - Comptes courants			7	20210509	Relevé O-04L76063159331348 du 09/05/2021	0,0	35,99			20230720	0,00	EUR
+HA	Journal d'achat	1	20210509	613	Locations			7	20210509	Relevé O-04L76063159331348 du 09/05/2021	35,99	0,0			20230720	0,00	EUR
+HA	Journal d'achat	2	20210517	455000001	Associés - Comptes courants			12	20210517	Facture du 17/05/2021	0,0	45,69			20230720	0,00	EUR
+HA	Journal d'achat	2	20210517	625	Déplacements, missions et réceptions			12	20210517	Facture du 17/05/2021	45,69	0,0			20230720	0,00	EUR
+HA	Journal d'achat	3	20210523	455000001	Associés - Comptes courants			17	20210523	Facture du 23/05/2021	0,0	50,43			20230720	0,00	EUR
+HA	Journal d'achat	3	20210523	625	Déplacements, missions et réceptions			17	20210523	Facture du 23/05/2021	50,43	0,0			20230720	0,00	EUR
+HA	Journal d'achat	4	20210609	455000001	Associés - Comptes courants			4	20210609	Facture O-1J286802V3622104R du 09/06/2021	0,0	35,99			20230720	0,00	EUR
+HA	Journal d'achat	4	20210609	625	Déplacements, missions et réceptions			4	20210609	Facture O-1J286802V3622104R du 09/06/2021	35,99	0,0			20230720	0,00	EUR
+HA	Journal d'achat	5	20210619	455000001	Associés - Comptes courants			16	20210619	Facture du 19/06/2021	0,0	47,99			20230720	0,00	EUR
+HA	Journal d'achat	5	20210619	625	Déplacements, missions et réceptions			16	20210619	Facture du 19/06/2021	47,99	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	6	20210701	6270000003	Services bancaires et assimilés (Pas de TVA)			28	20210701	Services bancaires et assimilés	60,0	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	6	20210701	5121001	LCL - LCL			28	20210701	Services bancaires et assimilés	0,0	60,0			20230720	0,00	EUR
+HA	Journal d'achat	7	20210703	455000001	Associés - Comptes courants			19	20210703	Facture du 03/07/2021	0,0	50,43			20230720	0,00	EUR
+HA	Journal d'achat	7	20210703	625	Déplacements, missions et réceptions			19	20210703	Facture du 03/07/2021	50,43	0,0			20230720	0,00	EUR
+HA	Journal d'achat	8	20210705	455000001	Associés - Comptes courants			31	20210705	Facture du 05/07/2021	0,0	50,43			20230720	0,00	EUR
+HA	Journal d'achat	8	20210705	625	Déplacements, missions et réceptions			31	20210705	Facture du 05/07/2021	50,43	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	9	20210708	401	Fournisseurs	401FOURNISSEURATTENTE	FOURNISSEURS	1	20210708	AMH EXPERTISE	102,0	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	9	20210708	5121001	LCL - LCL			1	20210708	AMH EXPERTISE	0,0	102,0			20230720	0,00	EUR
+HA	Journal d'achat	10	20210709	455000001	Associés - Comptes courants			8	20210709	Facture O-9TG58432U9093705E du 09/07/2021	0,0	59,99			20230720	0,00	EUR
+HA	Journal d'achat	10	20210709	455000001	Associés - Comptes courants			8	20210709	Facture O-9TG58432U9093705E du 09/07/2021	59,99	0,0			20230720	0,00	EUR
+HA	Journal d'achat	11	20210714	455000001	Associés - Comptes courants			37	20210714	Facture du 14/07/2021	0,0	60,22			20230720	0,00	EUR
+HA	Journal d'achat	11	20210714	625	Déplacements, missions et réceptions			37	20210714	Facture du 14/07/2021	60,22	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	12	20210720	6160000003	Primes d'assurances (Pas de TVA)			2	20210720	ASSURANCE LCL	5,51	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	12	20210720	5121001	LCL - LCL			2	20210720	ASSURANCE LCL	0,0	5,51			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	13	20210721	6270000003	Services bancaires et assimilés (Pas de TVA)			3	20210721	Services bancaires et assimilés	0,0	60,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	13	20210721	5121001	LCL - LCL			3	20210721	Services bancaires et assimilés	60,0	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	14	20210721	6270000003	Services bancaires et assimilés (Pas de TVA)			4	20210721	Services bancaires et assimilés	19,2	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	14	20210721	5121001	LCL - LCL			4	20210721	Services bancaires et assimilés	0,0	19,2			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	15	20210802	6160000003	Primes d'assurances (Pas de TVA)			5	20210802	Frais postaux et frais de télécommunications	7,11	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	15	20210802	5121001	LCL - LCL			5	20210802	Frais postaux et frais de télécommunications	0,0	7,11			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	16	20210809	401	Fournisseurs	401FOURNISSEURATTENTE	FOURNISSEURS	7	20210809	AMH EXPERTISE	102,0	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	16	20210809	5121001	LCL - LCL			7	20210809	AMH EXPERTISE	0,0	102,0			20230720	0,00	EUR
+HA	Journal d'achat	17	20210809	455000001	Associés - Comptes courants			5	20210809	Facture O-1R822031E1236674V du 09/08/2021	0,0	59,99			20230720	0,00	EUR
+HA	Journal d'achat	17	20210809	455000001	Associés - Comptes courants			5	20210809	Facture O-1R822031E1236674V du 09/08/2021	59,99	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	18	20210816	455000001	Associés - Comptes courants			8	20210816	Associés - Comptes courants	0,0	300,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	18	20210816	5121001	LCL - LCL			8	20210816	Associés - Comptes courants	300,0	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	19	20210817	455000001	Associés - Comptes courants			9	20210817	Associés - Comptes courants	0,0	40,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	19	20210817	5121001	LCL - LCL			9	20210817	Associés - Comptes courants	40,0	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	20	20210831	6270000003	Services bancaires et assimilés (Pas de TVA)			10	20210831	Services bancaires et assimilés	19,2	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	20	20210831	5121001	LCL - LCL			10	20210831	Services bancaires et assimilés	0,0	19,2			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	21	20210901	6160000003	Primes d'assurances (Pas de TVA)			11	20210901	Primes d'assurances	7,11	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	21	20210901	5121001	LCL - LCL			11	20210901	Primes d'assurances	0,0	7,11			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	22	20210901	6270000003	Services bancaires et assimilés (Pas de TVA)			12	20210901	Services bancaires et assimilés	4,1	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	22	20210901	5121001	LCL - LCL			12	20210901	Services bancaires et assimilés	0,0	4,1			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	23	20210908	401	Fournisseurs	401FOURNISSEURATTENTE	FOURNISSEURS	13	20210908	AMH EXPERTISE	102,0	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	23	20210908	5121001	LCL - LCL			13	20210908	AMH EXPERTISE	0,0	102,0			20230720	0,00	EUR
+HA	Journal d'achat	24	20210909	455000001	Associés - Comptes courants			6	20210909	Facture O-3PG902038C953674T du 09/09/2021	0,0	59,99			20230720	0,00	EUR
+HA	Journal d'achat	24	20210909	455000001	Associés - Comptes courants			6	20210909	Facture O-3PG902038C953674T du 09/09/2021	59,99	0,0			20230720	0,00	EUR
+HA	Journal d'achat	25	20210920	455000001	Associés - Comptes courants			28	20210920	Facture du 20/09/2021	0,0	34,16			20230720	0,00	EUR
+HA	Journal d'achat	25	20210920	625	Déplacements, missions et réceptions			28	20210920	Facture du 20/09/2021	34,16	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	26	20210930	6270000003	Services bancaires et assimilés (Pas de TVA)			14	20210930	Services bancaires et assimilés	9,6	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	26	20210930	5121001	LCL - LCL			14	20210930	Services bancaires et assimilés	0,0	9,6			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	27	20211001	6270000003	Services bancaires et assimilés (Pas de TVA)			16	20211001	Services bancaires et assimilés	4,1	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	27	20211001	5121001	LCL - LCL			16	20211001	Services bancaires et assimilés	0,0	4,1			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	28	20211001	6270000003	Services bancaires et assimilés (Pas de TVA)			17	20211001	Services bancaires et assimilés	77,9	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	28	20211001	5121001	LCL - LCL			17	20211001	Services bancaires et assimilés	0,0	77,9			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	29	20211001	6160000003	Primes d'assurances (Pas de TVA)			18	20211001	Primes d'assurances	7,11	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	29	20211001	5121001	LCL - LCL			18	20211001	Primes d'assurances	0,0	7,11			20230720	0,00	EUR
+HA	Journal d'achat	30	20211002	455000001	Associés - Comptes courants			23	20211002	Facture du 02/10/2021	0,0	117,98			20230720	0,00	EUR
+HA	Journal d'achat	30	20211002	625	Déplacements, missions et réceptions			23	20211002	Facture du 02/10/2021	117,98	0,0			20230720	0,00	EUR
+HA	Journal d'achat	31	20211008	455000001	Associés - Comptes courants			29	20211008	Facture du 08/10/2021	0,0	77,75			20230720	0,00	EUR
+HA	Journal d'achat	31	20211008	625	Déplacements, missions et réceptions			29	20211008	Facture du 08/10/2021	77,75	0,0			20230720	0,00	EUR
+HA	Journal d'achat	32	20211009	455000001	Associés - Comptes courants			10	20211009	Facture O-3N32343148496083K du 09/10/2021	0,0	59,99			20230720	0,00	EUR
+HA	Journal d'achat	32	20211009	455000001	Associés - Comptes courants			10	20211009	Facture O-3N32343148496083K du 09/10/2021	59,99	0,0			20230720	0,00	EUR
+HA	Journal d'achat	33	20211017	455000001	Associés - Comptes courants			22	20211017	Facture du 17/10/2021	0,0	49,79			20230720	0,00	EUR
+HA	Journal d'achat	33	20211017	625	Déplacements, missions et réceptions			22	20211017	Facture du 17/10/2021	49,79	0,0			20230720	0,00	EUR
+HA	Journal d'achat	34	20211018	455000001	Associés - Comptes courants			21	20211018	Facture du 18/10/2021	0,0	51,19			20230720	0,00	EUR
+HA	Journal d'achat	34	20211018	625	Déplacements, missions et réceptions			21	20211018	Facture du 18/10/2021	51,19	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	35	20211026	6160000003	Primes d'assurances (Pas de TVA)			19	20211026	Primes d'assurances	0,0	14,22			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	35	20211026	5121001	LCL - LCL			19	20211026	Primes d'assurances	14,22	0,0			20230720	0,00	EUR
+HA	Journal d'achat	36	20211027	455000001	Associés - Comptes courants			30	20211027	Facture du 27/10/2021	0,0	80,8			20230720	0,00	EUR
+HA	Journal d'achat	36	20211027	625	Déplacements, missions et réceptions			30	20211027	Facture du 27/10/2021	80,8	0,0			20230720	0,00	EUR
+HA	Journal d'achat	37	20211028	455000001	Associés - Comptes courants			26	20211028	Facture du 28/10/2021	0,0	34,19			20230720	0,00	EUR
+HA	Journal d'achat	37	20211028	625	Déplacements, missions et réceptions			26	20211028	Facture du 28/10/2021	34,19	0,0			20230720	0,00	EUR
+HA	Journal d'achat	38	20211029	455000001	Associés - Comptes courants			24	20211029	Facture du 29/10/2021	0,0	56,11			20230720	0,00	EUR
+HA	Journal d'achat	38	20211029	625	Déplacements, missions et réceptions			24	20211029	Facture du 29/10/2021	56,11	0,0			20230720	0,00	EUR
+HA	Journal d'achat	39	20211030	455000001	Associés - Comptes courants			13	20211030	Facture du 30/10/2021	0,0	37,8			20230720	0,00	EUR
+HA	Journal d'achat	39	20211030	625	Déplacements, missions et réceptions			13	20211030	Facture du 30/10/2021	37,8	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	40	20211031	6270000003	Services bancaires et assimilés (Pas de TVA)			20	20211031	Services bancaires et assimilés	19,2	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	40	20211031	5121001	LCL - LCL			20	20211031	Services bancaires et assimilés	0,0	19,2			20230720	0,00	EUR
+HA	Journal d'achat	41	20211101	455000001	Associés - Comptes courants			23	20211101	Facture du 01/11/2021	0,0	80,86			20230720	0,00	EUR
+HA	Journal d'achat	41	20211101	625	Déplacements, missions et réceptions			23	20211101	Facture du 01/11/2021	80,86	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	42	20211102	6270000003	Services bancaires et assimilés (Pas de TVA)			21	20211102	Services bancaires et assimilés	4,1	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	42	20211102	5121001	LCL - LCL			21	20211102	Services bancaires et assimilés	0,0	4,1			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	43	20211102	6160000003	Primes d'assurances (Pas de TVA)			22	20211102	Primes d'assurances	7,11	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	43	20211102	5121001	LCL - LCL			22	20211102	Primes d'assurances	0,0	7,11			20230720	0,00	EUR
+HA	Journal d'achat	44	20211104	455000001	Associés - Comptes courants			14	20211104	Facture du 04/11/2021	0,0	47,05			20230720	0,00	EUR
+HA	Journal d'achat	44	20211104	625	Déplacements, missions et réceptions			14	20211104	Facture du 04/11/2021	47,05	0,0			20230720	0,00	EUR
+HA	Journal d'achat	45	20211105	455000001	Associés - Comptes courants			1	20211105	Facture du 05/11/2021	0,0	38,38			20230720	0,00	EUR
+HA	Journal d'achat	45	20211105	625	Déplacements, missions et réceptions			1	20211105	Facture du 05/11/2021	38,38	0,0			20230720	0,00	EUR
+HA	Journal d'achat	46	20211106	455000001	Associés - Comptes courants			36	20211106	Facture 8410 du 06/11/2021	0,0	60,48			20230720	0,00	EUR
+HA	Journal d'achat	46	20211106	625	Déplacements, missions et réceptions			36	20211106	Facture 8410 du 06/11/2021	60,48	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	47	20211108	401	Fournisseurs	401FOURNISSEURATTENTE	FOURNISSEURS	29	20211108	AMH EXPERTISE	102,0	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	47	20211108	5121001	LCL - LCL			29	20211108	AMH EXPERTISE	0,0	102,0			20230720	0,00	EUR
+HA	Journal d'achat	48	20211109	455000001	Associés - Comptes courants			7	20211109	Facture O-2KE48919NJ962803M du 09/11/2021	0,0	59,99			20230720	0,00	EUR
+HA	Journal d'achat	48	20211109	455000001	Associés - Comptes courants			7	20211109	Facture O-2KE48919NJ962803M du 09/11/2021	59,99	0,0			20230720	0,00	EUR
+HA	Journal d'achat	49	20211114	455000001	Associés - Comptes courants			16	20211114	Facture du 14/11/2021	0,0	45,29			20230720	0,00	EUR
+HA	Journal d'achat	49	20211114	625	Déplacements, missions et réceptions			16	20211114	Facture du 14/11/2021	45,29	0,0			20230720	0,00	EUR
+HA	Journal d'achat	50	20211115	455000001	Associés - Comptes courants			25	20211115	Facture du 15/11/2021	0,0	45,29			20230720	0,00	EUR
+HA	Journal d'achat	50	20211115	625	Déplacements, missions et réceptions			25	20211115	Facture du 15/11/2021	45,29	0,0			20230720	0,00	EUR
+HA	Journal d'achat	51	20211120	455000001	Associés - Comptes courants			18	20211120	Facture du 20/11/2021	0,0	56,48			20230720	0,00	EUR
+HA	Journal d'achat	51	20211120	625	Déplacements, missions et réceptions			18	20211120	Facture du 20/11/2021	56,48	0,0			20230720	0,00	EUR
+HA	Journal d'achat	52	20211123	455000001	Associés - Comptes courants			20	20211123	Facture du 23/11/2021	0,0	51,19			20230720	0,00	EUR
+HA	Journal d'achat	52	20211123	625	Déplacements, missions et réceptions			20	20211123	Facture du 23/11/2021	51,19	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	53	20211130	6270000003	Services bancaires et assimilés (Pas de TVA)			30	20211130	Services bancaires et assimilés	19,2	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	53	20211130	5121001	LCL - LCL			30	20211130	Services bancaires et assimilés	0,0	19,2			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	54	20211201	6160000003	Primes d'assurances (Pas de TVA)			24	20211201	ASSURANCE LCL	7,11	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	54	20211201	5121001	LCL - LCL			24	20211201	AMH EXPERTISE	0,0	7,11			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	55	20211201	6270000003	Services bancaires et assimilés (Pas de TVA)			25	20211201	FRAIS BANCAIRES	4,1	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	55	20211201	5121001	LCL - LCL			25	20211201	Services bancaires et assimilés	0,0	4,1			20230720	0,00	EUR
+HA	Journal d'achat	56	20211201	455000001	Associés - Comptes courants			15	20211201	Facture du 01/12/2021	0,0	43,98			20230720	0,00	EUR
+HA	Journal d'achat	56	20211201	625	Déplacements, missions et réceptions			15	20211201	Facture du 01/12/2021	43,98	0,0			20230720	0,00	EUR
+HA	Journal d'achat	57	20211206	455000001	Associés - Comptes courants			3	20211206	Facture du 06/12/2021	0,0	33,8			20230720	0,00	EUR
+HA	Journal d'achat	57	20211206	625	Déplacements, missions et réceptions			3	20211206	Facture du 06/12/2021	33,8	0,0			20230720	0,00	EUR
+HA	Journal d'achat	58	20211209	455000001	Associés - Comptes courants			2	20211209	Facture O-5V994962FA382710N du 09/12/2021	0,0	59,99			20230720	0,00	EUR
+HA	Journal d'achat	58	20211209	455000001	Associés - Comptes courants			2	20211209	Facture O-5V994962FA382710N du 09/12/2021	59,99	0,0			20230720	0,00	EUR
+HA	Journal d'achat	59	20211210	455000001	Associés - Comptes courants			43	20211210	Facture 9483 du 10/12/2021	0,0	60,48			20230720	0,00	EUR
+HA	Journal d'achat	59	20211210	625	Déplacements, missions et réceptions			43	20211210	Facture 9483 du 10/12/2021	60,48	0,0			20230720	0,00	EUR
+HA	Journal d'achat	60	20211215	455000001	Associés - Comptes courants			34	20211215	Facture du 15/12/2021	0,0	71,98			20230720	0,00	EUR
+HA	Journal d'achat	60	20211215	625	Déplacements, missions et réceptions			34	20211215	Facture du 15/12/2021	71,98	0,0			20230720	0,00	EUR
+HA	Journal d'achat	61	20211218	455000001	Associés - Comptes courants			27	20211218	Facture du 18/12/2021	0,0	48,2			20230720	0,00	EUR
+HA	Journal d'achat	61	20211218	625	Déplacements, missions et réceptions			27	20211218	Facture du 18/12/2021	48,2	0,0			20230720	0,00	EUR
+HA	Journal d'achat	62	20211218	455000001	Associés - Comptes courants			42	20211218	Facture du 18/12/2021	0,0	24,6			20230720	0,00	EUR
+HA	Journal d'achat	62	20211218	625	Déplacements, missions et réceptions			42	20211218	Facture du 18/12/2021	24,6	0,0			20230720	0,00	EUR
+HA	Journal d'achat	63	20211219	455000001	Associés - Comptes courants			32	20211219	Facture du 19/12/2021	0,0	38,15			20230720	0,00	EUR
+HA	Journal d'achat	63	20211219	625	Déplacements, missions et réceptions			32	20211219	Facture du 19/12/2021	38,15	0,0			20230720	0,00	EUR
+HA	Journal d'achat	64	20211221	455000001	Associés - Comptes courants			33	20211221	Facture du 21/12/2021	0,0	56,5			20230720	0,00	EUR
+HA	Journal d'achat	64	20211221	625	Déplacements, missions et réceptions			33	20211221	Facture du 21/12/2021	56,5	0,0			20230720	0,00	EUR
+HA	Journal d'achat	65	20211222	455000001	Associés - Comptes courants			38	20211222	Facture du 22/12/2021	0,0	26,85			20230720	0,00	EUR
+HA	Journal d'achat	65	20211222	625	Déplacements, missions et réceptions			38	20211222	Facture du 22/12/2021	26,85	0,0			20230720	0,00	EUR
+HA	Journal d'achat	66	20211223	455000001	Associés - Comptes courants			41	20211223	Facture du 23/12/2021	0,0	6,49			20230720	0,00	EUR
+HA	Journal d'achat	66	20211223	625	Déplacements, missions et réceptions			41	20211223	Facture du 23/12/2021	6,49	0,0			20230720	0,00	EUR
+HA	Journal d'achat	67	20211224	455000001	Associés - Comptes courants			40	20211224	Facture du 24/12/2021	0,0	18,65			20230720	0,00	EUR
+HA	Journal d'achat	67	20211224	625	Déplacements, missions et réceptions			40	20211224	Facture du 24/12/2021	18,65	0,0			20230720	0,00	EUR
+HA	Journal d'achat	68	20211225	455000001	Associés - Comptes courants			39	20211225	Facture du 25/12/2021	0,0	21,69			20230720	0,00	EUR
+HA	Journal d'achat	68	20211225	625	Déplacements, missions et réceptions			39	20211225	Facture du 25/12/2021	21,69	0,0			20230720	0,00	EUR
+HA	Journal d'achat	69	20211230	455000001	Associés - Comptes courants			35	20211230	Facture du 30/12/2021	0,0	44,85			20230720	0,00	EUR
+HA	Journal d'achat	69	20211230	625	Déplacements, missions et réceptions			35	20211230	Facture du 30/12/2021	44,85	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	70	20211231	6270000003	Services bancaires et assimilés (Pas de TVA)			26	20211231	Services bancaires et assimilés	9,6	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	70	20211231	5121001	LCL - LCL			26	20211231	Services bancaires et assimilés	0,0	9,6			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	71	20211231	6270000003	Services bancaires et assimilés (Pas de TVA)			27	20211231	Services bancaires et assimilés	82,42	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	71	20211231	5121001	LCL - LCL			27	20211231	Services bancaires et assimilés	0,0	82,42			20230720	0,00	EUR
+OD	Journal des opérations diverses	72	20211231	622	Rémunérations d'intermédiaires et honoraires			1	20211231	Rémunérations d'intermédiaires et honoraires	936,0	0,0			20230720	0,00	EUR
+OD	Journal des opérations diverses	72	20211231	4081	Fournisseurs Factures non parvenues			1	20211231	Rémunérations d'intermédiaires et honoraires	0,0	936,0			20230720	0,00	EUR
+OD	Journal des opérations diverses	73	20211231	622	Rémunérations d'intermédiaires et honoraires			2	20211231	Rémunérations d'intermédiaires et honoraires	408,0	0,0			20230720	0,00	EUR
+OD	Journal des opérations diverses	73	20211231	4081	Fournisseurs Factures non parvenues			2	20211231	Rémunérations d'intermédiaires et honoraires	0,0	408,0			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	129	Résultat de l'exercice - perte			Non dispo	20220101	Résultat de l'exercice	3481,74	0,0			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	401	Fournisseurs	401FOURNISSEURATTENTE	FOURNISSEURS	Non dispo	20220101	AMH EXPERTISE	102,0	0,0			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	401	Fournisseurs	401FOURNISSEURATTENTE	FOURNISSEURS	Non dispo	20220101	AMH EXPERTISE	102,0	0,0			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	401	Fournisseurs	401FOURNISSEURATTENTE	FOURNISSEURS	Non dispo	20220101	AMH EXPERTISE	102,0	0,0			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	401	Fournisseurs	401FOURNISSEURATTENTE	FOURNISSEURS	Non dispo	20220101	AMH EXPERTISE	102,0	0,0			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	4081	Fournisseurs Factures non parvenues			Non dispo	20220101	Rémunérations d'intermédiaires et honoraires	0,0	408,0			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	4081	Fournisseurs Factures non parvenues			Non dispo	20220101	Rémunérations d'intermédiaires et honoraires	0,0	936,0			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	455000002	Associés - Comptes courants			Non dispo	20220101	A-nouveaux au 01/01/2022	0,0	2178,18			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	Associés - Comptes courants	300,0	0,0			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	AMH EXPERTISE	0,0	102,0			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	AMH EXPERTISE	0,0	102,0			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	Services bancaires et assimilés	0,0	19,2			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	Associés - Comptes courants	40,0	0,0			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	Primes d'assurances	0,0	7,11			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	Services bancaires et assimilés	0,0	77,9			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	Frais postaux et frais de télécommunications	0,0	7,11			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	Services bancaires et assimilés	0,0	19,2			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	ASSURANCE LCL	0,0	5,51			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	Primes d'assurances	0,0	7,11			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	AMH EXPERTISE	0,0	7,11			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	AMH EXPERTISE	0,0	102,0			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	Primes d'assurances	14,22	0,0			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	Services bancaires et assimilés	0,0	4,1			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	AMH EXPERTISE	0,0	102,0			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	Services bancaires et assimilés	0,0	19,2			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	Services bancaires et assimilés	0,0	4,1			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	Services bancaires et assimilés	0,0	60,0			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	Services bancaires et assimilés	0,0	19,2			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	Services bancaires et assimilés	0,0	4,1			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	Services bancaires et assimilés	60,0	0,0			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	Services bancaires et assimilés	0,0	82,42			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	Services bancaires et assimilés	0,0	9,6			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	Services bancaires et assimilés	0,0	4,1			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	Services bancaires et assimilés	0,0	9,6			20230720	0,00	EUR
+AN	Journal des à-nouveaux	74	20220101	5121001	LCL - LCL			Non dispo	20220101	Primes d'assurances	0,0	7,11			20230720	0,00	EUR
+OD	Journal des opérations diverses	75	20220101	129	Résultat de l'exercice - perte			3	20220101	Perte de l'exercice	0,0	3481,74			20230720	0,00	EUR
+OD	Journal des opérations diverses	75	20220101	119	Report à nouveau - solde débiteur			3	20220101	Perte de l'exercice	3481,74	0,0			20230720	0,00	EUR
+EXT	Journal d'EXTOURNE	76	20220101	4081	Fournisseurs Factures non parvenues			2	20220101	EXTOURNE FNP SG	936,0	0,0			20230720	0,00	EUR
+EXT	Journal d'EXTOURNE	76	20220101	6220000003	Rémunérations d'intermédiaires et honoraires (Pas de TVA)			2	20220101	EXTOURNE FNP SG	0,0	936,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	77	20220101	6270000003	Services bancaires et assimilés (Pas de TVA)			13	20220101	frais bancaires	4,1	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	77	20220101	5121001	LCL - LCL			13	20220101	TRAIT.IRREG.FONCT.CTE 12/21	0,0	9,6			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	77	20220101	5121001	LCL - LCL			13	20220101	TRAIT.IRREG.FONCT.CTE 12/21	5,5	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	78	20220103	6270000003	Services bancaires et assimilés (Pas de TVA)			14	20220103	PRLV SEPA ASSURANCE LCL	7,11	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	78	20220103	5121001	LCL - LCL			14	20220103	PRLV SEPA ASSURANCE LCL	0,0	7,11			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	79	20220201	6270000003	Services bancaires et assimilés (Pas de TVA)			3	20220201	TRAIT.IRREG.FONCT.CTE 01/22	19,2	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	79	20220201	5121001	LCL - LCL			3	20220201	TRAIT.IRREG.FONCT.CTE 01/22	0,0	19,2			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	80	20220201	6270000003	Services bancaires et assimilés (Pas de TVA)			16	20220201	PRLV SEPA ASSURANCE LCL	7,11	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	80	20220201	5121001	LCL - LCL			16	20220201	PRLV SEPA ASSURANCE LCL	0,0	7,11			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	80	20220201	6270000003	Services bancaires et assimilés (Pas de TVA)			16	20220201	PRLV SEPA ASSURANCE LCL	4,1	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	80	20220201	5121001	LCL - LCL			16	20220201	PRLV SEPA ASSURANCE LCL	0,0	4,1			20230720	0,00	EUR
+HA	Journal d'achat	81	20220223	401	Fournisseurs	401SAULIEUGITTINGERCONSEILS	SAULIEU & GITTINGER CONSEILS PARIS	11	20220223	Facture SAULIEU & GITTINGER CONSEILS - PARIS du 23/02/2022	0,0	936,0			20230720	0,00	EUR
+HA	Journal d'achat	81	20220223	6220000003	Rémunérations d'intermédiaires et honoraires (Pas de TVA)			11	20220223	Facture SAULIEU & GITTINGER CONSEILS - PARIS du 23/02/2022	936,0	0,0			20230720	0,00	EUR
+OD	Journal des opérations diverses	82	20220224	401	Fournisseurs	401SAULIEUGITTINGERCONSEILS	SAULIEU & GITTINGER CONSEILS PARIS	4	20220224	SAULIEU & GITTINGER CONSEILS - PARIS	936,0	0,0			20230720	0,00	EUR
+OD	Journal des opérations diverses	82	20220224	467	Autres comptes débiteurs ou créditeurs			4	20220224	SAULIEU & GITTINGER CONSEILS - PARIS	0,0	936,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	83	20220301	6270000003	Services bancaires et assimilés (Pas de TVA)			5	20220301	TRAIT.IRREG.FONCT.CTE 02/22	9,6	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	83	20220301	5121001	LCL - LCL			5	20220301	TRAIT.IRREG.FONCT.CTE 02/22	0,0	9,6			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	84	20220301	6270000003	Services bancaires et assimilés (Pas de TVA)			15	20220301	PRLV SEPA ASSURANCE LCL	7,11	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	84	20220301	5121001	LCL - LCL			15	20220301	PRLV SEPA ASSURANCE LCL	0,0	7,11			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	84	20220301	6270000003	Services bancaires et assimilés (Pas de TVA)			15	20220301	Non dispo	4,1	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	84	20220301	5121001	LCL - LCL			15	20220301	Non dispo	0,0	4,1			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	85	20220401	6270000003	Services bancaires et assimilés (Pas de TVA)			19	20220401	Services bancaires et assimilés	4,1	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	85	20220401	5121001	LCL - LCL			19	20220401	Services bancaires et assimilés	0,0	4,1			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	86	20220401	6270000003	Services bancaires et assimilés (Pas de TVA)			7	20220401	TRAIT.IRREG.FONCT.CTE 03/22	9,6	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	86	20220401	5121001	LCL - LCL			7	20220401	TRAIT.IRREG.FONCT.CTE 03/22	0,0	9,6			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	87	20220401	6270000003	Services bancaires et assimilés (Pas de TVA)			8	20220401	PRLV SEPA ASSURANCE LCL	7,11	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	87	20220401	5121001	LCL - LCL			8	20220401	PRLV SEPA ASSURANCE LCL	0,0	7,11			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	88	20220404	455000002	Associés - Comptes courants			9	20220404	VIRT DE 00406/076758/Y	0,0	500,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	88	20220404	5121001	LCL - LCL			9	20220404	VIRT DE 00406/076758/Y	500,0	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	89	20220501	6270000003	Services bancaires et assimilés (Pas de TVA)			18	20220501	TRAIT.IRREG.FONCT.CTE 04/22	19,2	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	89	20220501	5121001	LCL - LCL			18	20220501	TRAIT.IRREG.FONCT.CTE 04/22	0,0	19,2			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	89	20220501	6270000003	Services bancaires et assimilés (Pas de TVA)			18	20220501	TRAIT.IRREG.FONCT.CTE 04/22	89,19	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	89	20220501	5121001	LCL - LCL			18	20220501	TRAIT.IRREG.FONCT.CTE 04/22	0,0	89,19			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	89	20220501	6270000003	Services bancaires et assimilés (Pas de TVA)			18	20220501	TRAIT.IRREG.FONCT.CTE 03/22	9,6	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	89	20220501	5121001	LCL - LCL			18	20220501	TRAIT.IRREG.FONCT.CTE 03/22	0,0	9,6			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	90	20220502	6270000003	Services bancaires et assimilés (Pas de TVA)			10	20220502	PRLV SEPA ASSURANCE LCL	5,71	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	90	20220502	5121001	LCL - LCL			10	20220502	PRLV SEPA ASSURANCE LCL	0,0	7,11			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	90	20220502	5121001	LCL - LCL			10	20220502	PRLV SEPA ASSURANCE LCL	1,4	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	91	20220601	6270000003	Services bancaires et assimilés (Pas de TVA)			11	20220601	TRAIT.IRREG.FONCT.CTE 05/22	9,6	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	91	20220601	5121001	LCL - LCL			11	20220601	TRAIT.IRREG.FONCT.CTE 05/22	0,0	9,6			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	92	20220601	6270000003	Services bancaires et assimilés (Pas de TVA)			12	20220601	PRLV SEPA ASSURANCE LCL	7,11	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	92	20220601	5121001	LCL - LCL			12	20220601	PRLV SEPA ASSURANCE LCL	0,0	7,11			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	93	20220630	6270000003	Services bancaires et assimilés (Pas de TVA)			10	20220630	TRAIT.IRREG.FONCT.CTE 06/22	9,6	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	93	20220630	5121001	LCL - LCL			10	20220630	TRAIT.IRREG.FONCT.CTE 06/22	0,0	9,6			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	94	20220701	6270000003	Services bancaires et assimilés (Pas de TVA)			11	20220701	RESULTAT ARRETE COMPTE 30062022	80,12	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	94	20220701	5121001	LCL - LCL			11	20220701	RESULTAT ARRETE COMPTE 30062022	0,0	80,12			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	95	20220701	6270000003	Services bancaires et assimilés (Pas de TVA)			12	20220701	ABON LCL ACCESS 004,10EUR	4,1	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	95	20220701	5121001	LCL - LCL			12	20220701	ABON LCL ACCESS 004,10EUR	0,0	4,1			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	96	20220701	6270000003	Services bancaires et assimilés (Pas de TVA)			13	20220701	ASSURANCE LCL	7,42	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	96	20220701	5121001	LCL - LCL			13	20220701	ASSURANCE LCL	0,0	7,42			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	97	20220731	6270000003	Services bancaires et assimilés (Pas de TVA)			14	20220731	TRAIT.IRREG.FONCT.CTE 07/22	19,2	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	97	20220731	5121001	LCL - LCL			14	20220731	TRAIT.IRREG.FONCT.CTE 07/22	0,0	19,2			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	98	20220801	6270000003	Services bancaires et assimilés (Pas de TVA)			16	20220801	ABON LCL ACCESS 004,10EUR	4,1	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	98	20220801	5121001	LCL - LCL			16	20220801	ABON LCL ACCESS 004,10EUR	0,0	4,1			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	99	20220801	6270000003	Services bancaires et assimilés (Pas de TVA)			17	20220801	ASSURANCE LCL	7,46	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	99	20220801	5121001	LCL - LCL			17	20220801	ASSURANCE LCL	0,0	7,46			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	100	20220831	6270000003	Services bancaires et assimilés (Pas de TVA)			18	20220831	TRAIT.IRREG.FONCT.CTE 08/22	9,6	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	100	20220831	5121001	LCL - LCL			18	20220831	TRAIT.IRREG.FONCT.CTE 08/22	0,0	9,6			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	101	20220901	6270000003	Services bancaires et assimilés (Pas de TVA)			20	20220901	ABON LCL ACCESS 004,10EUR	4,1	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	101	20220901	5121001	LCL - LCL			20	20220901	ABON LCL ACCESS 004,10EUR	0,0	4,1			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	102	20220901	6270000003	Services bancaires et assimilés (Pas de TVA)			21	20220901	ASSURANCE LCL	7,46	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	102	20220901	5121001	LCL - LCL			21	20220901	ASSURANCE LCL	0,0	7,46			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	103	20220902	455000002	Associés - Comptes courants			22	20220902	VIREMENT REGUL NODANCH	0,0	300,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	103	20220902	5121001	LCL - LCL			22	20220902	VIREMENT REGUL NODANCH	300,0	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	104	20220930	6270000003	Services bancaires et assimilés (Pas de TVA)			23	20220930	TRAIT.IRREG.FONCT.CTE 09/22	9,6	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	104	20220930	5121001	LCL - LCL			23	20220930	TRAIT.IRREG.FONCT.CTE 09/22	0,0	9,6			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	105	20221003	6270000003	Services bancaires et assimilés (Pas de TVA)			24	20221003	RESULTAT ARRETE COMPTE	82,37	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	105	20221003	5121001	LCL - LCL			24	20221003	RESULTAT ARRETE COMPTE	0,0	82,37			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	106	20221003	6270000003	Services bancaires et assimilés (Pas de TVA)			25	20221003	ABON LCL ACCESS	4,1	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	106	20221003	5121001	LCL - LCL			25	20221003	ABON LCL ACCESS	0,0	4,1			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	107	20221003	6270000003	Services bancaires et assimilés (Pas de TVA)			26	20221003	ASSURANCE LCL	7,46	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	107	20221003	5121001	LCL - LCL			26	20221003	ASSURANCE LCL	0,0	7,46			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	108	20221019	455000002	Associés - Comptes courants			28	20221019	M PATRICK NODANCHE	0,0	300,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	108	20221019	5121001	LCL - LCL			28	20221019	M PATRICK NODANCHE	300,0	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	109	20221031	6270000003	Services bancaires et assimilés (Pas de TVA)			27	20221031	TRAIT.IRREG.FONCT.CTE 10/2	9,6	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	109	20221031	5121001	LCL - LCL			27	20221031	TRAIT.IRREG.FONCT.CTE 10/2	0,0	9,6			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	110	20221102	6270000003	Services bancaires et assimilés (Pas de TVA)			29	20221102	ASSURANCE LCL	7,46	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	110	20221102	5121001	LCL - LCL			29	20221102	ASSURANCE LCL	0,0	7,46			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	111	20221102	6270000003	Services bancaires et assimilés (Pas de TVA)			30	20221102	ABON LCL ACCESS 004,10EUR	4,1	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	111	20221102	5121001	LCL - LCL			30	20221102	ABON LCL ACCESS 004,10EUR	0,0	4,1			20230720	0,00	EUR
+OD	Journal des opérations diverses	112	20221201	4081	Fournisseurs Factures non parvenues			6	20221201	FNP SG	0,0	936,0			20230720	0,00	EUR
+OD	Journal des opérations diverses	112	20221201	6220000003	Rémunérations d'intermédiaires et honoraires (Pas de TVA)			6	20221201	FNP SG	936,0	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	113	20221201	6270000003	Services bancaires et assimilés (Pas de TVA)			31	20221201	ASSURANCE LCL	7,46	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	113	20221201	5121001	LCL - LCL			31	20221201	ASSURANCE LCL	0,0	7,46			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	114	20221201	6270000003	Services bancaires et assimilés (Pas de TVA)			32	20221201	ABON LCL ACCESS 004,10EUR	4,1	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	114	20221201	5121001	LCL - LCL			32	20221201	ABON LCL ACCESS 004,10EUR	0,0	4,1			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	115	20221216	6351100003	Contribution Economique Territoriale (Pas de TVA)			33	20221216	CFE	207,0	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	115	20221216	5121001	LCL - LCL			33	20221216	CFE	0,0	207,0			20230720	0,00	EUR
+OD	Journal des opérations diverses	116	20221231	101	Capital			1	20221231	Capital	0,0	100,0			20230720	0,00	EUR
+OD	Journal des opérations diverses	116	20221231	455000002	Associés - Comptes courants			1	20221231	Capital	100,0	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	117	20221231	6270000003	Services bancaires et assimilés (Pas de TVA)			34	20221231	RESULTAT ARRETE COMPTE 31122022	77,34	0,0			20230720	0,00	EUR
+BQ1	Journal de trésorerie - LCL	117	20221231	5121001	LCL - LCL			34	20221231	RESULTAT ARRETE COMPTE 31122022	0,0	77,34			20230720	0,00	EUR
+AN	Journal des à-nouveaux	118	20230101	101	Capital			GXYEFEPUBG	20230101	Report à nouveau	0,0	100,0				0,00	EUR
+AN	Journal des à-nouveaux	118	20230101	119	Report à nouveau - solde débiteur			GXYEFEPUBG	20230101	Report à nouveau	3481,74	0,0				0,00	EUR
+AN	Journal des à-nouveaux	118	20230101	5121001	LCL - LCL			GXYEFEPUBG	20230101	Report à nouveau	0,0	64,96				0,00	EUR
+AN	Journal des à-nouveaux	118	20230101	4081	Fournisseurs Factures non parvenues			GXYEFEPUBG	20230101	2022-01-01 – Rémunérations d'intermédiaires et honoraires	0,0	408,0				0,00	EUR
+AN	Journal des à-nouveaux	118	20230101	4081	Fournisseurs Factures non parvenues			GXYEFEPUBG	20230101	2022-01-01 – Rémunérations d'intermédiaires et honoraires	0,0	936,0				0,00	EUR
+AN	Journal des à-nouveaux	118	20230101	4081	Fournisseurs Factures non parvenues			GXYEFEPUBG	20230101	2022-12-01 – FNP SG	0,0	936,0				0,00	EUR
+AN	Journal des à-nouveaux	118	20230101	4081	Fournisseurs Factures non parvenues			GXYEFEPUBG	20230101	2022-01-01 – EXTOURNE FNP SG	936,0	0,0				0,00	EUR
+AN	Journal des à-nouveaux	118	20230101	401	Fournisseurs	401SAULIEUGITTINGERCONSEILS	SAULIEU & GITTINGER CONSEILS PARIS	GXYEFEPUBG	20230101	2022-02-23 – Facture SAULIEU & GITTINGER CONSEILS - PARIS du 23/02/2022	0,0	936,0				0,00	EUR
+AN	Journal des à-nouveaux	118	20230101	401	Fournisseurs	401FOURNISSEURATTENTE	FOURNISSEURS	GXYEFEPUBG	20230101	2022-01-01 – AMH EXPERTISE	102,0	0,0				0,00	EUR
+AN	Journal des à-nouveaux	118	20230101	401	Fournisseurs	401FOURNISSEURATTENTE	FOURNISSEURS	GXYEFEPUBG	20230101	2022-01-01 – AMH EXPERTISE	102,0	0,0				0,00	EUR
+AN	Journal des à-nouveaux	118	20230101	401	Fournisseurs	401FOURNISSEURATTENTE	FOURNISSEURS	GXYEFEPUBG	20230101	2022-01-01 – AMH EXPERTISE	102,0	0,0				0,00	EUR
+AN	Journal des à-nouveaux	118	20230101	401	Fournisseurs	401FOURNISSEURATTENTE	FOURNISSEURS	GXYEFEPUBG	20230101	2022-01-01 – AMH EXPERTISE	102,0	0,0				0,00	EUR
+AN	Journal des à-nouveaux	118	20230101	455000002	Associés - Comptes courants			GXYEFEPUBG	20230101	2022-01-01 – A-nouveaux au 01/01/2022	0,0	2178,18				0,00	EUR
+AN	Journal des à-nouveaux	118	20230101	401	Fournisseurs	401SAULIEUGITTINGERCONSEILS	SAULIEU & GITTINGER CONSEILS PARIS	GXYEFEPUBG	20230101	2022-02-24 – SAULIEU & GITTINGER CONSEILS - PARIS	936,0	0,0				0,00	EUR
+AN	Journal des à-nouveaux	118	20230101	467	Autres comptes débiteurs ou créditeurs			GXYEFEPUBG	20230101	2022-02-24 – SAULIEU & GITTINGER CONSEILS - PARIS	0,0	936,0				0,00	EUR
+AN	Journal des à-nouveaux	118	20230101	455000002	Associés - Comptes courants			GXYEFEPUBG	20230101	2022-12-31 – Capital	100,0	0,0				0,00	EUR
+AN	Journal des à-nouveaux	118	20230101	455000002	Associés - Comptes courants			GXYEFEPUBG	20230101	2022-04-04 – VIRT DE 00406/076758/Y	0,0	500,0				0,00	EUR
+AN	Journal des à-nouveaux	118	20230101	455000002	Associés - Comptes courants			GXYEFEPUBG	20230101	2022-09-02 – VIREMENT REGUL NODANCH	0,0	300,0				0,00	EUR
+AN	Journal des à-nouveaux	118	20230101	455000002	Associés - Comptes courants			GXYEFEPUBG	20230101	2022-10-19 – M PATRICK NODANCHE	0,0	300,0				0,00	EUR
+AN	Journal des à-nouveaux	118	20230101	129	Résultat de l'exercice - perte			GXYEFEPUBG	20230101	Report à nouveau	1733,4	0,0				0,00	EUR
+BQ1	Journal de trésorerie - LCL	119	20230102	5121001	LCL - LCL			MBT6DTJ7ZY	20230102	ABON LCL ACCESS 004 10EUR (ref: 3990043703014381)	0,0	4,1				-4,10	EUR
+BQ1	Journal de trésorerie - LCL	119	20230102	6270000009	Services bancaires et assimilés (TVA 20%)			MBT6DTJ7ZY	20230102	ABON LCL ACCESS 004 10EUR (ref: 3990043703014381)	4,1	0,0				4,10	EUR
+BQ1	Journal de trésorerie - LCL	120	20230102	5121001	LCL - LCL			PIJQEMV5CX	20230102	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 01/2023 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 2212295000115038362A000190087789904)	0,0	7,46				-7,46	EUR
+BQ1	Journal de trésorerie - LCL	120	20230102	6161000003	Multirisques (Pas de TVA)			PIJQEMV5CX	20230102	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 01/2023 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 2212295000115038362A000190087789904)	7,46	0,0				7,46	EUR
+BQ1	Journal de trésorerie - LCL	121	20230124	5121001	LCL - LCL			KLKAUT7KPS	20230124	V/DEMANDE DU 23012023 COPIE DE 01 RELEVE(S) 00437 446735 CION 99 EUR 10 15HT + TVA20 0 2 03 99 FRF 66 58HT + TVA20 0 13 32 99 (ref: 0360043744673500)	0,0	12,18				-12,18	EUR
+BQ1	Journal de trésorerie - LCL	121	20230124	6270000009	Services bancaires et assimilés (TVA 20%)			KLKAUT7KPS	20230124	V/DEMANDE DU 23012023 COPIE DE 01 RELEVE(S) 00437 446735 CION 99 EUR 10 15HT + TVA20 0 2 03 99 FRF 66 58HT + TVA20 0 13 32 99 (ref: 0360043744673500)	12,18	0,0				12,18	EUR
+BQ1	Journal de trésorerie - LCL	122	20230124	5121001	LCL - LCL			1T4WWJNULL	20230124	V/DEMANDE DU 23012023 COPIE DE 01 RELEVE(S) 00437 446735 CION 99 EUR 10 15HT + TVA20 0 2 03 99 FRF 66 58HT + TVA20 0 13 32 99 (ref: 0360043744673500)	0,0	12,18				-12,18	EUR
+BQ1	Journal de trésorerie - LCL	122	20230124	6270000009	Services bancaires et assimilés (TVA 20%)			1T4WWJNULL	20230124	V/DEMANDE DU 23012023 COPIE DE 01 RELEVE(S) 00437 446735 CION 99 EUR 10 15HT + TVA20 0 2 03 99 FRF 66 58HT + TVA20 0 13 32 99 (ref: 0360043744673500)	12,18	0,0				12,18	EUR
+BQ1	Journal de trésorerie - LCL	123	20230124	5121001	LCL - LCL			A9YBINSORW	20230124	V/DEMANDE DU 23012023 COPIE DE 01 RELEVE(S) 00437 446735 CION 99 EUR 10 15HT + TVA20 0 2 03 99 FRF 66 58HT + TVA20 0 13 32 99 (ref: 0360043744673500)	0,0	12,18				-12,18	EUR
+BQ1	Journal de trésorerie - LCL	123	20230124	6270000009	Services bancaires et assimilés (TVA 20%)			A9YBINSORW	20230124	V/DEMANDE DU 23012023 COPIE DE 01 RELEVE(S) 00437 446735 CION 99 EUR 10 15HT + TVA20 0 2 03 99 FRF 66 58HT + TVA20 0 13 32 99 (ref: 0360043744673500)	12,18	0,0				12,18	EUR
+BQ1	Journal de trésorerie - LCL	124	20230131	5121001	LCL - LCL			RPKIEUWMOQ	20230131	TRAIT.IRREG.FONCT.CTE 01/23 (ref: 0000000000000000)	0,0	9,6				-9,60	EUR
+BQ1	Journal de trésorerie - LCL	124	20230131	627	Services bancaires et assimilés			RPKIEUWMOQ	20230131	TRAIT.IRREG.FONCT.CTE 01/23 (ref: 0000000000000000)	9,6	0,0				9,60	EUR
+BQ1	Journal de trésorerie - LCL	125	20230201	5121001	LCL - LCL			OCDSBLSWQL	20230201	ABON LCL ACCESS 004 10EUR (ref: 3990043703014381)	0,0	4,1				-4,10	EUR
+BQ1	Journal de trésorerie - LCL	125	20230201	6270000009	Services bancaires et assimilés (TVA 20%)			OCDSBLSWQL	20230201	ABON LCL ACCESS 004 10EUR (ref: 3990043703014381)	4,1	0,0				4,10	EUR
+BQ1	Journal de trésorerie - LCL	126	20230201	5121001	LCL - LCL			6IATJ5IGJU	20230201	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 02/2023 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 2301205000034272017A000191825327904)	0,0	7,46				-7,46	EUR
+BQ1	Journal de trésorerie - LCL	126	20230201	6161000003	Multirisques (Pas de TVA)			6IATJ5IGJU	20230201	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 02/2023 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 2301205000034272017A000191825327904)	7,46	0,0				7,46	EUR
+BQ1	Journal de trésorerie - LCL	127	20230213	5121001	LCL - LCL			2AI1Y5VI9I	20230213	REGUL VIA COMPTE PERSO REGUL VIA COMPTE PERSO - M PATRICK NODANCHE (ref: REGUL COMPTE NOD)	150,0	0,0				150,00	EUR
+BQ1	Journal de trésorerie - LCL	127	20230213	4717001	LCL - LCL - encaissements en attente			2AI1Y5VI9I	20230213	REGUL VIA COMPTE PERSO REGUL VIA COMPTE PERSO - M PATRICK NODANCHE (ref: REGUL COMPTE NOD)	0,0	150,0				-150,00	EUR
+BQ1	Journal de trésorerie - LCL	128	20230222	5121001	LCL - LCL			HGHSBYNDCL	20230222	FRAIS DE COMMISSAIRE AU COMPTE 20230222140146181023 99 (ref: 3053200279999800)	0,0	172,2				-172,20	EUR
+BQ1	Journal de trésorerie - LCL	128	20230222	627	Services bancaires et assimilés			HGHSBYNDCL	20230222	FRAIS DE COMMISSAIRE AU COMPTE 20230222140146181023 99 (ref: 3053200279999800)	172,2	0,0				172,20	EUR
+BQ1	Journal de trésorerie - LCL	129	20230228	5121001	LCL - LCL			PXTXHXFINA	20230228	TRAIT.IRREG.FONCT.CTE 02/23 (ref: 0000000000000000)	0,0	9,6				-9,60	EUR
+BQ1	Journal de trésorerie - LCL	129	20230228	627	Services bancaires et assimilés			PXTXHXFINA	20230228	TRAIT.IRREG.FONCT.CTE 02/23 (ref: 0000000000000000)	9,6	0,0				9,60	EUR
+BQ1	Journal de trésorerie - LCL	130	20230301	5121001	LCL - LCL			XNAJAEBLLA	20230301	ABON LCL ACCESS 004 10EUR (ref: 3990043703014381)	0,0	4,1				-4,10	EUR
+BQ1	Journal de trésorerie - LCL	130	20230301	6270000009	Services bancaires et assimilés (TVA 20%)			XNAJAEBLLA	20230301	ABON LCL ACCESS 004 10EUR (ref: 3990043703014381)	4,1	0,0				4,10	EUR
+BQ1	Journal de trésorerie - LCL	131	20230301	5121001	LCL - LCL			RU7GUXWLZO	20230301	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 03/2023 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 2302175000032267395A000193587948904)	0,0	7,46				-7,46	EUR
+BQ1	Journal de trésorerie - LCL	131	20230301	6161000003	Multirisques (Pas de TVA)			RU7GUXWLZO	20230301	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 03/2023 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 2302175000032267395A000193587948904)	7,46	0,0				7,46	EUR
+BQ1	Journal de trésorerie - LCL	132	20230302	5121001	LCL - LCL			OJ70DFU3CP	20230302	REGUL DECOUVERT REGUL DECOUVERT - M PATRICK NODANCHE (ref: REGUL DECOUVERT)	250,0	0,0				250,00	EUR
+BQ1	Journal de trésorerie - LCL	132	20230302	4717001	LCL - LCL - encaissements en attente			OJ70DFU3CP	20230302	REGUL DECOUVERT REGUL DECOUVERT - M PATRICK NODANCHE (ref: REGUL DECOUVERT)	0,0	250,0				-250,00	EUR
+BQ1	Journal de trésorerie - LCL	133	20230331	5121001	LCL - LCL			C6QPF2MSXE	20230331	TRAIT.IRREG.FONCT.CTE 03/23 (ref: 0000000000000000)	0,0	9,6				-9,60	EUR
+BQ1	Journal de trésorerie - LCL	133	20230331	627	Services bancaires et assimilés			C6QPF2MSXE	20230331	TRAIT.IRREG.FONCT.CTE 03/23 (ref: 0000000000000000)	9,6	0,0				9,60	EUR
+BQ1	Journal de trésorerie - LCL	134	20230403	5121001	LCL - LCL			XP1NZIT0ZV	20230403	ABON LCL ACCESS 005 00EUR (ref: 3990043703014381)	0,0	5,0				-5,00	EUR
+BQ1	Journal de trésorerie - LCL	134	20230403	6270000009	Services bancaires et assimilés (TVA 20%)			XP1NZIT0ZV	20230403	ABON LCL ACCESS 005 00EUR (ref: 3990043703014381)	5,0	0,0				5,00	EUR
+BQ1	Journal de trésorerie - LCL	135	20230403	5121001	LCL - LCL			HGIVASHSOO	20230403	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 04/2023 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 2303225000036245407A000195359721904)	0,0	7,46				-7,46	EUR
+BQ1	Journal de trésorerie - LCL	135	20230403	6161000003	Multirisques (Pas de TVA)			HGIVASHSOO	20230403	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 04/2023 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 2303225000036245407A000195359721904)	7,46	0,0				7,46	EUR
+BQ1	Journal de trésorerie - LCL	136	20230403	5121001	LCL - LCL			LHOVH6HLKQ	20230403	RESULTAT ARRETE COMPTE 31032023 (ref: 6470000000000000)	0,0	79,42				-79,42	EUR
+BQ1	Journal de trésorerie - LCL	136	20230403	627	Services bancaires et assimilés			LHOVH6HLKQ	20230403	RESULTAT ARRETE COMPTE 31032023 (ref: 6470000000000000)	79,42	0,0				79,42	EUR
+BQ1	Journal de trésorerie - LCL	137	20230430	5121001	LCL - LCL			WH95LCSEWD	20230430	TRAIT.IRREG.FONCT.CTE 04/23 (ref: 0000000000000000)	0,0	9,6				-9,60	EUR
+BQ1	Journal de trésorerie - LCL	137	20230430	627	Services bancaires et assimilés			WH95LCSEWD	20230430	TRAIT.IRREG.FONCT.CTE 04/23 (ref: 0000000000000000)	9,6	0,0				9,60	EUR
+BQ1	Journal de trésorerie - LCL	138	20230502	5121001	LCL - LCL			CHLVTPKF1W	20230502	ABON LCL ACCESS 005 00EUR (ref: 3990043703014381)	0,0	5,0				-5,00	EUR
+BQ1	Journal de trésorerie - LCL	138	20230502	6270000009	Services bancaires et assimilés (TVA 20%)			CHLVTPKF1W	20230502	ABON LCL ACCESS 005 00EUR (ref: 3990043703014381)	5,0	0,0				5,00	EUR
+BQ1	Journal de trésorerie - LCL	139	20230503	5121001	LCL - LCL			1TBEEQLWFZ	20230503	FRAIS PRLV IMP ASSURANCE LCL (ref: 9400000000000000)	0,0	7,46				-7,46	EUR
+BQ1	Journal de trésorerie - LCL	139	20230503	6270000003	Services bancaires et assimilés (Pas de TVA)			1TBEEQLWFZ	20230503	FRAIS PRLV IMP ASSURANCE LCL (ref: 9400000000000000)	7,46	0,0				7,46	EUR
+BQ1	Journal de trésorerie - LCL	140	20230525	5121001	LCL - LCL			PZURIWIFKY	20230525	PRLV SEPA ASSURANCE LCL +REPRESENTATION+LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 05/2023 COTISA TION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 2305165000007005248A000199023062904)	0,0	7,46				-7,46	EUR
+BQ1	Journal de trésorerie - LCL	140	20230525	6161000003	Multirisques (Pas de TVA)			PZURIWIFKY	20230525	PRLV SEPA ASSURANCE LCL +REPRESENTATION+LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 05/2023 COTISA TION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 2305165000007005248A000199023062904)	7,46	0,0				7,46	EUR
+BQ1	Journal de trésorerie - LCL	141	20230531	5121001	LCL - LCL			QYH2E8V81O	20230531	TRAIT.IRREG.FONCT.CTE 05/23 (ref: 0000000000000000)	0,0	9,6				-9,60	EUR
+BQ1	Journal de trésorerie - LCL	141	20230531	627	Services bancaires et assimilés			QYH2E8V81O	20230531	TRAIT.IRREG.FONCT.CTE 05/23 (ref: 0000000000000000)	9,6	0,0				9,60	EUR
+BQ1	Journal de trésorerie - LCL	142	20230601	5121001	LCL - LCL			YFFDOBGTIP	20230601	ABON LCL ACCESS 005 00EUR (ref: 3990043703014381)	0,0	5,0				-5,00	EUR
+BQ1	Journal de trésorerie - LCL	142	20230601	6270000009	Services bancaires et assimilés (TVA 20%)			YFFDOBGTIP	20230601	ABON LCL ACCESS 005 00EUR (ref: 3990043703014381)	5,0	0,0				5,00	EUR
+BQ1	Journal de trésorerie - LCL	143	20230601	5121001	LCL - LCL			9UVUGUUVJH	20230601	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 06/2023 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 2305195000030257562A000199023063904)	0,0	7,46				-7,46	EUR
+BQ1	Journal de trésorerie - LCL	143	20230601	6161000003	Multirisques (Pas de TVA)			9UVUGUUVJH	20230601	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 06/2023 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 2305195000030257562A000199023063904)	7,46	0,0				7,46	EUR
+BQ1	Journal de trésorerie - LCL	144	20230602	5121001	LCL - LCL			BETMB4E2EH	20230602	VIRT DE 00406/076758/Y VIRT DE 00406/076758/Y - M PATRICK NODANCHE (ref: REGUL NOD)	200,0	0,0				200,00	EUR
+BQ1	Journal de trésorerie - LCL	144	20230602	4717001	LCL - LCL - encaissements en attente			BETMB4E2EH	20230602	VIRT DE 00406/076758/Y VIRT DE 00406/076758/Y - M PATRICK NODANCHE (ref: REGUL NOD)	0,0	200,0				-200,00	EUR
+BQ1	Journal de trésorerie - LCL	145	20230630	5121001	LCL - LCL			WZIBGY0FPG	20230630	TRAIT.IRREG.FONCT.CTE 06/23 (ref: 0000000000000000)	0,0	9,6				-9,60	EUR
+BQ1	Journal de trésorerie - LCL	145	20230630	627	Services bancaires et assimilés			WZIBGY0FPG	20230630	TRAIT.IRREG.FONCT.CTE 06/23 (ref: 0000000000000000)	9,6	0,0				9,60	EUR
+BQ1	Journal de trésorerie - LCL	146	20230703	5121001	LCL - LCL			AJPGOPNKLC	20230703	ABON LCL ACCESS 005 00EUR (ref: 3990043703014381)	0,0	5,0				-5,00	EUR
+BQ1	Journal de trésorerie - LCL	146	20230703	6270000009	Services bancaires et assimilés (TVA 20%)			AJPGOPNKLC	20230703	ABON LCL ACCESS 005 00EUR (ref: 3990043703014381)	5,0	0,0				5,00	EUR
+BQ1	Journal de trésorerie - LCL	147	20230703	5121001	LCL - LCL			PXN1RILO2B	20230703	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 07/2023 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 2306215000033252611A000200733670904)	0,0	8,03				-8,03	EUR
+BQ1	Journal de trésorerie - LCL	147	20230703	6161000003	Multirisques (Pas de TVA)			PXN1RILO2B	20230703	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 07/2023 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 2306215000033252611A000200733670904)	8,03	0,0				8,03	EUR
+BQ1	Journal de trésorerie - LCL	148	20230703	5121001	LCL - LCL			SK4EVRH9ZZ	20230703	RESULTAT ARRETE COMPTE 30062023 (ref: 6470000000000000)	0,0	81,12				-81,12	EUR
+BQ1	Journal de trésorerie - LCL	148	20230703	627	Services bancaires et assimilés			SK4EVRH9ZZ	20230703	RESULTAT ARRETE COMPTE 30062023 (ref: 6470000000000000)	81,12	0,0				81,12	EUR
+BQ1	Journal de trésorerie - LCL	149	20230801	5121001	LCL - LCL			AZZT4QOLGP	20230801	ABON LCL ACCESS 005 00EUR (ref: 3990043703014381)	0,0	5,0				-5,00	EUR
+BQ1	Journal de trésorerie - LCL	149	20230801	6270000009	Services bancaires et assimilés (TVA 20%)			AZZT4QOLGP	20230801	ABON LCL ACCESS 005 00EUR (ref: 3990043703014381)	5,0	0,0				5,00	EUR
+BQ1	Journal de trésorerie - LCL	150	20230801	5121001	LCL - LCL			ZI0CBBJODK	20230801	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 08/2023 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 2307205000030256149A000202536541904)	0,0	7,99				-7,99	EUR
+BQ1	Journal de trésorerie - LCL	150	20230801	6161000003	Multirisques (Pas de TVA)			ZI0CBBJODK	20230801	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 08/2023 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 2307205000030256149A000202536541904)	7,99	0,0				7,99	EUR
+BQ1	Journal de trésorerie - LCL	151	20230901	5121001	LCL - LCL			PK1TKP0OO5	20230901	ABON LCL ACCESS 005 00EUR (ref: 3990043703014381)	0,0	5,0				-5,00	EUR
+BQ1	Journal de trésorerie - LCL	151	20230901	6270000009	Services bancaires et assimilés (TVA 20%)			PK1TKP0OO5	20230901	ABON LCL ACCESS 005 00EUR (ref: 3990043703014381)	5,0	0,0				5,00	EUR
+BQ1	Journal de trésorerie - LCL	152	20230901	5121001	LCL - LCL			FVDCGT4FCR	20230901	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 09/2023 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 2308225000033245853A000204421668904)	0,0	7,99				-7,99	EUR
+BQ1	Journal de trésorerie - LCL	152	20230901	6161000003	Multirisques (Pas de TVA)			FVDCGT4FCR	20230901	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 09/2023 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 2308225000033245853A000204421668904)	7,99	0,0				7,99	EUR
+BQ1	Journal de trésorerie - LCL	153	20230930	5121001	LCL - LCL			7JAI9IW7UU	20230930	TRAIT.IRREG.FONCT.CTE 09/23 (ref: 0000000000000000)	0,0	9,6				-9,60	EUR
+BQ1	Journal de trésorerie - LCL	153	20230930	627	Services bancaires et assimilés			7JAI9IW7UU	20230930	TRAIT.IRREG.FONCT.CTE 09/23 (ref: 0000000000000000)	9,6	0,0				9,60	EUR
+BQ1	Journal de trésorerie - LCL	154	20231002	5121001	LCL - LCL			ID2UJFZHDB	20231002	ABON LCL ACCESS 005 00EUR (ref: 3990043703014381)	0,0	5,0				-5,00	EUR
+BQ1	Journal de trésorerie - LCL	154	20231002	6270000009	Services bancaires et assimilés (TVA 20%)			ID2UJFZHDB	20231002	ABON LCL ACCESS 005 00EUR (ref: 3990043703014381)	5,0	0,0				5,00	EUR
+BQ1	Journal de trésorerie - LCL	155	20231002	5121001	LCL - LCL			61QE34QQTC	20231002	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 10/2023 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 4010210000000320 - 2309205000068248884A000206196486904)	0,0	7,99				-7,99	EUR
+BQ1	Journal de trésorerie - LCL	155	20231002	6161000003	Multirisques (Pas de TVA)			61QE34QQTC	20231002	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 10/2023 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 4010210000000320 - 2309205000068248884A000206196486904)	7,99	0,0				7,99	EUR
+BQ1	Journal de trésorerie - LCL	156	20231002	5121001	LCL - LCL			JH6I1KOCEI	20231002	RESULTAT ARRETE COMPTE 30092023 (ref: 6470000000000000)	0,0	80,12				-80,12	EUR
+BQ1	Journal de trésorerie - LCL	156	20231002	627	Services bancaires et assimilés			JH6I1KOCEI	20231002	RESULTAT ARRETE COMPTE 30092023 (ref: 6470000000000000)	80,12	0,0				80,12	EUR
+BQ1	Journal de trésorerie - LCL	157	20231020	5121001	LCL - LCL			AHXCDKTVYG	20231020	REGUL COMPTE REGUL COMPTE - M PATRICK NODANCHE (ref: 1029316800000000 - REGUL COMPTE NOD)	115,0	0,0				115,00	EUR
+BQ1	Journal de trésorerie - LCL	157	20231020	4717001	LCL - LCL - encaissements en attente			AHXCDKTVYG	20231020	REGUL COMPTE REGUL COMPTE - M PATRICK NODANCHE (ref: 1029316800000000 - REGUL COMPTE NOD)	0,0	115,0				-115,00	EUR
+BQ1	Journal de trésorerie - LCL	158	20231031	5121001	LCL - LCL			XA0Q4EJGTQ	20231031	TRAIT.IRREG.FONCT.CTE 10/23 (ref: 0000000000000000)	0,0	19,2				-19,20	EUR
+BQ1	Journal de trésorerie - LCL	158	20231031	627	Services bancaires et assimilés			XA0Q4EJGTQ	20231031	TRAIT.IRREG.FONCT.CTE 10/23 (ref: 0000000000000000)	19,2	0,0				19,20	EUR
+BQ1	Journal de trésorerie - LCL	159	20231102	5121001	LCL - LCL			VD11O5BEHA	20231102	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 11/2023 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 4010211000000320 - 2310205000031250648A000208029580904)	0,0	7,99				-7,99	EUR
+BQ1	Journal de trésorerie - LCL	159	20231102	6161000003	Multirisques (Pas de TVA)			VD11O5BEHA	20231102	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 11/2023 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 4010211000000320 - 2310205000031250648A000208029580904)	7,99	0,0				7,99	EUR
+BQ1	Journal de trésorerie - LCL	160	20231102	5121001	LCL - LCL			UPXW09V57P	20231102	ABON LCL ACCESS 005 00EUR (ref: 3990043703014381)	0,0	5,0				-5,00	EUR
+BQ1	Journal de trésorerie - LCL	160	20231102	6270000009	Services bancaires et assimilés (TVA 20%)			UPXW09V57P	20231102	ABON LCL ACCESS 005 00EUR (ref: 3990043703014381)	5,0	0,0				5,00	EUR
+BQ1	Journal de trésorerie - LCL	161	20231121	5121001	LCL - LCL			SKV5ZGZWBT	20231121	REGUL COMPTE NOD REGUL COMPTE NOD - M PATRICK NODANCHE (ref: 1032516800000000 - REGUL COMPTE NOD)	50,0	0,0				50,00	EUR
+BQ1	Journal de trésorerie - LCL	161	20231121	4717001	LCL - LCL - encaissements en attente			SKV5ZGZWBT	20231121	REGUL COMPTE NOD REGUL COMPTE NOD - M PATRICK NODANCHE (ref: 1032516800000000 - REGUL COMPTE NOD)	0,0	50,0				-50,00	EUR
+BQ1	Journal de trésorerie - LCL	162	20231130	5121001	LCL - LCL			FLLDQZ2CR1	20231130	TRAIT.IRREG.FONCT.CTE 11/23 (ref: 0000000000000000)	0,0	9,6				-9,60	EUR
+BQ1	Journal de trésorerie - LCL	162	20231130	627	Services bancaires et assimilés			FLLDQZ2CR1	20231130	TRAIT.IRREG.FONCT.CTE 11/23 (ref: 0000000000000000)	9,6	0,0				9,60	EUR
+BQ1	Journal de trésorerie - LCL	163	20231201	5121001	LCL - LCL			TE8G4VTWZL	20231201	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 12/2023 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 4010112000000320 - 2311215000030247491A000209887440904)	0,0	7,99				-7,99	EUR
+BQ1	Journal de trésorerie - LCL	163	20231201	6161000003	Multirisques (Pas de TVA)			TE8G4VTWZL	20231201	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 12/2023 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 4010112000000320 - 2311215000030247491A000209887440904)	7,99	0,0				7,99	EUR
+BQ1	Journal de trésorerie - LCL	164	20231201	5121001	LCL - LCL			IQWDBBHQRT	20231201	ABON LCL ACCESS 005 00EUR (ref: 3990043703014381)	0,0	5,0				-5,00	EUR
+BQ1	Journal de trésorerie - LCL	164	20231201	6270000009	Services bancaires et assimilés (TVA 20%)			IQWDBBHQRT	20231201	ABON LCL ACCESS 005 00EUR (ref: 3990043703014381)	5,0	0,0				5,00	EUR
+BQ1	Journal de trésorerie - LCL	165	20231218	5121001	LCL - LCL			ZRE2TNYSPC	20231218	PRLV SEPA DIRECTION GENERALE DE 600200521720TLR2380009815237 TLRSEPA DGFIP IMPOT CFE - DIRECTION GENERALE DES FINANCES PUBLIQUES (ref: 4021812000000320 - 2P0870000TLR238000981523780017)	0,0	418,0				-418,00	EUR
+BQ1	Journal de trésorerie - LCL	165	20231218	4716001	LCL - LCL - décaissements en attente			ZRE2TNYSPC	20231218	PRLV SEPA DIRECTION GENERALE DE 600200521720TLR2380009815237 TLRSEPA DGFIP IMPOT CFE - DIRECTION GENERALE DES FINANCES PUBLIQUES (ref: 4021812000000320 - 2P0870000TLR238000981523780017)	418,0	0,0				418,00	EUR
+BQ1	Journal de trésorerie - LCL	166	20231219	5121001	LCL - LCL			54ESBMKKUM	20231219	VIRT DE 00406/076758/Y VIRT DE 00406/076758/Y - M PATRICK NODANCHE (ref: 1035316800000000 - NOD)	430,0	0,0				430,00	EUR
+BQ1	Journal de trésorerie - LCL	166	20231219	4717001	LCL - LCL - encaissements en attente			54ESBMKKUM	20231219	VIRT DE 00406/076758/Y VIRT DE 00406/076758/Y - M PATRICK NODANCHE (ref: 1035316800000000 - NOD)	0,0	430,0				-430,00	EUR
+BQ1	Journal de trésorerie - LCL	167	20231231	5121001	LCL - LCL			KXMWRPVSCR	20231231	TRAIT.IRREG.FONCT.CTE 12/23 (ref: 0000000000000000)	0,0	9,6				-9,60	EUR
+BQ1	Journal de trésorerie - LCL	167	20231231	627	Services bancaires et assimilés			KXMWRPVSCR	20231231	TRAIT.IRREG.FONCT.CTE 12/23 (ref: 0000000000000000)	9,6	0,0				9,60	EUR
+BQ1	Journal de trésorerie - LCL	168	20231231	5121001	LCL - LCL			KXZHVQPLUI	20231231	RESULTAT ARRETE COMPTE 31122023 (ref: 6470000000000000)	0,0	81,54				-81,54	EUR
+BQ1	Journal de trésorerie - LCL	168	20231231	627	Services bancaires et assimilés			KXZHVQPLUI	20231231	RESULTAT ARRETE COMPTE 31122023 (ref: 6470000000000000)	81,54	0,0				81,54	EUR
+BQ1	Journal de trésorerie - LCL	169	20240102	5121001	LCL - LCL			LEBQGQ2FRI	20240102	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 01/2024 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 4010201000000320 - 2312185000067187299A000211726481904)	0,0	7,99				-7,99	EUR
+BQ1	Journal de trésorerie - LCL	169	20240102	6161000003	Multirisques (Pas de TVA)			LEBQGQ2FRI	20240102	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 01/2024 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 4010201000000320 - 2312185000067187299A000211726481904)	7,99	0,0				7,99	EUR
+BQ1	Journal de trésorerie - LCL	170	20240102	5121001	LCL - LCL			N3ALGPCUW2	20240102	ABON LCL ACCESS 005 00EUR (ref: 3990043703014381)	0,0	5,0				-5,00	EUR
+BQ1	Journal de trésorerie - LCL	170	20240102	6270000009	Services bancaires et assimilés (TVA 20%)			N3ALGPCUW2	20240102	ABON LCL ACCESS 005 00EUR (ref: 3990043703014381)	5,0	0,0				5,00	EUR
+BQ1	Journal de trésorerie - LCL	171	20240131	5121001	LCL - LCL			HAPJG6MRWK	20240131	TRAIT.IRREG.FONCT.CTE 01/24 (ref: 0000000000000000)	0,0	9,6				-9,60	EUR
+BQ1	Journal de trésorerie - LCL	171	20240131	627	Services bancaires et assimilés			HAPJG6MRWK	20240131	TRAIT.IRREG.FONCT.CTE 01/24 (ref: 0000000000000000)	9,6	0,0				9,60	EUR
+BQ1	Journal de trésorerie - LCL	172	20240201	5121001	LCL - LCL			TCR379YLI2	20240201	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 02/2024 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 4010102000000320 - 2401225000030240239A000213631279904)	0,0	7,99				-7,99	EUR
+BQ1	Journal de trésorerie - LCL	172	20240201	6161000003	Multirisques (Pas de TVA)			TCR379YLI2	20240201	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO ECHEANCE 02/2024 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 4010102000000320 - 2401225000030240239A000213631279904)	7,99	0,0				7,99	EUR
+BQ1	Journal de trésorerie - LCL	173	20240201	5121001	LCL - LCL			DBW3RJPJXQ	20240201	ABON LCL ACCESS 005 15EUR (ref: 3990043703014381)	0,0	5,15				-5,15	EUR
+BQ1	Journal de trésorerie - LCL	173	20240201	6270000009	Services bancaires et assimilés (TVA 20%)			DBW3RJPJXQ	20240201	ABON LCL ACCESS 005 15EUR (ref: 3990043703014381)	5,15	0,0				5,15	EUR
+BQ1	Journal de trésorerie - LCL	174	20240222	5121001	LCL - LCL			69UCW5I3UF	20240222	VIRT DE 00406/076758/Y VIRT DE 00406/076758/Y - M PATRICK NODANCHE (ref: 1005316800000000 - REGUL COMPTE NOD)	120,0	0,0				120,00	EUR
+BQ1	Journal de trésorerie - LCL	174	20240222	4717001	LCL - LCL - encaissements en attente			69UCW5I3UF	20240222	VIRT DE 00406/076758/Y VIRT DE 00406/076758/Y - M PATRICK NODANCHE (ref: 1005316800000000 - REGUL COMPTE NOD)	0,0	120,0				-120,00	EUR
+BQ1	Journal de trésorerie - LCL	175	20240229	5121001	LCL - LCL			Z9PZKE0LZW	20240229	TRAIT.IRREG.FONCT.CTE 02/24 (ref: 0000000000000000)	0,0	9,6				-9,60	EUR
+BQ1	Journal de trésorerie - LCL	175	20240229	627	Services bancaires et assimilés			Z9PZKE0LZW	20240229	TRAIT.IRREG.FONCT.CTE 02/24 (ref: 0000000000000000)	9,6	0,0				9,60	EUR
+BQ1	Journal de trésorerie - LCL	176	20240301	5121001	LCL - LCL			JKPDD8IPFF	20240301	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO -ECHEANCE 03/2024 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 4010103000000320 - 2402205000032236414A000215441005904)	0,0	7,99				-7,99	EUR
+BQ1	Journal de trésorerie - LCL	176	20240301	6161000003	Multirisques (Pas de TVA)			JKPDD8IPFF	20240301	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO -ECHEANCE 03/2024 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 4010103000000320 - 2402205000032236414A000215441005904)	7,99	0,0				7,99	EUR
+BQ1	Journal de trésorerie - LCL	177	20240301	5121001	LCL - LCL			RV1F2MU6VS	20240301	ABON LCL ACCESS 005 15EUR (ref: 3990043703014381)	0,0	5,15				-5,15	EUR
+BQ1	Journal de trésorerie - LCL	177	20240301	6270000009	Services bancaires et assimilés (TVA 20%)			RV1F2MU6VS	20240301	ABON LCL ACCESS 005 15EUR (ref: 3990043703014381)	5,15	0,0				5,15	EUR
+BQ1	Journal de trésorerie - LCL	178	20240331	5121001	LCL - LCL			LRNJHBQEYU	20240331	TRAIT.IRREG.FONCT.CTE 03/24 (ref: 0000000000000000)	0,0	9,6				-9,60	EUR
+BQ1	Journal de trésorerie - LCL	178	20240331	627	Services bancaires et assimilés			LRNJHBQEYU	20240331	TRAIT.IRREG.FONCT.CTE 03/24 (ref: 0000000000000000)	9,6	0,0				9,60	EUR
+BQ1	Journal de trésorerie - LCL	179	20240402	5121001	LCL - LCL			IM6NF8XW97	20240402	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO -ECHEANCE 04/2024 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 4010204000000320 - 2403205000071216871A000217284962904)	0,0	7,99				-7,99	EUR
+BQ1	Journal de trésorerie - LCL	179	20240402	6161000003	Multirisques (Pas de TVA)			IM6NF8XW97	20240402	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO -ECHEANCE 04/2024 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 4010204000000320 - 2403205000071216871A000217284962904)	7,99	0,0				7,99	EUR
+BQ1	Journal de trésorerie - LCL	180	20240402	5121001	LCL - LCL			N3JMHETNXL	20240402	ABON LCL ACCESS 005 15EUR (ref: 3990043703014381)	0,0	5,15				-5,15	EUR
+BQ1	Journal de trésorerie - LCL	180	20240402	6270000009	Services bancaires et assimilés (TVA 20%)			N3JMHETNXL	20240402	ABON LCL ACCESS 005 15EUR (ref: 3990043703014381)	5,15	0,0				5,15	EUR
+BQ1	Journal de trésorerie - LCL	181	20240402	5121001	LCL - LCL			4HKSNTBVTZ	20240402	RESULTAT ARRETE COMPTE 31032024 (ref: 6470000000000000)	0,0	84,38				-84,38	EUR
+BQ1	Journal de trésorerie - LCL	181	20240402	627	Services bancaires et assimilés			4HKSNTBVTZ	20240402	RESULTAT ARRETE COMPTE 31032024 (ref: 6470000000000000)	84,38	0,0				84,38	EUR
+BQ1	Journal de trésorerie - LCL	182	20240403	5121001	LCL - LCL			DJVISO3Z90	20240403	VIRT DE 00406/076758/Y VIRT DE 00406/076758/Y - M PATRICK NODANCHE (ref: 1009416800000000 - VIRT EN FAV DE 00437/446735/X)	30,0	0,0				30,00	EUR
+BQ1	Journal de trésorerie - LCL	182	20240403	4717001	LCL - LCL - encaissements en attente			DJVISO3Z90	20240403	VIRT DE 00406/076758/Y VIRT DE 00406/076758/Y - M PATRICK NODANCHE (ref: 1009416800000000 - VIRT EN FAV DE 00437/446735/X)	0,0	30,0				-30,00	EUR
+BQ1	Journal de trésorerie - LCL	183	20240430	5121001	LCL - LCL			QEQKOD32V9	20240430	TRAIT.IRREG.FONCT.CTE 04/24 (ref: 0000000000000000)	0,0	19,2				-19,20	EUR
+BQ1	Journal de trésorerie - LCL	183	20240430	627	Services bancaires et assimilés			QEQKOD32V9	20240430	TRAIT.IRREG.FONCT.CTE 04/24 (ref: 0000000000000000)	19,2	0,0				19,20	EUR
+BQ1	Journal de trésorerie - LCL	184	20240502	5121001	LCL - LCL			VAQO52LTHM	20240502	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO -ECHEANCE 05/2024 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 4010205000000320 - 2404195000031233908A000219149373904)	0,0	7,99				-7,99	EUR
+BQ1	Journal de trésorerie - LCL	184	20240502	6161000003	Multirisques (Pas de TVA)			VAQO52LTHM	20240502	PRLV SEPA ASSURANCE LCL LCL ASSURANCE MULTIRISQUE PRO -ECHEANCE 05/2024 COTISATION DU CONTRAT PACIFICA 3502271904 - ASSURANCE LCL (ref: 4010205000000320 - 2404195000031233908A000219149373904)	7,99	0,0				7,99	EUR
+BQ1	Journal de trésorerie - LCL	185	20240502	5121001	LCL - LCL			3VPWOJ71PB	20240502	ABON LCL ACCESS 005 15EUR (ref: 3990043703014381)	0,0	5,15				-5,15	EUR
+BQ1	Journal de trésorerie - LCL	185	20240502	6270000009	Services bancaires et assimilés (TVA 20%)			3VPWOJ71PB	20240502	ABON LCL ACCESS 005 15EUR (ref: 3990043703014381)	5,15	0,0				5,15	EUR
+BQ1	Journal de trésorerie - LCL	186	20240503	5121001	LCL - LCL			EHV2YPLYZN	20240503	VIRT DE 00406/076758/Y VIRT DE 00406/076758/Y - M PATRICK NODANCHE (ref: 1012416800000000 - NOD)	110,0	0,0				110,00	EUR
+BQ1	Journal de trésorerie - LCL	186	20240503	4717001	LCL - LCL - encaissements en attente			EHV2YPLYZN	20240503	VIRT DE 00406/076758/Y VIRT DE 00406/076758/Y - M PATRICK NODANCHE (ref: 1012416800000000 - NOD)	0,0	110,0				-110,00	EUR
+BQ1	Journal de trésorerie - LCL	187	20240531	5121001	LCL - LCL			LMNMB6YE1A	20240531	TRAIT.IRREG.FONCT.CTE 05/24 (ref: 0000000000000000)	0,0	9,6				-9,60	EUR
+BQ1	Journal de trésorerie - LCL	187	20240531	627	Services bancaires et assimilés			LMNMB6YE1A	20240531	TRAIT.IRREG.FONCT.CTE 05/24 (ref: 0000000000000000)	9,6	0,0				9,60	EUR
+BQ1	Journal de trésorerie - LCL	188	20240603	5121001	LCL - LCL			ACWQAX9QHP	20240603	ABON LCL ACCESS 005 15EUR (ref: 3990043703014381)	0,0	5,15				-5,15	EUR
+BQ1	Journal de trésorerie - LCL	188	20240603	6270000009	Services bancaires et assimilés (TVA 20%)			ACWQAX9QHP	20240603	ABON LCL ACCESS 005 15EUR (ref: 3990043703014381)	5,15	0,0				5,15	EUR
+BQ1	Journal de trésorerie - LCL	189	20240604	5121001	LCL - LCL			PISSU8MM8W	20240604	FRAIS PRLV IMP ASSURANCE LCL (ref: 9400000000000000)	0,0	7,99				-7,99	EUR
+BQ1	Journal de trésorerie - LCL	189	20240604	6270000003	Services bancaires et assimilés (Pas de TVA)			PISSU8MM8W	20240604	FRAIS PRLV IMP ASSURANCE LCL (ref: 9400000000000000)	7,99	0,0				7,99	EUR
+BQ1	Journal de trésorerie - LCL	190	20240701	5121001	LCL - LCL			ZQPSATFNDV	20240701	ABON LCL ACCESS 005 15EUR (ref: 3990043703014381)	0,0	5,15				-5,15	EUR
+BQ1	Journal de trésorerie - LCL	190	20240701	6270000009	Services bancaires et assimilés (TVA 20%)			ZQPSATFNDV	20240701	ABON LCL ACCESS 005 15EUR (ref: 3990043703014381)	5,15	0,0				5,15	EUR
+BQ1	Journal de trésorerie - LCL	191	20240701	5121001	LCL - LCL			MQDJZQC0ME	20240701	RESULTAT ARRETE COMPTE 30062024 (ref: 6470000000000000)	0,0	84,08				-84,08	EUR
+BQ1	Journal de trésorerie - LCL	191	20240701	627	Services bancaires et assimilés			MQDJZQC0ME	20240701	RESULTAT ARRETE COMPTE 30062024 (ref: 6470000000000000)	84,08	0,0				84,08	EUR
+BQ1	Journal de trésorerie - LCL	192	20240702	5121001	LCL - LCL			G2Q8UUZARL	20240702	FRAIS PRLV IMP ASSURANCE LCL (ref: 9400000000000000)	0,0	8,88				-8,88	EUR
+BQ1	Journal de trésorerie - LCL	192	20240702	6270000003	Services bancaires et assimilés (Pas de TVA)			G2Q8UUZARL	20240702	FRAIS PRLV IMP ASSURANCE LCL (ref: 9400000000000000)	8,88	0,0				8,88	EUR
