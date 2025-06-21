@@ -27,6 +27,8 @@ const TaxPage = lazy(() => import('@/pages/TaxPage'));
 const InventoryPage = lazy(() => import('@/pages/InventoryPage'));
 const UserManagementPage = lazy(() => import('@/pages/UserManagementPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
+const SetupWizard = lazy(() => import('@/components/setup/SetupWizard'));
+
 
 const LoadingFallback = () => (
   <div className="flex h-screen w-screen items-center justify-center">
@@ -46,6 +48,7 @@ function App() {
                   <Routes>
                     <Route path="/auth" element={<AuthPage />} />
                     <Route path="/signup" element={<SignUpPage />} />
+                    <Route path="/setup" element={<SetupWizard />} />  
 
                     <Route element={<MainLayout />}>
                       <Route path="/" element={<DashboardPage />} />
