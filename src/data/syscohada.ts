@@ -1,4 +1,6 @@
-// data/syscohada.ts
+// src/data/syscohada.ts
+import type { AccountPlan } from '../types/accounting';
+
 export const SYSCOHADA_PLAN: AccountPlan = {
   standard: 'SYSCOHADA',
   country: 'OHADA',
