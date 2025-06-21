@@ -6,8 +6,6 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle, AlertCircle, Database, Building, Globe, Shield, MapPin } from 'lucide-react';
-import { useMarket } from '@/hooks/useMarket';
-import { useCurrency } from '@/hooks/useCurrency';
 
 const UniversalSetupWizard = () => {
   const [currentStep, setCurrentStep] = useState(1);
