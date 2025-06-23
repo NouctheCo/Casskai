@@ -1,319 +1,461 @@
-// src/hooks/useCurrency.ts
+// src/hooks/useCurrency.ts - VERSION FINALE
+
 import { useState, useEffect, useCallback } from 'react';
-import type { Currency, ExchangeRate, CurrencyFormatOptions, MonetaryAmount } from '../types/currency';
+import { CurrencyService, Currency, CurrencyConversion, ExchangeRate } from '../services/currencyService';
+import { useConfig } from './useConfig';
 
-// Données des devises (vous pourrez les déplacer dans un fichier séparé plus tard)
-const CURRENCIES: Currency[] = [
-  // Devises européennes
-  {
-    code: 'EUR',
-    name: 'Euro',
-    symbol: '€',
-    decimals: 2,
-    format: 'after',
-    separator: { thousands: ' ', decimal: ',' },
-    countries: ['FR', 'DE', 'ES', 'IT', 'BE', 'NL', 'AT', 'IE', 'PT', 'FI']
-  },
-  {
-    code: 'CHF',
-    name: 'Franc Suisse',
-    symbol: 'CHF',
-    decimals: 2,
-    format: 'after',
-    separator: { thousands: "'", decimal: '.' },
-    countries: ['CH']
-  },
-  {
-    code: 'GBP',
-    name: 'Livre Sterling',
-    symbol: '£',
-    decimals: 2,
-    format: 'before',
-    separator: { thousands: ',', decimal: '.' },
-    countries: ['GB']
-  },
-
-  // Devises américaines
-  {
-    code: 'USD',
-    name: 'Dollar Américain',
-    symbol: '$',
-    decimals: 2,
-    format: 'before',
-    separator: { thousands: ',', decimal: '.' },
-    countries: ['US']
-  },
-  {
-    code: 'CAD',
-    name: 'Dollar Canadien',
-    symbol: 'CA$',
-    decimals: 2,
-    format: 'before',
-    separator: { thousands: ',', decimal: '.' },
-    countries: ['CA']
-  },
-
-  // Devises africaines - UEMOA (Union Économique et Monétaire Ouest Africaine)
-  {
-    code: 'XOF',
-    name: 'Franc CFA BCEAO',
-    symbol: 'F CFA',
-    decimals: 0,
-    format: 'after',
-    separator: { thousands: ' ', decimal: ',' },
-    countries: ['BJ', 'BF', 'CI', 'GW', 'ML', 'NE', 'SN', 'TG']
-  },
+interface UseCurrencyReturn {
+  // État de base (compatible avec votre hook existant)
+  currentCurrency: string;
+  setCurrentCurrency: (currency: string) => void;
+  currencies: Currency[];
+  africanCurrencies: Currency[];
   
-  // Devises africaines - CEMAC (Communauté Économique et Monétaire d'Afrique Centrale)
-  {
-    code: 'XAF',
-    name: 'Franc CFA BEAC',
-    symbol: 'F CFA',
-    decimals: 0,
-    format: 'after',
-    separator: { thousands: ' ', decimal: ',' },
-    countries: ['CM', 'CF', 'TD', 'CG', 'GQ', 'GA']
-  },
+  // État étendu
+  isLoading: boolean;
+  error: string | null;
+  lastUpdate: Date | null;
 
-  // Autres devises africaines
-  {
-    code: 'NGN',
-    name: 'Naira Nigérian',
-    symbol: '₦',
-    decimals: 2,
-    format: 'before',
-    separator: { thousands: ',', decimal: '.' },
-    countries: ['NG']
-  },
-  {
-    code: 'GHS',
-    name: 'Cedi Ghanéen',
-    symbol: '₵',
-    decimals: 2,
-    format: 'before',
-    separator: { thousands: ',', decimal: '.' },
-    countries: ['GH']
-  },
-  {
-    code: 'MAD',
-    name: 'Dirham Marocain',
-    symbol: 'DH',
-    decimals: 2,
-    format: 'after',
-    separator: { thousands: ' ', decimal: ',' },
-    countries: ['MA']
-  },
-  {
-    code: 'TND',
-    name: 'Dinar Tunisien',
-    symbol: 'DT',
-    decimals: 3,
-    format: 'after',
-    separator: { thousands: ' ', decimal: ',' },
-    countries: ['TN']
-  }
-];
+  // Méthodes de formatage (compatibles avec votre hook existant)
+  formatAmount: (amount: number, currency?: string) => string;
+  
+  // Méthodes de conversion (étendues)
+  convertAmount: (amount: number, fromCurrency: string, toCurrency?: string) => Promise<CurrencyConversion>;
+  convertAmountSync: (amount: number, fromCurrency: string, toCurrency?: string) => number;
+  convertBatch: (conversions: Array<{amount: number; from: string; to: string}>) => Promise<CurrencyConversion[]>;
+  
+  // Nouvelles méthodes
+  formatAmountWithConversion: (amount: number, from: string, to?: string) => Promise<string>;
+  getExchangeRate: (from: string, to: string) => Promise<number>;
+  getExchangeRateHistory: (from: string, to: string, days?: number) => Promise<ExchangeRate[]>;
+  refreshRates: () => Promise<void>;
+  getCurrency: (code: string) => Currency | undefined;
+  needsConversion: (from: string, to?: string) => boolean;
+  getSupportedCurrencies: () => Currency[];
+  getGlobalCurrencies: () => Currency[];
+}
 
-export function useCurrency(defaultCurrency: string = 'EUR') {
-  const [currentCurrency, setCurrentCurrency] = useState<string>(defaultCurrency);
-  const [exchangeRates, setExchangeRates] = useState<Map<string, ExchangeRate>>(new Map());
+export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
+  // État de base (compatible avec votre hook existant)
+  const [currentCurrency, setCurrentCurrency] = useState(defaultCurrency);
+  const [currencyService] = useState(() => CurrencyService.getInstance());
+  
+  // État étendu
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
-  // Charger les taux de change au démarrage
+  const { getCompanyConfig } = useConfig();
+
+  // Obtenir la devise de base de l'entreprise
+  const baseCurrency = getCompanyConfig()?.currency || currentCurrency;
+
+  // Mise à jour des taux au chargement (votre logique existante + améliorations)
   useEffect(() => {
-    loadExchangeRates();
-  }, []);
+    const initializeRates = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        // Mettre à jour les taux de change
+        await currencyService.updateExchangeRates();
+        setLastUpdate(currencyService.getLastUpdate());
+      } catch (err) {
+        console.warn('Impossible de mettre à jour les taux:', err);
+        // Ne pas bloquer l'application si les taux ne peuvent pas être mis à jour
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const loadExchangeRates = async () => {
-    setIsLoading(true);
+    initializeRates();
+  }, [currencyService]);
+
+  // Méthode formatAmount (compatible avec votre version existante)
+  const formatAmount = useCallback((amount: number, currency?: string): string => {
     try {
-      // Dans un vrai environnement, vous utiliseriez une API comme :
-      // - exchangerate-api.com
-      // - fixer.io
-      // - openexchangerates.org
-      
-      // Pour l'instant, simulation avec des taux fixes
-      const mockRates = new Map<string, ExchangeRate>([
-        // Taux fixes EUR comme base
-        ['EUR-USD', { from: 'EUR', to: 'USD', rate: 1.08, lastUpdated: new Date() }],
-        ['EUR-CAD', { from: 'EUR', to: 'CAD', rate: 1.47, lastUpdated: new Date() }],
-        ['EUR-CHF', { from: 'EUR', to: 'CHF', rate: 0.97, lastUpdated: new Date() }],
-        ['EUR-GBP', { from: 'EUR', to: 'GBP', rate: 0.86, lastUpdated: new Date() }],
-        
-        // Taux fixes CFA (taux officiel fixe)
-        ['EUR-XOF', { from: 'EUR', to: 'XOF', rate: 655.957, lastUpdated: new Date() }],
-        ['EUR-XAF', { from: 'EUR', to: 'XAF', rate: 655.957, lastUpdated: new Date() }],
-        
-        // Autres devises africaines (approximatifs)
-        ['EUR-NGN', { from: 'EUR', to: 'NGN', rate: 850, lastUpdated: new Date() }],
-        ['EUR-GHS', { from: 'EUR', to: 'GHS', rate: 13, lastUpdated: new Date() }],
-        ['EUR-MAD', { from: 'EUR', to: 'MAD', rate: 11, lastUpdated: new Date() }],
-        ['EUR-TND', { from: 'EUR', to: 'TND', rate: 3.3, lastUpdated: new Date() }],
-      ]);
+      return currencyService.formatAmount(amount, currency || currentCurrency);
+    } catch (err) {
+      console.warn('Erreur formatage montant:', err);
+      return amount.toString();
+    }
+  }, [currencyService, currentCurrency]);
 
-      setExchangeRates(mockRates);
-      setLastUpdate(new Date());
-    } catch (error) {
-      console.error('Erreur lors du chargement des taux de change:', error);
+  // Méthode convertAmount asynchrone (nouvelle)
+  const convertAmount = useCallback(async (
+    amount: number, 
+    fromCurrency: string, 
+    toCurrency?: string
+  ): Promise<CurrencyConversion> => {
+    const targetCurrency = toCurrency || baseCurrency;
+    
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const conversion = await currencyService.convertAmount(amount, fromCurrency, targetCurrency);
+      return conversion;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur de conversion';
+      setError(errorMessage);
+      throw err;
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currencyService, baseCurrency]);
 
-  const getCurrency = useCallback((code: string): Currency | undefined => {
-    return CURRENCIES.find(c => c.code === code);
-  }, []);
-
-  const getAllCurrencies = useCallback((): Currency[] => {
-    return CURRENCIES;
-  }, []);
-
-  const getCurrenciesByRegion = useCallback((countries: string[]): Currency[] => {
-    return CURRENCIES.filter(currency => 
-      currency.countries.some(country => countries.includes(country))
-    );
-  }, []);
-
-  const formatAmount = useCallback((
+  // Méthode convertAmount synchrone (compatible avec votre version existante)
+  const convertAmountSync = useCallback((
     amount: number, 
-    currencyCode?: string, 
-    options?: CurrencyFormatOptions
-  ): string => {
-    const currency = getCurrency(currencyCode || currentCurrency);
-    if (!currency) return amount.toString();
-
-    const precision = options?.precision ?? currency.decimals;
-    const showSymbol = options?.showSymbol ?? true;
-    const showCode = options?.showCode ?? false;
-
-    // Arrondir selon la précision de la devise
-    const rounded = Math.round(amount * Math.pow(10, precision)) / Math.pow(10, precision);
-    
-    // Formater le nombre
-    const parts = rounded.toFixed(precision).split('.');
-    
-    // Ajouter les séparateurs de milliers
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, currency.separator.thousands);
-    
-    // Rejoindre avec le séparateur décimal
-    let formatted = precision > 0 && parts[1] ? 
-      parts.join(currency.separator.decimal) : 
-      parts[0];
-
-    // Ajouter le symbole/code
-    if (showSymbol) {
-      formatted = currency.format === 'before' 
-        ? `${currency.symbol}${formatted}`
-        : `${formatted} ${currency.symbol}`;
-    }
-
-    if (showCode) {
-      formatted += ` ${currency.code}`;
-    }
-
-    return formatted;
-  }, [currentCurrency, getCurrency]);
-
-  const convertAmount = useCallback((
-    amount: number,
-    fromCurrency: string,
+    fromCurrency: string, 
     toCurrency?: string
   ): number => {
-    const targetCurrency = toCurrency || currentCurrency;
-    
-    if (fromCurrency === targetCurrency) {
+    try {
+      return currencyService.convertAmountSync(amount, fromCurrency, toCurrency || baseCurrency);
+    } catch (err) {
+      console.warn('Erreur conversion synchrone:', err);
       return amount;
     }
+  }, [currencyService, baseCurrency]);
 
-    // Chercher le taux direct
-    const directRate = exchangeRates.get(`${fromCurrency}-${targetCurrency}`);
-    if (directRate) {
-      return amount * directRate.rate;
+  // Conversion en lot
+  const convertBatch = useCallback(async (
+    conversions: Array<{amount: number; from: string; to: string}>
+  ): Promise<CurrencyConversion[]> => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const results = await currencyService.convertBatch(conversions);
+      return results;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur de conversion batch';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
     }
+  }, [currencyService]);
 
-    // Chercher le taux inverse
-    const inverseRate = exchangeRates.get(`${targetCurrency}-${fromCurrency}`);
-    if (inverseRate) {
-      return amount / inverseRate.rate;
+  // Formatage avec conversion
+  const formatAmountWithConversion = useCallback(async (
+    amount: number, 
+    from: string, 
+    to?: string
+  ): Promise<string> => {
+    try {
+      const conversion = await convertAmount(amount, from, to);
+      return formatAmount(conversion.convertedAmount, conversion.to);
+    } catch (err) {
+      // En cas d'erreur, retourner le montant original
+      return formatAmount(amount, from);
     }
+  }, [convertAmount, formatAmount]);
 
-    // Conversion via EUR comme devise pivot
-    const fromEurRate = exchangeRates.get(`EUR-${fromCurrency}`);
-    const toEurRate = exchangeRates.get(`EUR-${targetCurrency}`);
-    
-    if (fromEurRate && toEurRate) {
-      const eurAmount = amount / fromEurRate.rate;
-      return eurAmount * toEurRate.rate;
+  // Obtenir un taux de change
+  const getExchangeRate = useCallback(async (from: string, to: string): Promise<number> => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const rate = await currencyService.getExchangeRate(from, to);
+      return rate;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur récupération taux';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
     }
+  }, [currencyService]);
 
-    console.warn(`Taux de change non trouvé pour ${fromCurrency} -> ${targetCurrency}`);
-    return amount; // Fallback
-  }, [currentCurrency, exchangeRates]);
-
-  const createMonetaryAmount = useCallback((
-    amount: number,
-    currencyCode?: string
-  ): MonetaryAmount => {
-    const currency = currencyCode || currentCurrency;
-    return {
-      amount,
-      currency,
-      formatted: formatAmount(amount, currency)
-    };
-  }, [currentCurrency, formatAmount]);
-
-  const getExchangeRate = useCallback((
-    fromCurrency: string,
-    toCurrency: string
-  ): ExchangeRate | null => {
-    const key = `${fromCurrency}-${toCurrency}`;
-    return exchangeRates.get(key) || null;
-  }, [exchangeRates]);
-
-  // Devises spécialisées
-  const getAfricanCurrencies = useCallback((): Currency[] => {
-    return CURRENCIES.filter(currency => 
-      ['XOF', 'XAF', 'NGN', 'GHS', 'MAD', 'TND'].includes(currency.code)
-    );
+  // Historique des taux (placeholder - à implémenter si base de données disponible)
+  const getExchangeRateHistory = useCallback(async (
+    from: string, 
+    to: string, 
+    days: number = 30
+  ): Promise<ExchangeRate[]> => {
+    try {
+      // Cette méthode nécessite une base de données
+      // Pour l'instant, retourner un tableau vide
+      return [];
+    } catch (err) {
+      console.warn('Historique des taux non disponible:', err);
+      return [];
+    }
   }, []);
 
-  const getEuropeanCurrencies = useCallback((): Currency[] => {
-    return CURRENCIES.filter(currency => 
-      ['EUR', 'CHF', 'GBP'].includes(currency.code)
-    );
-  }, []);
+  // Rafraîchir tous les taux
+  const refreshRates = useCallback(async (): Promise<void> => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      await currencyService.refreshAllRates();
+      setLastUpdate(currencyService.getLastUpdate());
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur rafraîchissement taux';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currencyService]);
 
-  const isCFAFranc = useCallback((currencyCode: string): boolean => {
-    return ['XOF', 'XAF'].includes(currencyCode);
-  }, []);
+  // Méthodes utilitaires
+  const getCurrency = useCallback((code: string): Currency | undefined => {
+    return currencyService.getCurrency(code);
+  }, [currencyService]);
+
+  const needsConversion = useCallback((from: string, to?: string): boolean => {
+    return currencyService.needsConversion(from, to);
+  }, [currencyService]);
+
+  const getSupportedCurrencies = useCallback((): Currency[] => {
+    return currencyService.getSupportedCurrencies();
+  }, [currencyService]);
+
+  const getGlobalCurrencies = useCallback((): Currency[] => {
+    return currencyService.getGlobalCurrencies();
+  }, [currencyService]);
+
+  // Propriétés dérivées (compatibles avec votre hook existant)
+  const currencies = currencyService.getAllCurrencies();
+  const africanCurrencies = currencyService.getAfricanCurrencies();
 
   return {
-    // État
+    // État de base (compatible)
     currentCurrency,
     setCurrentCurrency,
+    currencies,
+    africanCurrencies,
+
+    // État étendu
     isLoading,
+    error,
     lastUpdate,
 
-    // Données
-    getAllCurrencies,
-    getCurrency,
-    getCurrenciesByRegion,
-    getAfricanCurrencies,
-    getEuropeanCurrencies,
-
-    // Formatage
+    // Méthodes de formatage (compatibles)
     formatAmount,
-    createMonetaryAmount,
 
-    // Conversion
+    // Méthodes de conversion (étendues)
     convertAmount,
-    getExchangeRate,
+    convertAmountSync,
+    convertBatch,
 
-    // Utilitaires
-    isCFAFranc,
-    
-    // Actions
-    refreshRates: loadExchangeRates
+    // Nouvelles méthodes
+    formatAmountWithConversion,
+    getExchangeRate,
+    getExchangeRateHistory,
+    refreshRates,
+    getCurrency,
+    needsConversion,
+    getSupportedCurrencies,
+    getGlobalCurrencies
   };
 }
+
+// Hook spécialisé pour l'affichage de montants (nouveau)
+export const useAmountDisplay = () => {
+  const { formatAmount, formatAmountWithConversion, convertAmount, currentCurrency } = useCurrency();
+
+  const AmountDisplay = ({ 
+    amount, 
+    currency, 
+    showConverted = false, 
+    className = '' 
+  }: {
+    amount: number;
+    currency: string;
+    showConverted?: boolean;
+    className?: string;
+  }) => {
+    const [convertedAmount, setConvertedAmount] = useState<string>('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+      if (showConverted && currency !== currentCurrency) {
+        setIsLoading(true);
+        formatAmountWithConversion(amount, currency)
+          .then(setConvertedAmount)
+          .finally(() => setIsLoading(false));
+      }
+    }, [amount, currency, showConverted]);
+
+    const originalAmount = formatAmount(amount, currency);
+
+    if (showConverted && convertedAmount && currency !== currentCurrency) {
+      return (
+        <span className={className}>
+          <span className="font-medium">{originalAmount}</span>
+          {isLoading ? (
+            <span className="text-sm text-gray-500 ml-2">
+              <span className="animate-spin">⟳</span>
+            </span>
+          ) : (
+            <span className="text-sm text-gray-500 ml-2">
+              (≈ {convertedAmount})
+            </span>
+          )}
+        </span>
+      );
+    }
+
+    return <span className={className}>{originalAmount}</span>;
+  };
+
+  return {
+    AmountDisplay,
+    formatAmount,
+    formatAmountWithConversion,
+    convertAmount
+  };
+};
+
+// Hook pour la sélection de devise (nouveau)
+export const useCurrencySelector = () => {
+  const { currencies, currentCurrency, setCurrentCurrency } = useCurrency();
+  const [selectedCurrency, setSelectedCurrency] = useState(currentCurrency);
+
+  const currencyOptions = currencies.map(currency => ({
+    value: currency.code,
+    label: `${currency.code} - ${currency.name}`,
+    symbol: currency.symbol,
+    format: currency.format
+  }));
+
+  // Grouper les devises par région
+  const currencyGroups = {
+    african: currencies.filter(c => 
+      ['XOF', 'XAF', 'NGN', 'GHS', 'MAD', 'TND'].includes(c.code)
+    ).map(c => ({
+      value: c.code,
+      label: `${c.code} - ${c.name}`,
+      symbol: c.symbol
+    })),
+    global: currencies.filter(c => 
+      ['EUR', 'USD', 'GBP', 'CAD', 'CHF'].includes(c.code)
+    ).map(c => ({
+      value: c.code,
+      label: `${c.code} - ${c.name}`,
+      symbol: c.symbol
+    }))
+  };
+
+  return {
+    currencies,
+    currencyOptions,
+    currencyGroups,
+    selectedCurrency,
+    setSelectedCurrency: (currency: string) => {
+      setSelectedCurrency(currency);
+      setCurrentCurrency(currency);
+    },
+    currentCurrency
+  };
+};
+
+// Hook pour les conversions rapides (nouveau)
+export const useQuickConverter = () => {
+  const { convertAmountSync, convertAmount, formatAmount } = useCurrency();
+
+  const quickConvert = useCallback((
+    amount: number, 
+    from: string, 
+    to: string
+  ): string => {
+    try {
+      const converted = convertAmountSync(amount, from, to);
+      return formatAmount(converted, to);
+    } catch (error) {
+      return formatAmount(amount, from);
+    }
+  }, [convertAmountSync, formatAmount]);
+
+  const quickConvertAsync = useCallback(async (
+    amount: number, 
+    from: string, 
+    to: string
+  ): Promise<string> => {
+    try {
+      const conversion = await convertAmount(amount, from, to);
+      return formatAmount(conversion.convertedAmount, to);
+    } catch (error) {
+      return formatAmount(amount, from);
+    }
+  }, [convertAmount, formatAmount]);
+
+  return {
+    quickConvert,
+    quickConvertAsync
+  };
+};
+
+// Hook pour les statistiques de devises (nouveau)
+export const useCurrencyStats = () => {
+  const { currencies, getExchangeRate } = useCurrency();
+  const [stats, setStats] = useState<{
+    totalCurrencies: number;
+    africanCurrencies: number;
+    globalCurrencies: number;
+    popularRates: Array<{ from: string; to: string; rate: number }>;
+  }>({
+    totalCurrencies: 0,
+    africanCurrencies: 0,
+    globalCurrencies: 0,
+    popularRates: []
+  });
+
+  useEffect(() => {
+    const african = currencies.filter(c => 
+      ['XOF', 'XAF', 'NGN', 'GHS', 'MAD', 'TND'].includes(c.code)
+    );
+    const global = currencies.filter(c => 
+      ['EUR', 'USD', 'GBP', 'CAD', 'CHF'].includes(c.code)
+    );
+
+    setStats({
+      totalCurrencies: currencies.length,
+      africanCurrencies: african.length,
+      globalCurrencies: global.length,
+      popularRates: []
+    });
+  }, [currencies]);
+
+  const getPopularRates = useCallback(async () => {
+    try {
+      const popularPairs = [
+        { from: 'EUR', to: 'XOF' },
+        { from: 'USD', to: 'EUR' },
+        { from: 'XOF', to: 'EUR' },
+        { from: 'EUR', to: 'XAF' }
+      ];
+
+      const rates = await Promise.all(
+        popularPairs.map(async (pair) => {
+          try {
+            const rate = await getExchangeRate(pair.from, pair.to);
+            return { ...pair, rate };
+          } catch {
+            return { ...pair, rate: 0 };
+          }
+        })
+      );
+
+      setStats(prev => ({ ...prev, popularRates: rates }));
+    } catch (error) {
+      console.warn('Impossible de récupérer les taux populaires:', error);
+    }
+  }, [getExchangeRate]);
+
+  return {
+    stats,
+    getPopularRates
+  };
+};
+
+// Export du hook principal avec rétrocompatibilité
+export default useCurrency;
+
+// Types pour la compatibilité
+export type { Currency, CurrencyConversion, ExchangeRate } from '../services/currencyService';
