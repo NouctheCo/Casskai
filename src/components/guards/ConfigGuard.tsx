@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useAppState } from '../hooks';
+import { useAppState } from '../../hooks';
 import SupabaseSetupWizard from '../components/setup/SupabaseSetupWizard';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
