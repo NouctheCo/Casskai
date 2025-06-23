@@ -5,11 +5,40 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { CheckCircle, AlertCircle, Database, Building, Globe, Shield, MapPin } from 'lucide-react';
+import { CheckCircle, AlertCircle, Database, Building, Globe, Shield, MapPin, Languages } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { changeLanguageAndDetectCountry } from '../lib/i18n';
+
+// Composant Sélecteur de Langue
+const LanguageSwitcher = ({ className = "" }) => {
+  const { i18n } = useTranslation();
+  
+  const handleLanguageChange = async (langCode) => {
+    try {
+      await changeLanguageAndDetectCountry(langCode);
+    } catch (error) {
+      console.error('Erreur changement de langue:', error);
+    }
+  };
+
+  return (
+    <div className={`flex items-center space-x-2 ${className}`}>
+      <Languages className="w-4 h-4 text-gray-600" />
+      <select 
+        value={i18n.language} 
+        onChange={(e) => handleLanguageChange(e.target.value)}
+        className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+      >
+        <option value="fr">🇫🇷 Français</option>
+        <option value="en">🇺🇸 English</option>
+        <option value="es">🇪🇸 Español</option>
+      </select>
+    </div>
+  );
+};
 
 const UniversalSetupWizard = () => {
-  const { t } = useTranslation('setup');
+  const { t, i18n } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const [detectedMarket, setDetectedMarket] = useState(null);
   const [config, setConfig] = useState({
@@ -31,106 +60,107 @@ const UniversalSetupWizard = () => {
   });
   const [connectionStatus, setConnectionStatus] = useState(null);
 
-  const markets = [
+  // Données des marchés avec traductions dynamiques
+  const getMarkets = () => [
     {
       id: 'france',
-      name: 'France',
-      region: '🇪🇺 Europe',
+      name: t('setup.market.countries.france'),
+      region: t('setup.market.regions.europe'),
       currency: 'EUR',
       standard: 'PCG',
-      pricing: '19€/mois',
-      features: ['RGPD', 'FEC', 'SEPA', 'TVA EU'],
+      pricing: '€19/month',
+      features: ['GDPR', 'FEC', 'SEPA', 'EU VAT'],
       color: 'bg-blue-50 border-blue-200'
     },
     {
       id: 'belgium',
-      name: 'Belgique',
-      region: '🇪🇺 Europe',
+      name: t('setup.market.countries.belgium'),
+      region: t('setup.market.regions.europe'),
       currency: 'EUR',
-      standard: 'PCG Belge',
-      pricing: '19€/mois',
-      features: ['RGPD', 'BNB', 'Bancontact'],
+      standard: 'Belgian GAAP',
+      pricing: '€19/month',
+      features: ['GDPR', 'NBB', 'Bancontact'],
       color: 'bg-blue-50 border-blue-200'
     },
     {
       id: 'benin',
-      name: 'Bénin',
-      region: '🌍 Afrique',
+      name: t('setup.market.countries.benin'),
+      region: t('setup.market.regions.africa'),
       currency: 'XOF',
       standard: 'SYSCOHADA',
-      pricing: '12K FCFA/mois',
+      pricing: '12K CFA/month',
       features: ['OHADA', 'Mobile Money', 'DGI'],
       color: 'bg-green-50 border-green-200'
     },
     {
       id: 'ivory_coast',
-      name: 'Côte d\'Ivoire',
-      region: '🌍 Afrique',
+      name: t('setup.market.countries.ivory_coast'),
+      region: t('setup.market.regions.africa'),
       currency: 'XOF',
       standard: 'SYSCOHADA',
-      pricing: '12K FCFA/mois',
+      pricing: '12K CFA/month',
       features: ['OHADA', 'Orange Money', 'DGI'],
       color: 'bg-green-50 border-green-200'
     },
     {
       id: 'burkina_faso',
-      name: 'Burkina Faso',
-      region: '🌍 Afrique',
+      name: t('setup.market.countries.burkina_faso'),
+      region: t('setup.market.regions.africa'),
       currency: 'XOF',
       standard: 'SYSCOHADA',
-      pricing: '12K FCFA/mois',
+      pricing: '12K CFA/month',
       features: ['OHADA', 'Mobile Money', 'DGID'],
       color: 'bg-green-50 border-green-200'
     },
     {
       id: 'mali',
-      name: 'Mali',
-      region: '🌍 Afrique',
+      name: t('setup.market.countries.mali'),
+      region: t('setup.market.regions.africa'),
       currency: 'XOF',
       standard: 'SYSCOHADA',
-      pricing: '12K FCFA/mois',
+      pricing: '12K CFA/month',
       features: ['OHADA', 'Orange Money', 'DGI'],
       color: 'bg-green-50 border-green-200'
     },
     {
       id: 'senegal',
-      name: 'Sénégal',
-      region: '🌍 Afrique',
+      name: t('setup.market.countries.senegal'),
+      region: t('setup.market.regions.africa'),
       currency: 'XOF',
       standard: 'SYSCOHADA',
-      pricing: '12K FCFA/mois',
+      pricing: '12K CFA/month',
       features: ['OHADA', 'Wave', 'DGI'],
       color: 'bg-green-50 border-green-200'
     },
     {
       id: 'togo',
-      name: 'Togo',
-      region: '🌍 Afrique',
+      name: t('setup.market.countries.togo'),
+      region: t('setup.market.regions.africa'),
       currency: 'XOF',
       standard: 'SYSCOHADA',
-      pricing: '12K FCFA/mois',
+      pricing: '12K CFA/month',
       features: ['OHADA', 'Flooz', 'OTR'],
       color: 'bg-green-50 border-green-200'
     },
     {
       id: 'canada',
-      name: 'Canada (QC)',
-      region: '🌎 Amériques',
+      name: t('setup.market.countries.canada'),
+      region: t('setup.market.regions.americas'),
       currency: 'CAD',
       standard: 'GAAP',
-      pricing: '25$ CAD/mois',
-      features: ['TPS/TVQ', 'ARC', 'Interac'],
+      pricing: '$25 CAD/month',
+      features: ['GST/HST', 'CRA', 'Interac'],
       color: 'bg-orange-50 border-orange-200'
     }
   ];
 
-  // CORRIGÉ: Ajout de l'étape Mobile Money
-  const steps = [
-    { id: 1, title: 'Marché & Localisation', icon: MapPin },
-    { id: 2, title: 'Configuration Supabase', icon: Database },
-    { id: 3, title: 'Informations Entreprise', icon: Building },
-    { id: 4, title: 'Mobile Money', icon: Globe },
-    { id: 5, title: 'Compte Administrateur', icon: Shield }
+  // Étapes avec traductions dynamiques
+  const getSteps = () => [
+    { id: 1, title: t('setup.wizard.steps.market'), icon: MapPin },
+    { id: 2, title: t('setup.wizard.steps.supabase'), icon: Database },
+    { id: 3, title: t('setup.wizard.steps.company'), icon: Building },
+    { id: 4, title: t('setup.wizard.steps.mobile_money'), icon: Globe },
+    { id: 5, title: t('setup.wizard.steps.admin'), icon: Shield }
   ];
 
   // Détection automatique du marché au chargement
@@ -165,6 +195,7 @@ const UniversalSetupWizard = () => {
   };
 
   const handleMarketSelection = (marketId) => {
+    const markets = getMarkets();
     const market = markets.find(m => m.id === marketId);
     setConfig(prev => ({
       ...prev,
@@ -177,7 +208,6 @@ const UniversalSetupWizard = () => {
   const testSupabaseConnection = async () => {
     setConnectionStatus('testing');
     try {
-      // Simulation du test de connexion
       await new Promise(resolve => setTimeout(resolve, 2000));
       setConnectionStatus('success');
     } catch (error) {
@@ -185,104 +215,98 @@ const UniversalSetupWizard = () => {
     }
   };
 
-  const formatCurrency = (amount, currency) => {
-    if (currency === 'XOF') {
-      return new Intl.NumberFormat('fr-FR', {
-        style: 'decimal',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-      }).format(amount) + ' CFA';
-    }
+  const renderMarketSelection = () => {
+    const markets = getMarkets();
+    const regions = [...new Set(markets.map(m => m.region))];
     
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: currency
-    }).format(amount);
-  };
+    return (
+      <div className="space-y-6">
+        {detectedMarket && (
+          <Alert className="border-blue-200 bg-blue-50">
+            <MapPin className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800">
+              {t('setup.market.detected', { 
+                market: markets.find(m => m.id === detectedMarket)?.name 
+              })}
+            </AlertDescription>
+          </Alert>
+        )}
 
-  const renderMarketSelection = () => (
-    <div className="space-y-6">
-      {detectedMarket && (
-        <Alert className="border-blue-200 bg-blue-50">
-          <MapPin className="h-4 w-4 text-blue-600" />
-          <AlertDescription className="text-blue-800">
-            Marché détecté automatiquement : <strong>{markets.find(m => m.id === detectedMarket)?.name}</strong>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <div>
-        <Label className="text-lg font-medium mb-4 block">Sélectionnez votre marché principal</Label>
-        
-        <div className="space-y-4">
-          {['🇪🇺 Europe', '🌍 Afrique', '🌎 Amériques'].map(region => {
-            const regionMarkets = markets.filter(m => m.region === region);
-            
-            return (
-              <div key={region}>
-                <h3 className="font-medium text-gray-700 mb-2">{region}</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {regionMarkets.map(market => (
-                    <Card 
-                      key={market.id}
-                      className={`cursor-pointer transition-all ${market.color} ${
-                        config.market === market.id ? 'ring-2 ring-blue-500' : 'hover:shadow-md'
-                      }`}
-                      onClick={() => handleMarketSelection(market.id)}
-                    >
-                      <CardHeader className="pb-2">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <CardTitle className="text-lg">{market.name}</CardTitle>
-                            <CardDescription>
-                              {market.currency} • {market.standard}
-                            </CardDescription>
-                          </div>
-                          <Badge variant="outline" className="text-xs">
-                            {market.pricing}
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-wrap gap-1">
-                          {market.features.map(feature => (
-                            <Badge key={feature} variant="secondary" className="text-xs">
-                              {feature}
+        <div>
+          <Label className="text-lg font-medium mb-4 block">
+            {t('setup.market.select')}
+          </Label>
+          
+          <div className="space-y-4">
+            {regions.map(region => {
+              const regionMarkets = markets.filter(m => m.region === region);
+              
+              return (
+                <div key={region}>
+                  <h3 className="font-medium text-gray-700 mb-2">{region}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {regionMarkets.map(market => (
+                      <Card 
+                        key={market.id}
+                        className={`cursor-pointer transition-all ${market.color} ${
+                          config.market === market.id ? 'ring-2 ring-blue-500' : 'hover:shadow-md'
+                        }`}
+                        onClick={() => handleMarketSelection(market.id)}
+                      >
+                        <CardHeader className="pb-2">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <CardTitle className="text-lg">{market.name}</CardTitle>
+                              <CardDescription>
+                                {market.currency} • {market.standard}
+                              </CardDescription>
+                            </div>
+                            <Badge variant="outline" className="text-xs">
+                              {market.pricing}
                             </Badge>
-                          ))}
-                        </div>
-                        {config.market === market.id && (
-                          <div className="mt-2 flex items-center text-green-600 text-sm">
-                            <CheckCircle className="w-4 h-4 mr-1" />
-                            Sélectionné
                           </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex flex-wrap gap-1">
+                            {market.features.map(feature => (
+                              <Badge key={feature} variant="secondary" className="text-xs">
+                                {feature}
+                              </Badge>
+                            ))}
+                          </div>
+                          {config.market === market.id && (
+                            <div className="mt-2 flex items-center text-green-600 text-sm">
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              {t('setup.market.selected')}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderSupabaseConfig = () => (
     <div className="space-y-6">
       <Alert className="border-amber-200 bg-amber-50">
         <AlertCircle className="h-4 w-4 text-amber-600" />
         <AlertDescription className="text-amber-800">
-          Vous devez créer un projet Supabase gratuit sur <a href="https://supabase.com" target="_blank" rel="noopener noreferrer" className="underline">supabase.com</a>
+          {t('setup.supabase.info')}
         </AlertDescription>
       </Alert>
 
       <div>
-        <Label htmlFor="supabaseUrl">URL du projet Supabase</Label>
+        <Label htmlFor="supabaseUrl">{t('setup.supabase.url_label')}</Label>
         <Input
           id="supabaseUrl"
-          placeholder="https://votre-projet.supabase.co"
+          placeholder={t('setup.supabase.url_placeholder')}
           value={config.supabaseUrl}
           onChange={(e) => setConfig(prev => ({ ...prev, supabaseUrl: e.target.value }))}
           className="mt-2"
@@ -290,11 +314,11 @@ const UniversalSetupWizard = () => {
       </div>
       
       <div>
-        <Label htmlFor="supabaseKey">Clé API Supabase (anon)</Label>
+        <Label htmlFor="supabaseKey">{t('setup.supabase.key_label')}</Label>
         <Input
           id="supabaseKey"
           type="password"
-          placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI..."
+          placeholder={t('setup.supabase.key_placeholder')}
           value={config.supabaseKey}
           onChange={(e) => setConfig(prev => ({ ...prev, supabaseKey: e.target.value }))}
           className="mt-2"
@@ -306,14 +330,14 @@ const UniversalSetupWizard = () => {
         disabled={!config.supabaseUrl || !config.supabaseKey || connectionStatus === 'testing'}
         className="w-full"
       >
-        {connectionStatus === 'testing' ? 'Test en cours...' : 'Tester la connexion'}
+        {connectionStatus === 'testing' ? t('setup.supabase.testing') : t('setup.supabase.test_connection')}
       </Button>
 
       {connectionStatus === 'success' && (
         <Alert className="border-green-200 bg-green-50">
           <CheckCircle className="h-4 w-4 text-green-600" />
           <AlertDescription className="text-green-800">
-            Connexion Supabase réussie ! Configuration automatique en cours...
+            {t('setup.supabase.success')}
           </AlertDescription>
         </Alert>
       )}
@@ -322,7 +346,7 @@ const UniversalSetupWizard = () => {
         <Alert className="border-red-200 bg-red-50">
           <AlertCircle className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-800">
-            Erreur de connexion. Vérifiez vos paramètres Supabase.
+            {t('setup.supabase.error')}
           </AlertDescription>
         </Alert>
       )}
@@ -330,19 +354,22 @@ const UniversalSetupWizard = () => {
   );
 
   const renderCompanyInfo = () => {
+    const markets = getMarkets();
     const selectedMarket = markets.find(m => m.id === config.market);
-    const isAfricanMarket = selectedMarket?.region === '🌍 Afrique';
+    const isAfricanMarket = selectedMarket?.region === t('setup.market.regions.africa');
     
     return (
       <div className="space-y-6">
         <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="font-medium mb-2">Configuration pour : {selectedMarket?.name}</h3>
+          <h3 className="font-medium mb-2">
+            {t('setup.company.config_for', { country: selectedMarket?.name })}
+          </h3>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="text-gray-600">Devise :</span> {selectedMarket?.currency}
+              <span className="text-gray-600">{t('currency')}:</span> {selectedMarket?.currency}
             </div>
             <div>
-              <span className="text-gray-600">Standard :</span> {selectedMarket?.standard}
+              <span className="text-gray-600">{t('setup.standards.pcg')}:</span> {selectedMarket?.standard}
             </div>
           </div>
         </div>
@@ -351,17 +378,20 @@ const UniversalSetupWizard = () => {
           <Alert className="border-green-200 bg-green-50">
             <AlertCircle className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-800">
-              <strong>Configuration OHADA activée</strong><br/>
-              Plan comptable SYSCOHADA, support Mobile Money, conformité fiscale locale.
+              <strong>{t('setup.company.ohada_activated')}</strong><br/>
+              {t('setup.company.ohada_description')}
             </AlertDescription>
           </Alert>
         )}
 
         <div>
-          <Label htmlFor="companyName">Nom de l'entreprise</Label>
+          <Label htmlFor="companyName">{t('setup.company.name_label')}</Label>
           <Input
             id="companyName"
-            placeholder={isAfricanMarket ? "Entreprise SARL-U" : "Mon Entreprise SARL"}
+            placeholder={isAfricanMarket ? 
+              t('setup.company.name_placeholder_african') : 
+              t('setup.company.name_placeholder_default')
+            }
             value={config.companyName}
             onChange={(e) => setConfig(prev => ({ ...prev, companyName: e.target.value }))}
             className="mt-2"
@@ -370,37 +400,45 @@ const UniversalSetupWizard = () => {
 
         {isAfricanMarket && (
           <div>
-            <Label htmlFor="legalForm">Forme juridique</Label>
+            <Label htmlFor="legalForm">{t('setup.company.legal_form')}</Label>
             <select
               id="legalForm"
               value={config.legalForm || ''}
               onChange={(e) => setConfig(prev => ({ ...prev, legalForm: e.target.value }))}
               className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="">Sélectionner...</option>
-              <option value="SARL">SARL (Société à Responsabilité Limitée)</option>
-              <option value="SUARL">SUARL (Société Unipersonnelle à Responsabilité Limitée)</option>
-              <option value="SA">SA (Société Anonyme)</option>
-              <option value="SAS">SAS (Société par Actions Simplifiée)</option>
-              <option value="GIE">GIE (Groupement d'Intérêt Économique)</option>
-              <option value="EI">EI (Entreprise Individuelle)</option>
+              <option value="">{t('setup.company.legal_forms.select')}</option>
+              <option value="SARL">{t('setup.company.legal_forms.sarl')}</option>
+              <option value="SUARL">{t('setup.company.legal_forms.suarl')}</option>
+              <option value="SA">{t('setup.company.legal_forms.sa')}</option>
+              <option value="SAS">{t('setup.company.legal_forms.sas')}</option>
+              <option value="GIE">{t('setup.company.legal_forms.gie')}</option>
+              <option value="EI">{t('setup.company.legal_forms.ei')}</option>
             </select>
           </div>
         )}
 
         <div>
           <Label htmlFor="taxNumber">
-            {isAfricanMarket ? 'Numéro d\'Identification Fiscale (NIF)' :
-             selectedMarket?.id === 'france' ? 'SIREN/SIRET' : 
-             selectedMarket?.id === 'belgium' ? 'TVA BE' : 'Numéro fiscal'}
+            {isAfricanMarket ? 
+              t('setup.company.tax_number.african') :
+              selectedMarket?.id === 'france' ? 
+                t('setup.company.tax_number.france') : 
+                selectedMarket?.id === 'belgium' ? 
+                  t('setup.company.tax_number.belgium') : 
+                  t('setup.company.tax_number.default')
+            }
           </Label>
           <Input
             id="taxNumber"
             placeholder={
-              isAfricanMarket ? 'Ex: 2024123456789' :
-              selectedMarket?.id === 'france' ? '12345678901234' :
-              selectedMarket?.id === 'belgium' ? 'BE0123456789' :
-              'Numéro fiscal'
+              isAfricanMarket ? 
+                t('setup.company.tax_number_placeholder.african') :
+                selectedMarket?.id === 'france' ? 
+                  t('setup.company.tax_number_placeholder.france') :
+                  selectedMarket?.id === 'belgium' ? 
+                    t('setup.company.tax_number_placeholder.belgium') :
+                    t('setup.company.tax_number_placeholder.default')
             }
             value={config.taxNumber}
             onChange={(e) => setConfig(prev => ({ ...prev, taxNumber: e.target.value }))}
@@ -410,54 +448,38 @@ const UniversalSetupWizard = () => {
 
         {isAfricanMarket && (
           <div>
-            <Label htmlFor="capital">Capital social (en CFA)</Label>
+            <Label htmlFor="capital">{t('setup.company.capital_label')}</Label>
             <Input
               id="capital"
               type="number"
-              placeholder="1000000"
+              placeholder={t('setup.company.capital_placeholder')}
               value={config.capital || ''}
               onChange={(e) => setConfig(prev => ({ ...prev, capital: e.target.value }))}
               className="mt-2"
             />
             <p className="text-sm text-gray-500 mt-1">
-              Capital minimum : 1,000,000 CFA pour SARL, 10,000,000 CFA pour SA
+              {t('setup.company.capital_minimum')}
             </p>
           </div>
         )}
 
         <div>
-          <Label htmlFor="sector">Secteur d'activité</Label>
+          <Label htmlFor="sector">{t('setup.company.sector_label')}</Label>
           <select
             id="sector"
             value={config.sector || ''}
             onChange={(e) => setConfig(prev => ({ ...prev, sector: e.target.value }))}
             className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="">Sélectionner...</option>
+            <option value="">{t('setup.company.sectors.select')}</option>
             {isAfricanMarket ? (
-              <>
-                <option value="agriculture">Agriculture et élevage</option>
-                <option value="commerce">Commerce et distribution</option>
-                <option value="services">Services</option>
-                <option value="industrie">Industrie et manufacturing</option>
-                <option value="btp">BTP et construction</option>
-                <option value="transport">Transport et logistique</option>
-                <option value="telecom">Télécommunications</option>
-                <option value="finance">Services financiers</option>
-                <option value="education">Éducation et formation</option>
-                <option value="sante">Santé</option>
-                <option value="tourisme">Tourisme et hôtellerie</option>
-                <option value="energie">Énergie et mines</option>
-              </>
+              Object.entries(t('setup.company.sectors.african', { returnObjects: true })).map(([key, value]) => (
+                <option key={key} value={key}>{value}</option>
+              ))
             ) : (
-              <>
-                <option value="commerce">Commerce</option>
-                <option value="services">Services</option>
-                <option value="industrie">Industrie</option>
-                <option value="btp">BTP</option>
-                <option value="it">Informatique</option>
-                <option value="consulting">Conseil</option>
-              </>
+              Object.entries(t('setup.company.sectors.default', { returnObjects: true })).map(([key, value]) => (
+                <option key={key} value={key}>{value}</option>
+              ))
             )}
           </select>
         </div>
@@ -466,18 +488,19 @@ const UniversalSetupWizard = () => {
   };
 
   const renderMobileMoneyConfig = () => {
+    const markets = getMarkets();
     const selectedMarket = markets.find(m => m.id === config.market);
-    const isAfricanMarket = selectedMarket?.region === '🌍 Afrique';
+    const isAfricanMarket = selectedMarket?.region === t('setup.market.regions.africa');
     
     if (!isAfricanMarket) {
       return (
         <div className="text-center py-8">
           <Globe className="w-16 h-16 mx-auto text-gray-400 mb-4" />
           <h3 className="text-lg font-medium text-gray-600 mb-2">
-            Mobile Money non applicable
+            {t('setup.mobile_money.not_applicable')}
           </h3>
           <p className="text-gray-500">
-            Cette fonctionnalité est spécifique aux marchés africains.
+            {t('setup.mobile_money.not_applicable_description')}
           </p>
         </div>
       );
@@ -499,14 +522,14 @@ const UniversalSetupWizard = () => {
         <Alert className="border-blue-200 bg-blue-50">
           <AlertCircle className="h-4 w-4 text-blue-600" />
           <AlertDescription className="text-blue-800">
-            <strong>Mobile Money</strong><br/>
-            Configurez les moyens de paiement mobile populaires dans votre région.
+            <strong>{t('setup.mobile_money.title')}</strong><br/>
+            {t('setup.mobile_money.description')}
           </AlertDescription>
         </Alert>
 
         <div>
           <Label className="text-lg font-medium mb-4 block">
-            Moyens de paiement mobile à activer
+            {t('setup.mobile_money.providers_label')}
           </Label>
           
           <div className="space-y-3">
@@ -534,10 +557,11 @@ const UniversalSetupWizard = () => {
         </div>
 
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <h4 className="font-medium text-yellow-800 mb-2">Note importante</h4>
+          <h4 className="font-medium text-yellow-800 mb-2">
+            {t('setup.mobile_money.note_title')}
+          </h4>
           <p className="text-yellow-700 text-sm">
-            L'intégration Mobile Money nécessite des partenariats avec les opérateurs. 
-            Ces options seront disponibles dans une version future de CassKai.
+            {t('setup.mobile_money.note_description')}
           </p>
         </div>
       </div>
@@ -547,11 +571,11 @@ const UniversalSetupWizard = () => {
   const renderAdminAccount = () => (
     <div className="space-y-6">
       <div>
-        <Label htmlFor="adminEmail">Email administrateur</Label>
+        <Label htmlFor="adminEmail">{t('setup.admin.email_label')}</Label>
         <Input
           id="adminEmail"
           type="email"
-          placeholder="admin@monentreprise.com"
+          placeholder={t('setup.admin.email_placeholder')}
           value={config.adminEmail}
           onChange={(e) => setConfig(prev => ({ ...prev, adminEmail: e.target.value }))}
           className="mt-2"
@@ -559,11 +583,11 @@ const UniversalSetupWizard = () => {
       </div>
 
       <div>
-        <Label htmlFor="adminPassword">Mot de passe</Label>
+        <Label htmlFor="adminPassword">{t('setup.admin.password_label')}</Label>
         <Input
           id="adminPassword"
           type="password"
-          placeholder="Mot de passe sécurisé"
+          placeholder={t('setup.admin.password_placeholder')}
           value={config.adminPassword}
           onChange={(e) => setConfig(prev => ({ ...prev, adminPassword: e.target.value }))}
           className="mt-2"
@@ -571,14 +595,14 @@ const UniversalSetupWizard = () => {
       </div>
 
       <div className="bg-blue-50 p-4 rounded-lg">
-        <h3 className="font-medium mb-2">Configuration finale</h3>
+        <h3 className="font-medium mb-2">{t('setup.admin.final_config')}</h3>
         <div className="space-y-1 text-sm text-gray-600">
-          <div>• Installation du schéma de base de données</div>
-          <div>• Import du plan comptable {config.accountingStandard}</div>
-          <div>• Configuration des devises et taux</div>
-          <div>• Activation des fonctionnalités locales</div>
+          <div>• {t('setup.admin.tasks.database')}</div>
+          <div>• {t('setup.admin.tasks.accounting_plan', { standard: config.accountingStandard })}</div>
+          <div>• {t('setup.admin.tasks.currencies')}</div>
+          <div>• {t('setup.admin.tasks.features')}</div>
           {config.mobileMoneyProviders?.length > 0 && (
-            <div>• Configuration Mobile Money ({config.mobileMoneyProviders.length} opérateurs)</div>
+            <div>• {t('setup.admin.tasks.mobile_money', { count: config.mobileMoneyProviders.length })}</div>
           )}
         </div>
       </div>
@@ -601,7 +625,7 @@ const UniversalSetupWizard = () => {
       case 1: return config.market;
       case 2: return connectionStatus === 'success';
       case 3: return config.companyName;
-      case 4: return true; // Mobile Money optionnel
+      case 4: return true;
       case 5: return config.adminEmail && config.adminPassword;
       default: return false;
     }
@@ -612,29 +636,34 @@ const UniversalSetupWizard = () => {
 
   const handleFinish = async () => {
     try {
-      // Ici vous ajouterez la logique pour :
-      // - Créer les tables Supabase
-      // - Configurer la première entreprise
-      // - Créer le compte admin
       console.log('Configuration finale:', config);
-      
-      alert('Installation terminée ! Redirection vers Casskai...');
-      // window.location.href = '/dashboard';
+      alert(t('setup.installation.completed'));
     } catch (error) {
       console.error('Erreur lors de l\'installation:', error);
-      alert('Erreur lors de l\'installation. Veuillez réessayer.');
+      alert(t('setup.installation.error'));
     }
   };
+
+  const steps = getSteps();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="max-w-4xl mx-auto">
+        {/* En-tête avec sélecteur de langue */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Configuration Casskai</h1>
-          <p className="text-gray-600">Solution de gestion financière multi-marchés</p>
+          <div className="flex justify-between items-center mb-4">
+            <div></div>
+            <LanguageSwitcher />
+          </div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            {t('setup.wizard.title')}
+          </h1>
+          <p className="text-gray-600">
+            {t('setup.wizard.subtitle')}
+          </p>
         </div>
 
-        {/* Progress Steps */}
+        {/* Progression des étapes */}
         <div className="flex justify-center mb-8">
           <div className="flex space-x-4">
             {steps.map((step) => {
@@ -660,7 +689,7 @@ const UniversalSetupWizard = () => {
           </div>
         </div>
 
-        {/* Main Content */}
+        {/* Contenu principal */}
         <Card className="max-w-3xl mx-auto">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -668,7 +697,7 @@ const UniversalSetupWizard = () => {
               {steps[currentStep - 1].title}
             </CardTitle>
             <CardDescription>
-              Étape {currentStep} sur {steps.length}
+              {t('setup.navigation.step_of', { current: currentStep, total: steps.length })}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -680,7 +709,7 @@ const UniversalSetupWizard = () => {
                 onClick={prevStep}
                 disabled={currentStep === 1}
               >
-                Précédent
+                {t('setup.navigation.previous')}
               </Button>
               
               {currentStep < 5 ? (
@@ -688,7 +717,7 @@ const UniversalSetupWizard = () => {
                   onClick={nextStep}
                   disabled={!canProceed()}
                 >
-                  Suivant
+                  {t('setup.navigation.next')}
                 </Button>
               ) : (
                 <Button
@@ -696,7 +725,7 @@ const UniversalSetupWizard = () => {
                   disabled={!canProceed()}
                   className="bg-green-600 hover:bg-green-700"
                 >
-                  Finaliser l'installation
+                  {t('setup.navigation.finish')}
                 </Button>
               )}
             </div>
