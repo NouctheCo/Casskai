@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useLocale } from '@/contexts/LocaleContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,24 +15,32 @@ import { useNavigate } from 'react-router-dom';
 
 export default function SettingsPage() {
   const { t, currentLocale } = useLocale();
-  const { ALL_MODULES: systemModules, enabledModules, updateModuleState, loadingModules: contextLoading, fetchEnabledModules } = useModules();
+  const { ALL_MODULES: systemModules, enabledModules, updateModuleState, loadingModules: contextLoading } = useModules();
   const { toast } = useToast();
-  const { user, loading, hasPermission, currentEnterpriseId, currentCompanySubscription, fetchAccessData } = useAuth(); 
+  const { user, loading, hasPermission, currentEnterpriseId, currentCompanySubscription } = useAuth(); 
   const navigate = useNavigate();
 
+  // ✅ États locaux stabilisés
   const [moduleStates, setModuleStates] = useState({});
   const [isSaving, setIsSaving] = useState(false);
-  const [isLoadingInitial, setIsLoadingInitial] = useState(true);
-  const [subscription, setSubscription] = useState(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // ✅ OPTIMISATION: Mémoriser les permissions pour éviter les recalculs
-  const permissions = useMemo(() => ({
-    canManageModules: hasPermission('manage_company_settings'),
-    canManageRolesAndUsers: hasPermission('manage_company_users') || hasPermission('manage_company_roles'),
-    canManageBilling: hasPermission('manage_company_settings')
-  }), [hasPermission]);
+  // ✅ Refs pour éviter les appels redondants
+  const hasInitialized = useRef(false);
+  const prevModulesRef = useRef();
 
-  // ✅ OPTIMISATION: Mémoriser la configuration des sections
+  // ✅ Permissions mémorisées de façon stable
+  const permissions = useMemo(() => {
+    if (!user) return { canManageModules: false, canManageRolesAndUsers: false, canManageBilling: false };
+    
+    return {
+      canManageModules: hasPermission('manage_company_settings'),
+      canManageRolesAndUsers: hasPermission('manage_company_users') || hasPermission('manage_company_roles'),
+      canManageBilling: hasPermission('manage_company_settings')
+    };
+  }, [user, hasPermission]);
+
+  // ✅ Configuration sections mémorisée
   const settingsSections = useMemo(() => [
     { 
       title: t('userProfile', { defaultValue: 'Profil Utilisateur' }), 
@@ -57,7 +65,7 @@ export default function SettingsPage() {
     },
   ], [t]);
 
-  // ✅ OPTIMISATION: Stabiliser la fonction formatDate
+  // ✅ Fonction formatDate stable
   const formatDate = useCallback((dateString) => {
     if (!dateString) return 'N/A';
     try {
@@ -71,7 +79,7 @@ export default function SettingsPage() {
     }
   }, [currentLocale]);
 
-  // ✅ OPTIMISATION: Mémoriser les fonctions pour éviter les re-créations
+  // ✅ Handlers stables
   const handleModuleToggle = useCallback((moduleKey) => {
     setModuleStates(prev => ({ ...prev, [moduleKey]: !prev[moduleKey] }));
   }, []);
@@ -85,19 +93,23 @@ export default function SettingsPage() {
       });
       return;
     }
+
     setIsSaving(true);
     try {
+      const promises = [];
       for (const mod of systemModules) {
         if (moduleStates[mod.key] !== enabledModules[mod.key]) {
-          await updateModuleState(mod.key, moduleStates[mod.key]);
+          promises.push(updateModuleState(mod.key, moduleStates[mod.key]));
         }
       }
+      
+      await Promise.all(promises);
+      
       toast({
         title: t('success', { defaultValue: 'Succès' }),
         description: t('moduleSettingsUpdated', { defaultValue: 'Paramètres des modules mis à jour' }),
         variant: "success",
       });
-      await fetchEnabledModules(); 
     } catch (error) {
       console.error("Error saving module settings:", error);
       toast({
@@ -108,67 +120,35 @@ export default function SettingsPage() {
     } finally {
       setIsSaving(false);
     }
-  }, [permissions.canManageModules, systemModules, moduleStates, enabledModules, updateModuleState, fetchEnabledModules, toast, t]);
+  }, [permissions.canManageModules, systemModules, moduleStates, enabledModules, updateModuleState, toast, t]);
 
-  // ✅ OPTIMISATION: Combiner les useEffect liés aux modules
+  // ✅ Initialisation unique des modules
   useEffect(() => {
-    if (!contextLoading) {
-      setModuleStates(enabledModules);
-      setIsLoadingInitial(false);
-    }
-  }, [enabledModules, contextLoading]);
-  
-  // ✅ OPTIMISATION: Optimiser la gestion de l'abonnement
-  useEffect(() => {
-    if (!loading) {
-      if (currentEnterpriseId && currentCompanySubscription) {
-        setSubscription(currentCompanySubscription);
-      } else {
-        setSubscription(null);
+    if (!contextLoading && enabledModules && !hasInitialized.current) {
+      // Vérifier si les modules ont changé
+      const modulesChanged = JSON.stringify(enabledModules) !== JSON.stringify(prevModulesRef.current);
+      
+      if (modulesChanged || !isInitialized) {
+        setModuleStates(enabledModules);
+        setIsInitialized(true);
+        hasInitialized.current = true;
+        prevModulesRef.current = enabledModules;
       }
     }
-  }, [currentEnterpriseId, currentCompanySubscription, loading]);
+  }, [enabledModules, contextLoading, isInitialized]);
 
-  // ✅ OPTIMISATION: Éviter les appels redondants fetchAccessData
-  useEffect(() => {
-    if (user && currentEnterpriseId && !loading) {
-      let isMounted = true;
-      
-      const loadData = async () => {
-        try {
-          await Promise.all([
-            fetchAccessData(),
-            fetchEnabledModules()
-          ]);
-        } catch (error) {
-          if (isMounted) {
-            console.error('Error loading settings data:', error);
-          }
-        }
-      };
-
-      loadData();
-
-      return () => {
-        isMounted = false;
-      };
-    }
-  }, [user, currentEnterpriseId, loading]);
-
-  // ✅ OPTIMISATION: Mémoriser l'état de chargement
+  // ✅ État de chargement simplifié
   const isLoading = useMemo(() => {
-    return isLoadingInitial && contextLoading && loading;
-  }, [isLoadingInitial, contextLoading, loading]);
+    return loading || contextLoading || !isInitialized;
+  }, [loading, contextLoading, isInitialized]);
 
-  // ✅ OPTIMISATION: Composant de chargement mémorisé
-  const LoadingComponent = useMemo(() => (
-    <div className="flex h-64 items-center justify-center">
-      <Loader2 className="h-12 w-12 animate-spin text-primary" />
-    </div>
-  ), []);
-
+  // ✅ Composant de chargement
   if (isLoading) {
-    return LoadingComponent;
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
   }
 
   return (
@@ -187,6 +167,7 @@ export default function SettingsPage() {
         </p>
       </div>
 
+      {/* Thème et Langue */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader>
@@ -216,8 +197,10 @@ export default function SettingsPage() {
         </Card>
       </div>
       
+      {/* Sections d'entreprise */}
       {currentEnterpriseId && (
         <>
+          {/* Abonnement */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -228,28 +211,26 @@ export default function SettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {loading ? (
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-              ) : permissions.canManageBilling ? (
-                subscription ? (
+              {permissions.canManageBilling ? (
+                currentCompanySubscription ? (
                   <div>
                     <p>
-                      <strong>{t('currentPlan', { defaultValue: 'Plan actuel' })}:</strong> {subscription.product?.name || t('unknownPlan', { defaultValue: 'Plan inconnu' })}
+                      <strong>{t('currentPlan', { defaultValue: 'Plan actuel' })}:</strong> {currentCompanySubscription.product?.name || t('unknownPlan', { defaultValue: 'Plan inconnu' })}
                     </p>
                     <p>
                       <strong>{t('status', { defaultValue: 'Statut' })}:</strong> 
-                      <span className={`capitalize ml-1 ${subscription.status === 'active' ? 'text-green-600' : 'text-red-600'}`}>
-                        {t(`subscription_${subscription.status}`, { defaultValue: subscription.status })}
+                      <span className={`capitalize ml-1 ${currentCompanySubscription.status === 'active' ? 'text-green-600' : 'text-red-600'}`}>
+                        {t(`subscription_${currentCompanySubscription.status}`, { defaultValue: currentCompanySubscription.status })}
                       </span>
                     </p>
-                    {subscription.price && (
+                    {currentCompanySubscription.price && (
                       <p>
-                        <strong>{t('price', { defaultValue: 'Prix' })}:</strong> {(subscription.price.unit_amount / 100).toFixed(2)} {subscription.price.currency?.toUpperCase()} / {t(`interval_${subscription.price.recurring?.interval}`, { defaultValue: subscription.price.recurring?.interval || 'ponctuel' })}
+                        <strong>{t('price', { defaultValue: 'Prix' })}:</strong> {(currentCompanySubscription.price.unit_amount / 100).toFixed(2)} {currentCompanySubscription.price.currency?.toUpperCase()} / {t(`interval_${currentCompanySubscription.price.recurring?.interval}`, { defaultValue: currentCompanySubscription.price.recurring?.interval || 'ponctuel' })}
                       </p>
                     )}
-                    {subscription.current_period_end && 
+                    {currentCompanySubscription.current_period_end && 
                       <p>
-                        <strong>{t('renewsOn', { defaultValue: 'Renouvellement le' })}:</strong> {formatDate(subscription.current_period_end)}
+                        <strong>{t('renewsOn', { defaultValue: 'Renouvellement le' })}:</strong> {formatDate(currentCompanySubscription.current_period_end)}
                       </p>
                     }
                     <Button className="mt-4" disabled>
@@ -270,15 +251,9 @@ export default function SettingsPage() {
                 </p>
               )}
             </CardContent>
-            {permissions.canManageBilling && 
-              <CardFooter>
-                <p className="text-xs text-muted-foreground">
-                  {t('stripePortalInfo', { defaultValue: 'Gestion via portail Stripe sécurisé' })}
-                </p>
-              </CardFooter>
-            }
           </Card>
 
+          {/* Gestion des modules */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -308,14 +283,14 @@ export default function SettingsPage() {
                     id={`module-${mod.key}`}
                     checked={moduleStates[mod.key] || false}
                     onCheckedChange={() => handleModuleToggle(mod.key)}
-                    disabled={isSaving || contextLoading || !permissions.canManageModules}
+                    disabled={isSaving || !permissions.canManageModules}
                   />
                 </div>
               ))}
             </CardContent>
             {permissions.canManageModules && (
               <CardFooter>
-                <Button onClick={handleSaveChanges} disabled={isSaving || contextLoading}>
+                <Button onClick={handleSaveChanges} disabled={isSaving}>
                   {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
                   {t('saveChanges', { defaultValue: 'Enregistrer les modifications' })}
                 </Button>
@@ -323,6 +298,7 @@ export default function SettingsPage() {
             )}
           </Card>
 
+          {/* Gestion des utilisateurs */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -349,17 +325,11 @@ export default function SettingsPage() {
                 </p>
               )}
             </CardContent>
-             {permissions.canManageRolesAndUsers && (
-                <CardFooter>
-                    <p className="text-xs text-muted-foreground">
-                      {t('userManagement.accessControlInfo', {defaultValue: 'Définissez les droits d\'accès et invitez de nouveaux membres.'})}
-                    </p>
-                </CardFooter>
-             )}
           </Card>
         </>
       )}
       
+      {/* Autres sections */}
       <div className="grid gap-6 md:grid-cols-2">
         {settingsSections.map((section, index) => {
           if (section.permission && !hasPermission(section.permission) && currentEnterpriseId) {
@@ -374,34 +344,35 @@ export default function SettingsPage() {
               whileHover={{ y: -5, boxShadow: "0px 8px 15px rgba(0,0,0,0.07)" }}
             >
               <Card>
-                  <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <section.icon className="text-primary"/>
-                        {section.title}
-                      </CardTitle>
-                      <CardDescription>{section.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="h-[100px] flex items-center justify-center">
-                      <p className="text-muted-foreground">
-                        {t('comingSoon', { defaultValue: 'Bientôt disponible' })}
-                      </p>
-                  </CardContent>
-                   <CardFooter>
-                      <Button 
-                        variant="outline" 
-                        className="w-full" 
-                        disabled={(section.permission && !hasPermission(section.permission) && currentEnterpriseId) || !currentEnterpriseId } 
-                        onClick={section.action}
-                      >
-                        {t('configureButton', {defaultValue: 'Configurer'})}
-                      </Button>
-                  </CardFooter>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <section.icon className="text-primary"/>
+                    {section.title}
+                  </CardTitle>
+                  <CardDescription>{section.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="h-[100px] flex items-center justify-center">
+                  <p className="text-muted-foreground">
+                    {t('comingSoon', { defaultValue: 'Bientôt disponible' })}
+                  </p>
+                </CardContent>
+                <CardFooter>
+                  <Button 
+                    variant="outline" 
+                    className="w-full" 
+                    disabled 
+                    onClick={section.action}
+                  >
+                    {t('configureButton', {defaultValue: 'Configurer'})}
+                  </Button>
+                </CardFooter>
               </Card>
             </motion.div>
           );
         })}
       </div>
 
+      {/* Export et sauvegarde */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -414,21 +385,21 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" disabled>
               <DownloadCloud className="mr-2 h-4 w-4" />
               {t('exportData', { defaultValue: 'Exporter les données' })}
             </Button>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" disabled>
               <FileArchive className="mr-2 h-4 w-4" />
               {t('generateFECReport', { defaultValue: 'Générer rapport FEC' })}
             </Button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" disabled>
               <Database className="mr-2 h-4 w-4" />
               {t('backupData', { defaultValue: 'Sauvegarder données' })}
             </Button>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" disabled>
               <Upload className="mr-2 h-4 w-4" />
               {t('importData', { defaultValue: 'Importer données' })}
             </Button>
