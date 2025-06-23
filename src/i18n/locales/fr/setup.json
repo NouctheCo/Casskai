@@ -1,0 +1,209 @@
+{
+  "wizard": {
+    "title": "Configuration Casskai",
+    "subtitle": "Solution de gestion financière multi-marchés",
+    "welcome": "Bienvenue dans l'assistant de configuration",
+    "steps": {
+      "market": "Marché & Localisation",
+      "supabase": "Configuration Supabase",
+      "company": "Informations Entreprise",
+      "mobile_money": "Mobile Money",
+      "admin": "Compte Administrateur"
+    }
+  },
+  "market": {
+    "detected": "Marché détecté automatiquement : {{market}}",
+    "select": "Sélectionnez votre marché principal",
+    "selected": "Sélectionné",
+    "regions": {
+      "europe": "🇪🇺 Europe",
+      "africa": "🌍 Afrique",
+      "americas": "🌎 Amériques"
+    },
+    "countries": {
+      "france": "France",
+      "belgium": "Belgique",
+      "benin": "Bénin",
+      "ivory_coast": "Côte d'Ivoire",
+      "burkina_faso": "Burkina Faso",
+      "mali": "Mali",
+      "senegal": "Sénégal",
+      "togo": "Togo",
+      "canada": "Canada (QC)"
+    }
+  },
+  "supabase": {
+    "info": "Vous devez créer un projet Supabase gratuit sur supabase.com",
+    "info_title": "Information importante",
+    "info_description": "Vous devez avoir créé un projet Supabase avant de continuer. Les clés sont disponibles dans les paramètres de votre projet.",
+    "url_label": "URL du projet Supabase",
+    "url_placeholder": "https://votre-projet.supabase.co",
+    "key_label": "Clé API Supabase (anon)",
+    "key_placeholder": "eyJhbGciOiJIUzI1NiIsInR5cCI...",
+    "test_connection": "Tester la connexion",
+    "testing": "Test en cours...",
+    "success": "Connexion Supabase réussie ! Configuration automatique en cours...",
+    "error": "Erreur de connexion. Vérifiez vos paramètres Supabase.",
+    "required": "Ce champ est obligatoire"
+  },
+  "company": {
+    "config_for": "Configuration pour : {{country}}",
+    "ohada_activated": "Configuration OHADA activée",
+    "ohada_description": "Plan comptable SYSCOHADA, support Mobile Money, conformité fiscale locale.",
+    "name_label": "Nom de l'entreprise",
+    "name_placeholder_african": "Entreprise SARL-U",
+    "name_placeholder_default": "Mon Entreprise SARL",
+    "legal_form": "Forme juridique",
+    "legal_forms": {
+      "select": "Sélectionner...",
+      "sarl": "SARL (Société à Responsabilité Limitée)",
+      "suarl": "SUARL (Société Unipersonnelle à Responsabilité Limitée)",
+      "sa": "SA (Société Anonyme)",
+      "sas": "SAS (Société par Actions Simplifiée)",
+      "gie": "GIE (Groupement d'Intérêt Économique)",
+      "ei": "EI (Entreprise Individuelle)"
+    },
+    "tax_number": {
+      "african": "Numéro d'Identification Fiscale (NIF)",
+      "france": "SIREN/SIRET",
+      "belgium": "TVA BE",
+      "default": "Numéro fiscal"
+    },
+    "tax_number_placeholder": {
+      "african": "Ex: 2024123456789",
+      "france": "12345678901234",
+      "belgium": "BE0123456789",
+      "default": "Numéro fiscal"
+    },
+    "capital_label": "Capital social (en CFA)",
+    "capital_placeholder": "1000000",
+    "capital_minimum": "Capital minimum : 1,000,000 CFA pour SARL, 10,000,000 CFA pour SA",
+    "sector_label": "Secteur d'activité",
+    "sectors": {
+      "select": "Sélectionner...",
+      "african": {
+        "agriculture": "Agriculture et élevage",
+        "commerce": "Commerce et distribution",
+        "services": "Services",
+        "industrie": "Industrie et manufacturing",
+        "btp": "BTP et construction",
+        "transport": "Transport et logistique",
+        "telecom": "Télécommunications",
+        "finance": "Services financiers",
+        "education": "Éducation et formation",
+        "sante": "Santé",
+        "tourisme": "Tourisme et hôtellerie",
+        "energie": "Énergie et mines"
+      },
+      "default": {
+        "commerce": "Commerce",
+        "services": "Services",
+        "industrie": "Industrie",
+        "btp": "BTP",
+        "it": "Informatique",
+        "consulting": "Conseil"
+      }
+    }
+  },
+  "mobile_money": {
+    "title": "Mobile Money",
+    "description": "Configurez les moyens de paiement mobile populaires dans votre région.",
+    "not_applicable": "Mobile Money non applicable",
+    "not_applicable_description": "Cette fonctionnalité est spécifique aux marchés africains.",
+    "providers_label": "Moyens de paiement mobile à activer",
+    "providers": {
+      "benin": {
+        "mtn": "MTN Mobile Money",
+        "moov": "Moov Money"
+      },
+      "ivory_coast": {
+        "orange": "Orange Money",
+        "mtn": "MTN Mobile Money",
+        "moov": "Moov Money"
+      },
+      "burkina_faso": {
+        "orange": "Orange Money",
+        "moov": "Moov Money"
+      },
+      "mali": {
+        "orange": "Orange Money",
+        "moov": "Moov Money"
+      },
+      "senegal": {
+        "orange": "Orange Money",
+        "wave": "Wave",
+        "free": "Free Money"
+      },
+      "togo": {
+        "flooz": "Flooz",
+        "tmoney": "T-Money"
+      }
+    },
+    "note_title": "Note importante",
+    "note_description": "L'intégration Mobile Money nécessite des partenariats avec les opérateurs. Ces options seront disponibles dans une version future de CassKai."
+  },
+  "admin": {
+    "email_label": "Email administrateur",
+    "email_placeholder": "admin@monentreprise.com",
+    "password_label": "Mot de passe",
+    "password_placeholder": "Mot de passe sécurisé",
+    "final_config": "Configuration finale",
+    "tasks": {
+      "database": "Installation du schéma de base de données",
+      "accounting_plan": "Import du plan comptable {{standard}}",
+      "currencies": "Configuration des devises et taux",
+      "features": "Activation des fonctionnalités locales",
+      "mobile_money": "Configuration Mobile Money ({{count}} opérateurs)"
+    }
+  },
+  "navigation": {
+    "previous": "Précédent",
+    "next": "Suivant",
+    "finish": "Finaliser l'installation",
+    "step_of": "Étape {{current}} sur {{total}}"
+  },
+  "validation": {
+    "required": "Ce champ est obligatoire",
+    "email_invalid": "Adresse email invalide",
+    "password_min": "Le mot de passe doit contenir au moins 8 caractères",
+    "company_name_required": "Le nom de l'entreprise est requis",
+    "supabase_connection_required": "La connexion Supabase doit être testée"
+  },
+  "installation": {
+    "starting": "Démarrage de l'installation...",
+    "creating_database": "Création de la base de données...",
+    "importing_accounting": "Import du plan comptable...",
+    "configuring_company": "Configuration de l'entreprise...",
+    "creating_admin": "Création du compte administrateur...",
+    "finalizing": "Finalisation...",
+    "completed": "Installation terminée avec succès !",
+    "error": "Erreur lors de l'installation",
+    "redirecting": "Redirection vers Casskai...",
+    "please_wait": "Veuillez patienter, cela peut prendre quelques minutes."
+  },
+  "features": {
+    "ohada_compliance": "Conformité OHADA",
+    "mobile_money_integration": "Intégration Mobile Money",
+    "local_tax_compliance": "Conformité fiscale locale",
+    "multi_currency": "Multi-devises",
+    "automatic_exchange_rates": "Taux de change automatiques",
+    "local_banking": "Connexions bancaires locales",
+    "regulatory_reports": "Rapports réglementaires",
+    "fiscal_calendar": "Calendrier fiscal local"
+  },
+  "currencies": {
+    "eur": "Euro",
+    "xof": "Franc CFA BCEAO",
+    "xaf": "Franc CFA BEAC",
+    "usd": "Dollar américain",
+    "cad": "Dollar canadien",
+    "gbp": "Livre sterling"
+  },
+  "standards": {
+    "pcg": "Plan Comptable Général (France)",
+    "pcg_belge": "Plan Comptable Général Belge",
+    "syscohada": "SYSCOHADA (Afrique de l'Ouest)",
+    "gaap": "GAAP (Canada)",
+    "ifrs": "IFRS International"
+  }
+}
