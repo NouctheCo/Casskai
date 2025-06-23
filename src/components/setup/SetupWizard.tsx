@@ -6,8 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle, AlertCircle, Database, Building, Globe, Shield, MapPin } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const UniversalSetupWizard = () => {
+  const { t } = useTranslation('setup');
   const [currentStep, setCurrentStep] = useState(1);
   const [detectedMarket, setDetectedMarket] = useState(null);
   const [config, setConfig] = useState({
@@ -19,6 +21,10 @@ const UniversalSetupWizard = () => {
     currency: '',
     accountingStandard: '',
     taxNumber: '',
+    legalForm: '',
+    capital: '',
+    sector: '',
+    mobileMoneyProviders: [],
     adminEmail: '',
     adminPassword: '',
     acceptTerms: false
@@ -67,6 +73,46 @@ const UniversalSetupWizard = () => {
       color: 'bg-green-50 border-green-200'
     },
     {
+      id: 'burkina_faso',
+      name: 'Burkina Faso',
+      region: '🌍 Afrique',
+      currency: 'XOF',
+      standard: 'SYSCOHADA',
+      pricing: '12K FCFA/mois',
+      features: ['OHADA', 'Mobile Money', 'DGID'],
+      color: 'bg-green-50 border-green-200'
+    },
+    {
+      id: 'mali',
+      name: 'Mali',
+      region: '🌍 Afrique',
+      currency: 'XOF',
+      standard: 'SYSCOHADA',
+      pricing: '12K FCFA/mois',
+      features: ['OHADA', 'Orange Money', 'DGI'],
+      color: 'bg-green-50 border-green-200'
+    },
+    {
+      id: 'senegal',
+      name: 'Sénégal',
+      region: '🌍 Afrique',
+      currency: 'XOF',
+      standard: 'SYSCOHADA',
+      pricing: '12K FCFA/mois',
+      features: ['OHADA', 'Wave', 'DGI'],
+      color: 'bg-green-50 border-green-200'
+    },
+    {
+      id: 'togo',
+      name: 'Togo',
+      region: '🌍 Afrique',
+      currency: 'XOF',
+      standard: 'SYSCOHADA',
+      pricing: '12K FCFA/mois',
+      features: ['OHADA', 'Flooz', 'OTR'],
+      color: 'bg-green-50 border-green-200'
+    },
+    {
       id: 'canada',
       name: 'Canada (QC)',
       region: '🌎 Amériques',
@@ -75,54 +121,16 @@ const UniversalSetupWizard = () => {
       pricing: '25$ CAD/mois',
       features: ['TPS/TVQ', 'ARC', 'Interac'],
       color: 'bg-orange-50 border-orange-200'
-    },
-      {
-    id: 'burkina_faso',
-    name: 'Burkina Faso',
-    region: '🌍 Afrique',
-    currency: 'XOF',
-    standard: 'SYSCOHADA',
-    pricing: '12K FCFA/mois',
-    features: ['OHADA', 'Mobile Money', 'DGID'],
-    color: 'bg-green-50 border-green-200'
-  },
-  {
-    id: 'mali',
-    name: 'Mali',
-    region: '🌍 Afrique',
-    currency: 'XOF',
-    standard: 'SYSCOHADA',
-    pricing: '12K FCFA/mois',
-    features: ['OHADA', 'Orange Money', 'DGI'],
-    color: 'bg-green-50 border-green-200'
-  },
-  {
-    id: 'senegal',
-    name: 'Sénégal',
-    region: '🌍 Afrique',
-    currency: 'XOF',
-    standard: 'SYSCOHADA',
-    pricing: '12K FCFA/mois',
-    features: ['OHADA', 'Wave', 'DGI'],
-    color: 'bg-green-50 border-green-200'
-  },
-  {
-    id: 'togo',
-    name: 'Togo',
-    region: '🌍 Afrique',
-    currency: 'XOF',
-    standard: 'SYSCOHADA',
-    pricing: '12K FCFA/mois',
-    features: ['OHADA', 'Flooz', 'OTR'],
-    color: 'bg-green-50 border-green-200'
-  }
+    }
   ];
 
+  // CORRIGÉ: Ajout de l'étape Mobile Money
   const steps = [
     { id: 1, title: 'Marché & Localisation', icon: MapPin },
     { id: 2, title: 'Configuration Supabase', icon: Database },
     { id: 3, title: 'Informations Entreprise', icon: Building },
-    { id: 4, title: 'Compte Administrateur', icon: Shield }
+    { id: 4, title: 'Mobile Money', icon: Globe },
+    { id: 5, title: 'Compte Administrateur', icon: Shield }
   ];
 
   // Détection automatique du marché au chargement
@@ -132,29 +140,25 @@ const UniversalSetupWizard = () => {
 
   const detectUserMarket = async () => {
     try {
-      // Simulation détection IP/géolocalisation
       const response = await fetch('https://ipapi.co/json/');
       const data = await response.json();
       
       const marketMap = {
-      'FR': 'france',
-      'BE': 'belgium',
-      'BJ': 'benin',
-      'CI': 'ivory_coast',
-      'BF': 'burkina_faso',  // ← NOUVEAU
-      'ML': 'mali',          // ← NOUVEAU
-      'SN': 'senegal',       // ← NOUVEAU
-      'TG': 'togo',          // ← NOUVEAU
-      'CM': 'cameroon',      // ← À ajouter si nécessaire
-      'GA': 'gabon',         // ← À ajouter si nécessaire
-      'CA': 'canada'
+        'FR': 'france',
+        'BE': 'belgium',
+        'BJ': 'benin',
+        'CI': 'ivory_coast',
+        'BF': 'burkina_faso',
+        'ML': 'mali',
+        'SN': 'senegal',
+        'TG': 'togo',
+        'CA': 'canada'
       };
       
       const detected = marketMap[data.country_code] || 'france';
       setDetectedMarket(detected);
       setConfig(prev => ({ ...prev, market: detected }));
     } catch (error) {
-      // Fallback sur France
       setDetectedMarket('france');
       setConfig(prev => ({ ...prev, market: 'france' }));
     }
@@ -171,8 +175,29 @@ const UniversalSetupWizard = () => {
   };
 
   const testSupabaseConnection = async () => {
-    // ... logique de test connection
-    setTimeout(() => setConnectionStatus('success'), 2000);
+    setConnectionStatus('testing');
+    try {
+      // Simulation du test de connexion
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setConnectionStatus('success');
+    } catch (error) {
+      setConnectionStatus('error');
+    }
+  };
+
+  const formatCurrency = (amount, currency) => {
+    if (currency === 'XOF') {
+      return new Intl.NumberFormat('fr-FR', {
+        style: 'decimal',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(amount) + ' CFA';
+    }
+    
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: currency
+    }).format(amount);
   };
 
   const renderMarketSelection = () => (
@@ -249,7 +274,7 @@ const UniversalSetupWizard = () => {
       <Alert className="border-amber-200 bg-amber-50">
         <AlertCircle className="h-4 w-4 text-amber-600" />
         <AlertDescription className="text-amber-800">
-          Vous devez créer un projet Supabase gratuit sur <a href="https://supabase.com" target="_blank" className="underline">supabase.com</a>
+          Vous devez créer un projet Supabase gratuit sur <a href="https://supabase.com" target="_blank" rel="noopener noreferrer" className="underline">supabase.com</a>
         </AlertDescription>
       </Alert>
 
@@ -278,10 +303,10 @@ const UniversalSetupWizard = () => {
 
       <Button 
         onClick={testSupabaseConnection}
-        disabled={!config.supabaseUrl || !config.supabaseKey}
+        disabled={!config.supabaseUrl || !config.supabaseKey || connectionStatus === 'testing'}
         className="w-full"
       >
-        Tester la connexion
+        {connectionStatus === 'testing' ? 'Test en cours...' : 'Tester la connexion'}
       </Button>
 
       {connectionStatus === 'success' && (
@@ -292,165 +317,232 @@ const UniversalSetupWizard = () => {
           </AlertDescription>
         </Alert>
       )}
-    </div>
-  );
 
-const formatCurrency = (amount, currency) => {
-  if (currency === 'XOF') {
-    // Format CFA: pas de décimales, espace comme séparateur de milliers
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'decimal',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount) + ' CFA';
-  }
-  
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: currency
-  }).format(amount);
-};
-  
-  const renderCompanyInfo = () => {
-  const selectedMarket = markets.find(m => m.id === config.market);
-  const isAfricanMarket = selectedMarket?.region === '🌍 Afrique';
-  
-  return (
-    <div className="space-y-6">
-      {/* Configuration existante */}
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <h3 className="font-medium mb-2">Configuration pour : {selectedMarket?.name}</h3>
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="text-gray-600">Devise :</span> {selectedMarket?.currency}
-          </div>
-          <div>
-            <span className="text-gray-600">Standard :</span> {selectedMarket?.standard}
-          </div>
-        </div>
-      </div>
-
-      {/* Champs spécifiques à l'Afrique */}
-      {isAfricanMarket && (
-        <Alert className="border-green-200 bg-green-50">
-          <AlertCircle className="h-4 w-4 text-green-600" />
-          <AlertDescription className="text-green-800">
-            <strong>Configuration OHADA activée</strong><br/>
-            Plan comptable SYSCOHADA, support Mobile Money, conformité fiscale locale.
+      {connectionStatus === 'error' && (
+        <Alert className="border-red-200 bg-red-50">
+          <AlertCircle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-800">
+            Erreur de connexion. Vérifiez vos paramètres Supabase.
           </AlertDescription>
         </Alert>
       )}
-
-      <div>
-        <Label htmlFor="companyName">Nom de l'entreprise</Label>
-        <Input
-          id="companyName"
-          placeholder={isAfricanMarket ? "Entreprise SARL-U" : "Mon Entreprise SARL"}
-          value={config.companyName}
-          onChange={(e) => setConfig(prev => ({ ...prev, companyName: e.target.value }))}
-          className="mt-2"
-        />
-      </div>
-
-      {/* Forme juridique pour l'Afrique */}
-      {isAfricanMarket && (
-        <div>
-          <Label htmlFor="legalForm">Forme juridique</Label>
-          <select
-            id="legalForm"
-            value={config.legalForm || ''}
-            onChange={(e) => setConfig(prev => ({ ...prev, legalForm: e.target.value }))}
-            className="w-full mt-2 p-3 border border-gray-300 rounded-lg"
-          >
-            <option value="">Sélectionner...</option>
-            <option value="SARL">SARL (Société à Responsabilité Limitée)</option>
-            <option value="SUARL">SUARL (Société Unipersonnelle à Responsabilité Limitée)</option>
-            <option value="SA">SA (Société Anonyme)</option>
-            <option value="SAS">SAS (Société par Actions Simplifiée)</option>
-            <option value="GIE">GIE (Groupement d'Intérêt Économique)</option>
-            <option value="EI">EI (Entreprise Individuelle)</option>
-          </select>
-        </div>
-      )}
-
-      <div>
-        <Label htmlFor="taxNumber">
-          {isAfricanMarket ? 'Numéro d\'Identification Fiscale (NIF)' :
-           selectedMarket?.id === 'france' ? 'SIREN/SIRET' : 
-           selectedMarket?.id === 'belgium' ? 'TVA BE' : 'Numéro fiscal'}
-        </Label>
-        <Input
-          id="taxNumber"
-          placeholder={
-            isAfricanMarket ? 'Ex: 2024123456789' :
-            selectedMarket?.id === 'france' ? '12345678901234' :
-            selectedMarket?.id === 'belgium' ? 'BE0123456789' :
-            'Numéro fiscal'
-          }
-          value={config.taxNumber}
-          onChange={(e) => setConfig(prev => ({ ...prev, taxNumber: e.target.value }))}
-          className="mt-2"
-        />
-      </div>
-
-      {/* Capital social pour l'Afrique */}
-      {isAfricanMarket && (
-        <div>
-          <Label htmlFor="capital">Capital social (en CFA)</Label>
-          <Input
-            id="capital"
-            type="number"
-            placeholder="1000000"
-            value={config.capital || ''}
-            onChange={(e) => setConfig(prev => ({ ...prev, capital: e.target.value }))}
-            className="mt-2"
-          />
-          <p className="text-sm text-gray-500 mt-1">
-            Capital minimum : 1,000,000 CFA pour SARL, 10,000,000 CFA pour SA
-          </p>
-        </div>
-      )}
-
-      {/* Secteur d'activité */}
-      <div>
-        <Label htmlFor="sector">Secteur d'activité</Label>
-        <select
-          id="sector"
-          value={config.sector || ''}
-          onChange={(e) => setConfig(prev => ({ ...prev, sector: e.target.value }))}
-          className="w-full mt-2 p-3 border border-gray-300 rounded-lg"
-        >
-          <option value="">Sélectionner...</option>
-          {isAfricanMarket ? (
-            <>
-              <option value="agriculture">Agriculture et élevage</option>
-              <option value="commerce">Commerce et distribution</option>
-              <option value="services">Services</option>
-              <option value="industrie">Industrie et manufacturing</option>
-              <option value="btp">BTP et construction</option>
-              <option value="transport">Transport et logistique</option>
-              <option value="telecom">Télécommunications</option>
-              <option value="finance">Services financiers</option>
-              <option value="education">Éducation et formation</option>
-              <option value="sante">Santé</option>
-              <option value="tourisme">Tourisme et hôtellerie</option>
-              <option value="energie">Énergie et mines</option>
-            </>
-          ) : (
-            <>
-              <option value="commerce">Commerce</option>
-              <option value="services">Services</option>
-              <option value="industrie">Industrie</option>
-              <option value="btp">BTP</option>
-              <option value="it">Informatique</option>
-              <option value="consulting">Conseil</option>
-            </>
-          )}
-        </select>
-      </div>
     </div>
   );
-};
+
+  const renderCompanyInfo = () => {
+    const selectedMarket = markets.find(m => m.id === config.market);
+    const isAfricanMarket = selectedMarket?.region === '🌍 Afrique';
+    
+    return (
+      <div className="space-y-6">
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="font-medium mb-2">Configuration pour : {selectedMarket?.name}</h3>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="text-gray-600">Devise :</span> {selectedMarket?.currency}
+            </div>
+            <div>
+              <span className="text-gray-600">Standard :</span> {selectedMarket?.standard}
+            </div>
+          </div>
+        </div>
+
+        {isAfricanMarket && (
+          <Alert className="border-green-200 bg-green-50">
+            <AlertCircle className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">
+              <strong>Configuration OHADA activée</strong><br/>
+              Plan comptable SYSCOHADA, support Mobile Money, conformité fiscale locale.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <div>
+          <Label htmlFor="companyName">Nom de l'entreprise</Label>
+          <Input
+            id="companyName"
+            placeholder={isAfricanMarket ? "Entreprise SARL-U" : "Mon Entreprise SARL"}
+            value={config.companyName}
+            onChange={(e) => setConfig(prev => ({ ...prev, companyName: e.target.value }))}
+            className="mt-2"
+          />
+        </div>
+
+        {isAfricanMarket && (
+          <div>
+            <Label htmlFor="legalForm">Forme juridique</Label>
+            <select
+              id="legalForm"
+              value={config.legalForm || ''}
+              onChange={(e) => setConfig(prev => ({ ...prev, legalForm: e.target.value }))}
+              className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">Sélectionner...</option>
+              <option value="SARL">SARL (Société à Responsabilité Limitée)</option>
+              <option value="SUARL">SUARL (Société Unipersonnelle à Responsabilité Limitée)</option>
+              <option value="SA">SA (Société Anonyme)</option>
+              <option value="SAS">SAS (Société par Actions Simplifiée)</option>
+              <option value="GIE">GIE (Groupement d'Intérêt Économique)</option>
+              <option value="EI">EI (Entreprise Individuelle)</option>
+            </select>
+          </div>
+        )}
+
+        <div>
+          <Label htmlFor="taxNumber">
+            {isAfricanMarket ? 'Numéro d\'Identification Fiscale (NIF)' :
+             selectedMarket?.id === 'france' ? 'SIREN/SIRET' : 
+             selectedMarket?.id === 'belgium' ? 'TVA BE' : 'Numéro fiscal'}
+          </Label>
+          <Input
+            id="taxNumber"
+            placeholder={
+              isAfricanMarket ? 'Ex: 2024123456789' :
+              selectedMarket?.id === 'france' ? '12345678901234' :
+              selectedMarket?.id === 'belgium' ? 'BE0123456789' :
+              'Numéro fiscal'
+            }
+            value={config.taxNumber}
+            onChange={(e) => setConfig(prev => ({ ...prev, taxNumber: e.target.value }))}
+            className="mt-2"
+          />
+        </div>
+
+        {isAfricanMarket && (
+          <div>
+            <Label htmlFor="capital">Capital social (en CFA)</Label>
+            <Input
+              id="capital"
+              type="number"
+              placeholder="1000000"
+              value={config.capital || ''}
+              onChange={(e) => setConfig(prev => ({ ...prev, capital: e.target.value }))}
+              className="mt-2"
+            />
+            <p className="text-sm text-gray-500 mt-1">
+              Capital minimum : 1,000,000 CFA pour SARL, 10,000,000 CFA pour SA
+            </p>
+          </div>
+        )}
+
+        <div>
+          <Label htmlFor="sector">Secteur d'activité</Label>
+          <select
+            id="sector"
+            value={config.sector || ''}
+            onChange={(e) => setConfig(prev => ({ ...prev, sector: e.target.value }))}
+            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">Sélectionner...</option>
+            {isAfricanMarket ? (
+              <>
+                <option value="agriculture">Agriculture et élevage</option>
+                <option value="commerce">Commerce et distribution</option>
+                <option value="services">Services</option>
+                <option value="industrie">Industrie et manufacturing</option>
+                <option value="btp">BTP et construction</option>
+                <option value="transport">Transport et logistique</option>
+                <option value="telecom">Télécommunications</option>
+                <option value="finance">Services financiers</option>
+                <option value="education">Éducation et formation</option>
+                <option value="sante">Santé</option>
+                <option value="tourisme">Tourisme et hôtellerie</option>
+                <option value="energie">Énergie et mines</option>
+              </>
+            ) : (
+              <>
+                <option value="commerce">Commerce</option>
+                <option value="services">Services</option>
+                <option value="industrie">Industrie</option>
+                <option value="btp">BTP</option>
+                <option value="it">Informatique</option>
+                <option value="consulting">Conseil</option>
+              </>
+            )}
+          </select>
+        </div>
+      </div>
+    );
+  };
+
+  const renderMobileMoneyConfig = () => {
+    const selectedMarket = markets.find(m => m.id === config.market);
+    const isAfricanMarket = selectedMarket?.region === '🌍 Afrique';
+    
+    if (!isAfricanMarket) {
+      return (
+        <div className="text-center py-8">
+          <Globe className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+          <h3 className="text-lg font-medium text-gray-600 mb-2">
+            Mobile Money non applicable
+          </h3>
+          <p className="text-gray-500">
+            Cette fonctionnalité est spécifique aux marchés africains.
+          </p>
+        </div>
+      );
+    }
+
+    const mobileMoneyProviders = {
+      'benin': ['MTN Mobile Money', 'Moov Money'],
+      'ivory_coast': ['Orange Money', 'MTN Mobile Money', 'Moov Money'],
+      'burkina_faso': ['Orange Money', 'Moov Money'],
+      'mali': ['Orange Money', 'Moov Money'],
+      'senegal': ['Orange Money', 'Wave', 'Free Money'],
+      'togo': ['Flooz', 'T-Money']
+    };
+
+    const providers = mobileMoneyProviders[config.market] || [];
+
+    return (
+      <div className="space-y-6">
+        <Alert className="border-blue-200 bg-blue-50">
+          <AlertCircle className="h-4 w-4 text-blue-600" />
+          <AlertDescription className="text-blue-800">
+            <strong>Mobile Money</strong><br/>
+            Configurez les moyens de paiement mobile populaires dans votre région.
+          </AlertDescription>
+        </Alert>
+
+        <div>
+          <Label className="text-lg font-medium mb-4 block">
+            Moyens de paiement mobile à activer
+          </Label>
+          
+          <div className="space-y-3">
+            {providers.map(provider => (
+              <div key={provider} className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id={provider}
+                  checked={config.mobileMoneyProviders?.includes(provider) || false}
+                  onChange={(e) => {
+                    const current = config.mobileMoneyProviders || [];
+                    const updated = e.target.checked
+                      ? [...current, provider]
+                      : current.filter(p => p !== provider);
+                    setConfig(prev => ({ ...prev, mobileMoneyProviders: updated }));
+                  }}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <label htmlFor={provider} className="font-medium">
+                  {provider}
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <h4 className="font-medium text-yellow-800 mb-2">Note importante</h4>
+          <p className="text-yellow-700 text-sm">
+            L'intégration Mobile Money nécessite des partenariats avec les opérateurs. 
+            Ces options seront disponibles dans une version future de CassKai.
+          </p>
+        </div>
+      </div>
+    );
+  };
 
   const renderAdminAccount = () => (
     <div className="space-y-6">
@@ -485,6 +577,9 @@ const formatCurrency = (amount, currency) => {
           <div>• Import du plan comptable {config.accountingStandard}</div>
           <div>• Configuration des devises et taux</div>
           <div>• Activation des fonctionnalités locales</div>
+          {config.mobileMoneyProviders?.length > 0 && (
+            <div>• Configuration Mobile Money ({config.mobileMoneyProviders.length} opérateurs)</div>
+          )}
         </div>
       </div>
     </div>
@@ -495,7 +590,8 @@ const formatCurrency = (amount, currency) => {
       case 1: return renderMarketSelection();
       case 2: return renderSupabaseConfig();
       case 3: return renderCompanyInfo();
-      case 4: return renderAdminAccount();
+      case 4: return renderMobileMoneyConfig();
+      case 5: return renderAdminAccount();
       default: return null;
     }
   };
@@ -505,13 +601,30 @@ const formatCurrency = (amount, currency) => {
       case 1: return config.market;
       case 2: return connectionStatus === 'success';
       case 3: return config.companyName;
-      case 4: return config.adminEmail && config.adminPassword;
+      case 4: return true; // Mobile Money optionnel
+      case 5: return config.adminEmail && config.adminPassword;
       default: return false;
     }
   };
 
-  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 4));
+  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 5));
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
+
+  const handleFinish = async () => {
+    try {
+      // Ici vous ajouterez la logique pour :
+      // - Créer les tables Supabase
+      // - Configurer la première entreprise
+      // - Créer le compte admin
+      console.log('Configuration finale:', config);
+      
+      alert('Installation terminée ! Redirection vers Casskai...');
+      // window.location.href = '/dashboard';
+    } catch (error) {
+      console.error('Erreur lors de l\'installation:', error);
+      alert('Erreur lors de l\'installation. Veuillez réessayer.');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
@@ -538,7 +651,7 @@ const formatCurrency = (amount, currency) => {
                   `}>
                     {isCompleted ? <CheckCircle className="w-6 h-6" /> : <Icon className="w-6 h-6" />}
                   </div>
-                  <span className={`text-sm ${isActive ? 'text-blue-600 font-medium' : 'text-gray-500'}`}>
+                  <span className={`text-sm text-center ${isActive ? 'text-blue-600 font-medium' : 'text-gray-500'}`}>
                     {step.title}
                   </span>
                 </div>
@@ -570,7 +683,7 @@ const formatCurrency = (amount, currency) => {
                 Précédent
               </Button>
               
-              {currentStep < 4 ? (
+              {currentStep < 5 ? (
                 <Button
                   onClick={nextStep}
                   disabled={!canProceed()}
@@ -579,7 +692,7 @@ const formatCurrency = (amount, currency) => {
                 </Button>
               ) : (
                 <Button
-                  onClick={() => alert('Installation terminée ! Redirection vers Casskai...')}
+                  onClick={handleFinish}
                   disabled={!canProceed()}
                   className="bg-green-600 hover:bg-green-700"
                 >
@@ -589,73 +702,6 @@ const formatCurrency = (amount, currency) => {
             </div>
           </CardContent>
         </Card>
-      </div>
-    </div>
-  );
-};
-
-const renderMobileMoneyConfig = () => {
-  const selectedMarket = markets.find(m => m.id === config.market);
-  const isAfricanMarket = selectedMarket?.region === '🌍 Afrique';
-  
-  if (!isAfricanMarket) return null;
-
-  const mobileMoneyProviders = {
-    'benin': ['MTN Mobile Money', 'Moov Money'],
-    'ivory_coast': ['Orange Money', 'MTN Mobile Money', 'Moov Money'],
-    'burkina_faso': ['Orange Money', 'Moov Money'],
-    'mali': ['Orange Money', 'Moov Money'],
-    'senegal': ['Orange Money', 'Wave', 'Free Money'],
-    'togo': ['Flooz', 'T-Money']
-  };
-
-  const providers = mobileMoneyProviders[config.market] || [];
-
-  return (
-    <div className="space-y-6">
-      <Alert className="border-blue-200 bg-blue-50">
-        <AlertCircle className="h-4 w-4 text-blue-600" />
-        <AlertDescription className="text-blue-800">
-          <strong>Mobile Money</strong><br/>
-          Configurez les moyens de paiement mobile populaires dans votre région.
-        </AlertDescription>
-      </Alert>
-
-      <div>
-        <Label className="text-lg font-medium mb-4 block">
-          Moyens de paiement mobile à activer
-        </Label>
-        
-        <div className="space-y-3">
-          {providers.map(provider => (
-            <div key={provider} className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                id={provider}
-                checked={config.mobileMoneyProviders?.includes(provider) || false}
-                onChange={(e) => {
-                  const current = config.mobileMoneyProviders || [];
-                  const updated = e.target.checked
-                    ? [...current, provider]
-                    : current.filter(p => p !== provider);
-                  setConfig(prev => ({ ...prev, mobileMoneyProviders: updated }));
-                }}
-                className="rounded border-gray-300"
-              />
-              <label htmlFor={provider} className="font-medium">
-                {provider}
-              </label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <h4 className="font-medium text-yellow-800 mb-2">Note importante</h4>
-        <p className="text-yellow-700 text-sm">
-          L'intégration Mobile Money nécessite des partenariats avec les opérateurs. 
-          Ces options seront disponibles dans une version future de CassKai.
-        </p>
       </div>
     </div>
   );
