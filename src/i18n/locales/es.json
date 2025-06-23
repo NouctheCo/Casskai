@@ -3,9 +3,9 @@
     "title": "Gestión Contable",
     "description": "Gestione sus asientos, plan contable y diarios.",
     "saveErrorTitle": "Error de guardado",
-    "balanceError": "El debe y el haber deben estar equilibrados.",
+    "balanceError": "El débito y el crédito deben estar equilibrados.",
     "saveSuccessTitle": "Asiento guardado",
-    "saveSuccessMessage": "El asiento contable se ha guardado correctamente.",
+    "saveSuccessMessage": "El asiento contable se ha guardado con éxito.",
     "noCompanySelected": {
       "title": "Ninguna empresa seleccionada",
       "message": "Por favor seleccione una empresa para gestionar la contabilidad"
@@ -14,36 +14,36 @@
   "accounting": {
     "setup": {
       "title": "Configuración contable",
-      "description": "Completa la configuración inicial de tu sistema contable",
+      "description": "Complete la configuración inicial de su sistema contable",
       "chartOfAccounts": "Plan contable",
-      "chartOfAccountsDesc": "Configura la estructura de tu plan contable",
+      "chartOfAccountsDesc": "Configure la estructura de su plan contable",
       "fiscalYear": "Ejercicio fiscal",
-      "fiscalYearDesc": "Define tu ejercicio fiscal y tus períodos",
+      "fiscalYearDesc": "Defina su ejercicio fiscal y períodos",
       "journals": "Diarios",
-      "journalsDesc": "Configura tus diarios contables",
+      "journalsDesc": "Configure sus diarios contables",
       "completed": "Configuración contable completada con éxito",
-      "configureChartOfAccounts": "Configurar Plan Contable",
-      "chartOfAccountsDialogDesc": "Elige cómo configurar tu plan contable",
-      "chartOption": "Opción de plan contable",
-      "selectChartOption": "Selecciona una opción",
-      "useDefaultChart": "Usar plan contable francés por defecto",
+      "configureChartOfAccounts": "Configurar plan contable",
+      "chartOfAccountsDialogDesc": "Elija cómo configurar su plan contable",
+      "chartOption": "Opción del plan contable",
+      "selectChartOption": "Seleccione una opción",
+      "useDefaultChart": "Usar plan contable por defecto",
       "createCustomChart": "Crear plan personalizado (próximamente)",
       "importFromFile": "Importar desde archivo (próximamente)",
-      "configureFiscalYear": "Configurar Ejercicio Fiscal",
-      "fiscalYearDialogDesc": "Define las fechas de inicio y fin de tu ejercicio fiscal",
+      "configureFiscalYear": "Configurar ejercicio fiscal",
+      "fiscalYearDialogDesc": "Defina las fechas de inicio y fin de su ejercicio fiscal",
       "fiscalYearStart": "Inicio del ejercicio fiscal",
       "fiscalYearEnd": "Fin del ejercicio fiscal",
       "periodType": "Tipo de período",
-      "selectPeriodType": "Selecciona el tipo de período",
+      "selectPeriodType": "Seleccione el tipo de período",
       "monthly": "Mensual",
       "quarterly": "Trimestral",
       "annual": "Anual",
       "fiscalYearSaved": "Configuración del ejercicio fiscal guardada con éxito",
       "fiscalYearError": "Error al guardar la configuración del ejercicio fiscal",
-      "configureJournals": "Configurar Diarios",
-      "journalsDialogDesc": "Elige cómo configurar tus diarios contables",
+      "configureJournals": "Configurar diarios",
+      "journalsDialogDesc": "Elija cómo configurar sus diarios contables",
       "journalsOption": "Opción de diarios",
-      "selectJournalsOption": "Selecciona una opción",
+      "selectJournalsOption": "Seleccione una opción",
       "useDefaultJournals": "Usar diarios por defecto",
       "createCustomJournals": "Crear diarios personalizados (próximamente)",
       "journalsSaved": "Diarios por defecto creados con éxito",
@@ -51,7 +51,7 @@
     },
     "journals": {
       "title": "Diarios contables",
-      "description": "Gestiona tus diarios contables",
+      "description": "Gestione sus diarios contables",
       "newJournal": "Nuevo diario",
       "editJournal": "Editar diario",
       "newJournalDesc": "Crear un nuevo diario contable",
@@ -65,10 +65,10 @@
       "namePlaceholder": "Nombre del diario",
       "descriptionPlaceholder": "Descripción del diario",
       "selectType": "Seleccionar tipo",
-      "noJournals": "No hay diarios todavía",
-      "createFirstJournal": "Crea tu primer diario para empezar",
+      "noJournals": "Aún no hay diarios",
+      "createFirstJournal": "Cree su primer diario para comenzar",
       "createJournal": "Crear diario",
-      "validationError": "Por favor completa todos los campos obligatorios",
+      "validationError": "Por favor complete todos los campos obligatorios",
       "createSuccess": "Diario creado con éxito",
       "updateSuccess": "Diario actualizado con éxito",
       "saveError": "Error al guardar el diario",
@@ -88,8 +88,8 @@
     "description": "Descripción",
     "journal": "Diario",
     "account": "Cuenta",
-    "debit": "Debe",
-    "credit": "Haber",
+    "debit": "Débito",
+    "credit": "Crédito",
     "balance": "Saldo",
     "status": "Estado",
     "new": "Nuevo asiento",
@@ -98,10 +98,10 @@
     "save": "Guardar asiento",
     "cancel": "Cancelar",
     "items": "Líneas de asiento",
-    "add_item": "Añadir línea",
+    "add_item": "Agregar línea",
     "remove_item": "Eliminar línea",
-    "total_debit": "Total debe",
-    "total_credit": "Total haber",
+    "total_debit": "Total débito",
+    "total_credit": "Total crédito",
     "difference": "Diferencia",
     "balanced": "Equilibrado",
     "unbalanced": "No equilibrado",
@@ -110,7 +110,7 @@
     "retry": "Reintentar",
     "no_enterprise_selected": "Ninguna empresa seleccionada",
     "supabase_not_configured": "Supabase no está configurado. Por favor configure sus variables de entorno.",
-    "network_error": "Error de red. Compruebe su conexión a internet y la configuración de Supabase.",
+    "network_error": "Error de red. Verifique su conexión a internet y la configuración de Supabase.",
     "error_loading_accounts": "Error al cargar las cuentas",
     "error_loading_journals": "Error al cargar los diarios",
     "no_accounts_found": "No se encontraron cuentas",
@@ -126,7 +126,7 @@
     "create": "Crear",
     "actions": "Acciones",
     "view": "Ver",
-    "dashboard": "Panel de control",
+    "dashboard": "Panel",
     "forecasts": "Previsiones",
     "guest": "Invitado",
     "humanResources": "Recursos Humanos",
@@ -134,26 +134,28 @@
     "invoicing": "Facturación",
     "loading": "Cargando...",
     "month": "Mes",
-    "noCompanySelectedTitle": "Ninguna empresa seleccionada",
+    "noCompanySelectedTitle": "Ninguna Empresa Seleccionada",
     "projects": "Proyectos",
     "purchases": "Compras",
     "quarter": "Trimestre",
-    "salesCrm": "Ventas y CRM",
+    "salesCrm": "Ventas & CRM",
     "settings": "Configuración",
     "thirdParties": "Terceros",
     "configure": "Configurar",
     "getStarted": "Comenzar",
-    "year": "Año"
+    "year": "Año",
+    "update": "Actualizar",
+    "saving": "Guardando..."
   },
   "entries": {
-    "updated": "Asiento actualizado correctamente",
-    "created": "Asiento creado correctamente",
+    "updated": "Asiento actualizado con éxito",
+    "created": "Asiento creado con éxito",
     "failed": "Error al guardar el asiento",
     "new": "Nuevo asiento",
     "list": "Lista de asientos"
   },
   "navigation": {
-    "chartOfAccounts": "Plan contable",
+    "chartOfAccounts": "Plan de Cuentas",
     "journals": "Diarios",
     "fec": "FEC",
     "setupAssistant": "Asistente de configuración"
@@ -161,7 +163,7 @@
   "dashboard": {
     "activeClients": "Clientes activos",
     "activeClientsDescription": "Número de clientes con actividad reciente",
-    "cashBalance": "Saldo de tesorería",
+    "cashBalance": "Saldo de efectivo",
     "cashflow": "Flujo de efectivo",
     "cashflowDescription": "Evolución de entradas y salidas de efectivo",
     "clients": "Clientes",
@@ -201,12 +203,12 @@
     "balance": "Saldo",
     "city": "Ciudad",
     "country": "País",
-    "createSuccess": "Tercero creado correctamente",
+    "createSuccess": "Tercero creado con éxito",
     "createTitle": "Crear tercero",
-    "defaultCurrency": "Moneda predeterminada",
+    "defaultCurrency": "Moneda por defecto",
     "deleteConfirmation": "¿Está seguro de que desea eliminar {name}?",
     "deleteError": "Error al eliminar el tercero",
-    "deleteSuccess": "Tercero eliminado correctamente",
+    "deleteSuccess": "Tercero eliminado con éxito",
     "description": "Gestione sus clientes y proveedores",
     "editTitle": "Editar tercero",
     "email": "Email",
@@ -217,27 +219,34 @@
       "errorTitle": "Error de importación",
       "processingDesc": "Procesando datos...",
       "processingTitle": "Importación en curso",
-      "successDesc": "{count} terceros importados correctamente"
+      "successDesc": "{count} terceros importados con éxito"
     },
+    "validation": {
+      "websiteInvalid": "Formato de sitio web inválido",
+      "emailInvalid": "Formato de email inválido",
+      "nameRequired": "El nombre es requerido"
+    },
+    "website": "Sitio web",
+    "contactName": "Contacto principal",
     "name": "Nombre",
     "noResults": "No se encontraron resultados",
     "notes": "Notas",
     "notesPlaceholder": "Notas o comentarios sobre este tercero",
     "pageSubtitle": "Gestione sus clientes y proveedores",
-    "pageTitle": "Gestión de terceros",
+    "pageTitle": "Gestión de Terceros",
     "paymentTerms": "Condiciones de pago",
     "paymentTermsPlaceholder": "Ej: 30 días fin de mes",
     "phone": "Teléfono",
     "postalCode": "Código postal",
     "saveError": "Error al guardar el tercero",
     "searchPlaceholder": "Buscar un {type}...",
-    "selectCompany": "Seleccionar una empresa",
+    "selectCompany": "Seleccione una empresa",
     "selectCompanyPrompt": "Por favor seleccione una empresa",
     "selectCompanyToViewClients": "Seleccione una empresa para ver los clientes",
     "selectCompanyToViewSuppliers": "Seleccione una empresa para ver los proveedores",
-    "selectCountry": "Seleccionar un país",
+    "selectCountry": "Seleccionar país",
     "solvencyAnalysis": "Análisis de solvencia",
-    "solvencyAnalysisComingSoonDetail": "El análisis de solvencia con calificación automática estará disponible pronto",
+    "solvencyAnalysisComingSoonDetail": "El análisis de solvencia con puntuación automática estará disponible pronto",
     "solvencyAnalysisSubtitle": "Analice la salud financiera de sus terceros",
     "status": "Estado",
     "taxNumber": "Número fiscal",
@@ -245,18 +254,13 @@
     "unpaidTracking": "Seguimiento de impagos",
     "unpaidTrackingComingSoonDetail": "El seguimiento automático de impagos con recordatorios estará disponible pronto",
     "unpaidTrackingSubtitle": "Rastree y gestione sus cuentas por cobrar impagadas",
-    "updateSuccess": "Tercero actualizado correctamente",
-    "validation": {
-      "emailInvalid": "Formato de email inválido",
-      "nameRequired": "El nombre es obligatorio",
-      "websiteInvalid": "Formato de sitio web inválido"
-    },
-    "website": "Sitio web",
-    "contactName": "Contacto principal"
+    "updateSuccess": "Tercero actualizado con éxito"
   },
+  "client": "Cliente",
+  "supplier": "Proveedor",
   "invoicing": "Facturación",
   "purchases": "Compras",
-  "salesCrm": "Ventas y CRM",
+  "salesCrm": "Ventas & CRM",
   "humanResources": "Recursos Humanos",
   "projects": "Proyectos",
   "inventory": "Inventario",
@@ -270,8 +274,8 @@
   "type": "Tipo",
   "status": "Estado",
   "actions": "Acciones",
-  "debit": "Debe",
-  "credit": "Haber",
+  "debit": "Débito",
+  "credit": "Crédito",
   "balance": "Saldo",
   "accountNumber": "Número de cuenta",
   "accountName": "Nombre de cuenta",
@@ -290,9 +294,9 @@
   "newAccount": "Nueva cuenta",
   "editAccount": "Editar cuenta",
   "createAccountDescription": "Crear una nueva cuenta en su plan contable",
-  "editAccountDescription": "Edite la información de la cuenta",
-  "accountCreatedSuccess": "Cuenta creada correctamente",
-  "accountUpdatedSuccess": "Cuenta actualizada correctamente",
+  "editAccountDescription": "Editar información de la cuenta",
+  "accountCreatedSuccess": "Cuenta creada con éxito",
+  "accountUpdatedSuccess": "Cuenta actualizada con éxito",
   "accountDescriptionPlaceholder": "Descripción de la cuenta",
   "capitalPlaceholder": "Capital social",
   "parentAccountCodeOptional": "Código de cuenta padre (opcional)",
@@ -300,7 +304,7 @@
   "fieldRequired": "Este campo es obligatorio",
   "accountNumberUniqueError": "Este número de cuenta ya existe",
   "importDefaultChart": "Importar plan estándar",
-  "defaultChartImportedSuccess": "Plan contable estándar importado correctamente",
+  "defaultChartImportedSuccess": "Plan contable estándar importado con éxito",
   "defaultChartImportError": "Error al importar el plan contable estándar",
   "chartOfAccounts": "Plan contable",
   "chartOfAccountsDescription": "Gestione su plan contable",
@@ -309,8 +313,8 @@
   "accountingEntries": "Asientos contables",
   "accountingEntriesList": "Lista de asientos",
   "newEntry": "Nuevo asiento",
-  "dateFrom": "Fecha de inicio",
-  "dateTo": "Fecha de fin",
+  "dateFrom": "Fecha desde",
+  "dateTo": "Fecha hasta",
   "allJournals": "Todos los diarios",
   "allAccounts": "Todas las cuentas",
   "applyFilters": "Aplicar filtros",
@@ -325,10 +329,10 @@
   "confirmDeletion": "Confirmar eliminación",
   "confirmDeleteEntryMessage": "¿Está seguro de que desea eliminar este asiento? Esta acción es irreversible.",
   "confirmDeleteAllEntriesMessage": "¿Está seguro de que desea eliminar TODOS los asientos contables? Esta acción es irreversible y eliminará permanentemente todos los asientos de esta empresa.",
-  "journalEntryDeletedSuccess": "Asiento eliminado correctamente",
-  "allEntriesDeletedSuccess": "Todos los asientos han sido eliminados correctamente.",
-  "entryCreatedSuccess": "Asiento creado correctamente",
-  "entryUpdatedSuccess": "Asiento actualizado correctamente",
+  "journalEntryDeletedSuccess": "Asiento eliminado con éxito",
+  "allEntriesDeletedSuccess": "Todos los asientos han sido eliminados con éxito.",
+  "entryCreatedSuccess": "Asiento creado con éxito",
+  "entryUpdatedSuccess": "Asiento actualizado con éxito",
   "failedToDeleteEntry": "Error al eliminar el asiento",
   "failedToDeleteAllEntries": "Error al eliminar los asientos",
   "failedToSubmitEntry": "Error al guardar el asiento",
@@ -341,8 +345,8 @@
   "save": "Guardar",
   "cancel": "Cancelar",
   "delete": "Eliminar",
-  "deleteAll": "Eliminar Todo",
-  "deleteAllEntries": "Eliminar Todos los Asientos",
+  "deleteAll": "Eliminar todo",
+  "deleteAllEntries": "Eliminar todos los asientos",
   "deleting": "Eliminando...",
   "edit": "Editar",
   "noCompanySelectedMessage": "Por favor seleccione una empresa para continuar",
@@ -350,12 +354,12 @@
   "setupAssistant": "Asistente de configuración",
   "fec": "FEC",
   "fecImport": {
-    "description": "Importe su archivo FEC (Fichier des Écritures Comptables) para crear asientos, cuentas y diarios",
+    "description": "Importe su archivo FEC (Archivo de Asientos Contables) para crear asientos, cuentas y diarios",
     "parsing": "Analizando archivo...",
     "importing": "Importando datos...",
     "button": {
-      "clearFile": "Borrar",
-      "importing": "Importando datos...",
+      "clearFile": "Limpiar",
+      "importing": "Importando...",
       "startImport": "Iniciar importación",
       "reset": "Reiniciar"
     },
@@ -366,23 +370,23 @@
       "selectFile": "Seleccionar archivo FEC"
     },
     "error": {
-      "notEnoughLines": "Archivo demasiado corto. Un archivo FEC debe contener al menos un encabezado y una línea de datos.",
-      "lineFormat": "Línea {line}: Formato inválido, se esperaban {expected} campos, se obtuvieron {actual}.",
+      "notEnoughLines": "Archivo muy corto. Un archivo FEC debe contener al menos un encabezado y una línea de datos.",
+      "lineFormat": "Línea {line}: Formato inválido, se esperaban {expected} campos, se recibieron {actual}.",
       "invalidDate": "Línea {line}: Formato de fecha EcritureDate inválido: {date}",
-      "noValidEntries": "No se encontraron entradas válidas en el archivo. Por favor, verifique los errores.",
+      "noValidEntries": "No se encontraron entradas válidas en el archivo. Por favor verifique los errores.",
       "missingColumns": "Columnas requeridas faltantes: {columns}",
-      "fileType": "Tipo de archivo inválido. Por favor, cargue un archivo .txt o .csv, o un archivo sin extensión.",
-      "fileSize": "El archivo es demasiado grande. El tamaño máximo es de 10 MB.",
+      "fileType": "Tipo de archivo inválido. Por favor cargue un archivo .txt o .csv, o un archivo sin extensión.",
+      "fileSize": "El archivo es muy grande. El tamaño máximo es de 10 MB.",
       "readingFile": "Error al leer el archivo",
-      "handlingFile": "Error al procesar el archivo",
+      "handlingFile": "Error al manejar el archivo",
       "parsingFailed": "Error al analizar el archivo FEC",
-      "noDataOrCompany": "No hay datos para importar o no se ha seleccionado una empresa",
+      "noDataOrCompany": "No hay datos para importar o ninguna empresa seleccionada",
       "cannotImportWithErrors": "No se pueden importar datos con errores y sin entradas válidas",
-      "unbalancedEntries": "{count} asientos no equilibrados encontrados."
+      "unbalancedEntries": "Se encontraron {count} asientos no equilibrados."
     },
     "feedback": {
       "errors": "Errores de análisis",
-      "errorsFound": "{count} errores encontrados en el archivo.",
+      "errorsFound": "Se encontraron {count} errores en el archivo.",
       "moreErrors": "y {count} errores más",
       "summary": "Resumen del archivo",
       "company": "Empresa",
@@ -391,22 +395,22 @@
       "entries": "Asientos",
       "accounts": "Cuentas",
       "journals": "Diarios",
-      "totalDebit": "Total Debe",
-      "totalCredit": "Total Haber",
+      "totalDebit": "Total Débito",
+      "totalCredit": "Total Crédito",
       "unbalanced": "Asientos no equilibrados",
       "balanceDifference": "Los asientos no están equilibrados. Diferencia: {balance}",
       "noData": "Sin datos",
       "noDataFound": "No se encontraron entradas válidas en el archivo.",
       "unbalancedEntries": "Asientos no equilibrados",
-      "unbalancedEntriesFound": "{count} asientos no equilibrados encontrados.",
+      "unbalancedEntriesFound": "Se encontraron {count} asientos no equilibrados.",
       "unbalancedEntry": "Asiento {key}: Diferencia de {difference}",
-      "moreUnbalanced": "y {count} asientos no equilibrados más"
+      "moreUnbalanced": "y {count} asientos más no equilibrados"
     },
     "data": {
       "unavailable": "N/A"
     },
     "summary": {
-      "title": "Vista previa de datos FEC",
+      "title": "Resumen de datos FEC",
       "groupedEntries": "Asientos agrupados",
       "entries": "Asientos",
       "accounts": "Cuentas",
@@ -414,8 +418,8 @@
       "journalEntry": "Diario-Asiento",
       "date": "Fecha",
       "description": "Descripción",
-      "debit": "Debe",
-      "credit": "Haber",
+      "debit": "Débito",
+      "credit": "Crédito",
       "lines": "Líneas",
       "journal": "Diario",
       "entryNum": "N° Asiento",
@@ -433,19 +437,19 @@
       "bank": "Banco",
       "purchase": "Compras",
       "miscellaneous": "Operaciones diversas",
-      "opening": "Asientos de apertura",
+      "opening": "Saldos de apertura",
       "other": "Otro"
     },
     "import": {
       "successTitle": "Importación exitosa",
-      "errorTitle": "Error en la importación",
-      "successDescription": "Los datos FEC se han importado correctamente.",
+      "errorTitle": "Error de importación",
+      "successDescription": "Los datos FEC han sido importados con éxito.",
       "accountsCreated": "{count} cuentas creadas",
       "journalsCreated": "{count} diarios creados",
       "entriesCreated": "{count} asientos contables creados",
       "entriesWithErrors": "{count} asientos tenían errores",
       "failed": "Error al importar datos FEC",
-      "success": "Datos FEC importados correctamente"
+      "success": "Datos FEC importados con éxito"
     }
   },
   "accountTypes": {
@@ -454,21 +458,21 @@
     "EQUITY": "Patrimonio",
     "REVENUE": "Ingreso",
     "EXPENSE": "Gasto",
-    "COST_OF_GOODS_SOLD": "Costo de ventas"
+    "COST_OF_GOODS_SOLD": "Costo de mercancías vendidas"
   },
   "accountClasses": {
     "1": "Clase 1 - Cuentas de capital",
-    "2": "Clase 2 - Activos fijos",
-    "3": "Clase 3 - Inventarios",
-    "4": "Clase 4 - Terceros",
+    "2": "Clase 2 - Cuentas de activos fijos",
+    "3": "Clase 3 - Cuentas de inventario",
+    "4": "Clase 4 - Cuentas de terceros",
     "5": "Clase 5 - Cuentas financieras",
-    "6": "Clase 6 - Gastos",
-    "7": "Clase 7 - Ingresos",
+    "6": "Clase 6 - Cuentas de gastos",
+    "7": "Clase 7 - Cuentas de ingresos",
     "8": "Clase 8 - Cuentas especiales",
-    "9": "Clase 9 - Contabilidad analítica"
+    "9": "Clase 9 - Contabilidad de gestión"
   },
   "pagination": {
-    "showing": "Mostrando {start} a {end} de {total} entradas",
+    "showing": "Mostrando {start} a {end} de {total} elementos",
     "noResults": "Sin resultados",
     "page": "Página",
     "of": "de",
@@ -483,44 +487,44 @@
     "title": "Gestión de Usuarios",
     "description": "Gestione usuarios, invitaciones y roles",
     "fetchUsersError": "Error al cargar usuarios",
-    "adminApiError": "Error de acceso a la API de administración",
+    "adminApiError": "Error de acceso a API de administrador",
     "noRoleAssigned": "Sin rol asignado",
     "accessDenied": "Acceso denegado",
     "insufficientPermissions": "Permisos insuficientes",
     "pageDescription": "Gestione usuarios, roles e invitaciones para su empresa",
     "inviteUserTitle": "Invitar Nuevo Usuario",
-    "inviteUserDescription": "Envíe un correo de invitación para añadir un nuevo usuario a su empresa",
-    "emailAddress": "Dirección de correo",
+    "inviteUserDescription": "Envíe una invitación por email para agregar un nuevo usuario a su empresa",
+    "emailAddress": "Dirección de email",
     "emailPlaceholder": "usuario@ejemplo.com",
     "sendInvitation": "Enviar Invitación",
     "companyUsersTitle": "Usuarios de la Empresa",
-    "companyUsersDescription": "Ver y gestionar usuarios actualmente en su empresa",
-    "noUsersFound": "No se encontraron usuarios en esta empresa todavía",
+    "companyUsersDescription": "Vea y gestione los usuarios actualmente en su empresa",
+    "noUsersFound": "No se encontraron usuarios en esta empresa",
     "inviteFirstUser": "¡Use el formulario de arriba para invitar a su primer miembro del equipo!",
     "userNameHeader": "Usuario",
-    "assignedRole": "Rol Asignado",
-    "assignRole": "Asignar Rol",
-    "assignRoleToUser": "Asignar Rol al Usuario",
-    "selectRole": "Seleccionar Rol",
+    "assignedRole": "Rol asignado",
+    "assignRole": "Asignar rol",
+    "assignRoleToUser": "Asignar rol al usuario",
+    "selectRole": "Seleccionar rol",
     "selectRoleForUser": "Seleccione un nuevo rol para {0}",
-    "selectRolePlaceholder": "Seleccione un rol",
+    "selectRolePlaceholder": "Seleccionar rol",
     "cancel": "Cancelar",
-    "saveChanges": "Guardar Cambios",
-    "systemRole": "Rol del Sistema",
-    "noCompanyTitle": "Ninguna Empresa Seleccionada",
+    "saveChanges": "Guardar cambios",
+    "systemRole": "Rol del sistema",
+    "noCompanyTitle": "Ninguna empresa seleccionada",
     "selectCompanyPrompt": "Por favor seleccione una empresa para gestionar usuarios",
-    "emailRequired": "El correo electrónico es necesario para enviar una invitación",
+    "emailRequired": "El email es requerido para enviar una invitación",
     "invitationSent": "Invitación enviada a {0}",
     "invitationError": "Error al enviar la invitación",
-    "emailNotAvailable": "Correo no disponible",
+    "emailNotAvailable": "Email no disponible",
     "userNotAvailable": "Usuario no disponible",
-    "unknownEmail": "Correo Desconocido",
-    "unknownUser": "Usuario Desconocido",
-    "roleAssigned": "Rol asignado correctamente",
+    "unknownEmail": "Email desconocido",
+    "unknownUser": "Usuario desconocido",
+    "roleAssigned": "Rol asignado con éxito",
     "roleAssignError": "Error al asignar el rol",
     "manageUsersButton": "Gestionar Usuarios y Roles",
     "settingsCardPrompt": "Controle quién tiene acceso y qué pueden hacer",
-    "accessControlInfo": "Defina derechos de acceso de usuarios e invite nuevos miembros",
+    "accessControlInfo": "Defina derechos de acceso e invite nuevos miembros",
     "actions": "Acciones"
   },
   "reports": {
@@ -528,7 +532,7 @@
     "generateAndAnalyze": "Genere y analice sus informes contables",
     "noCompanySelected": "Ninguna empresa seleccionada",
     "selectCompanyPrompt": "Seleccione una empresa para generar informes",
-    "dataLoadError": "Error al cargar los datos contables",
+    "dataLoadError": "Error al cargar datos contables",
     "generationError": "Error al generar el informe",
     "exportStarted": "Exportación iniciada",
     "exportMessage": "Exportación {format} en preparación...",
@@ -538,22 +542,22 @@
     "close": "Cerrar",
     "periodLabel": "Período",
     "comingSoon": "Próximamente",
-    "requestDemo": "Solicitar una demo",
+    "requestDemo": "Solicitar demo",
     "recalculateBalances": "Recalcular saldos",
-    "balancesRecalculated": "Saldos de cuentas recalculados correctamente",
-    "balancesRecalculationError": "Error al recalcular los saldos de las cuentas",
+    "balancesRecalculated": "Saldos de cuentas recalculados con éxito",
+    "balancesRecalculationError": "Error al recalcular saldos de cuentas",
     
     "currentYear": "Año actual",
     "lastYear": "Año anterior", 
     "currentMonth": "Mes actual",
     "lastMonth": "Mes anterior",
     
-    "balanceSheet": "Balance de Situación",
-    "balanceSheetDesc": "Situación patrimonial en una fecha determinada",
-    "incomeStatement": "Cuenta de Resultados",
-    "incomeStatementDesc": "Rendimiento financiero durante un período",
-    "cashFlowStatement": "Estado de Flujos de Efectivo",
-    "cashFlowDesc": "Movimientos de tesorería",
+    "balanceSheet": "Balance General",
+    "balanceSheetDesc": "Situación patrimonial en una fecha dada",
+    "incomeStatement": "Estado de Resultados",
+    "incomeStatementDesc": "Rendimiento financiero en un período",
+    "cashFlowStatement": "Estado de Flujo de Efectivo",
+    "cashFlowDesc": "Movimientos de efectivo",
     "trialBalance": "Balance de Comprobación",
     "trialBalanceDesc": "Saldos de todas las cuentas",
     
@@ -562,15 +566,15 @@
     "revenues": "INGRESOS", 
     "expenses": "GASTOS",
     
-    "fixedAssets": "Inmovilizado",
-    "inventory": "Existencias",
+    "fixedAssets": "Inmovilizaciones",
+    "inventory": "Inventarios",
     "receivables": "Deudores",
     "payables": "Acreedores",
     "cash": "Tesorería",
     
     "salesRevenue": "Cifra de negocios",
     "otherRevenues": "Otros ingresos",
-    "financialRevenues": "Ingresos financieros",
+    "financialRevenues": "Productos financieros",
     "purchases": "Compras",
     "externalExpenses": "Servicios exteriores",
     "personnelExpenses": "Gastos de personal",
@@ -593,7 +597,7 @@
     "credit": "Haber",
     "balance": "Saldo",
     
-    "showingFirstAccounts": "Mostrando las primeras 10 cuentas de {total}",
+    "showingFirstAccounts": "Mostrando las 10 primeras cuentas de {total}",
     
     "customAnalysis": "Análisis Personalizados",
     "customAnalysisDesc": "Cree análisis a medida según sus necesidades"
@@ -607,7 +611,7 @@
     "login": "Iniciar sesión",
     "loading": "Cargando...",
     "dontHaveAccount": "¿No tiene una cuenta?",
-    "createAccount": "Crear cuenta",
+    "createAccount": "Crear una cuenta",
     "forgotPassword": "¿Olvidó su contraseña?",
     "allRightsReserved": "Todos los derechos reservados",
     
@@ -615,31 +619,31 @@
     "hidePassword": "Ocultar contraseña",
     
     "signupCompleteTitle": "¡Registro exitoso!",
-    "loginPromptAfterSignup": "Por favor inicie sesión con su nueva cuenta. Si se requiere confirmación por correo electrónico, revise su bandeja de entrada.",
+    "loginPromptAfterSignup": "Por favor, inicie sesión con su nueva cuenta. Si se requiere confirmación por correo electrónico, consulte su bandeja de entrada.",
     "emailConfirmedTitle": "¡Correo electrónico confirmado!",
     "emailConfirmedMessage": "Su correo electrónico ha sido confirmado. Ahora puede iniciar sesión.",
     
     "authErrorTitle": "Error de autenticación",
     "validationError": "Error de validación",
-    "fillAllFields": "Por favor complete todos los campos.",
+    "fillAllFields": "Por favor, complete todos los campos.",
     
     "emailNotConfirmedTitle": "Correo electrónico no confirmado",
-    "emailNotConfirmedMessage": "Por favor revise su bandeja de entrada para confirmar su dirección de correo electrónico antes de iniciar sesión.",
+    "emailNotConfirmedMessage": "Por favor, revise su bandeja de entrada para confirmar su dirección de correo electrónico antes de iniciar sesión.",
     
     "invalidCredentialsTitle": "Credenciales inválidas",
-    "invalidCredentialsMessage": "Correo electrónico o contraseña incorrectos. Por favor verifique su información.",
+    "invalidCredentialsMessage": "Correo electrónico o contraseña incorrecta. Por favor, verifique su información.",
     
     "tooManyAttemptsTitle": "Demasiados intentos",
-    "tooManyAttemptsMessage": "Demasiados intentos de inicio de sesión. Por favor espere antes de intentar nuevamente.",
+    "tooManyAttemptsMessage": "Demasiados intentos de inicio de sesión. Por favor, espere antes de intentar nuevamente.",
     
     "loginError": "Error de inicio de sesión",
-    "loginFailed": "Error al iniciar sesión. Por favor verifique sus credenciales.",
+    "loginFailed": "Fallo en el inicio de sesión. Por favor, verifique sus credenciales.",
     
     "loginSuccessTitle": "Inicio de sesión exitoso",
     "loginSuccessMessage": "¡Bienvenido! Redirigiendo...",
     
     "unexpectedError": "Error inesperado", 
-    "tryAgainLater": "Ha ocurrido un error inesperado. Por favor intente nuevamente.",
+    "tryAgainLater": "Se produjo un error inesperado. Por favor, inténtelo de nuevo.",
     
     "signUp": "Registrarse",
     "signUpSuccess": "¡Registro exitoso!",
@@ -668,23 +672,23 @@
     "companyName": "Nombre de la empresa",
     "companyNameOptional": "Nombre de la empresa (opcional)",
     
-    "createAccount": "Crear cuenta",
-    "creatingAccount": "Creando cuenta...",
+    "createAccount": "Crear mi cuenta",
+    "creatingAccount": "Creando...",
     
-    "passwordRequirements": "La contraseña debe tener al menos 8 caracteres",
+    "passwordRequirements": "La contraseña debe contener al menos 8 caracteres",
     "passwordsDoNotMatch": "Las contraseñas no coinciden",
-    "fillAllFields": "Por favor complete todos los campos obligatorios",
+    "fillAllFields": "Por favor, complete todos los campos obligatorios",
     
     "accountCreatedTitle": "¡Cuenta creada con éxito!",
-    "accountCreatedMessage": "Se ha enviado un correo de confirmación a su dirección. Por favor revise su bandeja de entrada.",
+    "accountCreatedMessage": "Se ha enviado un correo de confirmación a su dirección. Por favor, revise su bandeja de entrada.",
     "accountCreatedNoConfirm": "Su cuenta ha sido creada con éxito. Ahora puede iniciar sesión.",
     
     "emailAlreadyExists": "Esta dirección de correo electrónico ya está en uso",
     "weakPassword": "La contraseña es demasiado débil",
     "invalidEmail": "Dirección de correo electrónico inválida",
     "signupError": "Error al crear la cuenta",
-    "signupFailed": "Error al crear la cuenta. Por favor intente nuevamente.",
-    "unexpectedError": "Ha ocurrido un error inesperado",
+    "signupFailed": "Fallo en la creación de la cuenta. Por favor, inténtelo de nuevo.",
+    "unexpectedError": "Se produjo un error inesperado",
     
     "showPassword": "Mostrar contraseña",
     "hidePassword": "Ocultar contraseña"
@@ -693,20 +697,20 @@
   "language": "Idioma",
   "subscriptionManagement": "Gestión de Suscripción",
   "subscriptionManagementDesc": "Gestione su suscripción y facturación",
-  "currentPlan": "Plan Actual",
+  "currentPlan": "Plan actual",
   "status": "Estado", 
   "price": "Precio",
-  "renewsOn": "Se renueva el",
-  "manageSubscriptionButton": "Gestionar Suscripción",
-  "noSubscriptionFound": "No se encontró ninguna suscripción",
-  "subscribeNowButton": "Suscribirse Ahora", 
-  "noPermissionManageBilling": "No tiene permiso para gestionar la facturación",
+  "renewsOn": "Renovación el",
+  "manageSubscriptionButton": "Gestionar suscripción",
+  "noSubscriptionFound": "No se encontró suscripción",
+  "subscribeNowButton": "Suscribirse ahora", 
+  "noPermissionManageBilling": "No tiene permisos para gestionar la facturación",
   "stripePortalInfo": "Gestión a través del portal seguro de Stripe",
   "unknownPlan": "Plan desconocido",
-  "manageModules": "Gestionar Módulos",
+  "manageModules": "Gestión de Módulos",
   "moduleActivationDescription": "Active o desactive módulos según sus necesidades",
-  "noPermissionManageModules": "No tiene permiso para gestionar módulos", 
-  "saveChanges": "Guardar Cambios",
+  "noPermissionManageModules": "No tiene permisos para gestionar módulos", 
+  "saveChanges": "Guardar cambios",
   "success": "Éxito",
   "error": "Error",
   "moduleSettingsUpdated": "Configuración de módulos actualizada",
@@ -714,19 +718,19 @@
   "userProfile": "Perfil de Usuario",
   "companySettings": "Configuración de Empresa", 
   "notifications": "Notificaciones",
-  "comingSoon": "Próximamente",
+  "comingSoon": "Próximamente disponible",
   "subscription_active": "Activo",
   "subscription_inactive": "Inactivo", 
   "subscription_past_due": "Vencido",
   "interval_month": "mes",
   "interval_year": "año",
   "interval_week": "semana",
-  "backupAndExport": "Copia de seguridad y Exportación",
+  "backupAndExport": "Respaldo y Exportación",
   "exportData": "Exportar datos",
   "generateFECReport": "Generar informe FEC",
-  "backupData": "Copia de seguridad",
+  "backupData": "Respaldar datos",
   "importData": "Importar datos",
-  "fecCompliance": "Las exportaciones cumplen con los estándares contables franceses (FEC, DGI)",
+  "fecCompliance": "Las exportaciones respetan las normas contables francesas (FEC, DGI)",
   "taxes": {
     "title": "Impuestos",
     "subtitle": "Gestione sus declaraciones y cumplimiento fiscal",
@@ -734,41 +738,41 @@
     "selectCompanyPrompt": "Seleccione una empresa para gestionar los impuestos",
     
     "france": "Francia",
-    "belgium": "Bélgica",
+    "belgium": "Bélgica", 
     "switzerland": "Suiza",
     "luxembourg": "Luxemburgo",
     
-    "taxDeadlines": "Fechas Límite Fiscales",
-    "upcomingDeadlines": "Próximas fechas y declaraciones por realizar",
+    "taxDeadlines": "Vencimientos Fiscales",
+    "upcomingDeadlines": "Próximos vencimientos y declaraciones a realizar",
     "type": "Tipo",
     "declaration": "Declaración",
-    "dueDate": "Fecha límite",
+    "dueDate": "Vencimiento",
     "status": "Estado",
     "amount": "Importe",
     "actions": "Acciones",
     
     "pending": "Pendiente",
-    "overdue": "Atrasado",
+    "overdue": "Vencido",
     "completed": "Completado",
     "submitted": "Presentado",
     
-    "taxRates": "Tasas de Impuestos",
-    "manageRates": "Gestione sus tasas de IVA e impuestos",
+    "taxRates": "Tipos de Impuestos",
+    "manageRates": "Gestione sus tipos de IVA e impuestos",
     "addRate": "Agregar",
-    "editRate": "Editar tasa",
-    "rateName": "Nombre de la tasa",
-    "rateValue": "Tasa (%)",
+    "editRate": "Modificar tipo",
+    "rateName": "Nombre del tipo",
+    "rateValue": "Tipo (%)",
     "rateType": "Tipo",
     "description": "Descripción",
     
-    "corporateTax": "Impuesto de sociedades",
+    "corporateTax": "Impuesto sobre sociedades",
     "incomeTax": "Impuesto sobre la renta",
     "other": "Otro",
     
     "taxCalculator": "Calculadora de Impuestos",
     "calculateTaxes": "Calcule rápidamente sus impuestos",
     "baseAmount": "Importe sin IVA",
-    "taxRate": "Tasa (%)",
+    "taxRate": "Tipo (%)",
     "calculate": "Calcular",
     "taxAmount": "Impuesto",
     "totalAmount": "Total con IVA",
@@ -780,28 +784,28 @@
     
     "success": "Éxito",
     "error": "Error",
-    "rateDeleted": "Tasa eliminada con éxito",
-    "rateSaved": "Tasa guardada con éxito",
+    "rateDeleted": "Tipo eliminado con éxito",
+    "rateSaved": "Tipo guardado con éxito",
     "fillAllFields": "Por favor, complete todos los campos",
-    "invalidNumbers": "Por favor, introduzca números válidos",
+    "invalidNumbers": "Por favor, ingrese números válidos",
     "cancel": "Cancelar",
     "save": "Guardar",
     
     "view": "Ver",
-    "edit": "Editar",
+    "edit": "Modificar",
     "delete": "Eliminar",
     "export": "Exportar",
     "import": "Importar",
     "print": "Imprimir",
     "download": "Descargar",
-    "selectRate": "Elegir una tasa",
+    "selectRate": "Elegir un tipo",
     
     "search": "Buscar",
     "filter": "Filtrar",
     "filterBy": "Filtrar por",
     "sortBy": "Ordenar por",
     "all": "Todo",
-    "reset": "Restablecer",
+    "reset": "Reiniciar",
     
     "period": "Período",
     "monthly": "Mensual",
@@ -817,14 +821,14 @@
     "rejected": "Rechazado",
     
     "vatDeclaration": "Declaración de IVA",
-    "corporateTaxDeclaration": "Declaración del Impuesto de Sociedades",
-    "socialContributions": "Contribuciones sociales",
+    "corporateTaxDeclaration": "Declaración IS",
+    "socialContributions": "Cotizaciones sociales",
     "withholdingTax": "Retención en la fuente",
     
     "noData": "No hay datos disponibles",
-    "noDeadlines": "No hay fechas próximas",
+    "noDeadlines": "No hay vencimientos próximos",
     "loading": "Cargando...",
-    "confirmDelete": "¿Está seguro de que desea eliminar esta tasa?",
+    "confirmDelete": "¿Está seguro de que quiere eliminar este tipo?",
     "cannotBeUndone": "Esta acción no se puede deshacer",
     
     "lastUpdate": "Última actualización",
@@ -839,14 +843,14 @@
     "minValue": "El valor mínimo es {min}",
     "maxValue": "El valor máximo es {max}",
     
-    "advancedSettings": "Configuraciones avanzadas",
+    "advancedSettings": "Configuración avanzada",
     "autoCalculate": "Cálculo automático",
     "roundingRules": "Reglas de redondeo",
-    "defaultRate": "Tasa predeterminada",
+    "defaultRate": "Tipo por defecto",
     "active": "Activo",
     "inactive": "Inactivo",
     
-    "liasseFiscale": "Declaración fiscal anual",
+    "liasseFiscale": "Cuentas anuales",
     "vatQuarterly": "IVA trimestral",
     "vatMonthly": "IVA mensual",
     "annualTaxReturn": "Declaración anual",
@@ -856,21 +860,646 @@
     "markAsCompleted": "Marcar como completado",
     "downloadForm": "Descargar formulario",
     
-    "taxReduction": "Reducción de impuestos",
+    "taxReduction": "Reducción de impuesto",
     "taxCredit": "Crédito fiscal",
-    "taxExemption": "Exención fiscal",
+    "taxExemption": "Exención",
     
-    "realNormal": "Régimen Real Normal",
-    "realSimplified": "Régimen Real Simplificado",
+    "realNormal": "Real Normal",
+    "realSimplified": "Real Simplificado",
     "microEnterprise": "Microempresa",
     
-    "revenue": "Ingresos",
+    "revenue": "Cifra de negocios",
     "services": "Servicios",
     "sales": "Ventas",
     
     "validUntil": "Válido hasta",
-    "effectiveDate": "Fecha de entrada en vigor",
-    "expiryDate": "Fecha de expiración"
+    "effectiveDate": "Fecha de vigencia",
+    "expiryDate": "Fecha de vencimiento",
+    
+    "monthlyAmounts": "Importes fiscales por mes",
+    "exportSuccess": "Informe exportado con éxito",
+    "exportError": "Error al exportar el PDF",
+    "reminderSet": "Recordatorio programado",
+    "reminderDescription": "Será notificado 3 días antes del vencimiento de {name}",
+    "reminderTitle": "Recordatorio fiscal",
+    "reminderMessage": "{name} vence en 3 días",
+    "pastDueDate": "La fecha de vencimiento ya pasó",
+    "notificationDenied": "Permiso de notificación denegado",
+    "notificationsNotSupported": "Las notificaciones no son compatibles con su navegador",
+    "importSuccess": "{count} tipos importados con éxito",
+    "importError": "Error al importar el archivo",
+    "fileReadError": "Error al leer el archivo",
+    "importErrors": "Errores de importación"
   },
-  "tax": "Impuestos"
+  "tax": "Impuestos",
+  "enterprise": {
+    "select": "Seleccionar una empresa",
+    "yourEnterprises": "Sus empresas",
+    "addNew": "Agregar una empresa",
+    "manage": "Gestionar empresas",
+    "current": "Actual",
+    "confirmDelete": "¿Está seguro de que quiere eliminar esta empresa?",
+    
+    "name": "Nombre comercial",
+    "legalName": "Razón social",
+    "registrationNumber": "Nº de registro",
+    "vatNumber": "Nº IVA intracomunitario",
+    "country": "País",
+    "currency": "Moneda",
+    "address": "Dirección",
+    "street": "Calle",
+    "postalCode": "Código postal",
+    "city": "Ciudad",
+    "taxRegime": "Régimen fiscal",
+    
+    "generalInfo": "Información general",
+    "generalInfoDesc": "Información básica de su empresa",
+    "addressInfo": "Dirección",
+    "addressInfoDesc": "Dirección de la sede social",
+    "fiscalInfo": "Información fiscal",
+    "fiscalInfoDesc": "Régimen fiscal y año contable",
+    "settings": "Configuración",
+    "settingsDesc": "Preferencias y configuración",
+    
+    "fiscalYearStart": "Inicio ejercicio fiscal",
+    "fiscalYearEnd": "Fin ejercicio fiscal",
+    "vatPeriod": "Periodicidad IVA",
+    "defaultVATRate": "Tipo IVA por defecto",
+    "defaultPaymentTerms": "Plazo de pago (días)",
+    "taxReminderDays": "Recordatorio vencimientos fiscales (días antes)",
+    "roundingRule": "Regla de redondeo",
+    "autoCalculateTax": "Cálculo automático de impuestos",
+    "autoCalculateTaxDesc": "Calcular automáticamente los impuestos en las facturas",
+    "emailNotifications": "Notificaciones por correo electrónico",
+    "emailNotificationsDesc": "Recibir recordatorios para vencimientos fiscales",
+    
+    "tabs": {
+      "general": "General",
+      "address": "Dirección",
+      "fiscal": "Fiscal",
+      "settings": "Configuración"
+    },
+    
+    "regimes": {
+      "realNormal": "Real Normal",
+      "realSimplified": "Real Simplificado",
+      "microEnterprise": "Microempresa",
+      "other": "Otro"
+    },
+    
+    "periods": {
+      "monthly": "Mensual",
+      "quarterly": "Trimestral",
+      "yearly": "Anual",
+      "none": "No sujeto"
+    },
+    
+    "rounding": {
+      "up": "Redondear hacia arriba",
+      "down": "Redondear hacia abajo",
+      "nearest": "Al más cercano"
+    },
+    
+    "errors": {
+      "nameRequired": "El nombre es obligatorio",
+      "legalNameRequired": "La razón social es obligatoria",
+      "registrationRequired": "El número de registro es obligatorio",
+      "streetRequired": "La dirección es obligatoria",
+      "postalCodeRequired": "El código postal es obligatorio",
+      "cityRequired": "La ciudad es obligatoria"
+    }
+  },
+  
+  "setup": {
+    "wizard": {
+      "title": "Configuración Casskai",
+      "subtitle": "Solución de gestión financiera multimercado",
+      "welcome": "Bienvenido al asistente de configuración",
+      "steps": {
+        "market": "Mercado y Localización",
+        "supabase": "Configuración Supabase",
+        "company": "Información de Empresa",
+        "mobile_money": "Mobile Money",
+        "admin": "Cuenta de Administrador"
+      }
+    },
+    "market": {
+      "detected": "Mercado detectado automáticamente: {{market}}",
+      "select": "Seleccione su mercado principal",
+      "selected": "Seleccionado",
+      "regions": {
+        "europe": "🇪🇺 Europa",
+        "africa": "🌍 África",
+        "americas": "🌎 Américas"
+      },
+      "countries": {
+        "france": "Francia",
+        "belgium": "Bélgica",
+        "benin": "Benín",
+        "ivory_coast": "Costa de Marfil",
+        "burkina_faso": "Burkina Faso",
+        "mali": "Malí",
+        "senegal": "Senegal",
+        "togo": "Togo",
+        "canada": "Canadá (QC)"
+      }
+    },
+    "supabase": {
+      "info": "Debe crear un proyecto Supabase gratuito en supabase.com",
+      "info_title": "Información importante",
+      "info_description": "Debe haber creado un proyecto Supabase antes de continuar. Las claves están disponibles en la configuración de su proyecto.",
+      "url_label": "URL del proyecto Supabase",
+      "url_placeholder": "https://su-proyecto.supabase.co",
+      "key_label": "Clave API Supabase (anon)",
+      "key_placeholder": "eyJhbGciOiJIUzI1NiIsInR5cCI...",
+      "test_connection": "Probar conexión",
+      "testing": "Probando...",
+      "success": "¡Conexión Supabase exitosa! Configuración automática en progreso...",
+      "error": "Error de conexión. Verifique su configuración de Supabase.",
+      "required": "Este campo es obligatorio"
+    },
+    "company": {
+      "config_for": "Configuración para: {{country}}",
+      "ohada_activated": "Configuración OHADA activada",
+      "ohada_description": "Plan contable SYSCOHADA, soporte Mobile Money, cumplimiento fiscal local.",
+      "name_label": "Nombre de la empresa",
+      "name_placeholder_african": "Empresa SARL-U",
+      "name_placeholder_default": "Mi Empresa SARL",
+      "legal_form": "Forma jurídica",
+      "legal_forms": {
+        "select": "Seleccionar...",
+        "sarl": "SARL (Sociedad de Responsabilidad Limitada)",
+        "suarl": "SUARL (Sociedad Unipersonal de Responsabilidad Limitada)",
+        "sa": "SA (Sociedad Anónima)",
+        "sas": "SAS (Sociedad por Acciones Simplificada)",
+        "gie": "GIE (Agrupación de Interés Económico)",
+        "ei": "EI (Empresa Individual)"
+      },
+      "tax_number": {
+        "african": "Número de Identificación Fiscal (NIF)",
+        "france": "SIREN/SIRET",
+        "belgium": "IVA BE",
+        "default": "Número fiscal"
+      },
+      "tax_number_placeholder": {
+        "african": "Ej: 2024123456789",
+        "france": "12345678901234",
+        "belgium": "BE0123456789",
+        "default": "Número fiscal"
+      },
+      "capital_label": "Capital social (en CFA)",
+      "capital_placeholder": "1000000",
+      "capital_minimum": "Capital mínimo: 1,000,000 CFA para SARL, 10,000,000 CFA para SA",
+      "sector_label": "Sector de actividad",
+      "sectors": {
+        "select": "Seleccionar...",
+        "african": {
+          "agriculture": "Agricultura y ganadería",
+          "commerce": "Comercio y distribución",
+          "services": "Servicios",
+          "industrie": "Industria y manufactura",
+          "btp": "Construcción y obras públicas",
+          "transport": "Transporte y logística",
+          "telecom": "Telecomunicaciones",
+          "finance": "Servicios financieros",
+          "education": "Educación y formación",
+          "sante": "Salud",
+          "tourisme": "Turismo y hostelería",
+          "energie": "Energía y minas"
+        },
+        "default": {
+          "commerce": "Comercio",
+          "services": "Servicios",
+          "industrie": "Industria",
+          "btp": "Construcción",
+          "it": "Informática",
+          "consulting": "Consultoría"
+        }
+      }
+    },
+    "mobile_money": {
+      "title": "Mobile Money",
+      "description": "Configure los medios de pago móvil populares en su región.",
+      "not_applicable": "Mobile Money no aplicable",
+      "not_applicable_description": "Esta funcionalidad es específica de los mercados africanos.",
+      "providers_label": "Medios de pago móvil a activar",
+      "providers": {
+        "benin": {
+          "mtn": "MTN Mobile Money",
+          "moov": "Moov Money"
+        },
+        "ivory_coast": {
+          "orange": "Orange Money",
+          "mtn": "MTN Mobile Money",
+          "moov": "Moov Money"
+        },
+        "burkina_faso": {
+          "orange": "Orange Money",
+          "moov": "Moov Money"
+        },
+        "mali": {
+          "orange": "Orange Money",
+          "moov": "Moov Money"
+        },
+        "senegal": {
+          "orange": "Orange Money",
+          "wave": "Wave",
+          "free": "Free Money"
+        },
+        "togo": {
+          "flooz": "Flooz",
+          "tmoney": "T-Money"
+        }
+      },
+      "note_title": "Nota importante",
+      "note_description": "La integración de Mobile Money requiere asociaciones con los operadores. Estas opciones estarán disponibles en una versión futura de CassKai."
+    },
+    "admin": {
+      "email_label": "Correo electrónico del administrador",
+      "email_placeholder": "admin@miempresa.com",
+      "password_label": "Contraseña",
+      "password_placeholder": "Contraseña segura",
+      "final_config": "Configuración final",
+      "tasks": {
+        "database": "Instalación del esquema de base de datos",
+        "accounting_plan": "Importación del plan contable {{standard}}",
+        "currencies": "Configuración de monedas y tipos de cambio",
+        "features": "Activación de funcionalidades locales",
+        "mobile_money": "Configuración Mobile Money ({{count}} operadores)"
+      }
+    },
+    "navigation": {
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "finish": "Finalizar instalación",
+      "step_of": "Paso {{current}} de {{total}}"
+    },
+    "validation": {
+      "required": "Este campo es obligatorio",
+      "email_invalid": "Dirección de correo electrónico inválida",
+      "password_min": "La contraseña debe contener al menos 8 caracteres",
+      "company_name_required": "El nombre de la empresa es obligatorio",
+      "supabase_connection_required": "La conexión Supabase debe ser probada"
+    },
+    "installation": {
+      "starting": "Iniciando instalación...",
+      "creating_database": "Creando base de datos...",
+      "importing_accounting": "Importando plan contable...",
+      "configuring_company": "Configurando empresa...",
+      "creating_admin": "Creando cuenta de administrador...",
+      "finalizing": "Finalizando...",
+      "completed": "¡Instalación completada con éxito!",
+      "error": "Error durante la instalación",
+      "redirecting": "Redirigiendo a Casskai...",
+      "please_wait": "Por favor espere, esto puede tomar unos minutos."
+    },
+    "features": {
+      "ohada_compliance": "Cumplimiento OHADA",
+      "mobile_money_integration": "Integración Mobile Money",
+      "local_tax_compliance": "Cumplimiento fiscal local",
+      "multi_currency": "Multimoneda",
+      "automatic_exchange_rates": "Tipos de cambio automáticos",
+      "local_banking": "Conexiones bancarias locales",
+      "regulatory_reports": "Informes regulatorios",
+      "fiscal_calendar": "Calendario fiscal local"
+    },
+    "currencies": {
+      "eur": "Euro",
+      "xof": "Franco CFA BCEAO",
+      "xaf": "Franco CFA BEAC",
+      "usd": "Dólar estadounidense",
+      "cad": "Dólar canadiense",
+      "gbp": "Libra esterlina"
+    },
+    "standards": {
+      "pcg": "Plan Contable General (Francia)",
+      "pcg_belge": "Plan Contable General Belga",
+      "syscohada": "SYSCOHADA (África Occidental)",
+      "gaap": "GAAP (Canadá)",
+      "ifrs": "IFRS Internacional"
+    }
+  },
+  
+  "company": {
+    "management": {
+      "title": "Gestión de Empresas",
+      "description": "Cree y gestione sus empresas",
+      "create": "Crear una empresa",
+      "edit": "Modificar empresa",
+      "delete": "Eliminar empresa",
+      "switch": "Cambiar empresa",
+      "no_companies": "Ninguna empresa creada",
+      "create_first": "Cree su primera empresa para comenzar",
+      "current_company": "Empresa actual",
+      "select_company": "Seleccionar una empresa"
+    },
+    "fields": {
+      "trading_name": "Nombre comercial",
+      "legal_name": "Razón social",
+      "registration_number": "Nº de registro",
+      "vat_number": "Nº IVA",
+      "tax_number": "Nº fiscal",
+      "legal_form": "Forma jurídica",
+      "share_capital": "Capital social",
+      "business_sector": "Sector de actividad",
+      "accounting_standard": "Estándar contable",
+      "base_currency": "Moneda base",
+      "fiscal_year_start": "Inicio ejercicio fiscal",
+      "fiscal_year_end": "Fin ejercicio fiscal"
+    }
+  },
+  
+  "mobile_money": {
+    "title": "Mobile Money",
+    "description": "Gestión de pagos móviles",
+    "providers": "Operadores",
+    "transactions": "Transacciones",
+    "balance": "Saldo",
+    "transfer": "Transferencia",
+    "top_up": "Recarga",
+    "withdraw": "Retiro",
+    "fees": "Tarifas",
+    "history": "Historial"
+  },
+  
+  "geography": {
+    "countries": {
+      "BJ": "Benín",
+      "CI": "Costa de Marfil", 
+      "BF": "Burkina Faso",
+      "ML": "Malí",
+      "SN": "Senegal",
+      "TG": "Togo",
+      "FR": "Francia",
+      "BE": "Bélgica",
+      "CA": "Canadá",
+      "US": "Estados Unidos",
+      "GB": "Reino Unido"
+    },
+    "regions": {
+      "west_africa": "África Occidental",
+      "europe": "Europa",
+      "north_america": "América del Norte"
+    }
+  },
+  
+  "accounting_standards": {
+    "SYSCOHADA": "SYSCOHADA",
+    "PCG": "Plan Contable General",
+    "GAAP": "GAAP",
+    "IFRS": "IFRS"
+  },
+  
+  "legal_forms": {
+    "african": {
+      "SARL": "SARL",
+      "SUARL": "SUARL", 
+      "SA": "SA",
+      "SAS": "SAS",
+      "GIE": "GIE",
+      "EI": "EI"
+    },
+    "french": {
+      "SARL": "SARL",
+      "EURL": "EURL",
+      "SA": "SA",
+      "SAS": "SAS",
+      "SASU": "SASU",
+      "SNC": "SNC",
+      "EI": "EI",
+      "EIRL": "EIRL"
+    }
+  },
+  
+  "currencies_extended": {
+    "XOF": {
+      "name": "Franco CFA BCEAO",
+      "symbol": "CFA",
+      "format": "{{amount}} CFA"
+    },
+    "XAF": {
+      "name": "Franco CFA BEAC", 
+      "symbol": "FCFA",
+      "format": "{{amount}} FCFA"
+    },
+    "EUR": {
+      "name": "Euro",
+      "symbol": "€",
+      "format": "{{amount}} €"
+    },
+    "USD": {
+      "name": "Dólar estadounidense",
+      "symbol": "$", 
+      "format": "${{amount}}"
+    },
+    "CAD": {
+      "name": "Dólar canadiense",
+      "symbol": "CAD",
+      "format": "{{amount}} CAD"
+    }
+  },
+  
+  "installation": {
+    "wizard": {
+      "title": "Asistente de Instalación",
+      "subtitle": "Configuración de su instancia Casskai",
+      "progress": "Progreso: {{step}}/{{total}}",
+      "estimated_time": "Tiempo estimado: {{minutes}} minutos"
+    },
+    "status": {
+      "not_started": "No iniciado",
+      "in_progress": "En progreso",
+      "completed": "Completado",
+      "failed": "Fallido",
+      "skipped": "Omitido"
+    }
+  },
+  
+  "onboarding": {
+    "welcome": {
+      "title": "¡Bienvenido a Casskai!",
+      "subtitle": "Su solución de gestión financiera está casi lista",
+      "steps_remaining": "{{count}} pasos restantes"
+    },
+    "completion": {
+      "title": "¡Configuración completada!",
+      "subtitle": "Su instancia Casskai está ahora operativa",
+      "next_steps": "Próximos pasos",
+      "explore_dashboard": "Explorar el panel de control",
+      "invite_team": "Invitar a su equipo",
+      "import_data": "Importar sus datos"
+    }
+  },
+  
+  "business_sectors": {
+    "african": {
+      "agriculture": "Agricultura y ganadería",
+      "commerce": "Comercio y distribución",
+      "services": "Servicios",
+      "industrie": "Industria y manufactura",
+      "btp": "Construcción y obras públicas",
+      "transport": "Transporte y logística",
+      "telecom": "Telecomunicaciones",
+      "finance": "Servicios financieros",
+      "education": "Educación y formación",
+      "sante": "Salud",
+      "tourisme": "Turismo y hostelería",
+      "energie": "Energía y minas",
+      "mining": "Minas y extracción",
+      "textiles": "Textil y confección",
+      "food_processing": "Agroalimentario"
+    },
+    "european": {
+      "commerce": "Comercio",
+      "services": "Servicios",
+      "industrie": "Industria",
+      "btp": "Construcción",
+      "it": "Informática",
+      "consulting": "Consultoría",
+      "finance": "Finanzas",
+      "real_estate": "Inmobiliario",
+      "healthcare": "Salud",
+      "education": "Educación",
+      "hospitality": "Hostelería y restauración",
+      "media": "Medios y comunicación"
+    }
+  },
+  
+  "pricing": {
+    "plans": {
+      "starter": {
+        "name": "Inicial",
+        "price_eur": "19€/mes",
+        "price_xof": "12K FCFA/mes",
+        "price_cad": "25$ CAD/mes"
+      },
+      "professional": {
+        "name": "Profesional",
+        "price_eur": "49€/mes", 
+        "price_xof": "32K FCFA/mes",
+        "price_cad": "65$ CAD/mes"
+      },
+      "enterprise": {
+        "name": "Empresa",
+        "price_eur": "99€/mes",
+        "price_xof": "65K FCFA/mes", 
+        "price_cad": "129$ CAD/mes"
+      }
+    },
+    "features": {
+      "companies": "Empresas",
+      "users": "Usuarios",
+      "transactions": "Transacciones/mes",
+      "storage": "Almacenamiento",
+      "support": "Soporte",
+      "api_access": "Acceso API",
+      "custom_reports": "Informes personalizados",
+      "mobile_money": "Mobile Money",
+      "multi_currency": "Multimoneda",
+      "bank_sync": "Sincronización bancaria"
+    }
+  },
+  
+  "regions_detailed": {
+    "west_africa": {
+      "name": "África Occidental",
+      "description": "Zona económica y monetaria de África occidental",
+      "currency": "Franco CFA BCEAO (XOF)",
+      "central_bank": "Banco Central de los Estados de África Occidental",
+      "accounting_standard": "SYSCOHADA",
+      "countries": ["Benín", "Burkina Faso", "Costa de Marfil", "Malí", "Níger", "Senegal", "Togo", "Guinea-Bissau"]
+    },
+    "central_africa": {
+      "name": "África Central",
+      "description": "Zona económica y monetaria de África central",
+      "currency": "Franco CFA BEAC (XAF)",
+      "central_bank": "Banco de los Estados de África Central",
+      "accounting_standard": "SYSCOHADA",
+      "countries": ["Camerún", "República Centroafricana", "Chad", "República del Congo", "Guinea Ecuatorial", "Gabón"]
+    }
+  },
+  
+  "fiscal_calendars": {
+    "france": {
+      "year_start": "01-01",
+      "year_end": "12-31",
+      "vat_periods": ["monthly", "quarterly"],
+      "major_deadlines": {
+        "vat_annual": "05-02",
+        "corporate_tax": "05-15",
+        "social_declarations": "01-31"
+      }
+    },
+    "ohada": {
+      "year_start": "01-01",
+      "year_end": "12-31", 
+      "vat_periods": ["monthly"],
+      "major_deadlines": {
+        "vat_monthly": "15",
+        "corporate_tax": "04-30",
+        "annual_returns": "04-30"
+      }
+    }
+  },
+  
+  "mobile_money_operators": {
+    "orange_money": {
+      "name": "Orange Money",
+      "countries": ["CI", "BF", "ML", "SN"],
+      "services": ["transfer", "payment", "top_up", "withdraw"],
+      "fees": {
+        "transfer_local": "1%",
+        "transfer_international": "2.5%",
+        "payment": "0.5%"
+      }
+    },
+    "mtn_mobile_money": {
+      "name": "MTN Mobile Money", 
+      "countries": ["BJ", "CI"],
+      "services": ["transfer", "payment", "top_up", "withdraw"],
+      "fees": {
+        "transfer_local": "1.2%",
+        "payment": "0.8%"
+      }
+    },
+    "moov_money": {
+      "name": "Moov Money",
+      "countries": ["BJ", "CI", "BF", "ML"],
+      "services": ["transfer", "payment", "top_up"],
+      "fees": {
+        "transfer_local": "1.1%",
+        "payment": "0.6%"
+      }
+    },
+    "wave": {
+      "name": "Wave",
+      "countries": ["SN"],
+      "services": ["transfer", "payment"],
+      "fees": {
+        "transfer_local": "0%",
+        "payment": "1%"
+      }
+    },
+    "flooz": {
+      "name": "Flooz",
+      "countries": ["TG"],
+      "services": ["transfer", "payment", "top_up"],
+      "fees": {
+        "transfer_local": "1%",
+        "payment": "0.7%"
+      }
+    }
+  },
+  
+  "market_features": {
+    "france": ["RGPD", "FEC", "SEPA", "IVA UE", "DSN", "DAS2"],
+    "belgium": ["RGPD", "BNB", "Bancontact", "IVA UE"],
+    "benin": ["OHADA", "Mobile Money", "DGI", "CNSS", "Aduanas"],
+    "ivory_coast": ["OHADA", "Orange Money", "DGI", "CNPS"],
+    "burkina_faso": ["OHADA", "Mobile Money", "DGID", "CNSS"],
+    "mali": ["OHADA", "Orange Money", "DGI", "INPS"],
+    "senegal": ["OHADA", "Wave", "DGI", "CSS"],
+    "togo": ["OHADA", "Flooz", "OTR", "CNSS"],
+    "canada": ["TPS/TVQ", "ARC", "Interac", "CRA"]
+  }
 }
