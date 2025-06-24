@@ -50,19 +50,18 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const { data: companies, error } = await supabase
-        .from('user_companies')
-        .select(`
-          company_id,
-          is_default,
-          companies!inner (
-            id,
-            name,
-            country,
-            default_currency,
-            is_active
-          )
-        `)
-        .eq('user_id', userId);
+  .from('user_companies')
+  .select(`
+    company_id,
+    is_default,
+    companies (
+      id,
+      name,
+      country,
+      default_currency
+    )
+  `)
+  .eq('user_id', userId);
 
       if (error) {
         console.error('Erreur récupération entreprises:', error);
