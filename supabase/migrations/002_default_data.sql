@@ -1,4 +1,4 @@
--- Migration des données par défaut CassKai
+-- Migration des données par défaut CassKai (VERSION COMPLÈTE CORRIGÉE)
 -- Fichier: /supabase/migrations/002_default_data.sql
 
 -- ============================================================================
@@ -76,11 +76,11 @@ INSERT INTO permissions (name, description, module) VALUES
 ('view_third_parties', 'Voir les tiers', 'third_parties'),
 ('manage_third_parties', 'Gérer les tiers', 'third_parties'),
 
--- Administration
+-- Administration (CORRIGÉ - sans apostrophe)
 ('manage_company_settings', 'Gérer les paramètres entreprise', 'settings'),
 ('manage_company_users', 'Gérer les utilisateurs', 'settings'),
 ('manage_company_roles', 'Gérer les rôles', 'settings'),
-('view_audit_logs', 'Voir les logs d\'audit', 'settings')
+('view_audit_logs', 'Voir les logs audit', 'settings')
 
 ON CONFLICT (name) DO NOTHING;
 
@@ -91,7 +91,7 @@ ON CONFLICT (name) DO NOTHING;
 -- Insérer les rôles système (sans company_id pour être globaux)
 INSERT INTO roles (name, description, is_system_role) VALUES
 ('super_admin', 'Super administrateur système', true),
-('admin', 'Administrateur d''entreprise', true),
+('admin', 'Administrateur entreprise', true),
 ('accountant', 'Comptable', true),
 ('user', 'Utilisateur standard', true),
 ('viewer', 'Consultation uniquement', true)
@@ -148,12 +148,12 @@ BEGIN
   (company_uuid, '101000', 'Capital', 'EQUITY', 1, 'EUR'),
   (company_uuid, '106000', 'Réserves', 'EQUITY', 1, 'EUR'),
   (company_uuid, '110000', 'Report à nouveau (solde créditeur)', 'EQUITY', 1, 'EUR'),
-  (company_uuid, '120000', 'Résultat de l''exercice (bénéfice)', 'EQUITY', 1, 'EUR'),
-  (company_uuid, '129000', 'Résultat de l''exercice (perte)', 'EQUITY', 1, 'EUR');
+  (company_uuid, '120000', 'Résultat de exercice (bénéfice)', 'EQUITY', 1, 'EUR'),
+  (company_uuid, '129000', 'Résultat de exercice (perte)', 'EQUITY', 1, 'EUR');
 
-  -- Classe 2 : Comptes d'immobilisations
+  -- Classe 2 : Comptes immobilisations
   INSERT INTO accounts (company_id, account_number, name, type, class, currency) VALUES
-  (company_uuid, '201000', 'Frais d''établissement', 'ASSET', 2, 'EUR'),
+  (company_uuid, '201000', 'Frais établissement', 'ASSET', 2, 'EUR'),
   (company_uuid, '205000', 'Concessions et droits similaires', 'ASSET', 2, 'EUR'),
   (company_uuid, '213000', 'Constructions', 'ASSET', 2, 'EUR'),
   (company_uuid, '218000', 'Autres immobilisations corporelles', 'ASSET', 2, 'EUR'),
@@ -193,10 +193,10 @@ BEGIN
   (company_uuid, '613000', 'Locations', 'EXPENSE', 6, 'EUR'),
   (company_uuid, '614000', 'Charges locatives et de copropriété', 'EXPENSE', 6, 'EUR'),
   (company_uuid, '615000', 'Entretien et réparations', 'EXPENSE', 6, 'EUR'),
-  (company_uuid, '616000', 'Primes d''assurances', 'EXPENSE', 6, 'EUR'),
+  (company_uuid, '616000', 'Primes assurances', 'EXPENSE', 6, 'EUR'),
   (company_uuid, '618000', 'Autres services extérieurs', 'EXPENSE', 6, 'EUR'),
-  (company_uuid, '621000', 'Personnel extérieur à l''entreprise', 'EXPENSE', 6, 'EUR'),
-  (company_uuid, '622000', 'Rémunérations d''intermédiaires et honoraires', 'EXPENSE', 6, 'EUR'),
+  (company_uuid, '621000', 'Personnel extérieur à entreprise', 'EXPENSE', 6, 'EUR'),
+  (company_uuid, '622000', 'Rémunérations intermédiaires et honoraires', 'EXPENSE', 6, 'EUR'),
   (company_uuid, '623000', 'Publicité, publications, relations publiques', 'EXPENSE', 6, 'EUR'),
   (company_uuid, '624000', 'Transports de biens et transports collectifs du personnel', 'EXPENSE', 6, 'EUR'),
   (company_uuid, '625000', 'Déplacements, missions et réceptions', 'EXPENSE', 6, 'EUR'),
@@ -206,7 +206,7 @@ BEGIN
   (company_uuid, '641000', 'Rémunérations du personnel', 'EXPENSE', 6, 'EUR'),
   (company_uuid, '645000', 'Charges de sécurité sociale et de prévoyance', 'EXPENSE', 6, 'EUR'),
   (company_uuid, '651000', 'Redevances pour concessions, brevets, licences', 'EXPENSE', 6, 'EUR'),
-  (company_uuid, '661000', 'Charges d''intérêts', 'EXPENSE', 6, 'EUR'),
+  (company_uuid, '661000', 'Charges intérêts', 'EXPENSE', 6, 'EUR'),
   (company_uuid, '671000', 'Charges exceptionnelles sur opérations de gestion', 'EXPENSE', 6, 'EUR'),
   (company_uuid, '681000', 'Dotations aux amortissements', 'EXPENSE', 6, 'EUR'),
   (company_uuid, '695000', 'Impôts sur les bénéfices', 'EXPENSE', 6, 'EUR');
@@ -217,26 +217,25 @@ BEGIN
   (company_uuid, '706000', 'Prestations de services', 'REVENUE', 7, 'EUR'),
   (company_uuid, '707000', 'Ventes de marchandises', 'REVENUE', 7, 'EUR'),
   (company_uuid, '708000', 'Produits des activités annexes', 'REVENUE', 7, 'EUR'),
-  (company_uuid, '709000', 'Rabais, remises et ristournes accordés par l''entreprise', 'REVENUE', 7, 'EUR'),
-  (company_uuid, '740000', 'Subventions d''exploitation', 'REVENUE', 7, 'EUR'),
+  (company_uuid, '709000', 'Rabais, remises et ristournes accordés par entreprise', 'REVENUE', 7, 'EUR'),
+  (company_uuid, '740000', 'Subventions exploitation', 'REVENUE', 7, 'EUR'),
   (company_uuid, '758000', 'Produits divers de gestion courante', 'REVENUE', 7, 'EUR'),
   (company_uuid, '761000', 'Produits financiers', 'REVENUE', 7, 'EUR'),
   (company_uuid, '771000', 'Produits exceptionnels sur opérations de gestion', 'REVENUE', 7, 'EUR'),
   (company_uuid, '781000', 'Reprises sur amortissements et provisions', 'REVENUE', 7, 'EUR');
 
 END;
-$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
 
 -- ============================================================================
--- 7. PLAN COMPTABLE SYSCOHADA - BASE
+-- 7. PLAN COMPTABLE SYSCOHADA - BASE (VERSION SIMPLIFIÉE)
 -- ============================================================================
 
--- Fonction helper pour insérer les comptes SYSCOHADA
 CREATE OR REPLACE FUNCTION insert_default_syscohada_accounts(company_uuid UUID)
-RETURNS void AS $
+RETURNS void AS $$
 BEGIN
   -- Classe 1 : Comptes de ressources durables
-  INSERT INTO accounts (company_id, account_number, name, type, class, currency) VALUES
+ INSERT INTO accounts (company_id, account_number, name, type, class, currency) VALUES
   (company_uuid, '101', 'Capital social', 'EQUITY', 1, 'XOF'),
   (company_uuid, '106', 'Réserves', 'EQUITY', 1, 'XOF'),
   (company_uuid, '110', 'Report à nouveau', 'EQUITY', 1, 'XOF'),
@@ -470,18 +469,16 @@ BEGIN
   (company_uuid, '787', 'Reprises sur provisions pour risques et charges', 'REVENUE', 7, 'XOF');
 
 END;
-$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
 
 -- ============================================================================
 -- 8. JOURNAUX PAR DÉFAUT
 -- ============================================================================
 
--- Fonction pour insérer les journaux par défaut
 CREATE OR REPLACE FUNCTION insert_default_journals(company_uuid UUID, standard TEXT DEFAULT 'PCG')
-RETURNS void AS $
+RETURNS void AS $$
 BEGIN
   IF standard = 'SYSCOHADA' THEN
-    -- Journaux SYSCOHADA
     INSERT INTO journals (company_id, code, name, type, description) VALUES
     (company_uuid, 'VE', 'Journal des ventes', 'VENTE', 'Enregistrement des ventes et prestations'),
     (company_uuid, 'AC', 'Journal des achats', 'ACHAT', 'Enregistrement des achats et charges'),
@@ -502,7 +499,7 @@ BEGIN
     (company_uuid, 'INVENT', 'Journal d''inventaire', 'OD', 'Écritures d''inventaire et de clôture');
   END IF;
 END;
-$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
 
 -- ============================================================================
 -- 9. FONCTIONS RPC POUR L'APPLICATION
@@ -510,7 +507,7 @@ $ LANGUAGE plpgsql;
 
 -- Fonction pour obtenir les statistiques du dashboard
 CREATE OR REPLACE FUNCTION get_dashboard_stats(p_company_id UUID)
-RETURNS JSON AS $
+RETURNS JSON AS $$
 DECLARE
   result JSON;
   revenue_total DECIMAL(15,2);
@@ -554,11 +551,11 @@ BEGIN
 
   RETURN result;
 END;
-$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Fonction pour obtenir les échéances à venir
 CREATE OR REPLACE FUNCTION get_upcoming_deadlines(p_company_id UUID, p_days_ahead INTEGER DEFAULT 30)
-RETURNS JSON AS $
+RETURNS JSON AS $$
 DECLARE
   result JSON;
 BEGIN
@@ -568,15 +565,15 @@ BEGIN
   
   RETURN result;
 END;
-$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Fonction pour exécuter du SQL dynamique (pour les migrations)
 CREATE OR REPLACE FUNCTION execute_sql(sql TEXT)
-RETURNS void AS $
+RETURNS void AS $$
 BEGIN
   EXECUTE sql;
 END;
-$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================================================
 -- 10. POLITIQUES RLS (ROW LEVEL SECURITY)
@@ -676,7 +673,7 @@ CREATE POLICY "Users can access their company third parties" ON third_parties
 -- ============================================================================
 
 -- Insérer quelques données de test si c'est un environnement de développement
-DO $
+DO $$
 BEGIN
   -- Vérifier si on est en mode développement
   IF current_setting('app.environment', true) = 'development' THEN
@@ -706,4 +703,4 @@ BEGIN
     
     RAISE NOTICE 'Données de test créées pour l''environnement de développement';
   END IF;
-END $;
+END $$;
