@@ -1,5 +1,6 @@
-// src/services/configService.ts
+// src/services/configService.ts - Version mise à jour avec migrations
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import MigrationService from './migrationService';
 
 export interface SupabaseConfig {
   url: string;
@@ -12,6 +13,7 @@ export interface CompanyConfig {
   country: string;
   currency: string;
   timezone: string;
+  accountingStandard: string;
 }
 
 export interface AppConfig {
@@ -19,14 +21,18 @@ export interface AppConfig {
   company: CompanyConfig;
   setupCompleted: boolean;
   setupDate: string;
+  version: string;
 }
 
 class ConfigService {
   private static instance: ConfigService;
   private supabaseClient: SupabaseClient | null = null;
   private config: AppConfig | null = null;
+  private migrationService: MigrationService;
 
-  private constructor() {}
+  private constructor() {
+    this.migrationService = MigrationService.getInstance();
+  }
 
   static getInstance(): ConfigService {
     if (!ConfigService.instance) {
@@ -59,6 +65,9 @@ class ConfigService {
   // Sauvegarder la configuration
   async saveConfig(config: AppConfig): Promise<void> {
     try {
+      // Ajouter la version actuelle
+      config.version = '1.0.0';
+      
       localStorage.setItem('casskai_config', JSON.stringify(config));
       this.config = config;
       
@@ -118,205 +127,168 @@ class ConfigService {
     }
   }
 
-  // Initialiser la base de données avec les tables nécessaires
-  async initializeDatabase(): Promise<void> {
-    const client = this.getSupabaseClient();
-    const config = this.getConfig();
-    
-    if (!config) {
-      throw new Error('Configuration manquante');
-    }
-
+  // Initialiser la base de données avec les migrations
+  async initializeDatabase(): Promise<{ success: boolean; details?: string; error?: string }> {
     try {
-      // Créer les tables principales si elles n'existent pas
-      const sqlQueries = this.generateDatabaseSchema(config);
+      console.log('🚀 Initialisation de la base de données...');
       
-      for (const query of sqlQueries) {
-        const { error } = await client.rpc('execute_sql', { sql: query });
-        if (error && !error.message.includes('already exists')) {
-          console.error('Erreur SQL:', error);
-          throw error;
-        }
+      // Vérifier le statut des migrations
+      const migrationsStatus = await this.migrationService.checkMigrationsStatus();
+      console.log('📋 Statut des migrations:', migrationsStatus);
+
+      // Appliquer les migrations si nécessaire
+      const migrationResult = await this.migrationService.applyMigrations();
+      
+      if (!migrationResult.success) {
+        throw new Error(migrationResult.error || 'Erreur lors de l\'application des migrations');
       }
 
-      // Insérer les données de configuration initiales
-      await this.insertInitialData(config);
-      
+      console.log('✅ Base de données initialisée avec succès');
+      return {
+        success: true,
+        details: migrationResult.details
+      };
+
     } catch (error) {
-      console.error('Erreur d\'initialisation de la base de données:', error);
-      throw new Error('Impossible d\'initialiser la base de données');
+      console.error('❌ Erreur d\'initialisation de la base de données:', error);
+      return {
+        success: false,
+        error: error.message
+      };
     }
   }
 
-  // Générer le schéma de base de données selon le pays
-  private generateDatabaseSchema(config: AppConfig): string[] {
-    const baseSchema = [
-      // Table des entreprises
-      `CREATE TABLE IF NOT EXISTS companies (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        name TEXT NOT NULL,
-        country TEXT NOT NULL,
-        currency TEXT NOT NULL,
-        timezone TEXT NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );`,
-
-      // Table des utilisateurs (étend auth.users)
-      `CREATE TABLE IF NOT EXISTS user_profiles (
-        id UUID PRIMARY KEY REFERENCES auth.users(id),
-        email TEXT NOT NULL,
-        full_name TEXT,
-        avatar_url TEXT,
-        company_id UUID REFERENCES companies(id),
-        role TEXT DEFAULT 'user',
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );`,
-
-      // Table des comptes comptables
-      `CREATE TABLE IF NOT EXISTS accounts (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        company_id UUID NOT NULL REFERENCES companies(id),
-        code TEXT NOT NULL,
-        name TEXT NOT NULL,
-        type TEXT NOT NULL, -- asset, liability, equity, revenue, expense
-        parent_id UUID REFERENCES accounts(id),
-        is_active BOOLEAN DEFAULT true,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        UNIQUE(company_id, code)
-      );`,
-
-      // Table des écritures comptables
-      `CREATE TABLE IF NOT EXISTS journal_entries (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        company_id UUID NOT NULL REFERENCES companies(id),
-        entry_number TEXT NOT NULL,
-        date DATE NOT NULL,
-        description TEXT NOT NULL,
-        reference TEXT,
-        created_by UUID REFERENCES auth.users(id),
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        UNIQUE(company_id, entry_number)
-      );`,
-
-      // Table des lignes d'écriture
-      `CREATE TABLE IF NOT EXISTS journal_lines (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        entry_id UUID NOT NULL REFERENCES journal_entries(id) ON DELETE CASCADE,
-        account_id UUID NOT NULL REFERENCES accounts(id),
-        debit DECIMAL(15,2) DEFAULT 0,
-        credit DECIMAL(15,2) DEFAULT 0,
-        description TEXT,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );`
-    ];
-
-    // Ajouter des tables spécifiques selon le pays
-    if (config.company.country === 'BJ' || config.company.country === 'CI') {
-      // Plan comptable SYSCOHADA
-      baseSchema.push(`
-        CREATE TABLE IF NOT EXISTS syscohada_accounts (
-          code TEXT PRIMARY KEY,
-          name TEXT NOT NULL,
-          type TEXT NOT NULL,
-          level INTEGER NOT NULL
-        );
-      `);
+  // Créer une entreprise avec configuration par défaut
+  async createCompanyWithDefaults(
+    userId: string,
+    companyData: {
+      name: string;
+      country: string;
+      currency: string;
+      accountingStandard: string;
     }
+  ): Promise<{ success: boolean; companyId?: string; error?: string }> {
+    try {
+      const result = await this.migrationService.createCompanyWithDefaults(
+        userId,
+        companyData.name,
+        companyData.country,
+        companyData.currency,
+        companyData.accountingStandard
+      );
 
-    return baseSchema;
+      if (result.success) {
+        console.log('✅ Entreprise créée avec succès:', result.companyId);
+      }
+
+      return result;
+    } catch (error) {
+      console.error('❌ Erreur lors de la création de l\'entreprise:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
   }
 
-  // Insérer les données initiales
-  private async insertInitialData(config: AppConfig): Promise<void> {
-    const client = this.getSupabaseClient();
+  // Finaliser la configuration d'une entreprise
+  async finalizeCompanySetup(companyId: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const result = await this.migrationService.finalizeCompanySetup(companyId);
+      
+      if (result.success) {
+        console.log('✅ Configuration de l\'entreprise finalisée');
+      }
 
-    // Insérer l'entreprise
-    const { data: company, error: companyError } = await client
-      .from('companies')
-      .insert([{
-        name: config.company.name,
-        country: config.company.country,
-        currency: config.company.currency,
-        timezone: config.company.timezone
-      }])
-      .select()
-      .single();
-
-    if (companyError) {
-      throw companyError;
+      return result;
+    } catch (error) {
+      console.error('❌ Erreur lors de la finalisation:', error);
+      return {
+        success: false,
+        error: error.message
+      };
     }
-
-    // Insérer le plan comptable selon le pays
-    await this.insertChartOfAccounts(config.company.country, company.id);
   }
 
-  // Insérer le plan comptable selon le pays
-  private async insertChartOfAccounts(country: string, companyId: string): Promise<void> {
-    const client = this.getSupabaseClient();
-    let accounts: Array<{code: string, name: string, type: string}> = [];
-
-    switch (country) {
+  // Obtenir le plan comptable par défaut selon le pays
+  getDefaultChartOfAccounts(country: string): Array<{code: string, name: string, type: string}> {
+    switch (country.toUpperCase()) {
       case 'FR':
-        accounts = this.getFrenchChartOfAccounts();
-        break;
+        return this.getFrenchChartOfAccounts();
+      case 'BE':
+        return this.getBelgianChartOfAccounts();
       case 'BJ':
       case 'CI':
-        accounts = this.getSYSCOHADAChartOfAccounts();
-        break;
-      case 'BE':
-        accounts = this.getBelgianChartOfAccounts();
-        break;
+      case 'BF':
+      case 'ML':
+      case 'SN':
+      case 'TG':
+        return this.getSyscohadaChartOfAccounts();
       default:
-        accounts = this.getBasicChartOfAccounts();
-    }
-
-    const accountsWithCompany = accounts.map(account => ({
-      ...account,
-      company_id: companyId
-    }));
-
-    const { error } = await client
-      .from('accounts')
-      .insert(accountsWithCompany);
-
-    if (error) {
-      throw error;
+        return this.getBasicChartOfAccounts();
     }
   }
 
-  // Plans comptables par pays
   private getFrenchChartOfAccounts(): Array<{code: string, name: string, type: string}> {
     return [
-      { code: '101000', name: 'Capital souscrit non appelé', type: 'equity' },
-      { code: '104000', name: 'Primes liées au capital social', type: 'equity' },
+      // Classe 1 - Capitaux
+      { code: '101000', name: 'Capital', type: 'equity' },
       { code: '106000', name: 'Réserves', type: 'equity' },
+      { code: '110000', name: 'Report à nouveau', type: 'equity' },
       { code: '120000', name: 'Résultat de l\'exercice', type: 'equity' },
+      
+      // Classe 4 - Tiers
       { code: '401000', name: 'Fournisseurs', type: 'liability' },
       { code: '411000', name: 'Clients', type: 'asset' },
-      { code: '445660', name: 'TVA déductible', type: 'asset' },
+      { code: '445100', name: 'TVA à décaisser', type: 'liability' },
+      { code: '445660', name: 'TVA sur autres biens et services', type: 'asset' },
       { code: '445710', name: 'TVA collectée', type: 'liability' },
+      
+      // Classe 5 - Financiers
       { code: '512000', name: 'Banques', type: 'asset' },
       { code: '530000', name: 'Caisse', type: 'asset' },
-      { code: '606000', name: 'Achats non stockés de matières et fournitures', type: 'expense' },
+      
+      // Classe 6 - Charges
+      { code: '607000', name: 'Achats de marchandises', type: 'expense' },
+      { code: '613000', name: 'Locations', type: 'expense' },
+      { code: '627000', name: 'Services bancaires', type: 'expense' },
+      { code: '641000', name: 'Rémunérations du personnel', type: 'expense' },
+      
+      // Classe 7 - Produits
+      { code: '701000', name: 'Ventes de produits finis', type: 'revenue' },
+      { code: '706000', name: 'Prestations de services', type: 'revenue' },
       { code: '707000', name: 'Ventes de marchandises', type: 'revenue' }
     ];
   }
 
-  private getSYSCOHADAChartOfAccounts(): Array<{code: string, name: string, type: string}> {
+  private getSyscohadaChartOfAccounts(): Array<{code: string, name: string, type: string}> {
     return [
+      // Classe 1 - Ressources durables
       { code: '101', name: 'Capital social', type: 'equity' },
       { code: '106', name: 'Réserves', type: 'equity' },
-      { code: '121', name: 'Résultat de l\'exercice', type: 'equity' },
+      { code: '110', name: 'Report à nouveau', type: 'equity' },
+      { code: '120', name: 'Résultat net de l\'exercice', type: 'equity' },
+      
+      // Classe 4 - Tiers
       { code: '401', name: 'Fournisseurs, dettes en compte', type: 'liability' },
       { code: '411', name: 'Clients', type: 'asset' },
       { code: '443', name: 'État, TVA facturée', type: 'liability' },
       { code: '445', name: 'État, TVA récupérable', type: 'asset' },
-      { code: '521', name: 'Banques locales', type: 'asset' },
-      { code: '571', name: 'Caisse', type: 'asset' },
-      { code: '601', name: 'Achats de marchandises', type: 'expense' },
-      { code: '701', name: 'Ventes de marchandises', type: 'revenue' }
+      
+      // Classe 5 - Trésorerie
+      { code: '512', name: 'Banques', type: 'asset' },
+      { code: '521', name: 'Caisses siège social', type: 'asset' },
+      
+      // Classe 6 - Charges
+      { code: '601', name: 'Achats de matières premières', type: 'expense' },
+      { code: '613', name: 'Locations', type: 'expense' },
+      { code: '627', name: 'Services bancaires et assimilés', type: 'expense' },
+      { code: '641', name: 'Rémunérations du personnel', type: 'expense' },
+      
+      // Classe 7 - Produits
+      { code: '701', name: 'Ventes de produits finis', type: 'revenue' },
+      { code: '706', name: 'Autres prestations de services', type: 'revenue' },
+      { code: '707', name: 'Ventes de marchandises', type: 'revenue' }
     ];
   }
 
@@ -346,6 +318,27 @@ class ConfigService {
     ];
   }
 
+  // Obtenir les journaux par défaut selon le standard comptable
+  getDefaultJournals(standard: string): Array<{code: string, name: string, type: string}> {
+    if (standard === 'SYSCOHADA') {
+      return [
+        { code: 'VE', name: 'Journal des ventes', type: 'VENTE' },
+        { code: 'AC', name: 'Journal des achats', type: 'ACHAT' },
+        { code: 'BQ', name: 'Journal de banque', type: 'BANQUE' },
+        { code: 'CA', name: 'Journal de caisse', type: 'CAISSE' },
+        { code: 'OD', name: 'Journal des opérations diverses', type: 'OD' }
+      ];
+    } else {
+      return [
+        { code: 'VTE', name: 'Journal des ventes', type: 'VENTE' },
+        { code: 'ACH', name: 'Journal des achats', type: 'ACHAT' },
+        { code: 'BAN', name: 'Journal de banque', type: 'BANQUE' },
+        { code: 'CAI', name: 'Journal de caisse', type: 'CAISSE' },
+        { code: 'OD', name: 'Journal des opérations diverses', type: 'OD' }
+      ];
+    }
+  }
+
   // Réinitialiser la configuration (pour les tests ou changement)
   resetConfig(): void {
     localStorage.removeItem('casskai_config');
@@ -370,6 +363,54 @@ class ConfigService {
     };
     
     return JSON.stringify(exportConfig, null, 2);
+  }
+
+  // Obtenir les informations de santé de la base de données
+  async getDatabaseHealth(): Promise<{
+    status: 'healthy' | 'warning' | 'error';
+    details: any;
+  }> {
+    try {
+      const client = this.getSupabaseClient();
+      
+      // Test de connectivité
+      const { error: connectError } = await client.from('companies').select('id').limit(1);
+      if (connectError && connectError.code !== 'PGRST116') {
+        throw new Error(`Erreur de connectivité: ${connectError.message}`);
+      }
+
+      // Vérifier les migrations
+      const migrationsStatus = await this.migrationService.checkMigrationsStatus();
+      const pendingMigrations = migrationsStatus.filter(m => !m.applied);
+
+      if (pendingMigrations.length > 0) {
+        return {
+          status: 'warning',
+          details: {
+            connectivity: 'ok',
+            migrations: 'pending',
+            pendingMigrations: pendingMigrations.map(m => m.name)
+          }
+        };
+      }
+
+      return {
+        status: 'healthy',
+        details: {
+          connectivity: 'ok',
+          migrations: 'applied',
+          migrationsCount: migrationsStatus.length
+        }
+      };
+
+    } catch (error) {
+      return {
+        status: 'error',
+        details: {
+          error: error.message
+        }
+      };
+    }
   }
 }
 
