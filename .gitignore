@@ -1,94 +1,17 @@
-# Dependencies
-node_modules/
-/.pnp
-.pnp.js
-
-# Production
-/dist
-/build
-
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
 # Logs
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 lerna-debug.log*
-.pnpm-debug.log*
 
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory used by tools like istanbul
-coverage/
-*.lcov
-
-# nyc test coverage
-.nyc_output
-
-# node-waf configuration
-.lock-wscript
-
-# Compiled binary addons (https://nodejs.org/api/addons.html)
-build/Release
-
-# Dependency directories
-node_modules/
-jspm_packages/
-
-# TypeScript cache
-*.tsbuildinfo
-
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# dotenv environment variables file
-.env
-.env.test
-.env.production
-
-# parcel-bundler cache (https://parceljs.org/)
-.cache
-.parcel-cache
-
-# Next.js build output
-.next
-
-# Nuxt.js build / generate output
-.nuxt
+# Node modules
+node_modules
 dist
-
-# Gatsby files
-.cache/
-public
-
-# Storybook build outputs
-.out
-.storybook-out
-
-# Temporary folders
-tmp/
-temp/
+dist-ssr
+*.local
 
 # Editor directories and files
 .vscode/*
@@ -101,7 +24,131 @@ temp/
 *.sln
 *.sw?
 
+# ============================================================================
+# CONFIGURATION SENSIBLE (AJOUT CASSKAI)
+# ============================================================================
+
+# Variables d'environnement avec clés sensibles
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.staging
+
+# Configuration Supabase locale
+supabase/.env
+
+# Fichiers de configuration temporaires
+.casskai-config
+casskai-config.json
+*.config.local.*
+
+# Clés API et secrets
+*.key
+*.pem
+*.p12
+*.cert
+secrets/
+private/
+
+# ============================================================================
+# SUPABASE (CONFIGURATION STANDARD)
+# ============================================================================
+
 # Supabase
 .branches
 .temp
-supabase/config.toml
+.import
+.vscode/settings.json
+supabase/functions/.vscode/
+
+# Fichiers générés par Supabase CLI
+supabase/.temp/
+supabase/.branches/
+supabase/.import/
+
+# ============================================================================
+# DÉVELOPPEMENT ET TESTS
+# ============================================================================
+
+# Fichiers de test temporaires
+test-uploads/
+temp-files/
+*.test.local
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# Logs de debugging
+debug.log
+error.log
+access.log
+
+# ============================================================================
+# DÉPLOIEMENT
+# ============================================================================
+
+# Fichiers de build temporaires
+.vercel
+.netlify
+.next/
+out/
+
+# Archives et backups
+*.tar.gz
+*.zip
+backup/
+archives/
+
+# ============================================================================
+# OS SPECIFIQUES
+# ============================================================================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# ============================================================================
+# DONNÉES UTILISATEUR
+# ============================================================================
+
+# Uploads utilisateur (en développement)
+uploads/
+user-data/
+import-files/
+
+# Base de données locale de développement
+*.db
+*.sqlite
+*.sqlite3
+
+# ============================================================================
+# NOTES IMPORTANTES
+# ============================================================================
+
+# Ce .gitignore protège contre :
+# 1. L'exposition accidentelle de clés API
+# 2. Le commit de données sensibles utilisateur
+# 3. Les fichiers temporaires qui polluent le repo
+# 4. Les configurations locales qui varient selon l'environnement
+
+# Pour la production, assurez-vous que :
+# 1. Les variables d'environnement sont configurées sur votre plateforme
+# 2. Les secrets sont stockés de manière sécurisée
+# 3. Les sauvegardes de configuration sont chiffrées
