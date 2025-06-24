@@ -31,8 +31,9 @@ BEGIN
       ELSE 
         COALESCE(SUM(credit_amount), 0) - COALESCE(SUM(debit_amount), 0)
     END INTO new_balance
-  FROM journal_entry_items 
-  WHERE account_id = account_record.id;
+  FROM journal_entry_items jei
+  JOIN journal_entries je ON jei.journal_entry_id = je.id
+  WHERE jei.account_id = account_record.id;
   
   -- Mettre à jour le solde du compte
   UPDATE accounts 
@@ -398,28 +399,13 @@ BEGIN
   INSERT INTO companies (
     name, 
     country, 
-    currency, 
-    accounting_standard,
-    is_setup_completed
+    default_currency, 
+    is_active
   ) VALUES (
     p_company_name,
     p_country,
     p_currency,
-    p_accounting_standard,
-    false
-  -- Créer l'entreprise
-  INSERT INTO companies (
-    name, 
-    country, 
-    currency, 
-    accounting_standard,
-    is_setup_completed
-  ) VALUES (
-    p_company_name,
-    p_country,
-    p_currency,
-    p_accounting_standard,
-    false
+    true
   ) RETURNING id INTO new_company_id;
 
   -- Récupérer le rôle admin
@@ -438,26 +424,16 @@ BEGIN
     true
   );
 
-  -- Insérer le plan comptable par défaut selon le standard
-  IF p_accounting_standard = 'SYSCOHADA' THEN
-    PERFORM insert_default_syscohada_accounts(new_company_id);
-  ELSE
-    PERFORM insert_default_french_accounts(new_company_id);
-  END IF;
-
-  -- Insérer les journaux par défaut
-  PERFORM insert_default_journals(new_company_id, p_accounting_standard);
-
   RETURN new_company_id;
 END;
-$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Fonction pour basculer l'entreprise par défaut d'un utilisateur
 CREATE OR REPLACE FUNCTION set_default_company(
   p_user_id UUID,
   p_company_id UUID
 )
-RETURNS BOOLEAN AS $
+RETURNS BOOLEAN AS $$
 BEGIN
   -- Vérifier que l'utilisateur a accès à cette entreprise
   IF NOT EXISTS (
@@ -479,82 +455,13 @@ BEGIN
 
   RETURN true;
 END;
-$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================================================
--- 6. FONCTIONS D'IMPORT ET EXPORT
+-- 6. FONCTIONS DE RAPPROCHEMENT BANCAIRE
 -- ============================================================================
 
--- Fonction pour importer des écritures depuis FEC
-CREATE OR REPLACE FUNCTION import_fec_data(
-  p_company_id UUID,
-  p_fec_data JSONB
-)
-RETURNS JSON AS $
-DECLARE
-  imported_count INTEGER := 0;
-  error_count INTEGER := 0;
-  result JSON;
-  fec_record RECORD;
-BEGIN
-  -- Parcourir les données FEC
-  FOR fec_record IN SELECT * FROM jsonb_array_elements(p_fec_data)
-  LOOP
-    BEGIN
-      -- Logique d'import à implémenter selon le format FEC
-      -- Ceci est un placeholder pour la structure
-      
-      imported_count := imported_count + 1;
-      
-    EXCEPTION WHEN OTHERS THEN
-      error_count := error_count + 1;
-    END;
-  END LOOP;
-
-  result := json_build_object(
-    'imported', imported_count,
-    'errors', error_count,
-    'total', imported_count + error_count
-  );
-
-  RETURN result;
-END;
-$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- ============================================================================
--- 7. FONCTIONS DE RAPPROCHEMENT BANCAIRE
--- ============================================================================
-
--- Fonction pour rapprocher une transaction bancaire
-CREATE OR REPLACE FUNCTION reconcile_bank_transaction(
-  p_transaction_id UUID,
-  p_journal_entry_id UUID DEFAULT NULL
-)
-RETURNS BOOLEAN AS $
-BEGIN
-  -- Marquer la transaction comme rapprochée
-  UPDATE bank_transactions 
-  SET 
-    is_reconciled = true,
-    status = 'reconciled'
-  WHERE id = p_transaction_id;
-
-  -- Si une écriture est associée, la marquer aussi
-  IF p_journal_entry_id IS NOT NULL THEN
-    UPDATE journal_entries
-    SET status = 'reconciled'
-    WHERE id = p_journal_entry_id;
-  END IF;
-
-  RETURN true;
-END;
-$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- ============================================================================
--- 8. FONCTIONS D'AUDIT ET LOGS
--- ============================================================================
-
--- Table des logs d'audit
+-- Table des logs d'audit si elle n'existe pas déjà
 CREATE TABLE IF NOT EXISTS audit_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
@@ -574,7 +481,7 @@ CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at);
 
 -- Fonction générique d'audit
 CREATE OR REPLACE FUNCTION audit_trigger_function()
-RETURNS TRIGGER AS $
+RETURNS TRIGGER AS $$
 DECLARE
   company_id_value UUID;
 BEGIN
@@ -608,28 +515,15 @@ BEGIN
 
   RETURN COALESCE(NEW, OLD);
 END;
-$ LANGUAGE plpgsql;
-
--- Appliquer les triggers d'audit aux tables importantes
-CREATE TRIGGER audit_companies_trigger
-  AFTER INSERT OR UPDATE OR DELETE ON companies
-  FOR EACH ROW EXECUTE FUNCTION audit_trigger_function();
-
-CREATE TRIGGER audit_accounts_trigger
-  AFTER INSERT OR UPDATE OR DELETE ON accounts
-  FOR EACH ROW EXECUTE FUNCTION audit_trigger_function();
-
-CREATE TRIGGER audit_journal_entries_trigger
-  AFTER INSERT OR UPDATE OR DELETE ON journal_entries
-  FOR EACH ROW EXECUTE FUNCTION audit_trigger_function();
+$$ LANGUAGE plpgsql;
 
 -- ============================================================================
--- 9. FONCTIONS DE MAINTENANCE ET NETTOYAGE
+-- 7. FONCTIONS DE MAINTENANCE ET NETTOYAGE
 -- ============================================================================
 
 -- Fonction pour nettoyer les anciens logs d'audit
 CREATE OR REPLACE FUNCTION cleanup_old_audit_logs(p_days_to_keep INTEGER DEFAULT 365)
-RETURNS INTEGER AS $
+RETURNS INTEGER AS $$
 DECLARE
   deleted_count INTEGER;
 BEGIN
@@ -640,123 +534,32 @@ BEGIN
   
   RETURN deleted_count;
 END;
-$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Fonction pour recalculer tous les soldes des comptes
-CREATE OR REPLACE FUNCTION recalculate_all_account_balances(p_company_id UUID)
-RETURNS INTEGER AS $
-DECLARE
-  updated_count INTEGER := 0;
-  account_record RECORD;
-  new_balance DECIMAL(15,2);
+-- Fonction de nettoyage pour les tests (corrigée)
+CREATE OR REPLACE FUNCTION cleanup_test_data()
+RETURNS void AS $$
 BEGIN
-  -- Parcourir tous les comptes de l'entreprise
-  FOR account_record IN 
-    SELECT * FROM accounts WHERE company_id = p_company_id AND is_active = true
-  LOOP
-    -- Calculer le nouveau solde
-    SELECT 
-      CASE 
-        -- Pour les comptes d'actif et charges
-        WHEN account_record.class IN (1, 2, 3, 5, 6) THEN 
-          COALESCE(SUM(debit_amount), 0) - COALESCE(SUM(credit_amount), 0)
-        -- Pour les comptes de passif et produits
-        ELSE 
-          COALESCE(SUM(credit_amount), 0) - COALESCE(SUM(debit_amount), 0)
-      END INTO new_balance
-    FROM journal_entry_items 
-    WHERE account_id = account_record.id;
+  -- Attention : cette fonction supprime toutes les données de test
+  -- À utiliser uniquement en développement
+  IF current_setting('app.environment', true) = 'development' THEN
+    DELETE FROM audit_logs WHERE company_id = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
+    DELETE FROM journal_entry_items WHERE company_id = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
+    DELETE FROM journal_entries WHERE company_id = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
+    DELETE FROM accounts WHERE company_id = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
+    DELETE FROM journals WHERE company_id = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
+    DELETE FROM user_companies WHERE company_id = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
+    DELETE FROM companies WHERE id = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
     
-    -- Mettre à jour le solde si différent
-    IF COALESCE(new_balance, 0) != COALESCE(account_record.balance, 0) THEN
-      UPDATE accounts 
-      SET balance = COALESCE(new_balance, 0)
-      WHERE id = account_record.id;
-      
-      updated_count := updated_count + 1;
-    END IF;
-  END LOOP;
-  
-  RETURN updated_count;
+    RAISE NOTICE 'Données de test supprimées';
+  ELSE
+    RAISE EXCEPTION 'Nettoyage autorisé uniquement en développement';
+  END IF;
 END;
-$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================================================
--- 10. FONCTIONS DE VALIDATION ET CONTRÔLE
--- ============================================================================
-
--- Fonction pour valider la cohérence des données comptables
-CREATE OR REPLACE FUNCTION validate_accounting_data(p_company_id UUID)
-RETURNS JSON AS $
-DECLARE
-  result JSON;
-  unbalanced_entries INTEGER := 0;
-  orphan_items INTEGER := 0;
-  invalid_accounts INTEGER := 0;
-BEGIN
-  -- Vérifier les écritures non équilibrées
-  SELECT COUNT(*) INTO unbalanced_entries
-  FROM (
-    SELECT journal_entry_id
-    FROM journal_entry_items
-    WHERE company_id = p_company_id
-    GROUP BY journal_entry_id
-    HAVING ABS(SUM(debit_amount) - SUM(credit_amount)) > 0.01
-  ) unbalanced;
-
-  -- Vérifier les lignes d'écriture orphelines
-  SELECT COUNT(*) INTO orphan_items
-  FROM journal_entry_items jei
-  LEFT JOIN journal_entries je ON jei.journal_entry_id = je.id
-  WHERE jei.company_id = p_company_id AND je.id IS NULL;
-
-  -- Vérifier les comptes inactifs avec des mouvements
-  SELECT COUNT(*) INTO invalid_accounts
-  FROM accounts a
-  WHERE a.company_id = p_company_id 
-    AND a.is_active = false
-    AND EXISTS (
-      SELECT 1 FROM journal_entry_items jei 
-      WHERE jei.account_id = a.id
-    );
-
-  result := json_build_object(
-    'company_id', p_company_id,
-    'validation_date', NOW(),
-    'issues', json_build_object(
-      'unbalanced_entries', unbalanced_entries,
-      'orphan_items', orphan_items,
-      'invalid_accounts', invalid_accounts
-    ),
-    'is_valid', (unbalanced_entries + orphan_items + invalid_accounts = 0)
-  );
-
-  RETURN result;
-END;
-$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- ============================================================================
--- 11. FONCTIONS D'INITIALISATION POUR LE SETUP
--- ============================================================================
-
--- Fonction pour finaliser la configuration d'une entreprise
-CREATE OR REPLACE FUNCTION finalize_company_setup(p_company_id UUID)
-RETURNS BOOLEAN AS $
-BEGIN
-  -- Marquer l'entreprise comme configurée
-  UPDATE companies 
-  SET is_setup_completed = true 
-  WHERE id = p_company_id;
-
-  -- Insérer quelques données d'exemple si nécessaire
-  -- (à adapter selon les besoins)
-
-  RETURN true;
-END;
-$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- ============================================================================
--- 12. VUES UTILES POUR L'APPLICATION
+-- 8. VUES UTILES POUR L'APPLICATION
 -- ============================================================================
 
 -- Vue pour la balance des comptes
@@ -803,41 +606,9 @@ JOIN accounts a ON jei.account_id = a.id
 LEFT JOIN journals j ON je.journal_id = j.id
 ORDER BY je.entry_date, je.entry_number, jei.id;
 
--- ============================================================================
--- 13. FINALISATION ET NETTOYAGE
--- ============================================================================
-
--- Fonction de nettoyage pour les tests
-CREATE OR REPLACE FUNCTION cleanup_test_data()
-RETURNS void AS $
+-- Message de finalisation
+DO $$
 BEGIN
-  -- Attention : cette fonction supprime toutes les données de test
-  -- À utiliser uniquement en développement
-  IF current_setting('app.environment', true) = 'development' THEN
-    DELETE FROM audit_logs WHERE company_id = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
-    DELETE FROM journal_entry_items WHERE company_id = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
-    DELETE FROM journal_entries WHERE company_id = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
-    DELETE FROM accounts WHERE company_id = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
-    DELETE FROM journals WHERE company_id = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
-    DELETE FROM user_companies WHERE company_id = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
-    DELETE FROM companies WHERE id = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
-    
-    RAISE NOTICE 'Données de test supprimées';
-  ELSE
-    RAISE EXCEPTION 'Nettoyage autorisé uniquement en développement';
-  END IF;
-END;
-$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Créer un utilisateur de démonstration pour les tests
-DO $
-BEGIN
-  IF current_setting('app.environment', true) = 'development' THEN
-    RAISE NOTICE 'Schéma de base de données CassKai initialisé avec succès';
-    RAISE NOTICE 'Environnement: %', current_setting('app.environment', true);
-    RAISE NOTICE 'Fonctions créées: % triggers, % RPC functions, % views', 
-      (SELECT COUNT(*) FROM information_schema.triggers WHERE trigger_schema = 'public'),
-      (SELECT COUNT(*) FROM information_schema.routines WHERE routine_schema = 'public' AND routine_type = 'FUNCTION'),
-      (SELECT COUNT(*) FROM information_schema.views WHERE table_schema = 'public');
-  END IF;
-END $;
+  RAISE NOTICE 'Migration des fonctions et triggers terminée avec succès';
+  RAISE NOTICE 'Fonctions créées: %', (SELECT COUNT(*) FROM information_schema.routines WHERE routine_schema = 'public' AND routine_type = 'FUNCTION');
+END $$;
