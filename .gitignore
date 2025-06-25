@@ -11,7 +11,6 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
-*.local
 
 # Editor directories and files
 .vscode/*
@@ -25,15 +24,19 @@ dist-ssr
 *.sw?
 
 # ============================================================================
-# CONFIGURATION SENSIBLE (AJOUT CASSKAI)
+# CONFIGURATION SENSIBLE (ENVRIONNEMENT)
 # ============================================================================
 
 # Variables d'environnement avec clés sensibles
+.env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 .env.staging
+
+# Ne versionner que .env.example pour la doc
+!.env.example
 
 # Configuration Supabase locale
 supabase/.env
@@ -139,16 +142,13 @@ import-files/
 *.sqlite3
 
 # ============================================================================
-# NOTES IMPORTANTES
+# NOTES
 # ============================================================================
 
 # Ce .gitignore protège contre :
-# 1. L'exposition accidentelle de clés API
-# 2. Le commit de données sensibles utilisateur
-# 3. Les fichiers temporaires qui polluent le repo
-# 4. Les configurations locales qui varient selon l'environnement
+# - L'exposition accidentelle de clés API
+# - Le commit de données sensibles utilisateur
+# - Les fichiers temporaires qui polluent le repo
+# - Les configurations locales qui varient selon l'environnement
 
-# Pour la production, assurez-vous que :
-# 1. Les variables d'environnement sont configurées sur votre plateforme
-# 2. Les secrets sont stockés de manière sécurisée
-# 3. Les sauvegardes de configuration sont chiffrées
+# Ne versionner que .env.example pour la doc
