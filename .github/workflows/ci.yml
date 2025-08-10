@@ -552,7 +552,7 @@ jobs:
           fields: repo,message,commit,author,action,eventName,ref,workflow
 
       - name: 📧 Email notification on failure
-        uses: dawidd6/action-send-mail@v3
+        uses: dawidd6/action-send-mail@v6
         if: failure()
         with:
           server_address: smtp.gmail.com
