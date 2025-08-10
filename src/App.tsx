@@ -9,7 +9,7 @@ import { ModulesProvider } from '@/contexts/ModulesContext';
 import { EnterpriseProvider } from '@/contexts/EnterpriseContext';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 // import { SubscriptionProvider } from '@/contexts/SubscriptionContext'; // Temporairement désactivé pour le build
-import ABTestProvider from '@/components/ABTestProvider';
+// import ABTestProvider from '@/components/ABTestProvider'; // Temporairement désactivé pour le build
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { LoadingFallback } from '@/components/ui/LoadingFallback';
 import ErrorBoundary, { setupGlobalErrorHandling } from '@/components/ErrorBoundary';
@@ -417,7 +417,7 @@ function App() {
         <LocaleProvider>
           <AuthProvider>
             {/* <SubscriptionProvider> */}
-              <ABTestProvider>
+              {/* <ABTestProvider> */}
                 <ModulesProviderWrapper>
                   <EnterpriseProvider>
                     <TooltipProvider>
@@ -430,7 +430,7 @@ function App() {
                     </TooltipProvider>
                   </EnterpriseProvider>
                 </ModulesProviderWrapper>
-              </ABTestProvider>
+              {/* </ABTestProvider> */}
             {/* </SubscriptionProvider> */}
           </AuthProvider>
         </LocaleProvider>
