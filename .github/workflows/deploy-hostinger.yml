@@ -1,70 +1,36 @@
 name: Deploy to Hostinger
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ['CI/CD Pipeline']   # Nom EXACT du workflow CI
+    types: [completed]
   workflow_dispatch:
 
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build-and-deploy:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
+    - name: Download dist artifact
+      uses: actions/download-artifact@v4
       with:
-        node-version: '18'
-        cache: 'npm'
-
-    - name: Install dependencies
-      run: npm ci
-
-    - name: Debug secrets availability
-      run: |
-        echo "Checking secrets availability:"
-        echo "VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL != '' && 'SET' || 'NOT SET' }}"
-        echo "VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY != '' && 'SET' || 'NOT SET' }}"
-        echo "VITE_STRIPE_PUBLISHABLE_KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY != '' && 'SET' || 'NOT SET' }}"
-
-    - name: Create production .env file
-      run: |
-        cat > .env << 'EOF'
-        # Variables d'environnement pour production
-        VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
-        VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}
-        VITE_APP_NAME=CassKai
-        VITE_APP_VERSION=1.0.0
-        VITE_NODE_ENV=production
-        VITE_APP_URL=https://casskai.app
-        VITE_API_BASE_URL=https://casskai.app/api
-        VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
-        EOF
-        echo "Generated .env file contents (secrets masked):"
-        sed 's/=.*/=***/' .env
-
-    - name: Clean build environment  
-      run: |
-        echo "🧹 Nettoyage complet de l'environnement de build..."
-        rm -rf node_modules/.cache
-        rm -rf dist
-        rm -rf .vite
-        rm -rf node_modules/.vite
-        rm -rf .turbo
-        npm cache clean --force
-
-    - name: TypeScript check
-      run: npx tsc --noEmit
-
-    - name: Build application
-      run: npm run build
+        name: dist
+        path: dist
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        repository: ${{ github.repository }}
+        run-id: ${{ github.event.workflow_run.id }}
 
     - name: Verify build output
       run: |
-        echo "📦 Vérification du contenu du build..."
+        echo "📦 Vérification du contenu du build téléchargé..."
         ls -la dist/
         ls -la dist/assets/ || echo "Pas de dossier assets"
 
