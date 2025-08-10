@@ -1,7 +1,6 @@
 import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { createLogger, defineConfig } from 'vite';
-import { compression } from 'vite-plugin-compression2';
 
 console.warn = () => {};
 
@@ -15,27 +14,7 @@ logger.error = (msg, options) => {
 export default defineConfig(({ mode }) => ({
 	customLogger: logger,
 	plugins: [
-		react(),
-		// Compression Gzip
-		compression({
-			algorithm: 'gzip',
-			ext: '.gz',
-			threshold: 1024,
-			compressionOptions: {
-				level: 9,
-			},
-			filter: /\.(js|mjs|json|css|html|svg)$/i,
-		}),
-		// Compression Brotli (meilleure compression)
-		compression({
-			algorithm: 'brotliCompress',
-			ext: '.br',
-			threshold: 1024,
-			compressionOptions: {
-				level: 11, // Maximum compression
-			},
-			filter: /\.(js|mjs|json|css|html|svg)$/i,
-		}),
+		react()
 	],
 	css: {
 		postcss: './postcss.config.js'
