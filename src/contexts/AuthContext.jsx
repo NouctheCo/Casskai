@@ -27,17 +27,23 @@ const clearSupabaseAuthData = () => {
   }
 };
 
+import { useConfigContext } from './ConfigContext';
+
 export const AuthProvider = ({ children }) => {
   // États d'authentification
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
   // États d'entreprise
   const [currentEnterpriseId, setCurrentEnterpriseId] = useState(null);
   const [currentEnterpriseName, setCurrentEnterpriseName] = useState(null);
   const [userCompanies, setUserCompanies] = useState([]);
-  
+
   const { toast } = useToast();
+  const { config, isConfigured } = useConfigContext();
+
+  // Flag setup complet (config locale ou remote)
+  const isSetupComplete = config?.setupCompleted || isConfigured;
 
   // Récupérer les entreprises de l'utilisateur
   const fetchUserCompanies = useCallback(async (userId) => {
@@ -266,21 +272,22 @@ export const AuthProvider = ({ children }) => {
     // États d'authentification
     user,
     loading,
-    
+    isSetupComplete,
+
     // États d'entreprise
     currentEnterpriseId,
     currentEnterpriseName,
     userCompanies,
-    
+
     // Fonctions d'authentification
     signUp,
     signIn,
     signOut,
-    
+
     // Fonctions de gestion des entreprises
     switchEnterprise,
     refreshUserAccess,
-    
+
     // Fonctions utilitaires
     clearAccessData: clearUserData
   };

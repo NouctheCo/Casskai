@@ -1,5 +1,12 @@
-import { supabase, handleSupabaseError } from '@/lib/supabase';
-import { TaxRate, TaxDeclaration, TaxPayment, TaxDocument, TaxSettings } from '@/types/tax.types';
+// Helper to format Supabase errors
+function handleSupabaseError(error: unknown, context: string) {
+  if (error instanceof Error) {
+    return { message: `[${context}] ${error.message}` };
+  }
+  return { message: `[${context}] ${JSON.stringify(error)}` };
+}
+import { supabase } from '../lib/supabase';
+import { TaxRate, TaxDeclaration, TaxPayment, TaxDocument, TaxSettings } from '../types/tax.types';
 
 /**
  * Service for managing tax-related operations

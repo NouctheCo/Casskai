@@ -1,11 +1,12 @@
 // contexts/EnterpriseContext.tsx
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { Enterprise, EnterpriseTaxConfiguration } from '@/types/enterprise.types';
-import { TaxRate, TaxDeclaration, TaxPayment, TaxDocument } from '@/types/tax.types';
+import { Enterprise, EnterpriseTaxConfiguration } from '../types/enterprise.types';
+// import { SYSCOHADA_CLASSES, SYSCOHADA_ACCOUNTS } from '../data/accounts-syscohada';
+// import { TaxRate, TaxDeclaration, TaxPayment, TaxDocument } from '../types/tax.types';
 import { useAuth } from './AuthContext';
-import { useToast } from '@/components/ui/use-toast';
-import { supabase, handleSupabaseError } from '@/lib/supabase';
+import { useToast } from '../components/ui/use-toast';
+import { supabase, handleSupabaseError } from '../lib/supabase';
 
 interface EnterpriseContextType {
   enterprises: Enterprise[];
@@ -41,14 +42,16 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   // Charger les entreprises depuis Supabase
   useEffect(() => {
     const loadEnterprises = async () => {
+      console.log('🔄 Initialisation démarrée');
       if (!user) {
+        console.log('⏹️ Aucun utilisateur connecté, arrêt de l\'init.');
         setLoading(false);
         return;
       }
 
       setLoading(true);
       try {
-        // Récupérer les entreprises de l'utilisateur depuis Supabase
+        console.log('📡 Récupération des entreprises pour user:', user);
         const { data: userCompanies, error: userCompaniesError } = await supabase
           .from('user_companies')
           .select(`
@@ -67,19 +70,20 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           `)
           .eq('user_id', user.id);
 
+        console.log('📦 Résultat Supabase:', { userCompanies, userCompaniesError });
         if (userCompaniesError) {
+          console.log('❌ Erreur Supabase:', userCompaniesError);
           throw userCompaniesError;
         }
 
-        // Transformer les données pour correspondre à notre modèle Enterprise
-        const userEnterprises: Enterprise[] = userCompanies
-          .filter(uc => uc.companies) // Filtrer les entrées nulles
-          .map(uc => {
-            const company = uc.companies;
+        const userEnterprises: Enterprise[] = (userCompanies as any[])
+          .filter((uc: any) => uc.companies)
+          .map((uc: any) => {
+            const company = uc.companies as any;
             return {
               id: company.id,
               name: company.name || 'Entreprise sans nom',
-              registrationNumber: '000000000', // Default value since not in DB
+              registrationNumber: '000000000',
               vatNumber: undefined,
               countryCode: company.country || 'FR',
               address: {
@@ -101,7 +105,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
               currency: company.default_currency || 'EUR',
               createdAt: new Date(company.created_at),
               updatedAt: new Date(company.updated_at),
-              isActive: company.is_active !== false, // Default to true if undefined
+              isActive: company.is_active !== false,
               settings: {
                 defaultVATRate: '20',
                 defaultPaymentTerms: 30,
@@ -114,14 +118,10 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
               }
             };
           });
+        console.log('🗂️ Entreprises transformées:', userEnterprises);
 
         if (userEnterprises.length === 0) {
-          // Si aucune entreprise n'est trouvée, créer une entreprise par défaut
-          // Cela ne devrait pas arriver en production car l'utilisateur devrait avoir au moins une entreprise
           console.warn('No enterprises found for user, creating default');
-          
-          // Dans un environnement de production, vous pourriez rediriger vers une page de création d'entreprise
-          // ou afficher un message demandant à l'utilisateur d'en créer une
           const defaultEnterprise: Enterprise = {
             id: '1',
             name: 'Mon Entreprise',
@@ -159,39 +159,41 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
               timezone: 'Europe/Paris'
             }
           };
-          
           setEnterprises([defaultEnterprise]);
         } else {
           setEnterprises(userEnterprises);
         }
 
-        // Charger la dernière entreprise sélectionnée
+        // Sélection de l'entreprise courante
         const lastSelectedId = localStorage.getItem('currentEnterpriseId');
         if (lastSelectedId && userEnterprises.some(e => e.id === lastSelectedId)) {
           setCurrentEnterpriseId(lastSelectedId);
+          console.log('🏢 Entreprise sélectionnée (stockée):', lastSelectedId);
         } else if (userEnterprises.length > 0) {
-          // Si pas d'entreprise sélectionnée ou invalide, prendre la première
           setCurrentEnterpriseId(userEnterprises[0].id);
+          console.log('🏢 Entreprise sélectionnée (par défaut):', userEnterprises[0].id);
         }
 
         // Charger les configurations fiscales
         try {
+          console.log('📑 Chargement des configurations fiscales pour:', userEnterprises.map(e => e.id));
           await loadTaxConfigurations(userEnterprises.map(e => e.id));
+          console.log('✅ Configurations fiscales chargées');
         } catch (taxError) {
           console.error('Error loading tax configurations:', taxError);
-          // Ne pas bloquer le chargement des entreprises si les configurations fiscales échouent
         }
 
       } catch (error) {
         console.error('Error loading enterprises:', error);
-        const errorInfo = handleSupabaseError(error, 'Loading enterprises');
+        handleSupabaseError(error);
         toast({
           variant: 'destructive',
           title: 'Erreur',
-          description: errorInfo.message || 'Impossible de charger les entreprises'
+          description: 'Impossible de charger les entreprises'
         });
       } finally {
         setLoading(false);
+        console.log('✅ Initialisation terminée');
       }
     };
 
@@ -333,7 +335,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
       // Créer les taux de taxe par défaut
       const defaultTaxRates = getDefaultTaxRatesForCountry(enterpriseData.countryCode, newCompany.id);
-      if (defaultTaxRates.length > 0) {
+      if (Array.isArray(defaultTaxRates) && defaultTaxRates.length > 0) {
         // Vérifier si la table company_tax_rates existe
         const { data: tableExists, error: tableCheckError } = await supabase
           .from('information_schema.tables')
@@ -347,13 +349,13 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           // La table existe, on peut insérer les taux
           const { error: taxRatesError } = await supabase
             .from('company_tax_rates')
-            .insert(defaultTaxRates.map(rate => ({
+            .insert((defaultTaxRates as any[]).map((rate: any) => ({
               company_id: newCompany.id,
               name: rate.name,
               rate: rate.rate,
               type: rate.type,
               description: rate.description || '',
-              is_default: rate.isDefault || false,
+              is_default: rate.isDefault || rate.is_default || false,
               is_active: true,
               valid_from: new Date().toISOString(),
               created_by: user.id
@@ -555,25 +557,46 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
 // Fonction helper pour obtenir les taux par défaut selon le pays
 function getDefaultTaxRatesForCountry(countryCode: string, enterpriseId: string) {
+  // Pays d'Afrique de l'Ouest utilisant SYSCOHADA
+  const SYSCOHADA_COUNTRIES = ['BJ', 'CI', 'SN', 'TG', 'ML', 'NE', 'BF', 'GN'];
+  if (SYSCOHADA_COUNTRIES.includes(countryCode)) {
+    // Exemple : structure compatible TaxRate
+    const now = new Date();
+    return [{
+      id: `${enterpriseId}-1`,
+      company_id: enterpriseId,
+      name: 'SYSCOHADA - TVA',
+      rate: 18,
+      type: 'TVA' as const,
+      is_default: true,
+      is_active: true,
+      valid_from: now.toISOString(),
+      countryCode,
+      isActive: true,
+      createdAt: now,
+      updatedAt: now
+    }];
+  }
+  // Sinon, logique européenne classique
+  const now = new Date();
   const rates = {
     FR: [
-      { id: `${enterpriseId}-1`, company_id: enterpriseId, name: 'TVA Standard', rate: 20, type: 'VAT', is_default: true, is_active: true, valid_from: new Date().toISOString() },
-      { id: `${enterpriseId}-2`, company_id: enterpriseId, name: 'TVA Réduite', rate: 10, type: 'VAT', is_default: false, is_active: true, valid_from: new Date().toISOString() },
-      { id: `${enterpriseId}-3`, company_id: enterpriseId, name: 'TVA Super-réduite', rate: 5.5, type: 'VAT', is_default: false, is_active: true, valid_from: new Date().toISOString() },
+      { id: `${enterpriseId}-1`, company_id: enterpriseId, name: 'TVA Standard', rate: 20, type: 'TVA' as const, is_default: true, is_active: true, valid_from: now.toISOString(), countryCode: 'FR', isActive: true, createdAt: now, updatedAt: now },
+      { id: `${enterpriseId}-2`, company_id: enterpriseId, name: 'TVA Réduite', rate: 10, type: 'TVA' as const, is_default: false, is_active: true, valid_from: now.toISOString(), countryCode: 'FR', isActive: true, createdAt: now, updatedAt: now },
+      { id: `${enterpriseId}-3`, company_id: enterpriseId, name: 'TVA Super-réduite', rate: 5.5, type: 'TVA' as const, is_default: false, is_active: true, valid_from: now.toISOString(), countryCode: 'FR', isActive: true, createdAt: now, updatedAt: now },
     ],
     BE: [
-      { id: `${enterpriseId}-1`, company_id: enterpriseId, name: 'TVA Standard', rate: 21, type: 'VAT', is_default: true, is_active: true, valid_from: new Date().toISOString() },
-      { id: `${enterpriseId}-2`, company_id: enterpriseId, name: 'TVA Réduite', rate: 12, type: 'VAT', is_default: false, is_active: true, valid_from: new Date().toISOString() },
+      { id: `${enterpriseId}-1`, company_id: enterpriseId, name: 'TVA Standard', rate: 21, type: 'TVA' as const, is_default: true, is_active: true, valid_from: now.toISOString(), countryCode: 'BE', isActive: true, createdAt: now, updatedAt: now },
+      { id: `${enterpriseId}-2`, company_id: enterpriseId, name: 'TVA Réduite', rate: 12, type: 'TVA' as const, is_default: false, is_active: true, valid_from: now.toISOString(), countryCode: 'BE', isActive: true, createdAt: now, updatedAt: now },
     ],
     CH: [
-      { id: `${enterpriseId}-1`, company_id: enterpriseId, name: 'TVA Standard', rate: 7.7, type: 'VAT', is_default: true, is_active: true, valid_from: new Date().toISOString() },
-      { id: `${enterpriseId}-2`, company_id: enterpriseId, name: 'TVA Réduite', rate: 3.7, type: 'VAT', is_default: false, is_active: true, valid_from: new Date().toISOString() },
+      { id: `${enterpriseId}-1`, company_id: enterpriseId, name: 'TVA Standard', rate: 7.7, type: 'TVA' as const, is_default: true, is_active: true, valid_from: now.toISOString(), countryCode: 'CH', isActive: true, createdAt: now, updatedAt: now },
+      { id: `${enterpriseId}-2`, company_id: enterpriseId, name: 'TVA Réduite', rate: 3.7, type: 'TVA' as const, is_default: false, is_active: true, valid_from: now.toISOString(), countryCode: 'CH', isActive: true, createdAt: now, updatedAt: now },
     ],
     LU: [
-      { id: `${enterpriseId}-1`, company_id: enterpriseId, name: 'TVA Standard', rate: 17, type: 'VAT', is_default: true, is_active: true, valid_from: new Date().toISOString() },
-      { id: `${enterpriseId}-2`, company_id: enterpriseId, name: 'TVA Intermédiaire', rate: 14, type: 'VAT', is_default: false, is_active: true, valid_from: new Date().toISOString() },
+      { id: `${enterpriseId}-1`, company_id: enterpriseId, name: 'TVA Standard', rate: 17, type: 'TVA' as const, is_default: true, is_active: true, valid_from: now.toISOString(), countryCode: 'LU', isActive: true, createdAt: now, updatedAt: now },
+      { id: `${enterpriseId}-2`, company_id: enterpriseId, name: 'TVA Intermédiaire', rate: 14, type: 'TVA' as const, is_default: false, is_active: true, valid_from: now.toISOString(), countryCode: 'LU', isActive: true, createdAt: now, updatedAt: now },
     ]
   };
-  
-  return rates[countryCode] || rates.FR;
+  return rates[countryCode as keyof typeof rates] || rates.FR;
 }

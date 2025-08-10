@@ -1,5 +1,5 @@
-import { supabase } from '@/lib/supabase';
-import { formatDateForSQL, getAccountType, getAccountClass, getJournalType } from '@/lib/fecUtils';
+import { supabase } from '../lib/supabase';
+import { formatDateForSQL, getAccountType, getAccountClass, getJournalType } from '../lib/fecUtils';
 
 /**
  * Service pour gérer l'import des fichiers FEC (Fichier des Écritures Comptables)

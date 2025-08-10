@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAppState } from '../../hooks';
-import SupabaseSetupWizard from '../components/setup/SupabaseSetupWizard';
+import SupabaseSetupWizard from '../setup/SupabaseSetupWizard';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -37,7 +37,12 @@ const ConfigGuard: React.FC<ConfigGuardProps> = ({ children, fallback }) => {
     }
   };
 
-  // Affichage pendant le chargement initial
+  // Afficher le wizard d'installation dès que besoin, même si isLoading est true
+  if (needsSetup) {
+    return fallback || <SupabaseSetupWizard />;
+  }
+
+  // Affichage pendant le chargement initial (uniquement si la config existe déjà)
   if (config.isLoading || supabase.isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -52,11 +57,6 @@ const ConfigGuard: React.FC<ConfigGuardProps> = ({ children, fallback }) => {
         </Card>
       </div>
     );
-  }
-
-  // Configuration nécessaire - Afficher le wizard
-  if (needsSetup) {
-    return fallback || <SupabaseSetupWizard />;
   }
 
   // Erreur de configuration

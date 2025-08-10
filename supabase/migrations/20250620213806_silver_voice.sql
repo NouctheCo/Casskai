@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS company_tax_rates (
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   created_by UUID REFERENCES auth.users(id),
   
-  CONSTRAINT unique_default_rate_per_type UNIQUE (company_id, type, is_default) WHERE is_default = true
+  CONSTRAINT unique_default_rate_per_type UNIQUE (company_id, type)
 );
 
 -- Table pour les déclarations fiscales
@@ -128,32 +128,7 @@ FROM company_tax_declarations d
 JOIN companies c ON d.company_id = c.id
 WHERE d.status IN ('pending', 'draft')
 ORDER BY d.due_date;
-
--- Triggers pour updated_at
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_company_tax_rates_updated_at') THEN
-    CREATE TRIGGER update_company_tax_rates_updated_at
-      BEFORE UPDATE ON company_tax_rates
-      FOR EACH ROW
-      EXECUTE FUNCTION update_updated_at_column();
-  END IF;
-
-  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_company_tax_declarations_updated_at') THEN
-    CREATE TRIGGER update_company_tax_declarations_updated_at
-      BEFORE UPDATE ON company_tax_declarations
-      FOR EACH ROW
-      EXECUTE FUNCTION update_updated_at_column();
-  END IF;
-
-  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_company_tax_payments_updated_at') THEN
-    CREATE TRIGGER update_company_tax_payments_updated_at
-      BEFORE UPDATE ON company_tax_payments
-      FOR EACH ROW
-      EXECUTE FUNCTION update_updated_at_column();
-  END IF;
-END
-$$;
+;
 
 -- Enable Row Level Security
 ALTER TABLE company_tax_rates ENABLE ROW LEVEL SECURITY;
@@ -161,156 +136,6 @@ ALTER TABLE company_tax_declarations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE company_tax_payments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE company_tax_documents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE company_tax_reminders ENABLE ROW LEVEL SECURITY;
-
--- Policies for company_tax_rates
-CREATE POLICY "Users can view their company tax rates"
-  ON company_tax_rates
-  FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM user_companies
-      WHERE user_companies.company_id = company_tax_rates.company_id
-      AND user_companies.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can manage their company tax rates"
-  ON company_tax_rates
-  FOR ALL
-  USING (
-    EXISTS (
-      SELECT 1 FROM user_companies
-      WHERE user_companies.company_id = company_tax_rates.company_id
-      AND user_companies.user_id = auth.uid()
-    )
-  )
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM user_companies
-      WHERE user_companies.company_id = company_tax_rates.company_id
-      AND user_companies.user_id = auth.uid()
-    )
-  );
-
--- Policies for company_tax_declarations
-CREATE POLICY "Users can view their company tax declarations"
-  ON company_tax_declarations
-  FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM user_companies
-      WHERE user_companies.company_id = company_tax_declarations.company_id
-      AND user_companies.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can manage their company tax declarations"
-  ON company_tax_declarations
-  FOR ALL
-  USING (
-    EXISTS (
-      SELECT 1 FROM user_companies
-      WHERE user_companies.company_id = company_tax_declarations.company_id
-      AND user_companies.user_id = auth.uid()
-    )
-  )
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM user_companies
-      WHERE user_companies.company_id = company_tax_declarations.company_id
-      AND user_companies.user_id = auth.uid()
-    )
-  );
-
--- Policies for company_tax_payments
-CREATE POLICY "Users can view their company tax payments"
-  ON company_tax_payments
-  FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM user_companies
-      WHERE user_companies.company_id = company_tax_payments.company_id
-      AND user_companies.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can manage their company tax payments"
-  ON company_tax_payments
-  FOR ALL
-  USING (
-    EXISTS (
-      SELECT 1 FROM user_companies
-      WHERE user_companies.company_id = company_tax_payments.company_id
-      AND user_companies.user_id = auth.uid()
-    )
-  )
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM user_companies
-      WHERE user_companies.company_id = company_tax_payments.company_id
-      AND user_companies.user_id = auth.uid()
-    )
-  );
-
--- Policies for company_tax_documents
-CREATE POLICY "Users can view their company tax documents"
-  ON company_tax_documents
-  FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM user_companies
-      WHERE user_companies.company_id = company_tax_documents.company_id
-      AND user_companies.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can manage their company tax documents"
-  ON company_tax_documents
-  FOR ALL
-  USING (
-    EXISTS (
-      SELECT 1 FROM user_companies
-      WHERE user_companies.company_id = company_tax_documents.company_id
-      AND user_companies.user_id = auth.uid()
-    )
-  )
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM user_companies
-      WHERE user_companies.company_id = company_tax_documents.company_id
-      AND user_companies.user_id = auth.uid()
-    )
-  );
-
--- Policies for company_tax_reminders
-CREATE POLICY "Users can view their company tax reminders"
-  ON company_tax_reminders
-  FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM user_companies
-      WHERE user_companies.company_id = company_tax_reminders.company_id
-      AND user_companies.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can manage their company tax reminders"
-  ON company_tax_reminders
-  FOR ALL
-  USING (
-    EXISTS (
-      SELECT 1 FROM user_companies
-      WHERE user_companies.company_id = company_tax_reminders.company_id
-      AND user_companies.user_id = auth.uid()
-    )
-  )
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM user_companies
-      WHERE user_companies.company_id = company_tax_reminders.company_id
-      AND user_companies.user_id = auth.uid()
-    )
-  );
 
 -- Additional indexes for performance
 CREATE INDEX IF NOT EXISTS idx_tax_rates_company_active ON company_tax_rates(company_id, is_active);

@@ -74,6 +74,22 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+
+  input {
+    @apply border border-input bg-background text-black placeholder:text-gray-500;
+  }
+
+  button {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90;
+  }
+
+  a {
+    @apply text-accent hover:underline;
+  }
+
+  .form-field {
+    @apply border border-input rounded-md;
+  }
 }
 
 .gradient-text {

@@ -1,9 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useEnterprise } from '@/contexts/EnterpriseContext';
-import { TaxRate, TaxDeclaration, TaxPayment } from '@/types/tax.types';
-import { supabase, handleSupabaseError } from '@/lib/supabase';
-import { useToast } from '@/components/ui/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
+import { useEnterprise } from '../contexts/EnterpriseContext';
+import { TaxRate, TaxDeclaration, TaxPayment } from '../types/tax.types';
+import { supabase } from '../lib/supabase';
+
+// Helper to format Supabase errors
+function handleSupabaseError(error: unknown, context: string) {
+  if (error instanceof Error) {
+    return { message: `[${context}] ${error.message}` };
+  }
+  return { message: `[${context}] ${JSON.stringify(error)}` };
+}
+import { useToast } from '../components/ui/use-toast';
+import { useAuth } from '../contexts/AuthContext';
 import { format, addMonths, addQuarters, addYears, isBefore } from 'date-fns';
 
 export function useEnterpriseTaxData() {

@@ -1,4 +1,11 @@
+import { MarketLocalization, MarketPricing } from '../types/market';
 // services/marketService.ts
+import { MarketConfig } from '../types/market';
+import { MARKET_CONFIGS } from '../data/markets';
+import { SYSCOHADA_PLAN } from '../data/syscohada';
+import { PCG_ACCOUNTS as PCG_PLAN } from '../data/pcg';
+// import { CurrencyService } from './currencyService';
+import { AccountingService } from './accountingService';
 export class MarketService {
   private static instance: MarketService;
   private currentMarket: MarketConfig | null = null;
@@ -46,18 +53,19 @@ export class MarketService {
     return MARKET_CONFIGS.filter(market => market.region === region);
   }
 
+
+
+
   private applyMarketConfiguration(market: MarketConfig): void {
     // 1. Configurer la devise par défaut
-    const currencyService = require('./currencyService').CurrencyService.getInstance();
+    // const currencyService = CurrencyService.getInstance(); // Inutilisé
     // currencyService.setDefaultCurrency(market.defaultCurrency);
 
     // 2. Configurer le plan comptable
-    const accountingService = require('./accountingService').AccountingService.getInstance();
+    const accountingService = AccountingService.getInstance();
     if (market.accountingStandard === 'SYSCOHADA') {
-      const { SYSCOHADA_PLAN } = require('../data/syscohada');
       accountingService.setAccountPlan(SYSCOHADA_PLAN);
     } else if (market.accountingStandard === 'PCG') {
-      const { PCG_PLAN } = require('../data/pcg');
       accountingService.setAccountPlan(PCG_PLAN);
     }
 

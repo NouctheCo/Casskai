@@ -1,5 +1,5 @@
 // src/services/migrationService.ts
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../lib/supabase';
 
 export interface MigrationResult {
   success: boolean;
@@ -54,7 +54,7 @@ class MigrationService {
       const { data: functionsData, error: functionsError } = await supabase
         .rpc('get_dashboard_stats', { p_company_id: '00000000-0000-0000-0000-000000000000' })
         .then(() => ({ data: true, error: null }))
-        .catch((error) => ({ data: false, error }));
+        .catch((error: any) => ({ data: false, error }));
 
       const functionsExist = !functionsError;
 
@@ -141,7 +141,11 @@ class MigrationService {
           
         } catch (migrationError) {
           console.error(`❌ Erreur lors de l'application de la migration ${migration.version}:`, migrationError);
-          throw new Error(`Migration ${migration.version} échouée: ${migrationError.message}`);
+          if (migrationError instanceof Error) {
+            throw new Error(`Migration ${migration.version} échouée: ${migrationError.message}`);
+          } else {
+            throw new Error(`Migration ${migration.version} échouée: ${JSON.stringify(migrationError)}`);
+          }
         }
       }
 
@@ -155,7 +159,7 @@ class MigrationService {
       console.error('❌ Erreur lors de l\'application des migrations:', error);
       return {
         success: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : JSON.stringify(error),
         migrationsApplied: 0
       };
     }
@@ -286,7 +290,7 @@ class MigrationService {
         p_company_id: '00000000-0000-0000-0000-000000000000' 
       });
     } catch (error) {
-      if (error.message?.includes('function get_dashboard_stats')) {
+      if (error instanceof Error && error.message?.includes('function get_dashboard_stats')) {
         throw new Error('Fonction get_dashboard_stats non trouvée. Appliquez la migration 003 via Supabase CLI.');
       }
     }
@@ -337,7 +341,7 @@ class MigrationService {
       console.error('Erreur lors de la création de l\'entreprise:', error);
       return {
         success: false,
-        error: error.message
+        error: error instanceof Error ? error.message : JSON.stringify(error)
       };
     }
   }
@@ -360,7 +364,7 @@ class MigrationService {
       console.error('Erreur lors de la finalisation:', error);
       return {
         success: false,
-        error: error.message
+        error: error instanceof Error ? error.message : JSON.stringify(error)
       };
     }
   }
@@ -386,7 +390,7 @@ class MigrationService {
       console.error('Erreur lors de la validation:', error);
       return {
         success: false,
-        error: error.message
+        error: error instanceof Error ? error.message : JSON.stringify(error)
       };
     }
   }
@@ -412,7 +416,7 @@ class MigrationService {
       console.error('Erreur lors du recalcul:', error);
       return {
         success: false,
-        error: error.message
+        error: error instanceof Error ? error.message : JSON.stringify(error)
       };
     }
   }

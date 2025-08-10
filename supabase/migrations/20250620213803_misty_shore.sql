@@ -1,3 +1,4 @@
+
 /*
   # Add enterprise columns to companies table
 

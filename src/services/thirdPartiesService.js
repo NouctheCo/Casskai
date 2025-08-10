@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../lib/supabase';
 import { useState, useEffect, useCallback } from 'react';
 
 const TABLE_NAME = 'third_parties';

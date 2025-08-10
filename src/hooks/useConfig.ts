@@ -55,6 +55,7 @@ export const useConfig = (): UseConfigReturn => {
       setError(null);
 
       const savedConfig = configService.getConfig();
+      console.log('Config trouvée:', savedConfig);
       
       if (savedConfig) {
         setConfig(savedConfig);

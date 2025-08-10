@@ -1,5 +1,5 @@
 // src/services/accountsService.js
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../lib/supabase';
 
 export const accountsService = {
   // Récupérer les comptes avec filtres et pagination

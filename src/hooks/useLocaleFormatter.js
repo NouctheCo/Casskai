@@ -1,5 +1,5 @@
-import { useLocale } from '@/contexts/LocaleContext';
-    import { useAuth } from '@/contexts/AuthContext'; // To get company's default currency/locale
+import { useLocale } from '../contexts/LocaleContext';
+import { useAuth } from '../contexts/AuthContext'; // To get company's default currency/locale
 
     // Helper to map simple locale codes to more specific ones for Intl if needed
     const getExtendedLocale = (locale) => {

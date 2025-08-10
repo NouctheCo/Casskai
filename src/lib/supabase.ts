@@ -588,5 +588,13 @@ export function useSupabase() {
   };
 }
 
+/**
+ * Gestion centralisée des erreurs Supabase
+ */
+export function handleSupabaseError(error: any) {
+  console.error('Supabase Error:', error?.message || error);
+  throw new Error(error?.message || 'Une erreur inconnue est survenue avec Supabase');
+}
+
 // Export pour compatibilité
 export default supabase;
