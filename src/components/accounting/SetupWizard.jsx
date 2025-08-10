@@ -1,21 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { useLocale } from "@/contexts/LocaleContext";
-import { accountsService } from '@/services/accountsService';
-import { journalsService } from '@/services/journalsService';
+import { useAccounting } from '@/hooks/useAccounting';
+import { useJournals } from '@/hooks/useJournals';
+import { useCompanies } from '@/hooks/useCompanies';
+import { useAuth } from '@/contexts/AuthContext';
 import { defaultChartOfAccounts, defaultJournals } from '@/utils/defaultAccountingData';
 import { Loader2, CheckCircle, BookOpen, Calendar, FileText, ArrowRight } from 'lucide-react';
 
-const SetupWizard = ({ currentEnterpriseId, open, onOpenChange, onFinish }) => {
+const SetupWizard = ({ currentEnterpriseId: propCurrentEnterpriseId, open, onOpenChange, onFinish }) => {
   const { t } = useLocale();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { currentCompany } = useCompanies();
+  const companyId = propCurrentEnterpriseId || currentCompany?.id;
+  
+  // Utiliser les nouveaux hooks
+  const { accounts } = useAccounting(companyId);
+  const { journals, createDefaultJournals } = useJournals(companyId);
   
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -47,18 +56,17 @@ const SetupWizard = ({ currentEnterpriseId, open, onOpenChange, onFinish }) => {
   useEffect(() => {
     // Check if any of the setup steps have already been completed
     const checkSetupStatus = async () => {
-      if (!currentEnterpriseId) return;
+      if (!companyId) return;
       
       setLoading(true);
       try {
         // Check if chart of accounts exists
-        const { data: accounts } = await accountsService.getAccounts(currentEnterpriseId, { limit: 1 });
+        // Check if chart of accounts exists
         if (accounts && accounts.length > 0) {
           setCompleted(prev => ({ ...prev, chartOfAccounts: true }));
         }
         
         // Check if journals exist
-        const { data: journals } = await journalsService.getJournals(currentEnterpriseId);
         if (journals && journals.length > 0) {
           setCompleted(prev => ({ ...prev, journals: true }));
         }
@@ -75,7 +83,7 @@ const SetupWizard = ({ currentEnterpriseId, open, onOpenChange, onFinish }) => {
     };
     
     checkSetupStatus();
-  }, [currentEnterpriseId]);
+  }, [companyId, accounts, journals]);
   
   const handleConfigureChartOfAccounts = () => {
     setShowChartOfAccountsDialog(true);
@@ -90,13 +98,14 @@ const SetupWizard = ({ currentEnterpriseId, open, onOpenChange, onFinish }) => {
   };
   
   const handleSaveChartOfAccounts = async () => {
-    if (!currentEnterpriseId) return;
+    if (!companyId) return;
     
     setLoading(true);
     try {
       if (chartOfAccountsOption === 'default') {
-        const { error } = await accountsService.importStandardChartOfAccounts(currentEnterpriseId, defaultChartOfAccounts);
-        if (error) throw error;
+        // TODO: Implement importStandardChartOfAccounts in useAccounting hook
+        // await importStandardChartOfAccounts(defaultChartOfAccounts);
+        throw new Error('Import functionality not yet implemented');
         
         toast({
           title: t('success'),
@@ -119,7 +128,7 @@ const SetupWizard = ({ currentEnterpriseId, open, onOpenChange, onFinish }) => {
   };
   
   const handleSaveFiscalYear = async () => {
-    if (!currentEnterpriseId) return;
+    if (!companyId) return;
     
     setLoading(true);
     try {
@@ -149,13 +158,12 @@ const SetupWizard = ({ currentEnterpriseId, open, onOpenChange, onFinish }) => {
   };
   
   const handleSaveJournals = async () => {
-    if (!currentEnterpriseId) return;
+    if (!companyId) return;
     
     setLoading(true);
     try {
       if (journalsOption === 'default') {
-        const { error } = await journalsService.createDefaultJournals(currentEnterpriseId, defaultJournals);
-        if (error) throw error;
+        await createDefaultJournals(defaultJournals);
         
         toast({
           title: t('success'),
@@ -206,7 +214,7 @@ const SetupWizard = ({ currentEnterpriseId, open, onOpenChange, onFinish }) => {
         <div className="grid gap-6">
           <div className={`flex items-center justify-between p-4 border rounded-lg ${completed.chartOfAccounts ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' : ''}`}>
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-full ${completed.chartOfAccounts ? 'bg-green-100 dark:bg-green-800' : 'bg-primary/10'}`}>
+              <div className={`p-2 rounded-full ${completed.chartOfAccounts ? 'bg-green-100 dark:bg-green-800' : 'bg-blue-600/10'}`}>
                 <BookOpen className={`h-5 w-5 ${completed.chartOfAccounts ? 'text-green-600 dark:text-green-400' : 'text-primary'}`} />
               </div>
               <div>
@@ -224,7 +232,7 @@ const SetupWizard = ({ currentEnterpriseId, open, onOpenChange, onFinish }) => {
 
           <div className={`flex items-center justify-between p-4 border rounded-lg ${completed.fiscalYear ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' : ''}`}>
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-full ${completed.fiscalYear ? 'bg-green-100 dark:bg-green-800' : 'bg-primary/10'}`}>
+              <div className={`p-2 rounded-full ${completed.fiscalYear ? 'bg-green-100 dark:bg-green-800' : 'bg-blue-600/10'}`}>
                 <Calendar className={`h-5 w-5 ${completed.fiscalYear ? 'text-green-600 dark:text-green-400' : 'text-primary'}`} />
               </div>
               <div>
@@ -242,7 +250,7 @@ const SetupWizard = ({ currentEnterpriseId, open, onOpenChange, onFinish }) => {
 
           <div className={`flex items-center justify-between p-4 border rounded-lg ${completed.journals ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' : ''}`}>
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-full ${completed.journals ? 'bg-green-100 dark:bg-green-800' : 'bg-primary/10'}`}>
+              <div className={`p-2 rounded-full ${completed.journals ? 'bg-green-100 dark:bg-green-800' : 'bg-blue-600/10'}`}>
                 <FileText className={`h-5 w-5 ${completed.journals ? 'text-green-600 dark:text-green-400' : 'text-primary'}`} />
               </div>
               <div>
@@ -263,7 +271,7 @@ const SetupWizard = ({ currentEnterpriseId, open, onOpenChange, onFinish }) => {
         <Button 
           onClick={handleFinish} 
           disabled={!allCompleted || loading}
-          className="bg-primary text-primary-foreground hover:bg-primary/90"
+          className="bg-blue-600 text-white hover:bg-blue-600/90"
         >
           {loading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

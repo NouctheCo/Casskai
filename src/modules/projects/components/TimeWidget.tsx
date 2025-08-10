@@ -1,0 +1,1 @@
+import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const TimeWidget: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>TimeWidget</CardTitle> </CardHeader> <CardContent> <p>Composant TimeWidget en développement.</p> </CardContent> </Card> ); }; export default TimeWidget;

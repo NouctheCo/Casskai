@@ -1,4 +1,4 @@
-// src/hooks/useConfig.ts
+// src/hooks/useConfig.ts - Version corrigée
 
 import { useState, useEffect, useCallback } from 'react';
 import ConfigService from '../services/configService';
@@ -26,6 +26,7 @@ interface UseConfigReturn {
   initializeDatabase: () => Promise<void>;
   resetConfig: () => void;
   exportConfig: () => string | null;
+  refreshConfig: () => Promise<void>;
 
   // Validation
   validateConfig: (config: Partial<AppConfig>) => ConfigValidation;
@@ -58,13 +59,19 @@ export const useConfig = (): UseConfigReturn => {
       console.log('Config trouvée:', savedConfig);
       
       if (savedConfig) {
-        setConfig(savedConfig);
+        // Add required id property to company config
+        const configWithId = {
+          ...savedConfig,
+          company: { ...savedConfig.company, id: savedConfig.company.name }
+        };
+        setConfig(configWithId);
         setStatus(savedConfig.setupCompleted ? 'configured' : 'configuring');
         
         // Tenter d'initialiser Supabase si la config est complète
         if (savedConfig.setupCompleted && savedConfig.supabase.validated) {
           try {
-            await configService.initializeSupabaseClient();
+            // Appel à getSupabaseClient sans affectation inutile
+            configService.getSupabaseClient();
           } catch (err) {
             console.warn('Impossible d\'initialiser Supabase:', err);
           }
@@ -255,6 +262,11 @@ export const useConfig = (): UseConfigReturn => {
     };
   }, []);
 
+  // Recharger la configuration
+  const refreshConfig = useCallback(async (): Promise<void> => {
+    await loadConfig();
+  }, [loadConfig]);
+
   // Getters
   const getSupabaseConfig = useCallback((): SupabaseConfig | null => {
     return config?.supabase || null;
@@ -278,6 +290,7 @@ export const useConfig = (): UseConfigReturn => {
     initializeDatabase,
     resetConfig,
     exportConfig,
+    refreshConfig,
 
     // Validation
     validateConfig,

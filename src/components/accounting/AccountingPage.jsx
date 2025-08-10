@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -236,7 +236,7 @@ export default function AccountingPage() {
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="container mx-auto p-4 md:p-8">
         <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
-          <CardHeader className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-t-lg p-6">
+          <CardHeader className="bg-gradient-to-r from-primary to-primary/80 text-white rounded-t-lg p-6">
             <CardTitle className="text-2xl flex items-center">
               <AlertTriangle className="mr-3 h-8 w-8" />
               {t('noCompanySelectedTitle')}
@@ -261,7 +261,7 @@ export default function AccountingPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
           <div className="flex items-center gap-4">
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100 truncate">
               {t('accountingPageTitle', { defaultValue: "Gestion Comptable" })}
             </h1>
             <Button variant="outline" onClick={() => setShowSetupWizard(true)}>
@@ -269,18 +269,18 @@ export default function AccountingPage() {
               {t('setupAssistant')}
             </Button>
           </div>
-          <div className="flex gap-2 mt-4 sm:mt-0">
+          <div className="flex flex-wrap gap-2 mt-4 sm:mt-0 justify-center sm:justify-end">
             <TabsList className="grid w-full sm:w-auto grid-cols-2 md:grid-cols-4">
-              <TabsTrigger value="entries" className="flex items-center gap-2">
+              <TabsTrigger value="entries" className="flex items-center gap-2 truncate">
                 <FileText className="h-4 w-4" /> {t('accountingEntries')}
               </TabsTrigger>
-              <TabsTrigger value="chart" className="flex items-center gap-2">
+              <TabsTrigger value="chart" className="flex items-center gap-2 truncate">
                 <BookOpen className="h-4 w-4" /> {t('chartOfAccounts')}
               </TabsTrigger>
-              <TabsTrigger value="journals" className="flex items-center gap-2">
+              <TabsTrigger value="journals" className="flex items-center gap-2 truncate">
                 <BarChartHorizontalBig className="h-4 w-4" /> {t('journals')}
               </TabsTrigger>
-              <TabsTrigger value="fec" className="flex items-center gap-2">
+              <TabsTrigger value="fec" className="flex items-center gap-2 truncate">
                 <FileArchive className="h-4 w-4" /> {t('fec')}
               </TabsTrigger>
             </TabsList>

@@ -1,0 +1,1 @@
+import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const DealWidget: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>DealWidget</CardTitle> </CardHeader> <CardContent> <p>Composant DealWidget en développement.</p> </CardContent> </Card> ); }; export default DealWidget;

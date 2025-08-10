@@ -1,6 +1,5 @@
 // types/enterprise.types.ts
-
-import { TaxRate, TaxDeclaration, TaxPayment, TaxDocument } from './tax.types';
+import { TaxDocument } from './tax.types';
 
 export interface Enterprise {
   id: string;
@@ -18,8 +17,8 @@ export interface Enterprise {
   fiscalYearStart: number; // Mois (1-12)
   fiscalYearEnd: number;
   currency: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: number | Date;
+  updatedAt: number | Date;
   isActive: boolean;
   logo?: string;
   settings: EnterpriseSettings;

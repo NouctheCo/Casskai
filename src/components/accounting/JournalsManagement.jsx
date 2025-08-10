@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
@@ -9,15 +9,28 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { useLocale } from "@/contexts/LocaleContext";
-import { journalsService } from '@/services/journalsService';
+import { useJournals } from '@/hooks/useJournals';
+import { useCompanies } from '@/hooks/useCompanies';
+import { useAuth } from '@/contexts/AuthContext';
 import { PlusCircle, Edit, Loader2, FileText, BarChart3, CreditCard, Banknote, Settings } from 'lucide-react';
 
-const JournalsManagement = ({ currentEnterpriseId }) => {
+const JournalsManagement = ({ currentEnterpriseId: propCurrentEnterpriseId }) => {
   const { t } = useLocale();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { currentCompany } = useCompanies();
+  const companyId = propCurrentEnterpriseId || currentCompany?.id;
   
-  const [journals, setJournals] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Utiliser le nouveau hook useJournals
+  const {
+    journals,
+    loading,
+    error,
+    createJournal,
+    updateJournal,
+    deleteJournal,
+    refresh
+  } = useJournals(companyId);
   const [showJournalForm, setShowJournalForm] = useState(false);
   const [editingJournal, setEditingJournal] = useState(null);
   
@@ -37,29 +50,16 @@ const JournalsManagement = ({ currentEnterpriseId }) => {
     { value: 'OD', label: t('accounting.journals.types.miscellaneous', { defaultValue: 'Miscellaneous' }), icon: Settings },
   ];
   
+  // Show error if any
   useEffect(() => {
-    fetchJournals();
-  }, [currentEnterpriseId]);
-  
-  const fetchJournals = async () => {
-    if (!currentEnterpriseId) return;
-    
-    setLoading(true);
-    try {
-      const { data, error } = await journalsService.getJournals(currentEnterpriseId);
-      if (error) throw error;
-      setJournals(data || []);
-    } catch (error) {
-      console.error('Error fetching journals:', error);
+    if (error) {
       toast({
         variant: 'destructive',
         title: t('error'),
-        description: t('accounting.journals.fetchError', { defaultValue: 'Error fetching journals' })
+        description: error
       });
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [error, toast, t]);
   
   const handleNewJournal = () => {
     setEditingJournal(null);
@@ -110,26 +110,23 @@ const JournalsManagement = ({ currentEnterpriseId }) => {
       return;
     }
     
-    setLoading(true);
     try {
-      let result;
       if (editingJournal) {
-        result = await journalsService.updateJournal(editingJournal.id, formData);
+        await updateJournal(editingJournal.id, formData);
+        toast({
+          title: t('success'),
+          description: t('accounting.journals.updateSuccess', { defaultValue: 'Journal updated successfully' })
+        });
       } else {
-        result = await journalsService.createJournal(currentEnterpriseId, formData);
+        await createJournal(formData);
+        toast({
+          title: t('success'),
+          description: t('accounting.journals.createSuccess', { defaultValue: 'Journal created successfully' })
+        });
       }
       
-      if (result.error) throw result.error;
-      
-      toast({
-        title: t('success'),
-        description: editingJournal 
-          ? t('accounting.journals.updateSuccess', { defaultValue: 'Journal updated successfully' })
-          : t('accounting.journals.createSuccess', { defaultValue: 'Journal created successfully' })
-      });
-      
       setShowJournalForm(false);
-      fetchJournals();
+      refresh();
     } catch (error) {
       console.error('Error saving journal:', error);
       toast({
@@ -137,8 +134,6 @@ const JournalsManagement = ({ currentEnterpriseId }) => {
         title: t('error'),
         description: error.message || t('accounting.journals.saveError', { defaultValue: 'Error saving journal' })
       });
-    } finally {
-      setLoading(false);
     }
   };
   

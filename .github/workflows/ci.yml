@@ -1,0 +1,607 @@
+name: 🚀 CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  NODE_VERSION: '18'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # ===== CODE QUALITY STAGE =====
+  code-quality:
+    name: 🔍 Code Quality & Linting
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Needed for SonarQube
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📚 Install dependencies
+        run: npm ci
+
+      - name: 🔧 TypeScript check
+        run: npm run type-check
+
+      - name: 🎨 ESLint check
+        run: npm run lint
+
+      - name: 💅 Prettier check
+        run: npm run format:check
+
+      - name: 📊 SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        continue-on-error: true
+
+  # ===== UNIT TESTS STAGE =====
+  unit-tests:
+    name: 🧪 Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: code-quality
+    
+    strategy:
+      matrix:
+        node-version: [18, 20]
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: 📚 Install dependencies
+        run: npm ci
+
+      - name: 🧪 Run unit tests with coverage
+        run: npm run test:coverage
+
+      - name: 📊 Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage/lcov.info
+          flags: unit-tests
+          name: codecov-${{ matrix.node-version }}
+
+      - name: 📈 Coverage threshold check
+        run: |
+          COVERAGE=$(node -p "require('./coverage/coverage-summary.json').total.statements.pct")
+          echo "Coverage: $COVERAGE%"
+          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+            echo "❌ Coverage is below 80% ($COVERAGE%)"
+            exit 1
+          else
+            echo "✅ Coverage meets minimum requirement ($COVERAGE% >= 80%)"
+          fi
+
+  # ===== INTEGRATION TESTS STAGE =====
+  integration-tests:
+    name: 🔌 Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: unit-tests
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: casskai_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📚 Install dependencies
+        run: npm ci
+
+      - name: 🗄️ Setup test database
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/casskai_test
+        run: |
+          echo "Setting up test database..."
+          # Add database migration commands here if needed
+
+      - name: 🔌 Run integration tests
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/casskai_test
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_TEST_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_TEST_ANON_KEY }}
+        run: npm run test:integration
+
+  # ===== BUILD STAGE =====
+  build:
+    name: 🏗️ Build Application
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [code-quality, unit-tests]
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📚 Install dependencies
+        run: npm ci
+
+      - name: 🏗️ Build application
+        env:
+          NODE_ENV: production
+        run: npm run build
+
+      - name: 📦 Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-files
+          path: dist/
+          retention-days: 7
+
+      - name: 📊 Bundle size analysis
+        run: |
+          npm install -g bundlesize
+          echo "📦 Analyzing bundle sizes..."
+          # Create bundlesize config
+          cat > .bundlesizerc << EOF
+          {
+            "files": [
+              {
+                "path": "./dist/assets/*.js",
+                "maxSize": "500kB"
+              },
+              {
+                "path": "./dist/assets/*.css",
+                "maxSize": "50kB"
+              }
+            ]
+          }
+          EOF
+          bundlesize
+
+  # ===== E2E TESTS STAGE =====
+  e2e-tests:
+    name: 🎭 E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: build
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📚 Install dependencies
+        run: npm ci
+
+      - name: 📥 Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-files
+          path: dist/
+
+      - name: 🎭 Install Playwright
+        run: npx playwright install --with-deps
+
+      - name: 🎭 Run E2E tests
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:4173
+        run: |
+          npm run build
+          npm run preview &
+          sleep 5
+          npm run test:e2e
+
+      - name: 📊 Upload E2E test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: 🖼️ Upload screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-screenshots
+          path: test-results/
+          retention-days: 7
+
+  # ===== PERFORMANCE TESTS STAGE =====
+  performance-tests:
+    name: ⚡ Performance Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: build
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📚 Install dependencies
+        run: npm ci
+
+      - name: 📥 Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-files
+          path: dist/
+
+      - name: 🎭 Install Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: ⚡ Run performance tests
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:4173
+        run: |
+          npm run preview &
+          sleep 5
+          npm run test:performance
+
+      - name: 📊 Upload performance results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-report
+          path: lighthouse-results/
+          retention-days: 7
+
+  # ===== ACCESSIBILITY TESTS STAGE =====
+  accessibility-tests:
+    name: ♿ Accessibility Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: build
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📚 Install dependencies
+        run: npm ci
+
+      - name: 📥 Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-files
+          path: dist/
+
+      - name: 🎭 Install Playwright
+        run: npx playwright install --with-deps
+
+      - name: ♿ Run accessibility tests
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:4173
+        run: |
+          npm run preview &
+          sleep 5
+          npm run test:accessibility
+
+      - name: 📊 Upload accessibility results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: accessibility-report
+          path: test-results/
+          retention-days: 7
+
+  # ===== SECURITY SCAN STAGE =====
+  security-scan:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: code-quality
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📚 Install dependencies
+        run: npm ci
+
+      - name: 🔍 Audit dependencies
+        run: npm audit --audit-level=high
+
+      - name: 🔒 CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          languages: javascript
+
+      - name: 🛡️ Snyk Security Scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        continue-on-error: true
+
+  # ===== DOCKER BUILD STAGE =====
+  docker-build:
+    name: 🐳 Docker Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [build, e2e-tests]
+    if: github.event_name == 'push'
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📥 Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-files
+          path: dist/
+
+      - name: 🔑 Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📝 Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: 🏗️ Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🐳 Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+
+  # ===== PREVIEW DEPLOYMENT STAGE =====
+  deploy-preview:
+    name: 🚀 Deploy Preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [build, e2e-tests]
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📥 Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-files
+          path: dist/
+
+      - name: 🚀 Deploy to Vercel Preview
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./dist
+          scope: ${{ secrets.VERCEL_ORG_ID }}
+
+  # ===== STAGING DEPLOYMENT STAGE =====
+  deploy-staging:
+    name: 🎯 Deploy to Staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [docker-build, security-scan]
+    if: github.ref == 'refs/heads/develop'
+
+    environment:
+      name: staging
+      url: https://staging.casskai.app
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🚀 Deploy to staging
+        run: |
+          echo "🎯 Deploying to staging environment..."
+          # Add your staging deployment commands here
+          # kubectl apply -f k8s/staging/
+          # or docker-compose up -d
+
+      - name: 🔍 Health check
+        run: |
+          echo "🏥 Performing health check..."
+          curl -f https://staging.casskai.app/health || exit 1
+
+      - name: 📊 Notify Sentry of deployment
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: casskai
+          SENTRY_PROJECT: casskai-web
+        with:
+          environment: staging
+
+  # ===== PRODUCTION DEPLOYMENT STAGE =====
+  deploy-production:
+    name: 🚀 Deploy to Production
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [docker-build, security-scan]
+    if: github.ref == 'refs/heads/main'
+
+    environment:
+      name: production
+      url: https://app.casskai.fr
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🚀 Deploy to production
+        run: |
+          echo "🚀 Deploying to production environment..."
+          # Add your production deployment commands here
+          # kubectl apply -f k8s/production/
+          # or use blue-green deployment strategy
+
+      - name: 🔍 Health check
+        run: |
+          echo "🏥 Performing health check..."
+          curl -f https://app.casskai.fr/health || exit 1
+
+      - name: 📊 Notify Sentry of deployment
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: casskai
+          SENTRY_PROJECT: casskai-web
+        with:
+          environment: production
+
+      - name: 🔄 Setup rollback on failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed, initiating rollback..."
+          # kubectl rollout undo deployment/casskai-web
+          # or restore previous Docker image
+
+  # ===== NOTIFICATION STAGE =====
+  notify:
+    name: 📢 Notifications
+    runs-on: ubuntu-latest
+    needs: [deploy-production, deploy-staging]
+    if: always()
+
+    steps:
+      - name: 📢 Slack notification
+        uses: 8398a7/action-slack@v3
+        if: always()
+        with:
+          status: ${{ job.status }}
+          channel: '#deployments'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+
+      - name: 📧 Email notification on failure
+        uses: dawidd6/action-send-mail@v3
+        if: failure()
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "❌ CassKai CI/CD Pipeline Failed"
+          to: team@casskai.app
+          from: ci@casskai.app
+          body: |
+            The CI/CD pipeline for CassKai has failed.
+            
+            Repository: ${{ github.repository }}
+            Branch: ${{ github.ref }}
+            Commit: ${{ github.sha }}
+            Author: ${{ github.actor }}
+            
+            Please check the GitHub Actions logs for more details.
+
+# ===== CLEANUP STAGE =====
+  cleanup:
+    name: 🧹 Cleanup
+    runs-on: ubuntu-latest
+    needs: [deploy-production, deploy-staging, deploy-preview]
+    if: always()
+
+    steps:
+      - name: 🧹 Clean up old artifacts
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner,
+              repo,
+              workflow_id: context.workflow,
+              status: 'completed',
+              per_page: 30
+            });
+            
+            for (const run of runs.data.workflow_runs.slice(5)) {
+              try {
+                await github.rest.actions.deleteWorkflowRun({
+                  owner,
+                  repo,
+                  run_id: run.id
+                });
+                console.log(`Deleted workflow run ${run.id}`);
+              } catch (error) {
+                console.log(`Failed to delete workflow run ${run.id}: ${error.message}`);
+              }
+            }

@@ -1,11 +1,5 @@
-// Helper to format Supabase errors
-function handleSupabaseError(error: unknown, context: string) {
-  if (error instanceof Error) {
-    return { message: `[${context}] ${error.message}` };
-  }
-  return { message: `[${context}] ${JSON.stringify(error)}` };
-}
-import { supabase } from '../lib/supabase';
+import { supabase, handleSupabaseError } from '../lib/supabase';
+
 import { Enterprise, TaxRegime, EnterpriseSettings } from '../types/enterprise.types';
 
 /**
@@ -98,10 +92,9 @@ export const enterpriseService = {
       return { data: enterprises, error: null };
     } catch (error) {
       console.error('Error fetching user enterprises:', error);
-      const errorInfo = handleSupabaseError(error, 'Fetching user enterprises');
       return { 
         data: null, 
-        error: new Error(errorInfo.message) 
+        error: new Error(handleSupabaseError(error))
       };
     }
   },
@@ -183,10 +176,9 @@ export const enterpriseService = {
       return { data: newEnterprise, error: null };
     } catch (error) {
       console.error('Error creating enterprise:', error);
-      const errorInfo = handleSupabaseError(error, 'Creating enterprise');
       return { 
         data: null, 
-        error: new Error(errorInfo.message) 
+        error: new Error(handleSupabaseError(error))
       };
     }
   },
@@ -217,10 +209,9 @@ export const enterpriseService = {
       return { success: true, error: null };
     } catch (error) {
       console.error('Error updating enterprise:', error);
-      const errorInfo = handleSupabaseError(error, 'Updating enterprise');
       return { 
         success: false, 
-        error: new Error(errorInfo.message) 
+        error: new Error(handleSupabaseError(error))
       };
     }
   },
@@ -242,10 +233,9 @@ export const enterpriseService = {
       return { success: true, error: null };
     } catch (error) {
       console.error('Error deleting enterprise:', error);
-      const errorInfo = handleSupabaseError(error, 'Deleting enterprise');
       return { 
         success: false, 
-        error: new Error(errorInfo.message) 
+        error: new Error(handleSupabaseError(error))
       };
     }
   },
@@ -280,10 +270,9 @@ export const enterpriseService = {
       return { success: true, error: null };
     } catch (error) {
       console.error('Error setting default enterprise:', error);
-      const errorInfo = handleSupabaseError(error, 'Setting default enterprise');
       return { 
         success: false, 
-        error: new Error(errorInfo.message) 
+        error: new Error(handleSupabaseError(error))
       };
     }
   }

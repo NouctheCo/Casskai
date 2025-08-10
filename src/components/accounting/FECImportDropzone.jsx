@@ -65,7 +65,7 @@ const FECImportDropzone = ({ onFileSelected, isProcessing }) => {
       
       <div 
         className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg p-6 transition-colors ${
-          dragActive ? 'border-primary bg-primary/5' : 'border-gray-300 dark:border-gray-600'
+          dragActive ? 'border-blue-600 bg-blue-600/5' : 'border-gray-300 dark:border-gray-600'
         }`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}

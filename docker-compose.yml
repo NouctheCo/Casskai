@@ -1,0 +1,277 @@
+version: '3.8'
+
+services:
+  # ===== APPLICATION SERVICES =====
+  
+  # Main application (development)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: build-deps
+      cache_from:
+        - node:18-alpine
+        - casskai/app:cache
+      args:
+        - BUILDKIT_INLINE_CACHE=1
+    container_name: casskai-app
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules  # Anonymous volume for node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+      - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+      - CHOKIDAR_USEPOLLING=true  # For file watching in Docker
+    command: npm run dev -- --host 0.0.0.0
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - casskai-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+  
+  # Production build
+  app-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+      cache_from:
+        - casskai/app:latest
+        - casskai/app:cache
+    container_name: casskai-app-prod
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - casskai-network
+    restart: unless-stopped
+    profiles:
+      - production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # ===== DATABASE SERVICES =====
+  
+  # PostgreSQL (Supabase local development)
+  postgres:
+    image: postgres:15-alpine
+    container_name: casskai-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: casskai_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./supabase/migrations:/docker-entrypoint-initdb.d:ro
+    networks:
+      - casskai-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d casskai_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: >
+      postgres 
+      -c shared_preload_libraries=pg_stat_statements
+      -c pg_stat_statements.track=all
+      -c max_connections=200
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c work_mem=4MB
+      -c maintenance_work_mem=64MB
+
+  # Redis for caching and sessions
+  redis:
+    image: redis:7-alpine
+    container_name: casskai-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - casskai-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # ===== DEVELOPMENT SERVICES =====
+
+  # Mailhog for email testing
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: casskai-mailhog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - casskai-network
+    restart: unless-stopped
+    profiles:
+      - development
+
+  # Adminer for database management
+  adminer:
+    image: adminer:4-standalone
+    container_name: casskai-adminer
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    networks:
+      - casskai-network
+    restart: unless-stopped
+    profiles:
+      - development
+    depends_on:
+      - postgres
+
+  # Redis Commander for Redis management
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: casskai-redis-commander
+    ports:
+      - "8081:8081"
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    networks:
+      - casskai-network
+    restart: unless-stopped
+    profiles:
+      - development
+    depends_on:
+      - redis
+
+  # ===== TESTING SERVICES =====
+
+  # Test runner
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: build-deps
+    container_name: casskai-test
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=test
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/casskai_test
+    command: npm run test
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - casskai-network
+    profiles:
+      - testing
+
+  # E2E test runner with Playwright
+  e2e:
+    build:
+      context: .
+      dockerfile: Dockerfile.e2e
+    container_name: casskai-e2e
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - PLAYWRIGHT_BASE_URL=http://app:5173
+    command: npm run test:e2e
+    depends_on:
+      - app
+    networks:
+      - casskai-network
+    profiles:
+      - testing
+
+  # ===== MONITORING SERVICES =====
+
+  # Prometheus for metrics
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: casskai-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - casskai-network
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+  # Grafana for dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: casskai-grafana
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    networks:
+      - casskai-network
+    restart: unless-stopped
+    profiles:
+      - monitoring
+    depends_on:
+      - prometheus
+
+# ===== NETWORKS =====
+networks:
+  casskai-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# ===== VOLUMES =====
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+# ===== DEVELOPMENT OVERRIDES =====
+# Use: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up

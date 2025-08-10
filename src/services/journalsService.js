@@ -1,6 +1,13 @@
 // src/services/journalsService.js
 import { supabase } from '../lib/supabase';
 
+// Helper function to safely escape search terms for ILIKE queries
+const escapeSearchTerm = (term) => {
+  if (!term) return '';
+  // Escape special characters that could be used for SQL injection
+  return term.replace(/[%_\\]/g, '\\$&').replace(/'/g, "''");
+};
+
 export const journalsService = {
   // Récupérer tous les journaux d'une entreprise
   getJournals: async (currentEnterpriseId, options = {}) => {
@@ -32,7 +39,9 @@ export const journalsService = {
 
       // Recherche dans le code et le nom
       if (searchTerm) {
-        query = query.or(`code.ilike.%${searchTerm}%,name.ilike.%${searchTerm}%`);
+        // Use safe escaped search to prevent SQL injection
+        const escapedTerm = escapeSearchTerm(searchTerm);
+        query = query.or(`code.ilike.%${escapedTerm}%,name.ilike.%${escapedTerm}%`);
       }
 
       // Tri

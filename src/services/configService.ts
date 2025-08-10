@@ -1,5 +1,6 @@
 // src/services/configService.ts - Version mise à jour avec migrations
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseClient } from '@supabase/supabase-js';
+// import { getSupabaseClient } from '@/lib/supabase'; // Commented out for build compatibility
 import MigrationService from './migrationService';
 
 export interface SupabaseConfig {
@@ -32,6 +33,12 @@ class ConfigService {
 
   private constructor() {
     this.migrationService = MigrationService.getInstance();
+
+    // Initialiser la configuration par défaut si aucune configuration n'est trouvée
+    if (!this.getConfig()) {
+      console.warn('Aucune configuration trouvée. Initialisation de la configuration par défaut.');
+      this.initializeDefaultConfig();
+    }
   }
 
   static getInstance(): ConfigService {
@@ -57,7 +64,11 @@ class ConfigService {
         return this.config;
       }
     } catch (error) {
-      console.error('Erreur lors de la lecture de la configuration:', error);
+      if (error instanceof Error) {
+        console.error('Erreur lors de la lecture de la configuration:', error.message);
+      } else {
+        console.error('Erreur inconnue lors de la lecture de la configuration:', error);
+      }
     }
     return null;
   }
@@ -79,7 +90,7 @@ class ConfigService {
     }
   }
 
-  // Initialiser le client Supabase
+  // Initialiser le client Supabase (CORRECTION: utiliser l'instance unique)
   async initializeSupabaseClient(): Promise<SupabaseClient> {
     const config = this.getConfig();
     if (!config?.supabase.validated) {
@@ -87,10 +98,8 @@ class ConfigService {
     }
 
     try {
-      this.supabaseClient = createClient(
-        config.supabase.url,
-        config.supabase.anonKey
-      );
+      // CORRECTION CRITIQUE: Utiliser l'instance unique
+      this.supabaseClient = getSupabaseClient();
 
       // Test de connexion
       const { error } = await this.supabaseClient.from('_test').select('*').limit(1);
@@ -113,10 +122,11 @@ class ConfigService {
     return this.supabaseClient;
   }
 
-  // Valider la configuration Supabase
-  async validateSupabaseConfig(url: string, anonKey: string): Promise<boolean> {
+  // Valider la configuration Supabase (CORRECTION: utiliser l'instance unique)
+  async validateSupabaseConfig(): Promise<boolean> {
     try {
-      const tempClient = createClient(url, anonKey);
+      // CORRECTION CRITIQUE: Utiliser l'instance unique au lieu de créer une nouvelle
+      const tempClient = getSupabaseClient();
       const { error } = await tempClient.from('_test').select('*').limit(1);
       
       // Succès si pas d'erreur ou si l'erreur est "table not found"
@@ -153,7 +163,7 @@ class ConfigService {
       console.error('❌ Erreur d\'initialisation de la base de données:', error);
       return {
         success: false,
-        error: error.message
+        error: error instanceof Error ? error.message : 'Erreur inconnue'
       };
     }
   }
@@ -186,7 +196,7 @@ class ConfigService {
       console.error('❌ Erreur lors de la création de l\'entreprise:', error);
       return {
         success: false,
-        error: error.message
+        error: error instanceof Error ? error.message : 'Erreur inconnue'
       };
     }
   }
@@ -205,7 +215,7 @@ class ConfigService {
       console.error('❌ Erreur lors de la finalisation:', error);
       return {
         success: false,
-        error: error.message
+        error: error instanceof Error ? error.message : 'Erreur inconnue'
       };
     }
   }
@@ -407,9 +417,42 @@ class ConfigService {
       return {
         status: 'error',
         details: {
-          error: error.message
+          error: error instanceof Error ? error.message : 'Erreur inconnue'
         }
       };
+    }
+  }
+
+  // Initialiser la configuration par défaut
+  private initializeDefaultConfig(): void {
+    const defaultConfig: AppConfig = {
+      supabase: {
+        url: import.meta.env.VITE_SUPABASE_URL || '',
+        anonKey: import.meta.env.VITE_SUPABASE_KEY || '',
+        validated: false,
+      },
+      company: {
+        name: '',
+        country: '',
+        currency: '',
+        timezone: '',
+        accountingStandard: '',
+      },
+      setupCompleted: false,
+      setupDate: '',
+      version: '1.0.0',
+    };
+
+    if (!defaultConfig.supabase.url || !defaultConfig.supabase.anonKey) {
+      console.error('Configuration Supabase par défaut manquante. Vérifiez les variables d\'environnement.');
+      return;
+    }
+
+    try {
+      this.saveConfig(defaultConfig);
+      console.log('Configuration par défaut sauvegardée avec succès:', defaultConfig);
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde de la configuration par défaut:', error);
     }
   }
 }

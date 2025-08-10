@@ -1,258 +1,394 @@
-// src/hooks/useAccounting.ts
-import { useState, useEffect } from 'react';
-import { AccountingService } from '../services/accountingService';
-import type { AccountType, Account, AccountPlan } from '../types/accounting';
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
+import type { 
+  Account, 
+  JournalEntry, 
+  JournalEntryLine, 
+  AccountType,
+  JournalEntryStatus 
+} from '@/types/database.types';
 
-export function useAccounting() {
-  const [accountingService] = useState(() => AccountingService.getInstance());
-  const [accountTree, setAccountTree] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export interface CreateJournalEntryData {
+  date: string;
+  description: string;
+  reference?: string;
+  journal_code?: string;
+  lines: CreateJournalEntryLineData[];
+}
+
+export interface CreateJournalEntryLineData {
+  account_id: string;
+  description?: string;
+  debit: number;
+  credit: number;
+}
+
+export interface BalanceSheetData {
+  assets: { account_number: string; account_name: string; balance: number }[];
+  liabilities: { account_number: string; account_name: string; balance: number }[];
+  equity: { account_number: string; account_name: string; balance: number }[];
+  totalAssets: number;
+  totalLiabilities: number;
+  totalEquity: number;
+}
+
+export function useAccounting(companyId: string) {
+  const { user } = useAuth();
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    try {
-      setIsLoading(true);
-      const tree = accountingService.generateAccountTree();
-      setAccountTree(tree);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors du chargement du plan comptable');
-      console.error('Erreur useAccounting:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [accountingService]);
+  // Fetch chart of accounts
+  const fetchAccounts = useCallback(async () => {
+    if (!user || !companyId) return;
 
-  const getAccount = (accountNumber: string): Account | null => {
+    setLoading(true);
+    setError(null);
+
     try {
-      return accountingService.getAccountByNumber(accountNumber);
-    } catch (error) {
-      console.error('Erreur lors de la récupération du compte:', error);
+      const { data, error: fetchError } = await supabase
+        .from('accounts')
+        .select('*')
+        .eq('company_id', companyId)
+        .eq('is_active', true)
+        .order('account_number');
+
+      if (fetchError) throw fetchError;
+      setAccounts(data || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch accounts');
+      console.error('Error fetching accounts:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [user, companyId]);
+
+  // Fetch journal entries with lines
+  const fetchJournalEntries = useCallback(async (limit = 50) => {
+    if (!user || !companyId) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('journal_entries')
+        .select(`
+          *,
+          journal_entry_lines (
+            *,
+            accounts (
+              account_number,
+              name
+            )
+          )
+        `)
+        .eq('company_id', companyId)
+        .order('date', { ascending: false })
+        .limit(limit);
+
+      if (fetchError) throw fetchError;
+      setJournalEntries(data || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch journal entries');
+      console.error('Error fetching journal entries:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [user, companyId]);
+
+  // Create a new account
+  const createAccount = useCallback(async (accountData: {
+    account_number: string;
+    name: string;
+    type: AccountType;
+    class: number;
+    description?: string;
+    parent_account_id?: string;
+  }): Promise<Account | null> => {
+    if (!user || !companyId) throw new Error('User not authenticated or company not selected');
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { data: newAccount, error: insertError } = await supabase
+        .from('accounts')
+        .insert({
+          ...accountData,
+          company_id: companyId,
+        })
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+
+      setAccounts(prev => [...prev, newAccount].sort((a, b) => 
+        a.account_number.localeCompare(b.account_number)
+      ));
+
+      return newAccount;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create account';
+      setError(errorMessage);
+      console.error('Error creating account:', err);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [user, companyId]);
+
+  // Generate unique journal entry number
+  const generateEntryNumber = useCallback(async (): Promise<string> => {
+    const year = new Date().getFullYear();
+    const { data, error } = await supabase
+      .from('journal_entries')
+      .select('entry_number')
+      .eq('company_id', companyId)
+      .like('entry_number', `${year}%`)
+      .order('entry_number', { ascending: false })
+      .limit(1);
+
+    if (error) {
+      console.warn('Could not fetch last entry number:', error);
+      return `${year}001`;
+    }
+
+    if (!data || data.length === 0) {
+      return `${year}001`;
+    }
+
+    const lastNumber = data[0].entry_number;
+    const lastSequence = parseInt(lastNumber.slice(-3)) || 0;
+    const nextSequence = (lastSequence + 1).toString().padStart(3, '0');
+    
+    return `${year}${nextSequence}`;
+  }, [companyId]);
+
+  // Create a journal entry with lines
+  const createJournalEntry = useCallback(async (
+    entryData: CreateJournalEntryData
+  ): Promise<JournalEntry | null> => {
+    if (!user || !companyId) throw new Error('User not authenticated or company not selected');
+
+    // Validate that debits equal credits
+    const totalDebits = entryData.lines.reduce((sum, line) => sum + line.debit, 0);
+    const totalCredits = entryData.lines.reduce((sum, line) => sum + line.credit, 0);
+    
+    if (Math.abs(totalDebits - totalCredits) > 0.01) {
+      throw new Error('Journal entry must balance: total debits must equal total credits');
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Generate entry number
+      const entryNumber = await generateEntryNumber();
+      const totalAmount = totalDebits;
+
+      // Start transaction
+      const { data: newEntry, error: entryError } = await supabase
+        .from('journal_entries')
+        .insert({
+          company_id: companyId,
+          entry_number: entryNumber,
+          date: entryData.date,
+          description: entryData.description,
+          reference: entryData.reference,
+          journal_code: entryData.journal_code || 'OD',
+          total_amount: totalAmount,
+          created_by: user.id,
+        })
+        .select()
+        .single();
+
+      if (entryError) throw entryError;
+
+      // Create journal entry lines
+      const linesData = entryData.lines.map((line, index) => ({
+        company_id: companyId,
+        journal_entry_id: newEntry.id,
+        account_id: line.account_id,
+        description: line.description,
+        debit: line.debit,
+        credit: line.credit,
+        line_order: index + 1,
+      }));
+
+      const { error: linesError } = await supabase
+        .from('journal_entry_lines')
+        .insert(linesData);
+
+      if (linesError) throw linesError;
+
+      // Fetch the complete entry with lines and account details
+      const { data: completeEntry, error: fetchError } = await supabase
+        .from('journal_entries')
+        .select(`
+          *,
+          journal_entry_lines (
+            *,
+            accounts (
+              account_number,
+              name
+            )
+          )
+        `)
+        .eq('id', newEntry.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      setJournalEntries(prev => [completeEntry, ...prev]);
+      return completeEntry;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create journal entry';
+      setError(errorMessage);
+      console.error('Error creating journal entry:', err);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [user, companyId, generateEntryNumber]);
+
+  // Post a journal entry (mark as posted)
+  const postJournalEntry = useCallback(async (entryId: string): Promise<void> => {
+    if (!user || !companyId) throw new Error('User not authenticated or company not selected');
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { error: updateError } = await supabase
+        .from('journal_entries')
+        .update({ status: 'posted' })
+        .eq('id', entryId)
+        .eq('company_id', companyId);
+
+      if (updateError) throw updateError;
+
+      // Update local state
+      setJournalEntries(prev => prev.map(entry =>
+        entry.id === entryId
+          ? { ...entry, status: 'posted' as JournalEntryStatus }
+          : entry
+      ));
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to post journal entry';
+      setError(errorMessage);
+      console.error('Error posting journal entry:', err);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [user, companyId]);
+
+  // Get balance sheet data
+  const getBalanceSheet = useCallback(async (date?: string): Promise<BalanceSheetData | null> => {
+    if (!user || !companyId) return null;
+
+    try {
+      const { data, error } = await supabase.rpc('get_balance_sheet', {
+        p_company_id: companyId,
+        p_date: date || new Date().toISOString().split('T')[0],
+      });
+
+      if (error) throw error;
+
+      const assets: any[] = [];
+      const liabilities: any[] = [];
+      const equity: any[] = [];
+
+      let totalAssets = 0;
+      let totalLiabilities = 0;
+      let totalEquity = 0;
+
+      data?.forEach((item: any) => {
+        const balance = parseFloat(item.balance) || 0;
+        
+        switch (item.account_type) {
+          case 'asset':
+            assets.push(item);
+            totalAssets += balance;
+            break;
+          case 'liability':
+            liabilities.push(item);
+            totalLiabilities += balance;
+            break;
+          case 'equity':
+            equity.push(item);
+            totalEquity += balance;
+            break;
+        }
+      });
+
+      return {
+        assets,
+        liabilities,
+        equity,
+        totalAssets,
+        totalLiabilities,
+        totalEquity,
+      };
+    } catch (err) {
+      console.error('Error generating balance sheet:', err);
+      setError(err instanceof Error ? err.message : 'Failed to generate balance sheet');
       return null;
     }
-  };
+  }, [user, companyId]);
 
-  const validateAccount = (accountNumber: string): boolean => {
+  // Get trial balance
+  const getTrialBalance = useCallback(async (date?: string) => {
+    if (!user || !companyId) return null;
+
     try {
-      return accountingService.validateAccountNumber(accountNumber);
-    } catch (error) {
-      console.error('Erreur lors de la validation du compte:', error);
-      return false;
+      const { data, error } = await supabase.rpc('get_balance_sheet', {
+        p_company_id: companyId,
+        p_date: date || new Date().toISOString().split('T')[0],
+      });
+
+      if (error) throw error;
+
+      return data?.map((item: any) => ({
+        account_number: item.account_number,
+        account_name: item.account_name,
+        debit: parseFloat(item.balance) > 0 ? parseFloat(item.balance) : 0,
+        credit: parseFloat(item.balance) < 0 ? Math.abs(parseFloat(item.balance)) : 0,
+      }));
+    } catch (err) {
+      console.error('Error generating trial balance:', err);
+      setError(err instanceof Error ? err.message : 'Failed to generate trial balance');
+      return null;
     }
-  };
+  }, [user, companyId]);
 
-  const getAccountsByType = (type: AccountType): Account[] => {
-    try {
-      return accountingService.getAccountsByType(type);
-    } catch (error) {
-      console.error('Erreur lors de la récupération des comptes par type:', error);
-      return [];
+  // Load data on mount and company change
+  useEffect(() => {
+    if (companyId) {
+      fetchAccounts();
+      fetchJournalEntries();
     }
-  };
-
-  const searchAccounts = (query: string): Account[] => {
-    try {
-      const allAccounts = accountingService.getAllAccounts();
-      return allAccounts.filter(account => 
-        account.number.includes(query) || 
-        account.name.toLowerCase().includes(query.toLowerCase())
-      );
-    } catch (error) {
-      console.error('Erreur lors de la recherche de comptes:', error);
-      return [];
-    }
-  };
-
-  const getAccountHierarchy = (accountNumber: string): string[] => {
-    try {
-      return accountingService.getAccountHierarchy(accountNumber);
-    } catch (error) {
-      console.error('Erreur lors de la récupération de la hiérarchie:', error);
-      return [];
-    }
-  };
-
-  const isDebitAccount = (accountNumber: string): boolean => {
-    const account = getAccount(accountNumber);
-    return account ? account.isDebitNormal : false;
-  };
-
-  const isCreditAccount = (accountNumber: string): boolean => {
-    const account = getAccount(accountNumber);
-    return account ? !account.isDebitNormal : false;
-  };
-
-  // Fonctions spécifiques aux types de comptes
-  const getAssetAccounts = (): Account[] => getAccountsByType('immobilisations');
-  const getLiabilityAccounts = (): Account[] => getAccountsByType('dettes');
-  const getEquityAccounts = (): Account[] => getAccountsByType('capitaux');
-  const getRevenueAccounts = (): Account[] => getAccountsByType('produits');
-  const getExpenseAccounts = (): Account[] => getAccountsByType('charges');
-  const getCashAccounts = (): Account[] => getAccountsByType('tresorerie');
-  const getStockAccounts = (): Account[] => getAccountsByType('stocks');
-  const getReceivableAccounts = (): Account[] => getAccountsByType('creances');
-
-  // Fonctions de validation métier
-  const canDebit = (accountNumber: string, amount: number): boolean => {
-    if (amount <= 0) return false;
-    const account = getAccount(accountNumber);
-    return account !== null;
-  };
-
-  const canCredit = (accountNumber: string, amount: number): boolean => {
-    if (amount <= 0) return false;
-    const account = getAccount(accountNumber);
-    return account !== null;
-  };
-
-  // Suggestions d'écritures
-  const suggestCounterAccounts = (accountNumber: string): Account[] => {
-    const account = getAccount(accountNumber);
-    if (!account) return [];
-
-    // Logique de suggestion basée sur le type de compte
-    switch (account.type) {
-      case 'charges':
-        return [...getCashAccounts(), ...getLiabilityAccounts()].slice(0, 5);
-      case 'produits':
-        return [...getCashAccounts(), ...getReceivableAccounts()].slice(0, 5);
-      case 'immobilisations':
-        return [...getCashAccounts(), ...getLiabilityAccounts()].slice(0, 5);
-      default:
-        return [];
-    }
-  };
+  }, [companyId, fetchAccounts, fetchJournalEntries]);
 
   return {
-    // État
-    accountTree,
-    isLoading,
+    accounts,
+    journalEntries,
+    loading,
     error,
-    
-    // Fonctions de base
-    getAccount,
-    validateAccount,
-    getAccountsByType,
-    searchAccounts,
-    getAccountHierarchy,
-    
-    // Validation
-    isDebitAccount,
-    isCreditAccount,
-    canDebit,
-    canCredit,
-    
-    // Comptes par type
-    getAssetAccounts,
-    getLiabilityAccounts,
-    getEquityAccounts,
-    getRevenueAccounts,
-    getExpenseAccounts,
-    getCashAccounts,
-    getStockAccounts,
-    getReceivableAccounts,
-    
-    // Suggestions
-    suggestCounterAccounts,
-    
-    // Configuration
-    defaultAccounts: accountingService.getDefaultAccounts(),
-    currentPlan: accountingService.getCurrentPlan(),
-    
-    // Méthodes avancées
-    refreshAccountTree: () => {
-      const tree = accountingService.generateAccountTree();
-      setAccountTree(tree);
-    }
+    createAccount,
+    createJournalEntry,
+    postJournalEntry,
+    getBalanceSheet,
+    getTrialBalance,
+    fetchAccounts,
+    fetchJournalEntries,
+    refresh: () => {
+      fetchAccounts();
+      fetchJournalEntries();
+    },
   };
 }
 
-// Hook spécialisé pour les écritures comptables
-export function useJournalEntry() {
-  const accounting = useAccounting();
-  const [entries, setEntries] = useState<Array<{
-    accountNumber: string;
-    debit: number;
-    credit: number;
-    description: string;
-  }>>([]);
-
-  const addEntry = (accountNumber: string, debit: number, credit: number, description: string = '') => {
-    if (!accounting.validateAccount(accountNumber)) {
-      throw new Error(`Compte invalide: ${accountNumber}`);
-    }
-
-    setEntries(prev => [...prev, {
-      accountNumber,
-      debit: debit || 0,
-      credit: credit || 0,
-      description
-    }]);
-  };
-
-  const removeEntry = (index: number) => {
-    setEntries(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const clearEntries = () => {
-    setEntries([]);
-  };
-
-  const getTotalDebit = (): number => {
-    return entries.reduce((total, entry) => total + entry.debit, 0);
-  };
-
-  const getTotalCredit = (): number => {
-    return entries.reduce((total, entry) => total + entry.credit, 0);
-  };
-
-  const isBalanced = (): boolean => {
-    return Math.abs(getTotalDebit() - getTotalCredit()) < 0.01; // Tolérance pour les arrondis
-  };
-
-  const validate = (): { isValid: boolean; errors: string[] } => {
-    const errors: string[] = [];
-
-    if (entries.length === 0) {
-      errors.push('Aucune écriture saisie');
-    }
-
-    if (entries.length < 2) {
-      errors.push('Une écriture doit avoir au moins 2 lignes');
-    }
-
-    if (!isBalanced()) {
-      errors.push(`Écriture déséquilibrée: ${getTotalDebit()} ≠ ${getTotalCredit()}`);
-    }
-
-    // Vérification des comptes
-    entries.forEach((entry, index) => {
-      if (!accounting.validateAccount(entry.accountNumber)) {
-        errors.push(`Ligne ${index + 1}: Compte invalide ${entry.accountNumber}`);
-      }
-      if (entry.debit === 0 && entry.credit === 0) {
-        errors.push(`Ligne ${index + 1}: Montant requis`);
-      }
-      if (entry.debit > 0 && entry.credit > 0) {
-        errors.push(`Ligne ${index + 1}: Une ligne ne peut être à la fois débit et crédit`);
-      }
-    });
-
-    return {
-      isValid: errors.length === 0,
-      errors
-    };
-  };
-
-  return {
-    entries,
-    addEntry,
-    removeEntry,
-    clearEntries,
-    getTotalDebit,
-    getTotalCredit,
-    isBalanced,
-    validate,
-    ...accounting
-  };
-}

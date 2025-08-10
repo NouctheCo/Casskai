@@ -2,7 +2,11 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useLocale } from '@/contexts/LocaleContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { UserCog, Building, Palette, Languages, BellDot, ShieldCheck, SlidersHorizontal, Check, Loader2, Users, Lock, CreditCard, FileText, DownloadCloud, FileArchive, Database, Upload, ArrowRight } from 'lucide-react';
+import { Input } from '@/components/ui';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { UserCog, Building, Palette, Languages, BellDot, ShieldCheck, SlidersHorizontal, Check, Loader2, Users, Lock, CreditCard, FileText, DownloadCloud, FileArchive, Database, Upload, ArrowRight, Settings, Key, HelpCircle, QrCode, Smartphone, Mail, Eye, EyeOff, Star } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { LanguageToggle } from '@/components/LanguageToggle';
@@ -24,6 +28,77 @@ export default function SettingsPage() {
   const [moduleStates, setModuleStates] = useState({});
   const [isSaving, setIsSaving] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [activeTab, setActiveTab] = useState('profile');
+  
+  // États pour les paramètres avancés
+  const [userProfile, setUserProfile] = useState({
+    firstName: user?.user_metadata?.first_name || '',
+    lastName: user?.user_metadata?.last_name || '',
+    email: user?.email || '',
+    phone: '',
+    avatar: '',
+    timezone: 'Europe/Paris',
+    language: currentLocale,
+    jobTitle: '',
+    department: ''
+  });
+  
+  const [companySettings, setCompanySettings] = useState({
+    name: 'Casskai Demo',
+    siret: '12345678901234',
+    address: '123 Rue de la Paix, 75001 Paris',
+    phone: '+33 1 23 45 67 89',
+    email: 'contact@casskai.com',
+    website: 'https://casskai.com',
+    logo: '',
+    currency: 'EUR',
+    fiscalYear: 'calendar',
+    accountingMethod: 'accrual'
+  });
+  
+  const [notificationSettings, setNotificationSettings] = useState({
+    email: {
+      newTransactions: true,
+      weeklyReports: true,
+      systemUpdates: false,
+      marketing: false
+    },
+    push: {
+      newTransactions: false,
+      alerts: true,
+      reminders: true
+    },
+    frequency: 'daily'
+  });
+  
+  const [securitySettings, setSecuritySettings] = useState({
+    twoFactorEnabled: false,
+    lastPasswordChange: '2024-01-15',
+    loginNotifications: true,
+    sessionTimeout: 60,
+    allowedIPs: []
+  });
+  
+  const [integrations, setIntegrations] = useState([
+    { id: 'stripe', name: 'Stripe', status: 'connected', type: 'payment' },
+    { id: 'shopify', name: 'Shopify', status: 'disconnected', type: 'ecommerce' },
+    { id: 'sage', name: 'Sage', status: 'pending', type: 'accounting' }
+  ]);
+  
+  const [backupSettings, setBackupSettings] = useState({
+    autoBackup: true,
+    frequency: 'daily',
+    retention: 30,
+    lastBackup: '2024-03-15T10:30:00Z',
+    includeFiles: true,
+    encryption: true
+  });
+  
+  const [auditLogs, setAuditLogs] = useState([
+    { id: 1, user: 'Marie Dubois', action: 'Connexion utilisateur', timestamp: '2024-03-15 10:30', ip: '192.168.1.1' },
+    { id: 2, user: 'Jean Martin', action: 'Modification profil', timestamp: '2024-03-15 09:15', ip: '192.168.1.2' },
+    { id: 3, user: 'System', action: 'Sauvegarde automatique', timestamp: '2024-03-15 02:00', ip: 'localhost' }
+  ]);
 
   // ✅ Refs pour éviter les appels redondants
   const hasInitialized = useRef(false);
@@ -371,45 +446,38 @@ export default function SettingsPage() {
           );
         })}
       </div>
-
-      {/* Export et sauvegarde */}
+      
+      {/* Actions rapides */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="text-primary" />
-            {t('backupAndExport', { defaultValue: 'Sauvegarde et Export' })}
+            {t('quickActions', { defaultValue: 'Actions rapides' })}
           </CardTitle>
           <CardDescription>
-            {t('settingspage.grez_vos_donnes_et_exports', { defaultValue: 'Gérez vos données et exports' })}
+            {t('quickActionsDesc', { defaultValue: 'Accès rapide aux fonctions essentielles' })}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button variant="outline" className="w-full" disabled>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button variant="outline" className="w-full" onClick={handleExportData}>
               <DownloadCloud className="mr-2 h-4 w-4" />
               {t('exportData', { defaultValue: 'Exporter les données' })}
             </Button>
-            <Button variant="outline" className="w-full" disabled>
-              <FileArchive className="mr-2 h-4 w-4" />
-              {t('generateFECReport', { defaultValue: 'Générer rapport FEC' })}
-            </Button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button variant="outline" className="w-full" disabled>
+            <Button variant="outline" className="w-full" onClick={handleBackupNow}>
               <Database className="mr-2 h-4 w-4" />
-              {t('backupData', { defaultValue: 'Sauvegarder données' })}
+              {t('backupNow', { defaultValue: 'Sauvegarder maintenant' })}
             </Button>
-            <Button variant="outline" className="w-full" disabled>
-              <Upload className="mr-2 h-4 w-4" />
-              {t('importData', { defaultValue: 'Importer données' })}
+            <Button 
+              variant="outline" 
+              className="w-full" 
+              onClick={() => navigate('/settings/database-test')}
+            >
+              <Database className="mr-2 h-4 w-4" />
+              Tests Base de Données
             </Button>
           </div>
         </CardContent>
-        <CardFooter>
-          <p className="text-xs text-muted-foreground">
-            {t('fecCompliance', { defaultValue: 'Les exports respectent les normes comptables françaises (FEC, DGI)' })}
-          </p>
-        </CardFooter>
       </Card>
     </motion.div>
   );

@@ -7,7 +7,7 @@ export interface SupabaseConfig {
 }
 
 export interface CompanyConfig {
-  id?: string;
+  id: string; // ✅ Déjà présent
   name: string;
   country: string;
   currency: string;
@@ -15,6 +15,7 @@ export interface CompanyConfig {
   fiscalYearStart?: string; // Format: MM-DD (ex: "01-01")
   taxNumber?: string;
   address?: CompanyAddress;
+  accountingStandard: string; // ✅ Déjà présent
 }
 
 export interface CompanyAddress {

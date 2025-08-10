@@ -53,7 +53,7 @@ export class MigrationChecker {
    * Vérifie le statut complet des migrations
    */
   async checkMigrationStatus(): Promise<MigrationStatus> {
-    console.log('🔍 Vérification du statut des migrations...');
+    console.warn('🔍 Vérification du statut des migrations...');
 
     const status: MigrationStatus = {
       isConnected: false,
@@ -69,7 +69,7 @@ export class MigrationChecker {
 
     try {
       // 1. Test de connexion
-      console.log('📡 Test de connexion à Supabase...');
+      console.warn('📡 Test de connexion à Supabase...');
       const connectionTest = await this.testConnection();
       status.isConnected = connectionTest.success;
       
@@ -79,19 +79,19 @@ export class MigrationChecker {
       }
 
       // 2. Vérification des tables
-      console.log('🗄️ Vérification des tables...');
+      console.warn('🗄️ Vérification des tables...');
       const tablesCheck = await this.checkRequiredTables();
       status.hasRequiredTables = tablesCheck.allPresent;
       status.missingTables = tablesCheck.missing;
 
       // 3. Vérification des fonctions
-      console.log('⚙️ Vérification des fonctions...');
+      console.warn('⚙️ Vérification des fonctions...');
       const functionsCheck = await this.checkRequiredFunctions();
       status.hasRequiredFunctions = functionsCheck.allPresent;
       status.missingFunctions = functionsCheck.missing;
 
       // 4. Vérification des données par défaut
-      console.log('📊 Vérification des données par défaut...');
+      console.warn('📊 Vérification des données par défaut...');
       const dataCheck = await this.checkRequiredData();
       status.hasDefaultData = dataCheck.allPresent;
       status.missingData = dataCheck.missing;
@@ -156,7 +156,7 @@ export class MigrationChecker {
           // Autre erreur (permissions, etc.) - on considère que la table existe
           console.warn(`Table ${tableName}: ${error.message}`);
         }
-      } catch (error) {
+      } catch {
         missing.push(tableName);
       }
     }
@@ -212,7 +212,7 @@ export class MigrationChecker {
         } else if ((count || 0) < dataCheck.minCount) {
           missing.push(`${dataCheck.table} (${count}/${dataCheck.minCount})`);
         }
-      } catch (error) {
+      } catch {
         missing.push(`${dataCheck.table} (exception)`);
       }
     }
@@ -261,27 +261,27 @@ export class MigrationChecker {
    * Affiche un rapport détaillé dans la console
    */
   logDetailedReport(status: MigrationStatus): void {
-    console.log('📋 === RAPPORT DE MIGRATION CASSKAI ===');
-    console.log(`🔗 Connexion: ${status.isConnected ? '✅' : '❌'}`);
-    console.log(`🗄️ Tables: ${status.hasRequiredTables ? '✅' : '❌'}`);
-    console.log(`⚙️ Fonctions: ${status.hasRequiredFunctions ? '✅' : '❌'}`);
-    console.log(`📊 Données: ${status.hasDefaultData ? '✅' : '❌'}`);
+    console.warn('📋 === RAPPORT DE MIGRATION CASSKAI ===');
+    console.warn(`🔗 Connexion: ${status.isConnected ? '✅' : '❌'}`);
+    console.warn(`🗄️ Tables: ${status.hasRequiredTables ? '✅' : '❌'}`);
+    console.warn(`⚙️ Fonctions: ${status.hasRequiredFunctions ? '✅' : '❌'}`);
+    console.warn(`📊 Données: ${status.hasDefaultData ? '✅' : '❌'}`);
     
     if (status.missingTables.length > 0) {
-      console.log('❌ Tables manquantes:', status.missingTables);
+      console.error('❌ Tables manquantes:', status.missingTables);
     }
     
     if (status.missingFunctions.length > 0) {
-      console.log('❌ Fonctions manquantes:', status.missingFunctions);
+      console.error('❌ Fonctions manquantes:', status.missingFunctions);
     }
     
     if (status.missingData.length > 0) {
-      console.log('❌ Données manquantes:', status.missingData);
+      console.error('❌ Données manquantes:', status.missingData);
     }
     
-    console.log(`📊 Statut global: ${status.overallStatus.toUpperCase()}`);
-    console.log(`💬 Message: ${status.message}`);
-    console.log('=====================================');
+    console.warn(`📊 Statut global: ${status.overallStatus.toUpperCase()}`);
+    console.warn(`💬 Message: ${status.message}`);
+    console.warn('=====================================');
   }
 
   /**

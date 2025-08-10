@@ -1,6 +1,13 @@
 // src/services/accountsService.js
 import { supabase } from '../lib/supabase';
 
+// Helper function to safely escape search terms for ILIKE queries
+const escapeSearchTerm = (term) => {
+  if (!term) return '';
+  // Escape special characters that could be used for SQL injection
+  return term.replace(/[%_\\]/g, '\\$&').replace(/'/g, "''");
+};
+
 export const accountsService = {
   // Récupérer les comptes avec filtres et pagination
   getAccounts: async (currentEnterpriseId, options = {}) => {
@@ -29,7 +36,9 @@ export const accountsService = {
 
       // Recherche dans numéro et nom
       if (searchTerm) {
-        query = query.or(`account_number.ilike.%${searchTerm}%,name.ilike.%${searchTerm}%`);
+        // Use safe escaped search to prevent SQL injection
+        const escapedTerm = escapeSearchTerm(searchTerm);
+        query = query.or(`account_number.ilike.%${escapedTerm}%,name.ilike.%${escapedTerm}%`);
       }
       
       // Filtre par classe comptable

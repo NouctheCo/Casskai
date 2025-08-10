@@ -1,167 +1,266 @@
-import React, { useEffect } from 'react';
-import {
-  Menu,
-  UserCircle,
-  Briefcase,
-  LogOut,
-  ChevronsRightLeft,
-  Layers,
-  Settings as SettingsIcon,
-  Building2
-} from 'lucide-react';
+import { useState } from 'react';
+import { Menu, Settings, Bell, User, Search, ChevronDown, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { LanguageToggle } from '@/components/LanguageToggle';
+import { useEnterprise } from '@/contexts/EnterpriseContext';
 import { useLocale } from '@/contexts/LocaleContext';
 import { useAuth } from '@/contexts/AuthContext';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
   DropdownMenuTrigger,
-  DropdownMenuGroup,
+  DropdownMenuSeparator 
 } from '@/components/ui/dropdown-menu';
 import { useNavigate } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import EnterpriseSelector from '@/components/enterprise/EnterpriseSelector';
+import { SupabaseStatusBadge } from '@/components/status/SupabaseStatusBadge';
 
-// Logo component simplifié - juste du texte
-const Logo = () => {
-  return (
-    <div className="font-bold text-primary text-xl">CK</div>
-  );
-};
+interface HeaderProps {
+  onMenuClick?: () => void;
+  isMobile?: boolean;
+  isDesktopSidebarCollapsed?: boolean;
+}
 
-// Fonction pour obtenir les initiales d'un nom
-const getInitials = (name) => {
-  if (!name) return 'U';
-  
-  const parts = name.split(' ');
-  if (parts.length === 1) return name.charAt(0).toUpperCase();
-  
-  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
-};
-
-// Fonction pour obtenir le nom d'utilisateur
-const getUserDisplayName = (user) => {
-  if (!user) return null;
-  
-  // Vérifier les métadonnées utilisateur
-  if (user.user_metadata?.full_name) {
-    return user.user_metadata.full_name;
-  }
-  
-  if (user.user_metadata?.display_name) {
-    return user.user_metadata.display_name;
-  }
-  
-  if (user.user_metadata?.first_name && user.user_metadata?.last_name) {
-    return `${user.user_metadata.first_name} ${user.user_metadata.last_name}`;
-  }
-  
-  if (user.user_metadata?.first_name) {
-    return user.user_metadata.first_name;
-  }
-  
-  // Fallback sur l'email
-  if (user.email) {
-    const emailName = user.email.split('@')[0];
-    // Capitaliser la première lettre
-    return emailName.charAt(0).toUpperCase() + emailName.slice(1);
-  }
-  
-  return null;
-};
-
-export function Header({ toggleSidebar, isSidebarCollapsed, isMobile }) {
+export function Header({ 
+  onMenuClick, 
+  isMobile = false, 
+  isDesktopSidebarCollapsed = false 
+}: HeaderProps) {
+  const { currentEnterprise } = useEnterprise();
   const { t } = useLocale();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const {
-    user,
-    signOut,
-    userCompanies = [],
-    switchEnterprise,
-    currentEnterpriseId,
-    currentEnterpriseName
-  } = useAuth();
+  const [searchFocused, setSearchFocused] = useState(false);
 
-  const handleLogout = async () => {
-    await signOut();
-    navigate('/auth');
-  };
-
-  const handleEnterpriseChange = (company) => {
-    switchEnterprise(company.id);
-  };
-
-  // Obtenir le nom d'affichage et les initiales
-  const userDisplayName = getUserDisplayName(user);
-  const userInitials = getInitials(userDisplayName || user?.email);
+  const notificationCount = 0; // TODO: Implement dynamic notifications
 
   return (
-    <header className="sticky top-0 z-30 flex h-[60px] items-center gap-4 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex items-center">
-        {isMobile ? (
-          <Button variant="ghost\" size="icon\" onClick={toggleSidebar} className="mr-2">
-            <Menu className="h-6 w-6" />
-          </Button>
-        ) : (
-          <Button variant="ghost" size="icon" onClick={toggleSidebar} className="mr-2">
-            <ChevronsRightLeft className={cn("h-5 w-5 transition-transform duration-300", isSidebarCollapsed && "rotate-180")} />
-          </Button>
-        )}
-
-        {!isMobile && isSidebarCollapsed && (
-          <div className="flex items-center">
-            <Logo />
+    <motion.header 
+      className="main-header glass-nav shadow-soft border-b border-white/20 dark:border-gray-800/20 sticky top-0 z-50"
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      data-sidebar-collapsed={isDesktopSidebarCollapsed ? 'true' : 'false'}
+    >
+      <div className="header-content flex items-center justify-between h-16 px-4">
+        {/* Left side - Menu and branding */}
+        <div className="flex items-center space-x-4">
+          {isMobile && (
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onMenuClick}
+                className="md:hidden hover:bg-white/20 dark:hover:bg-gray-800/20"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </motion.div>
+          )}
+          
+          <div className="flex items-center space-x-3">
+            <motion.h1 
+              className="text-xl font-bold text-gray-900 dark:text-white gradient-text"
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            >
+              CassKai
+            </motion.h1>
+            {currentEnterprise && (
+              <motion.div
+                className="flex items-center space-x-2"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <span className="text-gray-300 dark:text-gray-600">|</span>
+                <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">
+                  {currentEnterprise.name}
+                </span>
+              </motion.div>
+            )}
           </div>
-        )}
-      </div>
+        </div>
 
-      {/* Entreprise active - visible sur mobile et desktop */}
-      <div className="flex items-center">
-        <EnterpriseSelector />
-      </div>
+  {/* Center - Search bar */}
+  <div className="hidden lg:flex flex-1 max-w-xl xl:max-w-2xl mx-4 lg:mx-8">
+          <motion.div
+            className="relative w-full"
+            animate={{ scale: searchFocused ? 1.02 : 1 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder={t('header.search', { defaultValue: 'Rechercher...' })}
+              className="w-full pl-10 pr-16 py-2 bg-white/50 dark:bg-gray-800/50 border border-white/20 dark:border-gray-700/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm transition-all duration-200"
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setSearchFocused(false)}
+            />
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+              <kbd className="hidden sm:inline-block px-2 py-1 text-xs font-medium text-gray-500 bg-gray-100 dark:bg-gray-700 dark:text-gray-400 rounded border border-gray-200 dark:border-gray-600">
+                ⌘K
+              </kbd>
+            </div>
+            
+            {/* Search spotlight effect */}
+            <AnimatePresence>
+              {searchFocused && (
+                <motion.div
+                  className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/20 to-indigo-500/20 -z-10"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.2 }}
+                />
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </div>
 
-      <div className="ml-auto flex items-center gap-2">
-        <LanguageToggle />
-        <ThemeToggle />
-        {user && (
+        {/* Right side - Actions */}
+        <div className="button-group flex items-center space-x-1 sm:space-x-2">
+          {/* Status badge */}
+          <div className="hidden md:block">
+            <SupabaseStatusBadge />
+          </div>
+          {/* Mobile search */}
+          <div className="lg:hidden">
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <Button variant="ghost" size="icon" className="hover:bg-white/20 dark:hover:bg-gray-800/20 min-h-[44px] min-w-[44px] touch-manipulation">
+                <Search className="h-5 w-5" />
+              </Button>
+            </motion.div>
+          </div>
+
+          {/* Notifications with animated badge */}
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <Button variant="ghost" size="icon" className="relative hover:bg-white/20 dark:hover:bg-gray-800/20 min-h-[44px] min-w-[44px] touch-manipulation">
+              <Bell className="h-5 w-5" />
+              {notificationCount > 0 && (
+                <motion.span
+                  className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full text-xs text-white flex items-center justify-center font-medium"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                >
+                  {notificationCount > 9 ? '9+' : notificationCount}
+                </motion.span>
+              )}
+            </Button>
+          </motion.div>
+
+          {/* Settings */}
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <Button variant="ghost" size="icon" className="hover:bg-white/20 dark:hover:bg-gray-800/20">
+              <Settings className="h-5 w-5" />
+            </Button>
+          </motion.div>
+
+          {/* Theme Toggle */}
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <ThemeToggle />
+          </motion.div>
+
+          {/* Language Toggle */}
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <LanguageToggle />
+          </motion.div>
+
+          {/* User Profile Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-primary text-primary-foreground">
-                    {userInitials}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <Button variant="ghost" className="flex items-center space-x-2 hover:bg-white/20 dark:hover:bg-gray-800/20 px-3">
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center">
+                    <User className="h-4 w-4 text-white" />
+                  </div>
+                  <ChevronDown className="h-4 w-4 text-gray-500" />
+                </Button>
+              </motion.div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-64 z-[100]" align="end" forceMount>
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  {userDisplayName && (
-                    <p className="text-sm font-medium leading-none">{userDisplayName}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+            <DropdownMenuContent align="end" className="glass-card w-56">
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <div className="px-3 py-2 border-b border-white/20 dark:border-gray-800/20">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                    {user?.user_metadata?.name || user?.email?.split('@')[0] || t('header.guestUser', { defaultValue: 'Utilisateur' })}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {user?.email || t('header.noEmail', { defaultValue: 'pas d\'email' })}
+                  </p>
                 </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate('/settings')}>
-                <SettingsIcon className="mr-2 h-4 w-4" />
-                <span>{t('settings')}</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>{t('logout')}</span>
-              </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="hover:bg-white/20 dark:hover:bg-gray-800/20"
+                  onClick={() => navigate('/settings')}
+                >
+                  {t('header.profile', { defaultValue: 'Mon profil' })}
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="hover:bg-white/20 dark:hover:bg-gray-800/20 flex items-center gap-2"
+                  onClick={() => navigate('/security')}
+                >
+                  <Shield className="h-4 w-4" />
+                  {t('sidebar.security', { defaultValue: 'Sécurité & Confidentialité' })}
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="hover:bg-white/20 dark:hover:bg-gray-800/20"
+                  onClick={() => navigate('/settings')}
+                >
+                  {t('header.settings', { defaultValue: 'Paramètres' })}
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="hover:bg-white/20 dark:hover:bg-gray-800/20"
+                  onClick={() => navigate('/help')}
+                >
+                  {t('header.help', { defaultValue: 'Aide' })}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-white/20 dark:bg-gray-800/20" />
+                <DropdownMenuItem 
+                  className="hover:bg-white/20 dark:hover:bg-gray-800/20 text-red-600 dark:text-red-400"
+                  onClick={async () => {
+                    await signOut();
+                    navigate('/auth');
+                  }}
+                >
+                  {t('header.logout', { defaultValue: 'Se déconnecter' })}
+                </DropdownMenuItem>
+              </motion.div>
             </DropdownMenuContent>
           </DropdownMenu>
-        )}
+        </div>
       </div>
-    </header>
+
+      {/* Animated border bottom */}
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
+    </motion.header>
   );
 }

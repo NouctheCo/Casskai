@@ -1,8 +1,10 @@
-// src/utils/migration.ts
+// src/utils/migration.ts - Version corrigée
 
+import React from 'react';
 import ConfigService from '../services/configService';
 import { AppConfig } from '../types/config';
-import { APP_VERSION, SUPPORTED_COUNTRIES } from './constants';
+import { APP_VERSION } from './constants';
+import { supabase } from '../lib/supabase';
 
 export class ConfigMigration {
   private configService = ConfigService.getInstance();
@@ -71,10 +73,6 @@ export class ConfigMigration {
    * Créer la nouvelle configuration
    */
   private async createNewConfig(envConfig: { url: string; anonKey: string }): Promise<AppConfig> {
-    // Détecter le pays depuis l'URL ou demander à l'utilisateur
-    const detectedCountry = this.detectCountryFromUrl(envConfig.url) || 'FR';
-    const countryInfo = SUPPORTED_COUNTRIES.find(c => c.code === detectedCountry) || SUPPORTED_COUNTRIES[0];
-
     const config: AppConfig = {
       supabase: {
         url: envConfig.url,
@@ -82,11 +80,13 @@ export class ConfigMigration {
         validated: true
       },
       company: {
-        name: 'Mon Entreprise', // Nom par défaut, à changer par l'utilisateur
-        country: countryInfo.code,
-        currency: countryInfo.currency,
-        timezone: countryInfo.timezone,
-        fiscalYearStart: countryInfo.fiscalYearStart
+        id: 'default-id',
+        accountingStandard: 'SYSCOHADA',
+        name: 'Default Company',
+        country: 'Default Country',
+        currency: 'USD',
+        timezone: 'UTC',
+        fiscalYearStart: '2025-01-01'
       },
       setupCompleted: false, // L'utilisateur devra compléter le setup
       setupDate: new Date().toISOString(),
@@ -96,15 +96,8 @@ export class ConfigMigration {
     return config;
   }
 
-  /**
-   * Détecter le pays depuis l'URL Supabase (très basique)
-   */
-  private detectCountryFromUrl(url: string): string | null {
-    // Logique très simple, peut être améliorée
-    if (url.includes('eu-')) return 'FR';
-    if (url.includes('us-')) return 'US';
-    return null;
-  }
+  // ✅ CORRECTION: Fonction supprimée car inutilisée
+  // private detectCountryFromUrl(url: string): string | null { ... }
 
   /**
    * Nettoyer l'ancienne configuration
@@ -134,7 +127,15 @@ export class ConfigMigration {
     suggestedActions: string[];
   }> {
     try {
-      const client = this.configService.getSupabaseClient();
+      // ✅ CORRECTION: Vérification du client
+      if (!supabase) {
+        return {
+          isCompatible: false,
+          missingTables: [],
+          suggestedActions: ['Vérifier la connexion à la base de données']
+        };
+      }
+
       const missingTables: string[] = [];
       const suggestedActions: string[] = [];
 
@@ -150,7 +151,7 @@ export class ConfigMigration {
       // Vérifier chaque table
       for (const table of requiredTables) {
         try {
-          const { error } = await client.from(table).select('*').limit(1);
+          const { error } = await supabase.from(table).select('*').limit(1);
           if (error && error.code === 'PGRST116') {
             missingTables.push(table);
           }

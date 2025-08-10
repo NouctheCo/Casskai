@@ -1,5 +1,8 @@
 // hooks/useTenant.ts
 import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
+import { TenantConfig, TenantFeatures } from '../types/tenant';
+import { TenantService } from '../services/tenantService';
 
 export function useTenant() {
   const [tenantService] = useState(() => TenantService.getInstance());
@@ -60,7 +63,7 @@ export function useTenant() {
     error,
     canAccess,
     getQuota,
-    supabase: tenantService.getSupabaseClient(),
+    supabase,
     reinitialize: initializeTenant
   };
 }
