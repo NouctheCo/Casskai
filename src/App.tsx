@@ -1,120 +1,441 @@
-// Modifications à apporter à votre App.tsx existant
-
-
-import React, { Suspense, lazy, useEffect } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import React, { Suspense, useEffect, lazy } from 'react';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { LocaleProvider } from '@/contexts/LocaleContext';
-import { AuthProvider } from '@/contexts/AuthContext';
+// ConfigProvider déplacé vers main.tsx
 import { ModulesProvider } from '@/contexts/ModulesContext';
 import { EnterpriseProvider } from '@/contexts/EnterpriseContext';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
+import ABTestProvider from '@/components/ABTestProvider';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { LoadingFallback } from '@/components/ui/LoadingFallback';
+import ErrorBoundary, { setupGlobalErrorHandling } from '@/components/ErrorBoundary';
+import RouteErrorBoundary from '@/components/RouteErrorBoundary';
+import ProtectedRoute from '@/components/guards/ProtectedRoute';
+import { UpdateNotification, OfflineIndicator } from '@/hooks/useServiceWorker';
+import HomePage from '@/components/HomePage';
 
-import ProtectedRoute from '@/components/ProtectedRoute';
-import { useConfigContext } from '@/contexts/ConfigContext';
+// Import des composants lazy intelligents
+import {
+  LazyAuthPage,
+  LazyOnboardingPage,
+  LazyLandingPage,
+  LazyDashboardPage,
+  LazyAccountingPage,
+  LazyBanksPage,
+  LazyThirdPartiesPage,
+  LazyPurchasesPage,
+  LazyInvoicingPage,
+  LazySalesCrmPage,
+  LazyHumanResourcesPage,
+  LazyProjectsPage,
+  LazyInventoryPage,
+  LazyReportsPage,
+  LazyForecastsPage,
+  LazyTaxPage,
+  LazyContractsPage,
+  LazySettingsPage,
+  LazyBillingPage,
+  initializeIntelligentPreloading
+} from '@/utils/lazyComponents';
 
-// Pages publiques
-const LandingPage = lazy(() => import('@/pages/LandingPage'));
-const AuthPage = lazy(() => import('@/pages/AuthPage'));
-const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
-const ForgotPasswordPage = lazy(() => import('@/pages/auth/ForgotPasswordPage'));
+// Pages spécifiques qui n'ont pas besoin de préchargement intelligent
+const AccountingImportPage = lazy(() => import('@/pages/AccountingImportPage'));
+const SecurityPage = lazy(() => import('@/components/security/SecuritySettingsPage'));
+const DatabaseTestPage = lazy(() => import('@/pages/DatabaseTestPage'));
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
+const ModuleManager = lazy(() => import('@/components/modules/ModuleManagerEnhanced'));
+const ModuleDiagnostics = lazy(() => import('@/components/modules/ModuleDiagnostics'));
 
-// Pages protégées
-const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
-const AccountingPage = lazy(() => import('@/pages/AccountingPage'));
-const BanksPage = lazy(() => import('@/pages/BanksPage'));
-const ThirdPartiesPage = lazy(() => import('@/pages/ThirdPartiesPage'));
-const PurchasesPage = lazy(() => import('@/pages/PurchasesPage'));
-const InvoicingPage = lazy(() => import('@/pages/InvoicingPage'));
-const ReportsPage = lazy(() => import('@/pages/ReportsPage'));
-const SettingsPage = lazy(() => import('@/pages/SettingsPage'));
+// Pages légales et de contenu
+const PrivacyPolicyPage = lazy(() => import('@/pages/PrivacyPolicyPage'));
+const TermsOfServicePage = lazy(() => import('@/pages/TermsOfServicePage'));
+const CookiesPolicyPage = lazy(() => import('@/pages/CookiesPolicyPage'));
+const GDPRPage = lazy(() => import('@/pages/GDPRPage'));
+const SecurityInfoPage = lazy(() => import('@/pages/SecurityPage'));
+const HelpCenterPage = lazy(() => import('@/pages/HelpCenterPage'));
+const DocumentationArticlePage = lazy(() => import('@/pages/DocumentationArticlePage'));
+const DocumentationCategoryPage = lazy(() => import('@/pages/DocumentationCategoryPage'));
 
-// Composants de configuration
-const SupabaseSetupWizard = lazy(() => import('@/components/setup/SupabaseSetupWizard'));
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <MainLayout />,
+    children: [
+      { index: true, element: <HomePage /> },
+      { path: '/landing', element: <LazyLandingPage /> },
+      { path: '/auth', element: <LazyAuthPage /> },
+      { path: '/login', element: <LazyAuthPage /> },
+      { path: '/register', element: <LazyAuthPage /> },
+      {
+        path: '/onboarding',
+        element: (
+          <ProtectedRoute requireCompany={false}>
+            <LazyOnboardingPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/dashboard',
+        element: (
+          <ProtectedRoute>
+            <RouteErrorBoundary routeName="Dashboard">
+              <LazyDashboardPage />
+            </RouteErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/accounting',
+        element: (
+          <ProtectedRoute>
+            <RouteErrorBoundary routeName="Comptabilité">
+              <LazyAccountingPage />
+            </RouteErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/accounting/import',
+        element: (
+          <ProtectedRoute>
+            <RouteErrorBoundary routeName="Import Comptable">
+              <AccountingImportPage />
+            </RouteErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/banks',
+        element: (
+          <ProtectedRoute>
+            <RouteErrorBoundary routeName="Banques">
+              <LazyBanksPage />
+            </RouteErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/third-parties',
+        element: (
+          <ProtectedRoute>
+            <RouteErrorBoundary routeName="Tiers">
+              <LazyThirdPartiesPage />
+            </RouteErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/purchases',
+        element: (
+          <ProtectedRoute>
+            <RouteErrorBoundary routeName="Achats">
+              <LazyPurchasesPage />
+            </RouteErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/invoicing',
+        element: (
+          <ProtectedRoute>
+            <RouteErrorBoundary routeName="Facturation">
+              <LazyInvoicingPage />
+            </RouteErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/sales',
+        element: (
+          <ProtectedRoute>
+            <RouteErrorBoundary routeName="Ventes">
+              <LazySalesCrmPage />
+            </RouteErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/hr',
+        element: (
+          <ProtectedRoute>
+            <RouteErrorBoundary routeName="Ressources Humaines">
+              <LazyHumanResourcesPage />
+            </RouteErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/projects',
+        element: (
+          <ProtectedRoute>
+            <RouteErrorBoundary routeName="Projets">
+              <LazyProjectsPage />
+            </RouteErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/inventory',
+        element: (
+          <ProtectedRoute>
+            <RouteErrorBoundary routeName="Inventaire">
+              <LazyInventoryPage />
+            </RouteErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/reports',
+        element: (
+          <ProtectedRoute>
+            <RouteErrorBoundary routeName="Rapports">
+              <LazyReportsPage />
+            </RouteErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/forecasts',
+        element: (
+          <ProtectedRoute>
+            <RouteErrorBoundary routeName="Prévisions">
+              <LazyForecastsPage />
+            </RouteErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/tax',
+        element: (
+          <ProtectedRoute>
+            <RouteErrorBoundary routeName="Fiscalité">
+              <LazyTaxPage />
+            </RouteErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/contracts',
+        element: (
+          <ProtectedRoute>
+            <RouteErrorBoundary routeName="Contrats RFA">
+              <LazyContractsPage />
+            </RouteErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/security',
+        element: (
+          <RouteErrorBoundary routeName="Sécurité">
+            <SecurityPage />
+          </RouteErrorBoundary>
+        ),
+      },
+      {
+        path: '/settings',
+        element: (
+          <ProtectedRoute>
+            <RouteErrorBoundary routeName="Paramètres">
+              <LazySettingsPage />
+            </RouteErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/settings/modules',
+        element: (
+          <ProtectedRoute>
+            <RouteErrorBoundary routeName="Gestion des Modules">
+              <ModuleManager />
+            </RouteErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/settings/modules/diagnostics',
+        element: (
+          <ProtectedRoute>
+            <RouteErrorBoundary routeName="Diagnostics Modulaires">
+              <ModuleDiagnostics />
+            </RouteErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/settings/billing',
+        element: (
+          <ProtectedRoute>
+            <RouteErrorBoundary routeName="Facturation">
+              <LazyBillingPage />
+            </RouteErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/settings/database-test',
+        element: (
+          <ProtectedRoute>
+            <RouteErrorBoundary routeName="Test Database">
+              <DatabaseTestPage />
+            </RouteErrorBoundary>
+          </ProtectedRoute>
+        ),
+      },
+      // Pages légales et de contenu (accessibles publiquement)
+      {
+        path: '/privacy',
+        element: (
+          <RouteErrorBoundary routeName="Confidentialité">
+            <PrivacyPolicyPage />
+          </RouteErrorBoundary>
+        ),
+      },
+      {
+        path: '/terms',
+        element: (
+          <RouteErrorBoundary routeName="Conditions">
+            <TermsOfServicePage />
+          </RouteErrorBoundary>
+        ),
+      },
+      {
+        path: '/cookies',
+        element: (
+          <RouteErrorBoundary routeName="Cookies">
+            <CookiesPolicyPage />
+          </RouteErrorBoundary>
+        ),
+      },
+      {
+        path: '/gdpr',
+        element: (
+          <RouteErrorBoundary routeName="RGPD">
+            <GDPRPage />
+          </RouteErrorBoundary>
+        ),
+      },
+      {
+        path: '/security-info',
+        element: (
+          <RouteErrorBoundary routeName="Sécurité">
+            <SecurityInfoPage />
+          </RouteErrorBoundary>
+        ),
+      },
+      {
+        path: '/help',
+        element: (
+          <RouteErrorBoundary routeName="Centre d'aide">
+            <HelpCenterPage />
+          </RouteErrorBoundary>
+        ),
+      },
+      {
+        path: '/docs',
+        element: (
+          <RouteErrorBoundary routeName="Documentation">
+            <HelpCenterPage />
+          </RouteErrorBoundary>
+        ),
+      },
+      {
+        path: '/docs/category/:categoryId',
+        element: (
+          <RouteErrorBoundary routeName="Catégorie Documentation">
+            <DocumentationCategoryPage />
+          </RouteErrorBoundary>
+        ),
+      },
+      {
+        path: '/docs/:articleId',
+        element: (
+          <RouteErrorBoundary routeName="Article Documentation">
+            <DocumentationArticlePage />
+          </RouteErrorBoundary>
+        ),
+      },
+      {
+        path: '/api',
+        element: (
+          <RouteErrorBoundary routeName="API">
+            <HelpCenterPage />
+          </RouteErrorBoundary>
+        ),
+      },
+      {
+        path: '/status',
+        element: (
+          <RouteErrorBoundary routeName="Statut">
+            <HelpCenterPage />
+          </RouteErrorBoundary>
+        ),
+      },
+      {
+        path: '*',
+        element: (
+          <RouteErrorBoundary routeName="404">
+            <NotFoundPage />
+          </RouteErrorBoundary>
+        ),
+      },
+    ],
+  },
+]);
+
+// Wrapper pour ModulesProvider qui utilise les données d'authentification
+const ModulesProviderWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
+  
+  return (
+    <ModulesProvider
+      userId={user?.id || 'anonymous'}
+      tenantId={user?.user_metadata?.tenantId || 'default'}
+      userPermissions={user?.user_metadata?.permissions || []}
+    >
+      {children}
+    </ModulesProvider>
+  );
+};
 
 function App() {
-  const { isConfigured, isLoading, config } = useConfigContext();
-  const location = useLocation();
+  console.warn("🚀 Application de gestion d'entreprise démarrée avec architecture modulaire");
 
-  // Log des informations importantes pour le débogage
+  // Initialiser le préchargement intelligent et la gestion d'erreurs globale
   useEffect(() => {
-    console.log("App rendu avec:", { 
-      isConfigured, 
-      isLoading, 
-      path: location.pathname,
-      setupCompleted: config?.setupCompleted
-    });
-  }, [isConfigured, isLoading, config, location.pathname]);
-
-  // Afficher un loader pendant le chargement initial
-  if (isLoading) {
-    console.log("App en chargement...");
-    return <LoadingFallback message="Chargement de la configuration..." />;
-  }
-
-  // Redirection automatique vers /setup si aucune configuration n'est trouvée
-  if (!isLoading && !config && location.pathname !== '/setup') {
-    return <Navigate to="/setup" replace />;
-  }
+    initializeIntelligentPreloading();
+    setupGlobalErrorHandling();
+  }, []);
 
   return (
-    <ThemeProvider defaultTheme="system" storageKey="casskai-theme">
-      <LocaleProvider>
-        <Suspense fallback={<LoadingFallback message="Chargement de l'application..." />}>
-          <Routes>
-            {/* Routes publiques */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<AuthPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-
-            {/* Route de configuration */}
-            <Route 
-              path="/setup/*" 
-              element={
-                <ProtectedRoute requireSetupComplete={false}>
-                  <SupabaseSetupWizard />
-                </ProtectedRoute>
-              } 
-            />
-
-            {/* Routes protégées sous dashboard */}
-            <Route 
-              path="/dashboard/*" 
-              element={
-                <ProtectedRoute requireSetupComplete={true}>
-                  <AuthProvider>
-                    <EnterpriseProvider>
-                      <ModulesProvider>
-                        <TooltipProvider>
-                          <MainLayout />
-                        </TooltipProvider>
-                      </ModulesProvider>
-                    </EnterpriseProvider>
-                  </AuthProvider>
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<DashboardPage />} />
-              <Route path="accounting" element={<AccountingPage />} />
-              <Route path="banks" element={<BanksPage />} />
-              <Route path="third-parties" element={<ThirdPartiesPage />} />
-              <Route path="purchases" element={<PurchasesPage />} />
-              <Route path="invoicing" element={<InvoicingPage />} />
-              <Route path="reports" element={<ReportsPage />} />
-              <Route path="settings" element={<SettingsPage />} />
-            </Route>
-
-            {/* Fallback: redirige vers / si route inconnue */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
-        <Toaster />
-      </LocaleProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider defaultTheme="system" storageKey="casskai-theme">
+        <LocaleProvider>
+          <AuthProvider>
+            <SubscriptionProvider>
+              <ABTestProvider>
+                <ModulesProviderWrapper>
+                  <EnterpriseProvider>
+                    <TooltipProvider>
+                      <Suspense fallback={<LoadingFallback message="Chargement de l'application..." />}>
+                        <RouterProvider router={router} />
+                      </Suspense>
+                      <Toaster />
+                      <UpdateNotification />
+                      <OfflineIndicator />
+                    </TooltipProvider>
+                  </EnterpriseProvider>
+                </ModulesProviderWrapper>
+              </ABTestProvider>
+            </SubscriptionProvider>
+          </AuthProvider>
+        </LocaleProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 
