@@ -1,5 +1,5 @@
 // Service Worker pour CassKai - Offline-First avec performance optimisée
-const CACHE_VERSION = 'v1.2.0';
+const CACHE_VERSION = 'v1.3.1';
 const CACHE_NAMES = {
   static: `casskai-static-${CACHE_VERSION}`,
   dynamic: `casskai-dynamic-${CACHE_VERSION}`,
