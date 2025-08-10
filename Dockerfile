@@ -38,7 +38,7 @@ ENV NODE_ENV=production
 RUN npm run build
 
 # ===== RUNTIME STAGE =====
-FROM nginx:1.25-alpine AS runtime
+FROM nginx:1.29-alpine AS runtime
 
 # Install security updates
 RUN apk update && apk upgrade
