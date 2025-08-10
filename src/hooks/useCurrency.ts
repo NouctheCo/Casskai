@@ -2,7 +2,63 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { CurrencyService, Currency, CurrencyConversion, ExchangeRate } from '../services/currencyService';
-import { useConfig } from './useConfig';
+import { useConfigContext } from '@/contexts/ConfigContext';
+
+// Types d'erreurs spécifiques
+export class CurrencyError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'CurrencyError';
+  }
+}
+
+export class ConversionError extends CurrencyError {
+  constructor(
+    message: string,
+    public readonly fromCurrency: string,
+    public readonly toCurrency: string,
+    public readonly amount?: number
+  ) {
+    super(message);
+    this.name = 'ConversionError';
+  }
+}
+
+export class RateUpdateError extends CurrencyError {
+  constructor(message: string, public readonly timestamp: Date) {
+    super(message);
+    this.name = 'RateUpdateError';
+  }
+}
+
+// Types pour la validation
+export type CurrencyCode = string;
+export type AmountValue = number;
+
+export interface CurrencyValidationRules {
+  minAmount: number;
+  maxAmount: number;
+  allowedDecimals: number;
+}
+
+export interface CurrencyWithValidation extends Currency {
+  validationRules: CurrencyValidationRules;
+}
+
+// Fonction de validation des montants
+const validateAmount = (
+  amount: AmountValue,
+  currency: CurrencyWithValidation
+): boolean => {
+  const { validationRules } = currency;
+  
+  if (amount < validationRules.minAmount || amount > validationRules.maxAmount) {
+    return false;
+  }
+
+  const decimalPlaces = (amount.toString().split('.')[1] || '').length;
+  return decimalPlaces <= validationRules.allowedDecimals;
+};
 
 interface UseCurrencyReturn {
   // État de base (compatible avec votre hook existant)
@@ -36,19 +92,62 @@ interface UseCurrencyReturn {
 }
 
 export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
-  // État de base (compatible avec votre hook existant)
   const [currentCurrency, setCurrentCurrency] = useState(defaultCurrency);
   const [currencyService] = useState(() => CurrencyService.getInstance());
-  
-  // État étendu
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  // Suppression temporaire de useConfigContext pour éviter l'erreur
+  // TODO: Réintégrer useConfigContext une fois le problème d'ordre résolu
+  // const { config } = useConfigContext();
+  const config = null; // Temporaire - utilise les valeurs par défaut
 
-  const { getCompanyConfig } = useConfig();
+  const baseCurrency = config?.company?.currency || currentCurrency;
 
-  // Obtenir la devise de base de l'entreprise
-  const baseCurrency = getCompanyConfig()?.currency || currentCurrency;
+  // Méthodes utilitaires
+  const getCurrency = useCallback((code: string): Currency | undefined => {
+    return currencyService.getCurrency(code);
+  }, [currencyService]);
+
+  const validateAmount = useCallback((
+    amount: AmountValue,
+    currency: CurrencyWithValidation
+  ): boolean => {
+    const { validationRules } = currency;
+    
+    if (amount < validationRules.minAmount || amount > validationRules.maxAmount) {
+      return false;
+    }
+
+    const decimalPlaces = (amount.toString().split('.')[1] || '').length;
+    return decimalPlaces <= validationRules.allowedDecimals;
+  }, []);
+
+  const formatAmount = useCallback((
+    amount: AmountValue, 
+    currencyCode?: CurrencyCode
+  ): string => {
+    try {
+      const targetCurrency = currencyCode || currentCurrency;
+      const currency = getCurrency(targetCurrency);
+
+      if (!currency) {
+        throw new CurrencyError(`Devise non supportée: ${targetCurrency}`);
+      }
+
+      if ('validationRules' in currency) {
+        const isValid = validateAmount(amount, currency as CurrencyWithValidation);
+        if (!isValid) {
+          throw new CurrencyError(`Montant invalide pour la devise ${targetCurrency}`);
+        }
+      }
+
+      return currencyService.formatAmount(amount, targetCurrency);
+    } catch (err) {
+      console.warn('Erreur formatage montant:', err);
+      return amount.toString();
+    }
+  }, [currencyService, currentCurrency, getCurrency, validateAmount]);
 
   // Mise à jour des taux au chargement (votre logique existante + améliorations)
   useEffect(() => {
@@ -71,17 +170,7 @@ export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
     initializeRates();
   }, [currencyService]);
 
-  // Méthode formatAmount (compatible avec votre version existante)
-  const formatAmount = useCallback((amount: number, currency?: string): string => {
-    try {
-      return currencyService.formatAmount(amount, currency || currentCurrency);
-    } catch (err) {
-      console.warn('Erreur formatage montant:', err);
-      return amount.toString();
-    }
-  }, [currencyService, currentCurrency]);
-
-  // Méthode convertAmount asynchrone (nouvelle)
+  // Méthode convertAmount asynchrone avec meilleure gestion des erreurs
   const convertAmount = useCallback(async (
     amount: number, 
     fromCurrency: string, 
@@ -93,12 +182,40 @@ export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
       setIsLoading(true);
       setError(null);
       
+      if (!fromCurrency || !targetCurrency) {
+        throw new ConversionError(
+          'Devises source ou cible manquantes',
+          fromCurrency,
+          targetCurrency || '',
+          amount
+        );
+      }
+
+      if (amount < 0) {
+        throw new ConversionError(
+          'Le montant ne peut pas être négatif',
+          fromCurrency,
+          targetCurrency,
+          amount
+        );
+      }
+
       const conversion = await currencyService.convertAmount(amount, fromCurrency, targetCurrency);
       return conversion;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur de conversion';
+      const errorMessage = err instanceof Error ? err.message : 'Erreur de conversion inconnue';
       setError(errorMessage);
-      throw err;
+      
+      if (err instanceof ConversionError) {
+        throw err;
+      }
+      
+      throw new ConversionError(
+        errorMessage,
+        fromCurrency,
+        targetCurrency,
+        amount
+      );
     } finally {
       setIsLoading(false);
     }
@@ -170,42 +287,36 @@ export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
   }, [currencyService]);
 
   // Historique des taux (placeholder - à implémenter si base de données disponible)
-  const getExchangeRateHistory = useCallback(async (
-    from: string, 
-    to: string, 
-    days: number = 30
-  ): Promise<ExchangeRate[]> => {
+  const getExchangeRateHistory = useCallback(async (): Promise<ExchangeRate[]> => {
     try {
-      // Cette méthode nécessite une base de données
-      // Pour l'instant, retourner un tableau vide
-      return [];
+      return []; // Placeholder pour l'historique des taux
     } catch (err) {
       console.warn('Historique des taux non disponible:', err);
       return [];
     }
   }, []);
 
-  // Rafraîchir tous les taux
+  // Rafraîchir tous les taux avec meilleure gestion des erreurs
   const refreshRates = useCallback(async (): Promise<void> => {
     try {
       setIsLoading(true);
       setError(null);
       
       await currencyService.refreshAllRates();
-      setLastUpdate(currencyService.getLastUpdate());
+      const updateTime = new Date();
+      setLastUpdate(updateTime);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur rafraîchissement taux';
+      const errorMessage = err instanceof Error ? err.message : 'Erreur de rafraîchissement des taux';
       setError(errorMessage);
-      throw err;
+      throw new RateUpdateError(errorMessage, new Date());
     } finally {
       setIsLoading(false);
     }
   }, [currencyService]);
 
-  // Méthodes utilitaires
-  const getCurrency = useCallback((code: string): Currency | undefined => {
-    return currencyService.getCurrency(code);
-  }, [currencyService]);
+  // Propriétés dérivées (compatibles avec votre hook existant)
+  const currencies = currencyService.getAllCurrencies();
+  const africanCurrencies = currencyService.getAfricanCurrencies();
 
   const needsConversion = useCallback((from: string, to?: string): boolean => {
     return currencyService.needsConversion(from, to);
@@ -219,31 +330,18 @@ export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
     return currencyService.getGlobalCurrencies();
   }, [currencyService]);
 
-  // Propriétés dérivées (compatibles avec votre hook existant)
-  const currencies = currencyService.getAllCurrencies();
-  const africanCurrencies = currencyService.getAfricanCurrencies();
-
   return {
-    // État de base (compatible)
     currentCurrency,
     setCurrentCurrency,
-    currencies,
-    africanCurrencies,
-
-    // État étendu
+    currencies: currencyService.getAllCurrencies(),
+    africanCurrencies: currencyService.getAfricanCurrencies(),
     isLoading,
     error,
     lastUpdate,
-
-    // Méthodes de formatage (compatibles)
     formatAmount,
-
-    // Méthodes de conversion (étendues)
     convertAmount,
     convertAmountSync,
     convertBatch,
-
-    // Nouvelles méthodes
     formatAmountWithConversion,
     getExchangeRate,
     getExchangeRateHistory,
@@ -255,57 +353,11 @@ export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
   };
 }
 
-// Hook spécialisé pour l'affichage de montants (nouveau)
+// Hook spécialisé pour l'affichage de montants
 export const useAmountDisplay = () => {
-  const { formatAmount, formatAmountWithConversion, convertAmount, currentCurrency } = useCurrency();
-
-  const AmountDisplay = ({ 
-    amount, 
-    currency, 
-    showConverted = false, 
-    className = '' 
-  }: {
-    amount: number;
-    currency: string;
-    showConverted?: boolean;
-    className?: string;
-  }) => {
-    const [convertedAmount, setConvertedAmount] = useState<string>('');
-    const [isLoading, setIsLoading] = useState(false);
-
-    useEffect(() => {
-      if (showConverted && currency !== currentCurrency) {
-        setIsLoading(true);
-        formatAmountWithConversion(amount, currency)
-          .then(setConvertedAmount)
-          .finally(() => setIsLoading(false));
-      }
-    }, [amount, currency, showConverted]);
-
-    const originalAmount = formatAmount(amount, currency);
-
-    if (showConverted && convertedAmount && currency !== currentCurrency) {
-      return (
-        <span className={className}>
-          <span className="font-medium">{originalAmount}</span>
-          {isLoading ? (
-            <span className="text-sm text-gray-500 ml-2">
-              <span className="animate-spin">⟳</span>
-            </span>
-          ) : (
-            <span className="text-sm text-gray-500 ml-2">
-              (≈ {convertedAmount})
-            </span>
-          )}
-        </span>
-      );
-    }
-
-    return <span className={className}>{originalAmount}</span>;
-  };
+  const { formatAmount, formatAmountWithConversion, convertAmount } = useCurrency();
 
   return {
-    AmountDisplay,
     formatAmount,
     formatAmountWithConversion,
     convertAmount
@@ -398,13 +450,18 @@ export const useCurrencyStats = () => {
     totalCurrencies: number;
     africanCurrencies: number;
     globalCurrencies: number;
-    popularRates: Array<{ from: string; to: string; rate: number }>;
+    popularRates: Array<{ from: string; to: string; rate: number; timestamp: number }>;
+    lastUpdate: number;
   }>({
     totalCurrencies: 0,
     africanCurrencies: 0,
     globalCurrencies: 0,
-    popularRates: []
+    popularRates: [],
+    lastUpdate: 0
   });
+
+  // Constante pour la durée de validité du cache (15 minutes)
+  const CACHE_DURATION = 15 * 60 * 1000;
 
   useEffect(() => {
     const african = currencies.filter(c => 
@@ -414,16 +471,26 @@ export const useCurrencyStats = () => {
       ['EUR', 'USD', 'GBP', 'CAD', 'CHF'].includes(c.code)
     );
 
-    setStats({
+    setStats(prev => ({
+      ...prev,
       totalCurrencies: currencies.length,
       africanCurrencies: african.length,
-      globalCurrencies: global.length,
-      popularRates: []
-    });
+      globalCurrencies: global.length
+    }));
   }, [currencies]);
 
-  const getPopularRates = useCallback(async () => {
+  const isCacheValid = useCallback((): boolean => {
+    const now = Date.now();
+    return (now - stats.lastUpdate) < CACHE_DURATION;
+  }, [stats.lastUpdate]);
+
+  const getPopularRates = useCallback(async (forceRefresh = false) => {
     try {
+      // Vérifier si le cache est valide
+      if (!forceRefresh && isCacheValid() && stats.popularRates.length > 0) {
+        return stats.popularRates;
+      }
+
       const popularPairs = [
         { from: 'EUR', to: 'XOF' },
         { from: 'USD', to: 'EUR' },
@@ -435,22 +502,38 @@ export const useCurrencyStats = () => {
         popularPairs.map(async (pair) => {
           try {
             const rate = await getExchangeRate(pair.from, pair.to);
-            return { ...pair, rate };
+            return { 
+              ...pair, 
+              rate,
+              timestamp: Date.now()
+            };
           } catch {
-            return { ...pair, rate: 0 };
+            return { 
+              ...pair, 
+              rate: 0,
+              timestamp: Date.now()
+            };
           }
         })
       );
 
-      setStats(prev => ({ ...prev, popularRates: rates }));
+      setStats(prev => ({ 
+        ...prev, 
+        popularRates: rates,
+        lastUpdate: Date.now()
+      }));
+
+      return rates;
     } catch (error) {
       console.warn('Impossible de récupérer les taux populaires:', error);
+      return stats.popularRates;
     }
-  }, [getExchangeRate]);
+  }, [getExchangeRate, isCacheValid, stats.popularRates]);
 
   return {
     stats,
-    getPopularRates
+    getPopularRates,
+    isCacheValid
   };
 };
 
@@ -459,3 +542,4 @@ export default useCurrency;
 
 // Types pour la compatibilité
 export type { Currency, CurrencyConversion, ExchangeRate } from '../services/currencyService';
+export { AmountDisplay } from '../components/currency/AmountDisplay';
