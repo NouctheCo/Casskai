@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { useToast } from '@/components/ui/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
-import { useLocale } from '@/contexts/LocaleContext';
-import { supabase } from '@/lib/supabase';
+import { Button } from '../ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
+import { useToast } from '../ui/use-toast';
+import { useAuth } from '../../contexts/AuthContext';
+import { useLocale } from '../../contexts/LocaleContext';
+import { supabase } from '../../lib/supabase';
 import { Loader2, PlusCircle, Building, CheckCircle } from 'lucide-react';
 import CompanyFormSection from './CompanyFormSection';
-import { countries, currencies } from '@/lib/formData';
+import { countries, currencies } from '../../lib/formData';
 
 const CompanySelector = ({ onCompanySelected }) => {
   const { user, userCompanies, loading: authLoading, refreshUserAccess } = useAuth();

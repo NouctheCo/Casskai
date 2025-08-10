@@ -1,5 +1,12 @@
-import { supabase, handleSupabaseError } from '@/lib/supabase';
-import { Enterprise, TaxRegime, EnterpriseSettings } from '@/types/enterprise.types';
+// Helper to format Supabase errors
+function handleSupabaseError(error: unknown, context: string) {
+  if (error instanceof Error) {
+    return { message: `[${context}] ${error.message}` };
+  }
+  return { message: `[${context}] ${JSON.stringify(error)}` };
+}
+import { supabase } from '../lib/supabase';
+import { Enterprise, TaxRegime, EnterpriseSettings } from '../types/enterprise.types';
 
 /**
  * Service for managing enterprise-related operations
@@ -10,6 +17,21 @@ export const enterpriseService = {
    */
   async getUserEnterprises(): Promise<{ data: Enterprise[] | null; error: Error | null }> {
     try {
+      type SupabaseCompany = {
+        company_id: string;
+        companies: {
+          id: string;
+          name: string;
+          country: string;
+          default_currency: string;
+          default_locale: string;
+          timezone: string;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        } | null;
+      };
+
       const { data: userCompanies, error: userCompaniesError } = await supabase
         .from('user_companies')
         .select(`
@@ -25,15 +47,15 @@ export const enterpriseService = {
             created_at,
             updated_at
           )
-        `);
+        `) as unknown as { data: SupabaseCompany[]; error: any };
 
       if (userCompaniesError) throw userCompaniesError;
 
       // Transform data to match Enterprise interface
       const enterprises: Enterprise[] = userCompanies
-        .filter(uc => uc.companies) // Filter out null entries
-        .map(uc => {
-          const company = uc.companies;
+        .filter((uc: SupabaseCompany) => uc.companies) // Filter out null entries
+        .map((uc: SupabaseCompany) => {
+          const company = uc.companies!;
           return {
             id: company.id,
             name: company.name || 'Unnamed Enterprise',

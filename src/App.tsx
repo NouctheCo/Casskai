@@ -1,7 +1,8 @@
 // Modifications à apporter à votre App.tsx existant
 
-import React, { Suspense, lazy } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+
+import React, { Suspense, lazy, useEffect } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/contexts/ThemeContext';
@@ -10,97 +11,108 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { ModulesProvider } from '@/contexts/ModulesContext';
 import { EnterpriseProvider } from '@/contexts/EnterpriseContext';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { LoadingFallback } from '@/components/ui/LoadingFallback';
 
-// NOUVEAU : Imports pour la configuration dynamique
-import { ConfigGuard, AuthGuard } from '@/components/guards';
-import { ConfigProvider } from '@/contexts/ConfigContext'; // À créer
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { useConfigContext } from '@/contexts/ConfigContext';
 
+// Pages publiques
+const LandingPage = lazy(() => import('@/pages/LandingPage'));
 const AuthPage = lazy(() => import('@/pages/AuthPage'));
-const SignUpPage = lazy(() => import('@/pages/SignUpPage'));
+const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
+const ForgotPasswordPage = lazy(() => import('@/pages/auth/ForgotPasswordPage'));
+
+// Pages protégées
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
 const AccountingPage = lazy(() => import('@/pages/AccountingPage'));
 const BanksPage = lazy(() => import('@/pages/BanksPage'));
-const ReportsPage = lazy(() => import('@/pages/ReportsPage'));
-const ForecastsPage = lazy(() => import('@/pages/ForecastsPage'));
 const ThirdPartiesPage = lazy(() => import('@/pages/ThirdPartiesPage'));
-const SettingsPage = lazy(() => import('@/pages/SettingsPage'));
-const InvoicingPage = lazy(() => import('@/pages/InvoicingPage'));
 const PurchasesPage = lazy(() => import('@/pages/PurchasesPage'));
-const SalesCrmPage = lazy(() => import('@/pages/SalesCrmPage'));
-const HumanResourcesPage = lazy(() => import('@/pages/HumanResourcesPage'));
-const ProjectsPage = lazy(() => import('@/pages/ProjectsPage'));
-const TaxPage = lazy(() => import('@/pages/TaxPage'));
-const InventoryPage = lazy(() => import('@/pages/InventoryPage'));
-const UserManagementPage = lazy(() => import('@/pages/UserManagementPage'));
-const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
+const InvoicingPage = lazy(() => import('@/pages/InvoicingPage'));
+const ReportsPage = lazy(() => import('@/pages/ReportsPage'));
+const SettingsPage = lazy(() => import('@/pages/SettingsPage'));
 
-// MODIFIÉ : Utiliser notre SupabaseSetupWizard au lieu de SetupWizard
+// Composants de configuration
 const SupabaseSetupWizard = lazy(() => import('@/components/setup/SupabaseSetupWizard'));
 
-const LoadingFallback = () => (
-  <div className="flex h-screen w-screen items-center justify-center">
-    <div className="h-16 w-16 animate-spin rounded-full border-4 border-solid border-primary border-t-transparent"></div>
-  </div>
-);
-
 function App() {
+  const { isConfigured, isLoading, config } = useConfigContext();
+  const location = useLocation();
+
+  // Log des informations importantes pour le débogage
+  useEffect(() => {
+    console.log("App rendu avec:", { 
+      isConfigured, 
+      isLoading, 
+      path: location.pathname,
+      setupCompleted: config?.setupCompleted
+    });
+  }, [isConfigured, isLoading, config, location.pathname]);
+
+  // Afficher un loader pendant le chargement initial
+  if (isLoading) {
+    console.log("App en chargement...");
+    return <LoadingFallback message="Chargement de la configuration..." />;
+  }
+
+  // Redirection automatique vers /setup si aucune configuration n'est trouvée
+  if (!isLoading && !config && location.pathname !== '/setup') {
+    return <Navigate to="/setup" replace />;
+  }
+
   return (
     <ThemeProvider defaultTheme="system" storageKey="casskai-theme">
       <LocaleProvider>
-        {/* NOUVEAU : Ajouter ConfigProvider en tant que provider racine */}
-        <ConfigProvider>
-          {/* ConfigGuard protège toute l'application */}
-          <ConfigGuard fallback={<SupabaseSetupWizard />}>
-            <AuthProvider>
-              {/* AuthGuard protège les routes authentifiées */}
-              <AuthGuard requireAuth={false}>
-                <EnterpriseProvider>
-                  <ModulesProvider>
-                    <TooltipProvider>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <Routes>
-                          {/* Routes publiques (pas d'auth requise) */}
-                          <Route path="/auth" element={<AuthPage />} />
-                          <Route path="/signup" element={<SignUpPage />} />
-                          
-                          {/* Route de setup (redirigée automatiquement si non configuré) */}
-                          <Route path="/setup" element={<SupabaseSetupWizard />} />
+        <Suspense fallback={<LoadingFallback message="Chargement de l'application..." />}>
+          <Routes>
+            {/* Routes publiques */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<AuthPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-                          {/* Routes protégées par authentification */}
-                          <Route element={
-                            <AuthGuard requireAuth={true}>
-                              <MainLayout />
-                            </AuthGuard>
-                          }>
-                            <Route path="/" element={<DashboardPage />} />
-                            <Route path="/accounting" element={<AccountingPage />} />
-                            <Route path="/banking" element={<BanksPage />} />
-                            <Route path="/invoicing" element={<InvoicingPage />} />
-                            <Route path="/purchases" element={<PurchasesPage />} />
-                            <Route path="/sales-crm" element={<SalesCrmPage />} />
-                            <Route path="/human-resources" element={<HumanResourcesPage />} />
-                            <Route path="/projects" element={<ProjectsPage />} />
-                            <Route path="/reports" element={<ReportsPage />} />
-                            <Route path="/forecasts" element={<ForecastsPage />} />
-                            <Route path="/third-parties" element={<ThirdPartiesPage />} />
-                            <Route path="/tax" element={<TaxPage />} />
-                            <Route path="/inventory" element={<InventoryPage />} />
-                            <Route path="/settings" element={<SettingsPage />} />
-                            <Route path="/settings/user-management" element={<UserManagementPage />} />
-                          </Route>
+            {/* Route de configuration */}
+            <Route 
+              path="/setup/*" 
+              element={
+                <ProtectedRoute requireSetupComplete={false}>
+                  <SupabaseSetupWizard />
+                </ProtectedRoute>
+              } 
+            />
 
-                          <Route path="/404" element={<NotFoundPage />} />
-                          <Route path="*" element={<Navigate to="/404" replace />} />
-                        </Routes>
-                      </Suspense>
-                      <Toaster />
-                    </TooltipProvider>
-                  </ModulesProvider>
-                </EnterpriseProvider>
-              </AuthGuard>
-            </AuthProvider>
-          </ConfigGuard>
-        </ConfigProvider>
+            {/* Routes protégées sous dashboard */}
+            <Route 
+              path="/dashboard/*" 
+              element={
+                <ProtectedRoute requireSetupComplete={true}>
+                  <AuthProvider>
+                    <EnterpriseProvider>
+                      <ModulesProvider>
+                        <TooltipProvider>
+                          <MainLayout />
+                        </TooltipProvider>
+                      </ModulesProvider>
+                    </EnterpriseProvider>
+                  </AuthProvider>
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<DashboardPage />} />
+              <Route path="accounting" element={<AccountingPage />} />
+              <Route path="banks" element={<BanksPage />} />
+              <Route path="third-parties" element={<ThirdPartiesPage />} />
+              <Route path="purchases" element={<PurchasesPage />} />
+              <Route path="invoicing" element={<InvoicingPage />} />
+              <Route path="reports" element={<ReportsPage />} />
+              <Route path="settings" element={<SettingsPage />} />
+            </Route>
+
+            {/* Fallback: redirige vers / si route inconnue */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+        <Toaster />
       </LocaleProvider>
     </ThemeProvider>
   );

@@ -1,10 +1,10 @@
 // src/utils/testMigration.js
 // Script pour tester et valider la migration des services
 
-import { accountsService } from '@/services/accountsService';
-import { journalsService } from '@/services/journalsService';
-import { journalEntryService } from '@/services/journalEntryService';
-import { dashboardService } from '@/services/dashboardService';
+import { accountsService } from '../services/accountsService';
+import { journalsService } from '../services/journalsService';
+import { journalEntryService } from '../services/journalEntryService';
+import { dashboardService } from '../services/dashboardService';
 
 // Configuration de test
 const TEST_COMPANY_ID = 'your-test-company-id'; // Remplacer par votre ID d'entreprise de test

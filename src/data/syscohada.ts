@@ -24,7 +24,7 @@ export const SYSCOHADA_PLAN: AccountPlan = {
         {
           number: '16',
           name: 'EMPRUNTS ET DETTES ASSIMILÉES',
-          type: 'liability',
+          type: 'dettes',
           isDebitNormal: false,
           subAccounts: [
             { number: '161', name: 'Emprunts obligataires', type: 'dettes', isDebitNormal: false },
@@ -40,7 +40,7 @@ export const SYSCOHADA_PLAN: AccountPlan = {
         {
           number: '17',
           name: 'DETTES DE FINANCEMENT DIVERSIFIÉES',
-          type: 'liability',
+          type: 'dettes',
           isDebitNormal: false,
           subAccounts: [
             { number: '171', name: 'Dettes rattachées à des participations', type: 'dettes', isDebitNormal: false },
@@ -51,7 +51,7 @@ export const SYSCOHADA_PLAN: AccountPlan = {
         {
           number: '18',
           name: 'DETTES LIÉES À DES PARTICIPATIONS ET COMPTES DE LIAISON DES ÉTABLISSEMENTS',
-          type: 'liability',
+          type: 'dettes',
           isDebitNormal: false,
           subAccounts: [
             { number: '181', name: 'Dettes liées à des participations', type: 'dettes', isDebitNormal: false },
@@ -591,4 +591,36 @@ export const SYSCOHADA_PLAN: AccountPlan = {
       ]
     }
   ]
+
 };
+
+// Exporte les classes principales SYSCOHADA (numéro et nom)
+export const SYSCOHADA_CLASSES = SYSCOHADA_PLAN.classes.map(cls => ({
+  number: cls.number,
+  name: cls.name
+}));
+
+// Exporte tous les comptes et sous-comptes SYSCOHADA à plat
+export const SYSCOHADA_ACCOUNTS = SYSCOHADA_PLAN.classes.flatMap(cls =>
+  cls.accounts.flatMap(acc => [
+    {
+      number: acc.number,
+      name: acc.name,
+      type: acc.type,
+      isDebitNormal: acc.isDebitNormal,
+      classNumber: cls.number
+    },
+    ...(acc.subAccounts?.map(sub => ({
+      number: sub.number,
+      name: sub.name,
+      type: sub.type,
+      isDebitNormal: sub.isDebitNormal,
+      classNumber: cls.number
+    })) || [])
+  ])
+);
+
+// Utilitaire pour filtrer les comptes d'une classe donnée
+export function getSyscohadaAccountsByClass(classNumber: string) {
+  return SYSCOHADA_ACCOUNTS.filter(acc => acc.classNumber === classNumber);
+}

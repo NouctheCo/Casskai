@@ -1,5 +1,5 @@
 // src/services/dashboardService.js
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../lib/supabase';
 
 export const dashboardService = {
   // Obtenir les statistiques principales du dashboard

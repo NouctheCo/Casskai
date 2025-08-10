@@ -34,6 +34,7 @@ dist-ssr
 .env.test.local
 .env.production.local
 .env.staging
+.env.hostinger
 
 # Ne versionner que .env.example pour la doc
 !.env.example
@@ -87,6 +88,31 @@ coverage/
 debug.log
 error.log
 access.log
+
+# Temporary files and backups
+*.backup
+*.tmp
+*.temp
+test-*.js
+test-*.html
+debug-*.js
+fix-*.js
+setup-*.js
+link-*.js
+create-*.js
+check-*.js
+diagnostic-*.js
+
+# Documentation temporaire
+*_FIXES_SUMMARY.md
+*_MIGRATION_GUIDE.md
+*_GUIDE.md
+DIAGNOSTIC.md
+TESTS_MANUELS.md
+TEST_*.md
+
+# SQL temporaires
+*.sql
 
 # ============================================================================
 # DÉPLOIEMENT

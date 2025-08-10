@@ -1,0 +1,92 @@
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build application
+      run: npm run build
+      env:
+        NODE_ENV: production
+
+    - name: Create .htaccess for React Router
+      run: |
+        cat > dist/.htaccess << 'EOF'
+        <IfModule mod_rewrite.c>
+            RewriteEngine On
+            
+            # Security headers
+            <IfModule mod_headers.c>
+                Header always set X-Content-Type-Options nosniff
+                Header always set X-Frame-Options DENY
+                Header always set X-XSS-Protection "1; mode=block"
+                Header always set Referrer-Policy "strict-origin-when-cross-origin"
+                Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+            </IfModule>
+            
+            # Cache static assets
+            <IfModule mod_expires.c>
+                ExpiresActive On
+                ExpiresByType text/css "access plus 1 year"
+                ExpiresByType application/javascript "access plus 1 year"
+                ExpiresByType image/png "access plus 1 year"
+                ExpiresByType image/jpg "access plus 1 year"
+                ExpiresByType image/jpeg "access plus 1 year"
+                ExpiresByType image/gif "access plus 1 year"
+                ExpiresByType image/svg+xml "access plus 1 year"
+                ExpiresByType font/woff2 "access plus 1 year"
+            </IfModule>
+            
+            # Block access to sensitive files
+            <Files ".env*">
+                Order deny,allow
+                Deny from all
+            </Files>
+            
+            <Files "config*">
+                Order deny,allow
+                Deny from all
+            </Files>
+            
+            # React Router - redirect all requests to index.html
+            RewriteRule ^index\.html$ - [L]
+            RewriteCond %{REQUEST_FILENAME} !-f
+            RewriteCond %{REQUEST_FILENAME} !-d
+            RewriteRule . /index.html [L]
+        </IfModule>
+        EOF
+
+    - name: Deploy to Hostinger via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: 82.25.113.130
+        username: u657259520.casskai.app
+        password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+        local-dir: ./dist/
+        server-dir: ./public_html/
+        port: 21
+        protocol: ftp
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/.env*

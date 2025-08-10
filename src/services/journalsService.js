@@ -1,5 +1,5 @@
 // src/services/journalsService.js
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../lib/supabase';
 
 export const journalsService = {
   // Récupérer tous les journaux d'une entreprise
