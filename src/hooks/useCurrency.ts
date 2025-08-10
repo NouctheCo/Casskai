@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { CurrencyService, Currency, CurrencyConversion, ExchangeRate } from '../services/currencyService';
-import { useConfigContext } from '@/contexts/ConfigContext';
+// import { useConfigContext } from '@/contexts/ConfigContext'; // Temporairement désactivé
 
 // Types d'erreurs spécifiques
 export class CurrencyError extends Error {
