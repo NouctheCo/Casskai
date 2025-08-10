@@ -38,11 +38,9 @@ function OnboardingContent() {
 
   // Redirect if onboarding is already completed AND company is configured
   useEffect(() => {
-    if (user?.user_metadata?.onboarding_completed) {
-      // Check if user has a company configured via the ProtectedRoute logic
-      setTimeout(() => {
-        navigate('/dashboard', { replace: true });
-      }, 1000); // Small delay to allow for any pending updates
+    if (user?.user_metadata?.onboarding_completed && user?.user_metadata?.company_id) {
+      // User has completed onboarding and has a company - go to dashboard
+      navigate('/dashboard', { replace: true });
     }
   }, [user, navigate]);
 

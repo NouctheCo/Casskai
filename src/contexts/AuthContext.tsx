@@ -171,10 +171,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Complete onboarding function
   const completeOnboarding = async (companyData: any, selectedModules?: any) => {
     if (!user) {
-      return { success: false };
+      throw new Error('Utilisateur non connecté');
     }
 
     try {
+      console.log('🚀 Starting onboarding completion with data:', { 
+        companyData, 
+        selectedModules,
+        userId: user.id 
+      });
+
+      // Validate required company data
+      if (!companyData.name) {
+        throw new Error('Le nom de l\'entreprise est requis');
+      }
+
       // Create the company
       const { data: company, error: companyError } = await supabase
         .from('companies')
@@ -203,9 +214,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         .single();
 
       if (companyError) {
-        console.error('Error creating company:', companyError);
-        return { success: false };
+        console.error('❌ Error creating company:', companyError);
+        throw new Error(`Erreur lors de la création de l'entreprise: ${companyError.message}`);
       }
+
+      console.log('✅ Company created:', company);
 
       // Associate user with company
       const { error: userCompanyError } = await supabase
@@ -218,9 +231,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         });
 
       if (userCompanyError) {
-        console.error('Error associating user with company:', userCompanyError);
-        return { success: false };
+        console.error('❌ Error associating user with company:', userCompanyError);
+        throw new Error(`Erreur lors de l'association utilisateur-entreprise: ${userCompanyError.message}`);
       }
+
+      console.log('✅ User associated with company');
 
       // Save selected modules to localStorage for now
       if (selectedModules) {
@@ -233,7 +248,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         const finalModules = { ...defaultModules, ...selectedModules };
         localStorage.setItem('casskai_modules', JSON.stringify(finalModules));
-        console.log('✅ Modules saved:', finalModules);
+        console.log('✅ Modules saved to localStorage:', finalModules);
       }
 
       // Create trial subscription automatically using auth.uid()
@@ -244,7 +259,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         });
 
       if (trialError) {
-        console.error('Error creating trial subscription:', trialError);
+        console.error('⚠️ Error creating trial subscription (non-critical):', trialError);
         // Continue anyway as basic setup is done
       } else {
         console.log('✅ Trial subscription created:', subscriptionId);
@@ -257,8 +272,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
 
       if (setupError) {
-        console.error('Error completing company setup:', setupError);
+        console.error('⚠️ Error completing company setup (non-critical):', setupError);
         // Continue anyway as basic setup is done
+      } else {
+        console.log('✅ Company setup completed');
       }
 
       // Update user metadata to mark onboarding as completed
@@ -270,16 +287,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
 
       if (updateError) {
-        console.error('Error updating user metadata:', updateError);
+        console.error('❌ Error updating user metadata:', updateError);
+        throw new Error(`Erreur lors de la mise à jour du profil utilisateur: ${updateError.message}`);
       }
 
-      // Reload user companies
-      await loadUserCompanies();
+      console.log('✅ User metadata updated - onboarding marked as completed');
 
+      // Reload user companies to refresh the context
+      await loadUserCompanies();
+      console.log('✅ User companies reloaded');
+
+      console.log('🎉 Onboarding completion successful!');
       return { success: true, company, trialCreated: !trialError };
     } catch (error) {
-      console.error('Error completing onboarding:', error);
-      return { success: false };
+      console.error('❌ Error completing onboarding:', error);
+      throw error; // Re-throw to let CompleteStep handle it properly
     }
   };
 
