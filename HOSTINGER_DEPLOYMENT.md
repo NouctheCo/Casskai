@@ -4,14 +4,16 @@
 
 ### 1. Configuration GitHub Secrets
 
-Dans votre repository GitHub, ajoutez le secret suivant :
+Dans votre repository GitHub, ajoutez les secrets suivants :
 - `HOSTINGER_FTP_PASSWORD` : Mot de passe FTP de votre compte Hostinger
+- `VITE_SUPABASE_URL` : URL de votre projet Supabase
+- `VITE_SUPABASE_ANON_KEY` : Clé anonyme Supabase
+- `VITE_STRIPE_PUBLISHABLE_KEY` : Clé publique Stripe (optionnel)
 
 **Comment ajouter un secret GitHub :**
 1. Allez dans `Settings` > `Secrets and variables` > `Actions`
 2. Cliquez sur `New repository secret`
-3. Nom : `HOSTINGER_FTP_PASSWORD`
-4. Valeur : Votre mot de passe FTP Hostinger
+3. Ajoutez chaque variable une par une
 
 ### 2. Informations FTP Hostinger
 
@@ -28,26 +30,22 @@ Dans votre repository GitHub, ajoutez le secret suivant :
 
 ### 4. Variables d'Environnement
 
-#### Sur Hostinger (cPanel) :
+**⚠️ Important : Hébergement Mutualisé PHP**
 
-1. **Option 1 : Via le fichier .env (non recommandé pour la production)**
-   - Uploadez un fichier `.env` dans `public_html`
-   - Le fichier `.htaccess` bloquera l'accès public à ce fichier
+Comme vous êtes sur un hébergement mutualisé PHP (et non Node.js), les variables d'environnement doivent être injectées **avant le build**, pas sur le serveur.
 
-2. **Option 2 : Variables d'environnement système (recommandé)**
-   - Dans cPanel > "Environment Variables"
-   - Ajoutez vos variables Supabase :
-     ```
-     VITE_SUPABASE_URL=https://votre-projet.supabase.co
-     VITE_SUPABASE_ANON_KEY=votre_clé_anonyme
-     VITE_APP_ENV=production
-     ```
+#### Configuration Automatique :
 
-#### Variables nécessaires :
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
-- `VITE_APP_ENV`
-- Autres variables spécifiques à votre application
+Le workflow GitHub Actions crée automatiquement le fichier `.env` avec les valeurs des GitHub Secrets :
+- `VITE_SUPABASE_URL` → Depuis GitHub Secrets
+- `VITE_SUPABASE_ANON_KEY` → Depuis GitHub Secrets  
+- `VITE_STRIPE_PUBLISHABLE_KEY` → Depuis GitHub Secrets
+- Variables fixes : `VITE_APP_URL=https://casskai.app`, etc.
+
+#### Variables nécessaires dans GitHub Secrets :
+- `VITE_SUPABASE_URL` (ex: https://smtdtgrymuzwvctattmx.supabase.co)
+- `VITE_SUPABASE_ANON_KEY` (votre clé Supabase anonyme)
+- `VITE_STRIPE_PUBLISHABLE_KEY` (optionnel, pour Stripe)
 
 ### 5. Déploiement
 
