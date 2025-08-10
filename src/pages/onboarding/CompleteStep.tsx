@@ -88,7 +88,11 @@ export default function CompleteStep() {
       // Marquer l'onboarding comme terminé
       try {
         setError(null);
+        console.log('🚀 Calling completeOnboarding with:', { companyData, modules });
+        
         const result = await completeOnboarding(companyData, modules);
+        console.log('✅ Onboarding completion result:', result);
+        
         setIsCompleted(true);
         
         if (result.trialCreated) {
@@ -104,9 +108,14 @@ export default function CompleteStep() {
             duration: 5000,
           });
         }
+
+        // Wait a bit before allowing navigation to ensure everything is saved
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
       } catch (error: any) {
-        console.error('Error completing onboarding:', error);
-        setError(error?.message || 'Une erreur est survenue');
+        console.error('❌ Error completing onboarding:', error);
+        setError(error?.message || 'Une erreur est survenue lors de la finalisation');
+        setIsCompleted(false);
         toast({
           title: "Erreur de configuration",
           description: (error?.message as string) || "Une erreur est survenue. Veuillez réessayer.",
@@ -121,8 +130,8 @@ export default function CompleteStep() {
   }, [companyData, modules, completeOnboarding, toast]);
 
   const handleGoToDashboard = () => {
-    // Force a page refresh to ensure all state is properly updated
-    window.location.href = '/dashboard';
+    // Navigate to dashboard after successful onboarding completion
+    navigate('/dashboard', { replace: true });
   };
 
   const handleNavigateTo = (path: string) => {
@@ -133,10 +142,12 @@ export default function CompleteStep() {
     setIsCompleting(true);
     setIsCompleted(false);
     setError(null);
-    // relancer le processus complet
-    // Simplifié: on relance simplement l'effet principal
+    
     try {
+      console.log('🔄 Retrying onboarding completion...');
       const result = await completeOnboarding(companyData, modules);
+      console.log('✅ Retry successful:', result);
+      
       setIsCompleted(true);
       toast({
         title: "Configuration terminée !",
@@ -145,8 +156,14 @@ export default function CompleteStep() {
           : "Votre entreprise a été configurée avec succès.",
         duration: 5000,
       });
+
+      // Wait a bit before allowing navigation
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
     } catch (err: any) {
-      setError(err?.message || 'Une erreur est survenue');
+      console.error('❌ Retry failed:', err);
+      setError(err?.message || 'Une erreur est survenue lors de la finalisation');
+      setIsCompleted(false);
       toast({
         title: "Échec du nouvel essai",
         description: (err?.message as string) || "Merci de vérifier votre connexion et réessayer.",
