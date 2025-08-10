@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { CurrencyService, Currency, CurrencyConversion, ExchangeRate } from '../services/currencyService';
-// import { useConfigContext } from '@/contexts/ConfigContext'; // Temporairement désactivé
+import { useConfigContext } from '@/contexts/ConfigContext';
 
 // Types d'erreurs spécifiques
 export class CurrencyError extends Error {
@@ -97,10 +97,7 @@ export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
-  // Suppression temporaire de useConfigContext pour éviter l'erreur
-  // TODO: Réintégrer useConfigContext une fois le problème d'ordre résolu
-  // const { config } = useConfigContext();
-  const config = null; // Temporaire - utilise les valeurs par défaut
+  const { config } = useConfigContext();
 
   const baseCurrency = config?.company?.currency || currentCurrency;
 

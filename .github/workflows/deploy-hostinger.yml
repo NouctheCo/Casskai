@@ -46,13 +46,17 @@ jobs:
         echo "Generated .env file contents (secrets masked):"
         sed 's/=.*/=***/' .env
 
-    - name: Clear build cache and build application
+    - name: Clean build environment
       run: |
-        echo "Clearing all caches..."
+        echo "Nettoyage complet de l'environnement de build..."
         rm -rf node_modules/.cache
         rm -rf dist
         rm -rf .vite
-        npm run build
+        rm -rf node_modules/.vite
+        npm cache clean --force
+
+    - name: Build application
+      run: npm run build
 
     - name: Create .htaccess for React Router
       run: |
