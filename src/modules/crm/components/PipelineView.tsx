@@ -1,0 +1,1 @@
+import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const PipelineView: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>PipelineView</CardTitle> </CardHeader> <CardContent> <p>Composant PipelineView en développement.</p> </CardContent> </Card> ); }; export default PipelineView;

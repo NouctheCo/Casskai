@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { journalEntryService } from '@/services/journalEntryService';
+import { useJournalEntries } from '@/hooks/useJournalEntries';
+import { useCompanies } from '@/hooks/useCompanies';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocale } from '@/contexts/LocaleContext';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -16,14 +17,23 @@ const ITEMS_PER_PAGE = 20;
 
 // ✅ MODIFICATION: Ajouter refreshTrigger dans les props
 const JournalEntriesList = ({ currentEnterpriseId: propCurrentEnterpriseId, onEdit, onNew, refreshTrigger }) => {
-  const { currentEnterpriseId: authCurrentEnterpriseId } = useAuth();
-  const currentEnterpriseId = propCurrentEnterpriseId || authCurrentEnterpriseId;
+  const { user } = useAuth();
+  const { currentCompany } = useCompanies();
+  const companyId = propCurrentEnterpriseId || currentCompany?.id;
   const { t } = useLocale();
   const { toast } = useToast();
 
-  const [entries, setEntries] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  // Utiliser le nouveau hook useJournalEntries
+  const {
+    journalEntries,
+    loading,
+    error,
+    getJournalEntries,
+    deleteJournalEntry,
+    getAccountsList,
+    getJournalsList
+  } = useJournalEntries(companyId);
+
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -40,7 +50,7 @@ const JournalEntriesList = ({ currentEnterpriseId: propCurrentEnterpriseId, onEd
   const [entryToDelete, setEntryToDelete] = useState(null); 
 
   const fetchEntries = useCallback(async (page, filtersToApply, limit) => {
-    if (!currentEnterpriseId) return;
+    if (!companyId) return;
     setLoading(true);
     setError(null);
     try {
@@ -56,10 +66,9 @@ const JournalEntriesList = ({ currentEnterpriseId: propCurrentEnterpriseId, onEd
       if (filtersToApply.journalId === 'all') delete effectiveFilters.journalId;
       if (filtersToApply.accountId === 'all') delete effectiveFilters.accountId;
 
-      const { data, count, error: fetchError } = await journalEntryService.getJournalEntries(currentEnterpriseId, effectiveFilters);
-      if (fetchError) throw fetchError;
+      const { data, count, error: fetchError } = await getJournalEntries(effectiveFilters);
+      if (fetchError) throw new Error(fetchError);
       
-      setEntries(data || []);
       setTotal(count || 0);
       setCurrentPage(page);
       setHasMore((data || []).length === limit);
@@ -70,7 +79,7 @@ const JournalEntriesList = ({ currentEnterpriseId: propCurrentEnterpriseId, onEd
     } finally {
       setLoading(false);
     }
-  }, [currentEnterpriseId, sortBy, sortOrder, t, toast]);
+  }, [companyId, sortBy, sortOrder, t, toast, getJournalEntries]);
 
   // ✅ AJOUT: useEffect pour écouter refreshTrigger
   useEffect(() => {
@@ -103,16 +112,16 @@ const JournalEntriesList = ({ currentEnterpriseId: propCurrentEnterpriseId, onEd
   }, [fetchEntries, localFilters, sortBy, sortOrder]);
 
   const fetchDropdownData = useCallback(async () => {
-    if (!currentEnterpriseId) return;
+    if (!companyId) return;
     try {
-      const accs = await journalEntryService.getAccountsList(currentEnterpriseId);
+      const accs = await getAccountsList();
       setAccounts(accs || []);
-      const jrnls = await journalEntryService.getJournalsList(currentEnterpriseId);
+      const jrnls = await getJournalsList();
       setJournals(jrnls || []);
     } catch (err) {
       toast({ variant: 'destructive', title: t('errorFetchingDropdownData'), description: err.message });
     }
-  }, [currentEnterpriseId, t, toast]);
+  }, [companyId, t, toast, getAccountsList, getJournalsList]);
 
   useEffect(() => { fetchDropdownData(); }, [fetchDropdownData]);
 
@@ -158,7 +167,7 @@ const JournalEntriesList = ({ currentEnterpriseId: propCurrentEnterpriseId, onEd
   const handleDeleteEntry = async () => {
     if (!entryToDelete) return;
     try {
-      await journalEntryService.deleteJournalEntry(entryToDelete.id);
+      await deleteJournalEntry(entryToDelete.id);
       toast({ title: t('success'), description: t('journalEntryDeletedSuccess') });
       setEntryToDelete(null);
       
@@ -174,7 +183,7 @@ const JournalEntriesList = ({ currentEnterpriseId: propCurrentEnterpriseId, onEd
       
       // Si on supprime le dernier élément d'une page > 1, aller à la page précédente
       const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
-      const pageToLoad = (entries.length === 1 && currentPage > 1) ? currentPage - 1 : currentPage;
+      const pageToLoad = (journalEntries.length === 1 && currentPage > 1) ? currentPage - 1 : currentPage;
       
       fetchEntries(pageToLoad, activeFilters, ITEMS_PER_PAGE);
       setExpandedRows({});
@@ -239,7 +248,7 @@ const JournalEntriesList = ({ currentEnterpriseId: propCurrentEnterpriseId, onEd
     }
   };
 
-  if (error && !loading && entries.length === 0) { 
+  if (error && !loading && journalEntries.length === 0) { 
     return (
       <Alert variant="destructive">
         <AlertTriangle className="h-4 w-4" />
@@ -301,11 +310,11 @@ const JournalEntriesList = ({ currentEnterpriseId: propCurrentEnterpriseId, onEd
               </TableHead>
               <TableHead className="text-right min-w-[120px]">{t('debit')}</TableHead>
               <TableHead className="text-right min-w-[120px]">{t('credit')}</TableHead>
-              <TableHead className="text-center min-w-[150px] sticky right-0 bg-background z-10">{t('actions')}</TableHead>
+              <TableHead className="text-center min-w-[150px] sticky right-0 bg-white dark:bg-gray-900 z-10">{t('actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? renderSkeleton() : entries.map(entry => (
+            {loading ? renderSkeleton() : journalEntries.map(entry => (
               <JournalEntriesListEntryRow 
                 key={entry.id}
                 entry={entry}
@@ -317,7 +326,7 @@ const JournalEntriesList = ({ currentEnterpriseId: propCurrentEnterpriseId, onEd
                 journals={journals}
               />
             ))}
-            {!loading && entries.length === 0 && (
+            {!loading && journalEntries.length === 0 && (
               <TableRow>
                 <TableCell colSpan={7} className="text-center h-24">{t('noEntriesFound')}</TableCell>
               </TableRow>

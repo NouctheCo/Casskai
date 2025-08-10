@@ -1,200 +1,202 @@
-// src/hooks/useSupabase.ts
-
 import { useState, useEffect, useCallback } from 'react';
-import { SupabaseClient, User, Session } from '@supabase/supabase-js';
-import ConfigService from '../services/configService';
-import { useConfig } from './useConfig';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
+import type { Database } from '@/types/database.types';
 
-interface UseSupabaseReturn {
-  // Client Supabase
-  client: SupabaseClient | null;
-  isClientReady: boolean;
+// Generic Supabase hook for CRUD operations with multi-tenancy
+export function useSupabase<T extends keyof Database['public']['Tables']>(
+  tableName: T,
+  companyId?: string
+) {
+  type TableRow = Database['public']['Tables'][T]['Row'];
+  type TableInsert = Database['public']['Tables'][T]['Insert'];
+  type TableUpdate = Database['public']['Tables'][T]['Update'];
 
-  // Authentification
-  user: User | null;
-  session: Session | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
+  const { user } = useAuth();
+  const [data, setData] = useState<TableRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Actions d'authentification
-  signUp: (email: string, password: string, userData?: any) => Promise<{ user: User | null; error: any }>;
-  signIn: (email: string, password: string) => Promise<{ user: User | null; error: any }>;
-  signOut: () => Promise<{ error: any }>;
-  resetPassword: (email: string) => Promise<{ error: any }>;
+  // Fetch all records with company filtering
+  const fetchData = useCallback(async (filters?: Record<string, any>) => {
+    if (!user || (tableName !== 'companies' && tableName !== 'user_companies' && !companyId)) {
+      return;
+    }
 
-  // Utilitaires
-  executeQuery: <T = any>(query: () => Promise<T>) => Promise<T>;
-  isConnected: () => boolean;
-}
+    setLoading(true);
+    setError(null);
 
-export const useSupabase = (): UseSupabaseReturn => {
-  const [client, setClient] = useState<SupabaseClient | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isClientReady, setIsClientReady] = useState(false);
+    try {
+      let query = supabase.from(tableName).select('*');
 
-  const { isConfigured, getSupabaseConfig } = useConfig();
-  const configService = ConfigService.getInstance();
-
-  // Initialiser le client Supabase quand la config est prête
-  useEffect(() => {
-    const initializeClient = async () => {
-      if (!isConfigured) {
-        setIsClientReady(false);
-        return;
+      // Add company_id filter for multi-tenant tables
+      if (companyId && tableName !== 'companies' && tableName !== 'user_companies') {
+        query = query.eq('company_id', companyId);
       }
 
-      try {
-        setIsLoading(true);
-        const supabaseClient = await configService.initializeSupabaseClient();
-        setClient(supabaseClient);
-        setIsClientReady(true);
-
-        // Récupérer la session actuelle
-        const { data: { session: currentSession } } = await supabaseClient.auth.getSession();
-        setSession(currentSession);
-        setUser(currentSession?.user || null);
-
-        // Écouter les changements d'authentification
-        const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(
-          (event, session) => {
-            setSession(session);
-            setUser(session?.user || null);
-            setIsLoading(false);
+      // Add additional filters
+      if (filters) {
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            query = query.eq(key, value);
           }
-        );
-
-        // Cleanup
-        return () => {
-          subscription.unsubscribe();
-        };
-
-      } catch (error) {
-        console.error('Erreur d\'initialisation Supabase:', error);
-        setIsClientReady(false);
-      } finally {
-        setIsLoading(false);
+        });
       }
-    };
 
-    initializeClient();
-  }, [isConfigured, configService]);
+      const { data: result, error: fetchError } = await query;
 
-  // Inscription
-  const signUp = useCallback(async (email: string, password: string, userData?: any) => {
-    if (!client) {
-      throw new Error('Client Supabase non initialisé');
-    }
+      if (fetchError) throw fetchError;
 
-    try {
-      setIsLoading(true);
-      const { data, error } = await client.auth.signUp({
-        email,
-        password,
-        options: {
-          data: userData
-        }
-      });
-
-      return { user: data.user, error };
-    } catch (error) {
-      return { user: null, error };
+      setData(result || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch data');
+      console.error(`Error fetching ${tableName}:`, err);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  }, [client]);
+  }, [tableName, companyId, user]);
 
-  // Connexion
-  const signIn = useCallback(async (email: string, password: string) => {
-    if (!client) {
-      throw new Error('Client Supabase non initialisé');
-    }
+  // Create a new record
+  const create = useCallback(async (record: TableInsert): Promise<TableRow | null> => {
+    if (!user) throw new Error('User not authenticated');
+
+    setLoading(true);
+    setError(null);
 
     try {
-      setIsLoading(true);
-      const { data, error } = await client.auth.signInWithPassword({
-        email,
-        password
-      });
+      // Add company_id and created_by if applicable
+      const recordWithMeta = {
+        ...record,
+        ...(companyId && tableName !== 'companies' && tableName !== 'user_companies' ? { company_id: companyId } : {}),
+        ...(record && 'created_by' in record ? { created_by: user.id } : {}),
+      };
 
-      return { user: data.user, error };
-    } catch (error) {
-      return { user: null, error };
+      const { data: result, error: insertError } = await supabase
+        .from(tableName)
+        .insert(recordWithMeta)
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+
+      // Update local state
+      setData(prev => [...prev, result]);
+      
+      return result;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create record';
+      setError(errorMessage);
+      console.error(`Error creating ${tableName}:`, err);
+      throw new Error(errorMessage);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  }, [client]);
+  }, [tableName, companyId, user]);
 
-  // Déconnexion
-  const signOut = useCallback(async () => {
-    if (!client) {
-      throw new Error('Client Supabase non initialisé');
-    }
+  // Update a record
+  const update = useCallback(async (id: string, updates: TableUpdate): Promise<TableRow | null> => {
+    if (!user) throw new Error('User not authenticated');
+
+    setLoading(true);
+    setError(null);
 
     try {
-      setIsLoading(true);
-      const { error } = await client.auth.signOut();
-      return { error };
-    } catch (error) {
-      return { error };
+      const { data: result, error: updateError } = await supabase
+        .from(tableName)
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+
+      // Update local state
+      setData(prev => prev.map(item => 
+        (item as any).id === id ? result : item
+      ));
+
+      return result;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update record';
+      setError(errorMessage);
+      console.error(`Error updating ${tableName}:`, err);
+      throw new Error(errorMessage);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  }, [client]);
+  }, [tableName, user]);
 
-  // Réinitialisation du mot de passe
-  const resetPassword = useCallback(async (email: string) => {
-    if (!client) {
-      throw new Error('Client Supabase non initialisé');
-    }
+  // Delete a record
+  const remove = useCallback(async (id: string): Promise<void> => {
+    if (!user) throw new Error('User not authenticated');
 
-    try {
-      const { error } = await client.auth.resetPasswordForEmail(email);
-      return { error };
-    } catch (error) {
-      return { error };
-    }
-  }, [client]);
-
-  // Exécuter une requête avec gestion d'erreur
-  const executeQuery = useCallback(async <T = any>(query: () => Promise<T>): Promise<T> => {
-    if (!client) {
-      throw new Error('Client Supabase non initialisé');
-    }
+    setLoading(true);
+    setError(null);
 
     try {
-      return await query();
-    } catch (error) {
-      console.error('Erreur lors de l\'exécution de la requête:', error);
-      throw error;
-    }
-  }, [client]);
+      const { error: deleteError } = await supabase
+        .from(tableName)
+        .delete()
+        .eq('id', id);
 
-  // Vérifier la connexion
-  const isConnected = useCallback((): boolean => {
-    return isClientReady && client !== null;
-  }, [isClientReady, client]);
+      if (deleteError) throw deleteError;
+
+      // Update local state
+      setData(prev => prev.filter(item => (item as any).id !== id));
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete record';
+      setError(errorMessage);
+      console.error(`Error deleting ${tableName}:`, err);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [tableName, user]);
+
+  // Get a single record by ID
+  const getById = useCallback(async (id: string): Promise<TableRow | null> => {
+    if (!user) throw new Error('User not authenticated');
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      let query = supabase.from(tableName).select('*').eq('id', id);
+
+      // Add company_id filter for multi-tenant tables
+      if (companyId && tableName !== 'companies' && tableName !== 'user_companies') {
+        query = query.eq('company_id', companyId);
+      }
+
+      const { data: result, error: fetchError } = await query.single();
+
+      if (fetchError) throw fetchError;
+
+      return result;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch record';
+      setError(errorMessage);
+      console.error(`Error fetching ${tableName} by ID:`, err);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [tableName, companyId, user]);
+
+  // Refresh data
+  const refresh = useCallback(() => {
+    fetchData();
+  }, [fetchData]);
 
   return {
-    // Client Supabase
-    client,
-    isClientReady,
-
-    // Authentification
-    user,
-    session,
-    isAuthenticated: !!user,
-    isLoading,
-
-    // Actions d'authentification
-    signUp,
-    signIn,
-    signOut,
-    resetPassword,
-
-    // Utilitaires
-    executeQuery,
-    isConnected
+    data,
+    loading,
+    error,
+    create,
+    update,
+    remove,
+    getById,
+    fetchData,
+    refresh,
   };
-};
+}

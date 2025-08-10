@@ -1,0 +1,1 @@
+import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const DealsList: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>DealsList</CardTitle> </CardHeader> <CardContent> <p>Composant DealsList en développement.</p> </CardContent> </Card> ); }; export default DealsList;

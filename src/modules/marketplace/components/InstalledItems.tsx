@@ -1,0 +1,1 @@
+import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const InstalledItems: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>InstalledItems</CardTitle> </CardHeader> <CardContent> <p>Composant InstalledItems en développement.</p> </CardContent> </Card> ); }; export default InstalledItems;

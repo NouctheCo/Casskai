@@ -2,12 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/use-toast';
-import { accountsService } from '@/services/accountsService';
+import { useAccounting } from '@/hooks/useAccounting';
+import { useCompanies } from '@/hooks/useCompanies';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocale } from '@/contexts/LocaleContext';
 import { PlusCircle, Edit3, Search, Filter, AlertTriangle, ListTree, Banknote, Landmark, Briefcase, Users, Coins, Package, Receipt } from 'lucide-react';
@@ -23,7 +24,7 @@ const ACCOUNT_CLASSES = [
   { value: '7', labelKey: 'accountClasses.7', icon: Banknote }, // Produits
 ];
 
-const ACCOUNT_TYPES = ['ASSET', 'LIABILITY', 'EQUITY', 'REVENUE', 'EXPENSE', 'COST_OF_GOODS_SOLD'];
+const ACCOUNT_TYPES = ['asset', 'liability', 'equity', 'revenue', 'expense'];
 
 const AccountForm = ({ account, onSave, onCancel, currentEnterpriseId, existingAccountNumbers }) => {
   const { t } = useLocale();
@@ -34,7 +35,7 @@ const AccountForm = ({ account, onSave, onCancel, currentEnterpriseId, existingA
     description: account?.description || '',
     is_active: account?.is_active !== undefined ? account.is_active : true,
     currency: account?.currency || 'EUR',
-    class: account?.class?.toString() || '',
+    class: account?.class ? String(account.class) : '',
     parent_code: account?.parent_code || '',
   });
   const [errors, setErrors] = useState({});
@@ -48,7 +49,7 @@ const AccountForm = ({ account, onSave, onCancel, currentEnterpriseId, existingA
         description: account.description || '',
         is_active: account.is_active !== undefined ? account.is_active : true,
         currency: account.currency || 'EUR',
-        class: account.class?.toString() || '',
+        class: account.class ? String(account.class) : '',
         parent_code: account.parent_code || '',
       });
     } else {
@@ -156,12 +157,21 @@ const AccountForm = ({ account, onSave, onCancel, currentEnterpriseId, existingA
 
 const ChartOfAccounts = ({ currentEnterpriseId: propCurrentEnterpriseId }) => {
   const { t } = useLocale();
-  const { currentEnterpriseId: authCurrentEnterpriseId } = useAuth();
-  const currentEnterpriseId = propCurrentEnterpriseId || authCurrentEnterpriseId;
+  const { user } = useAuth();
+  const { currentCompany } = useCompanies();
+  const companyId = propCurrentEnterpriseId || currentCompany?.id;
   const { toast } = useToast();
 
-  const [accounts, setAccounts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Utiliser le nouveau hook useAccounting
+  const {
+    accounts,
+    loading,
+    error,
+    createAccount,
+    fetchAccounts,
+    refresh
+  } = useAccounting(companyId);
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -169,58 +179,37 @@ const ChartOfAccounts = ({ currentEnterpriseId: propCurrentEnterpriseId }) => {
   const [typeFilter, setTypeFilter] = useState('');
   const [page, setPage] = useState(1);
   const [limit] = useState(15);
-  const [totalAccounts, setTotalAccounts] = useState(0);
 
-  const fetchAccounts = useCallback(async () => {
-    if (!currentEnterpriseId) {
-      setLoading(false);
-      setAccounts([]);
-      setTotalAccounts(0);
-      return;
-    }
-    setLoading(true);
-    try {
-      const { data, error, count } = await accountsService.getAccounts(currentEnterpriseId, { 
-        page, 
-        limit, 
-        searchTerm, 
-        classFilter,
-        typeFilter,
-        sortConfig: { key: 'account_number', direction: 'ascending' }
-      });
-      if (error) throw error;
-      setAccounts(data || []);
-      setTotalAccounts(count || 0);
-    } catch (error) {
-      toast({ variant: 'destructive', title: t('errorFetchingAccounts'), description: error.message });
-      setAccounts([]);
-      setTotalAccounts(0);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentEnterpriseId, toast, t, page, limit, searchTerm, classFilter, typeFilter]);
-
+  // Fetch accounts when filters change
   useEffect(() => {
-    fetchAccounts();
-  }, [fetchAccounts]);
+    if (companyId && fetchAccounts) {
+      fetchAccounts({
+        page,
+        pageSize: limit,
+        searchTerm,
+        classFilter: classFilter || undefined,
+        typeFilter: typeFilter || undefined,
+        sortBy: 'account_number',
+        sortDirection: 'asc'
+      });
+    }
+  }, [companyId, page, limit, searchTerm, classFilter, typeFilter, fetchAccounts]);
 
   const handleSaveAccount = async (formData) => {
-    let response;
     try {
       if (editingAccount) {
-        response = await accountsService.updateAccount(editingAccount.id, formData);
+        // TODO: Implémenter updateAccount dans useAccounting
+        toast({ variant: 'destructive', title: t('error'), description: 'Update functionality not yet implemented' });
+        return;
       } else {
-        response = await accountsService.createAccount(currentEnterpriseId, formData);
+        await createAccount(formData);
+        toast({ title: t('success'), description: t('accountCreatedSuccess') });
+        refresh();
+        setIsFormOpen(false);
+        setEditingAccount(null);
       }
-      const { data, error } = response;
-      if (error) throw error;
-      
-      toast({ title: t('success'), description: editingAccount ? t('accountUpdatedSuccess') : t('accountCreatedSuccess') });
-      fetchAccounts();
-      setIsFormOpen(false);
-      setEditingAccount(null);
     } catch (error) {
-      toast({ variant: 'destructive', title: t('error'), description: error.message });
+      toast({ variant: 'destructive', title: t('error'), description: error.message || error });
     }
   };
 
@@ -230,17 +219,12 @@ const ChartOfAccounts = ({ currentEnterpriseId: propCurrentEnterpriseId }) => {
   };
   
   const handleImportDefaults = async () => {
-    if (!currentEnterpriseId) return;
-    setLoading(true);
+    if (!companyId) return;
     try {
-      const { error } = await accountsService.importStandardChartOfAccounts(currentEnterpriseId, defaultChartOfAccounts);
-      if (error) throw error;
-      toast({ title: t('success'), description: t('defaultChartImportedSuccess') });
-      fetchAccounts();
+      // TODO: Implémenter importStandardChartOfAccounts dans useAccounting
+      toast({ variant: 'destructive', title: t('error'), description: 'Import functionality not yet implemented. Please create accounts manually for now.' });
     } catch (error) {
       toast({ variant: 'destructive', title: t('error'), description: error.message || t('defaultChartImportError') });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -248,6 +232,7 @@ const ChartOfAccounts = ({ currentEnterpriseId: propCurrentEnterpriseId }) => {
   const handleClassFilterChange = (value) => setClassFilter(value === "ALL_CLASSES" ? "" : value);
   const handleTypeFilterChange = (value) => setTypeFilter(value === "ALL_TYPES" ? "" : value);
 
+  const totalAccounts = accounts?.length || 0;
   const totalPages = Math.ceil(totalAccounts / limit);
 
   const renderSkeleton = () => (
@@ -263,7 +248,7 @@ const ChartOfAccounts = ({ currentEnterpriseId: propCurrentEnterpriseId }) => {
     ))
   );
 
-  if (!currentEnterpriseId && !loading) {
+  if (!companyId && !loading) {
     return (
        <div className="flex flex-col items-center justify-center h-full text-center p-8">
          <AlertTriangle className="w-16 h-16 text-yellow-500 mb-4" />
@@ -337,7 +322,7 @@ const ChartOfAccounts = ({ currentEnterpriseId: propCurrentEnterpriseId }) => {
             </TableHeader>
             <TableBody>{renderSkeleton()}</TableBody>
           </Table>
-        ) : accounts.length === 0 ? (
+        ) : !accounts || accounts.length === 0 ? (
           <div className="text-center py-10">
             <ListTree className="mx-auto h-12 w-12 text-muted-foreground" />
             <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">{t('noAccountsYet')}</h3>
@@ -367,7 +352,7 @@ const ChartOfAccounts = ({ currentEnterpriseId: propCurrentEnterpriseId }) => {
               </TableHeader>
               <TableBody>
                 {accounts.map((account) => {
-                  const AccClassIcon = ACCOUNT_CLASSES.find(ac => ac.value === account.class?.toString())?.icon || ListTree;
+                  const AccClassIcon = ACCOUNT_CLASSES.find(ac => ac.value === (account.class ? String(account.class) : ''))?.icon || ListTree;
                   return (
                     <TableRow key={account.id}>
                       <TableCell className="font-mono">{account.account_number}</TableCell>
@@ -376,7 +361,7 @@ const ChartOfAccounts = ({ currentEnterpriseId: propCurrentEnterpriseId }) => {
                       <TableCell>
                         <div className="flex items-center">
                           <AccClassIcon className="mr-2 h-4 w-4 text-muted-foreground" />
-                          {account.class} - {t(ACCOUNT_CLASSES.find(ac => ac.value === account.class?.toString())?.labelKey || 'Unknown')}
+                          {account.class} - {t(ACCOUNT_CLASSES.find(ac => ac.value === (account.class ? String(account.class) : ''))?.labelKey || 'Unknown')}
                         </div>
                       </TableCell>
                       <TableCell>{parseFloat(account.balance || 0).toFixed(2)} {account.currency}</TableCell>
@@ -426,14 +411,14 @@ const ChartOfAccounts = ({ currentEnterpriseId: propCurrentEnterpriseId }) => {
 
       {isFormOpen && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-background rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <h2 className="text-2xl font-bold mb-4">{editingAccount ? t('editAccount') : t('newAccount')}</h2>
               <AccountForm
                 account={editingAccount}
                 onSave={handleSaveAccount}
                 onCancel={() => { setIsFormOpen(false); setEditingAccount(null); }}
-                currentEnterpriseId={currentEnterpriseId}
+                currentEnterpriseId={companyId}
                 existingAccountNumbers={accounts.map(acc => acc.account_number)}
               />
             </div>

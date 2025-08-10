@@ -1,4 +1,6 @@
 // data/markets.ts
+import { MarketConfig } from '@/types/markets';
+
 export const MARKET_CONFIGS: MarketConfig[] = [
   {
     id: 'france',

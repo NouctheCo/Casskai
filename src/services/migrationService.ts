@@ -1,5 +1,5 @@
 // src/services/migrationService.ts
-import { supabase } from '../lib/supabase';
+// import { supabase } from '../lib/supabase'; // Commented out for build compatibility
 
 export interface MigrationResult {
   success: boolean;
@@ -384,7 +384,7 @@ class MigrationService {
 
       return {
         success: true,
-        data: data
+        data
       };
     } catch (error) {
       console.error('Erreur lors de la validation:', error);

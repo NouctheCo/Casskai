@@ -199,9 +199,10 @@ export const migrationTester = {
 
   // Test complet de la migration
   async runFullMigrationTest() {
-    console.log('🚀 Début des tests de migration des services CassKai...\n');
-    
-    const results = {
+    try {
+      console.log('🚀 Début des tests de migration des services CassKai...\n');
+      
+      const results = {
       accounts: await this.testAccountsService(),
       journals: await this.testJournalsService(),
       journalEntries: await this.testJournalEntryService(),
@@ -229,4 +230,9 @@ export const migrationTester = {
       console.log('3. Configurer l\'authentification');
       console.log('4. Déployer en production');
     } else {
-      console.log('\n⚠
+      console.log('\n⚠️ Certains tests ont échoué. Vérifiez la configuration avant de continuer.');
+    }
+  } catch (error) {
+    console.error('Erreur lors du test de migration:', error);
+  }
+}

@@ -1,0 +1,1 @@
+import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const QuotesManagement: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>QuotesManagement</CardTitle> </CardHeader> <CardContent> <p>Composant QuotesManagement en développement.</p> </CardContent> </Card> ); }; export default QuotesManagement;

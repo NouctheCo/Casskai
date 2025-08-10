@@ -1,124 +1,17 @@
 {
-  "accountingPage": {
-    "title": "Accounting Management",
-    "description": "Manage your journal entries, chart of accounts and journals.",
-    "saveErrorTitle": "Save Error",
-    "balanceError": "Debit and credit must be balanced.",
-    "saveSuccessTitle": "Entry Saved",
-    "saveSuccessMessage": "The journal entry has been saved successfully.",
-    "noCompanySelected": {
-      "title": "No Company Selected",
-      "message": "Please select a company to manage accounting"
-    }
-  },
-  "accounting": {
-    "setup": {
-      "title": "Accounting setup",
-      "description": "Complete the initial setup of your accounting system",
-      "chartOfAccounts": "Chart of accounts",
-      "chartOfAccountsDesc": "Configure your chart of accounts structure",
-      "fiscalYear": "Fiscal year",
-      "fiscalYearDesc": "Define your fiscal year and periods",
-      "journals": "Journals",
-      "journalsDesc": "Configure your accounting journals",
-      "completed": "Accounting setup completed successfully",
-      "configureChartOfAccounts": "Configure chart of accounts",
-      "chartOfAccountsDialogDesc": "Choose how to configure your chart of accounts",
-      "chartOption": "Chart of accounts option",
-      "selectChartOption": "Select an option",
-      "useDefaultChart": "Use default chart of accounts",
-      "createCustomChart": "Create custom chart (coming soon)",
-      "importFromFile": "Import from file (coming soon)",
-      "configureFiscalYear": "Configure fiscal year",
-      "fiscalYearDialogDesc": "Define your fiscal year start and end dates",
-      "fiscalYearStart": "Fiscal year start",
-      "fiscalYearEnd": "Fiscal year end",
-      "periodType": "Period type",
-      "selectPeriodType": "Select period type",
-      "monthly": "Monthly",
-      "quarterly": "Quarterly",
-      "annual": "Annual",
-      "fiscalYearSaved": "Fiscal year settings saved successfully",
-      "fiscalYearError": "Error saving fiscal year settings",
-      "configureJournals": "Configure journals",
-      "journalsDialogDesc": "Choose how to configure your accounting journals",
-      "journalsOption": "Journals option",
-      "selectJournalsOption": "Select an option",
-      "useDefaultJournals": "Use default journals",
-      "createCustomJournals": "Create custom journals (coming soon)",
-      "journalsSaved": "Default journals created successfully",
-      "journalsError": "Error creating journals"
-    },
-    "journals": {
-      "title": "Accounting journals",
-      "description": "Manage your accounting journals",
-      "newJournal": "New journal",
-      "editJournal": "Edit journal",
-      "newJournalDesc": "Create a new accounting journal",
-      "editJournalDesc": "Update journal information",
-      "code": "Code",
-      "name": "Name",
-      "type": "Type",
-      "description": "Description",
-      "status": "Status",
-      "isActive": "Active",
-      "namePlaceholder": "Journal name",
-      "descriptionPlaceholder": "Journal description",
-      "selectType": "Select type",
-      "noJournals": "No journals yet",
-      "createFirstJournal": "Create your first journal to get started",
-      "createJournal": "Create journal",
-      "validationError": "Please fill in all required fields",
-      "createSuccess": "Journal created successfully",
-      "updateSuccess": "Journal updated successfully",
-      "saveError": "Error saving journal",
-      "fetchError": "Error fetching journals",
-      "types": {
-        "sale": "Sales",
-        "purchase": "Purchases",
-        "bank": "Bank",
-        "cash": "Cash",
-        "miscellaneous": "Miscellaneous operations"
-      }
-    }
-  },
-  "journal_entries": {
-    "date": "Entry date",
-    "reference": "Reference",
-    "description": "Description",
-    "journal": "Journal",
-    "account": "Account",
-    "debit": "Debit",
-    "credit": "Credit",
-    "balance": "Balance",
-    "status": "Status",
-    "new": "New entry",
-    "edit": "Edit entry",
-    "delete": "Delete entry",
-    "save": "Save entry",
-    "cancel": "Cancel",
-    "items": "Entry lines",
-    "add_item": "Add line",
-    "remove_item": "Remove line",
-    "total_debit": "Total debit",
-    "total_credit": "Total credit",
-    "difference": "Difference",
-    "balanced": "Balanced",
-    "unbalanced": "Unbalanced",
-    "create": "Create",
-    "update": "Update",
-    "retry": "Retry",
-    "no_enterprise_selected": "No enterprise selected",
-    "supabase_not_configured": "Supabase is not configured. Please configure your environment variables.",
-    "network_error": "Network error. Check your internet connection and Supabase configuration.",
-    "error_loading_accounts": "Error loading accounts",
-    "error_loading_journals": "Error loading journals",
-    "no_accounts_found": "No accounts found",
-    "no_journals_found": "No journals found"
+  "translation": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
   },
   "common": {
-    "success": "Success",
+    "loading": "Loading...",
     "error": "Error",
+    "success": "Success",
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "logout": "Logout",
+    "welcome": "Welcome",
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
@@ -126,331 +19,270 @@
     "create": "Create",
     "actions": "Actions",
     "view": "View",
-    "dashboard": "Dashboard",
     "forecasts": "Forecasts",
     "guest": "Guest",
     "humanResources": "Human Resources",
     "inventory": "Inventory",
     "invoicing": "Invoicing",
-    "loading": "Loading...",
     "month": "Month",
     "noCompanySelectedTitle": "No Company Selected",
     "projects": "Projects",
-    "purchases": "Purchases",
     "quarter": "Quarter",
     "salesCrm": "Sales & CRM",
-    "settings": "Settings",
     "thirdParties": "Third Parties",
     "configure": "Configure",
     "getStarted": "Get Started",
     "year": "Year",
     "update": "Update",
-    "saving": "Saving..."
-  },
-  "entries": {
-    "updated": "Entry updated successfully",
-    "created": "Entry created successfully",
-    "failed": "Failed to save entry",
-    "new": "New entry",
-    "list": "Entries list"
-  },
-  "navigation": {
-    "chartOfAccounts": "Chart of Accounts",
-    "journals": "Journals",
-    "fec": "FEC",
-    "setupAssistant": "Setup Assistant"
-  },
-  "dashboard": {
-    "activeClients": "Active clients",
-    "activeClientsDescription": "Number of clients with recent activity",
-    "cashBalance": "Cash balance",
-    "cashflow": "Cash flow",
-    "cashflowDescription": "Evolution of cash inflows and outflows",
-    "clients": "Clients",
-    "comparedToPreviousPeriod": "Compared to previous period",
-    "dashboardWelcomeMessage": "Welcome, {userName}!",
-    "expenses": "Expenses",
-    "expensesDescription": "Period expenses",
-    "financialSummary": "Financial summary",
-    "financialSummaryDescription": "Overview of your financial situation",
-    "netProfit": "Net profit",
-    "netProfitDescription": "Profit after deducting expenses",
-    "newInvoice": "New invoice",
-    "newOpportunity": "New opportunity",
-    "newPurchaseOrder": "New purchase order",
-    "noUpcomingDeadlines": "No upcoming deadlines",
-    "overdueInvoices": "Overdue invoices",
-    "pendingInvoices": "Pending invoices",
-    "profit": "Profit",
-    "revenue": "Revenue",
-    "revenueDescription": "Period revenue",
-    "revenueExpenseTrend": "Revenue/Expense Trend",
-    "revenueExpenseTrendDescription": "Evolution of revenue and expenses",
-    "shortcutsDescription": "Quickly access main features",
-    "shortcutsTitle": "Quick Access",
-    "suppliers": "Suppliers",
-    "totalExpenses": "Total expenses",
-    "totalExpensesDescription": "Period expenses and charges",
-    "totalRevenue": "Total revenue",
-    "totalRevenueDescription": "Current period revenue",
-    "upcomingDeadlines": "Upcoming deadlines",
-    "upcomingDeadlinesDescription": "Upcoming deadlines and obligations"
-  },
-  "financialForecasts": "Financial forecasts",
-  "thirdParties": {
-    "active": "Active",
-    "address": "Address",
-    "balance": "Balance",
-    "city": "City",
-    "country": "Country",
-    "createSuccess": "Third party created successfully",
-    "createTitle": "Create third party",
-    "defaultCurrency": "Default currency",
-    "deleteConfirmation": "Are you sure you want to delete {name}?",
-    "deleteError": "Error deleting third party",
-    "deleteSuccess": "Third party deleted successfully",
-    "description": "Manage your clients and suppliers",
-    "editTitle": "Edit third party",
+    "saving": "Saving...",
+    "back": "Back",
+    "underDevelopment": "Under Development",
+    "underDevelopmentMessage": "This module is currently under development. It will be available soon.",
+    "comingSoon": "Coming Soon",
+    "newFeatures": "New Features",
+    "stayTuned": "Stay Tuned",
+    "stayTunedMessage": "We're working hard to bring you this feature. Thank you for your patience.",
+    "backToDashboard": "Back to Dashboard",
+    "close": "Close",
+    "search": "Search",
+    "all": "All",
     "email": "Email",
-    "errorLoading": "Error loading third parties",
-    "filterStatus": "Filter by status",
-    "formDescription": "Fill in third party information",
-    "import": {
-      "errorTitle": "Import error",
-      "processingDesc": "Processing data...",
-      "processingTitle": "Import in progress",
-      "successDesc": "{count} third parties imported successfully"
-    },
-    "validation": {
-      "websiteInvalid": "Invalid website format",
-      "emailInvalid": "Invalid email format",
-      "nameRequired": "Name is required"
-    },
-    "website": "Website",
-    "contactName": "Primary contact",
-    "name": "Name",
-    "noResults": "No results found",
-    "notes": "Notes",
-    "notesPlaceholder": "Notes or comments about this third party",
-    "pageSubtitle": "Manage your clients and suppliers",
-    "pageTitle": "Third Party Management",
-    "paymentTerms": "Payment terms",
-    "paymentTermsPlaceholder": "Ex: 30 days end of month",
-    "phone": "Phone",
-    "postalCode": "Postal code",
-    "saveError": "Error saving third party",
-    "searchPlaceholder": "Search for a {type}...",
-    "selectCompany": "Select a company",
-    "selectCompanyPrompt": "Please select a company",
-    "selectCompanyToViewClients": "Select a company to view clients",
-    "selectCompanyToViewSuppliers": "Select a company to view suppliers",
-    "selectCountry": "Select country",
-    "solvencyAnalysis": "Solvency analysis",
-    "solvencyAnalysisComingSoonDetail": "Solvency analysis with automatic scoring will be available soon",
-    "solvencyAnalysisSubtitle": "Analyze the financial health of your third parties",
-    "status": "Status",
-    "taxNumber": "Tax number",
-    "title": "Third Parties",
-    "unpaidTracking": "Unpaid tracking",
-    "unpaidTrackingComingSoonDetail": "Automatic unpaid tracking with reminders will be available soon",
-    "unpaidTrackingSubtitle": "Track and manage your unpaid receivables",
-    "updateSuccess": "Third party updated successfully"
+    "submit": "Submit",
+    "visible": "Visible",
+    "users": "Users",
+    "clients": "Clients",
+    "storage": "Storage",
+    "warning": "Warning",
+    "noCompanySelected": "No Company Selected",
+    "confirmDeleteAll": "Confirm Delete All",
+    "deleteAllEntriesConfirmation": "Are you sure you want to delete all entries?",
+    "deleteAllEntriesWarning": "This action cannot be undone and will permanently delete all entries.",
+    "balanceError": "Balance Error",
+    "canceled": "Canceled",
+    "input": "Input",
+    "newJournal": "New Journal",
+    "entry_date": "Entry Date",
+    "journal_id": "Journal ID",
+    "reference_number": "Reference Number",
+    "backupNow": "Backup Now",
+    "goHome": "Go Home",
+    "pageNotFound": "Page Not Found",
+    "quickActions": "Quick Actions",
+    "quickActionsDesc": "Access frequently used features",
+    "settingsDescription": "Manage your application preferences",
+    "themeDescription": "Choose your preferred theme",
+    "languageDescription": "Select your language",
+    "userProfileDesc": "Manage your profile information",
+    "companySettingsDesc": "Configure company settings",
+    "notificationsDesc": "Manage notification preferences",
+    "configureButton": "Configure",
+    "noPermissionManageRolesOrUsers": "You don't have permission to manage roles or users",
+    "france": "France"
   },
-  "client": "Client",
-  "supplier": "Supplier",
-  "invoicing": "Invoicing",
-  "purchases": "Purchases",
-  "salesCrm": "Sales & CRM",
-  "humanResources": "Human Resources",
-  "projects": "Projects",
-  "inventory": "Inventory",
-  "accountingPageTitle": "Accounting",
-  "bankConnections": "Banks",
-  "financialReports": "Financial reports",
-  "settings": "Settings",
-  "date": "Date",
-  "description": "Description",
-  "reference": "Reference",
-  "type": "Type",
-  "status": "Status",
-  "actions": "Actions",
-  "debit": "Debit",
-  "credit": "Credit",
-  "balance": "Balance",
-  "accountNumber": "Account number",
-  "accountName": "Account name",
-  "class": "Class",
-  "active": "Active",
-  "inactive": "Inactive",
-  "currency": "Currency",
-  "allClasses": "All classes",
-  "allTypes": "All types",
-  "allStatuses": "All statuses",
-  "filterByClass": "Filter by class",
-  "filterByType": "Filter by type",
-  "searchAccountsPlaceholder": "Search accounts...",
-  "noAccountsYet": "No accounts yet",
-  "startByCreatingAccountOrImport": "Start by creating an account or importing a standard chart of accounts",
-  "newAccount": "New account",
-  "editAccount": "Edit account",
-  "createAccountDescription": "Create a new account in your chart of accounts",
-  "editAccountDescription": "Edit account information",
-  "accountCreatedSuccess": "Account created successfully",
-  "accountUpdatedSuccess": "Account updated successfully",
-  "accountDescriptionPlaceholder": "Account description",
-  "capitalPlaceholder": "Share capital",
-  "parentAccountCodeOptional": "Parent account code (optional)",
-  "descriptionOptional": "Description (optional)",
-  "fieldRequired": "This field is required",
-  "accountNumberUniqueError": "This account number already exists",
-  "importDefaultChart": "Import standard chart",
-  "defaultChartImportedSuccess": "Standard chart of accounts imported successfully",
-  "defaultChartImportError": "Error importing standard chart of accounts",
-  "chartOfAccounts": "Chart of accounts",
-  "chartOfAccountsDescription": "Manage your chart of accounts",
-  "journals": "Journals",
-  "journal": "Journal",
-  "accountingEntries": "Journal entries",
-  "accountingEntriesList": "Entries list",
-  "newEntry": "New entry",
-  "dateFrom": "From date",
-  "dateTo": "To date",
-  "allJournals": "All journals",
-  "allAccounts": "All accounts",
-  "applyFilters": "Apply filters",
-  "clearFilters": "Clear filters",
-  "numberShort": "No.",
-  "noEntriesFound": "No entries found",
-  "previous": "Previous",
-  "next": "Next",
-  "entry": "entry",
-  "entries": "entries",
-  "pageWithCount": "Page {currentPage} of {totalPages} ({totalEntries} entries)",
-  "confirmDeletion": "Confirm deletion",
-  "confirmDeleteEntryMessage": "Are you sure you want to delete this entry? This action is irreversible.",
-  "confirmDeleteAllEntriesMessage": "Are you sure you want to delete ALL journal entries? This action is irreversible and will permanently delete all entries for this company.",
-  "journalEntryDeletedSuccess": "Entry deleted successfully",
-  "allEntriesDeletedSuccess": "All entries have been deleted successfully.",
-  "entryCreatedSuccess": "Entry created successfully",
-  "entryUpdatedSuccess": "Entry updated successfully",
-  "failedToDeleteEntry": "Failed to delete entry",
-  "failedToDeleteAllEntries": "Failed to delete entries",
-  "failedToSubmitEntry": "Failed to save entry",
-  "copySuffix": "(copy)",
-  "errorFetchingEntries": "Error fetching entries",
-  "errorFetchingAccounts": "Error fetching accounts",
-  "errorFetchingDropdownData": "Error fetching data",
-  "success": "Success",
-  "error": "Error",
-  "save": "Save",
-  "cancel": "Cancel",
-  "delete": "Delete",
-  "deleteAll": "Delete all",
-  "deleteAllEntries": "Delete all entries",
-  "deleting": "Deleting...",
-  "edit": "Edit",
-  "noCompanySelectedMessage": "Please select a company to continue",
-  "noCompanySelectedMessageAccounting": "Please select a company to access accounting",
-  "setupAssistant": "Setup assistant",
-  "fec": "FEC",
-  "fecImport": {
-    "description": "Import your FEC file (Accounting Entries File) to create entries, accounts and journals",
-    "parsing": "Parsing file...",
-    "importing": "Importing data...",
-    "button": {
-      "clearFile": "Clear",
-      "importing": "Importing...",
-      "startImport": "Start import",
-      "reset": "Reset"
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "accounting": "Accounting",
+    "banking": "Banking",
+    "invoicing": "Invoicing",
+    "purchases": "Purchases",
+    "sales": "Sales & CRM",
+    "humanResources": "Human Resources",
+    "projects": "Projects",
+    "inventory": "Inventory",
+    "reports": "Financial Reports",
+    "forecasts": "Financial Forecasts",
+    "thirdParties": "Third Parties",
+    "tax": "Taxes",
+    "contracts": "Contracts & RFA",
+    "security": "Security & Privacy",
+    "settings": "Settings"
+  },
+  "forecasts": {
+    "title": "Financial Forecasts",
+    "description": "Manage and analyze your budget forecasts and financial projections",
+    "dashboard": {
+      "title": "Dashboard",
+      "totalForecasts": "Total Forecasts",
+      "activeScenarios": "Active Scenarios",
+      "avgAccuracy": "Average Accuracy",
+      "nextReview": "Next Review",
+      "trends": {
+        "revenue": "Revenue",
+        "expenses": "Expenses",
+        "cashFlow": "Cash Flow",
+        "profitability": "Profitability"
+      },
+      "recentForecasts": "Recent Forecasts",
+      "upcomingReviews": "Upcoming Reviews"
     },
-    "dropzone": {
-      "clickToUpload": "Click to upload",
-      "orDragAndDrop": "or drag and drop",
-      "fileTypes": "FEC file (.txt or .csv)",
-      "selectFile": "Select FEC file"
+    "scenarios": {
+      "optimistic": "Optimistic",
+      "realistic": "Realistic",
+      "pessimistic": "Pessimistic",
+      "custom": "Custom",
+      "growthRate": "Growth Rate",
+      "marketConditions": "Market Conditions",
+      "favorable": "Favorable",
+      "stable": "Stable",
+      "unfavorable": "Unfavorable"
     },
-    "error": {
-      "notEnoughLines": "File too short. An FEC file must contain at least a header and one data line.",
-      "lineFormat": "Line {line}: Invalid format, expected {expected} fields, got {actual}.",
-      "invalidDate": "Line {line}: Invalid EcritureDate format: {date}",
-      "noValidEntries": "No valid entries found in file. Please check errors.",
-      "missingColumns": "Missing required columns: {columns}",
-      "fileType": "Invalid file type. Please upload a .txt or .csv file, or a file without extension.",
-      "fileSize": "File is too large. Maximum size is 10 MB.",
-      "readingFile": "Error reading file",
-      "handlingFile": "Error handling file",
-      "parsingFailed": "Failed to parse FEC file",
-      "noDataOrCompany": "No data to import or no company selected",
-      "cannotImportWithErrors": "Cannot import data with errors and no valid entries",
-      "unbalancedEntries": "{count} unbalanced entries found."
+    "status": {
+      "draft": "Draft",
+      "review": "Under Review",
+      "approved": "Approved",
+      "published": "Published"
     },
-    "feedback": {
-      "errors": "Parsing errors",
-      "errorsFound": "{count} errors found in file.",
-      "moreErrors": "and {count} more errors",
-      "summary": "File summary",
+    "buttons": {
+      "newForecast": "New Forecast",
+      "export": "Export",
+      "analyze": "Analyze",
+      "compare": "Compare"
+    }
+  },
+  "thirdParties": {
+    "title": "Third Parties Management",
+    "description": "Manage your customers, suppliers, and business partners",
+    "dashboard": {
+      "title": "Dashboard",
+      "totalThirdParties": "Total Third Parties",
+      "activeClients": "Active Customers",
+      "activeSuppliers": "Active Suppliers",
+      "newThisMonth": "New This Month",
+      "totalReceivables": "Total Receivables",
+      "totalPayables": "Total Payables",
+      "overdueReceivables": "Overdue Receivables",
+      "overduePayables": "Overdue Payables",
+      "topClients": "Top Customers by Revenue",
+      "topSuppliers": "Top Suppliers by Spending"
+    },
+    "types": {
+      "client": "Customer",
+      "supplier": "Supplier",
+      "partner": "Partner",
+      "both": "Customer/Supplier"
+    },
+    "categories": {
+      "individual": "Individual",
       "company": "Company",
-      "siren": "SIREN",
-      "period": "Period",
-      "entries": "Entries",
-      "accounts": "Accounts",
+      "government": "Government",
+      "nonprofit": "Non-profit"
+    },
+    "form": {
+      "generalInfo": "General Information",
+      "contactInfo": "Contact Information",
+      "financialInfo": "Financial Information",
+      "documents": "Documents",
+      "name": "Company Name",
+      "type": "Type",
+      "category": "Category",
+      "taxNumber": "Tax ID Number",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "address": "Address",
+      "city": "City",
+      "postalCode": "Postal Code",
+      "country": "Country",
+      "creditLimit": "Credit Limit",
+      "paymentTerms": "Payment Terms",
+      "website": "Website",
+      "notes": "Notes"
+    },
+    "buttons": {
+      "newThirdParty": "New Third Party",
+      "import": "Import",
+      "export": "Export",
+      "filter": "Filter"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "suspended": "Suspended"
+    }
+  },
+  "accounting": {
+    "title": "Accounting",
+    "description": "Manage your chart of accounts, journal entries, and accounting operations",
+    "tabs": {
+      "chartOfAccounts": "Chart of Accounts",
+      "journalEntries": "Journal Entries",
       "journals": "Journals",
+      "fecImport": "FEC Import",
+      "reports": "Reports"
+    },
+    "chartOfAccounts": {
+      "title": "Chart of Accounts",
+      "description": "Manage your chart of accounts",
+      "newAccount": "New Account",
+      "accountNumber": "Account Number",
+      "accountName": "Account Name",
+      "accountType": "Account Type",
+      "accountClass": "Account Class",
+      "balance": "Balance",
+      "currency": "Currency",
+      "isActive": "Active",
+      "actions": "Actions",
+      "noAccountsFound": "No accounts found",
+      "createFirstAccount": "Create your first account",
+      "searchPlaceholder": "Search accounts...",
+      "importStandardChart": "Import Standard Chart"
+    },
+    "journalEntries": {
+      "title": "Journal Entries",
+      "description": "Manage your accounting journal entries",
+      "newEntry": "New Entry",
+      "entryDate": "Entry Date",
+      "description": "Description",
+      "reference": "Reference",
+      "journal": "Journal",
       "totalDebit": "Total Debit",
       "totalCredit": "Total Credit",
-      "unbalanced": "Unbalanced entries",
-      "balanceDifference": "Entries are not balanced. Difference: {balance}",
-      "noData": "No data",
-      "noDataFound": "No valid entries found in file.",
-      "unbalancedEntries": "Unbalanced entries",
-      "unbalancedEntriesFound": "{count} unbalanced entries found.",
-      "unbalancedEntry": "Entry {key}: Difference of {difference}",
-      "moreUnbalanced": "and {count} more unbalanced entries"
+      "status": "Status",
+      "actions": "Actions",
+      "noEntriesFound": "No journal entries found",
+      "createFirstEntry": "Create your first journal entry",
+      "searchPlaceholder": "Search entries..."
     },
-    "data": {
-      "unavailable": "N/A"
-    },
-    "summary": {
-      "title": "FEC data overview",
-      "groupedEntries": "Grouped entries",
-      "entries": "Entries",
-      "accounts": "Accounts",
-      "journals": "Journals",
-      "journalEntry": "Journal-Entry",
-      "date": "Date",
+    "journals": {
+      "title": "Journals",
+      "description": "Manage your accounting journals",
+      "newJournal": "New Journal",
+      "journalCode": "Journal Code",
+      "journalName": "Journal Name",
+      "journalType": "Journal Type",
       "description": "Description",
-      "debit": "Debit",
-      "credit": "Credit",
-      "lines": "Lines",
-      "journal": "Journal",
-      "entryNum": "Entry No.",
-      "account": "Account",
-      "accountNumber": "Account number",
-      "accountName": "Account name",
-      "accountType": "Type",
-      "accountClass": "Class",
-      "journalCode": "Journal code",
-      "journalType": "Type",
-      "moreEntries": "... and {count} more entries",
-      "search": "Search entries..."
-    },
-    "journalTypes": {
-      "bank": "Bank",
-      "purchase": "Purchases",
-      "miscellaneous": "Miscellaneous operations",
-      "opening": "Opening balances",
-      "other": "Other"
-    },
-    "import": {
-      "successTitle": "Import successful",
-      "errorTitle": "Import failed",
-      "successDescription": "FEC data has been imported successfully.",
-      "accountsCreated": "{count} accounts created",
-      "journalsCreated": "{count} journals created",
-      "entriesCreated": "{count} journal entries created",
-      "entriesWithErrors": "{count} entries had errors",
-      "failed": "Failed to import FEC data",
-      "success": "FEC data imported successfully"
+      "isActive": "Active",
+      "actions": "Actions",
+      "noJournalsFound": "No journals found",
+      "createFirstJournal": "Create your first journal"
     }
+  },
+  "journal_entries": {
+    "account": "Account",
+    "add_item": "Add Item",
+    "balanced": "Balanced",
+    "cancel": "Cancel",
+    "create": "Create",
+    "credit": "Credit",
+    "date": "Date",
+    "debit": "Debit",
+    "description": "Description",
+    "difference": "Difference",
+    "edit": "Edit",
+    "error_loading_accounts": "Error loading accounts",
+    "error_loading_journals": "Error loading journals",
+    "items": "Items",
+    "journal": "Journal",
+    "network_error": "Network error",
+    "new": "New",
+    "no_accounts_found": "No accounts found",
+    "no_enterprise_selected": "No company selected",
+    "no_journals_found": "No journals found",
+    "reference": "Reference",
+    "remove_item": "Remove Item",
+    "retry": "Retry",
+    "supabase_not_configured": "Supabase not configured",
+    "unbalanced": "Unbalanced",
+    "update": "Update"
   },
   "accountTypes": {
     "ASSET": "Asset",
@@ -458,868 +290,248 @@
     "EQUITY": "Equity",
     "REVENUE": "Revenue",
     "EXPENSE": "Expense",
-    "COST_OF_GOODS_SOLD": "Cost of goods sold"
+    "COST_OF_GOODS_SOLD": "Cost of Goods Sold"
   },
   "accountClasses": {
-    "1": "Class 1 - Capital accounts",
-    "2": "Class 2 - Fixed asset accounts",
-    "3": "Class 3 - Inventory accounts",
-    "4": "Class 4 - Third party accounts",
-    "5": "Class 5 - Financial accounts",
-    "6": "Class 6 - Expense accounts",
-    "7": "Class 7 - Revenue accounts",
-    "8": "Class 8 - Special accounts",
-    "9": "Class 9 - Management accounting"
-  },
-  "pagination": {
-    "showing": "Showing {start} to {end} of {total} items",
-    "noResults": "No results",
-    "page": "Page",
-    "of": "of",
-    "entries": "entries",
-    "currentPage": "Current page",
-    "totalPages": "Total pages",
-    "totalEntries": "Total entries"
-  },
-  "selectAccountClass": "Select account class",
-  "selectAccountType": "Select account type",
-  "userManagement": {
-    "title": "User Management",
-    "description": "Manage users, invitations and roles",
-    "fetchUsersError": "Error loading users",
-    "adminApiError": "Admin API access error",
-    "noRoleAssigned": "No role assigned",
-    "accessDenied": "Access denied",
-    "insufficientPermissions": "Insufficient permissions",
-    "pageDescription": "Manage users, roles and invitations for your company",
-    "inviteUserTitle": "Invite New User",
-    "inviteUserDescription": "Send an email invitation to add a new user to your company",
-    "emailAddress": "Email address",
-    "emailPlaceholder": "user@example.com",
-    "sendInvitation": "Send Invitation",
-    "companyUsersTitle": "Company Users",
-    "companyUsersDescription": "View and manage users currently in your company",
-    "noUsersFound": "No users found in this company",
-    "inviteFirstUser": "Use the form above to invite your first team member!",
-    "userNameHeader": "User",
-    "assignedRole": "Assigned role",
-    "assignRole": "Assign role",
-    "assignRoleToUser": "Assign role to user",
-    "selectRole": "Select role",
-    "selectRoleForUser": "Select a new role for {0}",
-    "selectRolePlaceholder": "Select role",
-    "cancel": "Cancel",
-    "saveChanges": "Save changes",
-    "systemRole": "System role",
-    "noCompanyTitle": "No company selected",
-    "selectCompanyPrompt": "Please select a company to manage users",
-    "emailRequired": "Email is required to send an invitation",
-    "invitationSent": "Invitation sent to {0}",
-    "invitationError": "Failed to send invitation",
-    "emailNotAvailable": "Email not available",
-    "userNotAvailable": "User not available",
-    "unknownEmail": "Unknown email",
-    "unknownUser": "Unknown user",
-    "roleAssigned": "Role assigned successfully",
-    "roleAssignError": "Failed to assign role",
-    "manageUsersButton": "Manage Users & Roles",
-    "settingsCardPrompt": "Control who has access and what they can do",
-    "accessControlInfo": "Define access rights and invite new members",
-    "actions": "Actions"
-  },
-  "reports": {
-    "financialReports": "Financial Reports",
-    "generateAndAnalyze": "Generate and analyze your accounting reports",
-    "noCompanySelected": "No company selected",
-    "selectCompanyPrompt": "Select a company to generate reports",
-    "dataLoadError": "Error loading accounting data",
-    "generationError": "Error generating report",
-    "exportStarted": "Export started",
-    "exportMessage": "{format} export being prepared...",
-    "generateReport": "Generate report",
-    "exportPdf": "Export PDF",
-    "exportExcel": "Export Excel",
-    "close": "Close",
-    "periodLabel": "Period",
-    "comingSoon": "Coming soon",
-    "requestDemo": "Request demo",
-    "recalculateBalances": "Recalculate balances",
-    "balancesRecalculated": "Account balances recalculated successfully",
-    "balancesRecalculationError": "Error recalculating account balances",
-    
-    "currentYear": "Current year",
-    "lastYear": "Previous year", 
-    "currentMonth": "Current month",
-    "lastMonth": "Previous month",
-    
-    "balanceSheet": "Balance Sheet",
-    "balanceSheetDesc": "Financial position at a given date",
-    "incomeStatement": "Income Statement",
-    "incomeStatementDesc": "Financial performance over a period",
-    "cashFlowStatement": "Cash Flow Statement",
-    "cashFlowDesc": "Cash movements",
-    "trialBalance": "Trial Balance",
-    "trialBalanceDesc": "Balances of all accounts",
-    
-    "assets": "ASSETS",
-    "liabilities": "LIABILITIES",
-    "revenues": "REVENUES", 
-    "expenses": "EXPENSES",
-    
-    "fixedAssets": "Fixed assets",
-    "inventory": "Inventory",
-    "receivables": "Receivables",
-    "payables": "Payables",
-    "cash": "Cash",
-    
-    "salesRevenue": "Sales revenue",
-    "otherRevenues": "Other revenues",
-    "financialRevenues": "Financial revenues",
-    "purchases": "Purchases",
-    "externalExpenses": "External services",
-    "personnelExpenses": "Personnel expenses",
-    "otherExpenses": "Other expenses",
-    
-    "subtotal": "Subtotal",
-    "total": "TOTAL",
-    "totalAssets": "TOTAL ASSETS",
-    "totalLiabilities": "TOTAL LIABILITIES",
-    "totalRevenues": "TOTAL REVENUES",
-    "totalExpenses": "TOTAL EXPENSES",
-    "netResult": "NET RESULT",
-    
-    "balanced": "Balanced sheet",
-    "unbalanced": "Unbalanced sheet",
-    
-    "accountNumber": "Account No.",
-    "accountName": "Account Name",
-    "debit": "Debit",
-    "credit": "Credit",
-    "balance": "Balance",
-    
-    "showingFirstAccounts": "Showing first 10 accounts of {total}",
-    
-    "customAnalysis": "Custom Analysis",
-    "customAnalysisDesc": "Create custom analysis according to your needs"
+    "1": "Class 1 - Capital Accounts",
+    "2": "Class 2 - Fixed Asset Accounts",
+    "3": "Class 3 - Inventory Accounts",
+    "4": "Class 4 - Third Party Accounts",
+    "5": "Class 5 - Financial Accounts",
+    "6": "Class 6 - Expense Accounts",
+    "7": "Class 7 - Revenue Accounts",
+    "8": "Class 8 - Special Accounts",
+    "9": "Class 9 - Management Accounting"
   },
   "auth": {
-    "appName": "CassKai",
-    "loginToAccount": "Log in to your account",
-    "emailAddress": "Email address",
-    "emailPlaceholder": "example@email.com",
+    "login": "Login",
+    "signup": "Sign Up",
+    "email": "Email Address",
     "password": "Password",
-    "login": "Log in",
-    "loading": "Loading...",
-    "dontHaveAccount": "Don't have an account?",
-    "createAccount": "Create account",
-    "forgotPassword": "Forgot password?",
-    "allRightsReserved": "All rights reserved",
-    
-    "showPassword": "Show password",
+    "confirmPassword": "Confirm Password",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "loginButton": "Sign In",
+    "signupButton": "Create Account",
+    "forgotPassword": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "createAccount": "Create Account",
+    "goToLogin": "Sign In",
+    "goToRegister": "Sign Up",
+    "emailRequired": "Email is required",
+    "passwordRequired": "Password is required",
+    "firstNameRequired": "First name is required",
+    "lastNameRequired": "Last name is required",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "emailInvalid": "Please enter a valid email address",
+    "passwordMismatch": "Passwords do not match",
+    "loginError": "Invalid email or password",
+    "signupError": "Error creating account",
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "firstNamePlaceholder": "Enter your first name",
+    "lastNamePlaceholder": "Enter your last name",
+    "confirmPasswordPlaceholder": "Confirm your password",
+    "creating": "Creating account...",
+    "loggingIn": "Signing in...",
+    "checkYourEmail": "Check Your Email",
+    "emailSentTitle": "Confirmation Email Sent",
+    "checkEmailAgain": "Check your email again",
+    "checkSpamFolder": "Check your spam folder",
+    "emailConfirmedTitle": "Email Confirmed",
+    "emailConfirmedMessage": "Your email has been confirmed successfully.",
+    "emailNotConfirmed": "Email not confirmed",
+    "contactSupport": "Contact Support",
+    "backToLogin": "Back to Login",
+    "forgotPasswordTitle": "Reset Password",
+    "forgotPasswordSubtitle": "Enter your email to reset your password",
+    "resetPasswordButton": "Send Reset Link",
+    "resetLinkSent": "Reset link sent to your email",
+    "confirmationEmailResent": "Confirmation email resent",
+    "emailAlreadyExists": "An account with this email already exists",
+    "invalidCredentials": "Invalid email or password",
+    "fixErrors": "Please fix the errors above",
     "hidePassword": "Hide password",
-    
-    "signupCompleteTitle": "Registration successful!",
-    "loginPromptAfterSignup": "Please log in with your new account. If email confirmation is required, check your inbox.",
-    "emailConfirmedTitle": "Email confirmed!",
-    "emailConfirmedMessage": "Your email has been confirmed. You can now log in.",
-    
-    "authErrorTitle": "Authentication error",
-    "validationError": "Validation error",
-    "fillAllFields": "Please fill in all fields.",
-    
-    "emailNotConfirmedTitle": "Email not confirmed",
-    "emailNotConfirmedMessage": "Please check your inbox to confirm your email address before logging in.",
-    
-    "invalidCredentialsTitle": "Invalid credentials",
-    "invalidCredentialsMessage": "Incorrect email or password. Please check your information.",
-    
-    "tooManyAttemptsTitle": "Too many attempts",
-    "tooManyAttemptsMessage": "Too many login attempts. Please wait before trying again.",
-    
-    "loginError": "Login error",
-    "loginFailed": "Login failed. Please check your credentials.",
-    
-    "loginSuccessTitle": "Login successful",
-    "loginSuccessMessage": "Welcome! Redirecting...",
-    
-    "unexpectedError": "Unexpected error", 
-    "tryAgainLater": "An unexpected error occurred. Please try again.",
-    
-    "signUp": "Sign up",
-    "signUpSuccess": "Registration successful!",
-    "confirmPassword": "Confirm password"
-  },
-  "signup": {
-    "appName": "CassKai",
-    "loading": "Loading...",
-    "createAccountTitle": "Create account",
-    "createAccountDescription": "Join CassKai to manage your accounting",
-    "alreadyHaveAccount": "Already have an account?",
-    "loginButton": "Log in",
-    "allRightsReserved": "All rights reserved",
-    
-    "termsAgreement": "By creating an account, you agree to our",
-    "and": "and our",
+    "showPassword": "Show password",
+    "and": "and",
     "termsOfService": "Terms of Service",
     "privacyPolicy": "Privacy Policy",
-    
-    "firstName": "First name",
-    "lastName": "Last name",
-    "emailAddress": "Email address",
-    "emailPlaceholder": "example@email.com",
-    "password": "Password",
-    "confirmPassword": "Confirm password",
-    "companyName": "Company name",
-    "companyNameOptional": "Company name (optional)",
-    
-    "createAccount": "Create my account",
-    "creatingAccount": "Creating...",
-    
-    "passwordRequirements": "Password must contain at least 8 characters",
-    "passwordsDoNotMatch": "Passwords do not match",
-    "fillAllFields": "Please fill in all required fields",
-    
-    "accountCreatedTitle": "Account created successfully!",
-    "accountCreatedMessage": "A confirmation email has been sent to your address. Please check your inbox.",
-    "accountCreatedNoConfirm": "Your account has been created successfully. You can now log in.",
-    
-    "emailAlreadyExists": "This email address is already in use",
-    "weakPassword": "Password is too weak",
-    "invalidEmail": "Invalid email address",
-    "signupError": "Error creating account",
-    "signupFailed": "Failed to create account. Please try again.",
-    "unexpectedError": "An unexpected error occurred",
-    
-    "showPassword": "Show password",
-    "hidePassword": "Hide password"
+    "bySigningUp": "By signing up, you agree to our",
+    "importantNote": "Important Note",
+    "emailNotConfirmedNote": "Please check your email and click the confirmation link before signing in.",
+    "enterprise": "Enterprise",
+    "collaborative": "Collaborative",
+    "allRightsReserved": "All rights reserved",
+    "firstNameTooShort": "First name must be at least 2 characters",
+    "createAccountButton": "Create Account"
   },
-  "theme": "Theme", 
-  "language": "Language",
-  "subscriptionManagement": "Subscription Management",
-  "subscriptionManagementDesc": "Manage your subscription and billing",
-  "currentPlan": "Current plan",
-  "status": "Status", 
-  "price": "Price",
-  "renewsOn": "Renews on",
-  "manageSubscriptionButton": "Manage subscription",
-  "noSubscriptionFound": "No subscription found",
-  "subscribeNowButton": "Subscribe now", 
-  "noPermissionManageBilling": "You don't have permission to manage billing",
-  "stripePortalInfo": "Management via secure Stripe portal",
-  "unknownPlan": "Unknown plan",
-  "manageModules": "Module Management",
-  "moduleActivationDescription": "Activate or deactivate modules according to your needs",
-  "noPermissionManageModules": "You don't have permission to manage modules", 
-  "saveChanges": "Save changes",
-  "success": "Success",
-  "error": "Error",
-  "moduleSettingsUpdated": "Module settings updated",
-  "moduleSettingsUpdateError": "Error updating modules",
-  "userProfile": "User Profile",
-  "companySettings": "Company Settings", 
-  "notifications": "Notifications",
-  "comingSoon": "Coming soon",
-  "subscription_active": "Active",
-  "subscription_inactive": "Inactive", 
-  "subscription_past_due": "Past due",
-  "interval_month": "month",
-  "interval_year": "year",
-  "interval_week": "week",
-  "backupAndExport": "Backup and Export",
-  "exportData": "Export data",
-  "generateFECReport": "Generate FEC report",
-  "backupData": "Backup data",
-  "importData": "Import data",
-  "fecCompliance": "Exports comply with French accounting standards (FEC, DGI)",
-  "taxes": {
-    "title": "Taxes",
-    "subtitle": "Manage your tax declarations and compliance",
-    "noCompanySelected": "No company selected",
-    "selectCompanyPrompt": "Select a company to manage taxes",
-    
-    "france": "France",
-    "belgium": "Belgium", 
-    "switzerland": "Switzerland",
-    "luxembourg": "Luxembourg",
-    
-    "taxDeadlines": "Tax Deadlines",
-    "upcomingDeadlines": "Upcoming deadlines and declarations to file",
-    "type": "Type",
-    "declaration": "Declaration",
-    "dueDate": "Due date",
-    "status": "Status",
-    "amount": "Amount",
-    "actions": "Actions",
-    
-    "pending": "Pending",
-    "overdue": "Overdue",
-    "completed": "Completed",
-    "submitted": "Submitted",
-    
-    "taxRates": "Tax Rates",
-    "manageRates": "Manage your VAT and tax rates",
-    "addRate": "Add",
-    "editRate": "Edit rate",
-    "rateName": "Rate name",
-    "rateValue": "Rate (%)",
-    "rateType": "Type",
-    "description": "Description",
-    
-    "corporateTax": "Corporate tax",
-    "incomeTax": "Income tax",
-    "other": "Other",
-    
-    "taxCalculator": "Tax Calculator",
-    "calculateTaxes": "Calculate your taxes quickly",
-    "baseAmount": "Amount excl. tax",
-    "taxRate": "Rate (%)",
-    "calculate": "Calculate",
-    "taxAmount": "Tax",
-    "totalAmount": "Total incl. tax",
-    
-    "taxRegimes": "Tax Regimes",
-    "availableRegimes": "Tax regimes available for your country",
-    "conditions": "Conditions",
-    "obligations": "Obligations",
-    
-    "success": "Success",
-    "error": "Error",
-    "rateDeleted": "Rate deleted successfully",
-    "rateSaved": "Rate saved successfully",
-    "fillAllFields": "Please fill in all fields",
-    "invalidNumbers": "Please enter valid numbers",
-    "cancel": "Cancel",
-    "save": "Save",
-    
-    "view": "View",
-    "edit": "Edit",
-    "delete": "Delete",
-    "export": "Export",
-    "import": "Import",
-    "print": "Print",
-    "download": "Download",
-    "selectRate": "Choose rate",
-    
-    "search": "Search",
-    "filter": "Filter",
-    "filterBy": "Filter by",
-    "sortBy": "Sort by",
-    "all": "All",
-    "reset": "Reset",
-    
-    "period": "Period",
-    "monthly": "Monthly",
-    "quarterly": "Quarterly",
-    "yearly": "Yearly",
-    "custom": "Custom",
-    "from": "From",
-    "to": "To",
-    
-    "draft": "Draft",
-    "inProgress": "In progress",
-    "validated": "Validated",
-    "rejected": "Rejected",
-    
-    "vatDeclaration": "VAT declaration",
-    "corporateTaxDeclaration": "Corporate tax declaration",
-    "socialContributions": "Social contributions",
-    "withholdingTax": "Withholding tax",
-    
+  "formats": {
+    "date": {
+      "short": "MM/DD/YYYY",
+      "medium": "MMM DD, YYYY",
+      "long": "MMMM DD, YYYY",
+      "full": "dddd, MMMM DD, YYYY"
+    },
+    "currency": {
+      "symbol": "$",
+      "code": "USD",
+      "format": "$#,##0.00",
+      "position": "before"
+    },
+    "number": {
+      "decimal": ".",
+      "thousand": ",",
+      "precision": 2
+    }
+  },
+  "errors": {
+    "required": "This field is required",
+    "invalid": "Invalid value",
+    "minLength": "Must be at least {min} characters",
+    "maxLength": "Must be at most {max} characters",
+    "email": "Please enter a valid email address",
+    "number": "Please enter a valid number",
+    "positive": "Value must be positive",
+    "networkError": "Network error. Please try again.",
+    "serverError": "Server error. Please try again later.",
+    "unauthorized": "Unauthorized access",
+    "forbidden": "Access forbidden",
+    "notFound": "Resource not found",
+    "validationError": "Validation error"
+  },
+  "messages": {
+    "saveSuccess": "Saved successfully",
+    "deleteSuccess": "Deleted successfully",
+    "updateSuccess": "Updated successfully",
+    "createSuccess": "Created successfully",
+    "importSuccess": "Imported successfully",
+    "exportSuccess": "Exported successfully",
+    "confirmDelete": "Are you sure you want to delete this item?",
+    "confirmAction": "Are you sure you want to perform this action?",
     "noData": "No data available",
-    "noDeadlines": "No upcoming deadlines",
-    "loading": "Loading...",
-    "confirmDelete": "Are you sure you want to delete this rate?",
-    "cannotBeUndone": "This action cannot be undone",
-    
-    "lastUpdate": "Last update",
-    "createdBy": "Created by",
-    "modifiedBy": "Modified by",
-    "history": "History",
-    "notes": "Notes",
-    "attachments": "Attachments",
-    
-    "required": "Required field",
-    "invalidFormat": "Invalid format",
-    "minValue": "Minimum value is {min}",
-    "maxValue": "Maximum value is {max}",
-    
-    "advancedSettings": "Advanced settings",
-    "autoCalculate": "Auto calculate",
-    "roundingRules": "Rounding rules",
-    "defaultRate": "Default rate",
-    "active": "Active",
-    "inactive": "Inactive",
-    
-    "liasseFiscale": "Tax package",
-    "vatQuarterly": "Quarterly VAT",
-    "vatMonthly": "Monthly VAT",
-    "annualTaxReturn": "Annual tax return",
-    
-    "declareNow": "Declare now",
-    "scheduleReminder": "Schedule reminder",
-    "markAsCompleted": "Mark as completed",
-    "downloadForm": "Download form",
-    
-    "taxReduction": "Tax reduction",
-    "taxCredit": "Tax credit",
-    "taxExemption": "Tax exemption",
-    
-    "realNormal": "Real Normal",
-    "realSimplified": "Real Simplified",
-    "microEnterprise": "Micro-enterprise",
-    
-    "revenue": "Revenue",
-    "services": "Services",
-    "sales": "Sales",
-    
-    "validUntil": "Valid until",
-    "effectiveDate": "Effective date",
-    "expiryDate": "Expiry date",
-    
-    "monthlyAmounts": "Monthly tax amounts",
-    "exportSuccess": "Report exported successfully",
-    "exportError": "Error exporting PDF",
-    "reminderSet": "Reminder scheduled",
-    "reminderDescription": "You will be notified 3 days before {name} is due",
-    "reminderTitle": "Tax reminder",
-    "reminderMessage": "{name} is due in 3 days",
-    "pastDueDate": "Due date has already passed",
-    "notificationDenied": "Notification permission denied",
-    "notificationsNotSupported": "Notifications are not supported by your browser",
-    "importSuccess": "{count} rates imported successfully",
-    "importError": "Error importing file",
-    "fileReadError": "Error reading file",
-    "importErrors": "Import errors"
+    "loadingData": "Loading data...",
+    "processingRequest": "Processing request...",
+    "operationCompleted": "Operation completed successfully"
   },
-  "tax": "Taxes",
-  "enterprise": {
-    "select": "Select company",
-    "yourEnterprises": "Your companies",
-    "addNew": "Add company",
-    "manage": "Manage companies",
-    "current": "Current",
-    "confirmDelete": "Are you sure you want to delete this company?",
-    
-    "name": "Trading name",
-    "legalName": "Legal name",
-    "registrationNumber": "Registration number",
-    "vatNumber": "VAT number",
-    "country": "Country",
-    "currency": "Currency",
-    "address": "Address",
-    "street": "Street",
-    "postalCode": "Postal code",
-    "city": "City",
-    "taxRegime": "Tax regime",
-    
-    "generalInfo": "General information",
-    "generalInfoDesc": "Basic information about your company",
-    "addressInfo": "Address",
-    "addressInfoDesc": "Registered office address",
-    "fiscalInfo": "Tax information",
-    "fiscalInfoDesc": "Tax regime and fiscal year",
-    "settings": "Settings",
-    "settingsDesc": "Preferences and configuration",
-    
-    "fiscalYearStart": "Fiscal year start",
-    "fiscalYearEnd": "Fiscal year end",
-    "vatPeriod": "VAT periodicity",
-    "defaultVATRate": "Default VAT rate",
-    "defaultPaymentTerms": "Payment terms (days)",
-    "taxReminderDays": "Tax reminder (days before)",
-    "roundingRule": "Rounding rule",
-    "autoCalculateTax": "Auto calculate taxes",
-    "autoCalculateTaxDesc": "Automatically calculate taxes on invoices",
-    "emailNotifications": "Email notifications",
-    "emailNotificationsDesc": "Receive reminders for tax deadlines",
-    
-    "tabs": {
-      "general": "General",
-      "address": "Address",
-      "fiscal": "Tax",
-      "settings": "Settings"
+  "landing": {
+    "nav": {
+      "features": "Features",
+      "pricing": "Pricing",
+      "testimonials": "Testimonials",
+      "contact": "Contact",
+      "login": "Login",
+      "signup": "Get Started"
     },
-    
-    "regimes": {
-      "realNormal": "Real Normal",
-      "realSimplified": "Real Simplified",
-      "microEnterprise": "Micro-enterprise",
-      "other": "Other"
+    "hero": {
+      "badge": "🚀 Next generation business management",
+      "title": "Manage your business",
+      "subtitle": "with ease",
+      "description": "CassKai revolutionizes business management with a complete suite: accounting, invoicing, CRM, projects, HR and much more. All in one, simple and powerful.",
+      "cta": {
+        "start": "14-day free trial",
+        "demo": "Watch demo"
+      },
+      "stats": {
+        "companies": "Companies",
+        "uptime": "Uptime",
+        "support": "Support",
+        "rating": "Satisfaction"
+      }
     },
-    
-    "periods": {
+    "pricing": {
+      "badge": "Transparent pricing",
+      "title": "Choose your plan",
+      "subtitle": "and start today",
+      "description": "All our plans include a 14-day free trial, no commitment and no credit card required.",
+      "period": "/month",
+      "period.annual": "/year",
       "monthly": "Monthly",
-      "quarterly": "Quarterly",
-      "yearly": "Yearly",
-      "none": "Not applicable"
-    },
-    
-    "rounding": {
-      "up": "Round up",
-      "down": "Round down",
-      "nearest": "Round to nearest"
-    },
-    
-    "errors": {
-      "nameRequired": "Name is required",
-      "legalNameRequired": "Legal name is required",
-      "registrationRequired": "Registration number is required",
-      "streetRequired": "Address is required",
-      "postalCodeRequired": "Postal code is required",
-      "cityRequired": "City is required"
-    }
-  },
-  
-  "setup": {
-    "wizard": {
-      "title": "CassKai Configuration",
-      "subtitle": "Multi-market financial management solution",
-      "welcome": "Welcome to the configuration wizard",
-      "steps": {
-        "market": "Market & Localization",
-        "supabase": "Supabase Configuration",
-        "company": "Company Information",
-        "mobile_money": "Mobile Money",
-        "admin": "Administrator Account"
-      }
-    },
-    "market": {
-      "detected": "Market automatically detected: {{market}}",
-      "select": "Select your primary market",
-      "selected": "Selected",
-      "regions": {
-        "europe": "🇪🇺 Europe",
-        "africa": "🌍 Africa",
-        "americas": "🌎 Americas"
-      },
-      "countries": {
-        "france": "France",
-        "belgium": "Belgium",
-        "benin": "Benin",
-        "ivory_coast": "Ivory Coast",
-        "burkina_faso": "Burkina Faso",
-        "mali": "Mali",
-        "senegal": "Senegal",
-        "togo": "Togo",
-        "canada": "Canada (QC)"
-      }
-    },
-    "supabase": {
-      "info": "You must create a free Supabase project on supabase.com",
-      "info_title": "Important information",
-      "info_description": "You must have created a Supabase project before continuing. Keys are available in your project settings.",
-      "url_label": "Supabase project URL",
-      "url_placeholder": "https://your-project.supabase.co",
-      "key_label": "Supabase API key (anon)",
-      "key_placeholder": "eyJhbGciOiJIUzI1NiIsInR5cCI...",
-      "test_connection": "Test connection",
-      "testing": "Testing...",
-      "success": "Supabase connection successful! Automatic configuration in progress...",
-      "error": "Connection error. Check your Supabase settings.",
-      "required": "This field is required"
-    },
-    "company": {
-      "config_for": "Configuration for: {{country}}",
-      "ohada_activated": "OHADA configuration activated",
-      "ohada_description": "SYSCOHADA accounting plan, Mobile Money support, local tax compliance.",
-      "name_label": "Company name",
-      "name_placeholder_african": "Company Ltd",
-      "name_placeholder_default": "My Company Ltd",
-      "legal_form": "Legal form",
-      "legal_forms": {
-        "select": "Select...",
-        "sarl": "SARL (Limited Liability Company)",
-        "suarl": "SUARL (Single Member Limited Liability Company)",
-        "sa": "SA (Public Limited Company)",
-        "sas": "SAS (Simplified Joint Stock Company)",
-        "gie": "GIE (Economic Interest Group)",
-        "ei": "EI (Sole Proprietorship)"
-      },
-      "tax_number": {
-        "african": "Tax Identification Number (TIN)",
-        "france": "SIREN/SIRET",
-        "belgium": "VAT BE",
-        "default": "Tax number"
-      },
-      "tax_number_placeholder": {
-        "african": "Ex: 2024123456789",
-        "france": "12345678901234",
-        "belgium": "BE0123456789",
-        "default": "Tax number"
-      },
-      "capital_label": "Share capital (in CFA)",
-      "capital_placeholder": "1000000",
-      "capital_minimum": "Minimum capital: 1,000,000 CFA for SARL, 10,000,000 CFA for SA",
-      "sector_label": "Business sector",
-      "sectors": {
-        "select": "Select...",
-        "african": {
-          "agriculture": "Agriculture and livestock",
-          "commerce": "Trade and distribution",
-          "services": "Services",
-          "industrie": "Industry and manufacturing",
-          "btp": "Construction",
-          "transport": "Transport and logistics",
-          "telecom": "Telecommunications",
-          "finance": "Financial services",
-          "education": "Education and training",
-          "sante": "Healthcare",
-          "tourisme": "Tourism and hospitality",
-          "energie": "Energy and mining"
-        },
-        "default": {
-          "commerce": "Trade",
-          "services": "Services",
-          "industrie": "Industry",
-          "btp": "Construction",
-          "it": "Information Technology",
-          "consulting": "Consulting"
-        }
-      }
-    },
-    "mobile_money": {
-      "title": "Mobile Money",
-      "description": "Configure popular mobile payment methods in your region.",
-      "not_applicable": "Mobile Money not applicable",
-      "not_applicable_description": "This feature is specific to African markets.",
-      "providers_label": "Mobile payment methods to activate",
-      "providers": {
-        "benin": {
-          "mtn": "MTN Mobile Money",
-          "moov": "Moov Money"
-        },
-        "ivory_coast": {
-          "orange": "Orange Money",
-          "mtn": "MTN Mobile Money",
-          "moov": "Moov Money"
-        },
-        "burkina_faso": {
-          "orange": "Orange Money",
-          "moov": "Moov Money"
-        },
-        "mali": {
-          "orange": "Orange Money",
-          "moov": "Moov Money"
-        },
-        "senegal": {
-          "orange": "Orange Money",
-          "wave": "Wave",
-          "free": "Free Money"
-        },
-        "togo": {
-          "flooz": "Flooz",
-          "tmoney": "T-Money"
+      "annual": "Annual",
+      "popular": "Most popular",
+      "cta": "Start free trial",
+      "selectCountry": "Select your country",
+      "pricesIn": "Prices displayed in",
+      "starter": {
+        "name": "Starter",
+        "description": "Perfect to get started",
+        "features": {
+          "invoicing": "Unlimited invoicing",
+          "clients": "Up to 100 clients",
+          "accounting": "Basic accounting",
+          "reports": "10 standard reports",
+          "support": "Email support",
+          "storage": "5 GB storage"
         }
       },
-      "note_title": "Important note",
-      "note_description": "Mobile Money integration requires partnerships with operators. These options will be available in a future version of CassKai."
-    },
-    "admin": {
-      "email_label": "Administrator email",
-      "email_placeholder": "admin@mycompany.com",
-      "password_label": "Password",
-      "password_placeholder": "Secure password",
-      "final_config": "Final configuration",
-      "tasks": {
-        "database": "Database schema installation",
-        "accounting_plan": "Import accounting plan {{standard}}",
-        "currencies": "Currency and rates configuration",
-        "features": "Local features activation",
-        "mobile_money": "Mobile Money configuration ({{count}} operators)"
+      "professional": {
+        "name": "Professional",
+        "description": "For growing businesses",
+        "features": {
+          "everything": "Everything in Starter",
+          "clients": "Unlimited clients",
+          "advanced": "Advanced accounting",
+          "crm": "Complete CRM",
+          "projects": "Project management",
+          "hr": "Basic HR",
+          "reports": "Unlimited reports",
+          "api": "API Access",
+          "storage": "50 GB storage",
+          "support": "Priority support"
+        }
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "description": "Custom complete solution",
+        "features": {
+          "everything": "Everything in Professional",
+          "users": "Unlimited users",
+          "hr_advanced": "Advanced HR",
+          "banking": "Banking connections",
+          "forecasting": "Financial forecasting",
+          "audit": "Complete audit trail",
+          "integrations": "Custom integrations",
+          "storage": "Unlimited storage",
+          "support": "24/7 dedicated support",
+          "onboarding": "Training included"
+        }
       }
-    },
-    "navigation": {
-      "previous": "Previous",
-      "next": "Next",
-      "finish": "Complete installation",
-      "step_of": "Step {{current}} of {{total}}"
-    },
-    "validation": {
-      "required": "This field is required",
-      "email_invalid": "Invalid email address",
-      "password_min": "Password must contain at least 8 characters",
-      "company_name_required": "Company name is required",
-      "supabase_connection_required": "Supabase connection must be tested"
-    },
-    "installation": {
-      "starting": "Starting installation...",
-      "creating_database": "Creating database...",
-      "importing_accounting": "Importing accounting plan...",
-      "configuring_company": "Configuring company...",
-      "creating_admin": "Creating administrator account...",
-      "finalizing": "Finalizing...",
-      "completed": "Installation completed successfully!",
-      "error": "Installation error",
-      "redirecting": "Redirecting to CassKai...",
-      "please_wait": "Please wait, this may take a few minutes."
-    },
-    "features": {
-      "ohada_compliance": "OHADA Compliance",
-      "mobile_money_integration": "Mobile Money Integration",
-      "local_tax_compliance": "Local Tax Compliance",
-      "multi_currency": "Multi-currency",
-      "automatic_exchange_rates": "Automatic Exchange Rates",
-      "local_banking": "Local Banking Connections",
-      "regulatory_reports": "Regulatory Reports",
-      "fiscal_calendar": "Local Fiscal Calendar"
-    },
-    "currencies": {
-      "eur": "Euro",
-      "xof": "CFA Franc BCEAO",
-      "xaf": "CFA Franc BEAC",
-      "usd": "US Dollar",
-      "cad": "Canadian Dollar",
-      "gbp": "British Pound"
-    },
-    "standards": {
-      "pcg": "General Accounting Plan (France)",
-      "pcg_belge": "Belgian General Accounting Plan",
-      "syscohada": "SYSCOHADA (West Africa)",
-      "gaap": "GAAP (Canada)",
-      "ifrs": "IFRS International"
     }
   },
-  
-  "company": {
-    "management": {
-      "title": "Company Management",
-      "description": "Create and manage your companies",
-      "create": "Create company",
-      "edit": "Edit company",
-      "delete": "Delete company",
-      "switch": "Switch company",
-      "no_companies": "No companies created",
-      "create_first": "Create your first company to get started",
-      "current_company": "Current company",
-      "select_company": "Select company"
-    },
-    "fields": {
-      "trading_name": "Trading name",
-      "legal_name": "Legal name",
-      "registration_number": "Registration number",
-      "vat_number": "VAT number",
-      "tax_number": "Tax number",
-      "legal_form": "Legal form",
-      "share_capital": "Share capital",
-      "business_sector": "Business sector",
-      "accounting_standard": "Accounting standard",
-      "base_currency": "Base currency",
-      "fiscal_year_start": "Fiscal year start",
-      "fiscal_year_end": "Fiscal year end"
-    }
-  },
-  
-  "mobile_money": {
-    "title": "Mobile Money",
-    "description": "Mobile payment management",
-    "providers": "Operators",
-    "transactions": "Transactions",
-    "balance": "Balance",
-    "transfer": "Transfer",
-    "top_up": "Top up",
-    "withdraw": "Withdraw",
-    "fees": "Fees",
-    "history": "History"
-  },
-  
-  "geography": {
-    "countries": {
-      "BJ": "Benin",
-      "CI": "Ivory Coast", 
-      "BF": "Burkina Faso",
-      "ML": "Mali",
-      "SN": "Senegal",
-      "TG": "Togo",
-      "FR": "France",
-      "BE": "Belgium",
-      "CA": "Canada",
-      "US": "United States",
-      "GB": "United Kingdom"
-    },
-    "regions": {
-      "west_africa": "West Africa",
-      "europe": "Europe",
-      "north_america": "North America"
-    }
-  },
-  
-  "accounting_standards": {
-    "SYSCOHADA": "SYSCOHADA",
-    "PCG": "General Accounting Plan",
-    "GAAP": "GAAP",
-    "IFRS": "IFRS"
-  },
-  
-  "legal_forms": {
-    "african": {
-      "SARL": "SARL",
-      "SUARL": "SUARL", 
-      "SA": "SA",
-      "SAS": "SAS",
-      "GIE": "GIE",
-      "EI": "EI"
-    },
-    "french": {
-      "SARL": "SARL",
-      "EURL": "EURL",
-      "SA": "SA",
-      "SAS": "SAS",
-      "SASU": "SASU",
-      "SNC": "SNC",
-      "EI": "EI",
-      "EIRL": "EIRL"
-    }
-  },
-  
-  "currencies_extended": {
-    "XOF": {
-      "name": "CFA Franc BCEAO",
-      "symbol": "CFA",
-      "format": "{{amount}} CFA"
-    },
-    "XAF": {
-      "name": "CFA Franc BEAC", 
-      "symbol": "FCFA",
-      "format": "{{amount}} FCFA"
-    },
-    "EUR": {
-      "name": "Euro",
-      "symbol": "€",
-      "format": "{{amount}} €"
-    },
-    "USD": {
-      "name": "US Dollar",
-      "symbol": "$", 
-      "format": "${{amount}}"
-    },
-    "CAD": {
-      "name": "Canadian Dollar",
-      "symbol": "CAD",
-      "format": "{{amount}} CAD"
-    }
-  },
-  
-  "installation": {
-    "wizard": {
-      "title": "Installation Wizard",
-      "subtitle": "Setting up your CassKai instance",
-      "progress": "Progress: {{step}}/{{total}}",
-      "estimated_time": "Estimated time: {{minutes}} minutes"
-    },
-    "status": {
-      "not_started": "Not started",
-      "in_progress": "In progress",
-      "completed": "Completed",
-      "failed": "Failed",
-      "skipped": "Skipped"
-    }
-  },
-  
   "onboarding": {
     "welcome": {
       "title": "Welcome to CassKai!",
-      "subtitle": "Your financial management solution is almost ready",
-      "steps_remaining": "{{count}} steps remaining"
+      "subtitle": "We're excited to help you manage your business. Let's set up your platform together in a few simple steps.",
+      "whatYouGet": "What you get with CassKai",
+      "nextSteps": "Next steps",
+      "startSetup": "Start setup",
+      "duration": "⏱️ Estimated setup: 3-5 minutes"
+    },
+    "steps": {
+      "features": "Features",
+      "featuresDesc": "Discover our modules",
+      "preferences": "Preferences", 
+      "preferencesDesc": "Customize your experience",
+      "company": "Company",
+      "companyDesc": "Configure your business"
+    },
+    "features": {
+      "title": "Choose your features",
+      "subtitle": "Select the modules that match your needs. You can always change them later."
+    },
+    "preferences": {
+      "title": "Configure your preferences",
+      "subtitle": "Customize your CassKai experience according to your needs"
+    },
+    "company": {
+      "title": "Your company information",
+      "subtitle": "Enter your business details"
+    },
+    "complete": {
+      "welcomeTitle": "Welcome to CassKai!",
+      "welcomeSubtitle": "Your platform is ready! You can now start managing your business with CassKai.",
+      "configuringTitle": "Configuration in progress...",
+      "configuringSubtitle": "We're preparing your personalized workspace..."
     },
     "completion": {
       "title": "Setup complete!",
@@ -1329,177 +541,5 @@
       "invite_team": "Invite your team",
       "import_data": "Import your data"
     }
-  },
-  
-  "business_sectors": {
-    "african": {
-      "agriculture": "Agriculture and livestock",
-      "commerce": "Trade and distribution",
-      "services": "Services",
-      "industrie": "Industry and manufacturing",
-      "btp": "Construction",
-      "transport": "Transport and logistics",
-      "telecom": "Telecommunications",
-      "finance": "Financial services",
-      "education": "Education and training",
-      "sante": "Healthcare",
-      "tourisme": "Tourism and hospitality",
-      "energie": "Energy and mining",
-      "mining": "Mining and extraction",
-      "textiles": "Textile and clothing",
-      "food_processing": "Food processing"
-    },
-    "european": {
-      "commerce": "Trade",
-      "services": "Services",
-      "industrie": "Industry",
-      "btp": "Construction",
-      "it": "Information Technology",
-      "consulting": "Consulting",
-      "finance": "Finance",
-      "real_estate": "Real Estate",
-      "healthcare": "Healthcare",
-      "education": "Education",
-      "hospitality": "Hospitality",
-      "media": "Media and communication"
-    }
-  },
-  
-  "pricing": {
-    "plans": {
-      "starter": {
-        "name": "Starter",
-        "price_eur": "€19/month",
-        "price_xof": "12K CFA/month",
-        "price_cad": "$25 CAD/month"
-      },
-      "professional": {
-        "name": "Professional",
-        "price_eur": "€49/month", 
-        "price_xof": "32K CFA/month",
-        "price_cad": "$65 CAD/month"
-      },
-      "enterprise": {
-        "name": "Enterprise",
-        "price_eur": "€99/month",
-        "price_xof": "65K CFA/month", 
-        "price_cad": "$129 CAD/month"
-      }
-    },
-    "features": {
-      "companies": "Companies",
-      "users": "Users",
-      "transactions": "Transactions/month",
-      "storage": "Storage",
-      "support": "Support",
-      "api_access": "API Access",
-      "custom_reports": "Custom reports",
-      "mobile_money": "Mobile Money",
-      "multi_currency": "Multi-currency",
-      "bank_sync": "Bank synchronization"
-    }
-  },
-  
-  "regions_detailed": {
-    "west_africa": {
-      "name": "West Africa",
-      "description": "West African Economic and Monetary Union",
-      "currency": "CFA Franc BCEAO (XOF)",
-      "central_bank": "Central Bank of West African States",
-      "accounting_standard": "SYSCOHADA",
-      "countries": ["Benin", "Burkina Faso", "Ivory Coast", "Mali", "Niger", "Senegal", "Togo", "Guinea-Bissau"]
-    },
-    "central_africa": {
-      "name": "Central Africa",
-      "description": "Central African Economic and Monetary Union",
-      "currency": "CFA Franc BEAC (XAF)",
-      "central_bank": "Bank of Central African States",
-      "accounting_standard": "SYSCOHADA",
-      "countries": ["Cameroon", "Central African Republic", "Chad", "Republic of Congo", "Equatorial Guinea", "Gabon"]
-    }
-  },
-  
-  "fiscal_calendars": {
-    "france": {
-      "year_start": "01-01",
-      "year_end": "12-31",
-      "vat_periods": ["monthly", "quarterly"],
-      "major_deadlines": {
-        "vat_annual": "05-02",
-        "corporate_tax": "05-15",
-        "social_declarations": "01-31"
-      }
-    },
-    "ohada": {
-      "year_start": "01-01",
-      "year_end": "12-31", 
-      "vat_periods": ["monthly"],
-      "major_deadlines": {
-        "vat_monthly": "15",
-        "corporate_tax": "04-30",
-        "annual_returns": "04-30"
-      }
-    }
-  },
-  
-  "mobile_money_operators": {
-    "orange_money": {
-      "name": "Orange Money",
-      "countries": ["CI", "BF", "ML", "SN"],
-      "services": ["transfer", "payment", "top_up", "withdraw"],
-      "fees": {
-        "transfer_local": "1%",
-        "transfer_international": "2.5%",
-        "payment": "0.5%"
-      }
-    },
-    "mtn_mobile_money": {
-      "name": "MTN Mobile Money", 
-      "countries": ["BJ", "CI"],
-      "services": ["transfer", "payment", "top_up", "withdraw"],
-      "fees": {
-        "transfer_local": "1.2%",
-        "payment": "0.8%"
-      }
-    },
-    "moov_money": {
-      "name": "Moov Money",
-      "countries": ["BJ", "CI", "BF", "ML"],
-      "services": ["transfer", "payment", "top_up"],
-      "fees": {
-        "transfer_local": "1.1%",
-        "payment": "0.6%"
-      }
-    },
-    "wave": {
-      "name": "Wave",
-      "countries": ["SN"],
-      "services": ["transfer", "payment"],
-      "fees": {
-        "transfer_local": "0%",
-        "payment": "1%"
-      }
-    },
-    "flooz": {
-      "name": "Flooz",
-      "countries": ["TG"],
-      "services": ["transfer", "payment", "top_up"],
-      "fees": {
-        "transfer_local": "1%",
-        "payment": "0.7%"
-      }
-    }
-  },
-  
-  "market_features": {
-    "france": ["GDPR", "FEC", "SEPA", "EU VAT", "DSN", "DAS2"],
-    "belgium": ["GDPR", "NBB", "Bancontact", "EU VAT"],
-    "benin": ["OHADA", "Mobile Money", "DGI", "CNSS", "Customs"],
-    "ivory_coast": ["OHADA", "Orange Money", "DGI", "CNPS"],
-    "burkina_faso": ["OHADA", "Mobile Money", "DGID", "CNSS"],
-    "mali": ["OHADA", "Orange Money", "DGI", "INPS"],
-    "senegal": ["OHADA", "Wave", "DGI", "CSS"],
-    "togo": ["OHADA", "Flooz", "OTR", "CNSS"],
-    "canada": ["GST/HST", "CRA", "Interac", "CRA"]
   }
 }

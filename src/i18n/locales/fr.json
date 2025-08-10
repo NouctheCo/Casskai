@@ -1,4 +1,808 @@
 {
+  "translation": {
+    "light": "Clair",
+    "dark": "Sombre", 
+    "system": "Système"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "dashboard": "Tableau de bord",
+    "settings": "Paramètres",
+    "logout": "Déconnexion",
+    "welcome": "Bienvenue"
+  },
+  "landing": {
+    "nav": {
+      "features": "Fonctionnalités",
+      "pricing": "Tarifs",
+      "testimonials": "Témoignages",
+      "contact": "Contact",
+      "login": "Connexion",
+      "signup": "Commencer"
+    },
+    "hero": {
+      "badge": "🚀 Nouvelle génération de gestion d'entreprise",
+      "title": "Gérez votre entreprise",
+      "subtitle": "en toute simplicité",
+      "description": "CassKai révolutionne la gestion d'entreprise avec une suite complète : comptabilité, facturation, CRM, projets, RH et bien plus. Tout en un, simple et puissant.",
+      "cta": {
+        "start": "Essai gratuit 14 jours",
+        "demo": "Voir la démo"
+      },
+      "stats": {
+        "companies": "Entreprises",
+        "uptime": "Disponibilité",
+        "support": "Support",
+        "rating": "Satisfaction"
+      }
+    },
+    "features": {
+      "badge": "Suite complète",
+      "title": "Tout ce dont vous avez besoin",
+      "subtitle": "dans une seule application",
+      "description": "CassKai réunit tous les outils essentiels à la gestion de votre entreprise dans une interface moderne et intuitive.",
+      "accounting": {
+        "title": "Comptabilité & Finances",
+        "description": "Gestion complète de votre comptabilité avec écritures automatisées, plan comptable personnalisable et rapports financiers en temps réel."
+      },
+      "invoicing": {
+        "title": "Facturation & CRM",
+        "description": "Créez et envoyez vos factures en quelques clics. Gérez vos clients, suivez vos ventes et automatisez vos relances."
+      },
+      "analytics": {
+        "title": "Analyses & Rapports",
+        "description": "Tableaux de bord interactifs, analyses prédictives et rapports personnalisables pour piloter votre entreprise en toute connaissance."
+      },
+      "hr": {
+        "title": "Ressources Humaines",
+        "description": "Gestion complète de vos employés : paie, congés, absences, formations et déclarations sociales simplifiées."
+      },
+      "projects": {
+        "title": "Gestion de Projets",
+        "description": "Planifiez, suivez et livrez vos projets à temps. Gestion d'équipes, budgets et échéances dans une interface intuitive."
+      },
+      "banking": {
+        "title": "Gestion Bancaire",
+        "description": "Connectez vos comptes bancaires, automatisez les rapprochements et suivez votre trésorerie en temps réel."
+      },
+      "security": {
+        "title": "Sécurité maximale",
+        "description": "Données chiffrées, sauvegardes automatiques et conformité RGPD."
+      },
+      "access": {
+        "title": "Accès partout",
+        "description": "Application web responsive accessible depuis tous vos appareils."
+      },
+      "automation": {
+        "title": "Automatisation",
+        "description": "Workflows intelligents qui vous font gagner du temps au quotidien."
+      }
+    },
+    "pricing": {
+      "badge": "Tarifs transparents",
+      "title": "Choisissez votre plan",
+      "subtitle": "et démarrez aujourd'hui",
+      "description": "Tous nos plans incluent un essai gratuit de 14 jours, sans engagement et sans carte bancaire.",
+      "period": "/mois",
+      "period.annual": "/an",
+      "monthly": "Mensuel",
+      "annual": "Annuel",
+      "popular": "Plus populaire",
+      "cta": "Commencer l'essai gratuit",
+      "selectCountry": "Sélectionnez votre pays",
+      "pricesIn": "Prix affichés en",
+      "starter": {
+        "name": "Starter",
+        "description": "Parfait pour débuter",
+        "features": {
+          "invoicing": "Facturation illimitée",
+          "clients": "Jusqu'à 100 clients",
+          "accounting": "Comptabilité de base",
+          "reports": "10 rapports standards",
+          "support": "Support email",
+          "storage": "5 GB de stockage"
+        }
+      },
+      "professional": {
+        "name": "Professionnel",
+        "description": "Pour les entreprises en croissance",
+        "features": {
+          "everything": "Tout du plan Starter",
+          "clients": "Clients illimités",
+          "advanced": "Comptabilité avancée",
+          "crm": "CRM complet",
+          "projects": "Gestion de projets",
+          "hr": "RH de base",
+          "reports": "Rapports illimités",
+          "api": "API Access",
+          "storage": "50 GB de stockage",
+          "support": "Support prioritaire"
+        }
+      },
+      "enterprise": {
+        "name": "Entreprise",
+        "description": "Solution complète sur mesure",
+        "features": {
+          "everything": "Tout du plan Professionnel",
+          "users": "Utilisateurs illimités",
+          "hr_advanced": "RH avancées",
+          "banking": "Connexions bancaires",
+          "forecasting": "Prévisions financières",
+          "audit": "Piste d'audit complète",
+          "integrations": "Intégrations personnalisées",
+          "storage": "Stockage illimité",
+          "support": "Support dédié 24/7",
+          "onboarding": "Formation incluse"
+        }
+      },
+      "guarantee": {
+        "security": {
+          "title": "Sécurité garantie",
+          "description": "Vos données sont chiffrées et sauvegardées quotidiennement"
+        },
+        "trial": {
+          "title": "14 jours gratuits",
+          "description": "Testez toutes les fonctionnalités sans engagement"
+        },
+        "support": {
+          "title": "Support expert",
+          "description": "Notre équipe vous accompagne dans votre réussite"
+        }
+      }
+    },
+    "testimonials": {
+      "badge": "Témoignages clients",
+      "title": "Ils nous font confiance",
+      "subtitle": "et réussissent avec CassKai",
+      "description": "Découvrez comment CassKai transforme la gestion d'entreprise pour des milliers de professionnels.",
+      "marie": {
+        "content": "CassKai a révolutionné notre gestion financière. L'interface est intuitive et nous fait gagner un temps précieux chaque jour."
+      },
+      "pierre": {
+        "content": "Excellent outil pour mes clients PME. Les rapports automatisés et la conformité fiscale sont parfaits."
+      },
+      "sophie": {
+        "content": "La gestion multi-entités et les tableaux de bord nous donnent une vision claire de nos performances."
+      }
+    },
+    "contact": {
+      "badge": "Nous contacter",
+      "title": "Une question ?",
+      "subtitle": "Nous sommes là pour vous",
+      "description": "Notre équipe d'experts est disponible pour répondre à toutes vos questions et vous accompagner dans votre réussite.",
+      "email": {
+        "title": "Email",
+        "description": "Réponse sous 24h"
+      },
+      "phone": {
+        "title": "Téléphone",
+        "description": "Lun-Ven 9h-18h"
+      },
+      "chat": {
+        "title": "Chat en direct",
+        "content": "Support instantané",
+        "description": "Disponible 24/7"
+      }
+    },
+    "footer": {
+      "description": "La solution complète de gestion d'entreprise pour les PME et indépendants.",
+      "copyright": "Tous droits réservés.",
+      "ssl": "SSL Sécurisé",
+      "gdpr_compliant": "Conforme RGPD",
+      "product": {
+        "title": "Produit",
+        "features": "Fonctionnalités",
+        "pricing": "Tarifs",
+        "security": "Sécurité",
+        "integrations": "Intégrations"
+      },
+      "support": {
+        "title": "Support",
+        "help": "Centre d'aide",
+        "documentation": "Documentation",
+        "api": "API",
+        "status": "Statut"
+      },
+      "legal": {
+        "title": "Légal",
+        "privacy": "Confidentialité",
+        "terms": "Conditions",
+        "cookies": "Cookies",
+        "gdpr": "RGPD"
+      }
+    }
+  },
+  "sidebar": {
+    "dashboard": "Tableau de bord",
+    "accounting": "Comptabilité", 
+    "accountingImport": "Import/Export Comptable",
+    "banking": "Banques",
+    "invoicing": "Facturation",
+    "purchases": "Achats",
+    "sales": "Ventes & CRM",
+    "humanResources": "Ressources Humaines",
+    "projects": "Projets",
+    "inventory": "Inventaire",
+    "reports": "Rapports financiers",
+    "forecasts": "Prévisions financières",
+    "thirdParties": "Tiers",
+    "tax": "Taxes",
+    "contracts": "Contrats & RFA",
+    "security": "Sécurité & Confidentialité",
+    "settings": "Paramètres"
+  },
+  "forecasts": {
+    "title": "Prévisions Financières",
+    "description": "Gérez et analysez vos prévisions budgétaires et projections financières",
+    "dashboard": {
+      "title": "Tableau de Bord",
+      "totalForecasts": "Total Prévisions",
+      "activeScenarios": "Scénarios Actifs",
+      "avgAccuracy": "Précision Moyenne",
+      "nextReview": "Prochaine Révision",
+      "trends": {
+        "revenue": "Revenus",
+        "expenses": "Dépenses",
+        "cashFlow": "Flux de Trésorerie",
+        "profitability": "Rentabilité"
+      },
+      "recentForecasts": "Prévisions Récentes",
+      "upcomingReviews": "Révisions Programmées"
+    },
+    "scenarios": {
+      "optimistic": "Optimiste",
+      "realistic": "Réaliste",
+      "pessimistic": "Pessimiste",
+      "custom": "Personnalisé",
+      "growthRate": "Taux de croissance",
+      "marketConditions": "Conditions de marché",
+      "favorable": "Favorable",
+      "stable": "Stable",
+      "unfavorable": "Défavorable"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "review": "En révision",
+      "approved": "Approuvé",
+      "published": "Publié"
+    },
+    "buttons": {
+      "newForecast": "Nouvelle Prévision",
+      "export": "Exporter",
+      "analyze": "Analyser",
+      "compare": "Comparer"
+    }
+  },
+  "thirdParties": {
+    "title": "Gestion des Tiers",
+    "description": "Gérez vos clients, fournisseurs et partenaires commerciaux",
+    "dashboard": {
+      "title": "Tableau de Bord",
+      "totalThirdParties": "Total Tiers",
+      "activeClients": "Clients Actifs",
+      "activeSuppliers": "Fournisseurs Actifs",
+      "newThisMonth": "Nouveaux ce Mois",
+      "totalReceivables": "Total Créances",
+      "totalPayables": "Total Dettes",
+      "overdueReceivables": "Créances Échues",
+      "overduePayables": "Dettes Échues",
+      "topClients": "Top Clients par Chiffre d'Affaires",
+      "topSuppliers": "Top Fournisseurs par Dépenses"
+    },
+    "types": {
+      "client": "Client",
+      "supplier": "Fournisseur",
+      "partner": "Partenaire",
+      "both": "Client/Fournisseur"
+    },
+    "categories": {
+      "individual": "Particulier",
+      "company": "Entreprise",
+      "government": "Administration",
+      "ngo": "Association"
+    },
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif",
+      "suspended": "Suspendu",
+      "blocked": "Bloqué"
+    },
+    "fields": {
+      "code": "Code",
+      "currentBalance": "Solde Actuel",
+      "receivables": "Créances",
+      "payables": "Dettes",
+      "creditLimit": "Limite de Crédit",
+      "lastInteraction": "Dernière interaction"
+    },
+    "aging": {
+      "title": "Analyse d'Ancienneté des Créances",
+      "current": "0-30 jours",
+      "bucket30": "31-60 jours",
+      "bucket60": "61-90 jours",
+      "bucket90": "91-120 jours",
+      "bucketOver120": ">120 jours",
+      "total": "Total"
+    },
+    "alerts": {
+      "overdueInvoices": "Factures échues",
+      "creditLimitExceeded": "Limites de crédit dépassées",
+      "missingInformation": "Informations manquantes"
+    },
+    "buttons": {
+      "newThirdParty": "Nouveau Tiers",
+      "export": "Exporter",
+      "resetFilters": "Réinitialiser les filtres"
+    }
+  },
+  "tax": {
+    "title": "Gestion Fiscale",
+    "description": "Gérez vos déclarations, obligations et calendrier fiscal",
+    "dashboard": {
+      "title": "Tableau de Bord",
+      "totalDeclarations": "Total Déclarations",
+      "pending": "En Attente",
+      "overdue": "En Retard",
+      "activeAlerts": "Alertes Actives",
+      "taxesDue": "Taxes Dues",
+      "taxesPaid": "Taxes Payées",
+      "complianceScore": "Score de Conformité"
+    },
+    "types": {
+      "TVA": "TVA",
+      "IS": "IS",
+      "IR": "IR",
+      "Liasse": "Liasse",
+      "CFE": "CFE",
+      "CVAE": "CVAE"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "pending": "En attente",
+      "submitted": "Soumise",
+      "completed": "Terminée",
+      "overdue": "En retard"
+    },
+    "alerts": {
+      "severity": {
+        "critical": "Critique",
+        "error": "Erreur",
+        "warning": "Attention",
+        "info": "Information"
+      },
+      "status": {
+        "active": "Active",
+        "acknowledged": "Confirmée",
+        "resolved": "Résolue"
+      },
+      "deadlineApproaching": "Échéance dans 7 jours",
+      "paymentOverdue": "Paiement en retard",
+      "newRegulation": "Nouvelle réglementation"
+    },
+    "obligations": {
+      "frequency": {
+        "monthly": "Mensuelle",
+        "quarterly": "Trimestrielle",
+        "annual": "Annuelle",
+        "oneTime": "Ponctuelle"
+      },
+      "autoGenerate": "Génération automatique",
+      "requiresApproval": "Approbation requise",
+      "emailNotifications": "Notifications email"
+    },
+    "buttons": {
+      "newDeclaration": "Nouvelle Déclaration",
+      "export": "Exporter",
+      "acknowledge": "Confirmer",
+      "resetFilters": "Réinitialiser les filtres"
+    }
+  },
+  "contracts": {
+    "title": "Contrats & RFA",
+    "subtitle": "Gestion des contrats clients et calcul automatisé des remises de fin d'année",
+    "description": "Gérez vos contrats commerciaux et calculez automatiquement les remises de fin d'année",
+    "tabs": {
+      "dashboard": "Tableau de bord",
+      "contracts": "Contrats",
+      "calculations": "Calculs RFA"
+    },
+    "stats": {
+      "total_contracts": "Contrats totaux",
+      "active_contracts": "Contrats actifs",
+      "total_rfa_pending": "RFA en attente",
+      "total_rfa_paid": "RFA payées",
+      "average_rate": "Taux moyen",
+      "clients_with_contracts": "Clients sous contrat"
+    },
+    "status": {
+      "active": "Actif",
+      "expired": "Expiré",
+      "archived": "Archivé",
+      "draft": "Brouillon"
+    },
+    "type": {
+      "progressive": "Paliers progressifs",
+      "fixed_percent": "Pourcentage fixe",
+      "fixed_amount": "Montant fixe"
+    },
+    "rfa_status": {
+      "pending": "En attente",
+      "validated": "Validé",
+      "paid": "Payé",
+      "cancelled": "Annulé"
+    },
+    "alerts": {
+      "title": "Alertes importantes",
+      "tier_approaching": "Palier proche",
+      "contract_expiring": "Contrat expirant",
+      "rfa_threshold": "Seuil RFA",
+      "anomaly_detected": "Anomalie détectée"
+    },
+    "top_clients": "Top clients RFA",
+    "recent_calculations": "Calculs récents",
+    "rfa_calculations": "Calculs RFA",
+    "new_contract": "Nouveau contrat",
+    "search_placeholder": "Rechercher un contrat ou client...",
+    "form": {
+      "general_info": "Informations générales",
+      "client": "Client",
+      "name": "Nom du contrat",
+      "type": "Type de remise",
+      "start_date": "Date de début",
+      "end_date": "Date de fin (optionnelle)",
+      "currency": "Devise",
+      "discount_config": "Configuration des remises",
+      "conditions": "Conditions particulières"
+    },
+    "calculator": {
+      "title": "Calculateur RFA",
+      "single": "Calcul simple",
+      "simulation": "Simulation scénarios"
+    },
+    "export": {
+      "contracts": "Exporter les contrats",
+      "calculations": "Exporter les calculs RFA"
+    },
+    "buttons": {
+      "new_contract": "Nouveau contrat",
+      "new_calculation": "Nouveau calcul",
+      "simulate": "Simuler",
+      "export": "Exporter",
+      "calculate": "Calculer",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "edit": "Modifier",
+      "archive": "Archiver",
+      "view": "Voir"
+    },
+    "new": "Nouveau Contrat"
+  },
+  "reports": {
+    "title": "Rapports Financiers",
+    "description": "Générez et gérez vos rapports comptables et financiers",
+    "dashboard": {
+      "title": "Tableau de Bord",
+      "totalReports": "Total Rapports",
+      "thisMonth": "Ce Mois",
+      "automated": "Automatisés",
+      "scheduledToday": "Prévus Aujourd'hui",
+      "keyMetrics": {
+        "revenueYTD": "Chiffre d'Affaires YTD",
+        "expensesYTD": "Charges YTD",
+        "netIncomeYTD": "Résultat Net YTD",
+        "cashPosition": "Position de Trésorerie"
+      }
+    },
+    "types": {
+      "balanceSheet": "Bilan",
+      "incomeStatement": "Compte de résultat",
+      "cashFlow": "Flux de trésorerie",
+      "trialBalance": "Balance générale",
+      "profitLoss": "Profit & Pertes",
+      "generalLedger": "Grand livre"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "generating": "En cours",
+      "ready": "Prêt",
+      "published": "Publié",
+      "archived": "Archivé"
+    },
+    "formats": {
+      "pdf": "PDF",
+      "excel": "Excel",
+      "csv": "CSV"
+    },
+    "templates": {
+      "title": "Modèles",
+      "default": "Par défaut",
+      "custom": "Personnalisé",
+      "sections": "Sections",
+      "useTemplate": "Utiliser ce modèle"
+    },
+    "schedules": {
+      "title": "Planification",
+      "frequency": {
+        "daily": "Quotidienne",
+        "weekly": "Hebdomadaire",
+        "monthly": "Mensuelle",
+        "quarterly": "Trimestrielle",
+        "annually": "Annuelle"
+      },
+      "active": "Actif",
+      "inactive": "Inactif",
+      "nextRun": "Prochaine exécution",
+      "lastRun": "Dernière exécution",
+      "recipients": "Destinataires",
+      "autoSend": "Envoi automatique",
+      "includeCharts": "Inclure graphiques"
+    },
+    "analytics": {
+      "title": "Analytics",
+      "balanceSheetSimplified": "Bilan Simplifié",
+      "totalAssets": "Total Actif",
+      "totalLiabilities": "Total Passif",
+      "equity": "Capitaux Propres",
+      "balanced": "Équilibré",
+      "unbalanced": "Déséquilibré",
+      "revenue": "Chiffre d'Affaires",
+      "expenses": "Charges",
+      "operatingIncome": "Résultat Opérationnel",
+      "netIncome": "Résultat Net",
+      "operatingCashFlow": "Flux Exploitation",
+      "investingCashFlow": "Flux Investissement",
+      "financingCashFlow": "Flux Financement",
+      "netCashChange": "Variation Nette",
+      "ratiosAnalysis": "Analyse des Ratios",
+      "temporalAnalysis": "Analyse Temporelle"
+    },
+    "alerts": {
+      "missingData": "Données manquantes",
+      "failedSchedules": "Planifications échouées",
+      "outdatedReports": "Rapports obsolètes"
+    },
+    "buttons": {
+      "newReport": "Nouveau Rapport",
+      "export": "Exporter",
+      "download": "Télécharger",
+      "generate": "Générer",
+      "resetFilters": "Réinitialiser les filtres",
+      "analyzeRatios": "Analyser les Ratios",
+      "comparePeriods": "Comparer les Périodes"
+    }
+  },
+  "crm": {
+    "dashboard": {
+      "title": "Tableau de bord CRM",
+      "stats": {
+        "totalClients": "Total clients",
+        "activeOpportunities": "Opportunités actives",
+        "pipelineValue": "Valeur du pipeline",
+        "conversionRate": "Taux de conversion"
+      },
+      "pipeline": {
+        "title": "Pipeline des ventes",
+        "deals": "affaires",
+        "avgDeal": "Affaire moy."
+      },
+      "revenue": {
+        "title": "Évolution du chiffre d'affaires",
+        "total": "Total ce mois"
+      },
+      "recentOpportunities": {
+        "title": "Opportunités récentes"
+      },
+      "recentActions": {
+        "title": "Actions récentes"
+      },
+      "topClients": {
+        "title": "Meilleurs clients"
+      },
+      "quickActions": "Actions rapides",
+      "overdue": "en retard",
+      "pending": "en attente",
+      "actions": {
+        "newClient": "Nouveau client",
+        "newOpportunity": "Nouvelle opportunité",
+        "newAction": "Nouvelle action"
+      }
+    },
+    "clientsManagement": {
+      "title": "Gestion des clients",
+      "clients": "Clients",
+      "contacts": "Contacts",
+      "addClient": "Ajouter un client",
+      "addContact": "Ajouter un contact"
+    },
+    "clientsTable": {
+      "company": "Entreprise",
+      "industry": "Secteur",
+      "size": "Taille",
+      "status": "Statut",
+      "location": "Localisation",
+      "contacts": "Contacts",
+      "revenue": "CA"
+    },
+    "contactsTable": {
+      "name": "Nom",
+      "company": "Entreprise",
+      "position": "Poste",
+      "email": "Email",
+      "phone": "Téléphone",
+      "created": "Créé le"
+    },
+    "clientForm": {
+      "createTitle": "Créer un nouveau client",
+      "editTitle": "Modifier le client",
+      "companyName": "Nom de l'entreprise",
+      "industry": "Secteur d'activité",
+      "size": "Taille",
+      "status": "Statut",
+      "city": "Ville",
+      "website": "Site web",
+      "address": "Adresse",
+      "notes": "Notes"
+    },
+    "contactForm": {
+      "createTitle": "Créer un nouveau contact",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "email": "Email",
+      "phone": "Téléphone",
+      "position": "Poste",
+      "client": "Client",
+      "selectClient": "Sélectionner un client"
+    },
+    "opportunities": {
+      "title": "Gestion des opportunités",
+      "description": "Suivez vos opportunités commerciales",
+      "create": "Créer une opportunité",
+      "add": "Ajouter",
+      "nextAction": "Prochaine action"
+    },
+    "opportunityForm": {
+      "createTitle": "Créer une nouvelle opportunité",
+      "editTitle": "Modifier l'opportunité",
+      "title": "Titre",
+      "stage": "Étape",
+      "client": "Client",
+      "contact": "Contact",
+      "selectClient": "Sélectionner un client",
+      "selectContact": "Sélectionner un contact",
+      "value": "Valeur",
+      "probability": "Probabilité",
+      "expectedCloseDate": "Date de clôture prévue",
+      "priority": "Priorité",
+      "source": "Source",
+      "assignedTo": "Assigné à",
+      "description": "Description",
+      "nextAction": "Prochaine action",
+      "nextActionDate": "Date de la prochaine action"
+    },
+    "actions": {
+      "title": "Actions commerciales",
+      "description": "Gérez vos activités commerciales",
+      "create": "Créer une action",
+      "overdue": "En retard",
+      "stats": {
+        "total": "Total",
+        "completed": "Terminées",
+        "planned": "Planifiées",
+        "overdue": "En retard"
+      }
+    },
+    "actionsTable": {
+      "type": "Type",
+      "title": "Titre",
+      "client": "Client",
+      "contact": "Contact",
+      "status": "Statut",
+      "priority": "Priorité",
+      "dueDate": "Date d'échéance",
+      "assigned": "Assigné"
+    },
+    "actionForm": {
+      "createTitle": "Créer une nouvelle action",
+      "editTitle": "Modifier l'action",
+      "type": "Type",
+      "status": "Statut",
+      "title": "Titre",
+      "description": "Description",
+      "client": "Client",
+      "contact": "Contact",
+      "opportunity": "Opportunité",
+      "selectClient": "Sélectionner un client",
+      "selectContact": "Sélectionner un contact",
+      "selectOpportunity": "Sélectionner une opportunité",
+      "noClient": "Aucun client",
+      "noContact": "Aucun contact",
+      "noOpportunity": "Aucune opportunité",
+      "priority": "Priorité",
+      "dueDate": "Date d'échéance",
+      "assignedTo": "Assigné à",
+      "outcome": "Résultat"
+    },
+    "stages": {
+      "prospecting": "Prospection",
+      "qualification": "Qualification",
+      "proposal": "Proposition",
+      "negotiation": "Négociation",
+      "closing": "Finalisation",
+      "won": "Gagnée",
+      "lost": "Perdue"
+    },
+    "priority": {
+      "low": "Faible",
+      "medium": "Moyenne",
+      "high": "Élevée"
+    },
+    "clientStatus": {
+      "active": "Actif",
+      "prospect": "Prospect",
+      "inactive": "Inactif",
+      "lost": "Perdu"
+    },
+    "clientSize": {
+      "small": "Petite",
+      "medium": "Moyenne",
+      "large": "Grande"
+    },
+    "actionTypes": {
+      "call": "Appel",
+      "email": "Email",
+      "meeting": "Réunion",
+      "task": "Tâche",
+      "note": "Note",
+      "demo": "Démo",
+      "proposal": "Proposition"
+    },
+    "actionStatus": {
+      "planned": "Planifiée",
+      "completed": "Terminée",
+      "cancelled": "Annulée"
+    },
+    "filters": {
+      "title": "Filtres",
+      "search": "Recherche",
+      "searchPlaceholder": "Rechercher...",
+      "searchActions": "Rechercher des actions...",
+      "status": "Statut",
+      "industry": "Secteur",
+      "size": "Taille",
+      "type": "Type",
+      "priority": "Priorité",
+      "dateFrom": "Date de début",
+      "dateTo": "Date de fin",
+      "clear": "Effacer les filtres",
+      "allStatuses": "Tous les statuts",
+      "allIndustries": "Tous les secteurs",
+      "allSizes": "Toutes les tailles",
+      "allTypes": "Tous les types",
+      "allPriorities": "Toutes les priorités"
+    }
+  },
+  "auth": {
+    "loginTitle": "Connexion à votre compte",
+    "createAccount": "Créer votre compte",
+    "email": "Email",
+    "password": "Mot de passe",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "login": "Se connecter",
+    "register": "S'inscrire",
+    "validationError": "Erreur de validation",
+    "fillAllFields": "Veuillez remplir tous les champs.",
+    "invalidCredentialsTitle": "Identifiants invalides",
+    "invalidCredentialsMessage": "Email ou mot de passe incorrect. Veuillez vérifier vos informations.",
+    "loginError": "Erreur de connexion",
+    "loginFailed": "Échec de la connexion. Veuillez vérifier vos identifiants.",
+    "loginSuccessTitle": "Connexion réussie",
+    "loginSuccessMessage": "Bienvenue ! Redirection en cours...",
+    "unexpectedError": "Erreur inattendue",
+    "tryAgainLater": "Une erreur inattendue s'est produite. Veuillez réessayer."
+  },
   "accountingPage": {
     "title": "Gestion Comptable",
     "description": "Gérez vos écritures, plan comptable et journaux.",
@@ -145,7 +949,110 @@
     "getStarted": "Commencer",
     "year": "Année",
     "update": "Mettre à jour",
-    "saving": "Enregistrement..."
+    "saving": "Enregistrement...",
+    "back": "Retour",
+    "underDevelopment": "En cours de développement",
+    "underDevelopmentMessage": "Ce module est actuellement en cours de développement. Il sera bientôt disponible.",
+    "comingSoon": "Bientôt disponible",
+    "newFeatures": "Nouvelles fonctionnalités",
+    "stayTuned": "Restez à l'écoute",
+    "stayTunedMessage": "Nous travaillons dur pour vous apporter cette fonctionnalité. Merci de votre patience.",
+    "backToDashboard": "Retour au tableau de bord",
+    "exporting": "Exportation...",
+    "search": "Rechercher"
+  },
+  "purchases": {
+    "title": "Gestion des Achats",
+    "description": "Gérez vos achats, factures fournisseurs et paiements",
+    "noPurchases": "Aucun achat pour le moment",
+    "noPurchasesDescription": "Créez votre premier achat pour commencer",
+    "createPurchase": "Nouvel achat",
+    "table": {
+      "invoiceNumber": "N° Facture",
+      "date": "Date",
+      "supplier": "Fournisseur",
+      "description": "Description",
+      "amountHT": "Montant HT",
+      "amountTTC": "Montant TTC",
+      "status": "Statut",
+      "dueDate": "Échéance"
+    },
+    "status": {
+      "paid": "Payé",
+      "pending": "En attente",
+      "overdue": "En retard"
+    },
+    "form": {
+      "createTitle": "Nouvel achat",
+      "editTitle": "Modifier l'achat",
+      "invoiceNumber": "Numéro de facture",
+      "invoiceNumberPlaceholder": "FAC-2024-001",
+      "purchaseDate": "Date d'achat",
+      "supplier": "Fournisseur",
+      "selectSupplier": "Sélectionnez un fournisseur",
+      "description": "Description",
+      "descriptionPlaceholder": "Description de l'achat...",
+      "dueDate": "Date d'échéance",
+      "amounts": "Montants",
+      "amountHT": "Montant HT",
+      "tvaRate": "Taux TVA",
+      "calculatedAmounts": "Montants calculés",
+      "tvaAmount": "Montant TVA",
+      "amountTTC": "Montant TTC",
+      "attachments": "Pièces jointes",
+      "uploadFiles": "Télécharger des fichiers",
+      "acceptedFormats": "PDF, JPG, PNG acceptés",
+      "validation": {
+        "invoiceNumberRequired": "Le numéro de facture est requis",
+        "purchaseDateRequired": "La date d'achat est requise",
+        "supplierRequired": "Le fournisseur est requis",
+        "descriptionRequired": "La description est requise",
+        "amountRequired": "Le montant doit être supérieur à 0",
+        "dueDateRequired": "La date d'échéance est requise",
+        "dueDateInvalid": "La date d'échéance doit être postérieure à la date d'achat",
+        "formErrors": "Veuillez corriger les erreurs du formulaire"
+      }
+    },
+    "filters": {
+      "title": "Filtres",
+      "search": "Recherche",
+      "searchPlaceholder": "N° facture, fournisseur, description...",
+      "supplier": "Fournisseur",
+      "allSuppliers": "Tous les fournisseurs",
+      "paymentStatus": "Statut de paiement",
+      "allStatuses": "Tous les statuts",
+      "dateFrom": "Date de début",
+      "dateTo": "Date de fin",
+      "clear": "Effacer",
+      "activeFilters": "Filtres actifs"
+    },
+    "actions": {
+      "markAsPaid": "Marquer comme payé",
+      "export": "Exporter",
+      "generateReport": "Générer rapport PDF"
+    },
+    "stats": {
+      "totalPurchases": "Total achats",
+      "totalPurchasesDescription": "Nombre total d'achats",
+      "totalAmount": "Montant total",
+      "totalAmountDescription": "Montant total des achats",
+      "pendingPayments": "Paiements en attente",
+      "pendingPaymentsDescription": "Factures non payées",
+      "overduePayments": "Paiements en retard",
+      "overduePaymentsDescription": "Factures en retard",
+      "attention": "Attention",
+      "urgent": "Urgent"
+    },
+    "notifications": {
+      "createSuccess": "Achat créé avec succès",
+      "updateSuccess": "Achat mis à jour avec succès",
+      "deleteSuccess": "Achat supprimé avec succès",
+      "markAsPaidSuccess": "Facture marquée comme payée",
+      "exportSuccess": "Export réalisé avec succès",
+      "duplicateInvoice": "Une facture avec ce numéro existe déjà",
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cet achat ?",
+      "markAsPaidConfirm": "Marquer cette facture comme payée ?"
+    }
   },
   "entries": {
     "updated": "Écriture mise à jour avec succès",
@@ -198,6 +1105,7 @@
   },
   "financialForecasts": "Prévisions financières",
   "thirdParties": {
+    "title": "Tiers",
     "active": "Actif",
     "address": "Adresse",
     "balance": "Solde",
@@ -259,7 +1167,6 @@
   "client": "Client",
   "supplier": "Fournisseur",
   "invoicing": "Facturation",
-  "purchases": "Achats",
   "salesCrm": "Ventes & CRM",
   "humanResources": "Ressources Humaines",
   "projects": "Projets",
@@ -892,6 +1799,15 @@
     "importErrors": "Erreurs d'import"
   },
   "tax": "Taxes",
+  "header": {
+    "search": "Rechercher...",
+    "profile": "Mon profil",
+    "settings": "Paramètres",
+    "help": "Aide",
+    "logout": "Se déconnecter",
+    "guestUser": "Utilisateur",
+    "noEmail": "pas d'email"
+  },
   "enterprise": {
     "select": "Sélectionner une entreprise",
     "yourEnterprises": "Vos entreprises",
@@ -1317,9 +2233,38 @@
   
   "onboarding": {
     "welcome": {
-      "title": "Bienvenue dans Casskai !",
-      "subtitle": "Votre solution de gestion financière est presque prête",
-      "steps_remaining": "{{count}} étapes restantes"
+      "title": "Bienvenue dans CassKai !",
+      "subtitle": "Nous sommes ravis de vous accompagner dans la gestion de votre entreprise. Configurons ensemble votre plateforme en quelques étapes simples.",
+      "whatYouGet": "Ce que vous obtenez avec CassKai",
+      "nextSteps": "Les étapes suivantes",
+      "startSetup": "Commencer la configuration",
+      "duration": "⏱️ Configuration estimée : 3-5 minutes"
+    },
+    "steps": {
+      "features": "Fonctionnalités",
+      "featuresDesc": "Découvrez nos modules",
+      "preferences": "Préférences", 
+      "preferencesDesc": "Personnalisez votre expérience",
+      "company": "Entreprise",
+      "companyDesc": "Configurez votre société"
+    },
+    "features": {
+      "title": "Choisissez vos fonctionnalités",
+      "subtitle": "Sélectionnez les modules qui correspondent à vos besoins. Vous pourrez toujours les modifier plus tard."
+    },
+    "preferences": {
+      "title": "Configurez vos préférences",
+      "subtitle": "Personnalisez votre expérience CassKai selon vos besoins"
+    },
+    "company": {
+      "title": "Informations de votre entreprise",
+      "subtitle": "Renseignez les détails de votre société"
+    },
+    "complete": {
+      "welcomeTitle": "Bienvenue dans CassKai !",
+      "welcomeSubtitle": "Votre plateforme est prête ! Vous pouvez maintenant commencer à gérer votre entreprise avec CassKai.",
+      "configuringTitle": "Configuration en cours...",
+      "configuringSubtitle": "Nous préparons votre espace de travail personnalisé..."
     },
     "completion": {
       "title": "Configuration terminée !",
@@ -1501,5 +2446,134 @@
     "senegal": ["OHADA", "Wave", "DGI", "CSS"],
     "togo": ["OHADA", "Flooz", "OTR", "CNSS"],
     "canada": ["TPS/TVQ", "ARC", "Interac", "CRA"]
+  },
+  "connectAndTrackBanks": "Connectez et suivez vos banques",
+  "manage": "Gérer",
+  "viewTransactions": "Voir transactions",
+  "disconnect": "Déconnecter",
+  "connectBank": "Connecter une banque",
+  "bankReconciliation": "Rapprochement bancaire",
+  "transactionCategorization": "Catégorisation des transactions",
+  "cashFlowForecast": "Prévision de trésorerie",
+  "reconcileTransactions": "Rapprocher les transactions",
+  "aiCategorization": "Catégorisation IA",
+  "historyBasedProjections": "Projections basées sur l'historique",
+  "comingSoon": "Bientôt disponible",
+  "secureBankConnection": "Connexion bancaire sécurisée",
+  "secureBankConnectionDisclaimer": "Toutes les connexions bancaires sont sécurisées et cryptées",
+  "lastSyncToday": "Dernière synchro aujourd'hui",
+  "lastSyncYesterday": "Dernière synchro hier",
+  "dashboard": {
+    "title": "Tableau de bord",
+    "subtitle": "Vue d'ensemble de votre activité",
+    "customers": "Clients",
+    "orders": "Commandes", 
+    "growth": "Croissance",
+    "quickActions": "Actions rapides",
+    "recentActivity": "Activité récente",
+    "progress": "Objectifs"
+  },
+  "auth": {
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "firstNamePlaceholder": "Votre prénom",
+    "lastNamePlaceholder": "Votre nom",
+    "register": "S'inscrire",
+    "createYourAccount": "Créez votre compte",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?"
+  },
+  "noAccountsConnected": "Aucun compte connecté",
+  "connectFirstAccountPrompt": "Connectez votre premier compte",
+  "light": "Clair",
+  "dark": "Sombre",
+  "system": "Système",
+  "noCompanySelectedTitle": "Aucune entreprise sélectionnée",
+  "addInvoice": "Ajouter facture",
+  "noEmail": "Pas d'email",
+  "viewDetails": "Voir détails",
+  "message": "Message",
+  "error_description": "Description d'erreur",
+  "humanresourcespage": {
+    "grez_votre_personnel_congs_notes_de_frais_et_paie": "Gérez votre personnel, congés, notes de frais et paie",
+    "ajouter_employe": "Ajouter Employé",
+    "nouvel_employ": "Nouvel Employé",
+    "prnom": "Prénom",
+    "nom": "Nom",
+    "email_professionnel": "Email professionnel",
+    "tlphone": "Téléphone",
+    "poste": "Poste",
+    "dpartement": "Département",
+    "date_dembauche": "Date d'embauche",
+    "salaire_brut_mois": "Salaire brut (€/mois)",
+    "type_de_contrat": "Type de contrat",
+    "adresse": "Adresse",
+    "employs": "Employés",
+    "commercial": "Commercial",
+    "comptabilit": "Comptabilité",
+    "informatique": "Informatique",
+    "marketing": "Marketing",
+    "production": "Production",
+    "ressources_humaines": "Ressources Humaines",
+    "actif": "Actif",
+    "inactif": "Inactif",
+    "cdi": "CDI",
+    "cdd": "CDD",
+    "stage": "Stage",
+    "freelance": "Freelance"
+  },
+  "inventorypage": {
+    "grez_vos_stocks_de_marchandises_et_suivi_de_production": "Gérez vos stocks de marchandises et suivi de production",
+    "articles_en_stock": "Articles en stock",
+    "nouvel_article": "Nouvel article",
+    "nom_de_larticle": "Nom de l'article",
+    "rfrence": "Référence",
+    "catgorie": "Catégorie",
+    "prix_dachat_": "Prix d'achat (€)",
+    "prix_de_vente_": "Prix de vente (€)",
+    "stock_initial": "Stock initial",
+    "stock_minimum": "Stock minimum",
+    "unit": "Unité",
+    "emplacement": "Emplacement",
+    "matires_premires": "Matières premières",
+    "produits_finis": "Produits finis",
+    "fournitures": "Fournitures",
+    "services": "Services",
+    "unit_": "Unité",
+    "kg": "Kg",
+    "litres": "Litres",
+    "pices": "Pièces",
+    "heures": "Heures",
+    "mtres": "Mètres",
+    "entrept_principal": "Entrepôt principal",
+    "entrept_secondaire": "Entrepôt secondaire",
+    "magasin": "Magasin",
+    "bureau": "Bureau"
+  },
+  "projectspage": {
+    "suivez_vos_projets_internes_et_clients": "Suivez vos projets internes et clients",
+    "nouveau_projet": "Nouveau projet",
+    "nom_du_projet": "Nom du projet",
+    "description": "Description",
+    "client": "Client",
+    "chef_de_projet": "Chef de projet",
+    "date_de_dbut": "Date de début",
+    "date_de_fin_prvue": "Date de fin prévue",
+    "budget_": "Budget (€)",
+    "statut": "Statut",
+    "projets": "Projets",
+    "planifi": "Planifié",
+    "en_cours": "En cours",
+    "en_attente": "En attente",
+    "termin": "Terminé",
+    "annul": "Annulé",
+    "voir_projet": "Voir projet",
+    "modifier": "Modifier",
+    "supprimer": "Supprimer",
+    "aucun_projet": "Aucun projet",
+    "premier_projet": "Premier projet"
+  },
+  "journal_entries": {
+    "items_min_required": "Minimum 2 lignes requis",
+    "total": "Total"
   }
 }

@@ -1,0 +1,1 @@
+import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const UpcomingActivities: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>UpcomingActivities</CardTitle> </CardHeader> <CardContent> <p>Composant UpcomingActivities en développement.</p> </CardContent> </Card> ); }; export default UpcomingActivities;

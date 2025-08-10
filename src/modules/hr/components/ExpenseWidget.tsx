@@ -1,0 +1,1 @@
+import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const ExpenseWidget: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>ExpenseWidget</CardTitle> </CardHeader> <CardContent> <p>Composant ExpenseWidget en développement.</p> </CardContent> </Card> ); }; export default ExpenseWidget;

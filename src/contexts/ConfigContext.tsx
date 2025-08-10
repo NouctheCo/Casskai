@@ -1,118 +1,102 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useConfig } from '../hooks/useConfig';
-import { useSupabase } from '../hooks/useSupabase';
-import type { AppConfig, ConfigStatus } from '../types/config';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
-interface ConfigContextType {
-  // État de configuration
+interface AppConfig {
+  company: {
+    name: string;
+    country: string;
+    currency: string;
+    timezone: string;
+    fiscalYear: {
+      start: number;
+      end: number;
+    };
+  };
+  setupCompleted: boolean;
+  version: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ConfigContextType {
   config: AppConfig | null;
-  status: ConfigStatus;
-  isConfigured: boolean;
   isLoading: boolean;
+  isConfigured: boolean;
   error: string | null;
-
-  // État Supabase
-  isSupabaseReady: boolean;
-  isAuthenticated: boolean;
-
-  // Actions
-  refreshConfig: () => Promise<void>;
-  resetConfig: () => void;
-
-  // Getters
-  getCompanyInfo: () => { name: string; country: string; currency: string } | null;
-  getSupabaseInfo: () => { url: string; isConnected: boolean } | null;
+  updateConfig: (updates: Partial<AppConfig>) => void;
 }
 
 const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
 
-export const useConfigContext = () => {
-  const context = useContext(ConfigContext);
-  if (context === undefined) {
-    throw new Error('useConfigContext must be used within a ConfigProvider');
-  }
-  return context;
+const DEFAULT_CONFIG: AppConfig = {
+  company: {
+    name: 'Mon Entreprise',
+    country: 'FR',
+    currency: 'EUR',
+    timezone: 'Europe/Paris',
+    fiscalYear: {
+      start: 1, // Janvier
+      end: 12   // Décembre
+    }
+  },
+  setupCompleted: true,
+  version: '1.0.0',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString()
 };
 
-interface ConfigProviderProps {
-  children: React.ReactNode;
-}
-
-export const ConfigProvider: React.FC<ConfigProviderProps> = ({ children }) => {
-  const configHook = useConfig();
-  const supabaseHook = useSupabase();
+export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [config, setConfig] = useState<AppConfig | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Synchroniser les erreurs
   useEffect(() => {
-    if (configHook.error) {
-      setError(configHook.error.message);
-    } else {
-      setError(null);
-    }
-  }, [configHook.error]);
-
-  // Actions
-  const refreshConfig = async () => {
+    console.log('🔧 Chargement de la configuration...');
+    
     try {
-      setError(null);
-      // Le hook useConfig se recharge automatiquement
-      window.location.reload();
+      // Charger la configuration depuis localStorage
+      const savedConfig = localStorage.getItem('casskai_config');
+      
+      if (savedConfig) {
+        console.log('📦 Configuration trouvée dans localStorage');
+        setConfig(JSON.parse(savedConfig));
+      } else {
+        console.log('📦 Utilisation de la configuration par défaut');
+        setConfig(DEFAULT_CONFIG);
+        localStorage.setItem('casskai_config', JSON.stringify(DEFAULT_CONFIG));
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur de rechargement');
+      console.error('❌ Erreur lors du chargement de la configuration:', err);
+      setError('Erreur lors du chargement de la configuration');
+      setConfig(DEFAULT_CONFIG);
+    } finally {
+      setIsLoading(false);
+      console.log('🏁 Configuration chargée');
     }
-  };
+  }, []);
 
-  const resetConfig = () => {
-    try {
-      configHook.resetConfig();
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur de reset');
-    }
-  };
-
-  // Getters
-  const getCompanyInfo = () => {
-    const company = configHook.getCompanyConfig();
-    if (!company) return null;
-
-    return {
-      name: company.name,
-      country: company.country,
-      currency: company.currency
+  const updateConfig = (updates: Partial<AppConfig>) => {
+    if (!config) return;
+    
+    console.log('🔄 Mise à jour de la configuration:', updates);
+    
+    const newConfig = {
+      ...config,
+      ...updates,
+      updatedAt: new Date().toISOString()
     };
-  };
-
-  const getSupabaseInfo = () => {
-    const supabaseConfig = configHook.getSupabaseConfig();
-    if (!supabaseConfig) return null;
-
-    return {
-      url: supabaseConfig.url,
-      isConnected: supabaseHook.isClientReady
-    };
+    
+    setConfig(newConfig);
+    localStorage.setItem('casskai_config', JSON.stringify(newConfig));
+    
+    console.log('✅ Configuration mise à jour');
   };
 
   const value: ConfigContextType = {
-    // État de configuration
-    config: configHook.config,
-    status: configHook.status,
-    isConfigured: configHook.isConfigured,
-    isLoading: configHook.isLoading || supabaseHook.isLoading,
-    error: error || (supabaseHook.user ? null : 'Non authentifié'),
-
-    // État Supabase
-    isSupabaseReady: supabaseHook.isClientReady,
-    isAuthenticated: supabaseHook.isAuthenticated,
-
-    // Actions
-    refreshConfig,
-    resetConfig,
-
-    // Getters
-    getCompanyInfo,
-    getSupabaseInfo
+    config,
+    isLoading,
+    isConfigured: !!config && config.setupCompleted,
+    error,
+    updateConfig
   };
 
   return (
@@ -120,4 +104,12 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({ children }) => {
       {children}
     </ConfigContext.Provider>
   );
+};
+
+export const useConfigContext = () => {
+  const context = useContext(ConfigContext);
+  if (context === undefined) {
+    throw new Error('useConfigContext must be used within a ConfigProvider');
+  }
+  return context;
 };

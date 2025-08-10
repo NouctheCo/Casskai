@@ -1,0 +1,43 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🚀 Running pre-push checks..."
+
+# Get current branch
+current_branch=$(git branch --show-current)
+
+echo "📋 Current branch: $current_branch"
+
+# Skip pre-push hooks for certain branches if needed
+if [ "$current_branch" = "main" ] || [ "$current_branch" = "develop" ]; then
+    echo "⚠️  Pushing to protected branch $current_branch"
+fi
+
+# Run full test suite
+echo "🧪 Running full test suite..."
+npm run test:run
+
+# Run E2E tests for critical branches
+if [ "$current_branch" = "main" ] || [ "$current_branch" = "develop" ]; then
+    echo "🎭 Running E2E tests for protected branch..."
+    npm run test:e2e:ci || {
+        echo "❌ E2E tests failed!"
+        exit 1
+    }
+fi
+
+# Check build
+echo "🏗️  Checking production build..."
+npm run build || {
+    echo "❌ Build failed!"
+    exit 1
+}
+
+# Security audit
+echo "🔒 Running security audit..."
+npm audit --audit-level=high || {
+    echo "⚠️  Security vulnerabilities found!"
+    # Don't fail on audit issues, just warn
+}
+
+echo "✅ Pre-push checks passed!"

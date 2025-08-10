@@ -1,0 +1,1 @@
+import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const RecentlyInstalled: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>RecentlyInstalled</CardTitle> </CardHeader> <CardContent> <p>Composant RecentlyInstalled en développement.</p> </CardContent> </Card> ); }; export default RecentlyInstalled;

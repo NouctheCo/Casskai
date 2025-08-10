@@ -5,7 +5,7 @@ function handleSupabaseError(error: unknown, context: string) {
   }
   return { message: `[${context}] ${JSON.stringify(error)}` };
 }
-import { supabase } from '../lib/supabase';
+// import { supabase } from '../lib/supabase'; // Commented out for mock implementation
 import { TaxRate, TaxDeclaration, TaxPayment, TaxDocument, TaxSettings } from '../types/tax.types';
 
 /**

@@ -1,0 +1,1 @@
+import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const HRWidget: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>HRWidget</CardTitle> </CardHeader> <CardContent> <p>Composant HRWidget en développement.</p> </CardContent> </Card> ); }; export default HRWidget;

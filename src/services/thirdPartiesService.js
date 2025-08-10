@@ -1,4 +1,11 @@
 import { supabase } from '../lib/supabase';
+
+// Helper function to safely escape search terms for ILIKE queries
+const escapeSearchTerm = (term) => {
+  if (!term) return '';
+  // Escape special characters that could be used for SQL injection
+  return term.replace(/[%_\\]/g, '\\$&').replace(/'/g, "''");
+};
 import { useState, useEffect, useCallback } from 'react';
 
 const TABLE_NAME = 'third_parties';
@@ -19,7 +26,9 @@ export const thirdPartiesService = {
       query = query.eq('type', type);
     }
     if (searchTerm) {
-      query = query.or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,tax_number.ilike.%${searchTerm}%`);
+      // Use safe escaped search to prevent SQL injection
+      const escapedTerm = escapeSearchTerm(searchTerm);
+      query = query.or(`name.ilike.%${escapedTerm}%,email.ilike.%${escapedTerm}%,phone.ilike.%${escapedTerm}%,tax_number.ilike.%${escapedTerm}%`);
     }
     if (statusFilter === 'active') {
       query = query.eq('is_active', true);
@@ -106,7 +115,7 @@ export const thirdPartiesService = {
         .from(JOURNAL_ENTRIES_TABLE)
         .select('id', { count: 'exact', head: true })
         .eq('company_id', currentEnterpriseId)
-        .or(`description.ilike.%${thirdParty.name}%,reference_number.ilike.%${thirdParty.name}%`); // Example of a loose check
+        .or(`description.ilike.%${escapeSearchTerm(thirdParty.name)}%,reference_number.ilike.%${escapeSearchTerm(thirdParty.name)}%`); // Example of a loose check
 
     if (entriesError) {
         console.error('Error checking related journal entries:', entriesError);

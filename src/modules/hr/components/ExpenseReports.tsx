@@ -1,0 +1,1 @@
+import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const ExpenseReports: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>ExpenseReports</CardTitle> </CardHeader> <CardContent> <p>Composant ExpenseReports en développement.</p> </CardContent> </Card> ); }; export default ExpenseReports;

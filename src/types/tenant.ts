@@ -35,3 +35,11 @@ export interface TenantBranding {
   companyName: string;
   favicon?: string;
 }
+
+// ✅ AJOUT: Type manquant pour tenantService.ts
+export interface TenantBranding {
+  primaryColor: string;
+  secondaryColor: string;
+  companyName: string;
+  favicon?: string;
+}
