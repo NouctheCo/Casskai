@@ -8,7 +8,7 @@ import { LocaleProvider } from '@/contexts/LocaleContext';
 import { ModulesProvider } from '@/contexts/ModulesContext';
 import { EnterpriseProvider } from '@/contexts/EnterpriseContext';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
+// import { SubscriptionProvider } from '@/contexts/SubscriptionContext'; // Temporairement désactivé pour le build
 import ABTestProvider from '@/components/ABTestProvider';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { LoadingFallback } from '@/components/ui/LoadingFallback';
@@ -416,7 +416,7 @@ function App() {
       <ThemeProvider defaultTheme="system" storageKey="casskai-theme">
         <LocaleProvider>
           <AuthProvider>
-            <SubscriptionProvider>
+            {/* <SubscriptionProvider> */}
               <ABTestProvider>
                 <ModulesProviderWrapper>
                   <EnterpriseProvider>
@@ -431,7 +431,7 @@ function App() {
                   </EnterpriseProvider>
                 </ModulesProviderWrapper>
               </ABTestProvider>
-            </SubscriptionProvider>
+            {/* </SubscriptionProvider> */}
           </AuthProvider>
         </LocaleProvider>
       </ThemeProvider>
