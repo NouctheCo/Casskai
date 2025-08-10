@@ -1,172 +1,7 @@
 import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { createLogger, defineConfig } from 'vite';
-
-const configHorizonsViteErrorHandler = `
-const observer = new MutationObserver((mutations) => {
-	for (const mutation of mutations) {
-		for (const addedNode of mutation.addedNodes) {
-			if (
-				addedNode.nodeType === Node.ELEMENT_NODE &&
-				(
-					addedNode.tagName?.toLowerCase() === 'vite-error-overlay' ||
-					addedNode.classList?.contains('backdrop')
-				)
-			) {
-				handleViteOverlay(addedNode);
-			}
-		}
-	}
-});
-
-observer.observe(document.documentElement, {
-	childList: true,
-	subtree: true
-});
-
-function handleViteOverlay(node) {
-	if (!node.shadowRoot) {
-		return;
-	}
-
-	const backdrop = node.shadowRoot.querySelector('.backdrop');
-
-	if (backdrop) {
-		const overlayHtml = backdrop.outerHTML;
-		const parser = new DOMParser();
-		const doc = parser.parseFromString(overlayHtml, 'text/html');
-		const messageBodyElement = doc.querySelector('.message-body');
-		const fileElement = doc.querySelector('.file');
-		const messageText = messageBodyElement ? messageBodyElement.textContent.trim() : '';
-		const fileText = fileElement ? fileElement.textContent.trim() : '';
-		const error = messageText + (fileText ? ' File:' + fileText : '');
-
-		window.parent.postMessage({
-			type: 'horizons-vite-error',
-			error,
-		}, '*');
-	}
-}
-`;
-
-const configHorizonsRuntimeErrorHandler = `
-window.onerror = (message, source, lineno, colno, errorObj) => {
-	const errorDetails = errorObj ? JSON.stringify({
-		name: errorObj.name,
-		message: errorObj.message,
-		stack: errorObj.stack,
-		source,
-		lineno,
-		colno,
-	}) : null;
-
-	window.parent.postMessage({
-		type: 'horizons-runtime-error',
-		message,
-		error: errorDetails
-	}, '*');
-};
-`;
-
-const configHorizonsConsoleErrroHandler = `
-const originalConsoleError = console.error;
-console.error = function(...args) {
-	originalConsoleError.apply(console, args);
-
-	let errorString = '';
-
-	for (let i = 0; i < args.length; i++) {
-		const arg = args[i];
-		if (arg instanceof Error) {
-			errorString = arg.stack || \`\${arg.name}: \${arg.message}\`;
-			break;
-		}
-	}
-
-	if (!errorString) {
-		errorString = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' ');
-	}
-
-	window.parent.postMessage({
-		type: 'horizons-console-error',
-		error: errorString
-	}, '*');
-};
-`;
-
-const configWindowFetchMonkeyPatch = `
-const originalFetch = window.fetch;
-
-window.fetch = function(...args) {
-	const url = args[0] instanceof Request ? args[0].url : args[0];
-
-	// Skip WebSocket URLs
-	if (url.startsWith('ws:') || url.startsWith('wss:')) {
-		return originalFetch.apply(this, args);
-	}
-
-	return originalFetch.apply(this, args)
-		.then(async response => {
-			const contentType = response.headers.get('Content-Type') || '';
-
-			// Exclude HTML document responses
-			const isDocumentResponse =
-				contentType.includes('text/html') ||
-				contentType.includes('application/xhtml+xml');
-
-			if (!response.ok && !isDocumentResponse) {
-					const responseClone = response.clone();
-					const errorFromRes = await responseClone.text();
-					const requestUrl = response.url;
-					console.error(\`Fetch error from \${requestUrl}: \${errorFromRes}\`);
-			}
-
-			return response;
-		})
-		.catch(error => {
-			if (!url.match(/\.html?$/i)) {
-				console.error(error);
-			}
-
-			throw error;
-		});
-};
-`;
-
-const addTransformIndexHtml = {
-	name: 'add-transform-index-html',
-	transformIndexHtml(html) {
-		return {
-			html,
-			tags: [
-				{
-					tag: 'script',
-					attrs: { type: 'module' },
-					children: configHorizonsRuntimeErrorHandler,
-					injectTo: 'head',
-				},
-				{
-					tag: 'script',
-					attrs: { type: 'module' },
-					children: configHorizonsViteErrorHandler,
-					injectTo: 'head',
-				},
-				{
-					tag: 'script',
-					attrs: {type: 'module'},
-					children: configHorizonsConsoleErrroHandler,
-					injectTo: 'head',
-				},
-				{
-					tag: 'script',
-					attrs: { type: 'module' },
-					children: configWindowFetchMonkeyPatch,
-					injectTo: 'head',
-				},
-			],
-		};
-	},
-};
+import { compression } from 'vite-plugin-compression2';
 
 console.warn = () => {};
 
@@ -174,64 +9,78 @@ const logger = createLogger()
 const loggerError = logger.error
 
 logger.error = (msg, options) => {
-	if (options?.error?.toString().includes('CssSyntaxError: [postcss]')) {
-		return;
-	}
-
 	loggerError(msg, options);
 }
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
 	customLogger: logger,
-	plugins: [react(), addTransformIndexHtml],
-	
-	// OPTIMISATIONS AJOUTÉES POUR AMÉLIORER LES PERFORMANCES
-	optimizeDeps: {
-		include: [
-			'react',
-			'react-dom',
-			'react-router-dom',
-			'react-i18next',
-			'i18next',
-			'lucide-react',
-			'@radix-ui/react-dialog',
-			'@radix-ui/react-dropdown-menu',
-			'@radix-ui/react-tabs',
-			'@radix-ui/react-select',
-			'@radix-ui/react-switch',
-			'@radix-ui/react-label',
-			'@radix-ui/react-button',
-			'@supabase/supabase-js',
-			'recharts',
-			'clsx',
-			'class-variance-authority',
-			'tailwind-merge'
-		]
+	plugins: [
+		react(),
+		// Compression Gzip
+		compression({
+			algorithm: 'gzip',
+			ext: '.gz',
+			threshold: 1024,
+			compressionOptions: {
+				level: 9,
+			},
+			filter: /\.(js|mjs|json|css|html|svg)$/i,
+		}),
+		// Compression Brotli (meilleure compression)
+		compression({
+			algorithm: 'brotliCompress',
+			ext: '.br',
+			threshold: 1024,
+			compressionOptions: {
+				level: 11, // Maximum compression
+			},
+			filter: /\.(js|mjs|json|css|html|svg)$/i,
+		}),
+	],
+	css: {
+		postcss: './postcss.config.js'
 	},
-	
 	server: {
 		cors: true,
 		headers: {
 			'Cross-Origin-Embedder-Policy': 'credentialless',
 		},
 		allowedHosts: true,
-		// Optimisation ajoutée
-		fs: {
-			cachedChecks: false
-		}
 	},
 	
 	resolve: {
-		extensions: ['.jsx', '.js', '.tsx', '.ts', '.json', ],
+		extensions: ['.tsx', '.ts', '.jsx', '.js', '.json', ],
 		alias: {
 			'@': path.resolve(__dirname, './src'),
 		},
 	},
 	
+	optimizeDeps: {
+		include: ['i18next', 'react-i18next', 'i18next-browser-languagedetector']
+	},
+	
 	build: {
+		target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
+		sourcemap: mode !== 'production',
 		rollupOptions: {
-			// Traiter i18next-browser-languagedetector comme un module externe
-			external: ['i18next-browser-languagedetector']
+			output: {
+				manualChunks: {
+					'react-vendor': ['react', 'react-dom'],
+					'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
+					'supabase-vendor': ['@supabase/supabase-js'],
+					'chart-vendor': ['recharts'],
+					'i18n-vendor': ['i18next', 'react-i18next', 'i18next-browser-languagedetector'],
+					'utils-vendor': ['date-fns', 'clsx', 'tailwind-merge']
+				}
+			}
+		},
+		chunkSizeWarningLimit: 1000,
+		commonjsOptions: {
+			include: [/node_modules/]
 		}
+	},
+	
+	define: {
+		'process.env.NODE_ENV': JSON.stringify(mode),
 	}
-});
+}));
