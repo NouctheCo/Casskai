@@ -15,13 +15,13 @@ import React from 'react';
           transition={{ duration: 0.5, type: "spring", stiffness: 150 }}
         >
           <AlertTriangle className="w-24 h-24 text-destructive mb-6" />
-          <h1 className="text-5xl font-bold text-foreground mb-4">404</h1>
+          <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-4">404</h1>
           <p className="text-2xl text-muted-foreground mb-8">{t('pageNotFound')}</p>
           <motion.div
              whileHover={{ scale: 1.05 }}
              whileTap={{ scale: 0.95 }}
           >
-            <Button asChild size="lg" className="bg-gradient-to-r from-primary to-accent text-primary-foreground">
+            <Button asChild size="lg" className="bg-gradient-to-r from-primary to-accent text-white">
               <Link to="/">{t('goHome')}</Link>
             </Button>
           </motion.div>

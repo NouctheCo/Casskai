@@ -1,5 +1,5 @@
 import React from "react"
-import { cn } from "@/lib/utils"
+import { cn } from "../../lib/utils"
 
 const Table = React.forwardRef(({ className, ...props }, ref) => (
   <div className="w-full overflow-auto">
@@ -27,7 +27,7 @@ TableBody.displayName = "TableBody"
 const TableFooter = React.forwardRef(({ className, ...props }, ref) => (
   <tfoot
     ref={ref}
-    className={cn("bg-primary font-medium text-primary-foreground", className)}
+    className={cn("bg-blue-600 font-medium text-white", className)}
     {...props} />
 ))
 TableFooter.displayName = "TableFooter"

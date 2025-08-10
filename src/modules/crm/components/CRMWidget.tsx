@@ -1,0 +1,1 @@
+import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const CRMWidget: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>CRMWidget</CardTitle> </CardHeader> <CardContent> <p>Composant CRMWidget en développement.</p> </CardContent> </Card> ); }; export default CRMWidget;

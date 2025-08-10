@@ -1,9 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
-import fr from './locales/fr.json';
-import en from './locales/en.json';
-import es from './locales/es.json';
 
 // Configuration des devises ouest-africaines pour le formatage
 export const WEST_AFRICAN_CURRENCIES = {
@@ -57,6 +54,26 @@ export const WEST_AFRICAN_CURRENCIES = {
       pattern: '#,##0.00 ¤',
       groupingSeparator: ' ',
       decimalSeparator: ','
+    }
+  },
+  'GHS': {
+    name: 'Cedi ghanéen',
+    symbol: '₵',
+    format: {
+      decimal: 2,
+      pattern: '¤#,##0.00',
+      groupingSeparator: ',',
+      decimalSeparator: '.'
+    }
+  },
+  'NGN': {
+    name: 'Naira nigérian',
+    symbol: '₦',
+    format: {
+      decimal: 2,
+      pattern: '¤#,##0.00',
+      groupingSeparator: ',',
+      decimalSeparator: '.'
     }
   }
 };
@@ -112,6 +129,34 @@ export const SUPPORTED_LOCALES = {
     currency: 'XOF',
     country: 'TG'
   },
+  'fr-CM': { 
+    name: 'Français (Cameroun)', 
+    flag: '🇨🇲', 
+    region: 'central-africa',
+    currency: 'XAF',
+    country: 'CM'
+  },
+  'fr-GA': { 
+    name: 'Français (Gabon)', 
+    flag: '🇬🇦', 
+    region: 'central-africa',
+    currency: 'XAF',
+    country: 'GA'
+  },
+  'en-GH': { 
+    name: 'English (Ghana)', 
+    flag: '🇬🇭', 
+    region: 'west-africa',
+    currency: 'GHS',
+    country: 'GH'
+  },
+  'en-NG': { 
+    name: 'English (Nigeria)', 
+    flag: '🇳🇬', 
+    region: 'west-africa',
+    currency: 'NGN',
+    country: 'NG'
+  },
   'en': { 
     name: 'English', 
     flag: '🇺🇸', 
@@ -142,96 +187,50 @@ export const SUPPORTED_LOCALES = {
   }
 };
 
-// Détecteur de langue personnalisé pour l'Afrique de l'Ouest
-const customLanguageDetector = {
-  name: 'customDetector',
-  
-  lookup(options: any) {
-    // Priorité : URL params > localStorage > géolocalisation > navigateur
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlLang = urlParams.get('lng');
-    
-    if (urlLang && SUPPORTED_LOCALES[urlLang as keyof typeof SUPPORTED_LOCALES]) {
-      return urlLang;
-    }
-    
-    // Détection basée sur la géolocalisation si disponible
-    const storedCountry = localStorage.getItem('user_country');
-    if (storedCountry) {
-      const countryToLocale: Record<string, string> = {
-        'BJ': 'fr-BJ',
-        'CI': 'fr-CI',
-        'BF': 'fr-BF',
-        'ML': 'fr-ML',
-        'SN': 'fr-SN',
-        'TG': 'fr-TG',
-        'FR': 'fr',
-        'GB': 'en-GB',
-        'US': 'en',
-        'CA': 'en-CA',
-        'ES': 'es'
-      };
-      return countryToLocale[storedCountry] || 'fr';
-    }
-    
-    // Fallback sur la détection du navigateur
-    const browserLang = navigator.language;
-    if (browserLang.startsWith('fr')) {
-      return 'fr';
-    } else if (browserLang.startsWith('en')) {
-      return 'en';
-    } else if (browserLang.startsWith('es')) {
-      return 'es';
-    }
-    
-    return 'fr'; // Défaut pour l'Afrique de l'Ouest
-  },
-  
-  cacheUserLanguage(lng: string) {
-    localStorage.setItem('i18nextLng', lng);
-  }
-};
+// Import des ressources de traduction
+import frTranslations from './locales/fr.json';
+import enTranslations from './locales/en.json';
+import esTranslations from './locales/es.json';
 
 // Configuration i18next avancée
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    // Ressources de traduction
+    // Ressources de traduction avec structure de namespaces
     resources: {
-      fr: { translation: fr },
-      'fr-BJ': { translation: fr }, // Utilise les mêmes traductions FR pour l'instant
-      'fr-CI': { translation: fr },
-      'fr-BF': { translation: fr },
-      'fr-ML': { translation: fr },
-      'fr-SN': { translation: fr },
-      'fr-TG': { translation: fr },
-      en: { translation: en },
-      'en-GB': { translation: en },
-      'en-CA': { translation: en },
-      es: { translation: es }
+      fr: {
+        translation: frTranslations
+      },
+      en: {
+        translation: enTranslations
+      },
+      es: {
+        translation: esTranslations
+      }
     },
     
-    // Langues supportées
-    supportedLngs: Object.keys(SUPPORTED_LOCALES),
+    // Langue par défaut et fallback
+    lng: 'fr',
     fallbackLng: 'fr',
     
-    // Détection de langue
+    // Configuration des namespaces
+    defaultNS: 'translation',
+    ns: ['translation'],
+    
     detection: {
       order: ['querystring', 'localStorage', 'navigator', 'htmlTag'],
       lookupQuerystring: 'lng',
       lookupLocalStorage: 'i18nextLng',
       caches: ['localStorage'],
-      excludeCacheFor: ['cimode'],
-      // Ajouter le détecteur personnalisé
-      checkWhitelist: true
+      excludeCacheFor: ['cimode']
     },
     
     // Options d'interpolation avec formatage personnalisé
     interpolation: {
       escapeValue: false,
       formatSeparator: ',',
-      format: function(value, format, lng) {
+      format(value, format, lng) {
         // Formatage personnalisé pour les devises
         if (format === 'currency') {
           return formatCurrency(value, lng || 'fr');
@@ -260,6 +259,27 @@ i18n
     // Configuration React
     react: {
       useSuspense: false
+    },
+    
+    // Retourner la clé si traduction non trouvée
+    returnNull: false,
+    returnEmptyString: false,
+    returnObjects: false,
+    joinArrays: false,
+    
+    // Configuration pour éviter les conflits
+    keySeparator: '.',
+    nsSeparator: ':',
+    pluralSeparator: '_',
+    contextSeparator: '_',
+    
+    // Fonction de post-processing pour améliorer les fallbacks
+    postProcess: ['fallback'],
+    parseMissingKeyHandler: (key) => {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`🌍 Parsing missing key: ${key}`);
+      }
+      return key;
     }
   });
 
@@ -318,6 +338,10 @@ export function getCurrencyForLocale(locale: string): string {
     'fr-ML': 'XOF',
     'fr-SN': 'XOF',
     'fr-TG': 'XOF',
+    'fr-CM': 'XAF',
+    'fr-GA': 'XAF',
+    'en-GH': 'GHS',
+    'en-NG': 'NGN',
     'fr': 'EUR',
     'en': 'USD',
     'en-GB': 'GBP',
@@ -365,6 +389,46 @@ export async function changeLanguageAndDetectCountry(lng: string) {
 export function getCurrentLocaleInfo() {
   const currentLang = i18n.language;
   return SUPPORTED_LOCALES[currentLang as keyof typeof SUPPORTED_LOCALES] || SUPPORTED_LOCALES.fr;
+}
+
+// Fonction de traduction robuste avec fallbacks
+export function createSafeTranslation(i18nInstance = i18n) {
+  return (key: string, fallback?: string, options?: any) => {
+    try {
+      // Tentative de traduction avec i18next
+      const translation = i18nInstance.t(key, {
+        defaultValue: fallback || key,
+        ...options
+      });
+
+      // Vérifier si la traduction est valide
+      if (translation && typeof translation === 'string' && translation !== key) {
+        return translation;
+      }
+
+      // Si pas de traduction et qu'on a un fallback
+      if (fallback && fallback !== key) {
+        return fallback;
+      }
+
+      // En dernier recours, retourner la clé
+      return key;
+    } catch (error) {
+      console.warn(`🌍 Translation error for key '${key}':`, error);
+      return fallback || key;
+    }
+  };
+}
+
+// Instance de traduction sécurisée
+export const tSafe = createSafeTranslation();
+
+// Hook personnalisé pour les traductions avec fallbacks
+export function useSafeTranslation() {
+  return {
+    t: tSafe,
+    i18n
+  };
 }
 
 export default i18n;

@@ -1,0 +1,1 @@
+import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const RecommendedItems: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>RecommendedItems</CardTitle> </CardHeader> <CardContent> <p>Composant RecommendedItems en développement.</p> </CardContent> </Card> ); }; export default RecommendedItems;

@@ -1,0 +1,1 @@
+import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const CRMDashboard: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>CRMDashboard</CardTitle> </CardHeader> <CardContent> <p>Composant CRMDashboard en développement.</p> </CardContent> </Card> ); }; export default CRMDashboard;

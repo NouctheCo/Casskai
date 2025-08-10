@@ -1,379 +1,326 @@
-import React, { useEffect } from 'react';
-import {
-  Menu,
-  UserCircle,
-  Briefcase,
-  LogOut,
-  ChevronsRightLeft,
-  Layers,
-  Settings as SettingsIcon,
-  Building2
-} from 'lucide-react';
+import React, { useState } from 'react';
+import { useLocation, NavLink } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, Home, Briefcase, Landmark, FileText, ShoppingCart, Users, UsersRound, KanbanSquare, Archive, BarChart3, Zap, Users2, Settings, Sparkles, Bell, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '@/components/ThemeToggle';
-import { LanguageToggle } from '@/components/LanguageToggle';
-import { useLocale } from '@/contexts/LocaleContext';
-import { useAuth } from '@/contexts/AuthContext';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuGroup,
-} from '@/components/ui/dropdown-menu';
-import { useNavigate } from 'react-router-dom';
+import { useModules } from '@/contexts/ModulesContext';
+import { useTranslation } from 'react-i18next';
+import { tSafe } from '@/i18n/i18n';
 import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import EnterpriseSelector from '@/components/enterprise/EnterpriseSelector';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { motion, AnimatePresence } from 'framer-motion';
 
-// Logo component simplifié - juste du texte
-const Logo = ({ collapsed = false }) => {
-  return (
-    <div className={cn("font-bold text-primary select-none", collapsed ? "text-lg" : "text-xl")}>
-      CK
-    </div>
-  );
-};
-
-// Fonction pour obtenir les initiales d'un nom
-const getInitials = (name) => {
-  if (!name) return 'U';
-  
-  const parts = name.split(' ');
-  if (parts.length === 1) return name.charAt(0).toUpperCase();
-  
-  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
-};
-
-// Fonction pour obtenir le nom d'utilisateur
-const getUserDisplayName = (user) => {
-  if (!user) return null;
-  
-  // Vérifier les métadonnées utilisateur
-  if (user.user_metadata?.full_name) {
-    return user.user_metadata.full_name;
-  }
-  
-  if (user.user_metadata?.display_name) {
-    return user.user_metadata.display_name;
-  }
-  
-  if (user.user_metadata?.first_name && user.user_metadata?.last_name) {
-    return `${user.user_metadata.first_name} ${user.user_metadata.last_name}`;
-  }
-  
-  if (user.user_metadata?.first_name) {
-    return user.user_metadata.first_name;
-  }
-  
-  // Fallback sur l'email
-  if (user.email) {
-    const emailName = user.email.split('@')[0];
-    // Capitaliser la première lettre
-    return emailName.charAt(0).toUpperCase() + emailName.slice(1);
-  }
-  
-  return null;
-};
-
-export function Sidebar({ isCollapsed, toggleSidebar, isMobile, isMobileSidebarOpen }) {
-  const { t } = useLocale();
-  const navigate = useNavigate();
-  const {
-    user,
-    signOut,
-    userCompanies = [],
-    switchEnterprise,
-    currentEnterpriseId,
-    currentEnterpriseName
-  } = useAuth();
-
-  const handleLogout = async () => {
-    await signOut();
-    navigate('/auth');
-  };
-
-  const handleEnterpriseChange = (company) => {
-    switchEnterprise(company.id);
-  };
-
-  // Obtenir le nom d'affichage et les initiales
-  const userDisplayName = getUserDisplayName(user);
-  const userInitials = getInitials(userDisplayName || user?.email);
-
-  return (
-    <div className={cn(
-      'fixed inset-y-0 left-0 z-40 flex flex-col border-r bg-background shadow-xl transition-all duration-300 ease-in-out',
-      isMobile ? 'w-64' : (isCollapsed ? 'w-[4.5rem]' : 'w-64'),
-      isMobile && !isMobileSidebarOpen && 'translate-x-[-100%]'
-    )}>
-      <div className={cn(
-        "flex items-center border-b h-[60px] px-4",
-        isCollapsed && !isMobile ? "justify-center" : "justify-between"
-      )}>
-        {!isCollapsed && !isMobile && (
-          <div className="flex items-center gap-3">
-            <Logo />
-            <span className="font-semibold text-lg text-primary whitespace-nowrap overflow-hidden">
-              CassKai
-            </span>
-          </div>
-        )}
-        
-        {/* Logo collapsed state */}
-        {isCollapsed && !isMobile && (
-          <div className="flex items-center justify-center">
-            <Logo collapsed />
-          </div>
-        )}
-        
-        {/* Mobile close button */}
-        {(isMobile && isMobileSidebarOpen) && (
-          <Button variant="ghost" size="icon" onClick={toggleSidebar} className="ml-auto">
-            <Menu className="h-6 w-6" />
-          </Button>
-        )}
-        
-        {/* Desktop close button */}
-        {(!isMobile && !isCollapsed) && (
-          <Button variant="ghost" size="icon" onClick={toggleSidebar}>
-            <ChevronsRightLeft className="h-6 w-6" />
-          </Button>
-        )}
-        
-        {/* Desktop expand button */}
-        {isCollapsed && !isMobile && (
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={toggleSidebar} 
-            className="text-muted-foreground"
-          >
-            <Menu className="h-6 w-6" />
-          </Button>
-        )}
-      </div>
-
-      {/* Profil utilisateur */}
-      {!isCollapsed && user && (
-        <div className="px-3 py-3 border-b">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-primary text-primary-foreground">
-                {userInitials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium truncate max-w-[160px]">
-                {userDisplayName || user.email}
-              </span>
-              {userDisplayName && (
-                <span className="text-xs text-muted-foreground truncate max-w-[160px]">
-                  {user.email}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Entreprise active */}
-      {!isCollapsed && (
-        <div className="px-3 py-2 border-b">
-          <EnterpriseSelector />
-        </div>
-      )}
-
-      <div className="flex-1 overflow-y-auto py-2 px-3">
-        <NavItems isCollapsed={isCollapsed} isMobile={isMobile} />
-      </div>
-
-      <div className="mt-auto border-t p-3">
-        <NavItem 
-          to="/settings" 
-          icon={SettingsIcon} 
-          label={t('settings', 'Paramètres')} 
-          isEffectivelyCollapsed={isCollapsed} 
-        />
-      </div>
-    </div>
-  );
+interface SidebarProps {
+  isCollapsed: boolean;
+  onCollapse: () => void;
+  activeModules: any[];
+  isMobile?: boolean;
 }
 
-const NavItems = ({ isCollapsed, isMobile }) => {
-  const { t } = useLocale();
-  const { ALL_MODULES = [], isModuleActive, loadingModules } = useModules();
-  
-  // Fonction de traduction sécurisée
-  const safeT = (key, fallback = key) => {
-    const translation = t(key);
-    if (translation && !translation.includes("key '") && !translation.includes("' return")) {
+// Mapping des icônes avec nouvelles icônes modernes
+const iconMap = {
+  Home,
+  Briefcase,
+  Landmark,
+  FileText,
+  ShoppingCart,
+  Users,
+  UsersRound,
+  KanbanSquare,
+  Archive,
+  BarChart3,
+  Zap,
+  Users2,
+  Settings,
+  Sparkles,
+  Bell,
+  Shield
+};
+
+export function Sidebar({ isCollapsed, onCollapse, activeModules, isMobile = false }: SidebarProps) {
+  const location = useLocation();
+  const { t } = useTranslation();
+  const { allModules, isLoading } = useModules();
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+
+  // Fonction de traduction personnalisée avec fallbacks pour la sidebar
+  const getSidebarTranslation = (key: string, fallback?: string) => {
+    // Mapping des clés de modules vers les clés de traduction du JSON
+    const keyMappings: Record<string, string> = {
+      'dashboard': 'sidebar.dashboard',
+      'accounting': 'sidebar.accounting',
+      'accountingPageTitle': 'sidebar.accounting',
+      'banking': 'sidebar.banking',
+      'bankConnections': 'sidebar.banking',
+      'invoicing': 'sidebar.invoicing',
+      'purchases': 'sidebar.purchases',
+      'sales': 'sidebar.sales',
+      'salesCrm': 'sidebar.sales',
+      'humanResources': 'sidebar.humanResources',
+      'projects': 'sidebar.projects',
+      'inventory': 'sidebar.inventory',
+      'reports': 'sidebar.reports',
+      'financialReports': 'sidebar.reports',
+      'forecasts': 'sidebar.forecasts',
+      'thirdParties': 'sidebar.thirdParties',
+      'tax': 'sidebar.tax',
+      'security': 'sidebar.security',
+      'settings': 'sidebar.settings'
+    };
+
+    // Utiliser le mapping si disponible
+    const mappedKey = keyMappings[key] || key;
+    
+    // Essayer avec la clé mappée
+    let translation = tSafe(mappedKey, '');
+    if (translation && translation !== mappedKey) {
       return translation;
     }
-    return fallback;
+
+    // Essayer avec la clé originale
+    translation = tSafe(key, '');
+    if (translation && translation !== key) {
+      return translation;
+    }
+
+    // Essayer dans common
+    translation = tSafe(`common.${key}`, '');
+    if (translation && translation !== `common.${key}`) {
+      return translation;
+    }
+
+    // Utiliser le fallback ou la clé
+    return fallback || key;
   };
 
-  // Définir les éléments de navigation avec les traductions correctes
-  const baseNavItems = [
-    { 
-      to: "/", 
-      label: safeT('common.dashboard', 'Tableau de bord'), 
-      iconName: 'Home', 
-      moduleKey: 'dashboard' 
-    },
-    { 
-      to: "/forecasts", 
-      label: safeT('financialForecasts', 'Prévisions financières'), 
-      iconName: 'Zap', 
-      moduleKey: 'forecasts_module' 
-    },
-    { 
-      to: "/third-parties", 
-      label: safeT('thirdParties.title', 'Tiers'), 
-      iconName: 'Users2', 
-      moduleKey: 'third_parties_module' 
-    },
-  ];
+  const getIcon = (iconName: string) => {
+    const IconComponent = iconMap[iconName as keyof typeof iconMap];
+    return IconComponent ? <IconComponent className="h-5 w-5" /> : <Home className="h-5 w-5" />;
+  };
 
-  const additionalNavItems = [
-    { to: "/invoicing", label: safeT('invoicing', 'Facturation'), iconName: 'InvoicingIcon', moduleKey: 'invoicing' },
-    { to: "/purchases", label: safeT('purchases', 'Achats'), iconName: 'ShoppingCart', moduleKey: 'purchases' },
-    { to: "/sales-crm", label: safeT('salesCrm', 'Ventes & CRM'), iconName: 'Users', moduleKey: 'sales_crm' },
-    { to: "/human-resources", label: safeT('humanResources', 'Ressources Humaines'), iconName: 'UsersRound', moduleKey: 'human_resources' },
-    { to: "/projects", label: safeT('projects', 'Projets'), iconName: 'KanbanSquare', moduleKey: 'projects' },
-    { to: "/inventory", label: safeT('inventory', 'Inventaire'), iconName: 'Archive', moduleKey: 'inventory' },
-    { to: "/accounting", label: safeT('accountingPageTitle', 'Comptabilité'), iconName: 'Briefcase', moduleKey: 'accounting' },
-    { to: "/banking", label: safeT('bankConnections', 'Banques'), iconName: 'Landmark', moduleKey: 'banking' },
-    { to: "/reports", label: safeT('financialReports', 'Rapports financiers'), iconName: 'BarChart3', moduleKey: 'reports' },
-    { to: "/tax", label: safeT('tax', 'Taxes'), iconName: 'FileText', moduleKey: 'tax_module' },
-  ];
+  const NavItem = ({ module }: { module: any }) => {
+    const isActive = location.pathname === module.path;
+    const Icon = iconMap[module.icon as keyof typeof iconMap] || Home;
+    const isHovered = hoveredItem === module.key;
 
-  const moduleNavItems = ALL_MODULES
-    .filter(mod => typeof mod.path === 'string' && mod.path.startsWith('/'))
-    .map(mod => ({
-      to: mod.path,
-      label: safeT(mod.nameKey, mod.nameKey),
-      iconName: mod.icon,
-      moduleKey: mod.key,
-    }));
+    const navItem = (
+      <motion.div
+        className="relative"
+        onMouseEnter={() => setHoveredItem(module.key)}
+        onMouseLeave={() => setHoveredItem(null)}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        <NavLink
+          to={module.path}
+          className={cn(
+            "nav-item relative group min-h-[44px] touch-manipulation flex items-center gap-[5px]",
+            isActive
+              ? "nav-item-active"
+              : "nav-item-inactive"
+          )}
+        >
+          {/* Active indicator */}
+          {isActive && (
+            <motion.div
+              className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-indigo-500 rounded-r-full"
+              layoutId="activeIndicator"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+            />
+          )}
 
-  const combinedNavItems = [
-    ...baseNavItems,
-    ...additionalNavItems,
-    ...moduleNavItems
-  ];
-
-  const uniqueNavItems = combinedNavItems.reduce((acc, current) => {
-    const exists = acc.find(item => item.to === current.to);
-    return exists ? acc : [...acc, current];
-  }, []);
-
-  // Filtrage sécurisé des navItems
-  const navItems = uniqueNavItems
-    .filter(item => {
-      // Vérification de sécurité pour les routes
-      if (!item.to || typeof item.to !== 'string' || item.to.trim() === '' || !item.to.startsWith('/')) {
-        console.warn('Filtered out invalid nav item:', item);
-        return false;
-      }
-      return item.moduleKey === 'dashboard' || isModuleActive(item.moduleKey) || ['forecasts_module', 'third_parties_module', 'accounting', 'banking', 'reports', 'tax_module'].includes(item.moduleKey);
-    })
-    .map(item => ({ ...item, icon: getIcon(item.iconName) }));
-
-  if (loadingModules) {
-    return (
-      <div className="flex h-full w-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-1">
-      {navItems.map(item => (
-        <NavItem 
-          key={item.to} 
-          to={item.to} 
-          icon={item.icon} 
-          label={item.label} 
-          isEffectivelyCollapsed={isCollapsed && !isMobile} 
-        />
-      ))}
-    </div>
-  );
-};
-
-const NavItem = ({ to, icon: IconComponent, label, isEffectivelyCollapsed }) => {
-  const location = useLocation();
-  
-  // Vérifications de sécurité simplifiées pour les routes React
-  if (!to || typeof to !== 'string' || to.trim() === '') {
-    console.warn('NavItem: Invalid to prop', { to, label });
-    return null;
-  }
-  
-  if (!IconComponent) {
-    console.warn('NavItem: No icon component', { to, label });
-    return null;
-  }
-
-  // Vérification que la route commence par "/" (route interne React Router)
-  if (!to.startsWith('/')) {
-    console.error('NavItem: Route must start with /', { to, label });
-    return null;
-  }
-
-  const isActive = location.pathname === to || (to !== "/" && location.pathname.startsWith(to));
-
-  return (
-    <TooltipProvider delayDuration={0}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <NavLink
-            to={to}
-            className={cn(
-              'flex items-center h-10 px-3 rounded-md text-sm font-medium transition-colors',
-              'hover:bg-accent hover:text-accent-foreground',
-              isActive ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'text-muted-foreground'
+          {/* Glow effect on hover */}
+          <AnimatePresence>
+            {isHovered && !isActive && (
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 rounded-xl"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.2 }}
+              />
             )}
+          </AnimatePresence>
+
+          {/* Icon with animation */}
+          <motion.div
+            className="relative z-10 flex-shrink-0"
+            animate={{
+              rotate: isActive ? [0, 5, -5, 0] : 0,
+              scale: isHovered ? 1.1 : 1
+            }}
+            transition={{ 
+              rotate: { duration: 0.5, ease: "easeInOut" },
+              scale: { duration: 0.2 }
+            }}
           >
-            <IconComponent className={cn('h-5 w-5', !isEffectivelyCollapsed && 'mr-3')} />
-            {!isEffectivelyCollapsed && (
-              <span className="whitespace-nowrap overflow-hidden">{label}</span>
+            <Icon className="h-5 w-5" />
+          </motion.div>
+
+          {/* Text with slide animation */}
+          <AnimatePresence>
+            {!isCollapsed && (
+              <motion.span
+                className="truncate relative z-10 flex-1"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                {getSidebarTranslation(module.nameKey, module.label)}
+              </motion.span>
             )}
-          </NavLink>
-        </TooltipTrigger>
-        {isEffectivelyCollapsed && <TooltipContent side="right">{label}</TooltipContent>}
-      </Tooltip>
-    </TooltipProvider>
+          </AnimatePresence>
+
+          {/* Notification badge */}
+          {module.hasNotifications && (
+            <motion.div
+              className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-gray-800"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+            />
+          )}
+        </NavLink>
+      </motion.div>
+    );
+
+    if (isCollapsed) {
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              {navItem}
+            </TooltipTrigger>
+            <TooltipContent side="right" className="glass-card">
+              <motion.div
+                initial={{ opacity: 0, x: -5 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                {getSidebarTranslation(module.nameKey, module.label)}
+              </motion.div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    }
+
+    return navItem;
+  };
+
+  return (
+    <motion.div
+      className={cn(
+        "glass-nav flex flex-col h-full transition-all duration-300 shadow-xl",
+        isMobile ? "w-64 fixed inset-y-0 left-0 z-50" : 
+          isCollapsed ? "sidebar-collapsed w-16" : "sidebar-expanded w-64"
+      )}
+      initial={{ x: -100 }}
+      animate={{ x: 0 }}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+    >
+      {/* Header with modern design */}
+      <div className="p-4 border-b border-white/20 dark:border-gray-800/20">
+        <div className="flex items-center justify-between">
+          <AnimatePresence>
+            {!isCollapsed && (
+              <motion.div
+                className="flex items-center space-x-3"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-sm">CK</span>
+                </div>
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white gradient-text">
+                  CassKai
+                </h2>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
+          {!isMobile && (
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onCollapse}
+                className="h-8 w-8 hover:bg-white/20 dark:hover:bg-gray-800/20 transition-colors"
+              >
+                <motion.div
+                  animate={{ rotate: isCollapsed ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {isCollapsed ? (
+                    <ChevronRight className="h-4 w-4" />
+                  ) : (
+                    <ChevronLeft className="h-4 w-4" />
+                  )}
+                </motion.div>
+              </Button>
+            </motion.div>
+          )}
+        </div>
+      </div>
+
+      {/* Navigation with modern scrollbar */}
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto scrollbar-thin">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <motion.div
+              className="loading-spinner"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            />
+          </div>
+        ) : (
+          <motion.div
+            className="space-y-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, staggerChildren: 0.1 }}
+          >
+            {allModules
+              .filter(module => !module.isGlobal)
+              .map((module, index) => (
+                <motion.div
+                  key={module.key}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <NavItem module={module} />
+                </motion.div>
+              ))}
+          </motion.div>
+        )}
+      </nav>
+
+      {/* Footer with global modules */}
+      <div className="p-4 border-t border-white/20 dark:border-gray-800/20 space-y-2">
+        {allModules
+          .filter(module => module.isGlobal)
+          .map((module, index) => (
+            <motion.div
+              key={module.key}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + index * 0.1 }}
+            >
+              <NavItem module={module} />
+            </motion.div>
+          ))}
+      </div>
+
+      {/* Bottom gradient decoration */}
+      <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white/5 to-transparent pointer-events-none" />
+    </motion.div>
   );
-};
-
-// Imports manquants
-import { useLocation } from 'react-router-dom';
-import { NavLink } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
-import { useModules } from '@/contexts/ModulesContext';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Home, Landmark, BarChart3, Zap, Users2, ShoppingCart, Users, KeyRound as UsersRound, KanbanSquare, Archive, FileText as InvoiceIcon, Banknote, FileText } from 'lucide-react';
-
-const getIcon = (iconName) => {
-  switch (iconName) {
-    case 'Home': return Home;
-    case 'Briefcase': return Briefcase;
-    case 'Landmark': return Landmark;
-    case 'BarChart3': return BarChart3;
-    case 'Zap': return Zap;
-    case 'Users2': return Users2;
-    case 'ShoppingCart': return ShoppingCart;
-    case 'Users': return Users;
-    case 'UsersRound': return UsersRound;
-    case 'KanbanSquare': return KanbanSquare;
-    case 'Archive': return Archive;
-    case 'FileText': return FileText;
-    case 'InvoicingIcon': return InvoiceIcon;
-    default: return Home;
-  }
-};
+}

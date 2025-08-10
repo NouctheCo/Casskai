@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocale } from '@/contexts/LocaleContext';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Filter, Search, X } from 'lucide-react';
 import { DatePicker } from '@/components/ui/date-picker';

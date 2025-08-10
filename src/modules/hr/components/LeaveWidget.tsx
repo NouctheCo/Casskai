@@ -1,0 +1,1 @@
+import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const LeaveWidget: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>LeaveWidget</CardTitle> </CardHeader> <CardContent> <p>Composant LeaveWidget en développement.</p> </CardContent> </Card> ); }; export default LeaveWidget;

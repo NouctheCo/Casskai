@@ -63,7 +63,7 @@ VITE_APP_URL=https://votre-domaine.com
 ### 1. Migrations automatiques
 Lors du premier lancement, Casskai créera automatiquement:
 - Les tables nécessaires
-- Le plan comptable SYSCOHADA (si applicable)
+- Le plan comptable adapté à votre pays
 - Les données de base
 
 ### 2. Vérification manuelle (optionnel)

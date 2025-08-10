@@ -1,0 +1,1 @@
+import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const PopularItems: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>PopularItems</CardTitle> </CardHeader> <CardContent> <p>Composant PopularItems en développement.</p> </CardContent> </Card> ); }; export default PopularItems;
