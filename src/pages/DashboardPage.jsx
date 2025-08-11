@@ -569,12 +569,31 @@ const DashboardPage = () => {
 
   // Vérifier que l'entreprise est chargée avant d'afficher le dashboard
   if (enterpriseLoading || !currentEnterprise) {
-    return (
-      <div className="container mx-auto p-6">
-        <DashboardSkeleton />
-      </div>
-    );
-  }
+    if (enterpriseLoading) {
+      return (
+        <div className="container mx-auto p-6">
+          <DashboardSkeleton />
+        </div>
+      );
+    }
+
+    if (!currentEnterprise) {
+      return (
+        <div className="container mx-auto p-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Erreur du Dashboard</CardTitle>
+              <CardDescription>
+                Aucune entreprise sélectionnée. Veuillez créer ou sélectionner une entreprise pour accéder au dashboard.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={() => window.location.reload()}>Recharger la page</Button>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
 
   // Option pour utiliser le nouveau dashboard animé
   if (true) { // Changez à false pour utiliser l'ancien dashboard
@@ -954,5 +973,7 @@ const DashboardPage = () => {
     </motion.div>
   );
 };
+
+}
 
 export default DashboardPage;

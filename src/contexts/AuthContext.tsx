@@ -303,38 +303,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('✅ User companies reloaded');
 
       // Synchroniser avec EnterpriseContext pour éviter l'erreur dashboard
+      // Suppression de la déclaration locale de l'interface Enterprise (inutile ici)
       try {
         const enterpriseData = {
           id: company.id,
           name: company.name,
           legalName: company.legal_name || company.name,
-          country: company.country,
+          countryCode: company.country,
           currency: company.default_currency,
           accountingStandard: company.accounting_standard || 'PCG',
           registrationNumber: company.siret || '',
           vatNumber: company.vat_number || '',
-          street: company.address || '',
-          postalCode: company.postal_code || '',
-          city: company.city || '',
+          address: {
+            street: company.address || '',
+            postalCode: company.postal_code || '',
+            city: company.city || '',
+            country: company.country || '',
+          },
           phone: company.phone || '',
           email: company.email || '',
           website: company.website || '',
-          shareCapital: companyData.shareCapital || '10000',
-          ceoName: companyData.ceoName || '',
-          sector: companyData.sector || 'tech',
+          shareCapital: companyData?.shareCapital || '10000',
+          ceoName: companyData?.ceoName || '',
+          sector: companyData?.sector || 'tech',
           fiscalYearStart: company.fiscal_year_start || 1,
           fiscalYearEnd: company.fiscal_year_end || 12,
           isSetupCompleted: true,
           createdAt: company.created_at,
-          updatedAt: company.updated_at
+          updatedAt: company.updated_at,
+          settings: companyData?.settings || {},
+          taxRegime: companyData?.taxRegime || {},
+          isActive: true,
         };
 
-        // Synchroniser avec localStorage pour EnterpriseContext
         const existingEnterprises = JSON.parse(localStorage.getItem('casskai_enterprises') || '[]');
-        const updatedEnterprises = [enterpriseData, ...existingEnterprises.filter(e => e.id !== company.id)];
+        const updatedEnterprises = [enterpriseData, ...existingEnterprises.filter((e: any) => e.id !== company.id)];
         localStorage.setItem('casskai_enterprises', JSON.stringify(updatedEnterprises));
         localStorage.setItem('casskai_current_enterprise', company.id);
-        
         console.log('✅ Enterprise synchronized with localStorage');
       } catch (syncError) {
         console.warn('⚠️ Warning syncing enterprise data:', syncError);
