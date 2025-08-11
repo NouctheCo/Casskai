@@ -416,7 +416,7 @@ const KPIWidget = ({ title, currentValue, targetValue, icon, color = 'blue', tre
 
 const DashboardPage = () => {
   const { t } = useLocale();
-  const { currentEnterprise } = useEnterprise();
+  const { currentEnterprise, loading: enterpriseLoading } = useEnterprise();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState('30d');
@@ -566,6 +566,15 @@ const DashboardPage = () => {
     { icon: AlertTriangle, title: "Stock faible - Produit A", time: "Il y a 6 heures", status: true, color: "red" },
     { icon: Users, title: "3 nouveaux clients ajoutés", time: "Il y a 1 jour", status: false, color: "blue" }
   ];
+
+  // Vérifier que l'entreprise est chargée avant d'afficher le dashboard
+  if (enterpriseLoading || !currentEnterprise) {
+    return (
+      <div className="container mx-auto p-6">
+        <DashboardSkeleton />
+      </div>
+    );
+  }
 
   // Option pour utiliser le nouveau dashboard animé
   if (true) { // Changez à false pour utiliser l'ancien dashboard
