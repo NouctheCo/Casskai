@@ -203,12 +203,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           phone: companyData.phone || '',
           email: companyData.email || '',
           website: companyData.website || '',
-          fiscal_year_start: companyData.fiscalYearStart || 1,
-          fiscal_year_end: companyData.fiscalYearEnd || '12-31',
-          share_capital: companyData.shareCapital || '',
-          ceo_name: companyData.ceoName || '',
-          ceo_title: companyData.ceoTitle || 'Gérant',
-          accounting_standard: companyData.accountingStandard || 'PCG'
+          fiscal_year_start: companyData.fiscalYearStart || 1
         })
         .select()
         .single();
