@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Enterprise, EnterpriseTaxConfiguration } from '../types/enterprise.types';
 import { useToast } from '../components/ui/use-toast';
+import { supabase } from '../lib/supabase';
 
 interface EnterpriseContextType {
   enterprises: Enterprise[];
@@ -57,8 +58,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    // Charger les entreprises depuis localStorage
+  const loadEnterprises = () => {
     console.log('🏢 Chargement des entreprises...');
     
     const savedEnterprises = localStorage.getItem('casskai_enterprises');
@@ -91,32 +91,84 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       localStorage.setItem('casskai_current_enterprise', enterpriseList[0].id);
     }
     
-    setLoading(false);
     console.log('✅ Entreprises chargées avec succès');
+  };
+
+  useEffect(() => {
+    loadEnterprises();
+    setLoading(false);
+    
+    // Écouter les changements localStorage pour rester synchronisé
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'casskai_enterprises' || e.key === 'casskai_current_enterprise') {
+        console.log('📦 localStorage modifié, rechargement des entreprises...');
+        loadEnterprises();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const currentEnterprise = enterprises.find(e => e.id === currentEnterpriseId) || null;
 
   const addEnterprise = async (enterpriseData: Omit<Enterprise, 'id' | 'createdAt' | 'updatedAt'>) => {
-    console.log('🏢 Ajout d\'une nouvelle entreprise:', enterpriseData);
-    
+    console.log('🏢 Ajout d\'une nouvelle entreprise (Supabase):', enterpriseData);
+    // Création dans Supabase
+    const { data, error } = await supabase
+      .from('companies')
+      .insert([
+        {
+          name: enterpriseData.name,
+          country: enterpriseData.address?.country || '',
+          default_currency: enterpriseData.currency || 'EUR',
+          default_locale: 'fr',
+          timezone: 'Europe/Paris',
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }
+      ])
+      .select();
+
+    if (error || !data || !data[0]) {
+      toast({
+        title: 'Erreur',
+        description: "Impossible de créer l'entreprise dans Supabase."
+      });
+      return;
+    }
+
+    const supabaseEnterprise = data[0];
+    // Création locale avec l'ID Supabase
     const newEnterprise: Enterprise = {
       ...enterpriseData,
-      id: `enterprise-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      id: supabaseEnterprise.id,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+      countryCode: supabaseEnterprise.country,
+      address: {
+        ...enterpriseData.address,
+        country: supabaseEnterprise.country,
+      },
+      currency: supabaseEnterprise.default_currency || 'EUR',
+      isActive: true,
+      settings: enterpriseData.settings || {},
+      taxRegime: enterpriseData.taxRegime,
     };
-    
-    const updatedEnterprises = [...enterprises, newEnterprise];
+    const updatedEnterprises: Enterprise[] = [...enterprises, newEnterprise];
     setEnterprises(updatedEnterprises);
+    setCurrentEnterpriseId(newEnterprise.id);
     localStorage.setItem('casskai_enterprises', JSON.stringify(updatedEnterprises));
-    
+    localStorage.setItem('casskai_current_enterprise', newEnterprise.id);
     toast({
       title: 'Entreprise ajoutée',
-      description: `L'entreprise ${newEnterprise.name} a été ajoutée avec succès.`
+      description: `L'entreprise ${newEnterprise.name} a été ajoutée et sélectionnée.`
     });
-    
-    console.log('✅ Entreprise ajoutée avec succès');
+    console.log('✅ Entreprise ajoutée et synchronisée avec Supabase');
   };
 
   const updateEnterprise = async (id: string, data: Partial<Enterprise>) => {
@@ -180,12 +232,11 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     
     // Configuration fiscale par défaut basée sur le pays
     return {
-      country: enterprise.country,
-      vatRate: enterprise.country === 'FR' ? 20 : 0,
-      corporateTaxRate: enterprise.country === 'FR' ? 25 : 0,
-      fiscalYearStart: enterprise.fiscalYearStart,
-      fiscalYearEnd: enterprise.fiscalYearEnd,
-      taxRegime: 'normal'
+      enterpriseId: enterprise.id,
+      taxRates: [],
+      declarations: [],
+      payments: [],
+      documents: []
     };
   };
 
