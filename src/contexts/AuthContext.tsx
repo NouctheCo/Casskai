@@ -230,7 +230,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           phone: companyData.phone || '',
           email: companyData.email || '',
           website: companyData.website || '',
-          fiscal_year_start: companyData.fiscalYearStart || 1
+          fiscal_year_start: companyData.fiscalYearStart || 1,
+          ceo_name: companyData.ceoName || null,
+          ceo_title: companyData.ceoTitle || null
         })
         .eq('id', companyId);
 
