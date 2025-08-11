@@ -1,5 +1,8 @@
 // src/services/accountingService.ts
 import type { AccountPlan, AccountClass, Account, AccountType } from '../types/accounting';
+import { PCG_ACCOUNTS, PCG_CLASSES } from '../data/pcg';
+import { SYSCOHADA_PLAN } from '../data/syscohada';
+import { supabase } from '../lib/supabase';
 
 export class AccountingService {
   private static instance: AccountingService;
@@ -192,6 +195,162 @@ export class AccountingService {
         fraisBancaires: '627'
       };
     }
+  }
+
+  /**
+   * Détermine le standard comptable basé sur le pays
+   */
+  getStandardByCountry(country: string): string {
+    const SYSCOHADA_COUNTRIES = ['CI', 'SN', 'ML', 'BF', 'BJ', 'TG', 'NE', 'GW', 'CM', 'CF', 'TD', 'CG', 'GA', 'GQ', 'GN'];
+    return SYSCOHADA_COUNTRIES.includes(country) ? 'SYSCOHADA' : 'PCG';
+  }
+
+  /**
+   * Crée un plan comptable complet pour une entreprise
+   */
+  async createDefaultChartOfAccounts(
+    companyId: string, 
+    country: string, 
+    standard?: string
+  ): Promise<{ success: boolean; accountsCreated: number; error?: string }> {
+    try {
+      const accountingStandard = standard || this.getStandardByCountry(country);
+      
+      if (accountingStandard === 'PCG') {
+        return await this.createPCGAccounts(companyId);
+      } else if (accountingStandard === 'SYSCOHADA') {
+        return await this.createSYSCOHADAAccounts(companyId);
+      }
+      
+      return { success: false, accountsCreated: 0, error: 'Standard comptable non supporté' };
+    } catch (error) {
+      console.error('Erreur création plan comptable:', error);
+      return { success: false, accountsCreated: 0, error: error.message };
+    }
+  }
+
+  /**
+   * Crée les comptes du Plan Comptable Général français
+   */
+  private async createPCGAccounts(companyId: string): Promise<{ success: boolean; accountsCreated: number; error?: string }> {
+    try {
+      // Convertir les données PCG au format attendu par Supabase
+      const accountsToCreate = PCG_ACCOUNTS.map(account => ({
+        company_id: companyId,
+        account_number: account.code,
+        name: account.name,
+        type: this.mapPCGTypeToDBType(account.type),
+        class: parseInt(account.code.charAt(0)),
+        parent_account_id: null, // À implémenter si nécessaire
+        description: account.description || null,
+        is_active: account.isActive,
+        balance: 0,
+        currency: 'EUR',
+        tax_rate: 0
+      }));
+
+      const { data, error } = await supabase
+        .from('accounts')
+        .insert(accountsToCreate)
+        .select();
+
+      if (error) throw error;
+
+      return { success: true, accountsCreated: data?.length || 0 };
+    } catch (error) {
+      console.error('Erreur création comptes PCG:', error);
+      return { success: false, accountsCreated: 0, error: error.message };
+    }
+  }
+
+  /**
+   * Crée les comptes du système SYSCOHADA
+   */
+  private async createSYSCOHADAAccounts(companyId: string): Promise<{ success: boolean; accountsCreated: number; error?: string }> {
+    try {
+      const accountsToCreate: any[] = [];
+      
+      // Parcourir le plan SYSCOHADA et créer les comptes
+      for (const accountClass of SYSCOHADA_PLAN.classes) {
+        for (const account of accountClass.accounts) {
+          accountsToCreate.push({
+            company_id: companyId,
+            account_number: account.number,
+            name: account.name,
+            type: this.mapSYSCOHADATypeToDBType(account.type),
+            class: parseInt(account.number.charAt(0)),
+            parent_account_id: null,
+            description: null,
+            is_active: true,
+            balance: 0,
+            currency: 'XOF', // Franc CFA par défaut
+            tax_rate: 0
+          });
+
+          // Ajouter les sous-comptes
+          if (account.subAccounts) {
+            for (const subAccount of account.subAccounts) {
+              accountsToCreate.push({
+                company_id: companyId,
+                account_number: subAccount.number,
+                name: subAccount.name,
+                type: this.mapSYSCOHADATypeToDBType(subAccount.type),
+                class: parseInt(subAccount.number.charAt(0)),
+                parent_account_id: null, // Sera défini après création du compte parent
+                description: null,
+                is_active: true,
+                balance: 0,
+                currency: 'XOF',
+                tax_rate: 0
+              });
+            }
+          }
+        }
+      }
+
+      const { data, error } = await supabase
+        .from('accounts')
+        .insert(accountsToCreate)
+        .select();
+
+      if (error) throw error;
+
+      return { success: true, accountsCreated: data?.length || 0 };
+    } catch (error) {
+      console.error('Erreur création comptes SYSCOHADA:', error);
+      return { success: false, accountsCreated: 0, error: error.message };
+    }
+  }
+
+  /**
+   * Convertit les types PCG vers les types de base de données
+   */
+  private mapPCGTypeToDBType(pcgType: string): string {
+    const typeMapping: { [key: string]: string } = {
+      'asset': 'asset',
+      'liability': 'liability', 
+      'equity': 'equity',
+      'revenue': 'revenue',
+      'expense': 'expense'
+    };
+    return typeMapping[pcgType] || 'asset';
+  }
+
+  /**
+   * Convertit les types SYSCOHADA vers les types de base de données
+   */
+  private mapSYSCOHADATypeToDBType(syscohadaType: string): string {
+    const typeMapping: { [key: string]: string } = {
+      'capitaux': 'equity',
+      'dettes': 'liability',
+      'creances': 'asset',
+      'tresorerie': 'asset',
+      'immobilisations': 'asset',
+      'stocks': 'asset',
+      'charges': 'expense',
+      'produits': 'revenue'
+    };
+    return typeMapping[syscohadaType] || 'asset';
   }
 
   // Plan comptable français simplifié (sera remplacé par des données externes)

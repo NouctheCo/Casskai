@@ -187,12 +187,39 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       // Create the company
-      const { data: company, error: companyError } = await supabase
+      // Utiliser la fonction RPC améliorée pour créer l'entreprise avec plan comptable
+      const { data: companyId, error: companyError } = await supabase.rpc(
+        'create_company_with_setup',
+        {
+          company_name: companyData.name,
+          user_uuid: user.id,
+          country_code: companyData.country || 'FR',
+          currency_code: companyData.currency || 'EUR',
+          accounting_standard_param: companyData.accountingStandard || null,
+        }
+      );
+
+      if (companyError) {
+        console.error('❌ Error creating company:', companyError);
+        throw new Error(`Erreur lors de la création de l'entreprise: ${companyError.message}`);
+      }
+
+      // Récupérer les données complètes de l'entreprise créée
+      const { data: company, error: fetchError } = await supabase
         .from('companies')
-        .insert({
-          name: companyData.name,
-          country: companyData.country || 'FR',
-          default_currency: companyData.currency || 'EUR',
+        .select('*')
+        .eq('id', companyId)
+        .single();
+
+      if (fetchError) {
+        console.error('❌ Error fetching created company:', fetchError);
+        throw new Error(`Erreur lors de la récupération de l'entreprise: ${fetchError.message}`);
+      }
+
+      // Mettre à jour les informations supplémentaires de l'entreprise
+      const { error: updateError } = await supabase
+        .from('companies')
+        .update({
           default_locale: companyData.locale || 'fr',
           sector: companyData.sector || '',
           siret: companyData.siret || '',
@@ -205,32 +232,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           website: companyData.website || '',
           fiscal_year_start: companyData.fiscalYearStart || 1
         })
-        .select()
-        .single();
+        .eq('id', companyId);
 
-      if (companyError) {
-        console.error('❌ Error creating company:', companyError);
-        throw new Error(`Erreur lors de la création de l'entreprise: ${companyError.message}`);
+      if (updateError) {
+        console.warn('⚠️ Warning updating company details:', updateError);
       }
 
-      console.log('✅ Company created:', company);
-
-      // Associate user with company
-      const { error: userCompanyError } = await supabase
-        .from('user_companies')
-        .insert({
-          user_id: user.id,
-          company_id: company.id,
-          is_default: true,
-          role: 'admin'
-        });
-
-      if (userCompanyError) {
-        console.error('❌ Error associating user with company:', userCompanyError);
-        throw new Error(`Erreur lors de l'association utilisateur-entreprise: ${userCompanyError.message}`);
-      }
-
-      console.log('✅ User associated with company');
+      console.log('✅ Company created with accounting chart:', company);
 
       // Save selected modules to localStorage for now
       if (selectedModules) {
@@ -274,16 +282,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       // Update user metadata to mark onboarding as completed
-      const { error: updateError } = await supabase.auth.updateUser({
+      const { error: userUpdateError } = await supabase.auth.updateUser({
         data: { 
           onboarding_completed: true,
           company_id: company.id
         }
       });
 
-      if (updateError) {
-        console.error('❌ Error updating user metadata:', updateError);
-        throw new Error(`Erreur lors de la mise à jour du profil utilisateur: ${updateError.message}`);
+      if (userUpdateError) {
+        console.error('❌ Error updating user metadata:', userUpdateError);
+        throw new Error(`Erreur lors de la mise à jour du profil utilisateur: ${userUpdateError.message}`);
       }
 
       console.log('✅ User metadata updated - onboarding marked as completed');

@@ -98,6 +98,7 @@ export function useCompanies() {
           user_uuid: user.id,
           country_code: companyData.country || 'FR',
           currency_code: companyData.currency || 'EUR',
+          accounting_standard_param: companyData.accountingStandard || null,
         }
       );
 
