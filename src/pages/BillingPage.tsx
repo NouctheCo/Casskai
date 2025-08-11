@@ -48,6 +48,15 @@ const BillingPage: React.FC = () => {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   const [billingPeriod, setBillingPeriod] = useState<'month' | 'year'>('month');
+  const [activeTab, setActiveTab] = useState<string>('overview');
+
+  // Handle tab parameter from URL
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && ['overview', 'plans', 'payment', 'invoices'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   // Handle success/cancel from Stripe
   useEffect(() => {
@@ -219,7 +228,7 @@ const BillingPage: React.FC = () => {
         </div>
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
           <TabsTrigger value="plans">Plans</TabsTrigger>
@@ -233,7 +242,7 @@ const BillingPage: React.FC = () => {
           
           {/* Quick actions */}
           <div className="grid md:grid-cols-3 gap-4">
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/settings/billing?tab=plans')}>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('plans')}>
               <CardContent className="p-6 text-center">
                 <ArrowUpCircle className="w-8 h-8 text-blue-500 mx-auto mb-3" />
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
@@ -245,7 +254,7 @@ const BillingPage: React.FC = () => {
               </CardContent>
             </Card>
             
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/settings/billing?tab=payment')}>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('payment')}>
               <CardContent className="p-6 text-center">
                 <CreditCard className="w-8 h-8 text-green-500 mx-auto mb-3" />
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
@@ -257,7 +266,7 @@ const BillingPage: React.FC = () => {
               </CardContent>
             </Card>
             
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/settings/billing?tab=invoices')}>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('invoices')}>
               <CardContent className="p-6 text-center">
                 <FileText className="w-8 h-8 text-purple-500 mx-auto mb-3" />
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
