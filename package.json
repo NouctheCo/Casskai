@@ -46,7 +46,7 @@
   },
   "dependencies": {
     "@floating-ui/react": "^0.27.15",
-    "@hookform/resolvers": "^3.3.4",
+    "@hookform/resolvers": "^5.2.1",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-checkbox": "^1.1.1",
