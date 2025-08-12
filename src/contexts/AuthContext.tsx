@@ -186,22 +186,74 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error('Le nom de l\'entreprise est requis');
       }
 
-      // Create the company
-      // Utiliser la fonction RPC améliorée pour créer l'entreprise avec plan comptable
-      const { data: companyId, error: companyError } = await supabase.rpc(
-        'create_company_with_setup',
-        {
-          company_name: companyData.name,
-          user_uuid: user.id,
-          country_code: companyData.country || 'FR',
-          currency_code: companyData.currency || 'EUR',
-          accounting_standard_param: companyData.accountingStandard || null,
-        }
-      );
+      // Idempotency: reuse existing company if already created in this session or same name for this user
+      const localKey = `casskai_onboarding_company_${user.id}`;
+      let existingCompanyId: string | null = localStorage.getItem(localKey);
 
-      if (companyError) {
-        console.error('❌ Error creating company:', companyError);
-        throw new Error(`Erreur lors de la création de l'entreprise: ${companyError.message}`);
+      if (!existingCompanyId) {
+        // Try find company with same name linked to this user
+        const { data: existing, error: existingErr } = await supabase
+          .from('user_companies')
+          .select(`
+            company_id,
+            companies:company_id (
+              id,
+              name,
+              country,
+              default_currency,
+              default_locale,
+              timezone,
+              siret,
+              vat_number,
+              address,
+              city,
+              postal_code,
+              phone,
+              email,
+              website,
+              fiscal_year_start,
+              created_at,
+              updated_at
+            )
+          `)
+          .eq('user_id', user.id)
+          .eq('companies.name', companyData.name)
+          .limit(1);
+
+        if (existingErr) {
+          console.warn('⚠️ Error checking existing company (non-blocking):', existingErr);
+        }
+
+        if (existing && existing.length > 0) {
+          existingCompanyId = existing[0].company_id as string;
+          localStorage.setItem(localKey, existingCompanyId);
+          console.log('ℹ️ Reusing existing company by name for user:', existingCompanyId);
+        }
+      }
+
+      let companyId: string;
+      if (existingCompanyId) {
+        companyId = existingCompanyId;
+      } else {
+        // Create the company via RPC
+        const { data: newCompanyId, error: companyError } = await supabase.rpc(
+          'create_company_with_setup',
+          {
+            company_name: companyData.name,
+            user_uuid: user.id,
+            country_code: companyData.country || 'FR',
+            currency_code: companyData.currency || 'EUR',
+            accounting_standard_param: companyData.accountingStandard || null,
+          }
+        );
+
+        if (companyError) {
+          console.error('❌ Error creating company:', companyError);
+          throw new Error(`Erreur lors de la création de l'entreprise: ${companyError.message}`);
+        }
+
+        companyId = newCompanyId as string;
+        localStorage.setItem(localKey, companyId);
       }
 
       // Récupérer les données complètes de l'entreprise créée
@@ -296,6 +348,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error(`Erreur lors de la mise à jour du profil utilisateur: ${userUpdateError.message}`);
       }
 
+      // Update local user state immediately so UI reacts without waiting for session refresh
+      try {
+        setUser(prev => {
+          if (!prev) return prev;
+          // merge shallowly; supabase User type is readonly so cast to any for local state copy
+          const updated: any = { ...prev, user_metadata: { ...(prev as any).user_metadata, onboarding_completed: true, company_id: company.id } };
+          return updated as User;
+        });
+      } catch (e) {
+        console.warn('⚠️ Warning updating local user metadata state:', e);
+      }
+
       console.log('✅ User metadata updated - onboarding marked as completed');
 
       // Reload user companies to refresh the context
@@ -365,7 +429,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // Permission checking function
-  const hasPermission = (permission: string): boolean => {
+  const hasPermission = (_permission: string): boolean => {
     // For now, return true if user is authenticated
     // In production, check user role and permissions from database
     if (!user || !currentCompany) return false;

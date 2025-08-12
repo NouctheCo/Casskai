@@ -71,7 +71,7 @@ export function Header({
             >
               CassKai
             </motion.h1>
-            {currentEnterprise && (
+            {currentEnterprise && user?.user_metadata?.onboarding_completed && (
               <motion.div
                 className="flex items-center space-x-2"
                 initial={{ opacity: 0, x: -10 }}
