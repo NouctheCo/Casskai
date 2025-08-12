@@ -39,8 +39,10 @@
     "test:e2e:debug": "playwright test --debug",
     "test:performance": "playwright test tests/e2e/performance.spec.ts",
     "test:accessibility": "playwright test --grep=\"should be accessible\"",
-    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\""
+  "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+  "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+  "deploy:hostinger": "powershell -ExecutionPolicy Bypass -File ./hostinger-deploy.ps1 production",
+  "deploy:hostinger:staging": "powershell -ExecutionPolicy Bypass -File ./hostinger-deploy.ps1 staging"
   },
   "dependencies": {
     "@floating-ui/react": "^0.27.15",
