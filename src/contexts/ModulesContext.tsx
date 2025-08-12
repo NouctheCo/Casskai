@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import ModuleManager from '@/services/moduleManager';
-import { ModuleDefinition, ModuleActivation, ModuleContext } from '@/types/modules.types';
+import { ModuleDefinition, ModuleContext } from '@/types/modules.types';
 
 // Export the modules list for onboarding
 export const ALL_MODULES = [
@@ -92,6 +92,9 @@ export const ModulesProvider: React.FC<ModulesProviderProps> = ({
       // Enregistrer les modules disponibles
       await registerAvailableModules();
 
+  // Migration one-shot: activer les modules choisis durant l'onboarding
+  await migrateOnboardingSelections();
+
       // Charger les modules actifs
       await loadModules();
 
@@ -104,35 +107,69 @@ export const ModulesProvider: React.FC<ModulesProviderProps> = ({
     }
   };
 
+  // Active les modules choisis pendant l'onboarding (stockés dans casskai_modules)
+  const migrateOnboardingSelections = async () => {
+    try {
+      const migrationFlagKey = `casskai-modules-migrated-${tenantId}`;
+      const alreadyMigrated = localStorage.getItem(migrationFlagKey);
+      const storedSelections = localStorage.getItem('casskai_modules');
+      if (alreadyMigrated || !storedSelections) return;
+
+      const selections = JSON.parse(storedSelections) as Record<string, boolean>;
+      const moduleIds = Object.keys(selections).filter(k => selections[k]);
+
+      for (const moduleId of moduleIds) {
+        try {
+          // Activer seulement si le module est enregistré et pas déjà actif
+          const available = moduleManager.getAvailableModules().some(m => m.id === moduleId);
+          if (available && !moduleManager.isModuleActive(moduleId)) {
+            await moduleManager.activateModule(moduleId, userId, {});
+          }
+        } catch (e) {
+          console.warn(`[ModulesProvider] Impossible d'activer le module '${moduleId}' depuis l'onboarding:`, e);
+        }
+      }
+
+      // Marquer la migration comme effectuée pour ce tenant
+      localStorage.setItem(migrationFlagKey, '1');
+    } catch (e) {
+      console.warn('[ModulesProvider] Migration des modules onboarding échouée (non bloquant):', e);
+    }
+  };
+
   const registerAvailableModules = async () => {
     try {
       // Importer dynamiquement tous les modules
-      const moduleImports = await Promise.allSettled([
+      const [crmRes, hrRes, projectsRes, marketplaceRes] = await Promise.allSettled([
         import('@/modules/crm/crmModule'),
         import('@/modules/hr/hrModule'),
         import('@/modules/projects/projectsModule'),
         import('@/modules/marketplace/marketplaceModule'),
       ]);
 
-      // Enregistrer chaque module importé avec succès
-      moduleImports.forEach((result, index) => {
-        if (result.status === 'fulfilled') {
-          const moduleNames = ['crmModule', 'hrModule', 'projectsModule', 'marketplaceModule'];
-          const moduleName = moduleNames[index];
-          const moduleExport = result.value[moduleName];
-          
-          if (moduleExport) {
-            try {
-              moduleManager.registerModule(moduleExport);
-              console.log(`[ModulesProvider] Module ${moduleExport.definition.id} enregistré`);
-            } catch (error) {
-              console.error(`[ModulesProvider] Erreur enregistrement ${moduleName}:`, error);
+      const entries: Array<{ name: string; mod?: any; reason?: any }> = [];
+      if (crmRes.status === 'fulfilled') entries.push({ name: 'crmModule', mod: crmRes.value.crmModule }); else entries.push({ name: 'crmModule', reason: crmRes.reason });
+      if (hrRes.status === 'fulfilled') entries.push({ name: 'hrModule', mod: hrRes.value.hrModule }); else entries.push({ name: 'hrModule', reason: hrRes.reason });
+      if (projectsRes.status === 'fulfilled') entries.push({ name: 'projectsModule', mod: projectsRes.value.projectsModule }); else entries.push({ name: 'projectsModule', reason: projectsRes.reason });
+      if (marketplaceRes.status === 'fulfilled') entries.push({ name: 'marketplaceModule', mod: marketplaceRes.value.marketplaceModule }); else entries.push({ name: 'marketplaceModule', reason: marketplaceRes.reason });
+
+      for (const { name, mod, reason } of entries) {
+        if (mod) {
+          try {
+            const modId = mod.definition?.id;
+            if (modId && !moduleManager.getModule(modId)) {
+              moduleManager.registerModule(mod);
+              console.log(`[ModulesProvider] Module ${modId} enregistré`);
+            } else {
+              console.log(`[ModulesProvider] Module ${modId} déjà enregistré, on saute`);
             }
+          } catch (error) {
+            console.error(`[ModulesProvider] Erreur enregistrement ${name}:`, error);
           }
-        } else {
-          console.error(`[ModulesProvider] Erreur import module ${index}:`, result.reason);
+        } else if (reason) {
+          console.error(`[ModulesProvider] Erreur import module ${name}:`, reason);
         }
-      });
+      }
 
     } catch (error) {
       console.error('[ModulesProvider] Erreur d\'enregistrement des modules:', error);
@@ -324,7 +361,7 @@ export const useConditionalFeature = (moduleId: string, feature?: string) => {
 
 // Hook pour charger dynamiquement les composants d'un module
 export const useModuleComponents = (moduleId: string) => {
-  const { isModuleActive, getModule } = useModules();
+  const { isModuleActive } = useModules();
   const [components, setComponents] = useState<Record<string, React.ComponentType> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -334,27 +371,15 @@ export const useModuleComponents = (moduleId: string) => {
       return;
     }
 
-    const loadComponents = async () => {
+  const loadComponents = async () => {
       setIsLoading(true);
       try {
         // Récupérer les composants du module via le gestionnaire
         const module = ModuleManager.getInstance().getModule(moduleId);
         if (module && module.getComponents) {
-          const moduleComponents = module.getComponents();
-          
-          // Résoudre les imports dynamiques
-          const resolvedComponents: Record<string, React.ComponentType> = {};
-          
-          for (const [name, importFn] of Object.entries(moduleComponents)) {
-            try {
-              const component = await importFn();
-              resolvedComponents[name] = component.default || component;
-            } catch (error) {
-              console.error(`[useModuleComponents] Erreur chargement composant ${name}:`, error);
-            }
-          }
-          
-          setComponents(resolvedComponents);
+      const moduleComponents = module.getComponents();
+      // Utilise directement les composants fournis par le module
+      setComponents(moduleComponents as unknown as Record<string, React.ComponentType>);
         }
       } catch (error) {
         console.error(`[useModuleComponents] Erreur chargement composants ${moduleId}:`, error);
@@ -375,19 +400,19 @@ export function withModuleCondition<P extends object>(
   moduleId: string,
   fallback?: React.ComponentType<P> | null
 ) {
-  return React.forwardRef<any, P>((props, ref) => {
+  return (props: P) => {
     const { isModuleActive } = useModules();
 
     if (!isModuleActive(moduleId)) {
       if (fallback) {
         const FallbackComponent = fallback;
-        return <FallbackComponent {...props} ref={ref} />;
+        return <FallbackComponent {...props} />;
       }
       return null;
     }
 
-    return <Component {...props} ref={ref} />;
-  });
+    return <Component {...props} />;
+  };
 }
 
 export default ModulesProvider;

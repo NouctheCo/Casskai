@@ -17,6 +17,7 @@ export class ModuleManager {
   private activations: Map<string, ModuleActivation> = new Map();
   private dependencies: Map<string, string[]> = new Map();
   private isInitialized = false;
+  private tenantId: string | null = null;
 
   private constructor() {}
 
@@ -30,8 +31,9 @@ export class ModuleManager {
   // Initialisation du gestionnaire de modules
   async initialize(context: Partial<ModuleContext>): Promise<void> {
     try {
+      this.tenantId = context.tenantId ?? 'default';
       // Charger les activations depuis la base de données
-      await this.loadActivations(context.tenantId!);
+      await this.loadActivations(this.tenantId!);
       
       // Initialiser les modules core automatiquement
       await this.initializeCoreModules(context);
@@ -115,8 +117,9 @@ export class ModuleManager {
 
       console.log(`[ModuleManager] Module ${moduleId} activé avec succès`);
     } catch (error) {
-      console.error(`[ModuleManager] Erreur lors de l'activation de ${moduleId}:`, error);
-      throw new ModuleError(`Failed to activate module: ${error.message}`, moduleId, 'ACTIVATION_FAILED', error);
+      const err = error as any;
+      console.error(`[ModuleManager] Erreur lors de l'activation de ${moduleId}:`, err);
+      throw new ModuleError(`Failed to activate module: ${err?.message || String(err)}`, moduleId, 'ACTIVATION_FAILED', err);
     }
   }
 
@@ -160,8 +163,9 @@ export class ModuleManager {
 
       console.log(`[ModuleManager] Module ${moduleId} désactivé avec succès`);
     } catch (error) {
-      console.error(`[ModuleManager] Erreur lors de la désactivation de ${moduleId}:`, error);
-      throw new ModuleError(`Failed to deactivate module: ${error.message}`, moduleId, 'DEACTIVATION_FAILED', error);
+      const err = error as any;
+      console.error(`[ModuleManager] Erreur lors de la désactivation de ${moduleId}:`, err);
+      throw new ModuleError(`Failed to deactivate module: ${err?.message || String(err)}`, moduleId, 'DEACTIVATION_FAILED', err);
     }
   }
 
@@ -195,7 +199,7 @@ export class ModuleManager {
   }
 
   // Mettre à jour la configuration d'un module
-  async updateModuleConfig(moduleId: string, config: Record<string, any>, userId: string): Promise<void> {
+  async updateModuleConfig(moduleId: string, config: Record<string, any>, _userId: string): Promise<void> {
     const module = this.modules.get(moduleId);
     const activation = this.activations.get(moduleId);
 
@@ -275,9 +279,9 @@ export class ModuleManager {
     return {
       moduleId,
       userId,
-      tenantId: 'current-tenant', // À remplacer par le vrai tenantId
-      permissions: await this.getUserPermissions(userId),
-      config,
+  tenantId: this.tenantId ?? 'default',
+  permissions: await this.getUserPermissions(userId),
+  config,
       services: await this.createModuleServices(),
     };
   }
@@ -295,7 +299,7 @@ export class ModuleManager {
   }
 
   // Obtenir les permissions d'un utilisateur
-  private async getUserPermissions(userId: string): Promise<string[]> {
+  private async getUserPermissions(_userId: string): Promise<string[]> {
     // À implémenter selon le système de permissions
     return ['*']; // Temporaire: toutes les permissions
   }
@@ -317,7 +321,7 @@ export class ModuleManager {
   }
 
   // Initialiser les modules core
-  private async initializeCoreModules(context: Partial<ModuleContext>): Promise<void> {
+  private async initializeCoreModules(_context: Partial<ModuleContext>): Promise<void> {
     const coreModules = Array.from(this.modules.values())
       .filter(module => module.definition.isCore)
       .sort((a, b) => a.definition.name.localeCompare(b.definition.name));
@@ -352,13 +356,13 @@ export class ModuleManager {
     }
   }
 
-  private async saveActivation(activation: ModuleActivation): Promise<void> {
+  private async saveActivation(_activation: ModuleActivation): Promise<void> {
     try {
       // Sauvegarder en base de données
       // await db.moduleActivations.save(activation);
       
       // Simulation temporaire
-      const tenantId = 'current-tenant';
+  const tenantId = this.tenantId ?? 'default';
       const allActivations = Array.from(this.activations.values());
       localStorage.setItem(`casskai-modules-${tenantId}`, JSON.stringify(allActivations));
     } catch (error) {
