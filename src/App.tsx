@@ -49,6 +49,7 @@ const DatabaseTestPage = lazy(() => import('@/pages/DatabaseTestPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 const ModuleManager = lazy(() => import('@/components/modules/ModuleManagerEnhanced'));
 const ModuleDiagnostics = lazy(() => import('@/components/modules/ModuleDiagnostics'));
+// const OnboardingDebugPanel = lazy(() => import('@/components/debug/OnboardingDebugPanel')); // Debug panel removed for production
 
 // Pages légales et de contenu
 const PrivacyPolicyPage = lazy(() => import('@/pages/PrivacyPolicyPage'));
@@ -286,6 +287,17 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      // Debug route removed for production
+      // {
+      //   path: '/debug/onboarding',
+      //   element: (
+      //     <ProtectedRoute>
+      //       <RouteErrorBoundary routeName="Debug Onboarding">
+      //         <OnboardingDebugPanel />
+      //       </RouteErrorBoundary>
+      //     </ProtectedRoute>
+      //   ),
+      // },
       // Pages légales et de contenu (accessibles publiquement)
       {
         path: '/privacy',

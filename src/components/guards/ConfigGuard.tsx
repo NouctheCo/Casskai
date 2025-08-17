@@ -12,7 +12,7 @@ interface ConfigGuardProps {
 }
 
 const ConfigGuard: React.FC<ConfigGuardProps> = ({ children, fallback }) => {
-  const { config, supabase, isReady, needsSetup, hasError } = useAppState();
+  const { config, supabase, hasError } = useAppState();
   const [isRetrying, setIsRetrying] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
 
@@ -31,6 +31,7 @@ const ConfigGuard: React.FC<ConfigGuardProps> = ({ children, fallback }) => {
 
   // Reset complet de la configuration
   const handleReset = () => {
+    // eslint-disable-next-line no-alert
     if (confirm('Êtes-vous sûr de vouloir réinitialiser la configuration ? Cette action est irréversible.')) {
       config.resetConfig();
       window.location.reload();
@@ -38,12 +39,12 @@ const ConfigGuard: React.FC<ConfigGuardProps> = ({ children, fallback }) => {
   };
 
   // Afficher le wizard d'installation dès que besoin, même si isLoading est true
-  if (needsSetup) {
+  if (!config.isConfigured) {
     return fallback || <SupabaseSetupWizard />;
   }
 
   // Affichage pendant le chargement initial (uniquement si la config existe déjà)
-  if (config.isLoading || supabase.isLoading) {
+  if (config.isLoading || supabase.loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -141,7 +142,8 @@ const ConfigGuard: React.FC<ConfigGuardProps> = ({ children, fallback }) => {
   }
 
   // Configuration OK mais client Supabase pas prêt
-  if (config.isConfigured && !supabase.isClientReady) {
+  // When configured but client may not be fully ready, show a connecting state
+  if (config.isConfigured && supabase.loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-100 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -162,7 +164,7 @@ const ConfigGuard: React.FC<ConfigGuardProps> = ({ children, fallback }) => {
   }
 
   // Tout est OK - Afficher l'application
-  if (isReady) {
+  if (config.isConfigured) {
     return <>{children}</>;
   }
 

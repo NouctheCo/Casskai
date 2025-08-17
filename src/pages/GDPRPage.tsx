@@ -189,7 +189,8 @@ const GDPRPage = () => {
   const handleRequestSubmit = (e) => {
     e.preventDefault();
     console.log('Demande RGPD soumise:', requestForm);
-    alert('Votre demande a été envoyée. Vous recevrez une réponse sous 72 heures.');
+  // eslint-disable-next-line no-alert
+  alert('Votre demande a été envoyée. Vous recevrez une réponse sous 72 heures.');
     setRequestForm({
       type: '',
       email: '',

@@ -1,13 +1,11 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+/* eslint-disable max-lines-per-function */
+// Note: React import not needed with automatic JSX runtime; no translations used here
 import { motion } from 'framer-motion';
 import { Shield, Eye, Lock, Database, Users, FileText, Calendar, Mail, Phone } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 const PrivacyPolicyPage = () => {
-  const { t } = useTranslation();
-
   const lastUpdated = "8 août 2025";
 
   return (

@@ -521,7 +521,8 @@ export function ValidationCounter({
  * Hook pour intégrer la validation avec les toasts existants
  */
 export function useValidationToasts() {
-  const { toast } = require('@/components/ui/use-toast').useToast();
+  const { useToast } = await import('@/components/ui/use-toast');
+  const { toast } = useToast();
   
   const showValidationErrors = useCallback((errors: ValidationError[]) => {
     if (errors.length === 0) return;

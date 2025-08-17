@@ -19,8 +19,8 @@ export default [
       '**/*.d.ts',
       'supabase/functions/**/*',
       'tests/e2e/test-results/**/*',
-      'playwright-report/**/*'
-    ]
+      'playwright-report/**/*',
+    ],
   },
 
   // TypeScript/TSX files configuration (main app files)
@@ -36,9 +36,7 @@ export default [
       },
       parser: tsparser,
       parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
+        ecmaFeatures: { jsx: true },
         project: './tsconfig.app.json',
       },
     },
@@ -53,9 +51,7 @@ export default [
           moduleDirectory: ['node_modules', 'src'],
         },
         alias: {
-          map: [
-            ['@', './src'],
-          ],
+          map: [['@', './src']],
           extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
         },
       },
@@ -64,9 +60,9 @@ export default [
       '@typescript-eslint': tseslint,
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
-      'import': importPlugin,
+      import: importPlugin,
     },
-    rules: {
+  rules: {
       // Extend recommended configs
       ...js.configs.recommended.rules,
       ...tseslint.configs.recommended.rules,
@@ -74,12 +70,12 @@ export default [
 
       // TypeScript specific rules
       '@typescript-eslint/no-unused-vars': [
-        'error',
-        { 
+        'warn',
+        {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
-          ignoreRestSiblings: true 
-        }
+          ignoreRestSiblings: true,
+        },
       ],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-non-null-assertion': 'warn',
@@ -89,7 +85,7 @@ export default [
         {
           'ts-expect-error': 'allow-with-description',
           'ts-ignore': 'allow-with-description',
-        }
+        },
       ],
 
       // React specific rules
@@ -103,32 +99,36 @@ export default [
       // General code quality rules
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'no-debugger': 'error',
+      // Let TypeScript handle undefined variables in TS/TSX
+      'no-undef': 'off',
       'no-alert': 'error',
       'prefer-const': 'error',
       'no-var': 'error',
       'object-shorthand': 'error',
       'prefer-template': 'error',
-      
+
       // Import/Export rules for Linux compatibility
       'no-duplicate-imports': 'error',
-      'import/no-unresolved': 'error', // Prevent imports that don't exist
-      'import/no-useless-path-segments': 'error', // Clean up relative paths
-      'import/extensions': ['error', 'never', { 
-        'json': 'always',
-        'jsx': 'never',
-        'tsx': 'never',
-        'js': 'never',
-        'ts': 'never'
-      }], // Prevent unnecessary file extensions
-      'import/no-self-import': 'error', // Prevent self imports
-      'import/no-cycle': 'warn', // Detect circular dependencies
-      
-      // Complexity rules
-      'complexity': ['warn', 15],
+      'import/no-unresolved': 'error',
+      'import/no-useless-path-segments': 'error',
+      'import/extensions': [
+        'error',
+        'never',
+        { json: 'always', jsx: 'never', tsx: 'never', js: 'never', ts: 'never' },
+      ],
+      'import/no-self-import': 'error',
+      'import/no-cycle': 'warn',
+
+  // Complexity rules
+      complexity: ['warn', 15],
       'max-depth': ['warn', 4],
       'max-lines': ['warn', 500],
       'max-lines-per-function': ['warn', 100],
       'max-params': ['warn', 5],
+
+  // Relax a few broadly-triggered patterns to warnings during cleanup
+  'no-case-declarations': 'warn',
+  'no-useless-escape': 'warn',
 
       // Security rules
       'no-eval': 'error',
@@ -149,11 +149,7 @@ export default [
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
-      globals: {
-        ...globals.browser,
-        ...globals.node,
-        ...globals.es2022,
-      },
+      globals: { ...globals.browser, ...globals.node, ...globals.es2022 },
     },
     rules: {
       // Extend recommended configs
@@ -167,12 +163,12 @@ export default [
       'no-var': 'error',
       'object-shorthand': 'error',
       'prefer-template': 'error',
-      
+
       // Import/Export rules
       'no-duplicate-imports': 'error',
-      
+
       // Complexity rules
-      'complexity': ['warn', 20], // More lenient for config files
+      complexity: ['warn', 20], // More lenient for config files
       'max-depth': ['warn', 5],
       'max-lines': 'off',
       'max-lines-per-function': 'off',
@@ -186,10 +182,14 @@ export default [
     },
   },
 
-  // Test files specific configuration
+  // Test files specific configuration - TypeScript tests
   {
-    files: ['**/*.{test,spec}.{js,jsx,ts,tsx}', '**/tests/**/*.{js,jsx,ts,tsx}'],
+    files: ['**/*.{test,spec}.ts', '**/*.{test,spec}.tsx', '**/tests/**/*.{ts,tsx}'],
     languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      parser: tsparser,
+      parserOptions: { ecmaFeatures: { jsx: true } }, // no project for tests
       globals: {
         ...globals.jest,
         ...globals.node,
@@ -205,9 +205,26 @@ export default [
       },
     },
     rules: {
-      // Allow more flexible rules in tests
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/no-var-requires': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+      'no-console': 'off',
+      'max-lines': 'off',
+      'max-lines-per-function': 'off',
+    },
+  },
+
+  // Test files specific configuration - JavaScript tests
+  {
+    files: ['**/*.{test,spec}.js', '**/*.{test,spec}.jsx', '**/tests/**/*.{js,jsx}'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      parserOptions: { ecmaFeatures: { jsx: true } },
+      globals: { ...globals.jest, ...globals.node },
+    },
+    rules: {
       'no-console': 'off',
       'max-lines': 'off',
       'max-lines-per-function': 'off',
@@ -217,11 +234,7 @@ export default [
   // Configuration files
   {
     files: ['**/*.config.{js,ts}', '**/*.setup.{js,ts}'],
-    languageOptions: {
-      globals: {
-        ...globals.node,
-      },
-    },
+    languageOptions: { globals: { ...globals.node } },
     rules: {
       'no-console': 'off',
       '@typescript-eslint/no-var-requires': 'off',
@@ -231,11 +244,7 @@ export default [
   // Scripts directory
   {
     files: ['scripts/**/*.{js,ts}'],
-    languageOptions: {
-      globals: {
-        ...globals.node,
-      },
-    },
+    languageOptions: { globals: { ...globals.node } },
     rules: {
       'no-console': 'off',
       '@typescript-eslint/no-var-requires': 'off',

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
-import { stripeService } from '@/services/stripeService';
+import { stripeService } from '@/services';
 import { supabase } from '@/lib/supabase';
 import {
   UserSubscription,
@@ -242,11 +242,8 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({ chil
       );
 
       if (response.success && response.checkoutUrl) {
-        // For demo purposes, create a mock subscription immediately
-        const mockSubscription = await stripeService.createMockSubscription(user.id, planId);
-        setSubscription(mockSubscription);
-        const subscriptionPlan = getPlanById(planId);
-        setPlan(subscriptionPlan || null);
+        // Redirect to Stripe Checkout
+  window.location.assign(response.checkoutUrl);
         
         return { 
           success: true, 

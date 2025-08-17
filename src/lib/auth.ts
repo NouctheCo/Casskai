@@ -3,7 +3,7 @@ import type { Database, UserRole } from '@/types/database.types';
 
 // Enhanced authentication utilities with role-based access control
 
-export interface AuthUser extends Database['public']['Tables']['user_profiles']['Row'] {
+export type AuthUser = Database['public']['Tables']['user_profiles']['Row'] & {
   companies: Array<{
     company_id: string;
     company_name: string;
@@ -11,7 +11,7 @@ export interface AuthUser extends Database['public']['Tables']['user_profiles'][
     is_default: boolean;
     permissions: Record<string, boolean>;
   }>;
-}
+};
 
 export interface AuthSession {
   user: AuthUser | null;

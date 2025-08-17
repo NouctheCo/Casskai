@@ -3,10 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Purchase, PurchaseFormData, PurchaseFilters, Supplier } from '../types/purchase.types';
 import { purchasesService } from '../services/purchasesService';
-import { Button } from '../components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
-import { useToast } from '../components/ui/use-toast.js';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/components/ui/use-toast';
 import { useEnterprise } from '../contexts/EnterpriseContext';
 import PurchaseStatsComponent from '../components/purchases/PurchaseStats';
 import PurchasesTable from '../components/purchases/PurchasesTable';
@@ -194,6 +194,7 @@ export default function PurchasesPage() {
   };
 
   const handleDeletePurchase = async (id: string) => {
+    // eslint-disable-next-line no-alert
     if (window.confirm(t('purchases.notifications.deleteConfirm'))) {
       try {
         const result = await purchasesService.deletePurchase(id);

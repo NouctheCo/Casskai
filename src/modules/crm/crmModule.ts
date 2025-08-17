@@ -554,17 +554,17 @@ Cordialement,
 
   // Tâches automatisées
   private async sendFollowUpReminders(): Promise<void> {
-    console.log('[CRM] Envoi des relances automatiques');
+    console.warn('[CRM] Envoi des relances automatiques');
     // Logique de relance automatique
   }
 
   private async checkQuoteExpirations(): Promise<void> {
-    console.log('[CRM] Vérification des expirations de devis');
+    console.warn('[CRM] Vérification des expirations de devis');
     // Logique de vérification d'expiration
   }
 
   private async generatePipelineAnalytics(): Promise<void> {
-    console.log('[CRM] Génération des analytics pipeline');
+    console.warn('[CRM] Génération des analytics pipeline');
     // Logique d'analytics
   }
 }

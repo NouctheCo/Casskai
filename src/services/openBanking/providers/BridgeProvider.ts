@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import {
   BankConnection,
   BankAccount,
@@ -6,6 +7,7 @@ import {
   SyncResult,
   PSD2AuthFlow,
   WebhookEvent,
+  BankingProvider as BankingProviderConfig,
   BridgeConfig
 } from '../../../types/openBanking.types';
 import { BankingProvider, BankingProviderError, AuthenticationError, NetworkError } from '../base/BankingProvider';
@@ -13,32 +15,37 @@ import { BankingProvider, BankingProviderError, AuthenticationError, NetworkErro
 // Provider spécialisé pour Bridge API
 export class BridgeProvider extends BankingProvider {
   private accessToken: string | null = null;
-  private tokenExpiresAt: Date | null = null;
   private baseUrl: string;
+  private get bridgeConfig(): BridgeConfig {
+    return this.config.config as unknown as BridgeConfig;
+  }
 
-  constructor(config: any) {
+  constructor(config: BankingProviderConfig) {
     super(config);
-    this.baseUrl = config.config.baseUrl || 'https://api.bridgeapi.io';
+  this.baseUrl = (config.config as unknown as BridgeConfig).baseUrl || 'https://api.bridgeapi.io';
   }
 
   async initialize(): Promise<void> {
     try {
       await this.authenticateClient();
       this.isInitialized = true;
-    } catch (error) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const details =
+        error && typeof error === 'object' ? (error as Record<string, unknown>) : { value: error };
       throw new BankingProviderError(
         'INIT_ERROR',
-        `Failed to initialize Bridge provider: ${error.message}`,
-        error
+        `Failed to initialize Bridge provider: ${message}`,
+        details
       );
     }
   }
 
   async isHealthy(): Promise<boolean> {
     try {
-      const response = await this.makeRequest('GET', '/v2/status');
+      const response = await this.makeRequest<{ status: string }>('GET', '/v2/status');
       return response.status === 'ok';
-    } catch (error) {
+  } catch {
       return false;
     }
   }
@@ -46,14 +53,17 @@ export class BridgeProvider extends BankingProvider {
   // Authentification client Bridge
   private async authenticateClient(): Promise<void> {
     try {
-      const response = await this.makeRequest('POST', '/v2/authenticate', {
-        client_id: this.config.config.clientId,
-        client_secret: this.config.config.clientSecret
-      });
+    const response = await this.makeRequest<{ access_token: string; expires_in: number }>(
+        'POST',
+        '/v2/authenticate',
+        {
+      client_id: this.bridgeConfig.clientId,
+      client_secret: this.bridgeConfig.clientSecret
+        }
+      );
 
       this.accessToken = response.access_token;
-      this.tokenExpiresAt = new Date(Date.now() + response.expires_in * 1000);
-    } catch (error) {
+  } catch {
       throw new AuthenticationError('Failed to authenticate with Bridge API');
     }
   }
@@ -68,11 +78,15 @@ export class BridgeProvider extends BankingProvider {
       }
 
       // Bridge utilise un système de "items" pour les connexions bancaires
-      const response = await this.makeRequest('POST', '/v2/connect/items/add', {
+  const response = await this.makeRequest<{ item_id: string; redirect_url: string }>(
+        'POST',
+        '/v2/connect/items/add',
+        {
         user_id: userId,
         bank_id: bankId,
         redirect_url: `${window.location.origin}/banking/callback`
-      });
+        }
+      );
 
       const connection: BankConnection = {
         id: crypto.randomUUID(),
@@ -105,7 +119,18 @@ export class BridgeProvider extends BankingProvider {
       // En production, récupérer depuis la base de données
       // Ici on simule un appel à Bridge pour vérifier le statut
       const itemId = ''; // À récupérer depuis la DB
-      const response = await this.makeRequest('GET', `/v2/connect/items/${itemId}`);
+  const response = await this.makeRequest<{
+        user_id: string;
+        bank: { name: string; logo_url?: string };
+        status: string;
+        access_token?: string;
+        refresh_token?: string;
+        expires_at: number;
+        item_id: string;
+        last_refresh?: number;
+        created_at: number;
+        updated_at: number;
+      }>('GET', `/v2/connect/items/${itemId}`);
 
       const connection: BankConnection = {
         id: connectionId,
@@ -130,7 +155,7 @@ export class BridgeProvider extends BankingProvider {
     }
   }
 
-  async updateConnection(connectionId: string, updates: Partial<BankConnection>): Promise<OpenBankingResponse<BankConnection>> {
+  async updateConnection(_connectionId: string, _updates: Partial<BankConnection>): Promise<OpenBankingResponse<BankConnection>> {
     // En production, mettre à jour en base et synchroniser avec Bridge si nécessaire
     throw new Error('Method not implemented.');
   }
@@ -153,11 +178,11 @@ export class BridgeProvider extends BankingProvider {
 
     try {
       const itemId = ''; // À récupérer depuis la DB
-      const response = await this.makeRequest('POST', `/v2/connect/items/${itemId}/refresh`);
+  await this.makeRequest('POST', `/v2/connect/items/${itemId}/refresh`);
 
       // Mettre à jour la connexion avec les nouvelles données
       return await this.getConnection(connectionId);
-    } catch (error) {
+  } catch (error) {
       return this.handleError(error);
     }
   }
@@ -167,9 +192,13 @@ export class BridgeProvider extends BankingProvider {
     try {
       const itemId = ''; // À récupérer depuis la DB
       
-      const response = await this.makeRequest('POST', `/v2/connect/items/${itemId}/authenticate`, {
-        redirect_url: redirectUri
-      });
+  const response = await this.makeRequest<{ redirect_url: string; consent_id?: string }>(
+        'POST',
+        `/v2/connect/items/${itemId}/authenticate`,
+        {
+          redirect_url: redirectUri
+        }
+      );
 
       const authFlow: PSD2AuthFlow = {
         id: crypto.randomUUID(),
@@ -188,9 +217,9 @@ export class BridgeProvider extends BankingProvider {
     }
   }
 
-  async completeAuth(authFlowId: string, authCode: string): Promise<OpenBankingResponse<BankConnection>> {
+  async completeAuth(_authFlowId: string, authCode: string): Promise<OpenBankingResponse<BankConnection>> {
     try {
-      const response = await this.makeRequest('POST', '/v2/connect/items/auth/complete', {
+      await this.makeRequest('POST', '/v2/connect/items/auth/complete', {
         auth_code: authCode
       });
 
@@ -204,7 +233,11 @@ export class BridgeProvider extends BankingProvider {
 
   async handleSCA(authFlowId: string, challengeResponse: string): Promise<OpenBankingResponse<PSD2AuthFlow>> {
     try {
-      const response = await this.makeRequest('POST', '/v2/connect/items/sca/validate', {
+  const response = await this.makeRequest<{
+        status: string;
+        consent_id: string;
+        expires_at: number;
+      }>('POST', '/v2/connect/items/sca/validate', {
         auth_flow_id: authFlowId,
         challenge_response: challengeResponse
       });
@@ -231,9 +264,25 @@ export class BridgeProvider extends BankingProvider {
 
     try {
       const itemId = ''; // À récupérer depuis la DB
-      const response = await this.makeRequest('GET', `/v2/accounts?item_id=${itemId}`);
+      interface BridgeAccountDTO {
+        id: number | string;
+        name: string;
+        type: string;
+        currency_code: string;
+        balance: string;
+        iban?: string;
+        number?: string;
+        status: string;
+        created_at: number;
+        updated_at: number;
+        bank_id?: string | number;
+      }
+      const response = await this.makeRequest<{ resources: BridgeAccountDTO[]; pagination?: { next_uri?: string } }>(
+        'GET',
+        `/v2/accounts?item_id=${itemId}`
+      );
 
-      const accounts: BankAccount[] = response.resources.map((account: any) => ({
+  const accounts: BankAccount[] = response.resources.map((account) => ({
         id: crypto.randomUUID(),
         connectionId,
         accountId: account.id.toString(),
@@ -265,7 +314,18 @@ export class BridgeProvider extends BankingProvider {
     this.validateAccountId(accountId);
 
     try {
-      const response = await this.makeRequest('GET', `/v2/accounts/${accountId}`);
+  const response = await this.makeRequest<{
+        id: number | string;
+        name: string;
+        type: string;
+        currency_code: string;
+        balance: string;
+        iban?: string;
+        number?: string;
+        status: string;
+        created_at: number;
+        updated_at: number;
+      }>('GET', `/v2/accounts/${accountId}`);
 
       const account: BankAccount = {
         id: crypto.randomUUID(),
@@ -330,9 +390,27 @@ export class BridgeProvider extends BankingProvider {
         params.append('cursor', options.cursor);
       }
 
-      const response = await this.makeRequest('GET', `/v2/transactions?${params.toString()}`);
+      interface BridgeTransactionDTO {
+        id: number | string;
+        date: string | number;
+        value_date?: string | number;
+        amount: string;
+        currency_code: string;
+        description: string;
+        raw_description?: string;
+        category_id?: number;
+        status: string;
+        account_name?: string;
+        reference?: string;
+        created_at: number;
+        updated_at: number;
+      }
+      const response = await this.makeRequest<{ resources: BridgeTransactionDTO[]; pagination?: { next_uri?: string } }>(
+        'GET',
+        `/v2/transactions?${params.toString()}`
+      );
 
-      const transactions: BankTransaction[] = response.resources.map((tx: any) => ({
+      const transactions: BankTransaction[] = response.resources.map((tx) => ({
         id: crypto.randomUUID(),
         accountId,
         transactionId: tx.id.toString(),
@@ -401,13 +479,13 @@ export class BridgeProvider extends BankingProvider {
         throw new Error('Failed to fetch accounts');
       }
 
-      const syncResults: SyncResult[] = [];
-      for (const account of accountsResult.data) {
-        const result = await this.syncTransactions(connectionId, account.accountId);
-        if (result.success && result.data) {
-          syncResults.push(result.data);
-        }
-      }
+      const syncResults = (
+        await Promise.all(
+          accountsResult.data.map((account) => this.syncTransactions(connectionId, account.accountId))
+        )
+      )
+        .filter((r): r is OpenBankingResponse<SyncResult> & { success: true; data: SyncResult } => r.success && !!r.data)
+        .map((r) => r.data);
 
       return this.createResponse(syncResults);
     } catch (error) {
@@ -416,7 +494,7 @@ export class BridgeProvider extends BankingProvider {
   }
 
   // Webhooks
-  async setupWebhook(connectionId: string, events: string[]): Promise<OpenBankingResponse<void>> {
+  async setupWebhook(_connectionId: string, events: string[]): Promise<OpenBankingResponse<void>> {
     try {
       const itemId = ''; // À récupérer depuis la DB
       
@@ -432,7 +510,7 @@ export class BridgeProvider extends BankingProvider {
     }
   }
 
-  async removeWebhook(connectionId: string): Promise<OpenBankingResponse<void>> {
+  async removeWebhook(_connectionId: string): Promise<OpenBankingResponse<void>> {
     try {
       const webhookId = ''; // À récupérer depuis la DB
       await this.makeRequest('DELETE', `/v2/webhooks/${webhookId}`);
@@ -453,7 +531,7 @@ export class BridgeProvider extends BankingProvider {
           // Traiter la mise à jour du compte
           break;
         default:
-          console.log(`Unhandled webhook event: ${event.type}`);
+          console.warn(`Unhandled webhook event: ${event.type}`);
       }
 
       return this.createResponse(undefined);
@@ -463,9 +541,10 @@ export class BridgeProvider extends BankingProvider {
   }
 
   validateWebhookSignature(payload: string, signature: string): boolean {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
     const crypto = require('crypto');
     const expectedSignature = crypto
-      .createHmac('sha256', this.config.config.webhookSecret)
+      .createHmac('sha256', this.bridgeConfig.webhookSecret)
       .update(payload)
       .digest('hex');
     
@@ -487,7 +566,7 @@ export class BridgeProvider extends BankingProvider {
   }
 
   // Gestion des tokens
-  async refreshTokens(connectionId: string): Promise<OpenBankingResponse<void>> {
+  async refreshTokens(_connectionId: string): Promise<OpenBankingResponse<void>> {
     try {
       const itemId = ''; // À récupérer depuis la DB
       await this.makeRequest('POST', `/v2/connect/items/${itemId}/refresh`);
@@ -497,7 +576,7 @@ export class BridgeProvider extends BankingProvider {
     }
   }
 
-  async revokeTokens(connectionId: string): Promise<OpenBankingResponse<void>> {
+  async revokeTokens(_connectionId: string): Promise<OpenBankingResponse<void>> {
     try {
       const itemId = ''; // À récupérer depuis la DB
       await this.makeRequest('POST', `/v2/connect/items/${itemId}/revoke`);
@@ -511,7 +590,7 @@ export class BridgeProvider extends BankingProvider {
   protected async makeRequest<T>(
     method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     endpoint: string,
-    data?: any,
+  data?: unknown,
     headers: Record<string, string> = {}
   ): Promise<T> {
     await this.checkRateLimit();
@@ -527,7 +606,7 @@ export class BridgeProvider extends BankingProvider {
       requestHeaders['Authorization'] = `Bearer ${this.accessToken}`;
     }
 
-    try {
+  try {
       const response = await fetch(url, {
         method,
         headers: requestHeaders,
@@ -538,7 +617,8 @@ export class BridgeProvider extends BankingProvider {
         throw new NetworkError(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      const result = await response.json();
+      type APIResult = T & { error?: { type?: string; message?: string } };
+      const result = (await response.json()) as APIResult;
       
       if (result.error) {
         throw new BankingProviderError(
@@ -549,23 +629,26 @@ export class BridgeProvider extends BankingProvider {
       }
 
       return result;
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof BankingProviderError) {
         throw error;
       }
-      throw new NetworkError(`Request failed: ${error.message}`, error);
+      const message = error instanceof Error ? error.message : String(error);
+      const details =
+        error && typeof error === 'object' ? (error as Record<string, unknown>) : { value: error };
+      throw new NetworkError(`Request failed: ${message}`, details);
     }
   }
 
-  protected handleError(error: any): OpenBankingResponse<never> {
+  protected handleError(error: unknown): OpenBankingResponse<never> {
     if (error instanceof BankingProviderError) {
       return this.createErrorResponse(error.code, error.message, error.details);
     }
 
     return this.createErrorResponse(
       'UNKNOWN_ERROR',
-      error.message || 'An unknown error occurred',
-      error
+      error instanceof Error ? error.message : 'An unknown error occurred',
+      error && typeof error === 'object' ? (error as Record<string, unknown>) : { value: error }
     );
   }
 

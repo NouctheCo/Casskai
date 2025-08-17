@@ -42,6 +42,7 @@ export interface Database {
           default_locale: string;
           timezone: string;
           is_active: boolean;
+          active_modules?: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -53,6 +54,7 @@ export interface Database {
           default_locale?: string;
           timezone?: string;
           is_active?: boolean;
+          active_modules?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -64,6 +66,7 @@ export interface Database {
           default_locale?: string;
           timezone?: string;
           is_active?: boolean;
+          active_modules?: string | null;
           updated_at?: string;
         };
       };

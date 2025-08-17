@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -9,7 +9,6 @@ import {
   BookOpen,
   ArrowRight,
   Search,
-  Filter,
   Zap,
   CreditCard,
   Settings,
@@ -21,7 +20,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui';
-import { useState } from 'react';
 
 const categoriesData = {
   'premiers-pas': {
@@ -333,7 +331,7 @@ const DocumentationCategoryPage = () => {
   const [difficultyFilter, setDifficultyFilter] = useState('');
   const [sortBy, setSortBy] = useState('popular'); // popular, views, title
 
-  const category = categoriesData[categoryId];
+  const category = categoryId ? categoriesData[categoryId as keyof typeof categoriesData] : undefined;
 
   if (!category) {
     return (
@@ -356,13 +354,13 @@ const DocumentationCategoryPage = () => {
 
   // Filtrer et trier les articles
   const filteredArticles = category.articles
-    .filter(article => {
+  .filter((article: any) => {
       const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            article.description.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesDifficulty = !difficultyFilter || article.difficulty === difficultyFilter;
       return matchesSearch && matchesDifficulty;
     })
-    .sort((a, b) => {
+  .sort((a: any, b: any) => {
       switch (sortBy) {
         case 'popular':
           return b.popular - a.popular || b.views - a.views;
@@ -375,7 +373,7 @@ const DocumentationCategoryPage = () => {
       }
     });
 
-  const getDifficultyColor = (difficulty) => {
+  const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'Débutant':
         return 'bg-green-100 text-green-800 border-green-200';
@@ -427,7 +425,7 @@ const DocumentationCategoryPage = () => {
             </div>
             <div className="flex items-center">
               <Star className="w-4 h-4 mr-2 text-yellow-500" />
-              {category.articles.filter(a => a.popular).length} populaires
+              {category.articles.filter((a: any) => a.popular).length} populaires
             </div>
           </div>
         </div>
@@ -482,7 +480,7 @@ const DocumentationCategoryPage = () => {
 
         {/* Liste des articles */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredArticles.map((article, index) => (
+          {filteredArticles.map((article: any, index: number) => (
             <motion.div
               key={article.id}
               initial={{ opacity: 0, y: 20 }}

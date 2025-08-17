@@ -4,6 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
+// Google Analytics gtag may be available globally
+declare global {
+  interface Window { gtag?: (...args: any[]) => void }
+}
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const gtag = typeof window !== 'undefined' ? window.gtag : undefined;
+
 // Types pour l'Error Boundary
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -316,8 +323,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         { manualReport: true }
       );
       
-      // Feedback utilisateur
-      alert('Merci ! Le problème a été signalé à notre équipe technique.');
+  // Feedback utilisateur
+  // eslint-disable-next-line no-alert
+  alert('Merci ! Le problème a été signalé à notre équipe technique.');
     }
   };
 
