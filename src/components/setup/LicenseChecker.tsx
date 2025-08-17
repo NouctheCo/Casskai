@@ -1,8 +1,33 @@
 // components/LicenseChecker.tsx
 import React, { useEffect, useState } from 'react';
-import { LicenseService } from '../services/licenseService';
+import { LicenseService } from '@/services/licenseService';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+
+// Types minimes pour combler les références
+type LicenseFeatures = Record<
+  | 'multiCompany'
+  | 'multiCurrency'
+  | 'advancedReports'
+  | 'apiAccess'
+  | 'customBranding'
+  | 'prioritySupport'
+  | 'mobileApp'
+  | 'cloudBackup'
+  | 'auditTrail'
+  | 'customFields',
+  boolean
+>;
+
+type LicenseLimits = Record<'users' | 'storage' | 'companies', number | string>;
+
+interface LicenseType {
+  id: string;
+  name: string;
+  price: number;
+  features: LicenseFeatures;
+  limits: LicenseLimits;
+}
 
 interface LicenseCheckerProps {
   children: React.ReactNode;
@@ -12,7 +37,7 @@ interface LicenseCheckerProps {
 export function LicenseChecker({ children, requiredFeature }: LicenseCheckerProps) {
   const [licenseService] = useState(() => LicenseService.getInstance());
   const [hasAccess, setHasAccess] = useState(false);
-  const [currentLicense, setCurrentLicense] = useState(licenseService.getCurrentLicense());
+  const [currentLicense] = useState(licenseService.getCurrentLicense());
 
   useEffect(() => {
     if (!requiredFeature) {

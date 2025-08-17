@@ -1,6 +1,6 @@
 // components/TenantGuard.tsx
 import React from 'react';
-import { useTenant } from '../hooks/useTenant';
+import { useTenant } from '@/hooks/useTenant';
 
 interface TenantGuardProps {
   children: React.ReactNode;

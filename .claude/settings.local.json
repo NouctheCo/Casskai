@@ -54,7 +54,14 @@
       "Bash(git push:*)",
       "Bash(git rm:*)",
       "Bash(gh workflow:*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(railway login:*)",
+      "Bash(pm2 status:*)",
+      "Bash(docker compose:*)",
+      "Bash(scp:*)",
+      "Bash(bash:*)",
+      "Bash(.hostinger-deploy.ps1)",
+      "Bash(powershell.exe:*)"
     ],
     "deny": []
   }

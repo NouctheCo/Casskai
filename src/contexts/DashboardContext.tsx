@@ -6,7 +6,6 @@ import {
   WidgetLayout,
   RealtimeEvent,
   CollaborationState,
-  DashboardSettings,
   NotificationSettings,
   DashboardTemplate
 } from '../types/dashboard.types';
@@ -83,7 +82,13 @@ function dashboardReducer(state: DashboardState, action: DashboardAction): Dashb
       return { ...state, error: action.payload };
     
     case 'SET_CURRENT_DASHBOARD':
-      return { ...state, currentDashboard: action.payload };
+      return { 
+        ...state, 
+        currentDashboard: action.payload ? {
+          ...action.payload,
+          layout: action.payload.layout ?? []
+        } : null
+      };
     
     case 'SET_DASHBOARDS':
       return { ...state, dashboards: action.payload };
@@ -147,7 +152,7 @@ function dashboardReducer(state: DashboardState, action: DashboardAction): Dashb
     case 'ADD_REALTIME_EVENT':
       return {
         ...state,
-        realtimeEvents: [action.payload, ...state.realtimeEvents.slice(0, 99)] // Keep last 100 events
+        realtimeEvents: [action.payload, ...state.realtimeEvents.slice(0, 99)]
       };
     
     case 'SET_COLLABORATORS':
@@ -216,20 +221,21 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(dashboardReducer, initialState);
   const realtimeChannel = React.useRef<any>(null);
 
-  // Load initial data
-  useEffect(() => {
-    loadDashboardFromStorage();
-    loadDashboards();
-    loadTemplates();
-    initializeDefaultDashboard();
-  }, []);
+  // Helper pour garantir qu'une valeur est un tableau
+  const asArray = <T,>(v: any): T[] => Array.isArray(v) ? v as T[] : [];
 
   // Initialize default dashboard with example data
   const initializeDefaultDashboard = async () => {
     try {
-      // Create default dashboard if none exists
+      // Vérifier si on a déjà un dashboard par défaut
+      if (state.currentDashboard && state.widgets.length > 0) {
+        console.log('Dashboard déjà initialisé');
+        return;
+      }
+
+      // Créer le dashboard par défaut avec des valeurs sûres
       const defaultDashboard: DashboardConfig = {
-        id: 'default-dashboard',
+  id: `default-dashboard-${Date.now()}`,
         userId: 'current-user',
         name: 'Dashboard Principal',
         description: 'Vue d\'ensemble des métriques importantes',
@@ -240,10 +246,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
           { i: 'kpi-3', x: 6, y: 0, w: 3, h: 2 },
           { i: 'kpi-4', x: 9, y: 0, w: 3, h: 2 },
           { i: 'chart-1', x: 0, y: 2, w: 6, h: 4 },
-          { i: 'chart-2', x: 6, y: 2, w: 6, h: 4 },
-          { i: 'activities-1', x: 0, y: 6, w: 4, h: 3 },
-          { i: 'notifications-1', x: 4, y: 6, w: 4, h: 3 },
-          { i: 'actions-1', x: 8, y: 6, w: 4, h: 3 }
+          { i: 'chart-2', x: 6, y: 2, w: 6, h: 4 }
         ],
         settings: {
           gridCols: 12,
@@ -262,10 +265,10 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         updatedAt: new Date().toISOString()
       };
 
-      // Create example widgets
+      // Créer des widgets d'exemple simplifiés
       const exampleWidgets: WidgetConfig[] = [
         {
-          id: String('kpi-1'),
+          id: 'kpi-1',
           type: 'kpi-card',
           title: 'Chiffre d\'affaires',
           description: 'CA mensuel',
@@ -284,7 +287,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
           refreshInterval: 60
         },
         {
-          id: String('kpi-2'),
+          id: 'kpi-2',
           type: 'kpi-card',
           title: 'Nouveaux clients',
           description: 'Ce mois',
@@ -302,7 +305,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
           refreshInterval: 60
         },
         {
-          id: String('kpi-3'),
+          id: 'kpi-3',
           type: 'kpi-card',
           title: 'Factures impayées',
           description: 'À relancer',
@@ -320,7 +323,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
           refreshInterval: 60
         },
         {
-          id: String('kpi-4'),
+          id: 'kpi-4',
           type: 'kpi-card',
           title: 'Taux de conversion',
           description: 'Prospects → clients',
@@ -338,7 +341,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
           refreshInterval: 60
         },
         {
-          id: String('chart-1'),
+          id: 'chart-1',
           type: 'line-chart',
           title: 'Évolution du chiffre d\'affaires',
           description: 'Données mensuelles',
@@ -359,7 +362,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
           refreshInterval: 300
         },
         {
-          id: String('chart-2'),
+          id: 'chart-2',
           type: 'pie-chart',
           title: 'Répartition des factures',
           description: 'Par statut',
@@ -375,82 +378,144 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
             }
           },
           refreshInterval: 180
-        },
-        {
-          id: String('activities-1'),
-          type: 'recent-activities',
-          title: 'Activités récentes',
-          description: 'Dernières actions',
-          category: 'communication',
-          size: 'medium',
-          config: {},
-          refreshInterval: 60
-        },
-        {
-          id: String('notifications-1'),
-          type: 'notifications',
-          title: 'Notifications',
-          description: 'Alertes importantes',
-          category: 'communication',
-          size: 'medium',
-          config: {},
-          refreshInterval: 30
-        },
-        {
-          id: String('actions-1'),
-          type: 'quick-actions',
-          title: 'Actions rapides',
-          description: 'Raccourcis fréquents',
-          category: 'productivity',
-          size: 'medium',
-          config: {
-            actions: [
-              { name: 'Nouvelle facture', icon: 'FileText' },
-              { name: 'Ajouter client', icon: 'Users' },
-              { name: 'Créer devis', icon: 'Calculator' },
-              { name: 'Voir rapports', icon: 'BarChart3' }
-            ]
-          },
-          refreshInterval: 0
         }
       ];
 
-      // Set initial state
-      // Valider les données avant de les définir
-      if (defaultDashboard && defaultDashboard.layout && exampleWidgets) {
-        dispatch({ type: 'SET_CURRENT_DASHBOARD', payload: defaultDashboard });
-        dispatch({ type: 'SET_DASHBOARDS', payload: [defaultDashboard] });
-        dispatch({ type: 'SET_WIDGETS', payload: exampleWidgets });
+      // Essayer de sauvegarder en base Supabase d'abord
+      try {
+        console.log('💾 Sauvegarde du dashboard en base Supabase...');
+        
+        // Sauvegarder le dashboard
+        const { error: dashboardError } = await supabase
+          .from('dashboard_configs')
+          .insert(defaultDashboard);
+
+        if (dashboardError) {
+          console.warn('⚠️ Erreur sauvegarde dashboard (non critique):', dashboardError);
+        } else {
+          console.log('✅ Dashboard sauvegardé en base');
+        }
+
+        // Sauvegarder les widgets
+        const { error: widgetsError } = await supabase
+          .from('widget_configs')
+          .insert(exampleWidgets.map(widget => ({
+            ...widget,
+            dashboardId: defaultDashboard.id
+          })));
+
+        if (widgetsError) {
+          console.warn('⚠️ Erreur sauvegarde widgets (non critique):', widgetsError);
+        } else {
+          console.log('✅ Widgets sauvegardés en base');
+        }
+      } catch (dbError) {
+        console.warn('⚠️ Base non disponible, utilisation localStorage uniquement:', dbError);
       }
 
+      // Dispatcher les états de manière sécurisée
+      dispatch({ type: 'SET_CURRENT_DASHBOARD', payload: defaultDashboard });
+      dispatch({ type: 'SET_DASHBOARDS', payload: [defaultDashboard] });
+      dispatch({ type: 'SET_WIDGETS', payload: exampleWidgets });
+      
+      // Sauvegarder dans localStorage comme backup
+      localStorage.setItem('casskai_default_dashboard', JSON.stringify(defaultDashboard));
+      localStorage.setItem('casskai_default_widgets', JSON.stringify(exampleWidgets));
+      
+      console.log('✅ Dashboard par défaut initialisé avec succès');
     } catch (error) {
-      console.error('Error initializing default dashboard:', error);
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to initialize dashboard' });
+      console.error('Erreur lors de l\'initialisation du dashboard par défaut:', error);
+      dispatch({ type: 'SET_ERROR', payload: 'Impossible d\'initialiser le dashboard' });
     }
   };
+
+  // Load initial data
+  useEffect(() => {
+    loadDashboardFromStorage();
+    loadDashboards();
+    loadTemplates();
+  }, []);
 
   // Auto-save to localStorage
   useEffect(() => {
     if (state.currentDashboard) {
       saveDashboardToStorage();
     }
-  }, [state.currentDashboard]);
+  }, [state.currentDashboard, state.widgets]);
 
   const loadDashboards = async () => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
       
+      // Essayer de charger depuis localStorage d'abord
+      const localDashboard = localStorage.getItem('casskai_default_dashboard');
+      const localWidgets = localStorage.getItem('casskai_default_widgets');
+      
+      if (localDashboard && localWidgets) {
+        const rawDashboard = JSON.parse(localDashboard);
+        const rawWidgets = JSON.parse(localWidgets);
+        
+        // Normalisation
+        const normalized = {
+          ...rawDashboard,
+          layout: asArray(rawDashboard?.layout),
+        };
+        
+        dispatch({ type: 'SET_CURRENT_DASHBOARD', payload: normalized });
+        dispatch({ type: 'SET_DASHBOARDS', payload: [normalized] });
+        dispatch({ type: 'SET_WIDGETS', payload: asArray(rawWidgets) });
+        dispatch({ type: 'SET_LOADING', payload: false });
+        return;
+      }
+      
+      // Essayer de charger depuis Supabase
       const { data, error } = await supabase
         .from('dashboard_configs')
         .select('*')
-        .order('updatedAt', { ascending: false });
-
-      if (error) throw error;
+        .maybeSingle();
       
-      dispatch({ type: 'SET_DASHBOARDS', payload: data || [] });
+      if (error) {
+        // Si erreur 404 ou table n'existe pas
+        if (error.code === '42P01' || error.message?.includes('not exist')) {
+          console.warn('Table dashboard_configs non trouvée, utilisation du dashboard par défaut');
+          await initializeDefaultDashboard();
+          return;
+        }
+        
+        // Pour toute autre erreur, log mais continuer avec le défaut
+        console.error('Erreur Supabase non critique:', error);
+        await initializeDefaultDashboard();
+        return;
+      }
+
+      if (data && Array.isArray(data) && data.length > 0) {
+        // Trier de manière sécurisée
+        const sorted = [...data].sort((a: any, b: any) => {
+          const dateA = a.updatedAt || a.updated_at || a.createdAt || 0;
+          const dateB = b.updatedAt || b.updated_at || b.createdAt || 0;
+          return new Date(dateB).getTime() - new Date(dateA).getTime();
+        });
+        
+        // Normaliser tous les dashboards
+        const normalizedDashboards = sorted.map((dash: any) => ({
+          ...dash,
+          layout: asArray(dash?.layout),
+        }));
+        
+        dispatch({ type: 'SET_DASHBOARDS', payload: normalizedDashboards });
+        
+        // Sélectionner le premier dashboard par défaut
+        if (normalizedDashboards.length > 0 && !state.currentDashboard) {
+          dispatch({ type: 'SET_CURRENT_DASHBOARD', payload: normalizedDashboards[0] });
+        }
+      } else {
+        // Pas de données, initialiser avec le défaut
+        await initializeDefaultDashboard();
+      }
     } catch (error) {
-      console.error('Error loading dashboards:', error);
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to load dashboards' });
+      console.error('Erreur lors du chargement des dashboards:', error);
+      // En cas d'erreur, s'assurer qu'on a au moins un dashboard
+      await initializeDefaultDashboard();
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
@@ -469,7 +534,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         .from('dashboard_configs')
         .insert(newDashboard);
 
-      if (error) throw error;
+      if (error) {
+        console.warn('Dashboard create failed in Supabase, keeping local only:', error);
+      }
 
       dispatch({ type: 'SET_DASHBOARDS', payload: [...state.dashboards, newDashboard] });
       
@@ -494,7 +561,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         .update(updatedData)
         .eq('id', state.currentDashboard.id);
 
-      if (error) throw error;
+      if (error) {
+        console.warn('Dashboard update failed in Supabase, updating local only:', error);
+      }
 
       dispatch({ type: 'UPDATE_DASHBOARD', payload: updatedData });
     } catch (error) {
@@ -510,7 +579,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.warn('Dashboard delete failed in Supabase, removing local only:', error);
+      }
 
       dispatch({ 
         type: 'SET_DASHBOARDS', 
@@ -536,9 +607,18 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
           .eq('id', id)
           .single();
 
-        if (error) throw error;
-        dispatch({ type: 'SET_CURRENT_DASHBOARD', payload: data });
+        if (error) {
+          console.warn('Fetch single dashboard failed, keeping current selection:', error);
+        } else {
+          // Normaliser le dashboard récupéré
+          const normalized = {
+            ...data,
+            layout: asArray(data?.layout),
+          };
+          dispatch({ type: 'SET_CURRENT_DASHBOARD', payload: normalized });
+        }
       } else {
+        // Le dashboard existe déjà dans le state, il est déjà normalisé
         dispatch({ type: 'SET_CURRENT_DASHBOARD', payload: dashboard });
       }
 
@@ -548,8 +628,19 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         .select('*')
         .eq('dashboardId', id);
 
-      if (widgetsError) throw widgetsError;
-      dispatch({ type: 'SET_WIDGETS', payload: widgets || [] });
+      if (widgetsError) {
+        console.warn('Fetch widgets failed, using default widgets:', widgetsError);
+        // Utiliser les widgets par défaut si erreur
+        const localWidgets = localStorage.getItem('casskai_default_widgets');
+        if (localWidgets) {
+          const rawWidgets = JSON.parse(localWidgets);
+          dispatch({ type: 'SET_WIDGETS', payload: asArray(rawWidgets) });
+        } else {
+          dispatch({ type: 'SET_WIDGETS', payload: [] });
+        }
+      } else {
+        dispatch({ type: 'SET_WIDGETS', payload: asArray(widgets) });
+      }
 
     } catch (error) {
       console.error('Error setting current dashboard:', error);
@@ -590,7 +681,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
           dashboardId: state.currentDashboard.id
         });
 
-      if (error) throw error;
+      if (error) {
+        console.warn('Add widget failed in Supabase, adding locally only:', error);
+      }
 
       dispatch({ type: 'ADD_WIDGET', payload: newWidget });
       
@@ -608,7 +701,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         .update(updates)
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.warn('Update widget failed in Supabase, updating locally only:', error);
+      }
 
       dispatch({ type: 'UPDATE_WIDGET', payload: { id, updates } });
     } catch (error) {
@@ -624,7 +719,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.warn('Remove widget failed in Supabase, removing locally only:', error);
+      }
 
       dispatch({ type: 'REMOVE_WIDGET', payload: id });
     } catch (error) {
@@ -636,7 +733,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const updateLayout = async (layout: WidgetLayout[]) => {
     if (!state.currentDashboard) return;
 
-    dispatch({ type: 'UPDATE_LAYOUT', payload: layout });
+    // Normaliser le layout entrant
+    const normalizedLayout = asArray<WidgetLayout>(layout);
+    dispatch({ type: 'UPDATE_LAYOUT', payload: normalizedLayout });
     
     // Debounce the database update
     clearTimeout((updateLayout as any).timeoutId);
@@ -651,8 +750,6 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
   const loadTemplates = async () => {
     try {
-      // For now, load from a static file or API
-      // In production, this would come from your database
       const templates: DashboardTemplate[] = [
         {
           id: 'executive-template',
@@ -720,7 +817,6 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         id: crypto.randomUUID()
       };
 
-      // In production, save to database
       dispatch({ type: 'SET_TEMPLATES', payload: [...state.templates, newTemplate] });
       
       return newTemplate.id;
@@ -757,7 +853,18 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         dispatch({ type: 'SET_COLLABORATORS', payload: collaborators });
       })
       .on('broadcast', { event: 'dashboard-update' }, (payload) => {
-        dispatch({ type: 'ADD_REALTIME_EVENT', payload: payload.event });
+        const evt = (payload?.payload ?? payload) as any;
+        const realtimeEvent: RealtimeEvent = {
+          id: evt.id || crypto.randomUUID(),
+          type: evt.type || 'system_alert',
+          timestamp: evt.timestamp || new Date().toISOString(),
+          userId: evt.userId,
+          data: evt.data ?? evt,
+          priority: evt.priority || 'low',
+          widgetId: evt.widgetId,
+          dashboardId: evt.dashboardId,
+        };
+        dispatch({ type: 'ADD_REALTIME_EVENT', payload: realtimeEvent });
       })
       .subscribe((status) => {
         dispatch({ type: 'SET_CONNECTION_STATUS', payload: status === 'SUBSCRIBED' });
@@ -850,6 +957,31 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   };
 
   // Cleanup on unmount
+  // Écouter l'événement de création de dashboard depuis l'onboarding
+  useEffect(() => {
+    const handleInitializeDashboard = async (event: CustomEvent) => {
+      const { companyId, userId } = event.detail;
+      console.log('🔄 Réception signal création dashboard:', { companyId, userId });
+      
+      try {
+        // Attendre un peu pour laisser les contexts se synchroniser
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Initialiser le dashboard par défaut
+        await initializeDefaultDashboard();
+        console.log('✅ Dashboard initialisé suite à l\'onboarding');
+      } catch (error) {
+        console.error('❌ Erreur lors de l\'initialisation dashboard post-onboarding:', error);
+      }
+    };
+
+    window.addEventListener('initialize-user-dashboard', handleInitializeDashboard as EventListener);
+    
+    return () => {
+      window.removeEventListener('initialize-user-dashboard', handleInitializeDashboard as EventListener);
+    };
+  }, []);
+
   useEffect(() => {
     return () => {
       unsubscribeFromRealtime();

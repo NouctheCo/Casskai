@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 // Helper to format Supabase errors
 function handleSupabaseError(error: unknown, context: string) {
   if (error instanceof Error) {
@@ -5,13 +6,80 @@ function handleSupabaseError(error: unknown, context: string) {
   }
   return { message: `[${context}] ${JSON.stringify(error)}` };
 }
-// import { supabase } from '../lib/supabase'; // Commented out for mock implementation
-import { TaxRate, TaxDeclaration, TaxPayment, TaxDocument, TaxSettings } from '../types/tax.types';
+import { supabase } from '../lib/supabase';
+import { TaxRate, TaxDeclaration, TaxPayment } from '../types/tax.types';
+
+// DB row shapes used locally in this service
+type RateRowDB = {
+  id: string;
+  name: string;
+  rate: number;
+  type: string;
+  description?: string | null;
+  is_active: boolean;
+  is_default: boolean;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+};
+
+type DeclarationRowDB = {
+  id: string;
+  type: string;
+  name: string;
+  due_date: string;
+  status: string;
+  amount: number | null;
+  description?: string | null;
+  company_id: string;
+  period_start: string;
+  period_end: string;
+  submitted_date?: string | null;
+  submitted_by?: string | null;
+};
+
+type PaymentRowDB = {
+  id: string;
+  declaration_id: string;
+  amount: number;
+  currency: string;
+  payment_date: string;
+  payment_method: string;
+  reference?: string | null;
+  status: string;
+  receipt_url?: string | null;
+};
+
+// Update payloads for Supabase
+type TaxRateUpdateRow = Partial<{
+  name: string;
+  rate: number;
+  type: TaxRate['type'];
+  description: string;
+  is_active: boolean;
+  is_default: boolean;
+}>;
+
+type TaxDeclarationUpdateRow = Partial<{
+  name: string;
+  type: TaxDeclaration['type'];
+  due_date: string;
+  status: TaxDeclaration['status'];
+  amount: number;
+  description: string;
+  period_start: string;
+  period_end: string;
+  submitted_date: string;
+  submitted_by: string;
+}>;
 
 /**
  * Service for managing tax-related operations
  */
 export const taxService = {
+  // Local DB row helpers (minimal shape used by this service)
+  // These reflect columns selected from Supabase queries.
+  
   /**
    * Get tax rates for a company
    */
@@ -26,12 +94,12 @@ export const taxService = {
       if (error) throw error;
 
       // Map DB data to TaxRate model
-      const taxRates = data?.map(rate => ({
+      const taxRates = data?.map((rate: RateRowDB) => ({
         id: rate.id,
         name: rate.name,
         rate: rate.rate,
-        type: rate.type as any,
-        description: rate.description,
+        type: rate.type as TaxRate['type'],
+        description: rate.description ?? undefined,
         countryCode: 'FR', // This should come from the company
         isActive: rate.is_active,
         isDefault: rate.is_default,
@@ -88,8 +156,8 @@ export const taxService = {
         id: data.id,
         name: data.name,
         rate: data.rate,
-        type: data.type as any,
-        description: data.description,
+        type: data.type as unknown as TaxRate['type'],
+        description: data.description ?? undefined,
         countryCode: taxRate.countryCode,
         isActive: data.is_active,
         isDefault: data.is_default,
@@ -115,7 +183,7 @@ export const taxService = {
   async updateTaxRate(id: string, updates: Partial<TaxRate>): Promise<{ success: boolean; error: Error | null }> {
     try {
       // Prepare data for Supabase
-      const updateData: any = {};
+      const updateData: TaxRateUpdateRow = {};
       
       if (updates.name !== undefined) updateData.name = updates.name;
       if (updates.rate !== undefined) updateData.rate = updates.rate;
@@ -206,22 +274,22 @@ export const taxService = {
       if (error) throw error;
 
       // Map DB data to TaxDeclaration model
-      const declarations = data?.map(decl => ({
+      const declarations = data?.map((decl: DeclarationRowDB) => ({
         id: decl.id,
-        type: decl.type as any,
+        type: decl.type as TaxDeclaration['type'],
         name: decl.name,
         dueDate: new Date(decl.due_date),
-        status: decl.status as any,
-        amount: decl.amount,
-        description: decl.description,
+        status: decl.status as TaxDeclaration['status'],
+        amount: decl.amount ?? undefined,
+        description: decl.description ?? undefined,
         companyId: decl.company_id,
         countryCode: 'FR', // This should come from the company
         period: {
           start: new Date(decl.period_start),
           end: new Date(decl.period_end)
         },
-        submittedDate: decl.submitted_date ? new Date(decl.submitted_date) : undefined,
-        submittedBy: decl.submitted_by
+  submittedDate: decl.submitted_date ? new Date(decl.submitted_date) : undefined,
+  submittedBy: decl.submitted_by ?? undefined
       })) || null;
 
       return { data: declarations, error: null };
@@ -266,12 +334,12 @@ export const taxService = {
       // Convert to TaxDeclaration model
       const newDeclaration: TaxDeclaration = {
         id: data.id,
-        type: data.type as any,
+        type: data.type as unknown as TaxDeclaration['type'],
         name: data.name,
         dueDate: new Date(data.due_date),
-        status: data.status as any,
-        amount: data.amount,
-        description: data.description,
+        status: data.status as unknown as TaxDeclaration['status'],
+        amount: data.amount ?? undefined,
+        description: data.description ?? undefined,
         companyId: data.company_id,
         countryCode: declaration.countryCode,
         period: {
@@ -297,7 +365,7 @@ export const taxService = {
   async updateTaxDeclaration(id: string, updates: Partial<TaxDeclaration>): Promise<{ success: boolean; error: Error | null }> {
     try {
       // Prepare data for Supabase
-      const updateData: any = {};
+      const updateData: TaxDeclarationUpdateRow = {};
       
       if (updates.name !== undefined) updateData.name = updates.name;
       if (updates.type !== undefined) updateData.type = updates.type;
@@ -398,16 +466,17 @@ export const taxService = {
       if (error) throw error;
 
       // Convert to TaxPayment model
+      const row = data as PaymentRowDB;
       const newPayment: TaxPayment = {
-        id: data.id,
-        declarationId: data.declaration_id,
-        amount: data.amount,
-        currency: data.currency,
-        paymentDate: new Date(data.payment_date),
-        paymentMethod: data.payment_method as any,
-        reference: data.reference,
-        status: data.status as any,
-        receiptUrl: data.receipt_url
+        id: row.id,
+        declarationId: row.declaration_id,
+        amount: row.amount,
+        currency: row.currency,
+        paymentDate: new Date(row.payment_date),
+        paymentMethod: row.payment_method as unknown as TaxPayment['paymentMethod'],
+        reference: row.reference ?? '',
+        status: row.status as unknown as TaxPayment['status'],
+        receiptUrl: row.receipt_url ?? undefined
       };
 
       return { data: newPayment, error: null };
@@ -441,18 +510,9 @@ export const taxService = {
 
   /**
    * Export tax data to PDF
+   * Stubbed implementation; replace with real PDF export as needed.
    */
-  async exportToPDF(data: any): Promise<{ success: boolean; error: Error | null }> {
-    try {
-      // This would be implemented with a PDF generation library
-      // For now, we'll just return success
-      return { success: true, error: null };
-    } catch (error) {
-      console.error('Error exporting to PDF:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error : new Error('Unknown error exporting to PDF') 
-      };
-    }
+  async exportToPDF(_data: unknown): Promise<{ success: boolean; error: Error | null }> {
+    return { success: true, error: null };
   }
 };

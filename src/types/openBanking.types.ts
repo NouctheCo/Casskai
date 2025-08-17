@@ -15,7 +15,7 @@ export interface BankConnection {
   lastSync?: Date;
   createdAt: Date;
   updatedAt: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface BankAccount {
@@ -34,7 +34,7 @@ export interface BankAccount {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface BankTransaction {
@@ -61,7 +61,7 @@ export interface BankTransaction {
   reconciledAt?: Date;
   createdAt: Date;
   updatedAt: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface MerchantInfo {
@@ -90,7 +90,8 @@ export interface BankingProvider {
   supportedBanks: SupportedBank[];
   features: ProviderFeatures;
   isActive: boolean;
-  config: ProviderConfig;
+  // Provider-specific configuration (Bridge, Budget Insight, etc.)
+  config: BridgeConfig | BudgetInsightConfig | CustomProviderConfig;
 }
 
 export interface SupportedBank {
@@ -154,7 +155,7 @@ export interface PSD2AuthFlow {
 export interface SCAMethod {
   type: 'sms' | 'app' | 'hardware_token' | 'biometric';
   description: string;
-  challengeData?: Record<string, any>;
+  challengeData?: Record<string, unknown>;
 }
 
 export interface ChallengeData {
@@ -187,7 +188,7 @@ export interface ReconciliationCondition {
 
 export interface ReconciliationAction {
   type: 'match' | 'categorize' | 'split' | 'merge' | 'flag' | 'create_entry';
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
 }
 
 export interface ReconciliationMatch {
@@ -232,7 +233,7 @@ export interface WebhookEvent {
   type: 'transaction.created' | 'transaction.updated' | 'account.updated' | 'connection.status_changed';
   providerId: string;
   connectionId: string;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   timestamp: Date;
   processed: boolean;
   processedAt?: Date;
@@ -279,7 +280,7 @@ export interface AuditLog {
   userAgent: string;
   success: boolean;
   errorMessage?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   timestamp: Date;
 }
 
@@ -317,7 +318,7 @@ export interface FieldMapping {
 
 export interface FieldTransformation {
   type: 'format_date' | 'format_currency' | 'truncate' | 'uppercase' | 'lowercase' | 'regex_replace' | 'lookup';
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
 }
 
 export interface ValidationRule {
@@ -350,13 +351,13 @@ export interface ExportJob {
 }
 
 // Types pour les réponses API
-export interface OpenBankingResponse<T = any> {
+export interface OpenBankingResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: {
     code: string;
     message: string;
-    details?: Record<string, any>;
+  details?: Record<string, unknown>;
   };
   metadata?: {
     provider: string;
@@ -413,6 +414,7 @@ export interface BridgeConfig {
   baseUrl: string;
   version: string;
   webhookSecret: string;
+  rateLimit?: { requests: number; windowMs: number };
 }
 
 export interface BudgetInsightConfig {
@@ -421,10 +423,11 @@ export interface BudgetInsightConfig {
   baseUrl: string;
   manageUrl: string;
   webhookSecret: string;
+  rateLimit?: { requests: number; windowMs: number };
 }
 
 export interface CustomProviderConfig {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // Types pour les statistiques

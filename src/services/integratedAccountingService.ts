@@ -6,7 +6,7 @@ import { VATCalculationService } from './vatCalculationService';
 import { AutomaticLetterageService } from './automaticLetterageService';
 
 import { supabase } from '../lib/supabase';
-import { ImportResult, ImportSession, EntryTemplate } from '../types/accounting-import.types';
+import { ImportResult, ImportSession } from '../types/accounting-import.types';
 
 /**
  * Service intégré pour toutes les opérations d'import/export comptable
@@ -43,7 +43,9 @@ export class IntegratedAccountingService {
     const session: ImportSession = {
       id: crypto.randomUUID(),
       filename: file.name,
-      format: format === 'auto' ? this.detectFormat(file) : format as any,
+      format: ((): 'FEC' | 'CSV' | 'Excel' => (
+        format === 'auto' ? this.detectFormat(file) : (format as 'FEC' | 'CSV' | 'Excel')
+      ))(),
       status: 'parsing',
       totalRows: 0,
       validRows: 0,
@@ -58,19 +60,19 @@ export class IntegratedAccountingService {
       let result: ImportResult;
 
       switch (session.format) {
-        case 'FEC':
+        case 'FEC': {
           result = await FECParser.parseFEC(file, {
             encoding: options.encoding,
             skipFirstRow: options.skipFirstRow,
             skipEmptyLines: true
           });
           break;
-
-        case 'CSV':
+        }
+        case 'CSV': {
           const analysis = await CSVImportService.analyzeFile(file);
           result = await CSVImportService.importWithMapping(
-            file, 
-            analysis.suggestedMapping, 
+            file,
+            analysis.suggestedMapping,
             {
               encoding: options.encoding,
               delimiter: options.delimiter,
@@ -78,17 +80,18 @@ export class IntegratedAccountingService {
             }
           );
           break;
-
-        case 'Excel':
+        }
+        case 'Excel': {
           const excelAnalysis = await CSVImportService.analyzeFile(file);
           result = await CSVImportService.importWithMapping(
-            file, 
+            file,
             excelAnalysis.suggestedMapping
           );
           break;
-
-        default:
+        }
+        default: {
           throw new Error(`Format ${session.format} non supporté`);
+        }
       }
 
       onProgress?.(25, `${result.entries.length} écritures parsées`);
@@ -138,8 +141,9 @@ export class IntegratedAccountingService {
         validRows: savedEntries.length
       };
 
-    } catch (error) {
-      throw new Error(`Erreur import: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Erreur import: ${message}`);
     }
   }
 
@@ -158,13 +162,16 @@ export class IntegratedAccountingService {
   /**
    * Assure que tous les comptes nécessaires existent
    */
-  private static async ensureAccountsExist(entries: any[], companyId: string): Promise<void> {
+  private static async ensureAccountsExist(
+    entries: Array<{ items?: Array<{ accountNumber?: string }>; accountNumber?: string }>,
+    companyId: string
+  ): Promise<void> {
     const accountNumbers = new Set<string>();
     
     // Collecte tous les numéros de compte
-    entries.forEach(entry => {
+  entries.forEach(entry => {
       if (entry.items) {
-        entry.items.forEach((item: any) => {
+    entry.items.forEach((item) => {
           if (item.accountNumber) {
             accountNumbers.add(item.accountNumber);
           }
@@ -240,7 +247,7 @@ export class IntegratedAccountingService {
       '101': 'Capital',
       '106': 'Réserves',
       '110': 'Report à nouveau',
-      '120': 'Résultat de l\\'exercice',
+  '120': 'Résultat de l\'exercice',
 
       // Classe 4 - Comptes de tiers
       '401': 'Fournisseurs',
@@ -256,7 +263,7 @@ export class IntegratedAccountingService {
       // Classe 6 - Comptes de charges
       '607': 'Achats de marchandises',
       '641': 'Salaires',
-      '661': 'Charges d\\'intérêts',
+  '661': 'Charges d\'intérêts',
 
       // Classe 7 - Comptes de produits
       '707': 'Ventes de marchandises',
@@ -378,7 +385,7 @@ export class IntegratedAccountingService {
    */
   static async exportFEC(companyId: string, year: number): Promise<string> {
     // Récupération des écritures de l'année
-    const { data: entries, error } = await supabase
+  const { data: entries, error } = await supabase
       .from('journal_entry_items')
       .select(`
         debit_amount,
@@ -430,28 +437,44 @@ export class IntegratedAccountingService {
     ].join('|'));
 
     // Données
-    entries.forEach(item => {
-      const journal = item.journal_entries.journals;
-      const account = item.accounts;
-      const entry = item.journal_entries;
+    type Journal = { code: string; name: string } | null;
+    type JournalEntry = { entry_number: string; date: string; reference?: string | null; description?: string | null; journals: Journal | Journal[] | null } | null;
+    type AccountRow = { number?: string; name?: string } | null;
+    type ItemRow = {
+      debit_amount?: number;
+      credit_amount?: number;
+      description?: string | null;
+      auxiliary_account?: string | null;
+      letterage?: string | null;
+      accounts?: AccountRow | AccountRow[] | null;
+      journal_entries?: JournalEntry | JournalEntry[] | null;
+    };
+
+    (entries as ItemRow[]).forEach((item) => {
+      const jeRaw = Array.isArray(item.journal_entries) ? item.journal_entries[0] : item.journal_entries;
+      const journalRaw = jeRaw?.journals;
+      const journal = Array.isArray(journalRaw) ? journalRaw[0] : journalRaw;
+      const accountRaw = item.accounts;
+      const account = Array.isArray(accountRaw) ? accountRaw[0] : accountRaw;
+      const entry = jeRaw;
       
       const fecLine = [
-        journal.code,
-        journal.name,
-        entry.entry_number,
-        this.formatFECDate(entry.date),
-        account.number,
-        account.name,
+        journal?.code || '',
+        journal?.name || '',
+        entry?.entry_number || '',
+        this.formatFECDate(entry?.date || new Date().toISOString()),
+        account?.number || '',
+        account?.name || '',
         item.auxiliary_account || '',
         '', // CompAuxLib - à implémenter si nécessaire
-        entry.reference || '',
-        this.formatFECDate(entry.date), // PieceDate = EcritureDate par défaut
-        item.description || entry.description,
-        this.formatFECAmount(item.debit_amount || 0),
-        this.formatFECAmount(item.credit_amount || 0),
+        entry?.reference || '',
+        this.formatFECDate(entry?.date || new Date().toISOString()), // PieceDate = EcritureDate par défaut
+        item.description || entry?.description || '',
+        this.formatFECAmount(item.debit_amount ?? 0),
+        this.formatFECAmount(item.credit_amount ?? 0),
         item.letterage || '',
         '', // DateLet - à implémenter si nécessaire
-        this.formatFECDate(entry.date), // ValidDate
+        this.formatFECDate(entry?.date || new Date().toISOString()), // ValidDate
         '', // Montantdevise - à implémenter si nécessaire
         ''  // Idevise - à implémenter si nécessaire
       ].join('|');
@@ -512,8 +535,9 @@ export class IntegratedAccountingService {
       
       return savedEntries[0];
 
-    } catch (error) {
-      throw new Error(`Erreur génération template: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Erreur génération template: ${message}`);
     }
   }
 
@@ -555,8 +579,9 @@ export class IntegratedAccountingService {
         entry: savedEntries[0]
       };
 
-    } catch (error) {
-      throw new Error(`Erreur déclaration TVA: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Erreur déclaration TVA: ${message}`);
     }
   }
 }

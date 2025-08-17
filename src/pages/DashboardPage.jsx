@@ -5,7 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useLocale } from '@/contexts/LocaleContext';
-import { useEnterprise } from '@/contexts/EnterpriseContext';
+import { useEnterprise } from '@/hooks/useEnterpriseContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AnimatedDashboard } from '@/components/dashboard/AnimatedDashboard';
 import { ModularDashboard } from '@/components/dashboard/ModularDashboard';
@@ -231,11 +231,14 @@ const ProgressWidget = ({ title, value, max, color = "blue" }) => {
 
 // Interactive Chart Component
 const InteractiveChart = ({ title, data, type = 'line', height = 300, color = '#3B82F6' }) => {
+  // Always coerce incoming data to an array to avoid map-on-undefined
+  const safeData = Array.isArray(data) ? data : [];
+
   const renderChart = () => {
     switch (type) {
       case 'area':
         return (
-          <AreaChart data={data}>
+          <AreaChart data={safeData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
             <XAxis dataKey="name" stroke="#6B7280" fontSize={12} />
             <YAxis stroke="#6B7280" fontSize={12} />
@@ -261,7 +264,7 @@ const InteractiveChart = ({ title, data, type = 'line', height = 300, color = '#
       
       case 'bar':
         return (
-          <BarChart data={data}>
+          <BarChart data={safeData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
             <XAxis dataKey="name" stroke="#6B7280" fontSize={12} />
             <YAxis stroke="#6B7280" fontSize={12} />
@@ -282,7 +285,7 @@ const InteractiveChart = ({ title, data, type = 'line', height = 300, color = '#
         return (
           <RechartsPieChart>
             <Pie
-              data={data}
+              data={safeData}
               cx="50%"
               cy="50%"
               innerRadius={60}
@@ -290,7 +293,7 @@ const InteractiveChart = ({ title, data, type = 'line', height = 300, color = '#
               paddingAngle={5}
               dataKey="value"
             >
-              {data.map((entry, index) => (
+              {safeData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
@@ -301,7 +304,7 @@ const InteractiveChart = ({ title, data, type = 'line', height = 300, color = '#
       
       default:
         return (
-          <LineChart data={data}>
+          <LineChart data={safeData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
             <XAxis dataKey="name" stroke="#6B7280" fontSize={12} />
             <YAxis stroke="#6B7280" fontSize={12} />
@@ -567,36 +570,78 @@ const DashboardPage = () => {
     { icon: Users, title: "3 nouveaux clients ajoutés", time: "Il y a 1 jour", status: false, color: "blue" }
   ];
 
-  // Vérifier que l'entreprise est chargée avant d'afficher le dashboard
-  if (enterpriseLoading || !currentEnterprise) {
-    if (enterpriseLoading) {
-      return (
-        <div className="container mx-auto p-6">
-          <DashboardSkeleton />
-        </div>
-      );
-    }
+  // Vérifier le chargement de l'entreprise avec logique améliorée
+  if (enterpriseLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <DashboardSkeleton />
+      </div>
+    );
+  }
 
-    if (!currentEnterprise) {
+  // Si pas d'entreprise après chargement, essayer de charger depuis localStorage ou AuthContext
+  if (!currentEnterprise) {
+    // Vérifier localStorage pour une entreprise récemment créée
+    const recentCompanyId = localStorage.getItem('casskai_current_enterprise');
+    if (recentCompanyId) {
+      // Tentative de rechargement des entreprises
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+      
       return (
         <div className="container mx-auto p-6">
           <Card>
             <CardHeader>
-              <CardTitle>Erreur du Dashboard</CardTitle>
+              <CardTitle>Synchronisation en cours</CardTitle>
               <CardDescription>
-                Aucune entreprise sélectionnée. Veuillez créer ou sélectionner une entreprise pour accéder au dashboard.
+                Chargement des données de votre entreprise...
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button onClick={() => window.location.reload()}>Recharger la page</Button>
+              <div className="flex items-center space-x-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                <span>Synchronisation des données</span>
+              </div>
             </CardContent>
           </Card>
         </div>
       );
     }
 
+    // Si vraiment aucune entreprise disponible
+    return (
+      <div className="container mx-auto p-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Configuration requise</CardTitle>
+            <CardDescription>
+              Aucune entreprise configurée. Veuillez terminer votre configuration.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">
+                Il semble que la configuration de votre entreprise ne soit pas terminée ou synchronisée.
+              </p>
+              <div className="flex space-x-2">
+                <Button onClick={() => window.location.href = '/onboarding'}>
+                  Terminer la configuration
+                </Button>
+                <Button variant="outline" onClick={() => window.location.reload()}>
+                  Recharger la page
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   // Option pour utiliser le nouveau dashboard animé
-  if (true) { // Changez à false pour utiliser l'ancien dashboard
+  const USE_MODULAR_DASHBOARD = true; // Changez à false pour utiliser l'ancien dashboard
+  if (USE_MODULAR_DASHBOARD) {
     return (
       <DashboardErrorBoundary>
         <DashboardProvider>
@@ -615,6 +660,7 @@ const DashboardPage = () => {
     );
   }
 
+  // Legacy dashboard below is fully gated by USE_MODULAR_DASHBOARD flag to avoid accidental rendering
   return (
     <motion.div 
       className="space-y-8 p-6"
@@ -770,7 +816,9 @@ const DashboardPage = () => {
         </div>
         
         <div className="card-grid grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {quickActions.filter(action => action && action.title).map((action, index) => (
+          {(Array.isArray(quickActions) ? quickActions : [])
+            .filter(action => action && action.title)
+            .map((action, index) => (
             <motion.div
               key={action.title || index}
               initial={{ opacity: 0, y: 20 }}
@@ -846,7 +894,9 @@ const DashboardPage = () => {
             </div>
             
             <div className="space-y-1">
-              {recentActivities.filter(activity => activity && activity.title).map((activity, index) => (
+              {(Array.isArray(recentActivities) ? recentActivities : [])
+                .filter(activity => activity && activity.title)
+                .map((activity, index) => (
                 <motion.div
                   key={activity.title || index}
                   initial={{ opacity: 0, x: -20 }}
@@ -973,7 +1023,5 @@ const DashboardPage = () => {
     </motion.div>
   );
 };
-
-}
 
 export default DashboardPage;

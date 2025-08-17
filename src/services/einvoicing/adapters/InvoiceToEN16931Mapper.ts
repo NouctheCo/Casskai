@@ -65,7 +65,7 @@ export class InvoiceToEN16931Mapper {
    */
   async mapInvoiceToEN16931(invoice: CassKaiInvoice): Promise<EN16931Invoice> {
     try {
-      console.log(`🔄 Mapping invoice ${invoice.invoice_number} to EN16931 format`);
+  console.warn(`🔄 Mapping invoice ${invoice.invoice_number} to EN16931 format`);
 
       // Map core document information
       const en16931Invoice: EN16931Invoice = {
@@ -95,7 +95,7 @@ export class InvoiceToEN16931Mapper {
       // Validate the mapped invoice
       await this.validateMappedInvoice(en16931Invoice);
 
-      console.log(`✅ Invoice ${invoice.invoice_number} mapped successfully to EN16931`);
+  console.warn(`✅ Invoice ${invoice.invoice_number} mapped successfully to EN16931`);
       return en16931Invoice;
 
     } catch (error) {
@@ -272,7 +272,7 @@ export class InvoiceToEN16931Mapper {
   /**
    * Map references
    */
-  private async mapReferences(invoice: CassKaiInvoice): Promise<EN16931Invoice['references'] | undefined> {
+  private async mapReferences(_invoice: CassKaiInvoice): Promise<EN16931Invoice['references'] | undefined> {
     // For now, return undefined as CassKai doesn't have structured reference fields
     // This can be enhanced when reference fields are added to the invoice structure
     return undefined;

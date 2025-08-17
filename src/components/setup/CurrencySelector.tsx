@@ -1,7 +1,7 @@
 // components/CurrencySelector.tsx
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useCurrency } from '../hooks/useCurrency';
+import { useCurrency } from '@/hooks/useCurrency';
 
 interface CurrencySelectorProps {
   value?: string;

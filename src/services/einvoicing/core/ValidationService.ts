@@ -7,13 +7,13 @@ import {
   EN16931Invoice,
   ValidationResult,
   EInvoicingError,
-  ValidationError,
   CountryCode,
   CurrencyCode,
   UnitCode,
   DocumentTypeCode
 } from '@/types/einvoicing.types';
 
+/* eslint-disable max-lines */
 export class ValidationService {
   private readonly VALID_COUNTRY_CODES: CountryCode[] = ['FR', 'BE', 'BJ', 'CI', 'BF', 'ML', 'SN', 'TG', 'CM', 'GA'];
   private readonly VALID_CURRENCY_CODES: CurrencyCode[] = ['EUR', 'USD', 'GBP', 'XOF', 'XAF', 'CAD'];
@@ -30,7 +30,7 @@ export class ValidationService {
     const warnings: ValidationResult['warnings'] = [];
 
     try {
-      console.log(`🔍 Validating EN16931 invoice ${invoice.invoice_number}`);
+  console.warn(`Validating EN16931 invoice ${invoice.invoice_number}`);
 
       // Core document validation
       this.validateCoreDocument(invoice, errors, warnings);
@@ -53,7 +53,7 @@ export class ValidationService {
       // Business rules validation
       this.validateBusinessRules(invoice, errors, warnings);
 
-      console.log(`✅ Validation complete: ${errors.length} errors, ${warnings.length} warnings`);
+  console.warn(`Validation complete: ${errors.length} errors, ${warnings.length} warnings`);
 
       return {
         valid: errors.length === 0,
@@ -77,7 +77,7 @@ export class ValidationService {
   private validateCoreDocument(
     invoice: EN16931Invoice,
     errors: ValidationResult['errors'],
-    warnings: ValidationResult['warnings']
+  warnings: ValidationResult['warnings']
   ): void {
     // BT-1: Invoice number (mandatory)
     if (!invoice.invoice_number?.trim()) {
@@ -525,7 +525,7 @@ export class ValidationService {
   private validatePaymentTerms(
     paymentTerms: NonNullable<EN16931Invoice['payment_terms']>,
     errors: ValidationResult['errors'],
-    warnings: ValidationResult['warnings']
+  _warnings: ValidationResult['warnings']
   ): void {
     // BT-9: Payment due date
     if (paymentTerms.due_date && !this.isValidISODate(paymentTerms.due_date)) {
@@ -583,7 +583,7 @@ export class ValidationService {
   private validateBusinessRules(
     invoice: EN16931Invoice,
     errors: ValidationResult['errors'],
-    warnings: ValidationResult['warnings']
+    _warnings: ValidationResult['warnings']
   ): void {
     // BR-1: An Invoice shall have a Specification identifier
     // (implied by our EN16931 structure)
@@ -600,7 +600,7 @@ export class ValidationService {
 
     // French-specific rules
     if (invoice.seller.address?.country_code === 'FR') {
-      this.validateFrenchSpecificRules(invoice, errors, warnings);
+      this.validateFrenchSpecificRules(invoice, errors, _warnings);
     }
   }
 
@@ -613,7 +613,7 @@ export class ValidationService {
   ): void {
     const standardRatedCategories = lines
       .filter(line => line.tax?.category_code === 'S')
-      .map(line => line.tax!.rate);
+      .map(line => (line.tax?.rate ?? 0));
 
     const uniqueRates = [...new Set(standardRatedCategories)];
     
