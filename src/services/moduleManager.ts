@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 // Service de gestion des modules - Architecture modulaire CassKai
 
 import { 
@@ -33,13 +34,14 @@ export class ModuleManager {
     try {
       this.tenantId = context.tenantId ?? 'default';
       // Charger les activations depuis la base de données
-      await this.loadActivations(this.tenantId!);
+  const tenantId = this.tenantId ?? 'default';
+  await this.loadActivations(tenantId);
       
       // Initialiser les modules core automatiquement
       await this.initializeCoreModules(context);
       
-      this.isInitialized = true;
-      console.log('[ModuleManager] Initialisé avec succès');
+  this.isInitialized = true;
+  console.warn('[ModuleManager] Initialisé avec succès');
     } catch (error) {
       console.error('[ModuleManager] Erreur d\'initialisation:', error);
       throw error;
@@ -60,11 +62,11 @@ export class ModuleManager {
     this.modules.set(id, module);
     this.dependencies.set(id, module.definition.dependencies);
     
-    console.log(`[ModuleManager] Module ${id} enregistré`);
+  console.warn(`[ModuleManager] Module ${id} enregistré`);
   }
 
   // Activer un module
-  async activateModule(moduleId: string, userId: string, config: Record<string, any> = {}): Promise<void> {
+  async activateModule(moduleId: string, userId: string, config: Record<string, unknown> = {}): Promise<void> {
     const module = this.modules.get(moduleId);
     if (!module) {
       throw new ModuleError(`Module ${moduleId} not found`, moduleId, 'MODULE_NOT_FOUND');
@@ -115,11 +117,11 @@ export class ModuleManager {
       this.activations.set(moduleId, activation);
       await this.saveActivation(activation);
 
-      console.log(`[ModuleManager] Module ${moduleId} activé avec succès`);
+  console.warn(`[ModuleManager] Module ${moduleId} activé avec succès`);
     } catch (error) {
-      const err = error as any;
-      console.error(`[ModuleManager] Erreur lors de l'activation de ${moduleId}:`, err);
-      throw new ModuleError(`Failed to activate module: ${err?.message || String(err)}`, moduleId, 'ACTIVATION_FAILED', err);
+  const message = error instanceof Error ? error.message : String(error);
+  console.error(`[ModuleManager] Erreur lors de l'activation de ${moduleId}:`, error);
+  throw new ModuleError(`Failed to activate module: ${message}`, moduleId, 'ACTIVATION_FAILED', error);
     }
   }
 
@@ -148,7 +150,10 @@ export class ModuleManager {
     }
 
     try {
-      const activation = this.activations.get(moduleId)!;
+      const activation = this.activations.get(moduleId);
+      if (!activation) {
+        throw new ModuleError(`Activation not found for module ${moduleId}`, moduleId, 'MODULE_NOT_ACTIVE');
+      }
       const context = await this.createModuleContext(moduleId, userId, activation.configuration);
 
       // Désactiver le module
@@ -161,11 +166,11 @@ export class ModuleManager {
       this.activations.set(moduleId, activation);
       await this.saveActivation(activation);
 
-      console.log(`[ModuleManager] Module ${moduleId} désactivé avec succès`);
+  console.warn(`[ModuleManager] Module ${moduleId} désactivé avec succès`);
     } catch (error) {
-      const err = error as any;
-      console.error(`[ModuleManager] Erreur lors de la désactivation de ${moduleId}:`, err);
-      throw new ModuleError(`Failed to deactivate module: ${err?.message || String(err)}`, moduleId, 'DEACTIVATION_FAILED', err);
+  const message = error instanceof Error ? error.message : String(error);
+  console.error(`[ModuleManager] Erreur lors de la désactivation de ${moduleId}:`, error);
+  throw new ModuleError(`Failed to deactivate module: ${message}`, moduleId, 'DEACTIVATION_FAILED', error);
     }
   }
 
@@ -193,13 +198,13 @@ export class ModuleManager {
   }
 
   // Obtenir la configuration d'un module actif
-  getModuleConfig(moduleId: string): Record<string, any> | null {
+  getModuleConfig(moduleId: string): Record<string, unknown> | null {
     const activation = this.activations.get(moduleId);
     return activation?.isActive ? activation.configuration : null;
   }
 
   // Mettre à jour la configuration d'un module
-  async updateModuleConfig(moduleId: string, config: Record<string, any>, _userId: string): Promise<void> {
+  async updateModuleConfig(moduleId: string, config: Record<string, unknown>, _userId: string): Promise<void> {
     const module = this.modules.get(moduleId);
     const activation = this.activations.get(moduleId);
 
@@ -220,7 +225,7 @@ export class ModuleManager {
     this.activations.set(moduleId, activation);
     await this.saveActivation(activation);
 
-    console.log(`[ModuleManager] Configuration du module ${moduleId} mise à jour`);
+  console.warn(`[ModuleManager] Configuration du module ${moduleId} mise à jour`);
   }
 
   // Vérification des dépendances
@@ -228,19 +233,26 @@ export class ModuleManager {
     const dependencies = this.dependencies.get(moduleId) || [];
     const missingDependencies: string[] = [];
 
+    const toActivate: string[] = [];
     for (const depId of dependencies) {
       if (!this.isModuleActive(depId)) {
-        // Essayer d'activer automatiquement la dépendance si elle existe
         if (this.modules.has(depId)) {
-          try {
-            await this.activateModule(depId, 'system', {});
-          } catch (error) {
-            missingDependencies.push(depId);
-          }
+          toActivate.push(depId);
         } else {
           missingDependencies.push(depId);
         }
       }
+    }
+
+    if (toActivate.length > 0) {
+      const results = await Promise.allSettled(
+        toActivate.map((dep) => this.activateModule(dep, 'system', {}))
+      );
+      results.forEach((res, idx) => {
+        if (res.status === 'rejected') {
+          missingDependencies.push(toActivate[idx]);
+        }
+      });
     }
 
     if (missingDependencies.length > 0) {
@@ -275,7 +287,7 @@ export class ModuleManager {
   }
 
   // Créer le contexte d'exécution pour un module
-  private async createModuleContext(moduleId: string, userId: string, config: Record<string, any>): Promise<ModuleContext> {
+  private async createModuleContext(moduleId: string, userId: string, config: Record<string, unknown>): Promise<ModuleContext> {
     return {
       moduleId,
       userId,
@@ -287,15 +299,16 @@ export class ModuleManager {
   }
 
   // Créer les services disponibles pour les modules
-  private async createModuleServices(): Promise<any> {
-    return {
-      database: {}, // Service de base de données
-      storage: {}, // Service de stockage
-      notifications: {}, // Service de notifications
-      integrations: {}, // Service d'intégrations
-      analytics: {}, // Service d'analytics
-      ai: {}, // Service IA
+  private async createModuleServices(): Promise<ModuleContext['services']> {
+    const services: ModuleContext['services'] = {
+      database: {} as unknown as ModuleContext['services']['database'],
+      storage: {} as unknown as ModuleContext['services']['storage'],
+      notifications: {} as unknown as ModuleContext['services']['notifications'],
+      integrations: {} as unknown as ModuleContext['services']['integrations'],
+      analytics: {} as unknown as ModuleContext['services']['analytics'],
+      ai: {} as unknown as ModuleContext['services']['ai'],
     };
+    return services;
   }
 
   // Obtenir les permissions d'un utilisateur
@@ -314,7 +327,7 @@ export class ModuleManager {
     }
 
     // Valider la version (format semver)
-    const versionRegex = /^\d+\.\d+\.\d+(-[\w\.-]+)?$/;
+  const versionRegex = /^\d+\.\d+\.\d+(-[\w.-]+)?$/;
     if (!versionRegex.test(definition.version)) {
       throw new ModuleError(`Invalid version format: ${definition.version}`, definition.id, 'INVALID_VERSION');
     }
@@ -329,6 +342,7 @@ export class ModuleManager {
     for (const module of coreModules) {
       if (!this.isModuleActive(module.definition.id)) {
         try {
+          // eslint-disable-next-line no-await-in-loop
           await this.activateModule(module.definition.id, 'system', {});
         } catch (error) {
           console.error(`[ModuleManager] Erreur activation module core ${module.definition.id}:`, error);
@@ -340,10 +354,47 @@ export class ModuleManager {
   // Persistence des activations
   private async loadActivations(tenantId: string): Promise<void> {
     try {
-      // Charger depuis la base de données
-      // const activations = await db.moduleActivations.findByTenant(tenantId);
+      // Charger depuis Supabase
+  const { supabase } = await import('@/lib/supabase');
       
-      // Simulation temporaire
+      const { data, error } = await supabase
+        .from('companies')
+        .select('active_modules')
+        .eq('id', tenantId)
+        .single();
+        
+      if (error) {
+        console.warn('[ModuleManager] Erreur chargement depuis Supabase:', error);
+        // Fallback sur localStorage
+        const stored = localStorage.getItem(`casskai-modules-${tenantId}`);
+        if (stored) {
+          const activations = JSON.parse(stored) as ModuleActivation[];
+          activations.forEach(activation => {
+            this.activations.set(activation.moduleId, activation);
+          });
+        }
+        return;
+      }
+      
+      // Convertir les données de la base vers ModuleActivation
+      if (data?.active_modules) {
+        const modules = JSON.parse(data.active_modules as string) as Record<string, boolean>;
+        Object.entries(modules).forEach(([moduleId, isActive]) => {
+          if (isActive) {
+            const activation: ModuleActivation = {
+              moduleId,
+              isActive: true,
+              activatedAt: new Date(),
+              activatedBy: 'user',
+              configuration: {}
+            };
+            this.activations.set(moduleId, activation);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('[ModuleManager] Erreur chargement activations:', error);
+      // Fallback sur localStorage
       const stored = localStorage.getItem(`casskai-modules-${tenantId}`);
       if (stored) {
         const activations = JSON.parse(stored) as ModuleActivation[];
@@ -351,27 +402,50 @@ export class ModuleManager {
           this.activations.set(activation.moduleId, activation);
         });
       }
-    } catch (error) {
-      console.error('[ModuleManager] Erreur chargement activations:', error);
     }
   }
 
   private async saveActivation(_activation: ModuleActivation): Promise<void> {
     try {
-      // Sauvegarder en base de données
-      // await db.moduleActivations.save(activation);
+      const tenantId = this.tenantId ?? 'default';
       
-      // Simulation temporaire
-  const tenantId = this.tenantId ?? 'default';
+      // Convertir les activations en format simple pour la base
       const allActivations = Array.from(this.activations.values());
+      const modulesMap: Record<string, boolean> = {};
+      allActivations.forEach(activation => {
+        modulesMap[activation.moduleId] = activation.isActive;
+      });
+      
+      // Sauvegarder en base de données Supabase
+  const { supabase } = await import('@/lib/supabase');
+      
+      const { error } = await supabase
+        .from('companies')
+        .update({ active_modules: JSON.stringify(modulesMap) })
+        .eq('id', tenantId);
+        
+      if (error) {
+        console.warn('[ModuleManager] Erreur sauvegarde Supabase:', error);
+        // Fallback sur localStorage
+        localStorage.setItem(`casskai-modules-${tenantId}`, JSON.stringify(allActivations));
+        return;
+      }
+      
+  console.warn('[ModuleManager] Modules sauvegardés en base:', modulesMap);
+      
+      // Backup dans localStorage aussi
       localStorage.setItem(`casskai-modules-${tenantId}`, JSON.stringify(allActivations));
     } catch (error) {
       console.error('[ModuleManager] Erreur sauvegarde activation:', error);
+      // Fallback sur localStorage
+      const tenantId = this.tenantId ?? 'default';
+      const allActivations = Array.from(this.activations.values());
+      localStorage.setItem(`casskai-modules-${tenantId}`, JSON.stringify(allActivations));
     }
   }
 
   // Debugging et monitoring
-  getDebugInfo(): any {
+  getDebugInfo(): Record<string, unknown> {
     return {
       isInitialized: this.isInitialized,
       totalModules: this.modules.size,

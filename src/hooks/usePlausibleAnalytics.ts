@@ -11,7 +11,7 @@ interface PlausibleGoalProps {
     amount: string;
     currency: string;
   };
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface PlausibleConfig {
@@ -26,9 +26,17 @@ interface PlausibleConfig {
 }
 
 // Configuration par défaut pour Plausible
+// Domaine résolu: variable env (VITE_PLAUSIBLE_DOMAIN) sinon host courant, fallback 'app.casskai.fr'
+const RESOLVED_DOMAIN = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_PLAUSIBLE_DOMAIN)
+  ? import.meta.env.VITE_PLAUSIBLE_DOMAIN
+  : (typeof window !== 'undefined' ? window.location.host : 'app.casskai.fr');
+const RESOLVED_API_HOST = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_PLAUSIBLE_API_HOST)
+  ? import.meta.env.VITE_PLAUSIBLE_API_HOST
+  : 'https://plausible.io';
+
 const DEFAULT_CONFIG: PlausibleConfig = {
-  domain: 'app.casskai.fr',
-  apiHost: 'https://plausible.io',
+  domain: RESOLVED_DOMAIN,
+  apiHost: RESOLVED_API_HOST,
   trackLocalhost: false,
   excludePaths: ['/admin', '/api'],
   enableAutoOutboundTracking: true,
@@ -64,7 +72,7 @@ class PlausibleService {
        window.location.hostname === '127.0.0.1' ||
        window.location.hostname === '0.0.0.0')
     ) {
-      console.log('[Plausible] Tracking désactivé en développement local');
+  console.warn('[Plausible] Tracking désactivé en développement local');
       return;
     }
 
@@ -99,7 +107,7 @@ class PlausibleService {
       script.onload = () => {
         this.isLoaded = true;
         this.processQueue();
-        console.log('[Plausible] Analytics chargé avec succès');
+  // Loaded
       };
 
       script.onerror = () => {
@@ -120,17 +128,17 @@ class PlausibleService {
   }
 
   private createPlausibleProxy() {
-    return (...args: any[]) => {
+    return (event: string, options?: { props?: Record<string, unknown>; u?: string; callback?: () => void }) => {
       if (this.isLoaded) {
         // Si Plausible est chargé, utiliser la fonction native
         if (window.plausible && typeof window.plausible === 'function') {
-          return window.plausible.apply(null, args);
+          return window.plausible(event, options);
         }
       } else {
         // Sinon, mettre en queue
         this.queue.push(() => {
           if (window.plausible && typeof window.plausible === 'function') {
-            window.plausible.apply(null, args);
+            window.plausible(event, options);
           }
         });
       }
@@ -173,7 +181,7 @@ class PlausibleService {
     if (!this.shouldTrack()) return;
 
     if (window.plausible) {
-      const goalProps: any = { ...props };
+  const goalProps: Record<string, unknown> = { ...(props as Record<string, unknown> | undefined) };
       
       // Gérer les revenue goals
       if (props?.revenue) {
@@ -191,9 +199,8 @@ class PlausibleService {
   // Vérifier si on doit tracker
   private shouldTrack(): boolean {
     // Respecter Do Not Track
-    if (navigator.doNotTrack === '1' || 
-        (window as any).doNotTrack === '1' || 
-        navigator.msDoNotTrack === '1') {
+  if (navigator.doNotTrack === '1' || 
+    (window as (Window & { doNotTrack?: string })).doNotTrack === '1') {
       return false;
     }
 
@@ -407,7 +414,7 @@ export const usePrivacyCompliantTracking = () => {
 declare global {
   interface Window {
     plausible?: (event: string, options?: { 
-      props?: Record<string, any>;
+      props?: Record<string, unknown>;
       u?: string;
       callback?: () => void;
     }) => void;

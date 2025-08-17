@@ -1,5 +1,5 @@
 // src/services/migrationService.ts
-// import { supabase } from '../lib/supabase'; // Commented out for build compatibility
+import { supabase } from '../lib/supabase';
 
 export interface MigrationResult {
   success: boolean;
@@ -51,15 +51,15 @@ class MigrationService {
       const companiesTableExists = tablesData && tablesData.length > 0;
 
       // Vérifier si la fonction get_dashboard_stats existe
-      const { data: functionsData, error: functionsError } = await supabase
+  const { /* data: _functionsData, */ error: functionsError } = await supabase
         .rpc('get_dashboard_stats', { p_company_id: '00000000-0000-0000-0000-000000000000' })
-        .then(() => ({ data: true, error: null }))
-        .catch((error: any) => ({ data: false, error }));
+        .then(() => ({ data: true, error: null } as const))
+        .catch((error: unknown) => ({ data: false as const, error }));
 
       const functionsExist = !functionsError;
 
       // Vérifier si les devises par défaut existent
-      const { data: currenciesData, error: currenciesError } = await supabase
+  const { data: currenciesData, error: currenciesError } = await supabase
         .from('currencies')
         .select('code')
         .limit(1);
@@ -101,7 +101,7 @@ class MigrationService {
    */
   async applyMigrations(): Promise<MigrationResult> {
     try {
-      console.log('🚀 Début de l\'application des migrations...');
+  console.warn('🚀 Début de l\'application des migrations...');
       
       const migrationsStatus = await this.checkMigrationsStatus();
       const pendingMigrations = migrationsStatus.filter(m => !m.applied);
@@ -116,36 +116,23 @@ class MigrationService {
 
       let appliedCount = 0;
 
-      // Appliquer les migrations dans l'ordre
+      // Appliquer les migrations dans l'ordre (en série volontairement)
       for (const migration of pendingMigrations) {
-        console.log(`📋 Application de la migration ${migration.version}: ${migration.name}`);
-        
+        console.warn(`📋 Application de la migration ${migration.version}: ${migration.name}`);
         try {
-          switch (migration.version) {
-            case '001':
-              await this.applyInitialSchemaMigration();
-              break;
-            case '002':
-              await this.applyDefaultDataMigration();
-              break;
-            case '003':
-              await this.applyFunctionsAndTriggersMigration();
-              break;
-            default:
-              console.warn(`Migration inconnue: ${migration.version}`);
-              continue;
+          if (migration.version === '001') await this.applyInitialSchemaMigration();
+          else if (migration.version === '002') await this.applyDefaultDataMigration();
+          else if (migration.version === '003') await this.applyFunctionsAndTriggersMigration();
+          else {
+            console.warn(`Migration inconnue: ${migration.version}`);
+            continue;
           }
-          
           appliedCount++;
-          console.log(`✅ Migration ${migration.version} appliquée avec succès`);
-          
+          console.warn(`✅ Migration ${migration.version} appliquée avec succès`);
         } catch (migrationError) {
-          console.error(`❌ Erreur lors de l'application de la migration ${migration.version}:`, migrationError);
-          if (migrationError instanceof Error) {
-            throw new Error(`Migration ${migration.version} échouée: ${migrationError.message}`);
-          } else {
-            throw new Error(`Migration ${migration.version} échouée: ${JSON.stringify(migrationError)}`);
-          }
+          const msg = migrationError instanceof Error ? migrationError.message : String(migrationError);
+          console.error(`❌ Erreur lors de l'application de la migration ${migration.version}:`, msg);
+          throw new Error(`Migration ${migration.version} échouée: ${msg}`);
         }
       }
 
@@ -177,16 +164,17 @@ class MigrationService {
       'bank_accounts', 'bank_transactions', 'third_parties', 'currencies', 'exchange_rates'
     ];
 
-    for (const tableName of requiredTables) {
-      const { data, error } = await supabase
-        .from(tableName)
-        .select('*')
-        .limit(1);
-
-      if (error && error.code !== 'PGRST116') { // PGRST116 = table not found
-        throw new Error(`Table ${tableName} non accessible: ${error.message}`);
-      }
-    }
+    await Promise.all(
+      requiredTables.map(async (tableName) => {
+        const { /* data, */ error } = await supabase
+          .from(tableName)
+          .select('*')
+          .limit(1);
+        if (error && error.code !== 'PGRST116') { // PGRST116 = table not found
+          throw new Error(`Table ${tableName} non accessible: ${error.message}`);
+        }
+      })
+    );
   }
 
   /**
@@ -372,7 +360,7 @@ class MigrationService {
   /**
    * Valide les données comptables d'une entreprise
    */
-  async validateAccountingData(companyId: string): Promise<{ success: boolean; data?: any; error?: string }> {
+  async validateAccountingData(companyId: string): Promise<{ success: boolean; data?: unknown; error?: string }> {
     try {
       const { data, error } = await supabase.rpc('validate_accounting_data', {
         p_company_id: companyId

@@ -1,16 +1,14 @@
 import { beforeAll, afterAll, beforeEach, afterEach, vi } from 'vitest';
 import '@testing-library/jest-dom';
+import { getSupabaseTestClient } from './supabaseTestClient';
 
-// Setup real Supabase connection for integration tests
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'http://localhost:54321';
-const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || 'test-anon-key';
+// Setup real Supabase connection for integration tests via singleton client
 
 // Database cleanup utilities
 export const cleanupDatabase = async () => {
   try {
     // Only clean up test data to avoid affecting real data
-    const { createClient } = await import('@supabase/supabase-js');
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = getSupabaseTestClient();
     
     // Clean up test enterprises
     await supabase
@@ -24,16 +22,15 @@ export const cleanupDatabase = async () => {
       .delete()
       .like('email', '%@test.example');
     
-    console.log('✅ Database cleanup completed');
-  } catch (error) {
-    console.warn('⚠️  Database cleanup failed:', error);
+  console.warn('✅ Database cleanup completed');
+  } catch (_error) {
+    console.warn('⚠️  Database cleanup failed:', _error);
   }
 };
 
 // Create test data utilities
 export const createTestUser = async () => {
-  const { createClient } = await import('@supabase/supabase-js');
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabase = getSupabaseTestClient();
   
   const testUser = {
     id: `test-user-${  Math.random().toString(36).substr(2, 9)}`,
@@ -56,8 +53,7 @@ export const createTestUser = async () => {
 };
 
 export const createTestEnterprise = async (userId: string) => {
-  const { createClient } = await import('@supabase/supabase-js');
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabase = getSupabaseTestClient();
   
   const testEnterprise = {
     id: `test-enterprise-${  Math.random().toString(36).substr(2, 9)}`,
@@ -88,17 +84,17 @@ export const waitForSupabase = async (timeout = 10000) => {
   const start = Date.now();
   while (Date.now() - start < timeout) {
     try {
-      const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabase = getSupabaseTestClient();
       
       const { error } = await supabase.from('enterprises').select('id').limit(1);
       if (!error) {
-        console.log('✅ Supabase connection established');
+      console.warn('✅ Supabase connection established');
         return true;
       }
-    } catch (error) {
+  } catch (_error) {
       // Continue waiting
     }
+    // eslint-disable-next-line no-await-in-loop
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
   throw new Error('Supabase connection timeout');
@@ -106,12 +102,12 @@ export const waitForSupabase = async (timeout = 10000) => {
 
 // Global setup
 beforeAll(async () => {
-  console.log('🚀 Starting integration tests setup...');
+    console.warn('🚀 Starting integration tests setup...');
   
   // Wait for Supabase to be ready
   try {
     await waitForSupabase();
-  } catch (error) {
+  } catch (_error) {
     console.warn('⚠️  Supabase not available, some tests may fail');
   }
   
@@ -134,7 +130,7 @@ beforeAll(async () => {
 
 // Global teardown
 afterAll(async () => {
-  console.log('🧹 Cleaning up after integration tests...');
+    console.warn('🧹 Cleaning up after integration tests...');
   await cleanupDatabase();
 });
 

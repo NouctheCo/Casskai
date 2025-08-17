@@ -42,7 +42,8 @@ const BillingPage: React.FC = () => {
     defaultPaymentMethod,
     subscribe,
     updateSubscription,
-    refreshSubscription
+    refreshSubscription,
+    openBillingPortal
   } = useSubscription();
 
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
@@ -156,6 +157,37 @@ const BillingPage: React.FC = () => {
     } finally {
       setSubscriptionLoading(false);
       setSelectedPlan(null);
+    }
+  };
+
+  const handleAddPaymentMethod = async () => {
+    if (!subscription) {
+      toast({
+        title: "Abonnement requis",
+        description: "Vous devez avoir un abonnement actif pour ajouter une méthode de paiement.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const result = await openBillingPortal();
+      
+      if (!result.success) {
+        toast({
+          title: "Erreur",
+          description: result.error || "Impossible d'accéder au portail de facturation.",
+          variant: "destructive",
+        });
+      }
+      // If successful, the portal will open in a new tab
+    } catch (error) {
+      console.error('Error opening billing portal:', error);
+      toast({
+        title: "Erreur inattendue",
+        description: "Une erreur inattendue est survenue.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -347,11 +379,12 @@ const BillingPage: React.FC = () => {
                         </div>
                         
                         <div className="flex items-center space-x-2">
-                          <Button variant="outline" size="sm">
-                            Modifier
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            Supprimer
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleAddPaymentMethod()}
+                          >
+                            Gérer
                           </Button>
                         </div>
                       </div>
@@ -369,7 +402,7 @@ const BillingPage: React.FC = () => {
                   <p className="text-gray-600 dark:text-gray-400 mb-6">
                     Ajoutez une carte de crédit pour gérer vos paiements
                   </p>
-                  <Button>
+                  <Button onClick={() => handleAddPaymentMethod()}>
                     Ajouter une carte
                   </Button>
                 </CardContent>

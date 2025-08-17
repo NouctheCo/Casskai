@@ -1,5 +1,10 @@
-import { lazy, ComponentType, useState, useEffect } from 'react';
-import { LoadingFallback } from '@/components/ui/LoadingFallback';
+/* eslint-disable react-refresh/only-export-components */
+import React, { lazy, ComponentType, useState, useEffect } from 'react';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type LazyWithPreload<T extends ComponentType<any>> = React.LazyExoticComponent<T> & {
+  preload?: () => Promise<{ default: T }>;
+};
 
 // Configuration du préchargement intelligent
 interface LazyComponentConfig {
@@ -9,6 +14,7 @@ interface LazyComponentConfig {
 }
 
 // Utilitaire pour créer des composants lazy avec préchargement intelligent
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createLazyComponent<T extends ComponentType<any>>(
   factory: () => Promise<{ default: T }>,
   config: LazyComponentConfig = { priority: 'medium' }
@@ -38,7 +44,7 @@ export function createLazyComponent<T extends ComponentType<any>>(
       console.error('Error in lazy component factory:', error);
       throw error;
     }
-  });
+  }) as LazyWithPreload<T>;
 
   // Méthode pour précharger manuellement
   LazyComponent.preload = () => factory();
@@ -48,7 +54,7 @@ export function createLazyComponent<T extends ComponentType<any>>(
 
 // Composants lazy avec préchargement intelligent
 export const LazyDashboardPage = createLazyComponent(
-  () => import('@/pages/DashboardPage.jsx'),
+  () => import('@/pages/DashboardPage'),
   { 
     priority: 'high',
     preloadCondition: () => window.location.pathname === '/' || localStorage.getItem('user') !== null,
@@ -57,7 +63,7 @@ export const LazyDashboardPage = createLazyComponent(
 );
 
 export const LazyAccountingPage = createLazyComponent(
-  () => import('@/pages/AccountingPage.jsx'),
+  () => import('@/pages/AccountingPage'),
   { 
     priority: 'high',
     preloadCondition: () => document.querySelector('[data-accounting-access]') !== null,
@@ -66,7 +72,7 @@ export const LazyAccountingPage = createLazyComponent(
 );
 
 export const LazyInvoicingPage = createLazyComponent(
-  () => import('@/pages/InvoicingPage.jsx'),
+  () => import('@/pages/InvoicingPage'),
   { 
     priority: 'medium',
     chunkName: 'invoicing'
@@ -74,7 +80,7 @@ export const LazyInvoicingPage = createLazyComponent(
 );
 
 export const LazyBanksPage = createLazyComponent(
-  () => import('@/pages/BanksPage.jsx'),
+  () => import('@/pages/BanksPage'),
   { 
     priority: 'medium',
     chunkName: 'banks'
@@ -82,7 +88,7 @@ export const LazyBanksPage = createLazyComponent(
 );
 
 export const LazyReportsPage = createLazyComponent(
-  () => import('@/pages/ReportsPage.tsx'),
+  () => import('@/pages/ReportsPage'),
   { 
     priority: 'medium',
     chunkName: 'reports'
@@ -90,7 +96,7 @@ export const LazyReportsPage = createLazyComponent(
 );
 
 export const LazySettingsPage = createLazyComponent(
-  () => import('@/pages/SettingsPage.jsx'),
+  () => import('@/pages/SettingsPage'),
   { 
     priority: 'low',
     chunkName: 'settings'
@@ -98,7 +104,7 @@ export const LazySettingsPage = createLazyComponent(
 );
 
 export const LazyAuthPage = createLazyComponent(
-  () => import('@/pages/AuthPage.jsx'),
+  () => import('@/pages/AuthPage'),
   { 
     priority: 'high',
     preloadCondition: () => !localStorage.getItem('supabase.auth.token'),
@@ -107,7 +113,7 @@ export const LazyAuthPage = createLazyComponent(
 );
 
 export const LazyLandingPage = createLazyComponent(
-  () => import('@/pages/LandingPage.tsx'),
+  () => import('@/pages/LandingPage'),
   { 
     priority: 'high',
     preloadCondition: () => window.location.pathname === '/',
@@ -117,63 +123,63 @@ export const LazyLandingPage = createLazyComponent(
 
 // Pages secondaires
 export const LazyInventoryPage = createLazyComponent(
-  () => import('@/pages/InventoryPage.jsx'),
+  () => import('@/pages/InventoryPage'),
   { priority: 'low', chunkName: 'inventory' }
 );
 
 export const LazyProjectsPage = createLazyComponent(
-  () => import('@/pages/ProjectsPage.jsx'),
+  () => import('@/pages/ProjectsPage'),
   { priority: 'low', chunkName: 'projects' }
 );
 
 export const LazyHumanResourcesPage = createLazyComponent(
-  () => import('@/pages/HumanResourcesPage.jsx'),
+  () => import('@/pages/HumanResourcesPage'),
   { priority: 'low', chunkName: 'hr' }
 );
 
 export const LazyUserManagementPage = createLazyComponent(
-  () => import('@/pages/UserManagementPage.jsx'),
+  () => import('@/pages/UserManagementPage'),
   { priority: 'low', chunkName: 'user-management' }
 );
 
 // Nouvelles pages
 export const LazyTaxPage = createLazyComponent(
-  () => import('@/pages/TaxPage.tsx'),
+  () => import('@/pages/TaxPage'),
   { priority: 'medium', chunkName: 'tax' }
 );
 
 export const LazyThirdPartiesPage = createLazyComponent(
-  () => import('@/pages/ThirdPartiesPage.tsx'),
+  () => import('@/pages/ThirdPartiesPage'),
   { priority: 'medium', chunkName: 'third-parties' }
 );
 
 export const LazyPurchasesPage = createLazyComponent(
-  () => import('@/pages/PurchasesPage.tsx'),
+  () => import('@/pages/PurchasesPage'),
   { priority: 'medium', chunkName: 'purchases' }
 );
 
 export const LazyForecastsPage = createLazyComponent(
-  () => import('@/pages/ForecastsPage.tsx'),
+  () => import('@/pages/ForecastsPage'),
   { priority: 'low', chunkName: 'forecasts' }
 );
 
 export const LazySalesCrmPage = createLazyComponent(
-  () => import('@/pages/SalesCrmPage.tsx'),
+  () => import('@/pages/SalesCrmPage'),
   { priority: 'medium', chunkName: 'crm' }
 );
 
 export const LazyContractsPage = createLazyComponent(
-  () => import('@/pages/ContractsPage.tsx'),
+  () => import('@/pages/ContractsPage'),
   { priority: 'low', chunkName: 'contracts' }
 );
 
 export const LazyOnboardingPage = createLazyComponent(
-  () => import('@/pages/OnboardingPage.tsx'),
+  () => import('@/pages/OnboardingPage'),
   { priority: 'high', chunkName: 'onboarding' }
 );
 
 export const LazyBillingPage = createLazyComponent(
-  () => import('@/pages/BillingPage.tsx'),
+  () => import('@/pages/BillingPage'),
   { priority: 'low', chunkName: 'billing' }
 );
 
@@ -199,8 +205,9 @@ export const initializeIntelligentPreloading = () => {
 
   // Précharger selon la connexion réseau
   if ('connection' in navigator) {
-    const connection = (navigator as any).connection;
-    if (connection.effectiveType === '4g' && !connection.saveData) {
+    type NetworkInformation = { effectiveType?: string; saveData?: boolean };
+  const connection = (navigator as Navigator & { connection?: NetworkInformation }).connection;
+  if (connection && connection.effectiveType === '4g' && !connection.saveData) {
       preloadMediumPriorityComponents();
     }
   }
@@ -272,18 +279,22 @@ export const useChunkLoadingStats = () => {
 
   useEffect(() => {
     // Vérifier si webpack est disponible
-    if (typeof window === 'undefined' || !window.__webpack_require__?.e) {
+    const w = window as unknown as { __webpack_require__?: { e?: (chunkId: string) => Promise<unknown> } };
+    if (typeof window === 'undefined' || !w.__webpack_require__?.e) {
       return;
     }
 
-    const originalMethod = window.__webpack_require__.e;
+    if (!w.__webpack_require__ || !w.__webpack_require__.e) {
+      return;
+    }
+    const originalMethod = w.__webpack_require__.e;
     const loadTimes: number[] = [];
 
-    window.__webpack_require__.e = function(chunkId: string) {
+    w.__webpack_require__.e = function(chunkId: string) {
       const startTime = performance.now();
       
       return originalMethod.call(this, chunkId)
-        .then((result: any) => {
+        .then((result: unknown) => {
           const loadTime = performance.now() - startTime;
           loadTimes.push(loadTime);
           
@@ -294,7 +305,7 @@ export const useChunkLoadingStats = () => {
             averageLoadTime: loadTimes.reduce((a, b) => a + b, 0) / loadTimes.length
           }));
           
-          return result;
+          return result as unknown;
         })
         .catch((error: Error) => {
           setStats(prev => ({
@@ -307,8 +318,8 @@ export const useChunkLoadingStats = () => {
     };
 
     return () => {
-      if (window.__webpack_require__) {
-        window.__webpack_require__.e = originalMethod;
+      if (w.__webpack_require__) {
+        w.__webpack_require__.e = originalMethod;
       }
     };
   }, []);

@@ -108,6 +108,10 @@ export interface ModuleServices {
   ai: any; // Service IA
 }
 
+// Handlers
+export type ModuleEndpointHandler = (context: ModuleContext, payload?: unknown) => unknown | Promise<unknown>;
+export type ModuleTaskHandler = (context: ModuleContext) => void | Promise<void>;
+
 // Interface que doit implémenter chaque module
 export interface Module {
   definition: ModuleDefinition;
@@ -135,7 +139,7 @@ export interface Module {
   getAPIEndpoints?(): Array<{
     method: string;
     path: string;
-    handler: Function;
+  handler: ModuleEndpointHandler;
     permissions?: string[];
   }>;
   
@@ -143,7 +147,7 @@ export interface Module {
   getScheduledTasks?(): Array<{
     name: string;
     schedule: string; // Cron expression
-    handler: Function;
+  handler: ModuleTaskHandler;
   }>;
 }
 

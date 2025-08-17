@@ -97,6 +97,7 @@ const ModuleManagerEnhanced: React.FC = () => {
     if (activate) {
       const canActivate = canActivateModule(moduleId);
       if (!canActivate.canActivate) {
+        // eslint-disable-next-line no-alert
         alert(canActivate.reason || 'Impossible d\'activer ce module');
         return;
       }

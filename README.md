@@ -155,26 +155,31 @@ casskai/
 └── 📄 README.md         # Ce fichier
 ```
 
-## 🌐 Déploiement
+## 🚀 **Déploiement Production**
 
-### Netlify (Recommandé)
+> **⚠️ IMPORTANT** : CassKai utilise une architecture VPS dédiée. 
+> 
+> **Ne PAS déployer sur Netlify/Vercel** - Le projet utilise un VPS Hostinger avec architecture complète.
+
+### Architecture de Production
+- **Domaine** : https://casskai.app
+- **Infrastructure** : VPS Hostinger (89.116.111.88)
+- **Frontend** : React/Vite + Nginx
+- **Backend** : Node.js + PM2
+- **SSL** : Let's Encrypt automatique
+- **Base de données** : Supabase
+- **Paiements** : Stripe Live
+
+### Procédure de Déploiement
 ```bash
+# 1. Compiler le projet
 npm run build
-# Uploader le dossier 'dist' sur Netlify
+
+# 2. Déployer (nécessite accès SSH au VPS)
+scp -r dist/* root@89.116.111.88:/var/www/casskai.app/public/
 ```
 
-### Vercel
-```bash
-npm install -g vercel
-vercel --prod
-```
-
-### Variables d'Environnement de Production
-```bash
-VITE_SUPABASE_URL=https://qkbgbgupmgonjydbkvdj.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrYmdiZ3VwbWdvbmp5ZGJrdmRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgyMTUyMDIsImV4cCI6MjA2Mzc5MTIwMn0.5TzZrC67CalzVHFgqooARusmqboIwNq1FB9oZ56JAPc
-VITE_APP_URL=https://casskai.app
-```
+📖 **Voir [DEPLOYMENT.md](./DEPLOYMENT.md) pour le guide complet de déploiement**
 
 ## 🤝 Contribution
 

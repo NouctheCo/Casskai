@@ -67,7 +67,7 @@ export function MainLayout() {
   // Layout pour les pages publiques (sans sidebar)
   if (isPublicPage) {
     return (
-      <AnalyticsProvider domain="app.casskai.fr" showConsentBanner={true}>
+  <AnalyticsProvider domain={import.meta.env?.VITE_PLAUSIBLE_DOMAIN || window.location.host} showConsentBanner={true}>
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
           <PageTransition>
             <Outlet />
@@ -79,7 +79,7 @@ export function MainLayout() {
 
   // Layout principal avec sidebar pour les utilisateurs connectés
   return (
-    <AnalyticsProvider domain="app.casskai.fr" showConsentBanner={true}>
+  <AnalyticsProvider domain={import.meta.env?.VITE_PLAUSIBLE_DOMAIN || window.location.host} showConsentBanner={true}>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
         {/* Sidebar Desktop */}
         {showSidebar && (

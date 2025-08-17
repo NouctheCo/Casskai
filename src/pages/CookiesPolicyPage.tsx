@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useToast } from '@/components/ui/use-toast';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { 
@@ -107,10 +108,11 @@ const CookiesPolicyPage = () => {
     }));
   };
 
+  const { toast } = useToast();
   const savePreferences = () => {
     // Ici on sauvegarderait les préférences
     console.log('Préférences sauvegardées:', cookieSettings);
-    alert('Vos préférences ont été sauvegardées');
+  toast({ title: 'Vos préférences ont été sauvegardées' });
   };
 
   return (

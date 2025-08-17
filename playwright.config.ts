@@ -24,7 +24,6 @@ export default defineConfig({
     ['html', { open: 'never' }],
     ['json', { outputFile: 'test-results/results.json' }],
     ['junit', { outputFile: 'test-results/results.xml' }],
-    ...(process.env.CI ? [['github'] as const] : []),
   ],
   
   // Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions.
@@ -150,20 +149,6 @@ export default defineConfig({
   expect: {
     // Maximum time expect() should wait for the condition to be met
     timeout: 5000,
-    
-    // Take screenshot on assertion failure
-    toHaveScreenshot: { 
-      mode: 'only-on-failure',
-      animations: 'disabled',
-      caret: 'hide',
-    },
-    
-    // Visual comparison options
-    toMatchSnapshot: {
-      mode: 'only-on-failure',
-      animations: 'disabled',
-      caret: 'hide',
-    },
   },
   
   // Timeout for each test

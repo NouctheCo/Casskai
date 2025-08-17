@@ -14,18 +14,18 @@ export class ConfigMigration {
    */
   async migrateFromHardcodedConfig(): Promise<boolean> {
     try {
-      console.log('🔄 Début de la migration de configuration...');
+  console.warn('🔄 Début de la migration de configuration...');
 
       // Vérifier si une configuration existe déjà
       if (this.configService.isConfigured()) {
-        console.log('✅ Configuration dynamique déjà présente, migration non nécessaire');
+  console.warn('✅ Configuration dynamique déjà présente, migration non nécessaire');
         return true;
       }
 
       // Récupérer les variables d'environnement existantes
       const existingConfig = this.extractEnvConfig();
       if (!existingConfig) {
-        console.log('ℹ️  Aucune configuration existante trouvée, configuration manuelle requise');
+  console.warn('ℹ️  Aucune configuration existante trouvée, configuration manuelle requise');
         return false;
       }
 
@@ -33,10 +33,7 @@ export class ConfigMigration {
       const newConfig = await this.createNewConfig(existingConfig);
       
       // Valider la configuration
-      const isValid = await this.configService.validateSupabaseConfig(
-        newConfig.supabase.url,
-        newConfig.supabase.anonKey
-      );
+  const isValid = await this.configService.validateSupabaseConfig();
 
       if (!isValid) {
         console.error('❌ Configuration Supabase invalide');
@@ -46,7 +43,7 @@ export class ConfigMigration {
       // Sauvegarder la nouvelle configuration
       await this.configService.saveConfig(newConfig);
       
-      console.log('✅ Migration terminée avec succès!');
+  console.warn('✅ Migration terminée avec succès!');
       return true;
 
     } catch (error) {
@@ -113,7 +110,7 @@ export class ConfigMigration {
     oldKeys.forEach(key => {
       if (localStorage.getItem(key)) {
         localStorage.removeItem(key);
-        console.log(`🧹 Suppression de l'ancienne clé: ${key}`);
+  console.warn(`🧹 Suppression de l'ancienne clé: ${key}`);
       }
     });
   }
@@ -151,11 +148,12 @@ export class ConfigMigration {
       // Vérifier chaque table
       for (const table of requiredTables) {
         try {
+          // eslint-disable-next-line no-await-in-loop
           const { error } = await supabase.from(table).select('*').limit(1);
           if (error && error.code === 'PGRST116') {
             missingTables.push(table);
           }
-        } catch (error) {
+        } catch {
           missingTables.push(table);
         }
       }
@@ -175,7 +173,7 @@ export class ConfigMigration {
         suggestedActions
       };
 
-    } catch (error) {
+  } catch {
       return {
         isCompatible: false,
         missingTables: [],

@@ -172,12 +172,17 @@ export const usePrefersReducedMotion = (): boolean => {
 };
 
 // Hook pour détecter les performances faibles
+type NetworkInformation = {
+  effectiveType?: string;
+  saveData?: boolean;
+};
+
 export const usePerformanceMode = () => {
   const [isLowPerf, setIsLowPerf] = React.useState(false);
 
   React.useEffect(() => {
     // Détecter la performance du device
-    const connection = (navigator as any).connection;
+    const connection = (navigator as Navigator & { connection?: NetworkInformation }).connection;
     const hardwareConcurrency = navigator.hardwareConcurrency || 4;
     
     // Considérer comme faible performance si:
@@ -187,7 +192,8 @@ export const usePerformanceMode = () => {
     const isLowPerformance = 
       hardwareConcurrency < 4 || 
       (connection && (connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g')) ||
-      (performance.memory && performance.memory.usedJSHeapSize > 50000000); // > 50MB
+      // Mémoire utilisée (API non standard, on protège l'accès)
+      ((performance as unknown as { memory?: { usedJSHeapSize?: number } }).memory?.usedJSHeapSize ?? 0) > 50_000_000; // > 50MB
 
     setIsLowPerf(isLowPerformance);
   }, []);
@@ -227,18 +233,16 @@ export const OptimizedMotion: React.FC<{
   reducedMotion?: boolean;
 }> = ({ children, reducedMotion = false }) => {
   const adaptive = useAdaptiveAnimations();
-  
-  return (
-    <MotionConfig
-      transition={{
-        duration: adaptive.duration,
-        ease: ANIMATION_CONFIG.easings.ease
-      }}
-      reducedMotion={reducedMotion ? "always" : adaptive.enabled ? "never" : "user"}
-    >
-      {children}
-    </MotionConfig>
-  );
+
+  const props: Partial<React.ComponentProps<typeof MotionConfig>> = {
+    transition: {
+      duration: adaptive.duration,
+      ease: ANIMATION_CONFIG.easings.ease,
+    },
+    reducedMotion: reducedMotion ? 'always' : (adaptive.enabled ? 'never' : 'user'),
+  };
+
+  return React.createElement(MotionConfig, props, children);
 };
 
 // Utilitaires de performance
@@ -270,9 +274,9 @@ export const performanceUtils = {
   },
 
   // Throttle pour les animations intensives
-  throttleAnimation: (fn: Function, delay: number = 16) => {
+  throttleAnimation: <TArgs extends unknown[]>(fn: (...args: TArgs) => void, delay: number = 16) => {
     let lastCall = 0;
-    return (...args: any[]) => {
+    return (...args: TArgs) => {
       const now = Date.now();
       if (now - lastCall >= delay) {
         lastCall = now;
@@ -282,9 +286,9 @@ export const performanceUtils = {
   },
 
   // Débounce pour les animations de redimensionnement
-  debounceResize: (fn: Function, delay: number = 100) => {
-    let timeoutId: NodeJS.Timeout;
-    return (...args: any[]) => {
+  debounceResize: <TArgs extends unknown[]>(fn: (...args: TArgs) => void, delay: number = 100) => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+    return (...args: TArgs) => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => fn.apply(null, args), delay);
     };
@@ -316,9 +320,11 @@ export const optimizedStyles = {
 };
 
 // Composant de monitoring des performances d'animation
+type PerformanceIssue = { fps: number; timestamp: number; type: 'low-fps' };
+
 export const AnimationPerformanceMonitor: React.FC<{
   enabled?: boolean;
-  onPerformanceIssue?: (data: any) => void;
+  onPerformanceIssue?: (data: PerformanceIssue) => void;
 }> = ({ enabled = process.env.NODE_ENV === 'development', onPerformanceIssue }) => {
   React.useEffect(() => {
     if (!enabled) return;

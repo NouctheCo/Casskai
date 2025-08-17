@@ -11,7 +11,7 @@ import {
   EInvoicingError
 } from '@/types/einvoicing.types';
 import { ValidationService } from '../core/ValidationService';
-import { xml2js } from 'xml2js';
+import * as xml2js from 'xml2js';
 
 interface ParsedInvoiceResult {
   success: boolean;
@@ -42,7 +42,7 @@ export class InboundService {
     payload: string,
     contentType: string = 'application/xml',
     senderIdentifier?: string,
-    metadata: Record<string, any> = {}
+  metadata: Record<string, unknown> = {}
   ): Promise<{
     queue_id: string;
     status: ParsedStatus;
@@ -52,7 +52,7 @@ export class InboundService {
     let queueId: string | null = null;
     
     try {
-      console.log(`📥 Processing inbound invoice for company ${companyId}`);
+  console.warn(`📥 Processing inbound invoice for company ${companyId}`);
 
       // Create queue entry
       queueId = await this.createQueueEntry(
@@ -123,7 +123,7 @@ export class InboundService {
         creationResult.invoice_id
       );
 
-      console.log(`✅ Inbound invoice processed successfully: ${creationResult.invoice_id}`);
+  console.warn(`✅ Inbound invoice processed successfully: ${creationResult.invoice_id}`);
 
       return {
         queue_id: queueId,
@@ -233,7 +233,7 @@ export class InboundService {
     errors?: string[];
   }> {
     try {
-      console.log(`🔄 Retrying processing for queue item ${queueId}`);
+  console.warn(`🔄 Retrying processing for queue item ${queueId}`);
 
       // Get queue item
       const queueItem = await this.getQueueStatus(queueId);
@@ -290,7 +290,7 @@ export class InboundService {
     payload: string,
     contentType: string,
     senderIdentifier?: string,
-    metadata: Record<string, any> = {}
+  metadata: Record<string, unknown> = {}
   ): Promise<string> {
     const { data, error } = await supabase
       .from('einv_inbound_queue')
@@ -321,7 +321,7 @@ export class InboundService {
     errorMessage?: string,
     processedInvoiceId?: string | null
   ): Promise<void> {
-    const updates: any = {
+  const updates: Record<string, unknown> = {
       parsed_status: status,
       processed_at: new Date().toISOString()
     };
@@ -349,16 +349,15 @@ export class InboundService {
     payload: string
   ): Promise<boolean> {
     try {
-      // Generate payload hash for duplicate detection
-      const crypto = require('crypto');
-      const payloadHash = crypto.createHash('sha256').update(payload).digest('hex');
+  // Generate payload hash for duplicate detection using Web Crypto API
+  const payloadHash = await this.computeSHA256(payload);
 
       // Check if we've seen this payload hash before
       const { data, error } = await supabase
         .from('einv_inbound_queue')
         .select('id')
         .eq('company_id', companyId)
-        .like('metadata_json', `%"payload_hash":"${payloadHash}"%`)
+        .eq('metadata_json->>payload_hash', payloadHash)
         .limit(1);
 
       if (error) {
@@ -376,7 +375,7 @@ export class InboundService {
 
   private async parseInvoice(
     payload: string,
-    contentType: string
+  _contentType: string
   ): Promise<ParsedInvoiceResult> {
     try {
       // Detect format from payload
@@ -543,6 +542,16 @@ export class InboundService {
         amount_due_for_payment: parseFloat(transaction?.ApplicableHeaderTradeSettlement?.SpecifiedTradeSettlementHeaderMonetarySummation?.DuePayableAmount) || 0
       }
     };
+  }
+
+  // Compute SHA-256 hash as hex string using Web Crypto API
+  private async computeSHA256(input: string): Promise<string> {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(input);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
   }
 
   private async parseFacturX(payload: string): Promise<Partial<EN16931Invoice>> {

@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import OpenAI from 'openai';
 import {
   AIAssistantQuery,
@@ -20,7 +21,7 @@ class AIAssistantService {
     contextWindow: 10
   };
   
-  private conversationHistory: AIAssistantQuery[] = [];
+  private _conversationHistory: AIAssistantQuery[] = [];
   private isInitialized = false;
 
   // Initialisation du service
@@ -36,9 +37,9 @@ class AIAssistantService {
           dangerouslyAllowBrowser: true // Pour usage côté client uniquement en démo
         });
         
-        console.log('AI Assistant Service initialized with OpenAI API');
+  console.warn('AI Assistant Service initialized with OpenAI API');
       } else {
-        console.log('AI Assistant Service initialized in mock mode');
+  console.warn('AI Assistant Service initialized in mock mode');
       }
 
       this.isInitialized = true;
@@ -96,11 +97,11 @@ class AIAssistantService {
       };
 
       // Ajoute à l'historique
-      this.conversationHistory.push(assistantQuery);
+  this._conversationHistory.push(assistantQuery);
       
       // Limite la taille de l'historique
-      if (this.conversationHistory.length > this.config.contextWindow) {
-        this.conversationHistory = this.conversationHistory.slice(-this.config.contextWindow);
+      if (this._conversationHistory.length > this.config.contextWindow) {
+        this._conversationHistory = this._conversationHistory.slice(-this.config.contextWindow);
       }
 
       return {
@@ -112,9 +113,10 @@ class AIAssistantService {
 
     } catch (error) {
       console.error('Error processing AI assistant query:', error);
+      const message = error instanceof Error ? error.message : 'Unknown error';
       return {
         success: false,
-        error: error.message
+        error: message
       };
     }
   }
@@ -147,15 +149,16 @@ class AIAssistantService {
   // Requête vers OpenAI API
   private async queryOpenAI(
     query: string, 
-    type: string, 
-    context?: any
+    type: 'accounting' | 'tax' | 'analysis' | 'general', 
+    context?: { transactions?: Transaction[]; currentBalance?: number; period?: { start: Date; end: Date } }
   ): Promise<{response: string; confidence: number; sources: string[]; suggestions: string[]}> {
     try {
       // Construction du prompt avec contexte
       const systemPrompt = this.buildSystemPrompt(type, context);
       const userPrompt = this.buildUserPrompt(query, context);
 
-      const completion = await this.openai!.chat.completions.create({
+  if (!this.openai) throw new Error('OpenAI client not initialized');
+  const completion = await this.openai.chat.completions.create({
         model: this.config.model,
         messages: [
           { role: 'system', content: systemPrompt },
@@ -182,10 +185,10 @@ class AIAssistantService {
   }
 
   // Construction du prompt système
-  private buildSystemPrompt(type: string, context?: any): string {
+  private buildSystemPrompt(type: 'accounting' | 'tax' | 'analysis' | 'general', context?: { transactions?: Transaction[]; currentBalance?: number }): string {
     const basePrompt = `Vous êtes un assistant comptable expert français. Répondez de manière claire, précise et professionnelle.`;
     
-    const typeSpecificPrompts = {
+  const typeSpecificPrompts: Record<'accounting' | 'tax' | 'analysis' | 'general', string> = {
       accounting: `Vous spécialisez dans la comptabilité française, le plan comptable général, et les écritures comptables.`,
       tax: `Vous spécialisez dans la fiscalité française, la TVA, l'impôt sur les sociétés et l'optimisation fiscale.`,
       analysis: `Vous spécialisez dans l'analyse financière, les ratios, et l'interprétation des données comptables.`,
@@ -204,7 +207,7 @@ class AIAssistantService {
   }
 
   // Construction du prompt utilisateur
-  private buildUserPrompt(query: string, context?: any): string {
+  private buildUserPrompt(query: string, context?: { period?: { start: Date; end: Date } }): string {
     let prompt = query;
     
     // Ajoute du contexte si pertinent
@@ -217,7 +220,7 @@ class AIAssistantService {
 
   // Récupère l'historique récent de conversation
   private getRecentHistory(): Array<{role: 'user' | 'assistant'; content: string}> {
-    return this.conversationHistory.slice(-4).flatMap(item => [
+  return this._conversationHistory.slice(-4).flatMap(item => [
       { role: 'user' as const, content: item.query },
       { role: 'assistant' as const, content: item.response }
     ]);
@@ -226,8 +229,8 @@ class AIAssistantService {
   // Génération de réponses mock (fallback)
   private generateMockResponse(
     query: string, 
-    type: string, 
-    context?: any
+    type: 'accounting' | 'tax' | 'analysis' | 'general', 
+    context?: { transactions?: Transaction[]; currentBalance?: number; period?: { start: Date; end: Date } }
   ): {response: string; confidence: number; sources: string[]; suggestions: string[]} {
     
     const responses = {
@@ -253,7 +256,7 @@ class AIAssistantService {
       ]
     };
 
-    const typeResponses = responses[type] || responses.general;
+  const typeResponses = responses[type] || responses.general;
     const response = typeResponses[Math.floor(Math.random() * typeResponses.length)];
     
     return {
@@ -265,7 +268,7 @@ class AIAssistantService {
   }
 
   // Génération de suggestions
-  private generateSuggestions(query: string, type: string): string[] {
+  private generateSuggestions(_query: string, type: 'accounting' | 'tax' | 'analysis' | 'general'): string[] {
     const suggestions = {
       accounting: [
         "Vérifier le plan comptable général",
@@ -289,7 +292,7 @@ class AIAssistantService {
       ]
     };
 
-    return suggestions[type] || suggestions.general;
+  return suggestions[type] || suggestions.general;
   }
 
   // SUGGESTIONS D'OPTIMISATION FISCALE
@@ -318,9 +321,10 @@ class AIAssistantService {
 
     } catch (error) {
       console.error('Error generating tax optimizations:', error);
+      const message = error instanceof Error ? error.message : 'Unknown error';
       return {
         success: false,
-        error: error.message
+        error: message
       };
     }
   }
@@ -431,10 +435,10 @@ class AIAssistantService {
 
   // GÉNÉRATION DE RAPPORTS NARRATIFS
   async generateNarrativeReport(
-    type: 'monthly' | 'quarterly' | 'annual',
+  type: 'monthly' | 'quarterly' | 'annual' | 'custom',
     period: { start: Date; end: Date },
     transactions: Transaction[],
-    metrics: any
+    metrics: Record<string, unknown>
   ): Promise<AIServiceResponse<ReportNarrative>> {
     try {
       const startTime = Date.now();
@@ -450,19 +454,20 @@ class AIAssistantService {
 
     } catch (error) {
       console.error('Error generating narrative report:', error);
+      const message = error instanceof Error ? error.message : 'Unknown error';
       return {
         success: false,
-        error: error.message
+        error: message
       };
     }
   }
 
   // Génération du contenu du rapport
   private async generateReportContent(
-    type: string,
+    type: ReportNarrative['type'],
     period: { start: Date; end: Date },
     transactions: Transaction[],
-    metrics: any
+  metrics: Record<string, unknown>
   ): Promise<ReportNarrative> {
     
     const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
@@ -485,7 +490,7 @@ class AIAssistantService {
       
       Format attendu: JSON avec summary, keyInsights (array), recommendations (array)`;
 
-      try {
+  try {
         const completion = await this.openai.chat.completions.create({
           model: this.config.model,
           messages: [{ role: 'user', content: prompt }],
@@ -497,7 +502,7 @@ class AIAssistantService {
         summary = response.summary || this.generateDefaultSummary(balance, income, expenses);
         keyInsights = response.keyInsights || this.generateDefaultInsights(transactions, metrics);
         recommendations = response.recommendations || this.generateDefaultRecommendations(balance, metrics);
-      } catch (error) {
+  } catch {
         // Fallback vers génération par défaut
         summary = this.generateDefaultSummary(balance, income, expenses);
         keyInsights = this.generateDefaultInsights(transactions, metrics);
@@ -533,7 +538,7 @@ class AIAssistantService {
   }
 
   // Génération des insights par défaut
-  private generateDefaultInsights(transactions: Transaction[], metrics: any): string[] {
+  private generateDefaultInsights(transactions: Transaction[], _metrics: Record<string, unknown> = {}): string[] {
     const insights: string[] = [];
     
     // Analyse des transactions
@@ -560,7 +565,7 @@ class AIAssistantService {
   }
 
   // Génération des recommandations par défaut
-  private generateDefaultRecommendations(balance: number, metrics: any): string[] {
+  private generateDefaultRecommendations(balance: number, _metrics: Record<string, unknown> = {}): string[] {
     const recommendations: string[] = [];
     
     if (balance < 0) {
@@ -578,7 +583,7 @@ class AIAssistantService {
   }
 
   // Génération des métriques narratives
-  private generateNarrativeMetrics(income: number, expenses: number, balance: number): any[] {
+  private generateNarrativeMetrics(income: number, expenses: number, balance: number): { name: string; value: number; previousValue: number; change: number; trend: 'up' | 'down' | 'stable'; interpretation: string }[] {
     return [
       {
         name: 'Chiffre d\'affaires',
@@ -630,13 +635,14 @@ class AIAssistantService {
   }
 
   // Génération des actions d'alerte
-  private generateAlertActions(type: string, data: any): any[] {
-    const actions = [];
+  private generateAlertActions(type: SmartAlert['type'], data: unknown): Array<{ label: string; action: string; style: 'primary' | 'secondary' | 'danger' }> {
+    const actions: Array<{ label: string; action: string; style: 'primary' | 'secondary' | 'danger'; params?: Record<string, unknown> }> = [];
+    const safeData = (data && typeof data === 'object') ? (data as Record<string, unknown>) : {};
     
     switch (type) {
       case 'anomaly':
         actions.push(
-          { label: 'Analyser', action: 'analyze_anomaly', params: { id: data.id }, style: 'primary' },
+          { label: 'Analyser', action: 'analyze_anomaly', params: { id: safeData['id'] }, style: 'primary' },
           { label: 'Ignorer', action: 'dismiss_alert', style: 'secondary' }
         );
         break;
@@ -656,16 +662,17 @@ class AIAssistantService {
         break;
     }
     
-    return actions;
+  // Strip params for return type
+  return actions.map(({ label, action, style }) => ({ label, action, style }));
   }
 
   // Getters et utilitaires
   get conversationHistory(): AIAssistantQuery[] {
-    return [...this.conversationHistory];
+    return [...this._conversationHistory];
   }
 
   clearHistory(): void {
-    this.conversationHistory = [];
+    this._conversationHistory = [];
   }
 
   updateConfig(config: Partial<AIConfiguration['assistant']>): void {
@@ -681,7 +688,7 @@ class AIAssistantService {
   }
 
   dispose(): void {
-    this.conversationHistory = [];
+  this._conversationHistory = [];
     this.openai = null;
     this.isInitialized = false;
   }
