@@ -65,7 +65,7 @@ jobs:
           path: dist
 
       - name: 🚀 Deploy to Hostinger via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: 82.25.113.130
           username: u657259520.casskai.app
