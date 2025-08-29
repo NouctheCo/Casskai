@@ -1,1 +1,0 @@
-import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const PublishItem: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>PublishItem</CardTitle> </CardHeader> <CardContent> <p>Composant PublishItem en développement.</p> </CardContent> </Card> ); }; export default PublishItem;

@@ -458,3 +458,5 @@ class ConfigService {
 }
 
 export default ConfigService;
+// Adapter de commodité pour les tests et les hooks: instance unique nommée
+export const configService = ConfigService.getInstance();

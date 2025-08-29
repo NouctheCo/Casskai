@@ -86,19 +86,29 @@ export class BankingService {
 
   // Obtenir toutes les connexions d'un utilisateur
   async getUserBankConnections(userId: string): Promise<OpenBankingResponse<BankConnection[]>> {
-    // Ensure initialized but don't propagate init errors here; return safe fallback
+    await this.ensureInitialized();
     try {
-      await this.ensureInitialized();
-    } catch (e) {
-      console.warn('BankingService not initialized, returning empty connections list');
-      return { success: false, data: [], error: { code: 'NOT_INITIALIZED', message: 'Service not initialized' } } as any;
-    }
-    try {
-      const resp = await openBankingManager.getUserConnections(userId);
-      return (resp as any) ?? ({ success: true, data: [] } as any);
-    } catch (err: any) {
-      // Graceful handling per tests: resolve with error object rather than reject
-      return { success: false, data: [], error: { code: 'API_ERROR', message: err?.message || 'Unknown error' } } as any;
+      const res = await openBankingManager.getUserConnections(userId);
+      // If provider unexpectedly returns undefined/null, map to error response
+      if (!res) {
+        return {
+          success: false,
+          error: {
+            code: 'UNEXPECTED_RESPONSE',
+            message: 'No response from provider',
+          },
+        } as OpenBankingResponse<BankConnection[]>;
+      }
+      return res;
+    } catch (error) {
+      // Ne pas lancer l'erreur, renvoyer une réponse d'erreur conforme
+      return {
+        success: false,
+        error: {
+          code: 'NETWORK_ERROR',
+          message: (error as Error)?.message || 'Unknown error',
+        },
+      } as OpenBankingResponse<BankConnection[]>;
     }
   }
 
@@ -387,7 +397,7 @@ export class BankingService {
   private formatCurrency(amount: number, currency: string = 'EUR'): string {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency,
+      currency: currency,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(amount);

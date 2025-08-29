@@ -24,6 +24,7 @@ export default defineConfig({
     ['html', { open: 'never' }],
     ['json', { outputFile: 'test-results/results.json' }],
     ['junit', { outputFile: 'test-results/results.xml' }],
+    ...(process.env.CI ? [['github'] as const] : []),
   ],
   
   // Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions.
@@ -135,20 +136,32 @@ export default defineConfig({
     timeout: 120 * 1000,
     env: {
       NODE_ENV: 'test',
+  // Ensure client sees auth bypass flag during E2E
+  VITE_E2E_BYPASS_AUTH: 'true',
+  VITE_E2E_MINIMAL: 'true',
     },
   },
   
   // Test output directory
   outputDir: 'test-results/',
   
-  // Global setup and teardown
-  globalSetup: require.resolve('./tests/e2e/global-setup.ts'),
-  globalTeardown: require.resolve('./tests/e2e/global-teardown.ts'),
+  // Global setup and teardown (ESM-safe paths)
+  globalSetup: './tests/e2e/global-setup.ts',
+  globalTeardown: './tests/e2e/global-teardown.ts',
   
   // Expect options
   expect: {
     // Maximum time expect() should wait for the condition to be met
     timeout: 5000,
+    
+    // Take screenshot on assertion failure
+    toHaveScreenshot: {
+      animations: 'disabled',
+      caret: 'hide',
+    },
+    
+    // Visual comparison options
+  toMatchSnapshot: {},
   },
   
   // Timeout for each test

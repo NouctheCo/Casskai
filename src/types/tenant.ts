@@ -35,5 +35,3 @@ export interface TenantBranding {
   companyName: string;
   favicon?: string;
 }
-
-// NOTE: TenantBranding is declared above; remove duplicate declaration.

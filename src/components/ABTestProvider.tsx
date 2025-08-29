@@ -1,17 +1,34 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import ABTestingFramework from '@/utils/abTestingFramework';
+import ABTestingFramework, { UserContext as ABTestUserContext } from '@/utils/abTestingFramework';
 import { useAnalytics } from '@/components/analytics/AnalyticsProvider';
+
+// Types pour A/B Testing - on utilise le type du framework
+type UserContext = Partial<ABTestUserContext> & {
+  companyId?: string;
+  subscription?: string;
+  locale?: string;
+};
+
+interface TestVariantConfig {
+  [key: string]: string | number | boolean | undefined;
+}
+
+interface TestVariantResult {
+  variant: string;
+  isInTest: boolean;
+  config?: TestVariantConfig;
+}
+
+interface ConversionProperties {
+  [key: string]: string | number | boolean;
+}
 
 // Context pour A/B Testing
 interface ABTestContextType {
   framework: ABTestingFramework;
   isInitialized: boolean;
-  getVariant: (testId: string, userContext?: Record<string, any>) => {
-    variant: string;
-    isInTest: boolean;
-    config?: Record<string, any>;
-  };
-  trackConversion: (testId: string, eventName?: string, value?: number, properties?: Record<string, any>) => void;
+  getVariant: (testId: string, userContext?: UserContext) => TestVariantResult;
+  trackConversion: (testId: string, eventName?: string, value?: number, properties?: ConversionProperties) => void;
 }
 
 const ABTestContext = createContext<ABTestContextType | null>(null);
@@ -242,7 +259,7 @@ const AB_TESTS_CONFIG = [
         type: 'custom' as const,
         operator: 'equals' as const,
         value: 'mobile',
-        customFunction: (_context: any) => {
+        customFunction: (_context: UserContext) => {
           return window.innerWidth <= 768;
         },
       },
@@ -264,14 +281,14 @@ export const ABTestProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [isInitialized, setIsInitialized] = useState(false);
   
   // Utiliser le hook analytics de manière conditionnelle
-  let trackEvent: ((eventName: string, props?: Record<string, any>) => void) | null = null;
+  let trackEvent: ((eventName: string, props?: ConversionProperties) => void) | null = null;
   try {
     const analytics = useAnalytics();
     trackEvent = analytics.trackEvent;
   } catch {
     // AnalyticsProvider n'est pas disponible, créer un fallback
     trackEvent = () => {
-      console.log('[ABTest] Analytics non disponible, événement ignoré');
+      console.warn('[ABTest] Analytics non disponible, événement ignoré');
     };
   }
 
@@ -280,7 +297,7 @@ export const ABTestProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       try {
         await framework.initialize(AB_TESTS_CONFIG);
         setIsInitialized(true);
-        console.log('[ABTest] Framework A/B Testing initialisé');
+        console.warn('[ABTest] Framework A/B Testing initialisé');
       } catch (error) {
         console.error('[ABTest] Erreur d\'initialisation:', error);
       }
@@ -289,7 +306,7 @@ export const ABTestProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     initializeFramework();
   }, [framework]);
 
-  const getVariant = (testId: string, userContext?: Record<string, any>) => {
+  const getVariant = (testId: string, userContext?: UserContext) => {
     if (!isInitialized) {
       return { variant: 'control', isInTest: false };
     }
@@ -308,11 +325,11 @@ export const ABTestProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return {
       variant: result.variantId,
       isInTest: result.isInTest,
-      config: result.config,
+      config: result.config as TestVariantConfig,
     };
   };
 
-  const trackConversion = (testId: string, eventName?: string, value?: number, properties?: Record<string, any>) => {
+  const trackConversion = (testId: string, eventName?: string, value?: number, properties?: ConversionProperties) => {
     if (!isInitialized) return;
 
     framework.trackConversion(testId, eventName, value, properties);
@@ -354,7 +371,7 @@ export const useABTestContext = () => {
 // Composant pour afficher les informations de debug des tests A/B
 export const ABTestDebugPanel: React.FC<{ isVisible?: boolean }> = ({ isVisible = false }) => {
   const { framework, isInitialized } = useABTestContext();
-  const [debugInfo, setDebugInfo] = useState<any>(null);
+  const [debugInfo, setDebugInfo] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
     if (isInitialized && isVisible) {
@@ -372,10 +389,10 @@ export const ABTestDebugPanel: React.FC<{ isVisible?: boolean }> = ({ isVisible 
       <h3 className="font-bold text-sm mb-2">A/B Tests Debug</h3>
       {debugInfo && (
         <div className="text-xs space-y-1">
-          <div>Tests: {debugInfo.activeTestsCount}/{debugInfo.testsCount}</div>
-          <div>Session: {debugInfo.sessionId?.slice(-8)}</div>
-          <div>Assignments: {debugInfo.assignmentsCount}</div>
-          <div>Queue: {debugInfo.queuedEventsCount}</div>
+          <div>Tests: {String(debugInfo.activeTestsCount)}/{String(debugInfo.testsCount)}</div>
+          <div>Session: {String(debugInfo.sessionId)?.slice(-8)}</div>
+          <div>Assignments: {String(debugInfo.assignmentsCount)}</div>
+          <div>Queue: {String(debugInfo.queuedEventsCount)}</div>
         </div>
       )}
       
@@ -399,7 +416,7 @@ export function withABTest<P extends object>(
   testId: string,
   variantProp: string = 'variant'
 ) {
-  return React.forwardRef<any, P>((props, ref) => {
+  return React.forwardRef<React.ComponentRef<typeof Component>, P>((props, ref) => {
     const { getVariant } = useABTestContext();
     const { variant, config } = getVariant(testId);
 
@@ -407,7 +424,7 @@ export function withABTest<P extends object>(
       ...props,
       [variantProp]: variant,
       [`${variantProp}Config`]: config,
-    } as P & Record<string, any>;
+    } as P & Record<string, unknown>;
 
     return <Component {...enhancedProps} ref={ref} />;
   });

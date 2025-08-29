@@ -1,4 +1,10 @@
-import * as ExcelJS from 'exceljs';
+// ExcelJS import conditionnel pour éviter les problèmes de build
+let ExcelJS: any = null;
+try {
+  ExcelJS = require('exceljs');
+} catch (error) {
+  console.warn('ExcelJS not available in browser environment');
+}
 import { CSVMapping, ImportResult, ImportError, ImportWarning, FileParserOptions, ImportSession } from '../types/accounting-import.types';
 
 /**
@@ -71,6 +77,10 @@ export class CSVImportService {
    * Analyse un fichier Excel
    */
   private static async analyzeExcelFile(file: File): Promise<any> {
+    if (!ExcelJS) {
+      throw new Error('ExcelJS n\'est pas disponible dans cet environnement. Veuillez utiliser des fichiers CSV.');
+    }
+    
     try {
       const workbook = new ExcelJS.Workbook();
       const buffer = await file.arrayBuffer();

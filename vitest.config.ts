@@ -10,7 +10,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     include: ['src/**/*.{test,spec}.{js,ts,jsx,tsx}'],
-  exclude: ['node_modules', 'dist', '.next', '.vercel', '**/*.integration.*'],
+    exclude: ['node_modules', 'dist', '.next', '.vercel', 'src/**/*.integration.*'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],

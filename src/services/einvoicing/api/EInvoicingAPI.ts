@@ -1,4 +1,3 @@
-/* eslint-disable max-lines */
 /**
  * E-invoicing API Service
  * RESTful API interface for e-invoicing functionality
@@ -25,13 +24,12 @@ export interface EInvoicingAPIConfig {
   };
 }
 
-export interface APIResponse<T = unknown> {
+export interface APIResponse<T = any> {
   success: boolean;
   data?: T;
   error?: string;
   errors?: string[];
   warnings?: string[];
-  code?: string;
   timestamp: string;
   request_id: string;
 }
@@ -79,7 +77,7 @@ export class EInvoicingAPI {
     requestId: string = this.generateRequestId()
   ): Promise<APIResponse<SubmissionResult>> {
     try {
-  console.warn(`🚀 API: Submitting invoice ${invoiceId} for company ${companyId}`);
+      console.log(`🚀 API: Submitting invoice ${invoiceId} for company ${companyId}`);
 
       // Rate limiting check
       await this.checkRateLimit(companyId);
@@ -110,7 +108,7 @@ export class EInvoicingAPI {
     requestId: string = this.generateRequestId()
   ): Promise<APIResponse<EInvDocument>> {
     try {
-  console.warn(`📋 API: Getting status for document ${documentId}`);
+      console.log(`📋 API: Getting status for document ${documentId}`);
 
       await this.checkRateLimit(companyId);
       await this.verifyCompanyAccess(companyId);
@@ -154,7 +152,7 @@ export class EInvoicingAPI {
     };
   }>> {
     try {
-  console.warn(`📄 API: Listing documents for company ${companyId}`);
+      console.log(`📄 API: Listing documents for company ${companyId}`);
 
       await this.checkRateLimit(companyId);
       await this.verifyCompanyAccess(companyId);
@@ -208,7 +206,7 @@ export class EInvoicingAPI {
     requestId: string = this.generateRequestId()
   ): Promise<APIResponse<{ updated: boolean }>> {
     try {
-  console.warn(`🔄 API: Updating document status for message ${messageId} to ${status}`);
+      console.log(`🔄 API: Updating document status for message ${messageId} to ${status}`);
 
       // Note: Webhook endpoints typically bypass rate limiting and company access checks
       // as they come from external systems
@@ -243,7 +241,7 @@ export class EInvoicingAPI {
     features: string[];
   }>> {
     try {
-  console.warn(`🔧 API: Getting capabilities for company ${companyId}`);
+      console.log(`🔧 API: Getting capabilities for company ${companyId}`);
 
       await this.checkRateLimit(companyId);
       await this.verifyCompanyAccess(companyId);
@@ -301,7 +299,7 @@ export class EInvoicingAPI {
     }>;
   }>> {
     try {
-  console.warn(`📊 API: Getting statistics for company ${companyId}`);
+      console.log(`📊 API: Getting statistics for company ${companyId}`);
 
       await this.checkRateLimit(companyId);
       await this.verifyCompanyAccess(companyId);
@@ -326,7 +324,7 @@ export class EInvoicingAPI {
     requestId: string = this.generateRequestId()
   ): Promise<APIResponse<{ enabled: boolean }>> {
     try {
-  console.warn(`🟢 API: Enabling e-invoicing for company ${companyId}`);
+      console.log(`🟢 API: Enabling e-invoicing for company ${companyId}`);
 
       await this.checkRateLimit(companyId);
       await this.verifyCompanyAccess(companyId);
@@ -360,7 +358,7 @@ export class EInvoicingAPI {
     requestId: string = this.generateRequestId()
   ): Promise<APIResponse<{ enabled: boolean }>> {
     try {
-  console.warn(`🔴 API: Disabling e-invoicing for company ${companyId}`);
+      console.log(`🔴 API: Disabling e-invoicing for company ${companyId}`);
 
       await this.checkRateLimit(companyId);
       await this.verifyCompanyAccess(companyId);
@@ -472,14 +470,7 @@ export class EInvoicingAPI {
     companyId: string, 
     dateFrom?: string, 
     dateTo?: string
-  ): Promise<{
-    total_documents: number;
-    by_status: Record<EInvoiceLifecycleStatus, number>;
-    by_format: Record<EInvoiceFormat, number>;
-    by_channel: Record<EInvoiceChannel, number>;
-    success_rate: number;
-    recent_activity: Array<{ date: string; count: number }>;
-  }> {
+  ): Promise<any> {
     let query = supabase
       .from('einv_documents')
       .select('*')
@@ -548,7 +539,7 @@ export class EInvoicingAPI {
   private async logAPIUsage(
     companyId: string,
     endpoint: string,
-    params: unknown,
+    params: any,
     requestId: string
   ): Promise<void> {
     try {
@@ -578,13 +569,14 @@ export class EInvoicingAPI {
     };
   }
 
-  private handleAPIError<T>(
-    error: unknown,
+  private handleAPIError(
+    error: any,
     requestId: string,
     endpoint: string,
-    _context: unknown
-  ): APIResponse<T> {
+    context: any
+  ): APIResponse {
     console.error(`API Error in ${endpoint}:`, error);
+
     let errorMessage = 'Internal server error';
     let errorCode = 'INTERNAL_ERROR';
 
@@ -598,10 +590,9 @@ export class EInvoicingAPI {
       errorMessage = error.message;
     }
 
-  return {
+    return {
       success: false,
       error: errorMessage,
-      code: errorCode,
       timestamp: new Date().toISOString(),
       request_id: requestId
     };

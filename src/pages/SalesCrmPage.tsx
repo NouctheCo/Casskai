@@ -1,5 +1,4 @@
-/* eslint-disable max-lines, max-lines-per-function */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { 
@@ -15,12 +14,13 @@ import {
   CrmFilters
 } from '../types/crm.types';
 import { crmService } from '../services/crmService';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '../components/ui/use-toast.js';
 import { useEnterprise } from '../contexts/EnterpriseContext';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
+import { Badge } from '../components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { useConfirmDialog } from '../components/ui/ConfirmDialog';
 import CrmDashboard from '../components/crm/CrmDashboard';
 import ClientsManagement from '../components/crm/ClientsManagement';
 import OpportunitiesKanban from '../components/crm/OpportunitiesKanban';
@@ -40,6 +40,7 @@ export default function SalesCrmPage() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { currentEnterpriseId, currentEnterprise } = useEnterprise();
+  const { ConfirmDialog, confirm } = useConfirmDialog();
   
   // State management
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -76,7 +77,7 @@ export default function SalesCrmPage() {
   
   // Filter states
   const [clientFilters, setClientFilters] = useState<CrmFilters>({});
-  const [opportunityFilters] = useState<CrmFilters>({});
+  const [opportunityFilters, setOpportunityFilters] = useState<CrmFilters>({});
   const [actionFilters, setActionFilters] = useState<CrmFilters>({});
   
   const companyId = currentEnterpriseId || 'company-1';
@@ -105,70 +106,33 @@ export default function SalesCrmPage() {
     }
   };
 
-  const loadDashboardData = useCallback(async () => {
-    try {
-      setDashboardLoading(true);
-      const result = await crmService.getDashboardData(companyId);
-      if (result.error) {
-        throw new Error(result.error.message);
-      }
-      setDashboardData(result.data);
-    } catch (error) {
-      console.error('Error loading dashboard data:', error);
-    } finally {
-      setDashboardLoading(false);
+  // Load initial data
+  useEffect(() => {
+    if (companyId) {
+      loadAllData();
     }
   }, [companyId]);
 
-  const loadClients = useCallback(async () => {
-    try {
-      const result = await crmService.getClients(companyId, clientFilters);
-      if (result.error) {
-        throw new Error(result.error.message);
-      }
-      setClients(result.data);
-    } catch (error) {
-      console.error('Error loading clients:', error);
+  // Load data when filters change
+  useEffect(() => {
+    if (companyId && !loading) {
+      loadClients();
     }
-  }, [companyId, clientFilters]);
+  }, [clientFilters, companyId, loading]);
 
-  const loadContacts = useCallback(async () => {
-    try {
-      const result = await crmService.getContacts();
-      if (result.error) {
-        throw new Error(result.error.message);
-      }
-      setContacts(result.data);
-    } catch (error) {
-      console.error('Error loading contacts:', error);
+  useEffect(() => {
+    if (companyId && !loading) {
+      loadOpportunities();
     }
-  }, []);
+  }, [opportunityFilters, companyId, loading]);
 
-  const loadOpportunities = useCallback(async () => {
-    try {
-      const result = await crmService.getOpportunities(companyId, opportunityFilters);
-      if (result.error) {
-        throw new Error(result.error.message);
-      }
-      setOpportunities(result.data);
-    } catch (error) {
-      console.error('Error loading opportunities:', error);
+  useEffect(() => {
+    if (companyId && !loading) {
+      loadActions();
     }
-  }, [companyId, opportunityFilters]);
+  }, [actionFilters, companyId, loading]);
 
-  const loadActions = useCallback(async () => {
-    try {
-      const result = await crmService.getCommercialActions(companyId, actionFilters);
-      if (result.error) {
-        throw new Error(result.error.message);
-      }
-      setActions(result.data);
-    } catch (error) {
-      console.error('Error loading actions:', error);
-    }
-  }, [companyId, actionFilters]);
-
-  const loadAllData = useCallback(async () => {
+  const loadAllData = async () => {
     try {
       setLoading(true);
       await Promise.all([
@@ -188,35 +152,70 @@ export default function SalesCrmPage() {
     } finally {
       setLoading(false);
     }
-  }, [t, toast, loadDashboardData, loadClients, loadContacts, loadOpportunities, loadActions]);
+  };
 
-  
-
-  // Load initial data
-  useEffect(() => {
-    if (companyId) {
-      void loadAllData();
+  const loadDashboardData = async () => {
+    try {
+      setDashboardLoading(true);
+      const result = await crmService.getDashboardData(companyId);
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
+      setDashboardData(result.data);
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    } finally {
+      setDashboardLoading(false);
     }
-  }, [companyId, loadAllData]);
+  };
 
-  // Load data when filters change
-  useEffect(() => {
-    if (companyId && !loading) {
-      void loadClients();
+  const loadClients = async () => {
+    try {
+      const result = await crmService.getClients(companyId, clientFilters);
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
+      setClients(result.data);
+    } catch (error) {
+      console.error('Error loading clients:', error);
     }
-  }, [companyId, loading, loadClients]);
+  };
 
-  useEffect(() => {
-    if (companyId && !loading) {
-      void loadOpportunities();
+  const loadContacts = async () => {
+    try {
+      const result = await crmService.getContacts();
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
+      setContacts(result.data);
+    } catch (error) {
+      console.error('Error loading contacts:', error);
     }
-  }, [companyId, loading, loadOpportunities]);
+  };
 
-  useEffect(() => {
-    if (companyId && !loading) {
-      void loadActions();
+  const loadOpportunities = async () => {
+    try {
+      const result = await crmService.getOpportunities(companyId, opportunityFilters);
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
+      setOpportunities(result.data);
+    } catch (error) {
+      console.error('Error loading opportunities:', error);
     }
-  }, [companyId, loading, loadActions]);
+  };
+
+  const loadActions = async () => {
+    try {
+      const result = await crmService.getCommercialActions(companyId, actionFilters);
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
+      setActions(result.data);
+    } catch (error) {
+      console.error('Error loading actions:', error);
+    }
+  };
 
   // Client handlers
   const handleCreateClient = async (formData: ClientFormData) => {
@@ -268,8 +267,15 @@ export default function SalesCrmPage() {
   };
 
   const handleDeleteClient = async (clientId: string) => {
-  // eslint-disable-next-line no-alert
-  if (window.confirm('Êtes-vous sûr de vouloir supprimer ce client ?')) {
+    const confirmed = await confirm({
+      title: 'Supprimer le client',
+      description: 'Êtes-vous sûr de vouloir supprimer ce client ? Cette action est irréversible.',
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      variant: 'destructive'
+    });
+
+    if (confirmed) {
       try {
         const result = await crmService.deleteClient(clientId);
         if (result.error) {
@@ -368,11 +374,21 @@ export default function SalesCrmPage() {
   };
 
   const handleDeleteOpportunity = async (opportunityId: string) => {
-    void opportunityId;
-  // eslint-disable-next-line no-alert
-  if (window.confirm('Êtes-vous sûr de vouloir supprimer cette opportunité ?')) {
+    const confirmed = await confirm({
+      title: 'Supprimer l\'opportunité',
+      description: 'Êtes-vous sûr de vouloir supprimer cette opportunité ? Cette action est irréversible.',
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      variant: 'destructive'
+    });
+
+    if (confirmed) {
       try {
-        // Since we don't have a delete method in the service, we'll simulate it
+        const result = await crmService.deleteOpportunity(opportunityId);
+        if (result.error) {
+          throw new Error(result.error.message);
+        }
+        
         toast({
           title: t('common.success'),
           description: 'Opportunité supprimée avec succès'
@@ -384,7 +400,7 @@ export default function SalesCrmPage() {
         console.error('Error deleting opportunity:', error);
         toast({
           title: t('common.error'),
-          description: 'Erreur lors de la suppression de l\'opportunité',
+          description: error instanceof Error ? error.message : 'Erreur lors de la suppression de l\'opportunité',
           variant: 'destructive'
         });
       }
@@ -425,19 +441,20 @@ export default function SalesCrmPage() {
   };
 
   const handleUpdateAction = async (actionId: string, formData: Partial<CommercialActionFormData>) => {
-    void actionId;
     try {
       // Clean up the form data before submitting
-  const cleanFormData = {
+      const cleanFormData = {
         ...formData,
         client_id: formData.client_id === 'none' ? undefined : formData.client_id,
         contact_id: formData.contact_id === 'none' ? undefined : formData.contact_id,
         opportunity_id: formData.opportunity_id === 'none' ? undefined : formData.opportunity_id
       };
-  void cleanFormData;
       
-      // For now we simulate the update since the service method doesn't exist
-      // In a real implementation, you would call crmService.updateCommercialAction(actionId, cleanFormData)
+      const result = await crmService.updateCommercialAction(actionId, cleanFormData);
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
+      
       toast({
         title: t('common.success'),
         description: 'Action commerciale mise à jour avec succès'
@@ -449,18 +466,28 @@ export default function SalesCrmPage() {
       console.error('Error updating action:', error);
       toast({
         title: t('common.error'),
-        description: 'Erreur lors de la mise à jour de l\'action',
+        description: error instanceof Error ? error.message : 'Erreur lors de la mise à jour de l\'action',
         variant: 'destructive'
       });
     }
   };
 
   const handleDeleteAction = async (actionId: string) => {
-    void actionId;
-  // eslint-disable-next-line no-alert
-  if (window.confirm('Êtes-vous sûr de vouloir supprimer cette action ?')) {
+    const confirmed = await confirm({
+      title: 'Supprimer l\'action commerciale',
+      description: 'Êtes-vous sûr de vouloir supprimer cette action commerciale ? Cette action est irréversible.',
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      variant: 'destructive'
+    });
+
+    if (confirmed) {
       try {
-        // Since we don't have a delete method in the service, we'll simulate it
+        const result = await crmService.deleteCommercialAction(actionId);
+        if (result.error) {
+          throw new Error(result.error.message);
+        }
+        
         toast({
           title: t('common.success'),
           description: 'Action commerciale supprimée avec succès'
@@ -472,7 +499,7 @@ export default function SalesCrmPage() {
         console.error('Error deleting action:', error);
         toast({
           title: t('common.error'),
-          description: 'Erreur lors de la suppression de l\'action',
+          description: error instanceof Error ? error.message : 'Erreur lors de la suppression de l\'action',
           variant: 'destructive'
         });
       }
@@ -681,6 +708,9 @@ export default function SalesCrmPage() {
           </TabsContent>
         </Tabs>
       </motion.div>
+      
+      {/* Render confirmation dialog */}
+      <ConfirmDialog />
     </motion.div>
   );
 }

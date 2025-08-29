@@ -323,7 +323,7 @@ export const ThemeTransitionOverlay: React.FC = () => {
         >
           {/* Effet de vague */}
           <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/10 to-transparent"
+            className="absolute inset-0 bg-gradient-to-r from-transparent to-transparent"
             initial={{ x: '-100%', skewX: -45 }}
             animate={{ x: '200%', skewX: -45 }}
             transition={{ duration: 0.8, ease: 'easeInOut' }}

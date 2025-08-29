@@ -95,7 +95,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
       await aiAssistantService.initialize();
       aiVisualizationService.initialize();
       
-      console.log('AI services initialized successfully');
+      console.warn('AI services initialized successfully');
     } catch (error) {
       console.error('Failed to initialize AI services:', error);
     } finally {
@@ -333,7 +333,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
         <SmartAlertsWidget 
           alerts={smartAlerts}
           onAlertAction={(alertId, action) => {
-            console.log('Alert action:', alertId, action);
+            console.warn('Alert action:', alertId, action);
           }}
           onDismissAlert={(alertId) => {
             setSmartAlerts(alerts => alerts.filter(a => a.id !== alertId));
@@ -394,7 +394,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
               <AnomalyDetectionWidget 
                 anomalies={anomalies}
                 onAnomalyAction={(anomalyId, action) => {
-                  console.log('Anomaly action:', anomalyId, action);
+                  console.warn('Anomaly action:', anomalyId, action);
                 }}
                 isLoading={isLoading}
               />
@@ -417,7 +417,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
               <TaxOptimizationWidget 
                 optimizations={taxOptimizations}
                 onOptimizationAction={(optimizationId, action) => {
-                  console.log('Optimization action:', optimizationId, action);
+                  console.warn('Optimization action:', optimizationId, action);
                 }}
                 isLoading={isLoading}
               />
@@ -428,7 +428,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
                 transactions={transactions}
                 currentBalance={currentBalance}
                 onQueryProcessed={(query, response) => {
-                  console.log('AI query processed:', query, response);
+                  console.warn('AI query processed:', query, response);
                 }}
               />
             </TabsContent>

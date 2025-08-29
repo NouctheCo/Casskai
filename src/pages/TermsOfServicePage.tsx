@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { PageContainer } from '@/components/ui/PageContainer';
 
 const TermsOfServicePage = () => {
   const { t } = useTranslation();
@@ -24,7 +25,7 @@ const TermsOfServicePage = () => {
   const lastUpdated = "8 août 2025";
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <PageContainer variant="legal">
       {/* Header */}
       <div className="bg-gradient-to-br from-indigo-900 to-purple-900 text-white py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -35,14 +36,14 @@ const TermsOfServicePage = () => {
           >
             <Scale className="w-16 h-16 mx-auto mb-6 text-indigo-200" />
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Conditions Générales d'Utilisation
+              {t('termsOfService.title')}
             </h1>
             <p className="text-xl text-indigo-100 mb-4">
-              Les règles qui régissent l'utilisation de CassKai
+              {t('termsOfService.subtitle')}
             </p>
             <Badge className="bg-indigo-800/50 text-indigo-200 border-indigo-700">
               <Calendar className="w-4 h-4 mr-2" />
-              Dernière mise à jour : {lastUpdated}
+              {t('termsOfService.lastUpdated')} : {lastUpdated}
             </Badge>
           </motion.div>
         </div>
@@ -57,27 +58,25 @@ const TermsOfServicePage = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Building className="w-6 h-6 mr-3 text-blue-600" />
-                Préambule
+                {t('termsOfService.preamble.title')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p>
-                Les présentes Conditions Générales d'Utilisation (CGU) régissent l'utilisation 
-                de la plateforme CassKai, éditée par Noutche Conseil SASU, société par actions 
-                simplifiée unipersonnelle au capital de 1 500,00 euros.
+                {t('termsOfService.preamble.content')}
               </p>
               <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <h4 className="font-semibold mb-2">Informations légales de l'éditeur :</h4>
+                <h4 className="font-semibold mb-2">{t('termsOfService.preamble.legalInfo')}</h4>
                 <ul className="text-sm space-y-1">
-                  <li><strong>Dénomination :</strong> Noutche Conseil SASU</li>
-                  <li><strong>Forme juridique :</strong> Société par Actions Simplifiée Unipersonnelle</li>
-                  <li><strong>Capital social :</strong> 1 500,00 €</li>
-                  <li><strong>SIREN :</strong> 909 672 685</li>
-                  <li><strong>SIRET :</strong> 909 672 685 00023</li>
-                  <li><strong>RCS :</strong> Evry 909 672 685</li>
-                  <li><strong>TVA :</strong> FR85909672685</li>
-                  <li><strong>Code NAF :</strong> 70.22Z</li>
-                  <li><strong>Convention collective :</strong> IDCC 1486</li>
+                  <li><strong>{t('termsOfService.preamble.fields.denomination')}</strong> {t('termsOfService.preamble.company.name')}</li>
+                  <li><strong>{t('termsOfService.preamble.fields.legalForm')}</strong> {t('termsOfService.preamble.company.legalForm')}</li>
+                  <li><strong>{t('termsOfService.preamble.fields.capital')}</strong> {t('termsOfService.preamble.company.capital')}</li>
+                  <li><strong>{t('termsOfService.preamble.fields.siren')}</strong> {t('termsOfService.preamble.company.siren')}</li>
+                  <li><strong>{t('termsOfService.preamble.fields.siret')}</strong> {t('termsOfService.preamble.company.siret')}</li>
+                  <li><strong>{t('termsOfService.preamble.fields.rcs')}</strong> {t('termsOfService.preamble.company.rcs')}</li>
+                  <li><strong>{t('termsOfService.preamble.fields.vat')}</strong> {t('termsOfService.preamble.company.vat')}</li>
+                  <li><strong>{t('termsOfService.preamble.fields.nafCode')}</strong> {t('termsOfService.preamble.company.nafCode')}</li>
+                  <li><strong>{t('termsOfService.preamble.fields.collectiveAgreement')}</strong> {t('termsOfService.preamble.company.collectiveAgreement')}</li>
                 </ul>
               </div>
             </CardContent>
@@ -88,29 +87,31 @@ const TermsOfServicePage = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <FileText className="w-6 h-6 mr-3 text-green-600" />
-                Définitions
+                {t('termsOfService.definitions.title')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 <div>
-                  <strong>• CassKai ou la Plateforme :</strong> La solution logicielle de gestion d'entreprise 
-                  accessible via www.casskai.app
+                  <strong>•</strong> {t('termsOfService.definitions.platform')}
                 </div>
                 <div>
-                  <strong>• Utilisateur ou Client :</strong> Toute personne physique ou morale utilisant CassKai
+                  <strong>•</strong> {t('termsOfService.definitions.editor')}
                 </div>
                 <div>
-                  <strong>• Compte :</strong> Espace personnel sécurisé permettant l'accès aux fonctionnalités
+                  <strong>•</strong> {t('termsOfService.definitions.user')}
                 </div>
                 <div>
-                  <strong>• Données :</strong> Toutes informations saisies, traitées ou stockées via la plateforme
+                  <strong>•</strong> {t('termsOfService.definitions.client')}
                 </div>
                 <div>
-                  <strong>• Services :</strong> L'ensemble des fonctionnalités mises à disposition
+                  <strong>•</strong> {t('termsOfService.definitions.services')}
                 </div>
                 <div>
-                  <strong>• Abonnement :</strong> Contrat de service récurrent donnant accès à CassKai
+                  <strong>•</strong> {t('termsOfService.definitions.data')}
+                </div>
+                <div>
+                  <strong>•</strong> {t('termsOfService.definitions.account')}
                 </div>
               </div>
             </CardContent>
@@ -121,21 +122,20 @@ const TermsOfServicePage = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <CheckCircle className="w-6 h-6 mr-3 text-purple-600" />
-                Objet et acceptation
+                {t('termsOfService.acceptance.title')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="mb-4">
-                Les présentes CGU ont pour objet de définir les modalités et conditions d'utilisation 
-                de CassKai. Elles s'appliquent sans restriction ni réserve à toute utilisation de la plateforme.
+                {t('termsOfService.acceptance.content')}
               </p>
               
               <h4 className="font-semibold mb-3">Acceptation :</h4>
               <ul className="space-y-2">
-                <li>• L'utilisation de CassKai implique l'acceptation pleine et entière des présentes CGU</li>
-                <li>• Cette acceptation est matérialisée par la case à cocher lors de l'inscription</li>
-                <li>• En cas de désaccord, l'utilisateur doit s'abstenir d'utiliser CassKai</li>
-                <li>• L'acceptation emporte consentement à recevoir les communications essentielles</li>
+                <li>• {t('termsOfService.acceptance.content')}</li>
+                <li>• {t('termsOfService.acceptance.binding')}</li>
+                <li>• {t('termsOfService.acceptance.updates')}</li>
+                <li>• {t('termsOfService.acceptance.notification')}</li>
               </ul>
             </CardContent>
           </Card>
@@ -525,7 +525,7 @@ const TermsOfServicePage = () => {
           </div>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 };
 

@@ -69,7 +69,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
     status: 'prospect'
   });
 
-  const [contactFormData, setContactFormData] = useState<ContactFormData>({
+  const [contactFormData, setContactFormData] = React.useState<ContactFormData>({
     first_name: '',
     last_name: '',
     email: '',
@@ -525,7 +525,8 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
                 <Input
                   id="company_name"
                   value={clientFormData.company_name}
-                  onChange={(e) => setClientFormData({...clientFormData, company_name: e.target.value})}
+                  onChange={(e) => setClientFormData({ ...clientFormData, company_name: e.target.value })}
+                  placeholder={t('crm.clientForm.companyNamePlaceholder')}
                   required
                 />
               </div>

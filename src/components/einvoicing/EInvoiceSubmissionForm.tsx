@@ -4,15 +4,15 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-// import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Checkbox } from '../ui/checkbox';
+import { Alert, AlertDescription } from '../ui/alert';
+import { Progress } from '../ui/progress';
+import { Badge } from '../ui/badge';
 import { 
   Send, 
   FileText, 
@@ -26,7 +26,7 @@ import {
   SubmissionResult,
   EInvoiceFormat,
   EInvoiceChannel
-} from '@/types/einvoicing.types';
+} from '../../types/einvoicing.types';
 
 interface EInvoiceSubmissionFormProps {
   companyId: string;
@@ -223,7 +223,7 @@ export const EInvoiceSubmissionForm: React.FC<EInvoiceSubmissionFormProps> = ({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="format">Format de sortie</Label>
-                <Select value={format} onValueChange={(value: string) => setFormat(value as EInvoiceFormat)}>
+                <Select value={format} onValueChange={(value) => setFormat(value as EInvoiceFormat)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -249,7 +249,7 @@ export const EInvoiceSubmissionForm: React.FC<EInvoiceSubmissionFormProps> = ({
 
               <div className="space-y-2">
                 <Label htmlFor="channel">Canal de transmission</Label>
-                <Select value={channel} onValueChange={(value: string) => setChannel(value as EInvoiceChannel)}>
+                <Select value={channel} onValueChange={(value) => setChannel(value as EInvoiceChannel)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -280,7 +280,7 @@ export const EInvoiceSubmissionForm: React.FC<EInvoiceSubmissionFormProps> = ({
                 <Checkbox
                   id="async"
                   checked={asyncMode}
-                  onCheckedChange={(checked) => setAsyncMode(checked === true)}
+                  onCheckedChange={setAsyncMode}
                 />
                 <Label htmlFor="async" className="text-sm">
                   Traitement asynchrone
@@ -294,7 +294,7 @@ export const EInvoiceSubmissionForm: React.FC<EInvoiceSubmissionFormProps> = ({
                 <Checkbox
                   id="validate"
                   checked={validate}
-                  onCheckedChange={(checked) => setValidate(checked === true)}
+                  onCheckedChange={setValidate}
                 />
                 <Label htmlFor="validate" className="text-sm">
                   Validation EN 16931
@@ -308,7 +308,7 @@ export const EInvoiceSubmissionForm: React.FC<EInvoiceSubmissionFormProps> = ({
                 <Checkbox
                   id="archive"
                   checked={archive}
-                  onCheckedChange={(checked) => setArchive(checked === true)}
+                  onCheckedChange={setArchive}
                 />
                 <Label htmlFor="archive" className="text-sm">
                   Archivage sécurisé

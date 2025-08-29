@@ -250,7 +250,6 @@ const ModuleManager: React.FC = () => {
       );
       
       if (missingDeps.length > 0) {
-        // eslint-disable-next-line no-alert
         alert(`Ce module nécessite les dépendances suivantes : ${missingDeps.join(', ')}`);
         return;
       }
@@ -261,7 +260,6 @@ const ModuleManager: React.FC = () => {
       );
       
       if (conflicts.length > 0) {
-        // eslint-disable-next-line no-alert
         alert(`Ce module est en conflit avec : ${conflicts.join(', ')}`);
         return;
       }

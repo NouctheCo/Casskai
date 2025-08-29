@@ -12,17 +12,17 @@ import {
   RFACalculation,
   RFAFormData,
   RFAFilters,
-  // RFASimulation,
+  RFASimulation,
   TurnoverScenario,
   SimulationResult,
-  // ContractAlert,
-  // ContractHistory,
+  ContractAlert,
+  ContractHistory,
   ContractServiceResponse,
   DiscountConfig,
   RFATierBreakdown,
   RFACalculationDetails,
-  // ContractExportOptions,
-  // RFAReport
+  ContractExportOptions,
+  RFAReport
 } from '../types/contracts.types';
 
 // Helper pour formater les erreurs Supabase
@@ -212,9 +212,13 @@ export const contractsService = {
   /**
    * Archive un contrat
    */
-  async archiveContract(_id: string): Promise<ContractServiceResponse<boolean>> {
-    // TODO: Implémentation Supabase
-    return { data: true, success: true };
+  async archiveContract(id: string): Promise<ContractServiceResponse<boolean>> {
+    try {
+      // TODO: Implémentation Supabase
+      return { data: true, success: true };
+    } catch (error) {
+      return { error: handleSupabaseError(error, 'archiveContract'), success: false };
+    }
   },
 
   // ==================== CALCULS RFA ====================
@@ -277,7 +281,7 @@ export const contractsService = {
   /**
    * Récupère les calculs RFA
    */
-  async getRFACalculations(enterpriseId: string, _filters?: RFAFilters): Promise<ContractServiceResponse<RFACalculation[]>> {
+  async getRFACalculations(enterpriseId: string, filters?: RFAFilters): Promise<ContractServiceResponse<RFACalculation[]>> {
     try {
       // Données mock
       const mockCalculations: RFACalculation[] = [

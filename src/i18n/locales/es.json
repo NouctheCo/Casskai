@@ -457,5 +457,230 @@
       "invite_team": "Invitar a tu equipo",
       "import_data": "Importar tus datos"
     }
+  },
+  "security": {
+    "title": "Seguridad y Privacidad",
+    "score": "Puntuación",
+    "generate_report": "Generar Informe",
+    "tabs": {
+      "security": "Seguridad",
+      "privacy": "Privacidad",
+      "gdpr": "RGPD",
+      "incidents": "Incidentes",
+      "compliance": "Cumplimiento"
+    },
+    "overview": {
+      "title": "Resumen de Seguridad",
+      "description": "Monitorea y configura tus ajustes de seguridad",
+      "security_score": "Puntuación de Seguridad",
+      "open_incidents": "Incidentes Abiertos",
+      "audit_logging": "Registro de Auditoría"
+    },
+    "authentication": {
+      "title": "Configuración de Autenticación",
+      "two_factor": {
+        "title": "Autenticación de Dos Factores",
+        "description": "Requerir 2FA para todas las cuentas de usuario"
+      },
+      "password_policy": {
+        "title": "Política de Contraseñas",
+        "description": "Establecer requisitos de complejidad de contraseñas",
+        "min_length": "Longitud Mínima",
+        "require_uppercase": "Requerir Mayúsculas",
+        "require_numbers": "Requerir Números",
+        "require_symbols": "Requerir Símbolos"
+      },
+      "session_timeout": {
+        "title": "Tiempo de Espera de Sesión",
+        "description": "Duración de inactividad antes del cierre automático",
+        "minutes": "minutos"
+      }
+    },
+    "access_control": {
+      "title": "Control de Acceso",
+      "ip_whitelist": {
+        "title": "Lista Blanca de IP",
+        "description": "Restringir acceso a direcciones IP específicas"
+      },
+      "role_permissions": {
+        "title": "Permisos por Rol",
+        "description": "Gestionar permisos basados en roles"
+      }
+    },
+    "privacy": {
+      "title": "Configuración de Privacidad",
+      "data_retention": {
+        "title": "Retención de Datos",
+        "description": "Establecer período de retención de datos",
+        "days": "días"
+      },
+      "data_export": {
+        "title": "Exportación de Datos",
+        "description": "Permitir a usuarios exportar sus datos",
+        "export_button": "Exportar Mis Datos"
+      },
+      "cookies": {
+        "title": "Gestión de Cookies",
+        "essential": "Cookies Esenciales",
+        "analytics": "Cookies Analíticas",
+        "marketing": "Cookies de Marketing"
+      }
+    },
+    "gdpr": {
+      "title": "Cumplimiento RGPD",
+      "status": "Estado de Cumplimiento",
+      "compliant": "Conforme",
+      "non_compliant": "No Conforme",
+      "requests": {
+        "title": "Solicitudes RGPD",
+        "new_request": "Nueva Solicitud",
+        "type": "Tipo",
+        "status": "Estado",
+        "date": "Fecha",
+        "action": "Acción",
+        "types": {
+          "access": "Acceso a Datos",
+          "portability": "Portabilidad de Datos",
+          "rectification": "Rectificación",
+          "erasure": "Borrado"
+        },
+        "statuses": {
+          "pending": "Pendiente",
+          "processing": "Procesando",
+          "completed": "Completado",
+          "rejected": "Rechazado"
+        }
+      },
+      "data_processing": {
+        "title": "Registro de Procesamiento de Datos",
+        "purpose": "Propósito",
+        "legal_basis": "Base Legal",
+        "categories": "Categorías de Datos"
+      }
+    },
+    "incidents": {
+      "title": "Incidentes de Seguridad",
+      "report_incident": "Reportar Incidente",
+      "severity": "Gravedad",
+      "status": "Estado",
+      "date": "Fecha",
+      "description": "Descripción",
+      "severities": {
+        "low": "Baja",
+        "medium": "Media",
+        "high": "Alta",
+        "critical": "Crítica"
+      },
+      "statuses": {
+        "open": "Abierto",
+        "investigating": "Investigando",
+        "resolved": "Resuelto",
+        "closed": "Cerrado"
+      }
+    },
+    "compliance": {
+      "title": "Informe de Cumplimiento",
+      "generate": "Generar Informe",
+      "last_generated": "Último Informe Generado",
+      "download": "Descargar",
+      "score": "Puntuación de Cumplimiento",
+      "areas": {
+        "authentication": "Autenticación",
+        "data_protection": "Protección de Datos",
+        "access_control": "Control de Acceso",
+        "audit_logging": "Registro de Auditoría",
+        "incident_response": "Respuesta a Incidentes"
+      }
+    },
+    "buttons": {
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "delete": "Eliminar",
+      "edit": "Editar",
+      "view": "Ver",
+      "download": "Descargar",
+      "export": "Exportar",
+      "generate": "Generar",
+      "enable": "Activar",
+      "disable": "Desactivar"
+    },
+    "messages": {
+      "settings_updated": "Configuración de Seguridad Actualizada",
+      "settings_update_success": "Tu configuración de seguridad se ha guardado correctamente.",
+      "privacy_updated": "Configuración de Privacidad Actualizada",
+      "privacy_update_success": "Tus preferencias de privacidad se han guardado.",
+      "update_failed": "Actualización Fallida",
+      "update_failed_description": "Falló la actualización de la configuración de seguridad",
+      "report_generated": "Informe generado correctamente",
+      "export_started": "Exportación iniciada",
+      "incident_reported": "Incidente reportado correctamente"
+    }
+  },
+
+  "international": {
+    "landing": {
+      "badge": "Presencia Internacional",
+      "title": "Donde sea que estés,",
+      "subtitle": "CassKai se adapta",
+      "description": "Nuestra plataforma se adapta automáticamente a las especificidades locales: monedas, regulaciones, idiomas y prácticas empresariales de cada país.",
+      "stats": {
+        "countries": "Países compatibles",
+        "currencies": "Monedas integradas", 
+        "languages": "Idiomas disponibles"
+      },
+      "regions": {
+        "europe": {
+          "name": "Europa",
+          "description": "Cumplimiento RGPD y estándares europeos"
+        },
+        "west_africa": {
+          "name": "África Occidental",
+          "description": "Integración con sistemas bancarios locales"
+        },
+        "central_africa": {
+          "name": "África Central", 
+          "description": "Adaptación a regulaciones CEMAC"
+        },
+        "north_africa": {
+          "name": "África del Norte",
+          "description": "Soporte multilingüe árabe/francés"
+        },
+        "east_africa": {
+          "name": "África Oriental",
+          "description": "Integración Mobile Money"
+        }
+      },
+      "countries_label": "países",
+      "available_countries": "Países disponibles",
+      "cta": {
+        "title": "¿Tu país aún no está listado?",
+        "description": "Agregamos nuevos países regularmente. Contáctanos para discutir la integración de tu mercado local.",
+        "button": "Contáctanos"
+      }
+    },
+    "settings": {
+      "preferences_updated": "Preferencias regionales actualizadas",
+      "currency_updated": "Moneda actualizada",
+      "auto_adaptations": "Adaptaciones automáticas para {country}: {changes}",
+      "currency_auto_hint": "Moneda establecida automáticamente según el país: {country}",
+      "currency_auto_selected": "Moneda seleccionada automáticamente según el país de la empresa",
+      "language_recommended": "Idioma recomendado para {country}: {language}",
+      "timezone_recommended": "Zona horaria recomendada para {country}: {timezone}"
+    },
+    "onboarding": {
+      "regional_preferences": "Preferencias regionales detectadas",
+      "currency_label": "Moneda",
+      "timezone_label": "Zona horaria",
+      "language_label": "Idioma", 
+      "auto_applied_hint": "Estos ajustes se aplicarán automáticamente y podrán modificarse posteriormente en configuración."
+    }
+  },
+
+  "currency": {
+    "formats": {
+      "capital_social": "Capital social ({currency})",
+      "annual_revenue": "Ingresos anuales ({currency})",
+      "estimation_hint": "Estimación o año fiscal anterior • Moneda: {currency} ({country})"
+    }
   }
 }

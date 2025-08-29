@@ -6,8 +6,7 @@ import {
   SyncResult,
   PSD2AuthFlow,
   WebhookEvent,
-  BankingProvider as BankingProviderConfig,
-  
+  BankingProvider as BankingProviderConfig
 } from '../../../types/openBanking.types';
 
 // Interface abstraite pour tous les providers bancaires
@@ -70,7 +69,7 @@ export abstract class BankingProvider {
   abstract revokeTokens(connectionId: string): Promise<OpenBankingResponse<void>>;
 
   // Méthodes utilitaires
-  protected abstract makeRequest<T>(
+  protected abstract makeRequest<T = unknown>(
     method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     endpoint: string,
     data?: unknown,
@@ -91,11 +90,7 @@ export abstract class BankingProvider {
     };
   }
 
-  protected createErrorResponse(
-    code: string,
-    message: string,
-    details?: Record<string, unknown>
-  ): OpenBankingResponse<never> {
+  protected createErrorResponse(code: string, message: string, details?: Record<string, unknown>): OpenBankingResponse<never> {
     return {
       success: false,
       error: {
@@ -117,9 +112,9 @@ export abstract class BankingProvider {
     
     // Implémentation basique du rate limiting
     // En production, utiliser Redis ou une solution plus robuste
-  // const key = `rate_limit:${this.config.id}`;
-  // const now = Date.now();
-  // const windowStart = now - this.config.config.rateLimit.windowMs;
+  const _key = `rate_limit:${this.config.id}`;
+    const now = Date.now();
+  const _windowStart = now - this.config.config.rateLimit.windowMs;
     
     // Cette implémentation devrait être remplacée par une vraie solution de rate limiting
     return true;
@@ -135,17 +130,17 @@ export abstract class BankingProvider {
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-    // eslint-disable-next-line no-await-in-loop
-    return await operation();
+  // eslint-disable-next-line no-await-in-loop
+  return await operation();
       } catch (error) {
         lastError = error;
         
         if (attempt === maxRetries) break;
         
         // Backoff exponentiel avec jitter
-        const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000;
-    // eslint-disable-next-line no-await-in-loop
-    await new Promise(resolve => setTimeout(resolve, delay));
+  const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000;
+  // eslint-disable-next-line no-await-in-loop
+  await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
 
@@ -218,9 +213,9 @@ export abstract class BankingProvider {
 
 // Factory pour créer des providers
 export class BankingProviderFactory {
-  private static providers = new Map<string, BankingProviderConstructor>();
+  private static providers = new Map<string, new (config: BankingProviderConfig) => BankingProvider>();
 
-  static register(providerId: string, providerClass: BankingProviderConstructor): void {
+  static register(providerId: string, providerClass: new (config: BankingProviderConfig) => BankingProvider): void {
     this.providers.set(providerId, providerClass);
   }
 
@@ -242,7 +237,7 @@ export class BankingProviderError extends Error {
   constructor(
     public code: string,
     message: string,
-    public details?: Record<string, unknown>,
+  public details?: unknown,
     public recoverable: boolean = true
   ) {
     super(message);
@@ -251,7 +246,7 @@ export class BankingProviderError extends Error {
 }
 
 export class AuthenticationError extends BankingProviderError {
-  constructor(message: string, details?: Record<string, unknown>) {
+  constructor(message: string, details?: unknown) {
     super('AUTH_ERROR', message, details, false);
     this.name = 'AuthenticationError';
   }
@@ -265,7 +260,7 @@ export class RateLimitError extends BankingProviderError {
 }
 
 export class NetworkError extends BankingProviderError {
-  constructor(message: string, details?: Record<string, unknown>) {
+  constructor(message: string, details?: unknown) {
     super('NETWORK_ERROR', message, details, true);
     this.name = 'NetworkError';
   }
@@ -277,8 +272,3 @@ export class ValidationError extends BankingProviderError {
     this.name = 'ValidationError';
   }
 }
-
-// Type de constructeur concret pour les providers (évite l'instanciation de classe abstraite)
-export type BankingProviderConstructor = new (
-  config: BankingProviderConfig
-) => BankingProvider;

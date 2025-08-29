@@ -4,14 +4,13 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-// (types import normalisé vers '@/types')
-import { 
-  SubmissionOptions, 
+import {
+  EInvDocument,
+  SubmissionOptions,
   SubmissionResult,
   EInvoiceFormat,
-  EInvoiceChannel,
-  EInvDocument
-} from '@/types/einvoicing.types';
+  EInvoiceChannel
+} from '../types/einvoicing.types';
 
 interface EInvoicingCapabilities {
   enabled: boolean;

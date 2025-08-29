@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { motion, useAnimation, useInView } from 'framer-motion';
+import { motion, useAnimation } from 'framer-motion';
+import { useInView } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { CountrySelector } from '@/components/ui/CountrySelector';
 import { getMarketPricing, formatMarketPrice, getDefaultCountryCode } from '@/services/marketPricingService';
 import { changeLanguageAndDetectCountry } from '@/i18n/i18n';
+import { PageContainer } from '@/components/ui/PageContainer';
 import { 
   Calculator, 
   FileText, 
@@ -1118,41 +1120,41 @@ const Footer = () => {
                 <p>Noutche Conseil SASU</p>
                 <p>SIREN: 909 672 685</p>
                 <p>SIRET: 909 672 685 00023</p>
-                <p>Capital social: 1 500,00 €</p>
+                <p>{t('landing.footer.company.capitalSocial')}</p>
               </div>
             </div>
             <div>
               <h4 className="text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wider">Fiscal</h4>
               <div className="space-y-2 text-sm text-gray-400">
-                <p>TVA: FR85909672685</p>
-                <p>RCS: 909 672 685 R.C.S. Evry</p>
-                <p>Code NAF: 70.22Z</p>
-                <p>Activité: Conseil de gestion</p>
+                <p>{t('landing.footer.company.tva')}</p>
+                <p>{t('landing.footer.company.rcs')}</p>
+                <p>{t('landing.footer.company.nafCode')}</p>
+                <p>{t('landing.footer.company.activity')}</p>
               </div>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wider">Conformité</h4>
+              <h4 className="text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wider">{t('landing.footer.compliance.title')}</h4>
               <div className="space-y-2">
                 <Badge className="px-2 py-1 bg-green-900/50 text-green-400 border-green-700/50 text-xs">
                   <Shield className="w-3 h-3 mr-1" />
-                  SSL/TLS Sécurisé
+                  {t('landing.footer.compliance.ssl')}
                 </Badge>
                 <Badge className="px-2 py-1 bg-blue-900/50 text-blue-400 border-blue-700/50 text-xs">
                   <Database className="w-3 h-3 mr-1" />
-                  Conforme RGPD
+                  {t('landing.footer.compliance.gdpr')}
                 </Badge>
                 <Badge className="px-2 py-1 bg-purple-900/50 text-purple-400 border-purple-700/50 text-xs">
                   <Lock className="w-3 h-3 mr-1" />
-                  ISO 27001
+                  {t('landing.footer.compliance.iso')}
                 </Badge>
               </div>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wider">Convention</h4>
+              <h4 className="text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wider">{t('landing.footer.convention.title')}</h4>
               <div className="space-y-1 text-sm text-gray-400">
-                <p>Bureaux d'études techniques</p>
-                <p>et sociétés de conseils</p>
-                <p>IDCC 1486</p>
+                <p>{t('landing.footer.convention.description1')}</p>
+                <p>{t('landing.footer.convention.description2')}</p>
+                <p>{t('landing.footer.convention.idcc')}</p>
               </div>
             </div>
           </div>
@@ -1161,11 +1163,11 @@ const Footer = () => {
           <div className="border-t border-gray-800 pt-6 flex flex-col md:flex-row justify-between items-center">
             <div className="text-sm text-gray-400 mb-4 md:mb-0">
               <p>© {new Date().getFullYear()} CassKai - Édité par Noutche Conseil SASU. {t('landing.footer.copyright', 'Tous droits réservés.')}</p>
-              <p className="text-xs text-gray-500 mt-1">Inscrit au RCS d'Evry le 27/01/2022 - Domaine d'activité: Conseil de gestion</p>
+              <p className="text-xs text-gray-500 mt-1">{t('landing.footer.legalNotice')}</p>
             </div>
             <div className="flex items-center space-x-4">
               <Badge className="px-3 py-1 bg-gray-800/50 text-gray-400 border-gray-700/50 text-xs">
-                Version 2.0
+                {t('landing.footer.version')}
               </Badge>
             </div>
           </div>
@@ -1190,7 +1192,7 @@ const LandingPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 overflow-x-hidden">
+    <PageContainer variant="landing" className="overflow-x-hidden">
       <Navigation isScrolled={isScrolled} />
       <HeroSection />
       <FeaturesSection />
@@ -1198,7 +1200,7 @@ const LandingPage = () => {
       <TestimonialsSection />
       <ContactSection />
       <Footer />
-    </div>
+    </PageContainer>
   );
 };
 

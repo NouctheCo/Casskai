@@ -13,6 +13,7 @@ import { Building, Plus, Settings, Check } from 'lucide-react';
 import { useEnterprise } from '@/contexts/EnterpriseContext';
 import { useLocale } from '@/contexts/LocaleContext';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import EnterpriseForm from './EnterpriseForm';
 
 export default function EnterpriseSelector() {
@@ -21,7 +22,7 @@ export default function EnterpriseSelector() {
   const [isNewEnterpriseDialogOpen, setIsNewEnterpriseDialogOpen] = useState(false);
   const [isManageDialogOpen, setIsManageDialogOpen] = useState(false);
 
-  // const currentEnterprise = enterprises.find(e => e.id === currentEnterpriseId);
+  const currentEnterprise = enterprises.find(e => e.id === currentEnterpriseId);
 
   const handleSelectEnterprise = (value: string) => {
     if (value === 'new') {
@@ -34,23 +35,23 @@ export default function EnterpriseSelector() {
   };
 
   const getCountryFlag = (countryCode: string) => {
-    const flags: Record<'FR'|'BE'|'CH'|'LU', string> = {
+    const flags = {
       FR: '🇫🇷',
       BE: '🇧🇪',
       CH: '🇨🇭',
       LU: '🇱🇺'
     };
-    return (flags as Record<string, string>)[countryCode] || '🏢';
+    return flags[countryCode] || '🏢';
   };
 
   const getTaxRegimeLabel = (type: string) => {
-    const labels: Record<'realNormal'|'realSimplified'|'microEnterprise'|'other', string> = {
+    const labels = {
       realNormal: 'Réel Normal',
       realSimplified: 'Réel Simplifié',
       microEnterprise: 'Micro-entreprise',
       other: 'Autre'
     };
-    return (labels as Record<string, string>)[type] || type;
+    return labels[type] || type;
   };
 
   return (
@@ -135,7 +136,7 @@ export default function EnterpriseSelector() {
               {t('enterprise.manage', { defaultValue: 'Gérer les entreprises' })}
             </DialogTitle>
           </DialogHeader>
-          <EnterpriseManagement _onClose={() => setIsManageDialogOpen(false)} />
+          <EnterpriseManagement onClose={() => setIsManageDialogOpen(false)} />
         </DialogContent>
       </Dialog>
     </>
@@ -143,13 +144,12 @@ export default function EnterpriseSelector() {
 }
 
 // Composant de gestion des entreprises
-function EnterpriseManagement({ _onClose }: { _onClose: () => void }) {
-  const { enterprises, currentEnterpriseId, _updateEnterprise, deleteEnterprise } = useEnterprise();
+function EnterpriseManagement({ onClose }: { onClose: () => void }) {
+  const { enterprises, currentEnterpriseId, updateEnterprise, deleteEnterprise } = useEnterprise();
   const { t } = useLocale();
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const handleDelete = async (id: string) => {
-    // eslint-disable-next-line no-alert
     if (confirm(t('enterprise.confirmDelete', { defaultValue: 'Êtes-vous sûr de vouloir supprimer cette entreprise ?' }))) {
       await deleteEnterprise(id);
     }
@@ -164,7 +164,7 @@ function EnterpriseManagement({ _onClose }: { _onClose: () => void }) {
               <span className="text-2xl">{getCountryFlag(enterprise.countryCode)}</span>
               <div>
                 <h3 className="font-semibold">{enterprise.name}</h3>
-                {/* legalName non présent dans le type Enterprise */}
+                <p className="text-sm text-muted-foreground">{enterprise.legalName}</p>
               </div>
               {enterprise.id === currentEnterpriseId && (
                 <Badge variant="default" className="ml-2">
@@ -228,7 +228,7 @@ function EnterpriseManagement({ _onClose }: { _onClose: () => void }) {
 }
 
 function getCountryFlag(countryCode: string) {
-  const flags: Record<string, string> = {
+  const flags = {
     FR: '🇫🇷',
     BE: '🇧🇪',
     CH: '🇨🇭',
@@ -238,7 +238,7 @@ function getCountryFlag(countryCode: string) {
 }
 
 function getTaxRegimeLabel(type: string) {
-  const labels: Record<string, string> = {
+  const labels = {
     realNormal: 'Réel Normal',
     realSimplified: 'Réel Simplifié',
     microEnterprise: 'Micro-entreprise',

@@ -1,1 +1,0 @@
-import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const ProjectGantt: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>ProjectGantt</CardTitle> </CardHeader> <CardContent> <p>Composant ProjectGantt en développement.</p> </CardContent> </Card> ); }; export default ProjectGantt;

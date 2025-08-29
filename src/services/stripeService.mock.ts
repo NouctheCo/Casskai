@@ -3,6 +3,9 @@ import {
   SubscriptionResponse,
   PaymentResponse,
   BillingResponse,
+  CheckoutSession,
+  BillingPortalSession,
+  SubscriptionPlan,
   UserSubscription,
   PaymentMethod,
   Invoice
@@ -10,7 +13,7 @@ import {
 
 // Stripe configuration
 const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_mock_key';
-// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 class StripeService {
   private stripe: Promise<Stripe | null>;
@@ -31,13 +34,13 @@ class StripeService {
   async createCheckoutSession(
     planId: string,
     userId: string,
-  _successUrl: string,
-  _cancelUrl: string
+    successUrl: string,
+    cancelUrl: string
   ): Promise<SubscriptionResponse> {
     try {
       // In a real implementation, this would call your backend API
       // For now, we'll simulate the response
-  console.warn('Creating checkout session for plan:', planId, 'user:', userId);
+      console.log('Creating checkout session for plan:', planId, 'user:', userId);
       
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -89,7 +92,7 @@ class StripeService {
 
   async cancelSubscription(subscriptionId: string): Promise<SubscriptionResponse> {
     try {
-  console.warn('Canceling subscription:', subscriptionId);
+      console.log('Canceling subscription:', subscriptionId);
       
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -128,7 +131,7 @@ class StripeService {
 
   async updateSubscription(subscriptionId: string, newPlanId: string): Promise<SubscriptionResponse> {
     try {
-  console.warn('Updating subscription:', subscriptionId, 'to plan:', newPlanId);
+      console.log('Updating subscription:', subscriptionId, 'to plan:', newPlanId);
       
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
@@ -194,7 +197,7 @@ class StripeService {
 
   async addPaymentMethod(userId: string, paymentMethodId: string): Promise<PaymentResponse> {
     try {
-  console.warn('Adding payment method:', paymentMethodId, 'for user:', userId);
+      console.log('Adding payment method:', paymentMethodId, 'for user:', userId);
       
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -227,7 +230,7 @@ class StripeService {
 
   async removePaymentMethod(paymentMethodId: string): Promise<PaymentResponse> {
     try {
-  console.warn('Removing payment method:', paymentMethodId);
+      console.log('Removing payment method:', paymentMethodId);
       
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -247,10 +250,10 @@ class StripeService {
   // Billing Portal
   async createBillingPortalSession(
     customerId: string,
-  _returnUrl: string
+    returnUrl: string
   ): Promise<BillingResponse> {
     try {
-  console.warn('Creating billing portal session for customer:', customerId);
+      console.log('Creating billing portal session for customer:', customerId);
       
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 800));
@@ -315,7 +318,7 @@ class StripeService {
   }
 
   // Utility methods
-  async redirectToCheckout(sessionId: string): Promise<{ error?: unknown }> {
+  async redirectToCheckout(sessionId: string): Promise<{ error?: any }> {
     try {
       const stripe = await this.initialize();
       if (!stripe) {

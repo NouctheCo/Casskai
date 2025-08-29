@@ -3,6 +3,7 @@ import { AccountingImportExport } from '../components/accounting/AccountingImpor
 import { useConfig } from '../hooks/useConfig';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../components/ui/use-toast';
+import { PageContainer } from '../components/ui/PageContainer';
 
 const AccountingImportPage: React.FC = () => {
   const { t } = useTranslation();
@@ -13,7 +14,7 @@ const AccountingImportPage: React.FC = () => {
 
   if (!companyId) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
             {t('common.noCompanySelected')}
@@ -43,13 +44,13 @@ const AccountingImportPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <PageContainer variant="default">
       <AccountingImportExport
         companyId={companyId}
         onImportComplete={handleImportComplete}
         onError={handleError}
       />
-    </div>
+    </PageContainer>
   );
 };
 

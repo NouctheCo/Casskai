@@ -11,7 +11,7 @@ import {
 } from '../types/onboarding.types';
 
 // Types spécifiques au service
-export interface OnboardingResponse<T = any> {
+export interface OnboardingResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -99,7 +99,7 @@ class OnboardingService {
       await this.simulateDbOperation(200);
       
       // Créer la session
-      const session: OnboardingSession = {
+  const _session: OnboardingSession = {
         id: `session_${userId}_${Date.now()}`,
         userId,
         sessionData: initialData,

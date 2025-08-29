@@ -1,1 +1,0 @@
-import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const LeaveBalance: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>LeaveBalance</CardTitle> </CardHeader> <CardContent> <p>Composant LeaveBalance en développement.</p> </CardContent> </Card> ); }; export default LeaveBalance;

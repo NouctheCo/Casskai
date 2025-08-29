@@ -3,9 +3,10 @@
  * Test suite for main e-invoicing orchestration service
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { EInvoicingService } from '../EInvoicingService';
-import { SubmissionOptions } from '@/types/einvoicing.types';
+import { SubmissionOptions } from '../../../types/einvoicing.types';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+import * as supabaseModule from '../../../lib/supabase';
 
 // Mock dependencies
 vi.mock('../core/FormattingService');
@@ -14,8 +15,12 @@ vi.mock('../core/DispatchService');
 vi.mock('../core/ArchiveService');
 vi.mock('../adapters/InvoiceToEN16931Mapper');
 vi.mock('../utils/FeatureFlagService');
-vi.mock('@/lib/supabase');
-import { supabase as mockSupabase } from '@/lib/supabase';
+vi.mock('../../../lib/supabase', () => ({
+  supabase: {
+    from: vi.fn(),
+    rpc: vi.fn(),
+  },
+}));
 
 describe('EInvoicingService', () => {
   let einvoicingService: EInvoicingService;
@@ -28,7 +33,7 @@ describe('EInvoicingService', () => {
 
   beforeEach(() => {
     // Reset mocks
-    vi.clearAllMocks();
+  vi.clearAllMocks();
     
     einvoicingService = new EInvoicingService();
 
@@ -39,12 +44,6 @@ describe('EInvoicingService', () => {
     mockArchiveService = (einvoicingService as any).archiveService;
     mockMapper = (einvoicingService as any).mapper;
     mockFeatureFlagService = (einvoicingService as any).featureFlagService;
-
-    // Default archive stub to avoid runtime error in default submissions
-    mockArchiveService.storeDocuments = vi.fn().mockResolvedValue({
-      pdf_url: undefined,
-      xml_url: undefined,
-    });
   });
 
   describe('submitInvoice', () => {
@@ -75,15 +74,15 @@ describe('EInvoicingService', () => {
 
     beforeEach(() => {
       // Setup default mocks
-      (einvoicingService as any).loadInvoice = vi.fn().mockResolvedValue(mockInvoice);
-      (einvoicingService as any).getExistingDocument = vi.fn().mockResolvedValue(null);
-      (einvoicingService as any).createOrUpdateDocument = vi.fn().mockResolvedValue({
+  (einvoicingService as any).loadInvoice = vi.fn().mockResolvedValue(mockInvoice);
+  (einvoicingService as any).getExistingDocument = vi.fn().mockResolvedValue(null);
+  (einvoicingService as any).createOrUpdateDocument = vi.fn().mockResolvedValue({
         id: 'doc-789',
         invoice_id: 'invoice-123',
         company_id: 'company-456'
       });
-      (einvoicingService as any).updateDocument = vi.fn().mockResolvedValue(undefined);
-      (einvoicingService as any).logAudit = vi.fn().mockResolvedValue(undefined);
+  (einvoicingService as any).updateDocument = vi.fn().mockResolvedValue(undefined);
+  (einvoicingService as any).logAudit = vi.fn().mockResolvedValue(undefined);
 
       mockFeatureFlagService.isEInvoicingEnabled.mockResolvedValue(true);
       mockMapper.mapInvoiceToEN16931.mockResolvedValue(mockEN16931Invoice);
@@ -101,7 +100,7 @@ describe('EInvoicingService', () => {
       });
     });
 
-  it('should successfully submit an invoice with default options', async () => {
+    it('should successfully submit an invoice with default options', async () => {
       mockDispatchService.submitDocument.mockResolvedValue({
         success: true,
         message_id: 'msg-123'
@@ -228,8 +227,11 @@ describe('EInvoicingService', () => {
         created_at: '2024-01-15T10:00:00Z'
       };
 
-  mockSupabase.from = vi.fn().mockReturnValue({
-  select: vi.fn().mockReturnValue({
+      const mockSupabase = supabaseModule.supabase as unknown as {
+        from: ReturnType<typeof vi.fn>;
+      };
+      mockSupabase.from.mockReturnValue({
+        select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
             single: vi.fn().mockResolvedValue({
               data: mockDocument,
@@ -239,14 +241,17 @@ describe('EInvoicingService', () => {
         })
       });
 
-      const result = await einvoicingService.getDocumentStatus('doc-123');
+  const result = await einvoicingService.getDocumentStatus('doc-123');
 
       expect(result).toEqual(mockDocument);
     });
 
     it('should return null when document not found', async () => {
-  mockSupabase.from = vi.fn().mockReturnValue({
-  select: vi.fn().mockReturnValue({
+      const mockSupabase = supabaseModule.supabase as unknown as {
+        from: ReturnType<typeof vi.fn>;
+      };
+      mockSupabase.from.mockReturnValue({
+        select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
             single: vi.fn().mockResolvedValue({
               data: null,
@@ -264,8 +269,11 @@ describe('EInvoicingService', () => {
 
   describe('updateDocumentStatus', () => {
     it('should update document status successfully', async () => {
-  mockSupabase.from = vi.fn().mockReturnValue({
-  update: vi.fn().mockReturnValue({
+      const mockSupabase = supabaseModule.supabase as unknown as {
+        from: ReturnType<typeof vi.fn>;
+      };
+      mockSupabase.from.mockReturnValue({
+        update: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
             select: vi.fn().mockReturnValue({
               single: vi.fn().mockResolvedValue({
@@ -295,8 +303,11 @@ describe('EInvoicingService', () => {
     });
 
     it('should return false when update fails', async () => {
-  mockSupabase.from = vi.fn().mockReturnValue({
-  update: vi.fn().mockReturnValue({
+      const mockSupabase = supabaseModule.supabase as unknown as {
+        from: ReturnType<typeof vi.fn>;
+      };
+      mockSupabase.from.mockReturnValue({
+        update: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
             select: vi.fn().mockReturnValue({
               single: vi.fn().mockResolvedValue({
@@ -325,7 +336,10 @@ describe('EInvoicingService', () => {
     });
 
     it('should handle network errors', async () => {
-  mockSupabase.from = vi.fn(() => {
+      const mockSupabase = supabaseModule.supabase as unknown as {
+        from: ReturnType<typeof vi.fn>;
+      };
+      mockSupabase.from.mockImplementation(() => {
         throw new Error('Network error');
       });
 

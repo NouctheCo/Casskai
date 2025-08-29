@@ -1,207 +1,144 @@
-/* eslint-disable react-refresh/only-export-components */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Enterprise, EnterpriseTaxConfiguration } from '../types/enterprise.types';
 import { useToast } from '../components/ui/use-toast';
-import { supabase } from '../lib/supabase';
-import { EnterpriseContext, EnterpriseContextType } from './EnterpriseContextBase';
-export { useEnterprise } from '@/hooks/useEnterpriseContext';
 
-// Note: useEnterprise hook is defined in hooks/useEnterpriseContext.ts to avoid Fast Refresh issues
+interface EnterpriseContextType {
+  enterprises: Enterprise[];
+  currentEnterprise: Enterprise | null;
+  currentEnterpriseId: string | null;
+  setCurrentEnterpriseId: (id: string) => void;
+  addEnterprise: (enterprise: Omit<Enterprise, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateEnterprise: (id: string, data: Partial<Enterprise>) => Promise<void>;
+  deleteEnterprise: (id: string) => Promise<void>;
+  getEnterpriseTaxConfig: (enterpriseId: string) => EnterpriseTaxConfiguration | null;
+  switchEnterprise: (enterpriseId: string) => void;
+  loading: boolean;
+}
+
+const EnterpriseContext = createContext<EnterpriseContextType | undefined>(undefined);
+
+export const useEnterprise = () => {
+  const context = useContext(EnterpriseContext);
+  if (!context) {
+    throw new Error('useEnterprise must be used within an EnterpriseProvider');
+  }
+  return context;
+};
 
 // Entreprise par défaut
 const DEFAULT_ENTERPRISE: Enterprise = {
   id: 'default-enterprise',
   name: 'Mon Entreprise',
+  legalName: 'Mon Entreprise SAS',
+  country: 'FR',
+  currency: 'EUR',
+  accountingStandard: 'PCG',
   registrationNumber: '',
   vatNumber: '',
-  countryCode: 'FR',
-  address: {
-    street: '',
-    postalCode: '',
-    city: '',
-    country: 'FR',
-  },
-  taxRegime: {
-    id: 'default',
-    code: 'default',
-    name: 'Régime par défaut',
-    type: 'other',
-    vatPeriod: 'none',
-  },
+  street: '',
+  postalCode: '',
+  city: '',
+  phone: '',
+  email: '',
+  website: '',
+  shareCapital: '10000',
+  ceoName: '',
+  sector: 'tech',
   fiscalYearStart: 1,
   fiscalYearEnd: 12,
-  currency: 'EUR',
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  isActive: true,
-  settings: {
-    defaultVATRate: '20%',
-    defaultPaymentTerms: 30,
-    taxReminderDays: 7,
-    autoCalculateTax: true,
-    roundingRule: 'nearest',
-    emailNotifications: true,
-    language: 'fr',
-    timezone: 'Europe/Paris',
-  },
+  isSetupCompleted: true,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString()
 };
 
-// eslint-disable-next-line max-lines-per-function
 export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [enterprises, setEnterprises] = useState<Enterprise[]>([]);
   const [currentEnterpriseId, setCurrentEnterpriseId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const loadEnterprises = useCallback(() => {
-    console.warn('🏢 Chargement des entreprises...');
+  const loadEnterprises = () => {
+    // Charger les entreprises depuis localStorage
+    console.log('🏢 Chargement des entreprises...');
     
     const savedEnterprises = localStorage.getItem('casskai_enterprises');
     let enterpriseList: Enterprise[] = [];
     
     if (savedEnterprises) {
       try {
-  enterpriseList = JSON.parse(savedEnterprises);
+        enterpriseList = JSON.parse(savedEnterprises);
+        console.log('📦 Entreprises chargées depuis localStorage:', enterpriseList);
       } catch (error) {
         console.error('❌ Erreur lors du chargement des entreprises:', error);
       }
     }
     
-    // Si pas d'entreprises, créer l'entreprise par défaut
+    // Si pas d'entreprises, attendre que l'onboarding en crée une.
     if (enterpriseList.length === 0) {
-      enterpriseList = [DEFAULT_ENTERPRISE];
-      localStorage.setItem('casskai_enterprises', JSON.stringify(enterpriseList));
-  console.warn('🏢 Entreprise par défaut créée');
+      console.log('🏢 Aucune entreprise trouvée. En attente de l\'onboarding.');
     }
     
     setEnterprises(enterpriseList);
     
-    // Définir l'entreprise actuelle avec logique améliorée
+    // Définir l'entreprise actuelle
     const savedCurrentId = localStorage.getItem('casskai_current_enterprise');
-    if (savedCurrentId) {
-      const foundEnterprise = enterpriseList.find(e => e.id === savedCurrentId);
-      if (foundEnterprise) {
-        setCurrentEnterpriseId(savedCurrentId);
-  console.warn('✅ Entreprise actuelle définie:', foundEnterprise.name);
-      } else {
-        // Si l'ID sauvegardé n'existe pas, essayer de trouver par nom ou prendre la première
-  console.warn('⚠️ Entreprise sauvegardée introuvable, utilisation de la première disponible');
-        setCurrentEnterpriseId(enterpriseList[0].id);
-        localStorage.setItem('casskai_current_enterprise', enterpriseList[0].id);
-      }
+    if (savedCurrentId && enterpriseList.find(e => e.id === savedCurrentId)) {
+      setCurrentEnterpriseId(savedCurrentId);
     } else {
       setCurrentEnterpriseId(enterpriseList[0].id);
       localStorage.setItem('casskai_current_enterprise', enterpriseList[0].id);
     }
     
-  // Loaded
-  }, []);
-
-  // Fonction pour forcer la synchronisation après onboarding
-  const synchronizeAfterOnboarding = useCallback(() => {
-  console.warn('🔄 Synchronisation post-onboarding...');
-    loadEnterprises();
-    
-    // Force un refresh des états pour déclencher les re-renders
-    const currentId = localStorage.getItem('casskai_current_enterprise');
-    if (currentId) {
-      setTimeout(() => {
-        setCurrentEnterpriseId(currentId);
-      }, 100);
-    }
-  }, [loadEnterprises]);
+    setLoading(false);
+    console.log('✅ Entreprises chargées avec succès');
+  };
 
   useEffect(() => {
     loadEnterprises();
-    setLoading(false);
     
-    // Écouter les changements localStorage pour rester synchronisé
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'casskai_enterprises' || e.key === 'casskai_current_enterprise') {
-  console.warn('📦 localStorage modifié, rechargement des entreprises...');
-        loadEnterprises();
-      }
+    // Listen for custom refresh event
+    const handleRefresh = () => {
+      console.log('🔄 Actualisation forcée des entreprises...');
+      loadEnterprises();
     };
     
-    // Écouter les signaux de synchronisation après onboarding
-  const handleSyncNeeded = (_e: CustomEvent) => {
-  console.warn('📡 Signal de synchronisation reçu');
-      synchronizeAfterOnboarding();
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-  window.addEventListener('enterprise-sync-needed', handleSyncNeeded as EventListener);
+    window.addEventListener('enterpriseContextRefresh', handleRefresh);
     
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('enterprise-sync-needed', handleSyncNeeded as EventListener);
+      window.removeEventListener('enterpriseContextRefresh', handleRefresh);
     };
-  }, [loadEnterprises, synchronizeAfterOnboarding]);
+  }, []);
 
   const currentEnterprise = enterprises.find(e => e.id === currentEnterpriseId) || null;
 
   const addEnterprise = async (enterpriseData: Omit<Enterprise, 'id' | 'createdAt' | 'updatedAt'>) => {
-  console.warn('🏢 Ajout d\'une nouvelle entreprise (Supabase)');
-    // Création dans Supabase
-    const { data, error } = await supabase
-      .from('companies')
-      .insert([
-        {
-          name: enterpriseData.name,
-          country: enterpriseData.address?.country || '',
-          default_currency: enterpriseData.currency || 'EUR',
-          default_locale: 'fr',
-          timezone: 'Europe/Paris',
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }
-      ])
-      .select();
-
-    if (error || !data || !data[0]) {
-      toast({
-        title: 'Erreur',
-        description: "Impossible de créer l'entreprise dans Supabase."
-      });
-      return;
-    }
-
-    const supabaseEnterprise = data[0];
-    // Création locale avec l'ID Supabase
+    console.log('🏢 Ajout d\'une nouvelle entreprise:', enterpriseData);
+    
     const newEnterprise: Enterprise = {
       ...enterpriseData,
-      id: supabaseEnterprise.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      countryCode: supabaseEnterprise.country,
-      address: {
-        ...enterpriseData.address,
-        country: supabaseEnterprise.country,
-      },
-      currency: supabaseEnterprise.default_currency || 'EUR',
-      isActive: true,
-      settings: enterpriseData.settings || DEFAULT_ENTERPRISE.settings,
-      taxRegime: enterpriseData.taxRegime || DEFAULT_ENTERPRISE.taxRegime,
+      id: `enterprise-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
-    const updatedEnterprises: Enterprise[] = [...enterprises, newEnterprise];
+    
+    const updatedEnterprises = [...enterprises, newEnterprise];
     setEnterprises(updatedEnterprises);
-    setCurrentEnterpriseId(newEnterprise.id);
     localStorage.setItem('casskai_enterprises', JSON.stringify(updatedEnterprises));
-    localStorage.setItem('casskai_current_enterprise', newEnterprise.id);
+    
     toast({
       title: 'Entreprise ajoutée',
-      description: `L'entreprise ${newEnterprise.name} a été ajoutée et sélectionnée.`
+      description: `L'entreprise ${newEnterprise.name} a été ajoutée avec succès.`
     });
-  console.warn('✅ Entreprise ajoutée et synchronisée avec Supabase');
+    
+    console.log('✅ Entreprise ajoutée avec succès');
   };
 
   const updateEnterprise = async (id: string, data: Partial<Enterprise>) => {
-  console.warn('🔄 Mise à jour de l\'entreprise');
+    console.log('🔄 Mise à jour de l\'entreprise:', id, data);
     
     const updatedEnterprises = enterprises.map(enterprise =>
       enterprise.id === id
-        ? { ...enterprise, ...data, updatedAt: new Date() }
+        ? { ...enterprise, ...data, updatedAt: new Date().toISOString() }
         : enterprise
     );
     
@@ -213,11 +150,11 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       description: 'Les informations de l\'entreprise ont été mises à jour avec succès.'
     });
     
-  // updated
+    console.log('✅ Entreprise mise à jour avec succès');
   };
 
   const deleteEnterprise = async (id: string) => {
-  console.warn('🗑️ Suppression de l\'entreprise');
+    console.log('🗑️ Suppression de l\'entreprise:', id);
     
     const updatedEnterprises = enterprises.filter(enterprise => enterprise.id !== id);
     setEnterprises(updatedEnterprises);
@@ -234,11 +171,11 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       description: 'L\'entreprise a été supprimée avec succès.'
     });
     
-  // deleted
+    console.log('✅ Entreprise supprimée avec succès');
   };
 
   const switchEnterprise = (enterpriseId: string) => {
-  console.warn('🔄 Changement d\'entreprise');
+    console.log('🔄 Changement d\'entreprise:', enterpriseId);
     setCurrentEnterpriseId(enterpriseId);
     localStorage.setItem('casskai_current_enterprise', enterpriseId);
     
@@ -257,11 +194,12 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     
     // Configuration fiscale par défaut basée sur le pays
     return {
-      enterpriseId: enterprise.id,
-      taxRates: [],
-      declarations: [],
-      payments: [],
-      documents: []
+      country: enterprise.country,
+      vatRate: enterprise.country === 'FR' ? 20 : 0,
+      corporateTaxRate: enterprise.country === 'FR' ? 25 : 0,
+      fiscalYearStart: enterprise.fiscalYearStart,
+      fiscalYearEnd: enterprise.fiscalYearEnd,
+      taxRegime: 'normal'
     };
   };
 
@@ -275,7 +213,6 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     deleteEnterprise,
     getEnterpriseTaxConfig,
     switchEnterprise,
-    synchronizeAfterOnboarding,
     loading
   };
 

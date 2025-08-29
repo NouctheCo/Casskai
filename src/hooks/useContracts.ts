@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { useEnterprise } from '@/hooks/useEnterpriseContext';
+import { useEnterprise } from '../contexts/EnterpriseContext';
 import { useToast } from '../components/ui/use-toast';
 import { contractsService } from '../services/contractsService';
 import {

@@ -192,96 +192,128 @@ import frTranslations from './locales/fr.json';
 import enTranslations from './locales/en.json';
 import esTranslations from './locales/es.json';
 
-// Configuration i18next avancée
-i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
-    // Ressources de traduction avec structure de namespaces
-    resources: {
-      fr: {
-        translation: frTranslations
-      },
-      en: {
-        translation: enTranslations
-      },
-      es: {
-        translation: esTranslations
-      }
+// Configuration i18next avancée - synchrone pour éviter les problèmes d'ordre
+const initConfig = {
+  // Ressources de traduction avec structure de namespaces
+  resources: {
+    fr: {
+      translation: frTranslations
     },
-    
-    // Langue par défaut et fallback
-    lng: 'fr',
-    fallbackLng: 'fr',
-    
-    // Configuration des namespaces
-    defaultNS: 'translation',
-    ns: ['translation'],
-    
-    detection: {
-      order: ['querystring', 'localStorage', 'navigator', 'htmlTag'],
-      lookupQuerystring: 'lng',
-      lookupLocalStorage: 'i18nextLng',
-      caches: ['localStorage'],
-      excludeCacheFor: ['cimode']
+    en: {
+      translation: enTranslations
     },
-    
-    // Options d'interpolation avec formatage personnalisé
-    interpolation: {
-      escapeValue: false,
-      formatSeparator: ',',
-      format(value, format, lng) {
-        // Formatage personnalisé pour les devises
-        if (format === 'currency') {
-          return formatCurrency(value, lng || 'fr');
-        }
-        // Formatage des nombres
-        if (format === 'number') {
-          return formatNumber(value, lng || 'fr');
-        }
-        // Formatage des dates
-        if (format === 'date') {
-          return formatDate(value, lng || 'fr');
-        }
-        return value;
-      }
-    },
-    
-    // Options de développement
-    debug: process.env.NODE_ENV === 'development',
-    saveMissing: process.env.NODE_ENV === 'development',
-    missingKeyHandler: (lng, ns, key) => {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(`🌍 Missing translation: ${lng}.${ns}.${key}`);
-      }
-    },
-    
-    // Configuration React
-    react: {
-      useSuspense: false
-    },
-    
-    // Retourner la clé si traduction non trouvée
-    returnNull: false,
-    returnEmptyString: false,
-    returnObjects: false,
-    joinArrays: false,
-    
-    // Configuration pour éviter les conflits
-    keySeparator: '.',
-    nsSeparator: ':',
-    pluralSeparator: '_',
-    contextSeparator: '_',
-    
-    // Fonction de post-processing pour améliorer les fallbacks
-    postProcess: ['fallback'],
-    parseMissingKeyHandler: (key) => {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(`🌍 Parsing missing key: ${key}`);
-      }
-      return key;
+    es: {
+      translation: esTranslations
     }
-  });
+  },
+  
+  // Langue par défaut et fallback
+  lng: 'fr',
+  fallbackLng: 'fr',
+  
+  // Configuration des namespaces
+  defaultNS: 'translation',
+  ns: ['translation'],
+  
+  detection: {
+    order: ['querystring', 'localStorage', 'navigator', 'htmlTag'],
+    lookupQuerystring: 'lng',
+    lookupLocalStorage: 'i18nextLng',
+    caches: ['localStorage'],
+    excludeCacheFor: ['cimode']
+  },
+  
+  // Options d'interpolation avec formatage personnalisé
+  interpolation: {
+    escapeValue: false,
+    formatSeparator: ',',
+    format(value, format, lng) {
+      // Formatage personnalisé pour les devises
+      if (format === 'currency') {
+        return formatCurrency(value, lng || 'fr');
+      }
+      // Formatage des nombres
+      if (format === 'number') {
+        return formatNumber(value, lng || 'fr');
+      }
+      // Formatage des dates
+      if (format === 'date') {
+        return formatDate(value, lng || 'fr');
+      }
+      return value;
+    }
+  },
+  
+  // Options de développement
+  debug: process.env.NODE_ENV === 'development',
+  saveMissing: process.env.NODE_ENV === 'development',
+  missingKeyHandler: (lng, ns, key) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`🌍 Missing translation: ${lng}.${ns}.${key}`);
+    }
+  },
+  
+  // Configuration React
+  react: {
+    useSuspense: false
+  },
+  
+  // Retourner la clé si traduction non trouvée
+  returnNull: false,
+  returnEmptyString: false,
+  returnObjects: false,
+  joinArrays: false,
+  
+  // Configuration pour éviter les conflits
+  keySeparator: '.',
+  nsSeparator: ':',
+  pluralSeparator: '_',
+  contextSeparator: '_',
+  
+  // Fonction de post-processing pour améliorer les fallbacks
+  postProcess: ['fallback'],
+  parseMissingKeyHandler: (key) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`🌍 Parsing missing key: ${key}`);
+    }
+    return key;
+  }
+};
+
+// Initialisation asynchrone avec gestion d'erreur
+const initializeI18n = async () => {
+  try {
+    await i18n
+      .use(LanguageDetector)
+      .use(initReactI18next)
+      .init(initConfig);
+    
+    console.warn('i18n initialisé avec succès');
+    return true;
+  } catch (err) {
+    console.error('Erreur d\'initialisation i18n:', err);
+    // Fallback: initialiser avec une configuration minimale
+    try {
+      await i18n.init({
+        lng: 'fr',
+        resources: {
+          fr: { translation: {} },
+          en: { translation: {} }
+        },
+        react: { useSuspense: false },
+        fallbackLng: 'fr'
+      });
+      console.warn('i18n initialisé avec configuration de secours');
+      return true;
+    } catch (fallbackErr) {
+      console.error('Erreur d\'initialisation fallback i18n:', fallbackErr);
+      return false;
+    }
+  }
+};
+
+// Lancer l'initialisation
+initializeI18n();
 
 // Fonction de formatage des devises
 export function formatCurrency(amount: number, locale: string, currency?: string): string {
@@ -371,14 +403,25 @@ export function useCurrency() {
 // Fonction pour changer la langue et détecter automatiquement le pays
 export async function changeLanguageAndDetectCountry(lng: string) {
   try {
+    // Vérifier que i18n est correctement initialisé
+    if (!i18n || !i18n.changeLanguage) {
+      console.warn('i18n not properly initialized, waiting...');
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
     // Tenter la géolocalisation pour les langues africaines
     if (lng.startsWith('fr-') && lng !== 'fr') {
       const country = lng.split('-')[1];
       localStorage.setItem('user_country', country);
     }
     
-    await i18n.changeLanguage(lng);
-    return true;
+    if (i18n && typeof i18n.changeLanguage === 'function') {
+      await i18n.changeLanguage(lng);
+      return true;
+    } else {
+      console.error('i18n.changeLanguage is not available');
+      return false;
+    }
   } catch (error) {
     console.error('Erreur lors du changement de langue:', error);
     return false;

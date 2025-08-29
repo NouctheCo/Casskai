@@ -541,5 +541,230 @@
       "invite_team": "Invite your team",
       "import_data": "Import your data"
     }
+  },
+  "security": {
+    "title": "Security & Privacy",
+    "score": "Score",
+    "generate_report": "Generate Report",
+    "tabs": {
+      "security": "Security",
+      "privacy": "Privacy",
+      "gdpr": "GDPR",
+      "incidents": "Incidents",
+      "compliance": "Compliance"
+    },
+    "overview": {
+      "title": "Security Overview",
+      "description": "Monitor and configure your security settings",
+      "security_score": "Security Score",
+      "open_incidents": "Open Incidents",
+      "audit_logging": "Audit Logging"
+    },
+    "authentication": {
+      "title": "Authentication Settings",
+      "two_factor": {
+        "title": "Two-Factor Authentication",
+        "description": "Require 2FA for all user accounts"
+      },
+      "password_policy": {
+        "title": "Password Policy",
+        "description": "Set password complexity requirements",
+        "min_length": "Minimum Length",
+        "require_uppercase": "Require Uppercase",
+        "require_numbers": "Require Numbers",
+        "require_symbols": "Require Symbols"
+      },
+      "session_timeout": {
+        "title": "Session Timeout",
+        "description": "Inactivity duration before automatic logout",
+        "minutes": "minutes"
+      }
+    },
+    "access_control": {
+      "title": "Access Control",
+      "ip_whitelist": {
+        "title": "IP Whitelist",
+        "description": "Restrict access to specific IP addresses"
+      },
+      "role_permissions": {
+        "title": "Role Permissions",
+        "description": "Manage role-based permissions"
+      }
+    },
+    "privacy": {
+      "title": "Privacy Settings",
+      "data_retention": {
+        "title": "Data Retention",
+        "description": "Set data retention period",
+        "days": "days"
+      },
+      "data_export": {
+        "title": "Data Export",
+        "description": "Allow users to export their data",
+        "export_button": "Export My Data"
+      },
+      "cookies": {
+        "title": "Cookie Management",
+        "essential": "Essential Cookies",
+        "analytics": "Analytics Cookies",
+        "marketing": "Marketing Cookies"
+      }
+    },
+    "gdpr": {
+      "title": "GDPR Compliance",
+      "status": "Compliance Status",
+      "compliant": "Compliant",
+      "non_compliant": "Non-Compliant",
+      "requests": {
+        "title": "GDPR Requests",
+        "new_request": "New Request",
+        "type": "Type",
+        "status": "Status",
+        "date": "Date",
+        "action": "Action",
+        "types": {
+          "access": "Data Access",
+          "portability": "Data Portability",
+          "rectification": "Rectification",
+          "erasure": "Erasure"
+        },
+        "statuses": {
+          "pending": "Pending",
+          "processing": "Processing",
+          "completed": "Completed",
+          "rejected": "Rejected"
+        }
+      },
+      "data_processing": {
+        "title": "Data Processing Register",
+        "purpose": "Purpose",
+        "legal_basis": "Legal Basis",
+        "categories": "Data Categories"
+      }
+    },
+    "incidents": {
+      "title": "Security Incidents",
+      "report_incident": "Report Incident",
+      "severity": "Severity",
+      "status": "Status",
+      "date": "Date",
+      "description": "Description",
+      "severities": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "critical": "Critical"
+      },
+      "statuses": {
+        "open": "Open",
+        "investigating": "Investigating",
+        "resolved": "Resolved",
+        "closed": "Closed"
+      }
+    },
+    "compliance": {
+      "title": "Compliance Report",
+      "generate": "Generate Report",
+      "last_generated": "Last Report Generated",
+      "download": "Download",
+      "score": "Compliance Score",
+      "areas": {
+        "authentication": "Authentication",
+        "data_protection": "Data Protection",
+        "access_control": "Access Control",
+        "audit_logging": "Audit Logging",
+        "incident_response": "Incident Response"
+      }
+    },
+    "buttons": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "edit": "Edit",
+      "view": "View",
+      "download": "Download",
+      "export": "Export",
+      "generate": "Generate",
+      "enable": "Enable",
+      "disable": "Disable"
+    },
+    "messages": {
+      "settings_updated": "Security Settings Updated",
+      "settings_update_success": "Your security settings have been saved successfully.",
+      "privacy_updated": "Privacy Settings Updated",
+      "privacy_update_success": "Your privacy preferences have been saved.",
+      "update_failed": "Update Failed",
+      "update_failed_description": "Failed to update security settings",
+      "report_generated": "Report generated successfully",
+      "export_started": "Export started",
+      "incident_reported": "Incident reported successfully"
+    }
+  },
+
+  "international": {
+    "landing": {
+      "badge": "International Presence",
+      "title": "Wherever you are,",
+      "subtitle": "CassKai adapts",
+      "description": "Our platform automatically adapts to local specificities: currencies, regulations, languages and business practices of each country.",
+      "stats": {
+        "countries": "Countries supported",
+        "currencies": "Currencies integrated", 
+        "languages": "Languages available"
+      },
+      "regions": {
+        "europe": {
+          "name": "Europe",
+          "description": "GDPR compliance and European standards"
+        },
+        "west_africa": {
+          "name": "West Africa",
+          "description": "Integration with local banking systems"
+        },
+        "central_africa": {
+          "name": "Central Africa", 
+          "description": "Adaptation to CEMAC regulations"
+        },
+        "north_africa": {
+          "name": "North Africa",
+          "description": "Multilingual Arabic/French support"
+        },
+        "east_africa": {
+          "name": "East Africa",
+          "description": "Mobile Money integration"
+        }
+      },
+      "countries_label": "countries",
+      "available_countries": "Available countries",
+      "cta": {
+        "title": "Your country is not listed yet?",
+        "description": "We regularly add new countries. Contact us to discuss integrating your local market.",
+        "button": "Contact us"
+      }
+    },
+    "settings": {
+      "preferences_updated": "Regional preferences updated",
+      "currency_updated": "Currency updated",
+      "auto_adaptations": "Automatic adaptations for {country}: {changes}",
+      "currency_auto_hint": "Currency automatically set according to country: {country}",
+      "currency_auto_selected": "Currency automatically selected according to business country",
+      "language_recommended": "Recommended language for {country}: {language}",
+      "timezone_recommended": "Recommended timezone for {country}: {timezone}"
+    },
+    "onboarding": {
+      "regional_preferences": "Detected regional preferences",
+      "currency_label": "Currency",
+      "timezone_label": "Timezone",
+      "language_label": "Language", 
+      "auto_applied_hint": "These settings will be applied automatically and can be modified later in settings."
+    }
+  },
+
+  "currency": {
+    "formats": {
+      "capital_social": "Share capital ({currency})",
+      "annual_revenue": "Annual revenue ({currency})",
+      "estimation_hint": "Estimate or previous fiscal year • Currency: {currency} ({country})"
+    }
   }
 }

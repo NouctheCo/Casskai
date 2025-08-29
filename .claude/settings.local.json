@@ -61,7 +61,26 @@
       "Bash(scp:*)",
       "Bash(bash:*)",
       "Bash(.hostinger-deploy.ps1)",
-      "Bash(powershell.exe:*)"
+      "Bash(powershell.exe:*)",
+      "WebFetch(domain:casskai.app)",
+      "Bash(powershell:*)",
+      "Bash(.vps-deploy.ps1)",
+      "WebFetch(domain:89.116.111.88)",
+      "Bash(test:*)",
+      "Bash(for page in inventory hr projects banks forecasts reports taxes contracts purchases)",
+      "Bash(do echo -n \"$page: \")",
+      "Bash(for page in dashboard login onboarding accounting invoicing settings privacy-policy)",
+      "Bash(if exist node_modules.vite rmdir /s /q node_modules.vite)",
+      "Bash(for:*)",
+      "Bash(do if [ -f \"$file\" ])",
+      "Bash(fi)",
+      "Bash(do mv \"$file\" \"$file%.jsx.tsx\")",
+      "Bash(npm update:*)",
+      "Bash(npx lighthouse:*)",
+      "Bash(dir /b \"C:\\Users\\noutc\\Casskai\\supabase\\migrations\")",
+      "Bash(docker volume prune:*)",
+      "Bash(docker system prune:*)",
+      "Bash(do if [ -f \"C:\\Users\\noutc\\Casskai\\supabase\\migrations$file\" ])"
     ],
     "deny": []
   }

@@ -78,6 +78,6 @@ export interface SetupProgress {
 export interface ConfigError {
   code: string;
   message: string;
-  details?: any;
+  details?: Record<string, unknown>;
   timestamp: string;
 }

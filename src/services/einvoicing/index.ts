@@ -27,4 +27,4 @@ export { InboundService } from './inbound/InboundService';
 export { FeatureFlagService } from './utils/FeatureFlagService';
 
 // Re-export types
-export * from '@/types/einvoicing.types';
+export * from '../../types/einvoicing.types';

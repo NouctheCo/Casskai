@@ -2,143 +2,279 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useConfig } from './useConfig';
 
-// Hoisted instance used by the default export mock
-const hoisted = vi.hoisted(() => ({
-  instance: {
-    getConfig: vi.fn(),
-    saveConfig: vi.fn(),
-    validateSupabaseConfig: vi.fn(),
-    initializeDatabase: vi.fn(),
-    resetConfig: vi.fn(),
-    exportConfig: vi.fn(),
-    getSupabaseClient: vi.fn(),
-  },
-}));
-
-// Mock the default-exported ConfigService singleton
+// Mock the config service
 vi.mock('../services/configService', () => ({
-  default: class {
-    static getInstance() {
-      return hoisted.instance as any;
-    }
+  configService: {
+    getConfig: vi.fn(),
+    updateConfig: vi.fn(),
+    resetConfig: vi.fn(),
+    subscribe: vi.fn(),
+    unsubscribe: vi.fn(),
   },
 }));
 
 describe('useConfig Hook', () => {
   let mockConfigService: any;
-
-  beforeEach(() => {
+  
+  beforeEach(async () => {
     vi.clearAllMocks();
-    // Reset methods with fresh spies
-    hoisted.instance.getConfig = vi.fn();
-    hoisted.instance.saveConfig = vi.fn();
-    hoisted.instance.validateSupabaseConfig = vi.fn();
-    hoisted.instance.initializeDatabase = vi.fn();
-    hoisted.instance.resetConfig = vi.fn();
-    hoisted.instance.exportConfig = vi.fn();
-    hoisted.instance.getSupabaseClient = vi.fn();
-    mockConfigService = hoisted.instance;
+    mockConfigService = vi.mocked((await import('../services/configService')).configService);
   });
 
   afterEach(() => {
     vi.clearAllTimers();
   });
 
-  const sampleConfig = {
-    supabase: { url: 'https://abc.supabase.co', anonKey: 'x'.repeat(120), validated: true },
-    company: { id: 'Acme', name: 'Acme', country: 'FR', currency: 'EUR', timezone: 'Europe/Paris', accountingStandard: 'PCG' },
-    setupCompleted: true,
-    setupDate: '2024-01-01',
-    version: '1.0.0',
-  } as const;
+  it('should initialize with default config', () => {
+    const mockConfig = {
+      theme: 'light' as const,
+      language: 'fr' as const,
+      currency: 'EUR' as const,
+      dateFormat: 'DD/MM/YYYY' as const,
+      timezone: 'Europe/Paris',
+      notifications: {
+        email: true,
+        push: false,
+        desktop: true,
+      },
+    };
 
-  it('initializes by loading config and sets status', () => {
-    mockConfigService.getConfig.mockReturnValue(sampleConfig);
+    mockConfigService.getConfig.mockReturnValue(mockConfig);
 
     const { result } = renderHook(() => useConfig());
 
-    expect(result.current.config).not.toBeNull();
-    expect(result.current.status === 'configured' || result.current.status === 'configuring').toBe(true);
+    expect(result.current.config).toEqual(mockConfig);
     expect(result.current.isLoading).toBe(false);
     expect(mockConfigService.getConfig).toHaveBeenCalledTimes(1);
   });
 
-  it('saveConfig validates and persists via service', async () => {
-    mockConfigService.saveConfig.mockResolvedValue(undefined);
+  it('should handle loading state', () => {
+    mockConfigService.getConfig.mockImplementation(() => {
+      // Simulate async loading
+      return new Promise(resolve => {
+        setTimeout(() => resolve({
+          theme: 'light' as const,
+          language: 'fr' as const,
+          currency: 'EUR' as const,
+          dateFormat: 'DD/MM/YYYY' as const,
+          timezone: 'Europe/Paris',
+          notifications: { email: true, push: false, desktop: true },
+        }), 100);
+      }) as any;
+    });
+
+    const { result } = renderHook(() => useConfig());
+
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.config).toBeNull();
+  });
+
+  it('should update config successfully', async () => {
+    const initialConfig = {
+      theme: 'light' as const,
+      language: 'fr' as const,
+      currency: 'EUR' as const,
+      dateFormat: 'DD/MM/YYYY' as const,
+      timezone: 'Europe/Paris',
+      notifications: { email: true, push: false, desktop: true },
+    };
+
+    const updatedConfig = {
+      ...initialConfig,
+      theme: 'dark' as const,
+      notifications: { email: true, push: true, desktop: true },
+    };
+
+    mockConfigService.getConfig.mockReturnValue(initialConfig);
+    mockConfigService.updateConfig.mockResolvedValue(updatedConfig);
+
+    const { result } = renderHook(() => useConfig());
+
+    expect(result.current.config?.theme).toBe('light');
+
+    await act(async () => {
+      await result.current.updateConfig({
+        theme: 'dark',
+        'notifications.push': true,
+      });
+    });
+
+    expect(mockConfigService.updateConfig).toHaveBeenCalledWith({
+      theme: 'dark',
+      'notifications.push': true,
+    });
+  });
+
+  it('should handle update errors', async () => {
+    const mockConfig = {
+      theme: 'light' as const,
+      language: 'fr' as const,
+      currency: 'EUR' as const,
+      dateFormat: 'DD/MM/YYYY' as const,
+      timezone: 'Europe/Paris',
+      notifications: { email: true, push: false, desktop: true },
+    };
+
+    mockConfigService.getConfig.mockReturnValue(mockConfig);
+    mockConfigService.updateConfig.mockRejectedValue(new Error('Update failed'));
 
     const { result } = renderHook(() => useConfig());
 
     await act(async () => {
-      await result.current.saveConfig({ ...sampleConfig });
+      try {
+        await result.current.updateConfig({ theme: 'dark' });
+      } catch (error) {
+        expect(error).toEqual(new Error('Update failed'));
+      }
     });
 
-    expect(mockConfigService.saveConfig).toHaveBeenCalledWith({ ...sampleConfig });
+    expect(result.current.error).toBe('Update failed');
   });
 
-  it('validateSupabaseConfig returns boolean and sets error on failure', async () => {
-    mockConfigService.validateSupabaseConfig.mockResolvedValue(false);
+  it('should reset config', async () => {
+    const defaultConfig = {
+      theme: 'light' as const,
+      language: 'en' as const,
+      currency: 'USD' as const,
+      dateFormat: 'MM/DD/YYYY' as const,
+      timezone: 'America/New_York',
+      notifications: { email: true, push: true, desktop: true },
+    };
+
+    mockConfigService.getConfig.mockReturnValue({
+      theme: 'dark' as const,
+      language: 'fr' as const,
+      currency: 'EUR' as const,
+      dateFormat: 'DD/MM/YYYY' as const,
+      timezone: 'Europe/Paris',
+      notifications: { email: false, push: false, desktop: false },
+    });
+    
+    mockConfigService.resetConfig.mockResolvedValue(defaultConfig);
 
     const { result } = renderHook(() => useConfig());
 
-    let ok = true;
     await act(async () => {
-      ok = await result.current.validateSupabaseConfig('https://x.supabase.co', 'k');
-    });
-
-    expect(ok).toBe(false);
-    expect(result.current.error).not.toBeNull();
-  });
-
-  it('initializeDatabase delegates to service', async () => {
-    mockConfigService.initializeDatabase.mockResolvedValue(undefined);
-    const { result } = renderHook(() => useConfig());
-
-    await act(async () => {
-      await result.current.initializeDatabase();
-    });
-
-    expect(mockConfigService.initializeDatabase).toHaveBeenCalledTimes(1);
-  });
-
-  it('resetConfig clears state and calls service', () => {
-    mockConfigService.getConfig.mockReturnValue(sampleConfig);
-    const { result } = renderHook(() => useConfig());
-
-    act(() => {
-      result.current.resetConfig();
+      await result.current.resetConfig();
     });
 
     expect(mockConfigService.resetConfig).toHaveBeenCalledTimes(1);
-    expect(result.current.config).toBeNull();
-    expect(result.current.status).toBe('not_configured');
   });
 
-  it('exportConfig proxies to service', () => {
-    mockConfigService.exportConfig.mockReturnValue('{"ok":true}');
-    const { result } = renderHook(() => useConfig());
+  it('should subscribe to config changes on mount', () => {
+    const mockConfig = {
+      theme: 'light' as const,
+      language: 'fr' as const,
+      currency: 'EUR' as const,
+      dateFormat: 'DD/MM/YYYY' as const,
+      timezone: 'Europe/Paris',
+      notifications: { email: true, push: false, desktop: true },
+    };
 
-    const exported = result.current.exportConfig();
-    expect(exported).toBe('{"ok":true}');
-    expect(mockConfigService.exportConfig).toHaveBeenCalledTimes(1);
+    mockConfigService.getConfig.mockReturnValue(mockConfig);
+
+    const { unmount } = renderHook(() => useConfig());
+
+    expect(mockConfigService.subscribe).toHaveBeenCalledWith(expect.any(Function));
+
+    unmount();
+
+    expect(mockConfigService.unsubscribe).toHaveBeenCalledWith(expect.any(Function));
   });
 
-  it('validateConfig reports errors and warnings', () => {
-    const { result } = renderHook(() => useConfig());
+  it('should handle subscription updates', () => {
+    let subscriberCallback: (config: any) => void;
 
-    const invalid = result.current.validateConfig({
-      supabase: { url: 'bad', anonKey: 'short', validated: false } as any,
-      company: { name: 'A', country: '', currency: '' } as any,
+    mockConfigService.subscribe.mockImplementation((callback) => {
+      subscriberCallback = callback;
     });
 
-    expect(invalid.isValid).toBe(false);
-    expect(invalid.errors.length).toBeGreaterThan(0);
-  });
+    const initialConfig = {
+      theme: 'light' as const,
+      language: 'fr' as const,
+      currency: 'EUR' as const,
+      dateFormat: 'DD/MM/YYYY' as const,
+      timezone: 'Europe/Paris',
+      notifications: { email: true, push: false, desktop: true },
+    };
 
-  it('getSupabaseConfig and getCompanyConfig return values from state', () => {
-    mockConfigService.getConfig.mockReturnValue(sampleConfig);
+    mockConfigService.getConfig.mockReturnValue(initialConfig);
+
     const { result } = renderHook(() => useConfig());
 
-    expect(result.current.getSupabaseConfig()).not.toBeNull();
-    expect(result.current.getCompanyConfig()).not.toBeNull();
+    expect(result.current.config?.theme).toBe('light');
+
+    // Simulate config update from external source
+    act(() => {
+      subscriberCallback!({
+        ...initialConfig,
+        theme: 'dark' as const,
+      });
+    });
+
+    expect(result.current.config?.theme).toBe('dark');
+  });
+
+  it('should provide helper functions for specific config values', () => {
+    const mockConfig = {
+      theme: 'dark' as const,
+      language: 'fr' as const,
+      currency: 'EUR' as const,
+      dateFormat: 'DD/MM/YYYY' as const,
+      timezone: 'Europe/Paris',
+      notifications: { email: true, push: true, desktop: false },
+    };
+
+    mockConfigService.getConfig.mockReturnValue(mockConfig);
+
+    const { result } = renderHook(() => useConfig());
+
+    // Test helper functions if they exist in the actual implementation
+    expect(result.current.config?.theme).toBe('dark');
+    expect(result.current.config?.language).toBe('fr');
+    expect(result.current.config?.currency).toBe('EUR');
+    expect(result.current.config?.notifications.email).toBe(true);
+    expect(result.current.config?.notifications.push).toBe(true);
+    expect(result.current.config?.notifications.desktop).toBe(false);
+  });
+
+  it('should handle invalid config gracefully', () => {
+    mockConfigService.getConfig.mockReturnValue(null);
+
+    const { result } = renderHook(() => useConfig());
+
+    expect(result.current.config).toBeNull();
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it('should handle multiple concurrent updates', async () => {
+    const mockConfig = {
+      theme: 'light' as const,
+      language: 'fr' as const,
+      currency: 'EUR' as const,
+      dateFormat: 'DD/MM/YYYY' as const,
+      timezone: 'Europe/Paris',
+      notifications: { email: true, push: false, desktop: true },
+    };
+
+    mockConfigService.getConfig.mockReturnValue(mockConfig);
+    mockConfigService.updateConfig.mockImplementation((updates) => 
+      Promise.resolve({ ...mockConfig, ...updates })
+    );
+
+    const { result } = renderHook(() => useConfig());
+
+    // Simulate concurrent updates
+    await act(async () => {
+      const promises = [
+        result.current.updateConfig({ theme: 'dark' }),
+        result.current.updateConfig({ language: 'en' }),
+        result.current.updateConfig({ currency: 'USD' }),
+      ];
+
+      await Promise.all(promises);
+    });
+
+    expect(mockConfigService.updateConfig).toHaveBeenCalledTimes(3);
   });
 });

@@ -118,11 +118,14 @@ const ThirdPartiesPage: React.FC = () => {
   const loadThirdParties = async () => {
     try {
       const response = await thirdPartiesService.getThirdParties(currentEnterprise!.id);
-      if (response.data) {
-        setThirdParties(response.data);
-      }
+      setThirdParties(response || []);
     } catch (error) {
       console.error('Error loading third parties:', error);
+      toast({
+        title: 'Erreur de chargement',
+        description: 'Impossible de charger les tiers',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -174,7 +177,9 @@ const ThirdPartiesPage: React.FC = () => {
     }
     
     if (filters.has_overdue) {
-      filtered = filtered.filter(tp => tp.current_balance > 1000);
+      // TODO: Implement proper overdue logic based on invoice due dates
+      // For now, filter based on negative balance (indicating overdue payments)
+      filtered = filtered.filter(tp => tp.current_balance < 0);
     }
     
     setFilteredThirdParties(filtered);
@@ -197,6 +202,46 @@ const ThirdPartiesPage: React.FC = () => {
       style: 'currency',
       currency: 'EUR'
     }).format(amount);
+  };
+
+  const handleViewThirdParty = (thirdParty: ThirdParty) => {
+    setSelectedThirdParty(thirdParty);
+    toast({
+      title: 'Affichage des détails',
+      description: `Détails de ${thirdParty.name}`,
+    });
+    // TODO: Open modal or navigate to detail view
+  };
+
+  const handleEditThirdParty = (thirdParty: ThirdParty) => {
+    setSelectedThirdParty(thirdParty);
+    toast({
+      title: 'Modification',
+      description: `Édition de ${thirdParty.name}`,
+    });
+    // TODO: Open edit modal or navigate to edit form
+  };
+
+  const handleDeleteThirdParty = async (thirdPartyId: string) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce tiers ?')) {
+      return;
+    }
+    
+    try {
+      await thirdPartiesService.deleteThirdParty(thirdPartyId);
+      await loadThirdParties();
+      toast({
+        title: 'Suppression réussie',
+        description: 'Le tiers a été supprimé avec succès',
+      });
+    } catch (error) {
+      console.error('Error deleting third party:', error);
+      toast({
+        title: 'Erreur de suppression',
+        description: 'Impossible de supprimer le tiers',
+        variant: 'destructive'
+      });
+    }
   };
 
   const getTypeColor = (type: string) => {
@@ -659,13 +704,28 @@ const ThirdPartiesPage: React.FC = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleViewThirdParty(thirdParty)}
+                          title="Voir les détails"
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEditThirdParty(thirdParty)}
+                          title="Modifier"
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleDeleteThirdParty(thirdParty.id)}
+                          title="Supprimer"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -732,7 +792,14 @@ const ThirdPartiesPage: React.FC = () => {
                   <p className="text-gray-600 mb-4">
                     Aucun tiers ne correspond aux critères de recherche actuels.
                   </p>
-                  <Button onClick={() => setFilters({ search: '', type: '', category: '', status: '' })}>
+                  <Button onClick={() => setFilters({ 
+                    search: '', 
+                    type: '', 
+                    category: '', 
+                    status: '',
+                    balance_status: undefined,
+                    has_overdue: undefined 
+                  })}>
                     Réinitialiser les filtres
                   </Button>
                 </CardContent>

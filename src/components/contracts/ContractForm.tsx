@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, ControllerRenderProps } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
@@ -180,7 +180,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                 <FormField
                   control={form.control}
                   name="client_id"
-                  render={({ field }) => (
+                  render={({ field }: { field: ControllerRenderProps<ContractFormData, any> }) => (
                     <FormItem>
                       <FormLabel>{t('contracts.form.client', 'Client')}</FormLabel>
                       <FormControl>
@@ -205,7 +205,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                 <FormField
                   control={form.control}
                   name="contract_name"
-                  render={({ field }) => (
+                  render={({ field }: { field: ControllerRenderProps<ContractFormData, any> }) => (
                     <FormItem>
                       <FormLabel>{t('contracts.form.name', 'Nom du contrat')}</FormLabel>
                       <FormControl>
@@ -221,7 +221,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                 <FormField
                   control={form.control}
                   name="contract_type"
-                  render={({ field }) => (
+                  render={({ field }: { field: ControllerRenderProps<ContractFormData, any> }) => (
                     <FormItem>
                       <FormLabel>{t('contracts.form.type', 'Type de remise')}</FormLabel>
                       <FormControl>
@@ -259,7 +259,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                 <FormField
                   control={form.control}
                   name="start_date"
-                  render={({ field }) => (
+                  render={({ field }: { field: ControllerRenderProps<ContractFormData, any> }) => (
                     <FormItem>
                       <FormLabel>{t('contracts.form.start_date', 'Date de début')}</FormLabel>
                       <FormControl>
@@ -273,7 +273,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                 <FormField
                   control={form.control}
                   name="end_date"
-                  render={({ field }) => (
+                  render={({ field }: { field: ControllerRenderProps<ContractFormData, any> }) => (
                     <FormItem>
                       <FormLabel>{t('contracts.form.end_date', 'Date de fin (optionnelle)')}</FormLabel>
                       <FormControl>
@@ -288,7 +288,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
               <FormField
                 control={form.control}
                 name="currency"
-                render={({ field }) => (
+                render={({ field }: { field: ControllerRenderProps<ContractFormData, any> }) => (
                   <FormItem>
                     <FormLabel>{t('contracts.form.currency', 'Devise')}</FormLabel>
                     <FormControl>
@@ -349,7 +349,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                           <FormField
                             control={form.control}
                             name={`tiers.${index}.min`}
-                            render={({ field }) => (
+                            render={({ field }: { field: ControllerRenderProps<ContractFormData, any> }) => (
                               <FormItem>
                                 <FormLabel>Minimum (€)</FormLabel>
                                 <FormControl>
@@ -367,7 +367,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                           <FormField
                             control={form.control}
                             name={`tiers.${index}.max`}
-                            render={({ field }) => (
+                            render={({ field }: { field: ControllerRenderProps<ContractFormData, any> }) => (
                               <FormItem>
                                 <FormLabel>Maximum (€)</FormLabel>
                                 <FormControl>
@@ -387,7 +387,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                           <FormField
                             control={form.control}
                             name={`tiers.${index}.rate`}
-                            render={({ field }) => (
+                            render={({ field }: { field: ControllerRenderProps<ContractFormData, any> }) => (
                               <FormItem>
                                 <FormLabel>Taux (%)</FormLabel>
                                 <FormControl>
@@ -407,7 +407,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                           <FormField
                             control={form.control}
                             name={`tiers.${index}.description`}
-                            render={({ field }) => (
+                            render={({ field }: { field: ControllerRenderProps<ContractFormData, any> }) => (
                               <FormItem>
                                 <FormLabel>Description</FormLabel>
                                 <FormControl>
@@ -428,7 +428,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                 <FormField
                   control={form.control}
                   name="fixed_rate"
-                  render={({ field }) => (
+                  render={({ field }: { field: ControllerRenderProps<ContractFormData, any> }) => (
                     <FormItem>
                       <FormLabel>Taux de remise (%)</FormLabel>
                       <FormControl>
@@ -455,7 +455,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                 <FormField
                   control={form.control}
                   name="fixed_amount"
-                  render={({ field }) => (
+                  render={({ field }: { field: ControllerRenderProps<ContractFormData, any> }) => (
                     <FormItem>
                       <FormLabel>Montant de remise fixe</FormLabel>
                       <FormControl>

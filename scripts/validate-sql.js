@@ -41,9 +41,17 @@ const VALIDATION_RULES = [
   }
 ];
 
+// Required patterns for Supabase migrations
+const REQUIRED_PATTERNS = [
+  {
+    name: 'Migration header comment',
+    pattern: /^--\s*.*migration/i,
+    required: false
+  }
+];
 
 function validateSQL(content, filename) {
-  // const lines = content.split('\n');
+  const lines = content.split('\n');
   const issues = [];
   const info = [];
   const warnings = [];

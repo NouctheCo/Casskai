@@ -14,7 +14,6 @@ class OnboardingValidator {
 
   private addResult(test: string, status: 'PASS' | 'FAIL' | 'SKIP', message: string, details?: unknown) {
     this.results.push({ test, status, message, details });
-    console.warn(`[${status}] ${test}: ${message}`, details ? details : '');
   }
 
   /**
@@ -67,7 +66,6 @@ class OnboardingValidator {
    */
   async testRetryLogic(): Promise<ValidationResult> {
     try {
-      // Simuler une fonction qui échoue 2 fois puis réussit
       let attempts = 0;
       const mockOperation = async (): Promise<string> => {
         attempts++;
@@ -77,31 +75,35 @@ class OnboardingValidator {
         return 'Succès';
       };
 
-      // Fonction de retry (copiée de AuthContext)
-  const retryOperation = async <T>(operation: () => Promise<T>, maxRetries: number = 2, delay: number = 100): Promise<T> => {
+      const retryOperation = async <T>(
+        operation: () => Promise<T>,
+        maxRetries = 2,
+        delay = 100
+      ): Promise<T> => {
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
           try {
-    // eslint-disable-next-line no-await-in-loop
-    return await operation();
+            // eslint-disable-next-line no-await-in-loop
+            return await operation();
           } catch (error) {
             if (attempt === maxRetries) {
               throw error;
             }
-    // eslint-disable-next-line no-await-in-loop
-    await new Promise(resolve => setTimeout(resolve, delay));
+            // eslint-disable-next-line no-await-in-loop
+            await new Promise((resolve) => setTimeout(resolve, delay));
           }
         }
         throw new Error('Retry logic error');
       };
 
       const result = await retryOperation(mockOperation, 3);
-      
+
       if (result !== 'Succès') {
         throw new Error('Résultat inattendu du retry');
       }
 
-      this.addResult('retry logic', 'PASS', `Retry fonctionnel après ${attempts} tentatives`);
-      return { test: 'retry logic', status: 'PASS', message: `Retry fonctionnel après ${attempts} tentatives` };
+      const message = `Retry fonctionnel après ${attempts} tentatives`;
+      this.addResult('retry logic', 'PASS', message);
+      return { test: 'retry logic', status: 'PASS', message };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Erreur inconnue';
       this.addResult('retry logic', 'FAIL', message);
@@ -153,31 +155,28 @@ class OnboardingValidator {
     try {
       let eventReceived = false;
       
-      // Créer un listener pour l'événement personnalisé
-      const handler = (e: CustomEvent) => {
+      const handler = (_e: Event) => {
         eventReceived = true;
-  console.warn('Événement reçu:', e.detail);
+        // Pour le test, nous n'avons pas besoin de logger le détail de l'événement
       };
 
-      window.addEventListener('enterprise-sync-needed', handler as EventListener);
+      window.addEventListener('enterprise-sync-needed', handler);
 
-      // Émettre l'événement
       window.dispatchEvent(new CustomEvent('enterprise-sync-needed', {
         detail: { companyId: 'test-123' }
       }));
 
-      // Attendre un peu pour que l'événement soit traité
       await new Promise(resolve => setTimeout(resolve, 50));
 
-      // Nettoyer
-      window.removeEventListener('enterprise-sync-needed', handler as EventListener);
+      window.removeEventListener('enterprise-sync-needed', handler);
 
       if (!eventReceived) {
         throw new Error('Événement de synchronisation non reçu');
       }
 
-      this.addResult('event sync', 'PASS', 'Système d\'événements de synchronisation fonctionnel');
-      return { test: 'event sync', status: 'PASS', message: 'Système d\'événements de synchronisation fonctionnel' };
+      const message = 'Système d\'événements de synchronisation fonctionnel';
+      this.addResult('event sync', 'PASS', message);
+      return { test: 'event sync', status: 'PASS', message };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Erreur inconnue';
       this.addResult('event sync', 'FAIL', message);
@@ -189,7 +188,8 @@ class OnboardingValidator {
    * Exécuter tous les tests
    */
   async runAllTests(): Promise<{ summary: string; results: ValidationResult[] }> {
-  console.warn('🚀 Démarrage de la validation du flux onboarding...\n');
+    // eslint-disable-next-line no-console
+    console.log('🚀 Démarrage de la validation du flux onboarding...\n');
 
     // Exécuter les tests
     this.testLocalStorageSynchronization();
@@ -204,13 +204,14 @@ class OnboardingValidator {
 
     const summary = `Tests terminés: ${passed} réussis, ${failed} échoués, ${skipped} ignorés`;
     
-  console.warn('\n📊 Résumé des tests:');
-  console.warn(summary);
+    // eslint-disable-next-line no-console
+    console.log(`\n📊 Résumé des tests:\n${summary}`);
     
     if (failed === 0) {
-  console.warn('✅ Tous les tests sont passés ! Les améliorations semblent fonctionnelles.');
+      // eslint-disable-next-line no-console
+      console.log('✅ Tous les tests sont passés ! Les améliorations semblent fonctionnelles.');
     } else {
-  console.warn('❌ Certains tests ont échoué. Vérifiez les détails ci-dessus.');
+      console.error('❌ Certains tests ont échoué. Vérifiez les détails ci-dessus.');
     }
 
     return { summary, results: this.results };
@@ -227,5 +228,5 @@ export const validateOnboardingImprovements = async () => {
 
 // Si exécuté directement dans le navigateur
 if (typeof window !== 'undefined') {
-  (window as unknown as Record<string, unknown>).validateOnboarding = validateOnboardingImprovements;
+  (window as Window & typeof globalThis & { validateOnboarding: () => Promise<{ summary: string; results: ValidationResult[] }> }).validateOnboarding = validateOnboardingImprovements;
 }

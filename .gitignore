@@ -12,6 +12,10 @@ node_modules
 dist
 dist-ssr
 
+# Compiled JavaScript files in source
+src/**/*.js
+src/**/*.js.map
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

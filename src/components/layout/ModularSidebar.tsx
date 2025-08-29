@@ -3,7 +3,6 @@ import { useLocation, Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useModules } from '@/contexts/ModulesContext';
 import { 
   LayoutDashboard,
@@ -12,12 +11,20 @@ import {
   Users,
   FileText,
   Settings,
-  ChevronDown,
-  ChevronRight,
   Package,
   Zap,
-  Star,
-  Store
+  Store,
+  Briefcase,
+  ShoppingCart,
+  Archive,
+  BarChart3,
+  Sparkles,
+  UsersRound,
+  KanbanSquare,
+  Users2,
+  Landmark,
+  Shield,
+  Home
 } from 'lucide-react';
 
 // Configuration de base de la navigation (modules core toujours visibles)
@@ -100,23 +107,22 @@ const moduleNavItems = {
       { title: 'Rapports projets', href: '/projects/reports' },
     ],
   },
-  'marketplace': {
-    title: 'Marketplace',
-    href: '/marketplace',
-    icon: Store,
-    badge: 'Nouveau',
-    children: [
-      { title: 'Découvrir', href: '/marketplace/browse' },
-      { title: 'Mes extensions', href: '/marketplace/installed' },
-      { title: 'Publier', href: '/marketplace/publish' },
-    ],
-  },
 };
 
 const ModularSidebar: React.FC = () => {
   const location = useLocation();
-  const { activeModules, isModuleActive, availableModules } = useModules();
+  const { activeModules, isModuleActive, availableModules, allModules } = useModules();
   const [expandedItems, setExpandedItems] = React.useState<string[]>([]);
+
+  // DEBUG: Log pour comprendre le problème
+  React.useEffect(() => {
+    console.log('🐛 [ModularSidebar] DEBUG:', {
+      allModules: allModules?.length || 0,
+      activeModules: activeModules?.length || 0,
+      availableModules: availableModules?.length || 0,
+      allModulesData: allModules
+    });
+  }, [allModules, activeModules, availableModules]);
 
   const toggleExpanded = (itemTitle: string) => {
     setExpandedItems(prev => 
@@ -258,7 +264,7 @@ const ModularSidebar: React.FC = () => {
             className="w-full justify-start py-3 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
             asChild
           >
-            <Link to="/settings/modules">
+            <Link to="/modules">
               <Zap className="mr-3 h-4 w-4" />
               <span className="flex-1 text-left">Extensions disponibles</span>
               <Badge variant="outline" className="ml-2 text-xs border-blue-200 text-blue-600">
@@ -268,25 +274,6 @@ const ModularSidebar: React.FC = () => {
           </Button>
         )}
 
-        {/* Marketplace */}
-        {isModuleActive('marketplace') && (
-          <Button
-            variant="ghost"
-            className={cn(
-              'w-full justify-start py-3',
-              isActive('/marketplace') && 'bg-accent text-accent-foreground'
-            )}
-            asChild
-          >
-            <Link to="/marketplace">
-              <Store className="mr-3 h-4 w-4" />
-              <span className="flex-1 text-left">Marketplace</span>
-              <Badge variant="secondary" className="ml-2 text-xs">
-                Nouveau
-              </Badge>
-            </Link>
-          </Button>
-        )}
 
         {/* Paramètres */}
         <Button

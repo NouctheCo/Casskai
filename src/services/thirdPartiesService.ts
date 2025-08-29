@@ -1,754 +1,395 @@
-import {
-  ThirdParty,
-  ThirdPartyFormData,
-  ContactPerson,
-  ContactPersonFormData,
-  Transaction,
-  ThirdPartyBalance,
-  AgingReport,
-  ThirdPartyStats,
-  ThirdPartyFilters,
+import { supabase } from '@/lib/supabase';
+import { 
+  ThirdParty, 
+  ThirdPartyDashboardData, 
+  AgingReport, 
   ThirdPartyServiceResponse,
-  ThirdPartyDashboardData,
-  Address,
-  BankDetails,
-  ExportConfig
-} from '../types/third-parties.types';
+  ExportConfig,
+  ThirdPartyFormData,
+  ThirdPartyFilters
+} from '@/types/third-parties.types';
 
-// Mock data
-const mockAddresses: Address[] = [
-  {
-    street: '123 Rue de la Paix',
-    city: 'Paris',
-    postal_code: '75001',
-    country: 'France',
-    region: 'Île-de-France'
-  },
-  {
-    street: '456 Avenue des Champs',
-    city: 'Lyon',
-    postal_code: '69000',
-    country: 'France',
-    region: 'Auvergne-Rhône-Alpes'
-  }
-];
+export type ThirdPartyType = 'customer' | 'supplier' | 'partner' | 'employee';
 
-const mockBankDetails: BankDetails[] = [
-  {
-    bank_name: 'BNP Paribas',
-    account_number: '12345678901',
-    iban: 'FR1420041010050500013M02606',
-    swift_code: 'BNPAFRPP',
-    account_holder: 'Entreprise ABC SARL'
-  },
-  {
-    bank_name: 'Crédit Agricole',
-    account_number: '98765432101',
-    iban: 'FR1420041010050500013M02607',
-    swift_code: 'AGRIFRPP',
-    account_holder: 'Fournisseur XYZ SA'
-  }
-];
+export interface CreateThirdPartyData {
+  type: ThirdPartyType;
+  name: string;
+  legal_name?: string;
+  contact_person?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  postal_code?: string;
+  country?: string;
+  vat_number?: string;
+  payment_terms?: number;
+  credit_limit?: number;
+  notes?: string;
+}
 
-const mockContacts: ContactPerson[] = [
-  {
-    id: '1',
-    first_name: 'Jean',
-    last_name: 'Dupont',
-    position: 'Directeur Commercial',
-    email: 'j.dupont@entreprise-abc.fr',
-    phone: '+33 1 42 86 83 02',
-    mobile: '+33 6 12 34 56 78',
-    is_primary: true,
-    notes: 'Contact principal pour toutes les négociations commerciales'
-  },
-  {
-    id: '2',
-    first_name: 'Marie',
-    last_name: 'Martin',
-    position: 'Responsable Achats',
-    email: 'm.martin@fournisseur-xyz.fr',
-    phone: '+33 4 78 92 15 33',
-    is_primary: true,
-    notes: 'Disponible du lundi au vendredi de 9h à 17h'
-  },
-  {
-    id: '3',
-    first_name: 'Pierre',
-    last_name: 'Leblanc',
-    position: 'Comptable',
-    email: 'p.leblanc@entreprise-abc.fr',
-    phone: '+33 1 42 86 83 05',
-    is_primary: false
-  }
-];
+export interface UpdateThirdPartyData extends Partial<CreateThirdPartyData> {
+  is_active?: boolean;
+}
 
-const mockThirdParties: ThirdParty[] = [
-  {
-    id: '1',
-    code: 'CL001',
-    type: 'client',
-    category: 'company',
-    name: 'Entreprise ABC SARL',
-    legal_name: 'Entreprise ABC Société à Responsabilité Limitée',
-    display_name: 'ABC Corp',
-    siret: '12345678901234',
-    vat_number: 'FR12345678901',
-    registration_number: '123456789',
-    legal_form: 'SARL',
-    primary_email: 'contact@entreprise-abc.fr',
-    secondary_email: 'commercial@entreprise-abc.fr',
-    primary_phone: '+33 1 42 86 83 02',
-    secondary_phone: '+33 1 42 86 83 03',
-    website: 'https://www.entreprise-abc.fr',
-    billing_address: mockAddresses[0],
-    shipping_address: mockAddresses[0],
-    currency: 'EUR',
-    payment_terms: 30,
-    credit_limit: 50000,
-    current_balance: 15750.50,
-    total_receivables: 25800.00,
-    total_payables: 0,
-    bank_details: mockBankDetails[0],
-    client_since: '2022-01-15',
-    status: 'active',
-    contacts: [mockContacts[0], mockContacts[2]],
-    industry: 'Technology',
-    company_size: 'medium',
-    annual_revenue: 2500000,
-    employee_count: 45,
-    internal_notes: 'Client stratégique avec un fort potentiel de croissance',
-    tags: ['stratégique', 'technologie', 'croissance'],
-    enterprise_id: 'company-1',
-    created_by: 'user-1',
-    created_at: '2022-01-15T10:00:00Z',
-    updated_at: '2024-01-20T15:30:00Z',
-    last_interaction: '2024-01-18T14:22:00Z',
-    preferred_language: 'fr',
-    communication_preference: 'email',
-    invoice_delivery_method: 'email'
-  },
-  {
-    id: '2',
-    code: 'FO001',
-    type: 'supplier',
-    category: 'company',
-    name: 'Fournisseur XYZ SA',
-    legal_name: 'Fournisseur XYZ Société Anonyme',
-    siret: '98765432109876',
-    vat_number: 'FR98765432109',
-    primary_email: 'contact@fournisseur-xyz.fr',
-    primary_phone: '+33 4 78 92 15 33',
-    website: 'https://www.fournisseur-xyz.fr',
-    billing_address: mockAddresses[1],
-    currency: 'EUR',
-    payment_terms: 45,
-    credit_limit: 75000,
-    current_balance: -12450.75,
-    total_receivables: 0,
-    total_payables: 18900.00,
-    bank_details: mockBankDetails[1],
-    supplier_since: '2021-06-20',
-    status: 'active',
-    contacts: [mockContacts[1]],
-    industry: 'Manufacturing',
-    company_size: 'large',
-    annual_revenue: 15000000,
-    employee_count: 200,
-    internal_notes: 'Fournisseur fiable avec d\'excellents délais de livraison',
-    tags: ['fiable', 'manufacturier', 'livraison-rapide'],
-    enterprise_id: 'company-1',
-    created_by: 'user-1',
-    created_at: '2021-06-20T09:15:00Z',
-    updated_at: '2024-01-19T11:45:00Z',
-    last_interaction: '2024-01-17T09:30:00Z',
-    preferred_language: 'fr',
-    communication_preference: 'phone',
-    invoice_delivery_method: 'email'
-  },
-  {
-    id: '3',
-    code: 'CL002',
-    type: 'client',
-    category: 'individual',
-    name: 'Sophie Durand',
-    legal_name: 'Sophie Marie Durand',
-    primary_email: 's.durand@email.fr',
-    primary_phone: '+33 6 98 76 54 32',
-    billing_address: {
-      street: '78 Rue Victor Hugo',
-      city: 'Marseille',
-      postal_code: '13001',
-      country: 'France',
-      region: 'Provence-Alpes-Côte d\'Azur'
-    },
-    currency: 'EUR',
-    payment_terms: 15,
-    current_balance: 850.00,
-    total_receivables: 1200.00,
-    total_payables: 0,
-    client_since: '2023-03-10',
-    status: 'active',
-    contacts: [],
-    tags: ['particulier', 'ponctuel'],
-    enterprise_id: 'company-1',
-    created_by: 'user-2',
-    created_at: '2023-03-10T14:20:00Z',
-    updated_at: '2024-01-15T16:10:00Z',
-    preferred_language: 'fr',
-    communication_preference: 'email',
-    invoice_delivery_method: 'email'
-  }
-];
-
-const mockTransactions: Transaction[] = [
-  {
-    id: '1',
-    third_party_id: '1',
-    type: 'invoice',
-    direction: 'incoming',
-    reference: 'FAC-2024-001',
-    description: 'Prestation de conseil - Janvier 2024',
-    amount: 5400.00,
-    currency: 'EUR',
-    transaction_date: '2024-01-15',
-    due_date: '2024-02-14',
-    status: 'pending',
-    payment_status: 'unpaid',
-    tax_amount: 900.00,
-    net_amount: 4500.00,
-    created_at: '2024-01-15T10:30:00Z',
-    updated_at: '2024-01-15T10:30:00Z'
-  },
-  {
-    id: '2',
-    third_party_id: '2',
-    type: 'payment',
-    direction: 'outgoing',
-    reference: 'PAY-2024-001',
-    description: 'Paiement facture matières premières',
-    amount: 3200.00,
-    currency: 'EUR',
-    transaction_date: '2024-01-10',
-    payment_date: '2024-01-10',
-    status: 'paid',
-    payment_status: 'paid',
-    net_amount: 3200.00,
-    payment_method: 'transfer',
-    created_at: '2024-01-10T14:20:00Z',
-    updated_at: '2024-01-10T14:25:00Z'
-  },
-  {
-    id: '3',
-    third_party_id: '3',
-    type: 'invoice',
-    direction: 'incoming',
-    reference: 'FAC-2024-002',
-    description: 'Formation personnalisée',
-    amount: 1200.00,
-    currency: 'EUR',
-    transaction_date: '2024-01-20',
-    due_date: '2024-02-04',
-    status: 'pending',
-    payment_status: 'unpaid',
-    tax_amount: 200.00,
-    net_amount: 1000.00,
-    created_at: '2024-01-20T11:45:00Z',
-    updated_at: '2024-01-20T11:45:00Z'
-  }
-];
+export interface ThirdPartyStats {
+  total_customers: number;
+  total_suppliers: number;
+  active_customers: number;
+  active_suppliers: number;
+  total_credit_limit: number;
+  top_customers: Array<{
+    id: string;
+    name: string;
+    total_invoices: number;
+    total_amount: number;
+  }>;
+}
 
 class ThirdPartiesService {
-  // Third parties CRUD
-  async getThirdParties(enterpriseId: string, filters?: ThirdPartyFilters): Promise<ThirdPartyServiceResponse<ThirdParty[]>> {
+  async getCurrentCompanyId(): Promise<string> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    const { data: userCompanies, error } = await supabase
+      .from('user_companies')
+      .select('company_id')
+      .eq('user_id', user.id)
+      .eq('is_default', true)
+      .single();
+
+    if (error || !userCompanies) {
+      throw new Error('No active company found');
+    }
+
+    return userCompanies.company_id;
+  }
+
+  async getThirdParties(enterpriseId?: string, type?: ThirdPartyType): Promise<ThirdParty[]> {
     try {
-      let filteredThirdParties = mockThirdParties.filter(tp => tp.enterprise_id === enterpriseId);
-      
-      if (filters) {
-        if (filters.search) {
-          const searchLower = filters.search.toLowerCase();
-          filteredThirdParties = filteredThirdParties.filter(tp =>
-            tp.name.toLowerCase().includes(searchLower) ||
-            tp.primary_email.toLowerCase().includes(searchLower) ||
-            tp.code.toLowerCase().includes(searchLower)
-          );
-        }
-        
-        if (filters.type) {
-          filteredThirdParties = filteredThirdParties.filter(tp => tp.type === filters.type);
-        }
-        
-        if (filters.category) {
-          filteredThirdParties = filteredThirdParties.filter(tp => tp.category === filters.category);
-        }
-        
-        if (filters.status) {
-          filteredThirdParties = filteredThirdParties.filter(tp => tp.status === filters.status);
-        }
-        
-        if (filters.industry) {
-          filteredThirdParties = filteredThirdParties.filter(tp => tp.industry === filters.industry);
-        }
-        
-        if (filters.balance_status) {
-          if (filters.balance_status === 'positive') {
-            filteredThirdParties = filteredThirdParties.filter(tp => tp.current_balance > 0);
-          } else if (filters.balance_status === 'negative') {
-            filteredThirdParties = filteredThirdParties.filter(tp => tp.current_balance < 0);
-          } else if (filters.balance_status === 'zero') {
-            filteredThirdParties = filteredThirdParties.filter(tp => tp.current_balance === 0);
-          }
-        }
-        
-        if (filters.has_overdue) {
-          // Mock logic for overdue - in real implementation would check actual due dates
-          filteredThirdParties = filteredThirdParties.filter(tp => tp.current_balance > 1000);
-        }
-        
-        if (filters.tags && filters.tags.length > 0) {
-          filteredThirdParties = filteredThirdParties.filter(tp =>
-            filters.tags!.some(tag => tp.tags.includes(tag))
-          );
-        }
+      const companyId = enterpriseId || await this.getCurrentCompanyId();
+
+      let query = supabase
+        .from('third_parties')
+        .select('*')
+        .eq('enterprise_id', companyId)
+        .order('name');
+
+      if (type) {
+        query = query.eq('type', type);
       }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
       
-      return { data: filteredThirdParties };
+      // Transform data to match expected structure
+      const transformedData = (data || []).map(item => ({
+        ...item,
+        billing_address: item.billing_address || {
+          street: item.address || '',
+          city: item.city || '',
+          postal_code: item.postal_code || '',
+          country: item.country || 'FR'
+        },
+        primary_email: item.email || item.primary_email || '',
+        primary_phone: item.phone || item.primary_phone || '',
+        current_balance: item.current_balance || 0,
+        total_receivables: item.total_receivables || 0,
+        total_payables: item.total_payables || 0,
+        tags: item.tags || [],
+        contacts: item.contacts || [],
+        currency: item.currency || 'EUR',
+        payment_terms: item.payment_terms || 30,
+        status: item.status || 'active'
+      }));
+
+      return transformedData;
     } catch (error) {
-      return {
-        data: [],
-        error: { message: 'Erreur lors de la récupération des tiers' }
-      };
+      console.error('Error fetching third parties:', error);
+      throw error;
     }
   }
 
-  async getThirdPartyById(thirdPartyId: string): Promise<ThirdPartyServiceResponse<ThirdParty>> {
+  async getThirdPartyById(id: string): Promise<ThirdParty> {
     try {
-      const thirdParty = mockThirdParties.find(tp => tp.id === thirdPartyId);
-      if (!thirdParty) {
-        return {
-          data: {} as ThirdParty,
-          error: { message: 'Tiers non trouvé' }
-        };
-      }
-      
-      return { data: thirdParty };
+      const companyId = await this.getCurrentCompanyId();
+
+      const { data, error } = await supabase
+        .from('third_parties')
+        .select('*')
+        .eq('id', id)
+        .eq('company_id', companyId)
+        .single();
+
+      if (error) throw error;
+      if (!data) throw new Error('Third party not found');
+
+      return data;
     } catch (error) {
-      return {
-        data: {} as ThirdParty,
-        error: { message: 'Erreur lors de la récupération du tiers' }
-      };
+      console.error('Error fetching third party:', error);
+      throw error;
     }
   }
 
-  async createThirdParty(enterpriseId: string, formData: ThirdPartyFormData): Promise<ThirdPartyServiceResponse<ThirdParty>> {
+  async createThirdParty(thirdPartyData: CreateThirdPartyData): Promise<ThirdParty> {
     try {
-      const newThirdParty: ThirdParty = {
-        id: Date.now().toString(),
-        code: this.generateThirdPartyCode(formData.type),
-        type: formData.type,
-        category: formData.category,
-        name: formData.name,
-        legal_name: formData.legal_name,
-        siret: formData.siret,
-        vat_number: formData.vat_number,
-        primary_email: formData.primary_email,
-        primary_phone: formData.primary_phone,
-        website: formData.website,
-        billing_address: formData.billing_address,
-        shipping_address: formData.shipping_address,
-        currency: formData.currency,
-        payment_terms: formData.payment_terms,
-        credit_limit: formData.credit_limit,
-        current_balance: 0,
-        total_receivables: 0,
-        total_payables: 0,
-        bank_details: formData.bank_details,
-        client_since: formData.type === 'client' || formData.type === 'both' ? new Date().toISOString().split('T')[0] : undefined,
-        supplier_since: formData.type === 'supplier' || formData.type === 'both' ? new Date().toISOString().split('T')[0] : undefined,
-        status: 'active',
-        contacts: [],
-        industry: formData.industry,
-        company_size: formData.company_size,
-        internal_notes: formData.internal_notes,
-        tags: formData.tags,
-        enterprise_id: enterpriseId,
-        created_by: 'current-user',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        preferred_language: formData.preferred_language,
-        communication_preference: formData.communication_preference,
-        invoice_delivery_method: formData.invoice_delivery_method
-      };
-      
-      mockThirdParties.push(newThirdParty);
-      return { data: newThirdParty };
+      const companyId = await this.getCurrentCompanyId();
+
+      const { data, error } = await supabase
+        .from('third_parties')
+        .insert({
+          company_id: companyId,
+          ...thirdPartyData,
+          country: thirdPartyData.country || 'FR',
+          payment_terms: thirdPartyData.payment_terms || 30,
+          credit_limit: thirdPartyData.credit_limit || 0,
+          is_active: true
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
     } catch (error) {
-      return {
-        data: {} as ThirdParty,
-        error: { message: 'Erreur lors de la création du tiers' }
-      };
+      console.error('Error creating third party:', error);
+      throw error;
     }
   }
 
-  async updateThirdParty(thirdPartyId: string, formData: Partial<ThirdPartyFormData>): Promise<ThirdPartyServiceResponse<ThirdParty>> {
+  async updateThirdParty(id: string, updateData: UpdateThirdPartyData): Promise<ThirdParty> {
     try {
-      const thirdPartyIndex = mockThirdParties.findIndex(tp => tp.id === thirdPartyId);
-      if (thirdPartyIndex === -1) {
-        return {
-          data: {} as ThirdParty,
-          error: { message: 'Tiers non trouvé' }
-        };
-      }
-      
-      mockThirdParties[thirdPartyIndex] = {
-        ...mockThirdParties[thirdPartyIndex],
-        ...formData,
-        updated_at: new Date().toISOString()
-      };
-      
-      return { data: mockThirdParties[thirdPartyIndex] };
+      const companyId = await this.getCurrentCompanyId();
+
+      const { data, error } = await supabase
+        .from('third_parties')
+        .update(updateData)
+        .eq('id', id)
+        .eq('company_id', companyId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      if (!data) throw new Error('Third party not found');
+
+      return data;
     } catch (error) {
-      return {
-        data: {} as ThirdParty,
-        error: { message: 'Erreur lors de la mise à jour du tiers' }
-      };
+      console.error('Error updating third party:', error);
+      throw error;
     }
   }
 
-  async deleteThirdParty(thirdPartyId: string): Promise<ThirdPartyServiceResponse<boolean>> {
+  async deleteThirdParty(id: string): Promise<void> {
     try {
-      const thirdPartyIndex = mockThirdParties.findIndex(tp => tp.id === thirdPartyId);
-      if (thirdPartyIndex === -1) {
-        return {
-          data: false,
-          error: { message: 'Tiers non trouvé' }
-        };
+      const companyId = await this.getCurrentCompanyId();
+
+      // Check if third party is used in invoices
+      const { count: invoicesCount } = await supabase
+        .from('invoices')
+        .select('*', { count: 'exact', head: true })
+        .eq('third_party_id', id)
+        .eq('company_id', companyId);
+
+      if (invoicesCount && invoicesCount > 0) {
+        // Instead of deleting, deactivate the third party
+        await this.updateThirdParty(id, { is_active: false });
+        return;
       }
-      
-      mockThirdParties.splice(thirdPartyIndex, 1);
-      return { data: true };
+
+      const { error } = await supabase
+        .from('third_parties')
+        .delete()
+        .eq('id', id)
+        .eq('company_id', companyId);
+
+      if (error) throw error;
     } catch (error) {
-      return {
-        data: false,
-        error: { message: 'Erreur lors de la suppression du tiers' }
-      };
+      console.error('Error deleting third party:', error);
+      throw error;
     }
   }
 
-  // Contact management
-  async addContact(thirdPartyId: string, contactData: ContactPersonFormData): Promise<ThirdPartyServiceResponse<ContactPerson>> {
+  async getThirdPartyStats(): Promise<ThirdPartyStats> {
     try {
-      const thirdParty = mockThirdParties.find(tp => tp.id === thirdPartyId);
-      if (!thirdParty) {
-        return {
-          data: {} as ContactPerson,
-          error: { message: 'Tiers non trouvé' }
-        };
-      }
-      
-      const newContact: ContactPerson = {
-        id: Date.now().toString(),
-        ...contactData
-      };
-      
-      thirdParty.contacts.push(newContact);
-      thirdParty.updated_at = new Date().toISOString();
-      
-      return { data: newContact };
-    } catch (error) {
+      const companyId = await this.getCurrentCompanyId();
+
+      // Get basic counts
+      const { data: stats, error: statsError } = await supabase
+        .from('third_parties')
+        .select('type, is_active, credit_limit')
+        .eq('company_id', companyId);
+
+      if (statsError) throw statsError;
+
+      const totalCustomers = stats?.filter(tp => tp.type === 'customer').length || 0;
+      const totalSuppliers = stats?.filter(tp => tp.type === 'supplier').length || 0;
+      const activeCustomers = stats?.filter(tp => tp.type === 'customer' && tp.is_active).length || 0;
+      const activeSuppliers = stats?.filter(tp => tp.type === 'supplier' && tp.is_active).length || 0;
+      const totalCreditLimit = stats?.reduce((sum, tp) => sum + (tp.credit_limit || 0), 0) || 0;
+
+      // Get top customers with invoice totals
+      const { data: topCustomersData, error: topCustomersError } = await supabase
+        .from('third_parties')
+        .select(`
+          id,
+          name,
+          invoices!inner(total_amount)
+        `)
+        .eq('company_id', companyId)
+        .eq('type', 'customer')
+        .eq('is_active', true)
+        .limit(5);
+
+      if (topCustomersError) throw topCustomersError;
+
+      const topCustomers = (topCustomersData || []).map(customer => ({
+        id: customer.id,
+        name: customer.name,
+        total_invoices: customer.invoices?.length || 0,
+        total_amount: customer.invoices?.reduce((sum: number, inv: any) => sum + parseFloat(inv.total_amount || 0), 0) || 0
+      })).sort((a, b) => b.total_amount - a.total_amount);
+
       return {
-        data: {} as ContactPerson,
-        error: { message: 'Erreur lors de l\'ajout du contact' }
+        total_customers: totalCustomers,
+        total_suppliers: totalSuppliers,
+        active_customers: activeCustomers,
+        active_suppliers: activeSuppliers,
+        total_credit_limit: totalCreditLimit,
+        top_customers: topCustomers
       };
+    } catch (error) {
+      console.error('Error fetching third party stats:', error);
+      throw error;
     }
   }
 
-  async updateContact(thirdPartyId: string, contactId: string, contactData: Partial<ContactPersonFormData>): Promise<ThirdPartyServiceResponse<ContactPerson>> {
+  async searchThirdParties(query: string, type?: ThirdPartyType): Promise<ThirdParty[]> {
     try {
-      const thirdParty = mockThirdParties.find(tp => tp.id === thirdPartyId);
-      if (!thirdParty) {
-        return {
-          data: {} as ContactPerson,
-          error: { message: 'Tiers non trouvé' }
-        };
-      }
-      
-      const contactIndex = thirdParty.contacts.findIndex(c => c.id === contactId);
-      if (contactIndex === -1) {
-        return {
-          data: {} as ContactPerson,
-          error: { message: 'Contact non trouvé' }
-        };
-      }
-      
-      thirdParty.contacts[contactIndex] = {
-        ...thirdParty.contacts[contactIndex],
-        ...contactData
-      };
-      
-      thirdParty.updated_at = new Date().toISOString();
-      
-      return { data: thirdParty.contacts[contactIndex] };
-    } catch (error) {
-      return {
-        data: {} as ContactPerson,
-        error: { message: 'Erreur lors de la mise à jour du contact' }
-      };
-    }
-  }
+      const companyId = await this.getCurrentCompanyId();
 
-  async deleteContact(thirdPartyId: string, contactId: string): Promise<ThirdPartyServiceResponse<boolean>> {
-    try {
-      const thirdParty = mockThirdParties.find(tp => tp.id === thirdPartyId);
-      if (!thirdParty) {
-        return {
-          data: false,
-          error: { message: 'Tiers non trouvé' }
-        };
-      }
-      
-      const contactIndex = thirdParty.contacts.findIndex(c => c.id === contactId);
-      if (contactIndex === -1) {
-        return {
-          data: false,
-          error: { message: 'Contact non trouvé' }
-        };
-      }
-      
-      thirdParty.contacts.splice(contactIndex, 1);
-      thirdParty.updated_at = new Date().toISOString();
-      
-      return { data: true };
-    } catch (error) {
-      return {
-        data: false,
-        error: { message: 'Erreur lors de la suppression du contact' }
-      };
-    }
-  }
+      let supabaseQuery = supabase
+        .from('third_parties')
+        .select('*')
+        .eq('company_id', companyId)
+        .eq('is_active', true);
 
-  // Transactions
-  async getTransactions(thirdPartyId: string): Promise<ThirdPartyServiceResponse<Transaction[]>> {
-    try {
-      const transactions = mockTransactions.filter(t => t.third_party_id === thirdPartyId);
-      return { data: transactions };
-    } catch (error) {
-      return {
-        data: [],
-        error: { message: 'Erreur lors de la récupération des transactions' }
-      };
-    }
-  }
-
-  // Balance and aging
-  async getThirdPartyBalance(thirdPartyId: string): Promise<ThirdPartyServiceResponse<ThirdPartyBalance>> {
-    try {
-      const thirdParty = mockThirdParties.find(tp => tp.id === thirdPartyId);
-      if (!thirdParty) {
-        return {
-          data: {} as ThirdPartyBalance,
-          error: { message: 'Tiers non trouvé' }
-        };
+      if (type) {
+        supabaseQuery = supabaseQuery.eq('type', type);
       }
-      
-      const transactions = mockTransactions.filter(t => t.third_party_id === thirdPartyId);
-      const overdueTransactions = transactions.filter(t => 
-        t.status === 'overdue' || (t.due_date && new Date(t.due_date) < new Date())
+
+      // Add text search
+      supabaseQuery = supabaseQuery.or(
+        `name.ilike.%${query}%,legal_name.ilike.%${query}%,email.ilike.%${query}%,contact_person.ilike.%${query}%`
       );
+
+      const { data, error } = await supabaseQuery.order('name').limit(10);
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error searching third parties:', error);
+      throw error;
+    }
+  }
+
+  async getDashboardData(enterpriseId: string): Promise<ThirdPartyServiceResponse<ThirdPartyDashboardData>> {
+    try {
+      // Get stats
+      const stats = await this.getThirdPartyStats();
       
-      const balance: ThirdPartyBalance = {
-        third_party_id: thirdParty.id,
-        third_party_name: thirdParty.name,
-        current_balance: thirdParty.current_balance,
-        receivables: thirdParty.total_receivables,
-        payables: thirdParty.total_payables,
-        overdue_amount: overdueTransactions.reduce((sum, t) => sum + t.amount, 0),
-        overdue_count: overdueTransactions.length,
-        last_transaction_date: transactions.length > 0 ? transactions[0].transaction_date : undefined,
-        credit_limit: thirdParty.credit_limit,
-        credit_available: (thirdParty.credit_limit || 0) - thirdParty.current_balance,
-        payment_history: {
-          on_time_payments: Math.floor(Math.random() * 20) + 10,
-          late_payments: Math.floor(Math.random() * 5) + 1,
-          average_payment_delay: Math.floor(Math.random() * 10) + 2
+      // Get recent third parties
+      const { data: recentThirdParties, error: recentError } = await supabase
+        .from('third_parties')
+        .select('*')
+        .eq('company_id', enterpriseId)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (recentError) throw recentError;
+
+      // Get aging report summary
+      const agingData = await this.getAgingReport(enterpriseId);
+
+      // Create dashboard data
+      const dashboardData: ThirdPartyDashboardData = {
+        stats: {
+          total_third_parties: stats.total_customers + stats.total_suppliers,
+          active_clients: stats.active_customers,
+          active_suppliers: stats.active_suppliers,
+          new_this_month: 0, // TODO: Calculate from created_at
+          total_receivables: 0, // TODO: Calculate from invoices
+          total_payables: 0, // TODO: Calculate from bills
+          overdue_receivables: 0, // TODO: Calculate overdue invoices
+          overdue_payables: 0, // TODO: Calculate overdue bills
+          top_clients_by_revenue: [],
+          top_suppliers_by_spending: []
+        },
+        recent_third_parties: recentThirdParties || [],
+        aging_summary: agingData.data || [],
+        recent_transactions: [], // TODO: Implement transactions
+        alerts: {
+          overdue_invoices: 0,
+          credit_limit_exceeded: 0,
+          missing_information: 0
         }
       };
-      
-      return { data: balance };
+
+      return { data: dashboardData };
     } catch (error) {
-      return {
-        data: {} as ThirdPartyBalance,
-        error: { message: 'Erreur lors de la récupération du solde' }
+      console.error('Error fetching dashboard data:', error);
+      return { 
+        data: {} as ThirdPartyDashboardData,
+        error: { message: 'Failed to fetch dashboard data' } 
       };
     }
   }
 
   async getAgingReport(enterpriseId: string): Promise<ThirdPartyServiceResponse<AgingReport[]>> {
     try {
-      const enterpriseThirdParties = mockThirdParties.filter(tp => tp.enterprise_id === enterpriseId);
+      // TODO: Implement real aging report calculation
+      // For now, return empty data
+      const mockData: AgingReport[] = [];
       
-      const agingReports = enterpriseThirdParties.map(tp => {
-        // Mock aging buckets calculation
-        const totalOutstanding = tp.total_receivables;
-        const current = totalOutstanding * 0.4;
-        const bucket30 = totalOutstanding * 0.3;
-        const bucket60 = totalOutstanding * 0.2;
-        const bucket90 = totalOutstanding * 0.08;
-        const bucketOver120 = totalOutstanding * 0.02;
-        
-        return {
-          third_party_id: tp.id,
-          third_party_name: tp.name,
-          aging_buckets: {
-            current,
-            bucket_30: bucket30,
-            bucket_60: bucket60,
-            bucket_90: bucket90,
-            bucket_over_120: bucketOver120
-          },
-          total_outstanding: totalOutstanding,
-          oldest_invoice_date: tp.client_since
-        };
-      });
-      
-      return { data: agingReports };
+      return { data: mockData };
     } catch (error) {
-      return {
+      console.error('Error fetching aging report:', error);
+      return { 
         data: [],
-        error: { message: 'Erreur lors de la génération du rapport d\'ancienneté' }
+        error: { message: 'Failed to fetch aging report' } 
       };
     }
   }
 
-  // Dashboard
-  async getDashboardData(enterpriseId: string): Promise<ThirdPartyServiceResponse<ThirdPartyDashboardData>> {
-    try {
-      const enterpriseThirdParties = mockThirdParties.filter(tp => tp.enterprise_id === enterpriseId);
-      
-      const stats: ThirdPartyStats = {
-        total_third_parties: enterpriseThirdParties.length,
-        active_clients: enterpriseThirdParties.filter(tp => tp.type === 'client' && tp.status === 'active').length,
-        active_suppliers: enterpriseThirdParties.filter(tp => tp.type === 'supplier' && tp.status === 'active').length,
-        new_this_month: enterpriseThirdParties.filter(tp => {
-          const createdDate = new Date(tp.created_at);
-          const now = new Date();
-          return createdDate.getMonth() === now.getMonth() && createdDate.getFullYear() === now.getFullYear();
-        }).length,
-        total_receivables: enterpriseThirdParties.reduce((sum, tp) => sum + tp.total_receivables, 0),
-        total_payables: enterpriseThirdParties.reduce((sum, tp) => sum + tp.total_payables, 0),
-        overdue_receivables: enterpriseThirdParties.reduce((sum, tp) => sum + (tp.current_balance > 1000 ? tp.current_balance : 0), 0),
-        overdue_payables: enterpriseThirdParties.reduce((sum, tp) => sum + (tp.current_balance < -1000 ? Math.abs(tp.current_balance) : 0), 0),
-        top_clients_by_revenue: enterpriseThirdParties
-          .filter(tp => tp.type === 'client')
-          .sort((a, b) => b.total_receivables - a.total_receivables)
-          .slice(0, 5)
-          .map(tp => ({
-            id: tp.id,
-            name: tp.name,
-            revenue: tp.total_receivables
-          })),
-        top_suppliers_by_spending: enterpriseThirdParties
-          .filter(tp => tp.type === 'supplier')
-          .sort((a, b) => b.total_payables - a.total_payables)
-          .slice(0, 5)
-          .map(tp => ({
-            id: tp.id,
-            name: tp.name,
-            spending: tp.total_payables
-          }))
-      };
-      
-      const agingReportsResponse = await this.getAgingReport(enterpriseId);
-      const agingSummary = agingReportsResponse.data || [];
-      
-      const dashboardData: ThirdPartyDashboardData = {
-        stats,
-        recent_third_parties: enterpriseThirdParties.slice(0, 5),
-        aging_summary: agingSummary.slice(0, 10),
-        recent_transactions: mockTransactions.slice(0, 5),
-        alerts: {
-          overdue_invoices: Math.floor(Math.random() * 5) + 2,
-          credit_limit_exceeded: Math.floor(Math.random() * 3) + 1,
-          missing_information: Math.floor(Math.random() * 8) + 3
-        }
-      };
-      
-      return { data: dashboardData };
-    } catch (error) {
-      return {
-        data: {} as ThirdPartyDashboardData,
-        error: { message: 'Erreur lors de la récupération des données du tableau de bord' }
-      };
-    }
-  }
+  exportThirdPartiesToCSV(thirdParties: ThirdParty[], config: ExportConfig, filename: string): void {
+    const headers = ['Code', 'Name', 'Type', 'Email', 'Phone', 'Status', 'Current Balance'];
+    const csvData = thirdParties.map(tp => [
+      tp.code,
+      tp.name,
+      tp.type,
+      tp.primary_email,
+      tp.primary_phone,
+      tp.status,
+      tp.current_balance?.toString() || '0'
+    ]);
 
-  // Export functions
-  exportThirdPartiesToCSV(thirdParties: ThirdParty[], config: ExportConfig, filename: string = 'tiers') {
-    const headers = [
-      'Code',
-      'Type',
-      'Nom',
-      'Email',
-      'Téléphone',
-      'Solde actuel',
-      'Créances',
-      'Dettes',
-      'Statut',
-      'Date de création'
-    ];
-    
-    if (config.include_contacts) {
-      headers.push('Contacts');
-    }
-    
-    const csvContent = [
-      headers.join(','),
-      ...thirdParties.map(tp => {
-        const row = [
-          `"${tp.code}"`,
-          `"${tp.type}"`,
-          `"${tp.name}"`,
-          `"${tp.primary_email}"`,
-          `"${tp.primary_phone}"`,
-          tp.current_balance.toFixed(2),
-          tp.total_receivables.toFixed(2),
-          tp.total_payables.toFixed(2),
-          `"${tp.status}"`,
-          new Date(tp.created_at).toLocaleDateString('fr-FR')
-        ];
-        
-        if (config.include_contacts) {
-          const contactsStr = tp.contacts.map(c => `${c.first_name} ${c.last_name} (${c.email})`).join('; ');
-          row.push(`"${contactsStr}"`);
-        }
-        
-        return row.join(',');
-      })
-    ].join('\n');
-    
+    const csvContent = [headers, ...csvData]
+      .map(row => row.map(field => `"${field}"`).join(','))
+      .join('\n');
+
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `${filename}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `${filename}_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   }
 
-  generatePDFReport(thirdParties: ThirdParty[], config: ExportConfig): void {
-    // Mock PDF generation
-    console.log(`Génération du rapport PDF pour ${thirdParties.length} tiers`);
-    // In a real implementation, you would use a library like jsPDF or call a backend service
-  }
-
-  // Utility functions
-  private generateThirdPartyCode(type: string): string {
-    const prefix = type === 'client' ? 'CL' : type === 'supplier' ? 'FO' : 'TP';
-    const number = String(mockThirdParties.length + 1).padStart(3, '0');
-    return `${prefix}${number}`;
-  }
 }
 
 export const thirdPartiesService = new ThirdPartiesService();
+export default thirdPartiesService;

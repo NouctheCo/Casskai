@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -9,6 +9,7 @@ import {
   BookOpen,
   ArrowRight,
   Search,
+  Filter,
   Zap,
   CreditCard,
   Settings,
@@ -19,7 +20,9 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui';
+import { Input } from '@/components/ui/input';
+import { PageContainer } from '@/components/ui/PageContainer';
+import { useState } from 'react';
 
 const categoriesData = {
   'premiers-pas': {
@@ -331,11 +334,11 @@ const DocumentationCategoryPage = () => {
   const [difficultyFilter, setDifficultyFilter] = useState('');
   const [sortBy, setSortBy] = useState('popular'); // popular, views, title
 
-  const category = categoryId ? categoriesData[categoryId as keyof typeof categoriesData] : undefined;
+  const category = categoriesData[categoryId];
 
   if (!category) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Catégorie non trouvée
@@ -354,13 +357,13 @@ const DocumentationCategoryPage = () => {
 
   // Filtrer et trier les articles
   const filteredArticles = category.articles
-  .filter((article: any) => {
+    .filter(article => {
       const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            article.description.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesDifficulty = !difficultyFilter || article.difficulty === difficultyFilter;
       return matchesSearch && matchesDifficulty;
     })
-  .sort((a: any, b: any) => {
+    .sort((a, b) => {
       switch (sortBy) {
         case 'popular':
           return b.popular - a.popular || b.views - a.views;
@@ -373,7 +376,7 @@ const DocumentationCategoryPage = () => {
       }
     });
 
-  const getDifficultyColor = (difficulty: string) => {
+  const getDifficultyColor = (difficulty) => {
     switch (difficulty) {
       case 'Débutant':
         return 'bg-green-100 text-green-800 border-green-200';
@@ -389,7 +392,7 @@ const DocumentationCategoryPage = () => {
   const CategoryIcon = category.icon;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <PageContainer variant="default">
       {/* Header */}
       <div className={`${category.bgColor} py-16`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -425,7 +428,7 @@ const DocumentationCategoryPage = () => {
             </div>
             <div className="flex items-center">
               <Star className="w-4 h-4 mr-2 text-yellow-500" />
-              {category.articles.filter((a: any) => a.popular).length} populaires
+              {category.articles.filter(a => a.popular).length} populaires
             </div>
           </div>
         </div>
@@ -480,7 +483,7 @@ const DocumentationCategoryPage = () => {
 
         {/* Liste des articles */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredArticles.map((article: any, index: number) => (
+          {filteredArticles.map((article, index) => (
             <motion.div
               key={article.id}
               initial={{ opacity: 0, y: 20 }}
@@ -553,7 +556,7 @@ const DocumentationCategoryPage = () => {
           </div>
         )}
       </div>
-    </div>
+    </PageContainer>
   );
 };
 

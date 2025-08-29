@@ -6,6 +6,7 @@
  */
 
 import fs from 'fs';
+import path from 'path';
 import { execSync } from 'child_process';
 
 console.log('🔍 Validation de la pipeline de qualité CassKai\n');
@@ -228,7 +229,7 @@ let warnings = 0;
 let packageJson = {};
 try {
   packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-} catch {
+} catch (_error) {
   console.error('❌ Impossible de lire package.json');
   process.exit(1);
 }
@@ -236,7 +237,7 @@ try {
 function checkFile(filePath) {
   try {
     return fs.existsSync(filePath);
-  } catch {
+  } catch (_error) {
     return false;
   }
 }
@@ -249,14 +250,14 @@ function checkCommand(command) {
   try {
     execSync(command, { stdio: 'pipe' });
     return true;
-  } catch {
+  } catch (_error) {
     return false;
   }
 }
 
 console.log('📋 Vérification des configurations...\n');
 
-checks.forEach((check) => {
+checks.forEach((check, _index) => {
   let status = false;
   let statusText = '';
   

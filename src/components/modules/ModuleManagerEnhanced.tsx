@@ -6,7 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
-import { Input } from '@/components/ui';
+import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Package, 
@@ -97,7 +97,6 @@ const ModuleManagerEnhanced: React.FC = () => {
     if (activate) {
       const canActivate = canActivateModule(moduleId);
       if (!canActivate.canActivate) {
-        // eslint-disable-next-line no-alert
         alert(canActivate.reason || 'Impossible d\'activer ce module');
         return;
       }

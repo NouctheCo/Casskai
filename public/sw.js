@@ -12,9 +12,9 @@ const STATIC_ASSETS = [
   '/',
   '/manifest.json',
   '/favicon.ico',
-  '/apple-touch-icon.png',
-  '/icon-192x192.png',
-  '/icon-512x512.png',
+  '/icons/apple-touch-icon.png',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
 ];
 
 // Routes à précharger
@@ -147,11 +147,24 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Ignorer les ressources Vite en développement
+  if (url.pathname.startsWith('/@vite/') || 
+      url.pathname.startsWith('/@react-refresh') ||
+      url.pathname.includes('src/') ||
+      url.hostname === 'localhost' && (url.port === '5173' || url.port === '5174')) {
+    return;
+  }
+
   // Stratégie selon le type de ressource
   event.respondWith(handleRequest(request, url));
 });
 
 async function handleRequest(request, url) {
+  // Ne jamais mettre en cache les requêtes non-GET
+  if (request.method !== 'GET') {
+    return fetch(request);
+  }
+
   // Assets statiques (CSS, JS, fonts)
   if (request.destination === 'style' || 
       request.destination === 'script' || 

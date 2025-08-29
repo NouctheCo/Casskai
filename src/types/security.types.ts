@@ -122,7 +122,7 @@ export interface AuditLog {
   action: string;
   resource: string;
   resourceId?: string;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   ipAddress: string;
   userAgent: string;
   outcome: 'success' | 'failure' | 'error';
@@ -137,7 +137,7 @@ export interface GDPRRequest {
   type: 'access' | 'rectification' | 'erasure' | 'portability' | 'restriction' | 'objection';
   status: 'pending' | 'processing' | 'completed' | 'rejected';
   requestDetails: string;
-  responseData?: any;
+  responseData?: Record<string, unknown>;
   processedBy?: string;
   requestedAt: string;
   completedAt?: string;

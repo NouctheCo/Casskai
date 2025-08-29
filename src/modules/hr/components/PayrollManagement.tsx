@@ -1,1 +1,0 @@
-import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const PayrollManagement: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>PayrollManagement</CardTitle> </CardHeader> <CardContent> <p>Composant PayrollManagement en développement.</p> </CardContent> </Card> ); }; export default PayrollManagement;

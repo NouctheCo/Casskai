@@ -6,6 +6,7 @@ import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Checkbox } from '../components/ui/checkbox';
 import { useToast } from '../components/ui/use-toast';
 import { useEnterprise } from '../contexts/EnterpriseContext';
 import { forecastsService } from '../services/forecastsService';
@@ -16,6 +17,8 @@ import {
   ForecastDashboardData,
   ForecastFormData
 } from '../types/forecasts.types';
+import ForecastReportView from '../components/forecasts/ForecastReportView';
+import ForecastComparisonView from '../components/forecasts/ForecastComparisonView';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -46,6 +49,8 @@ const ForecastsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedForecast, setSelectedForecast] = useState<ForecastData | null>(null);
+  const [selectedForecasts, setSelectedForecasts] = useState<string[]>([]);
+  const [viewMode, setViewMode] = useState<'list' | 'detail' | 'comparison'>('list');
 
   // Animation variants
   const containerVariants = {
@@ -153,6 +158,35 @@ const ForecastsPage: React.FC = () => {
       case 'draft': return 'bg-gray-100 text-gray-800';
       default: return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const handleForecastSelect = (forecast: ForecastData) => {
+    setSelectedForecast(forecast);
+    setViewMode('detail');
+  };
+
+  const handleForecastCheckboxChange = (forecastId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedForecasts(prev => [...prev, forecastId]);
+    } else {
+      setSelectedForecasts(prev => prev.filter(id => id !== forecastId));
+    }
+  };
+
+  const handleCompareSelected = () => {
+    if (selectedForecasts.length >= 2) {
+      setViewMode('comparison');
+    }
+  };
+
+  const handleBackToList = () => {
+    setViewMode('list');
+    setSelectedForecast(null);
+    setSelectedForecasts([]);
+  };
+
+  const getSelectedForecastsData = () => {
+    return forecasts.filter(f => selectedForecasts.includes(f.id));
   };
 
   const formatCurrency = (amount: number) => {
@@ -431,101 +465,162 @@ const ForecastsPage: React.FC = () => {
 
           {/* Forecasts Tab */}
           <TabsContent value="forecasts" className="space-y-6">
-            <div className="grid gap-6">
-              {forecasts.map((forecast) => (
-                <Card key={forecast.id}>
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-lg">{forecast.name}</CardTitle>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {getScenarioName(forecast.scenario_id)} • {getPeriodName(forecast.period_id)}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className={getStatusColor(forecast.status)}>
-                          {forecast.status}
-                        </Badge>
-                        <div className="flex gap-1">
-                          <Button variant="outline" size="sm">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="text-center p-4 bg-green-50 rounded-lg">
-                        <p className="text-sm text-gray-600">Revenus Totaux</p>
-                        <p className="text-xl font-bold text-green-600">
-                          {formatCurrency(forecast.total_revenue)}
-                        </p>
-                      </div>
-                      <div className="text-center p-4 bg-red-50 rounded-lg">
-                        <p className="text-sm text-gray-600">Dépenses Totales</p>
-                        <p className="text-xl font-bold text-red-600">
-                          {formatCurrency(forecast.total_expenses)}
-                        </p>
-                      </div>
-                      <div className="text-center p-4 bg-blue-50 rounded-lg">
-                        <p className="text-sm text-gray-600">Flux de Trésorerie Net</p>
-                        <p className="text-xl font-bold text-blue-600">
-                          {formatCurrency(forecast.net_cash_flow)}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <p className="text-sm text-gray-600">Marge Brute</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Progress value={forecast.gross_margin} className="flex-1" />
-                          <span className="text-sm font-medium">{forecast.gross_margin.toFixed(1)}%</span>
-                        </div>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Marge Nette</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Progress value={forecast.net_margin} className="flex-1" />
-                          <span className="text-sm font-medium">{forecast.net_margin.toFixed(1)}%</span>
-                        </div>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Seuil de Rentabilité</p>
-                        <p className="text-sm font-medium mt-1">
-                          {formatCurrency(forecast.break_even_point)}
-                        </p>
-                      </div>
-                    </div>
-
-                    {forecast.key_assumptions && forecast.key_assumptions.length > 0 && (
-                      <div className="mt-6">
-                        <p className="text-sm font-medium text-gray-700 mb-2">Hypothèses Clés:</p>
-                        <div className="flex flex-wrap gap-2">
-                          {forecast.key_assumptions.slice(0, 3).map((assumption, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {assumption}
-                            </Badge>
-                          ))}
-                          {forecast.key_assumptions.length > 3 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{forecast.key_assumptions.length - 3} autres
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
+            {viewMode === 'list' && (
+              <>
+                {/* Controls */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <h2 className="text-lg font-semibold">Gestion des Prévisions</h2>
+                    {selectedForecasts.length > 0 && (
+                      <Badge variant="secondary">
+                        {selectedForecasts.length} sélectionnée{selectedForecasts.length > 1 ? 's' : ''}
+                      </Badge>
                     )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {selectedForecasts.length >= 2 && (
+                      <Button
+                        onClick={handleCompareSelected}
+                        className="flex items-center gap-2"
+                      >
+                        <BarChart3 className="h-4 w-4" />
+                        Comparer ({selectedForecasts.length})
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="grid gap-6">
+                  {forecasts.map((forecast) => (
+                    <Card key={forecast.id} className="relative">
+                      <CardHeader>
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-center space-x-3">
+                            <Checkbox
+                              checked={selectedForecasts.includes(forecast.id)}
+                              onCheckedChange={(checked) => 
+                                handleForecastCheckboxChange(forecast.id, checked as boolean)
+                              }
+                            />
+                            <div>
+                              <CardTitle 
+                                className="text-lg cursor-pointer hover:text-blue-600 transition-colors"
+                                onClick={() => handleForecastSelect(forecast)}
+                              >
+                                {forecast.name}
+                              </CardTitle>
+                              <p className="text-sm text-gray-600 mt-1">
+                                {getScenarioName(forecast.scenario_id)} • {getPeriodName(forecast.period_id)}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge className={getStatusColor(forecast.status)}>
+                              {forecast.status}
+                            </Badge>
+                            <div className="flex gap-1">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleForecastSelect(forecast)}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button variant="outline" size="sm">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button variant="outline" size="sm">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="text-center p-4 bg-green-50 rounded-lg">
+                            <p className="text-sm text-gray-600">Revenus Totaux</p>
+                            <p className="text-xl font-bold text-green-600">
+                              {formatCurrency(forecast.total_revenue)}
+                            </p>
+                          </div>
+                          <div className="text-center p-4 bg-red-50 rounded-lg">
+                            <p className="text-sm text-gray-600">Dépenses Totales</p>
+                            <p className="text-xl font-bold text-red-600">
+                              {formatCurrency(forecast.total_expenses)}
+                            </p>
+                          </div>
+                          <div className="text-center p-4 bg-blue-50 rounded-lg">
+                            <p className="text-sm text-gray-600">Flux de Trésorerie Net</p>
+                            <p className="text-xl font-bold text-blue-600">
+                              {formatCurrency(forecast.net_cash_flow)}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <p className="text-sm text-gray-600">Marge Brute</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Progress value={forecast.gross_margin} className="flex-1" />
+                              <span className="text-sm font-medium">{forecast.gross_margin.toFixed(1)}%</span>
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-600">Marge Nette</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Progress value={forecast.net_margin} className="flex-1" />
+                              <span className="text-sm font-medium">{forecast.net_margin.toFixed(1)}%</span>
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-600">Seuil de Rentabilité</p>
+                            <p className="text-sm font-medium mt-1">
+                              {formatCurrency(forecast.break_even_point)}
+                            </p>
+                          </div>
+                        </div>
+
+                        {forecast.key_assumptions && forecast.key_assumptions.length > 0 && (
+                          <div className="mt-6">
+                            <p className="text-sm font-medium text-gray-700 mb-2">Hypothèses Clés:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {forecast.key_assumptions.slice(0, 3).map((assumption, index) => (
+                                <Badge key={index} variant="outline" className="text-xs">
+                                  {assumption}
+                                </Badge>
+                              ))}
+                              {forecast.key_assumptions.length > 3 && (
+                                <Badge variant="outline" className="text-xs">
+                                  +{forecast.key_assumptions.length - 3} autres
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </>
+            )}
+            
+            {viewMode === 'detail' && selectedForecast && (
+              <ForecastReportView
+                forecast={selectedForecast}
+                scenario={scenarios.find(s => s.id === selectedForecast.scenario_id)}
+                period={periods.find(p => p.id === selectedForecast.period_id)}
+                onBack={handleBackToList}
+              />
+            )}
+            
+            {viewMode === 'comparison' && selectedForecasts.length >= 2 && (
+              <ForecastComparisonView
+                forecasts={getSelectedForecastsData()}
+                scenarios={scenarios}
+                onBack={handleBackToList}
+              />
+            )}
           </TabsContent>
 
           {/* Scenarios Tab */}

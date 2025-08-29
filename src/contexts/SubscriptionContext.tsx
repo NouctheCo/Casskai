@@ -243,7 +243,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({ chil
 
       if (response.success && response.checkoutUrl) {
         // Redirect to Stripe Checkout
-  window.location.assign(response.checkoutUrl);
+        window.location.href = response.checkoutUrl;
         
         return { 
           success: true, 

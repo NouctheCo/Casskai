@@ -8,7 +8,7 @@ import {
   FormattingResult,
   ChannelResponse,
   EInvoicingError
-} from '@/types/einvoicing.types';
+} from '../../../../types/einvoicing.types';
 import { ChannelProvider } from './base/ChannelProvider';
 
 interface PPFConfig {
@@ -182,7 +182,8 @@ export class PPFProvider extends ChannelProvider {
       // Perform a simple health check
       const response = await fetch(`${this.config.baseUrl}/api/ping`, {
         method: 'GET',
-        headers: await this.prepareAuthHeaders()
+        headers: await this.prepareAuthHeaders(),
+        // fetch timeout is not standard; tests will stub fetch if needed
       });
 
       const isAvailable = response.ok;
@@ -401,7 +402,7 @@ export class PPFProvider extends ChannelProvider {
     }
   }
 
-  private mapPPFStatusToStandard(ppfStatus: string, _codeStatut: number): string {
+  private mapPPFStatusToStandard(ppfStatus: string, codeStatut: number): string {
     // Map Chorus Pro status codes to standard lifecycle status
     switch (ppfStatus?.toUpperCase()) {
       case 'DEPOSE':

@@ -352,7 +352,7 @@ async function handleInvoicePaymentFailed(invoice) {
 // ERROR HANDLING
 // =================
 
-app.use((err, req, res) => {
+app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
   res.status(500).json({ 
     error: process.env.NODE_ENV === 'production' 

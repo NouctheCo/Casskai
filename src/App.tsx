@@ -4,12 +4,13 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { LocaleProvider } from '@/contexts/LocaleContext';
-// ConfigProvider déplacé vers main.tsx
+import { ConfigProvider } from '@/contexts/ConfigContext';
 import { ModulesProvider } from '@/contexts/ModulesContext';
 import { EnterpriseProvider } from '@/contexts/EnterpriseContext';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
 import ABTestProvider from '@/components/ABTestProvider';
+import { ToastProvider } from '@/components/ui/use-toast';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { LoadingFallback } from '@/components/ui/LoadingFallback';
 import ErrorBoundary, { setupGlobalErrorHandling } from '@/components/ErrorBoundary';
@@ -38,8 +39,7 @@ import {
   LazyTaxPage,
   LazyContractsPage,
   LazySettingsPage,
-  LazyBillingPage,
-  initializeIntelligentPreloading
+  LazyBillingPage
 } from '@/utils/lazyComponents';
 
 // Pages spécifiques qui n'ont pas besoin de préchargement intelligent
@@ -49,7 +49,6 @@ const DatabaseTestPage = lazy(() => import('@/pages/DatabaseTestPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 const ModuleManager = lazy(() => import('@/components/modules/ModuleManagerEnhanced'));
 const ModuleDiagnostics = lazy(() => import('@/components/modules/ModuleDiagnostics'));
-// const OnboardingDebugPanel = lazy(() => import('@/components/debug/OnboardingDebugPanel')); // Debug panel removed for production
 
 // Pages légales et de contenu
 const PrivacyPolicyPage = lazy(() => import('@/pages/PrivacyPolicyPage'));
@@ -287,17 +286,6 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      // Debug route removed for production
-      // {
-      //   path: '/debug/onboarding',
-      //   element: (
-      //     <ProtectedRoute>
-      //       <RouteErrorBoundary routeName="Debug Onboarding">
-      //         <OnboardingDebugPanel />
-      //       </RouteErrorBoundary>
-      //     </ProtectedRoute>
-      //   ),
-      // },
       // Pages légales et de contenu (accessibles publiquement)
       {
         path: '/privacy',
@@ -419,32 +407,51 @@ function App() {
 
   // Initialiser le préchargement intelligent et la gestion d'erreurs globale
   useEffect(() => {
-    initializeIntelligentPreloading();
+  // initializeIntelligentPreloading(); // supprimé car la fonction n'existe plus
     setupGlobalErrorHandling();
   }, []);
+
+  const isE2EMinimal = (import.meta as unknown as { env: Record<string, string | undefined> }).env?.VITE_E2E_MINIMAL === 'true';
 
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="system" storageKey="casskai-theme">
         <LocaleProvider>
-          <AuthProvider>
-            <SubscriptionProvider>
-              <ABTestProvider>
-                <ModulesProviderWrapper>
-                  <EnterpriseProvider>
-                    <TooltipProvider>
-                      <Suspense fallback={<LoadingFallback message="Chargement de l'application..." />}>
-                        <RouterProvider router={router} />
-                      </Suspense>
-                      <Toaster />
-                      <UpdateNotification />
-                      <OfflineIndicator />
-                    </TooltipProvider>
-                  </EnterpriseProvider>
-                </ModulesProviderWrapper>
-              </ABTestProvider>
-            </SubscriptionProvider>
-          </AuthProvider>
+          <ConfigProvider>
+            <AuthProvider>
+              <SubscriptionProvider>
+                <ABTestProvider>
+                  <ToastProvider>
+                    {isE2EMinimal ? (
+                    <EnterpriseProvider>
+                      <TooltipProvider>
+                        <Suspense fallback={<LoadingFallback message="Chargement de l'application..." />}>
+                          <RouterProvider router={router} />
+                        </Suspense>
+                        <Toaster />
+                        <UpdateNotification />
+                        <OfflineIndicator />
+                      </TooltipProvider>
+                    </EnterpriseProvider>
+                  ) : (
+                    <ModulesProviderWrapper>
+                      <EnterpriseProvider>
+                        <TooltipProvider>
+                          <Suspense fallback={<LoadingFallback message="Chargement de l'application..." />}>
+                            <RouterProvider router={router} />
+                          </Suspense>
+                          <Toaster />
+                          <UpdateNotification />
+                          <OfflineIndicator />
+                        </TooltipProvider>
+                      </EnterpriseProvider>
+                    </ModulesProviderWrapper>
+                  )}
+                  </ToastProvider>
+                </ABTestProvider>
+              </SubscriptionProvider>
+            </AuthProvider>
+          </ConfigProvider>
         </LocaleProvider>
       </ThemeProvider>
     </ErrorBoundary>

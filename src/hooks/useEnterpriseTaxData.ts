@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useEnterprise } from '@/hooks/useEnterpriseContext';
+import { useEnterprise } from '../contexts/EnterpriseContext';
 import { TaxRate, TaxDeclaration, TaxPayment } from '../types/tax.types';
 import { supabase } from '../lib/supabase';
 

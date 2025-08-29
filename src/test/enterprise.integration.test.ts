@@ -1,19 +1,19 @@
-/* eslint-disable require-atomic-updates */
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
-import { getSupabaseTestClient } from './supabaseTestClient';
+import { createClient } from '@supabase/supabase-js';
 import { createTestUser, createTestEnterprise, cleanupDatabase } from './integration-setup';
 import { enterpriseService } from '../services/enterpriseService';
 
-const maybeDescribe: typeof describe = (process.env.VITE_SUPABASE_URL ? describe : describe.skip) as any;
-
-maybeDescribe('Enterprise Service Integration Tests', () => {
+describe('Enterprise Service Integration Tests', () => {
   let testUser: any;
   let testEnterprise: any;
   let supabaseClient: any;
 
   beforeAll(async () => {
     // Use real Supabase connection for integration tests
-  supabaseClient = getSupabaseTestClient();
+    supabaseClient = createClient(
+      process.env.VITE_SUPABASE_URL || 'http://localhost:54321',
+      process.env.VITE_SUPABASE_ANON_KEY || 'test-anon-key'
+    );
   });
 
   beforeEach(async () => {
@@ -21,8 +21,8 @@ maybeDescribe('Enterprise Service Integration Tests', () => {
     try {
       testUser = await createTestUser();
       testEnterprise = await createTestEnterprise(testUser.id);
-    } catch {
-      console.warn('Failed to create test data, using mocks');
+    } catch (error) {
+      console.warn('Failed to create test data, using mocks:', error);
       // Fallback to mocked data if database is not available
       testUser = { id: 'mock-user-id', email: 'test@mock.com' };
       testEnterprise = { id: 'mock-enterprise-id', name: 'Mock Enterprise' };
@@ -59,7 +59,7 @@ maybeDescribe('Enterprise Service Integration Tests', () => {
         expect(result.data.name).toBe(enterpriseData.name);
         expect(result.data.siret).toBe(enterpriseData.siret);
         expect(result.data.user_id).toBe(testUser.id);
-  } catch {
+      } catch (error) {
         // If database is not available, test the service logic with mocks
         const mockResult = await enterpriseService.createEnterprise(enterpriseData);
         expect(mockResult).toBeDefined();
@@ -81,7 +81,7 @@ maybeDescribe('Enterprise Service Integration Tests', () => {
         expect(result.data).toBeDefined();
         expect(result.data.id).toBe(testEnterprise.id);
         expect(result.data.name).toBe(testEnterprise.name);
-  } catch {
+      } catch (error) {
         // Fallback test with mocked service
         const mockEnterprise = await enterpriseService.getEnterprise(testEnterprise.id);
         expect(mockEnterprise).toBeDefined();
@@ -109,7 +109,7 @@ maybeDescribe('Enterprise Service Integration Tests', () => {
         expect(result.data.name).toBe(updates.name);
         expect(result.data.sector).toBe(updates.sector);
         expect(result.data.id).toBe(testEnterprise.id);
-  } catch {
+      } catch (error) {
         // Test service logic with mocks
         const mockResult = await enterpriseService.updateEnterprise(testEnterprise.id, updates);
         expect(mockResult).toBeDefined();
@@ -135,7 +135,7 @@ maybeDescribe('Enterprise Service Integration Tests', () => {
         result.data.forEach((enterprise: any) => {
           expect(enterprise.user_id).toBe(testUser.id);
         });
-  } catch {
+      } catch (error) {
         // Test with mocked service
         const mockEnterprises = await enterpriseService.getUserEnterprises(testUser.id);
         expect(Array.isArray(mockEnterprises)).toBe(true);
@@ -181,7 +181,7 @@ maybeDescribe('Enterprise Service Integration Tests', () => {
 
         expect(fetchResult.data).toBeNull();
         expect(fetchResult.error?.code).toBe('PGRST116'); // Row not found
-  } catch {
+      } catch (error) {
         // Test deletion logic with mocks
         const mockResult = await enterpriseService.deleteEnterprise('mock-id');
         expect(mockResult).toBeDefined();
@@ -211,7 +211,7 @@ maybeDescribe('Enterprise Service Integration Tests', () => {
         if (result.error) {
           expect(result.error.message).toContain('constraint');
         }
-  } catch {
+      } catch (error) {
         // Test validation in service layer
         await expect(
           enterpriseService.createEnterprise(invalidData)
@@ -239,7 +239,7 @@ maybeDescribe('Enterprise Service Integration Tests', () => {
         if (result.error) {
           expect(result.error.code).toBe('23505'); // Unique constraint violation
         }
-  } catch {
+      } catch (error) {
         // Test uniqueness validation in service
         await expect(
           enterpriseService.createEnterprise(duplicateData)
@@ -271,14 +271,10 @@ maybeDescribe('Enterprise Service Integration Tests', () => {
         expect(result.data.currency).toBe('EUR'); // Should default to EUR
         expect(result.data.created_at).toBeDefined();
         expect(result.data.updated_at).toBeDefined();
-      } catch {
+      } catch (error) {
         // Test default values in service layer
         const mockResult = await enterpriseService.createEnterprise(minimalData);
-        if ('currency' in (mockResult as any)) {
-          expect((mockResult as any).currency).toBe('EUR');
-        } else {
-          expect((mockResult as any).data?.currency ?? 'EUR').toBe('EUR');
-        }
+        expect(mockResult.currency).toBe('EUR');
       }
     });
 
@@ -305,7 +301,7 @@ maybeDescribe('Enterprise Service Integration Tests', () => {
 
         expect(result.data.enterprise_id).toBe(testEnterprise.id);
         expect(result.data.vat_rate).toBe(settings.vat_rate);
-  } catch {
+      } catch (error) {
         // Test settings logic with mocks
         const mockSettings = await enterpriseService.updateSettings(testEnterprise.id, settings);
         expect(mockSettings).toBeDefined();
@@ -334,8 +330,8 @@ maybeDescribe('Enterprise Service Integration Tests', () => {
           expect(queryTime).toBeLessThan(1000); // Should complete within 1 second
           expect(Array.isArray(result.data)).toBe(true);
         }
-      } catch {
-        console.warn('Performance test skipped - database not available');
+      } catch (error) {
+        console.log('Performance test skipped - database not available');
       }
     });
 
@@ -366,8 +362,8 @@ maybeDescribe('Enterprise Service Integration Tests', () => {
         // At least some operations should succeed
         const successfulOperations = results.filter(r => !r.error);
         expect(successfulOperations.length).toBeGreaterThan(0);
-      } catch {
-        console.warn('Concurrent test skipped - database not available');
+      } catch (error) {
+        console.log('Concurrent test skipped - database not available');
       }
     });
   });

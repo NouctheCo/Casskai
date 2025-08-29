@@ -301,7 +301,7 @@ export const CashFlowPredictionWidget: React.FC<CashFlowPredictionWidgetProps> =
                   </div>
                 </div>
                 
-                <div className="divide-y max-h-64 overflow-y-auto">
+                <div className="max-h-64 overflow-y-auto">
                   <AnimatePresence>
                     {filteredPredictions.map((prediction, index) => (
                       <motion.div
