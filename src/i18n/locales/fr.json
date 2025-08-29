@@ -191,6 +191,28 @@
       "copyright": "Tous droits réservés.",
       "ssl": "SSL Sécurisé",
       "gdpr_compliant": "Conforme RGPD",
+      "company": {
+        "title": "Entreprise",
+        "capitalSocial": "Capital social: 1 500,00 €",
+        "tva": "TVA: FR85909672685",
+        "rcs": "RCS: 909 672 685 R.C.S. Evry",
+        "nafCode": "Code NAF: 70.22Z",
+        "activity": "Activité: Conseil de gestion"
+      },
+      "compliance": {
+        "title": "Conformité",
+        "ssl": "SSL/TLS Sécurisé",
+        "gdpr": "Conforme RGPD",
+        "iso": "ISO 27001"
+      },
+      "convention": {
+        "title": "Convention",
+        "description1": "Bureaux d'études techniques",
+        "description2": "et sociétés de conseils",
+        "idcc": "IDCC 1486"
+      },
+      "legalNotice": "Inscrit au RCS d'Evry le 27/01/2022 - Domaine d'activité: Conseil de gestion",
+      "version": "Version 2.0",
       "product": {
         "title": "Produit",
         "features": "Fonctionnalités",
@@ -2575,5 +2597,409 @@
   "journal_entries": {
     "items_min_required": "Minimum 2 lignes requis",
     "total": "Total"
+  },
+  "security": {
+    "title": "Sécurité et Confidentialité",
+    "score": "Score",
+    "generate_report": "Générer un rapport",
+    "tabs": {
+      "security": "Sécurité",
+      "privacy": "Confidentialité",
+      "gdpr": "RGPD",
+      "incidents": "Incidents",
+      "compliance": "Conformité"
+    },
+    "overview": {
+      "title": "Aperçu de la sécurité",
+      "description": "Surveillez et configurez vos paramètres de sécurité",
+      "security_score": "Score de sécurité",
+      "open_incidents": "Incidents ouverts",
+      "audit_logging": "Journalisation d'audit"
+    },
+    "authentication": {
+      "title": "Paramètres d'authentification",
+      "two_factor": {
+        "title": "Authentification à deux facteurs",
+        "description": "Exiger la 2FA pour tous les comptes utilisateur"
+      },
+      "password_policy": {
+        "title": "Politique de mot de passe",
+        "description": "Définir les exigences de complexité des mots de passe",
+        "min_length": "Longueur minimale",
+        "require_uppercase": "Exiger des majuscules",
+        "require_numbers": "Exiger des chiffres",
+        "require_symbols": "Exiger des symboles"
+      },
+      "session_timeout": {
+        "title": "Délai d'expiration de session",
+        "description": "Durée d'inactivité avant déconnexion automatique",
+        "minutes": "minutes"
+      }
+    },
+    "access_control": {
+      "title": "Contrôle d'accès",
+      "ip_whitelist": {
+        "title": "Liste blanche IP",
+        "description": "Restreindre l'accès à des adresses IP spécifiques"
+      },
+      "role_permissions": {
+        "title": "Permissions par rôle",
+        "description": "Gérer les autorisations basées sur les rôles"
+      }
+    },
+    "privacy": {
+      "title": "Paramètres de confidentialité",
+      "data_retention": {
+        "title": "Rétention des données",
+        "description": "Définir la durée de conservation des données",
+        "days": "jours"
+      },
+      "data_export": {
+        "title": "Exportation des données",
+        "description": "Permettre aux utilisateurs d'exporter leurs données",
+        "export_button": "Exporter mes données"
+      },
+      "cookies": {
+        "title": "Gestion des cookies",
+        "essential": "Cookies essentiels",
+        "analytics": "Cookies analytiques",
+        "marketing": "Cookies marketing"
+      }
+    },
+    "termsOfService": {
+      "title": "Conditions Générales d'Utilisation",
+      "subtitle": "Les règles qui régissent l'utilisation de CassKai",
+      "lastUpdated": "Dernière mise à jour",
+      "preamble": {
+        "title": "Préambule",
+        "content": "Les présentes Conditions Générales d'Utilisation (CGU) régissent l'utilisation de la plateforme CassKai, éditée par Noutche Conseil SASU, société par actions simplifiée unipersonnelle au capital de 1 500,00 euros.",
+        "legalInfo": "Informations légales de l'éditeur :",
+        "company": {
+          "name": "Noutche Conseil SASU",
+          "legalForm": "Société par Actions Simplifiée Unipersonnelle",
+          "capital": "1 500,00 €",
+          "siren": "909 672 685",
+          "siret": "909 672 685 00023",
+          "rcs": "Evry 909 672 685",
+          "vat": "FR85909672685",
+          "nafCode": "70.22Z",
+          "collectiveAgreement": "IDCC 1486"
+        },
+        "fields": {
+          "denomination": "Dénomination :",
+          "legalForm": "Forme juridique :",
+          "capital": "Capital social :",
+          "siren": "SIREN :",
+          "siret": "SIRET :",
+          "rcs": "RCS :",
+          "vat": "TVA :",
+          "nafCode": "Code NAF :",
+          "collectiveAgreement": "Convention collective :"
+        }
+      },
+      "definitions": {
+        "title": "Définitions",
+        "platform": "CassKai ou la Plateforme : La solution logicielle de gestion d'entreprise accessible via www.casskai.app",
+        "editor": "L'Éditeur : Noutche Conseil SASU, société éditrice de CassKai",
+        "user": "L'Utilisateur : Toute personne physique ou morale utilisant CassKai",
+        "client": "Le Client : L'Utilisateur ayant souscrit à un abonnement payant",
+        "services": "Les Services : L'ensemble des fonctionnalités proposées par CassKai",
+        "data": "Les Données : Informations saisies, stockées ou traitées via CassKai",
+        "account": "Le Compte : Espace personnel de l'Utilisateur sur CassKai"
+      },
+      "acceptance": {
+        "title": "Acceptation des CGU",
+        "content": "L'utilisation de CassKai implique l'acceptation pleine et entière des présentes CGU",
+        "binding": "Ces conditions sont opposables dès la première utilisation",
+        "updates": "L'Éditeur se réserve le droit de modifier les CGU à tout moment",
+        "notification": "Les modifications seront notifiées aux Utilisateurs"
+      }
+    },
+    "privacyPolicy": {
+      "title": "Politique de Confidentialité",
+      "subtitle": "CassKai s'engage à protéger et respecter votre vie privée",
+      "lastUpdated": "Dernière mise à jour",
+      "company": {
+        "name": "Noutche Conseil SASU",
+        "siren": "909 672 685",
+        "siret": "909 672 685 00023",
+        "rcs": "909 672 685 R.C.S. Evry",
+        "address": "Inscrit au greffe d'Evry"
+      },
+      "introduction": {
+        "title": "Introduction",
+        "content": "Noutche Conseil SASU, société éditrice de CassKai (ci-après \"nous\", \"notre\" ou \"CassKai\"), s'engage à protéger et à respecter votre vie privée. Cette politique de confidentialité explique comment nous collectons, utilisons, partageons et protégeons vos informations personnelles lorsque vous utilisez notre plateforme de gestion d'entreprise.",
+        "companyInfo": "Informations sur l'entreprise :",
+        "legalName": "Raison sociale :",
+        "registrationNumber": "SIREN :",
+        "businessNumber": "SIRET :",
+        "commercialRegister": "RCS :",
+        "registeredAddress": "Adresse :"
+      },
+      "dataCollection": {
+        "title": "Données que nous collectons",
+        "identification": {
+          "title": "1. Informations d'identification :",
+          "items": [
+            "Nom, prénom, adresse email",
+            "Numéro de téléphone",
+            "Informations de l'entreprise (nom, SIREN, adresse)",
+            "Photo de profil (optionnelle)"
+          ]
+        },
+        "usage": {
+          "title": "2. Données d'utilisation :",
+          "items": [
+            "Logs de connexion et d'activité",
+            "Adresse IP et informations sur l'appareil",
+            "Pages visitées et fonctionnalités utilisées",
+            "Préférences et paramètres"
+          ]
+        },
+        "business": {
+          "title": "3. Données métier :",
+          "items": [
+            "Données comptables et financières",
+            "Informations clients et fournisseurs",
+            "Factures et devis",
+            "Documents et fichiers uploadés"
+          ]
+        }
+      },
+      "dataUsage": {
+        "title": "Utilisation de vos données",
+        "purposes": [
+          "Fournir et maintenir nos services",
+          "Personnaliser votre expérience utilisateur",
+          "Traiter vos demandes et transactions",
+          "Vous envoyer des communications importantes",
+          "Améliorer nos services et développer de nouvelles fonctionnalités",
+          "Assurer la sécurité et prévenir la fraude",
+          "Respecter nos obligations légales"
+        ]
+      },
+      "dataSharing": {
+        "title": "Partage de vos données",
+        "intro": "Nous ne vendons jamais vos données personnelles. Nous pouvons partager vos informations uniquement dans les cas suivants :",
+        "cases": [
+          "Avec votre consentement explicite",
+          "Avec nos prestataires de services de confiance (hébergement, support technique)",
+          "Pour se conformer à une obligation légale",
+          "Pour protéger nos droits et notre sécurité",
+          "En cas de fusion, acquisition ou vente d'actifs"
+        ]
+      },
+      "dataSecurity": {
+        "title": "Sécurité des données",
+        "intro": "Nous mettons en place des mesures techniques et organisationnelles appropriées pour protéger vos données :",
+        "measures": [
+          "Chiffrement des données en transit et au repos",
+          "Contrôles d'accès stricts",
+          "Surveillance continue de la sécurité",
+          "Sauvegardes régulières et sécurisées",
+          "Formation du personnel sur la protection des données",
+          "Audits de sécurité réguliers"
+        ]
+      },
+      "yourRights": {
+        "title": "Vos droits",
+        "intro": "Conformément au RGPD, vous disposez des droits suivants :",
+        "rights": [
+          "Droit d'accès à vos données personnelles",
+          "Droit de rectification des données inexactes",
+          "Droit à l'effacement (\"droit à l'oubli\")",
+          "Droit à la limitation du traitement",
+          "Droit à la portabilité des données",
+          "Droit d'opposition au traitement",
+          "Droit de retirer votre consentement",
+          "Droit d'introduire une réclamation auprès de la CNIL"
+        ],
+        "exercise": "Pour exercer ces droits, contactez-nous à"
+      },
+      "dataRetention": {
+        "title": "Conservation des données",
+        "periods": [
+          "Données de compte : conservées tant que votre compte est actif",
+          "Données de facturation : conservées 10 ans (obligation légale)",
+          "Logs de connexion : conservés 1 an",
+          "Données marketing : conservées 3 ans après le dernier contact"
+        ],
+        "deletion": "Après ces périodes, vos données sont automatiquement supprimées ou anonymisées."
+      },
+      "cookies": {
+        "title": "Cookies et technologies similaires",
+        "description": "Nous utilisons des cookies pour améliorer votre expérience. Vous pouvez gérer vos préférences de cookies dans les paramètres de votre navigateur.",
+        "types": {
+          "essential": "Cookies essentiels : nécessaires au fonctionnement du site",
+          "analytics": "Cookies analytiques : pour comprendre l'utilisation du site",
+          "preferences": "Cookies de préférences : pour mémoriser vos choix"
+        }
+      },
+      "updates": {
+        "title": "Modifications de cette politique",
+        "content": "Nous pouvons mettre à jour cette politique de confidentialité. Les modifications importantes vous seront notifiées par email ou via notre plateforme."
+      },
+      "contact": {
+        "title": "Nous contacter",
+        "intro": "Pour toute question concernant cette politique de confidentialité ou vos données personnelles, contactez-nous :",
+        "dpo": "Délégué à la Protection des Données"
+      }
+    },
+    "gdpr": {
+      "title": "Conformité RGPD",
+      "status": "Statut de conformité",
+      "compliant": "Conforme",
+      "non_compliant": "Non conforme",
+      "requests": {
+        "title": "Demandes RGPD",
+        "new_request": "Nouvelle demande",
+        "type": "Type",
+        "status": "Statut",
+        "date": "Date",
+        "action": "Action",
+        "types": {
+          "access": "Accès aux données",
+          "portability": "Portabilité des données",
+          "rectification": "Rectification",
+          "erasure": "Effacement"
+        },
+        "statuses": {
+          "pending": "En attente",
+          "processing": "En traitement",
+          "completed": "Terminé",
+          "rejected": "Rejeté"
+        }
+      },
+      "data_processing": {
+        "title": "Registre des traitements",
+        "purpose": "Finalité",
+        "legal_basis": "Base légale",
+        "categories": "Catégories de données"
+      }
+    },
+    "incidents": {
+      "title": "Incidents de sécurité",
+      "report_incident": "Signaler un incident",
+      "severity": "Gravité",
+      "status": "Statut",
+      "date": "Date",
+      "description": "Description",
+      "severities": {
+        "low": "Faible",
+        "medium": "Moyenne",
+        "high": "Élevée",
+        "critical": "Critique"
+      },
+      "statuses": {
+        "open": "Ouvert",
+        "investigating": "En investigation",
+        "resolved": "Résolu",
+        "closed": "Fermé"
+      }
+    },
+    "compliance": {
+      "title": "Rapport de conformité",
+      "generate": "Générer le rapport",
+      "last_generated": "Dernier rapport généré",
+      "download": "Télécharger",
+      "score": "Score de conformité",
+      "areas": {
+        "authentication": "Authentification",
+        "data_protection": "Protection des données",
+        "access_control": "Contrôle d'accès",
+        "audit_logging": "Journalisation d'audit",
+        "incident_response": "Réponse aux incidents"
+      }
+    },
+    "buttons": {
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "edit": "Modifier",
+      "view": "Voir",
+      "download": "Télécharger",
+      "export": "Exporter",
+      "generate": "Générer",
+      "enable": "Activer",
+      "disable": "Désactiver"
+    },
+    "messages": {
+      "settings_updated": "Paramètres de sécurité mis à jour",
+      "settings_update_success": "Vos paramètres de sécurité ont été sauvegardés avec succès.",
+      "privacy_updated": "Paramètres de confidentialité mis à jour",
+      "privacy_update_success": "Vos préférences de confidentialité ont été sauvegardées.",
+      "update_failed": "Échec de la mise à jour",
+      "update_failed_description": "Échec de la mise à jour des paramètres de sécurité",
+      "report_generated": "Rapport généré avec succès",
+      "export_started": "Exportation démarrée",
+      "incident_reported": "Incident signalé avec succès"
+    }
+  },
+
+  "international": {
+    "landing": {
+      "badge": "Présence internationale",
+      "title": "Partout où vous êtes,",
+      "subtitle": "CassKai s'adapte",
+      "description": "Notre plateforme s'adapte automatiquement aux spécificités locales : devises, réglementations, langues et pratiques commerciales de chaque pays.",
+      "stats": {
+        "countries": "Pays supportés",
+        "currencies": "Devises intégrées", 
+        "languages": "Langues disponibles"
+      },
+      "regions": {
+        "europe": {
+          "name": "Europe",
+          "description": "Conformité RGPD et standards européens"
+        },
+        "west_africa": {
+          "name": "Afrique de l'Ouest",
+          "description": "Intégration avec les systèmes bancaires locaux"
+        },
+        "central_africa": {
+          "name": "Afrique Centrale", 
+          "description": "Adaptation aux régulations CEMAC"
+        },
+        "north_africa": {
+          "name": "Afrique du Nord",
+          "description": "Support multilingue arabe/français"
+        },
+        "east_africa": {
+          "name": "Afrique de l'Est",
+          "description": "Intégration Mobile Money"
+        }
+      },
+      "countries_label": "pays",
+      "available_countries": "Pays disponibles",
+      "cta": {
+        "title": "Votre pays n'est pas encore listé ?",
+        "description": "Nous ajoutons régulièrement de nouveaux pays. Contactez-nous pour discuter de l'intégration de votre marché local.",
+        "button": "Nous contacter"
+      }
+    },
+    "settings": {
+      "preferences_updated": "Préférences régionales mises à jour",
+      "currency_updated": "Devise mise à jour",
+      "auto_adaptations": "Adaptations automatiques pour {country}: {changes}",
+      "currency_auto_hint": "Devise automatiquement définie selon le pays : {country}",
+      "currency_auto_selected": "Devise automatiquement sélectionnée selon le pays d'activité",
+      "language_recommended": "Langue recommandée pour {country}: {language}",
+      "timezone_recommended": "Fuseau recommandé pour {country}: {timezone}"
+    },
+    "onboarding": {
+      "regional_preferences": "Préférences régionales détectées",
+      "currency_label": "Devise",
+      "timezone_label": "Fuseau",
+      "language_label": "Langue", 
+      "auto_applied_hint": "Ces paramètres seront appliqués automatiquement et pourront être modifiés plus tard dans les paramètres."
+    }
+  },
+
+  "currency": {
+    "formats": {
+      "capital_social": "Capital social ({currency})",
+      "annual_revenue": "Chiffre d'affaires annuel ({currency})",
+      "estimation_hint": "Estimation ou exercice précédent • Devise : {currency} ({country})"
+    }
   }
 }

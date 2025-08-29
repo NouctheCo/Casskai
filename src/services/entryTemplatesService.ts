@@ -327,9 +327,8 @@ export class EntryTemplatesService {
 
     try {
       // Utilisation de Function pour éviter eval() direct
-      // eslint-disable-next-line no-new-func
       return new Function(`"use strict"; return (${cleanExpression})`)();
-    } catch {
+    } catch (error) {
       throw new Error(`Expression invalide: ${cleanExpression}`);
     }
   }
@@ -615,7 +614,7 @@ export class EntryTemplatesService {
 
     // Variables spécifiques par catégorie
     switch (template.category) {
-      case 'other': { // Paie par exemple
+      case 'other': // Paie par exemple
         // Récupération des données de paie depuis les paramètres
         const salaryData = await supabase
           .from('company_settings')
@@ -628,7 +627,6 @@ export class EntryTemplatesService {
           Object.assign(variables, JSON.parse(salaryData.data.value));
         }
         break;
-      }
     }
 
     return variables;

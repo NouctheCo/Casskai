@@ -1,1 +1,0 @@
-import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const HRCompliance: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>HRCompliance</CardTitle> </CardHeader> <CardContent> <p>Composant HRCompliance en développement.</p> </CardContent> </Card> ); }; export default HRCompliance;

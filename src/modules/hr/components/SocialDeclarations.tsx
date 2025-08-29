@@ -1,1 +1,0 @@
-import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const SocialDeclarations: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>SocialDeclarations</CardTitle> </CardHeader> <CardContent> <p>Composant SocialDeclarations en développement.</p> </CardContent> </Card> ); }; export default SocialDeclarations;

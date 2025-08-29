@@ -60,7 +60,7 @@ const DataTable: React.FC<DataTableProps> = ({
           {displayData.map((row, rowIndex) => (
             <motion.tr
               key={row.id || rowIndex}
-              className="border-b border-gray-100 dark:border-gray-800"
+              className=""
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: rowIndex * 0.1 }}

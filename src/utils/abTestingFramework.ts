@@ -1,8 +1,7 @@
-/* eslint-disable max-lines */
 // Framework A/B Testing moderne et performant
 // Optimisé pour les Core Web Vitals et la performance
 
-interface ABTestVariant {
+export interface ABTestVariant {
   id: string;
   name: string;
   weight: number; // Pourcentage de trafic (0-100)
@@ -10,7 +9,7 @@ interface ABTestVariant {
   isControl?: boolean;
 }
 
-interface ABTest {
+export interface ABTest {
   id: string;
   name: string;
   description?: string;
@@ -25,14 +24,14 @@ interface ABTest {
   trafficAllocation: number; // Pourcentage du trafic total (0-100)
 }
 
-interface TargetingRule {
+export interface TargetingRule {
   type: 'url' | 'query' | 'cookie' | 'localStorage' | 'userAgent' | 'custom';
   operator: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'regex' | 'not';
   value: string | string[];
   customFunction?: (context: UserContext) => boolean;
 }
 
-interface UserContext {
+export interface UserContext {
   userId?: string;
   sessionId: string;
   url: string;
@@ -42,6 +41,7 @@ interface UserContext {
   localStorage: Record<string, unknown>;
   queryParams: Record<string, string>;
   customProperties?: Record<string, unknown>;
+  [key: string]: string | number | boolean | undefined | Record<string, unknown> | Record<string, string>;
 }
 
 interface ABTestResult {
@@ -105,8 +105,8 @@ export class ABTestingFramework {
       // Démarrer le flush périodique des événements
       this.startEventFlush();
 
-  this.isInitialized = true;
-  console.warn(`[ABTesting] Framework initialisé avec ${testsConfig.length} tests`);
+      this.isInitialized = true;
+      console.log(`[ABTesting] Framework initialisé avec ${testsConfig.length} tests`);
     } catch (error) {
       console.error('[ABTesting] Erreur d\'initialisation:', error);
     }
@@ -198,9 +198,8 @@ export class ABTestingFramework {
     return test.targetingRules.every(rule => this.evaluateTargetingRule(rule, context));
   }
 
-  // eslint-disable-next-line complexity
   private evaluateTargetingRule(rule: TargetingRule, context: UserContext): boolean {
-    let value: string | undefined;
+    let value: string | undefined | unknown;
 
     switch (rule.type) {
       case 'url':
@@ -212,11 +211,9 @@ export class ABTestingFramework {
       case 'cookie':
         value = context.cookies[rule.value as string];
         break;
-      case 'localStorage': {
-        const v = context.localStorage[rule.value as string];
-        value = typeof v === 'string' ? v : v != null ? String(v) : undefined;
+      case 'localStorage':
+        value = context.localStorage[rule.value as string];
         break;
-      }
       case 'userAgent':
         value = context.userAgent;
         break;
@@ -232,17 +229,17 @@ export class ABTestingFramework {
 
     switch (rule.operator) {
       case 'equals':
-        return targetValue.includes(value);
+        return targetValue.includes(value as string);
       case 'contains':
-  return targetValue.some(target => value.includes(target));
+        return targetValue.some(target => (value as string).includes(target));
       case 'startsWith':
-  return targetValue.some(target => value.startsWith(target));
+        return targetValue.some(target => (value as string).startsWith(target));
       case 'endsWith':
-  return targetValue.some(target => value.endsWith(target));
+        return targetValue.some(target => (value as string).endsWith(target));
       case 'regex':
-  return targetValue.some(target => new RegExp(target).test(value));
+        return targetValue.some(target => new RegExp(target).test(value as string));
       case 'not':
-        return !targetValue.includes(value);
+        return !targetValue.includes(value as string);
       default:
         return true;
     }
@@ -273,7 +270,7 @@ export class ABTestingFramework {
     this.eventQueue.push(fullEvent);
 
     // Flush immédiat si la queue est pleine
-  if (this.eventQueue.length >= (this.config.maxQueueSize ?? 100)) {
+    if (this.config.maxQueueSize && this.eventQueue.length >= this.config.maxQueueSize) {
       this.flushEvents();
     }
   }
@@ -301,9 +298,11 @@ export class ABTestingFramework {
   }
 
   private setUserAssignment(userId: string, testId: string, variantId: string): void {
-  const map = this.userAssignments.get(userId) ?? new Map<string, string>();
-  map.set(testId, variantId);
-  this.userAssignments.set(userId, map);
+    if (!this.userAssignments.has(userId)) {
+      this.userAssignments.set(userId, new Map());
+    }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    this.userAssignments.get(userId)!.set(testId, variantId);
 
     if (this.config.persistentStorage) {
       this.saveAssignmentsToStorage();
@@ -315,9 +314,9 @@ export class ABTestingFramework {
     try {
       const stored = localStorage.getItem('casskai-ab-assignments');
       if (stored) {
-        const assignments = JSON.parse(stored) as Record<string, Record<string, string>>;
+        const assignments = JSON.parse(stored);
         Object.entries(assignments).forEach(([userId, testAssignments]) => {
-          this.userAssignments.set(userId, new Map<string, string>(Object.entries(testAssignments)));
+          this.userAssignments.set(userId, new Map(Object.entries(testAssignments as Record<string, string>)));
         });
       }
     } catch (error) {
@@ -471,15 +470,7 @@ export class ABTestingFramework {
   }
 
   // Debug et monitoring
-  getDebugInfo(): {
-    isInitialized: boolean;
-    testsCount: number;
-    activeTestsCount: number;
-    assignmentsCount: number;
-    queuedEventsCount: number;
-    sessionId: string;
-    config: ABTestingConfig;
-  } {
+  getDebugInfo(): Record<string, unknown> {
     return {
       isInitialized: this.isInitialized,
       testsCount: this.tests.size,
@@ -493,7 +484,7 @@ export class ABTestingFramework {
 }
 
 // Configuration du framework
-interface ABTestingConfig {
+export interface ABTestingConfig {
   persistentStorage?: boolean;
   analyticsIntegration?: boolean;
   enableLocalTesting?: boolean;
@@ -501,6 +492,12 @@ interface ABTestingConfig {
   maxQueueSize?: number;
   hashSalt?: string;
   apiEndpoint?: string;
+}
+
+declare global {
+  interface Window {
+    plausible: (event: string, options?: { props: Record<string, unknown> }) => void;
+  }
 }
 
 export default ABTestingFramework;

@@ -1,1 +1,0 @@
-import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const CompanyStructure: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>CompanyStructure</CardTitle> </CardHeader> <CardContent> <p>Composant CompanyStructure en développement.</p> </CardContent> </Card> ); }; export default CompanyStructure;

@@ -1,7 +1,10 @@
 import { useEffect, useCallback, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 
 // Types pour les Core Web Vitals
+declare const gtag: ((event: string, name: string, params: Record<string, unknown>) => void) | undefined;
+declare const plausible: ((event: string, options?: { props?: Record<string, unknown> }) => void) | undefined;
 interface WebVitalMetric {
   name: 'FCP' | 'LCP' | 'FID' | 'CLS' | 'TTFB' | 'INP';
   value: number;
@@ -56,94 +59,12 @@ export const useWebVitals = (options?: {
   enableAnalytics?: boolean;
   debug?: boolean;
 }) => {
-  const location = useLocation();
+  // Note: do not call useLocation conditionally in this hook
   const [vitalsData, setVitalsData] = useState<WebVitalsData>({});
   const [isLoading, setIsLoading] = useState(true);
   const [pageScore, setPageScore] = useState<number>(0);
 
-  // Callback pour traiter les métriques
-  const handleMetric = useCallback((metric: WebVitalMetric) => {
-    if (options?.debug) {
-      console.log(`[WebVitals] ${metric.name}:`, {
-        value: metric.value,
-        rating: metric.rating,
-        delta: metric.delta,
-      });
-    }
-
-    // Mettre à jour l'état
-    setVitalsData(prev => ({
-      ...prev,
-      [metric.name]: metric,
-    }));
-
-    // Callback personnalisé
-    if (options?.reportCallback) {
-      options.reportCallback(metric);
-    }
-
-    // Envoi vers les analytics si activé
-    if (options?.enableAnalytics) {
-      sendToAnalytics(metric);
-    }
-  }, [options]);
-
-  // Initialisation du tracking des Web Vitals
-  useEffect(() => {
-    let isActive = true;
-    
-    const initWebVitals = async () => {
-      try {
-        // Import dynamique de web-vitals
-        const { getCLS, getFID, getFCP, getLCP, getTTFB } = await import('web-vitals');
-
-        if (!isActive) return;
-
-        // Initialiser chaque métrique
-        getCLS(handleMetric);
-        getFID(handleMetric);
-        getFCP(handleMetric);
-        getLCP(handleMetric);
-        getTTFB(handleMetric);
-
-        // INP (Interaction to Next Paint) - métrique expérimentale
-        if ('PerformanceObserver' in window) {
-          trackINP(handleMetric);
-        }
-
-        setIsLoading(false);
-      } catch (error) {
-        console.warn('[WebVitals] Erreur lors du chargement de web-vitals:', error);
-        setIsLoading(false);
-      }
-    };
-
-    initWebVitals();
-
-    return () => {
-      isActive = false;
-    };
-  }, [handleMetric]);
-
-  // Calculer le score global de la page
-  useEffect(() => {
-    const metrics = Object.values(vitalsData).filter(Boolean);
-    if (metrics.length === 0) return;
-
-    const scores = metrics.map(metric => {
-      switch (metric.rating) {
-        case 'good': return 100;
-        case 'needs-improvement': return 50;
-        case 'poor': return 0;
-        default: return 0;
-      }
-    });
-
-    const averageScore = scores.reduce((a, b) => a + b, 0) / scores.length;
-    setPageScore(Math.round(averageScore));
-  }, [vitalsData]);
-
-  // Envoyer les métriques vers les analytics
+  // Envoyer les métriques vers les analytics (déclaré avant handleMetric pour éviter TDZ)
   const sendToAnalytics = useCallback((metric: WebVitalMetric) => {
     // Google Analytics 4
     if (typeof gtag !== 'undefined') {
@@ -170,10 +91,9 @@ export const useWebVitals = (options?: {
     }
   }, []);
 
-  // Tracker INP manuellement
+  // Tracker INP manuellement (déclaré avant l'utilisation dans useEffect)
   const trackINP = useCallback((callback: (metric: WebVitalMetric) => void) => {
     let maxInteractionTime = 0;
-    let interactionCount = 0;
 
     const observer = new PerformanceObserver((list) => {
       const entries = list.getEntries() as PerformanceEventTiming[];
@@ -182,7 +102,7 @@ export const useWebVitals = (options?: {
         if (entry.processingStart && entry.processingEnd) {
           const interactionTime = entry.processingEnd - entry.processingStart;
           maxInteractionTime = Math.max(maxInteractionTime, interactionTime);
-          interactionCount++;
+          // no-op
         }
       });
 
@@ -195,7 +115,7 @@ export const useWebVitals = (options?: {
             rating: getRating('INP', maxInteractionTime),
             delta: maxInteractionTime,
             id: `inp-${Date.now()}`,
-            entries,
+            entries: [],
           });
         }
       }, 1000);
@@ -208,6 +128,94 @@ export const useWebVitals = (options?: {
       console.warn('[WebVitals] INP tracking non supporté:', e);
     }
   }, []);
+
+  // Callback pour traiter les métriques
+  const handleMetric = useCallback((metric: WebVitalMetric) => {
+    if (options?.debug) {
+      console.log(`[WebVitals] ${metric.name}:`, {
+        value: metric.value,
+        rating: metric.rating,
+        delta: metric.delta,
+      });
+    }
+
+    // Mettre à jour l'état
+    flushSync(() => {
+      setVitalsData(prev => ({
+        ...prev,
+        [metric.name]: metric,
+      }));
+    });
+
+    // Callback personnalisé
+    if (options?.reportCallback) {
+      options.reportCallback(metric);
+    }
+
+    // Envoi vers les analytics si activé
+    if (options?.enableAnalytics) {
+      sendToAnalytics(metric);
+    }
+  }, [options, sendToAnalytics]);
+
+  // Initialisation du tracking des Web Vitals
+  useEffect(() => {
+    let isActive = true;
+    
+  const initWebVitals = async () => {
+      try {
+        // Import dynamique de web-vitals
+        const webVitals: any = await import('web-vitals');
+        const { getCLS, getFID, getFCP, getLCP, getTTFB } = webVitals as any;
+
+        if (!isActive) return;
+
+        // Initialiser chaque métrique
+        getCLS(handleMetric);
+        getFID(handleMetric);
+        getFCP(handleMetric);
+        getLCP(handleMetric);
+        getTTFB(handleMetric);
+
+        // INP (Interaction to Next Paint) - métrique expérimentale
+        if ('PerformanceObserver' in window) {
+          trackINP(handleMetric);
+        }
+
+  // Mark as ready once listeners are registered
+  setIsLoading(false);
+      } catch (error) {
+        console.warn('[WebVitals] Erreur lors du chargement de web-vitals:', error);
+        setIsLoading(false);
+      }
+    };
+
+  void initWebVitals();
+
+    return () => {
+      isActive = false;
+    };
+  }, [handleMetric, trackINP]);
+
+  // Calculer le score global de la page
+  useEffect(() => {
+    const metrics = Object.values(vitalsData).filter(Boolean);
+    if (metrics.length === 0) return;
+
+    const scores = metrics.map(metric => {
+      switch (metric.rating) {
+        case 'good': return 100;
+        case 'needs-improvement': return 50;
+        case 'poor': return 0;
+        default: return 0;
+      }
+    });
+
+  const averageScore = scores.reduce((a: number, b) => a + b, 0) / scores.length;
+    setPageScore(Math.round(averageScore));
+  }, [vitalsData]);
+
+  // (sendToAnalytics et trackINP sont définis plus haut)
 
   return {
     vitalsData,
@@ -224,7 +232,7 @@ export const usePagePerformance = () => {
   const location = useLocation();
   const [performanceData, setPerformanceData] = useState<PagePerformanceData[]>([]);
 
-  const { vitalsData } = useWebVitals({
+  void useWebVitals({
     reportCallback: (metric) => {
       // Sauvegarder les données de performance par page
       const pageData: PagePerformanceData = {
@@ -234,8 +242,8 @@ export const usePagePerformance = () => {
         deviceInfo: {
           userAgent: navigator.userAgent,
           viewport: `${window.innerWidth}x${window.innerHeight}`,
-          connection: (navigator as any).connection?.effectiveType,
-          deviceMemory: (navigator as any).deviceMemory,
+          connection: (navigator as Navigator & { connection?: { effectiveType?: string } }).connection?.effectiveType,
+          deviceMemory: (navigator as Navigator & { deviceMemory?: number }).deviceMemory,
         },
       };
 
@@ -301,14 +309,12 @@ export const usePerformanceMonitoring = (alertThresholds?: Partial<typeof THRESH
 
   const thresholds = { ...THRESHOLDS, ...alertThresholds };
 
-  useWebVitals({
+  void useWebVitals({
     reportCallback: (metric) => {
       const threshold = thresholds[metric.name];
-      const severity: 'warning' | 'critical' = 
-        metric.value > threshold.poor ? 'critical' : 
-        metric.value > threshold.good ? 'warning' : null;
+      const severity = metric.value > threshold.poor ? 'critical' : metric.value > threshold.good ? 'warning' : undefined;
 
-      if (severity) {
+      if (severity !== undefined) {
         setAlerts(prev => [...prev, {
           metric: metric.name,
           value: metric.value,

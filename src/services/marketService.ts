@@ -1,19 +1,11 @@
-import type { MarketConfig as DataMarketConfig } from '../types/markets';
+import { MarketLocalization, MarketPricing } from '../types/market';
+// services/marketService.ts
+import { MarketConfig } from '../types/market';
 import { MARKET_CONFIGS } from '../data/markets';
 import { SYSCOHADA_PLAN } from '../data/syscohada';
-// import { PCG_ACCOUNTS as PCG_PLAN } from '../data/pcg';
+import { PCG_ACCOUNTS as PCG_PLAN } from '../data/pcg';
 // import { CurrencyService } from './currencyService';
 import { AccountingService } from './accountingService';
-
-type MarketConfig = DataMarketConfig;
-type MarketLocalization = DataMarketConfig['localization'];
-type MarketPricing = DataMarketConfig['pricing'];
-
-declare global {
-  interface Window {
-    CASSKAI_TIMEZONE?: string;
-  }
-}
 export class MarketService {
   private static instance: MarketService;
   private currentMarket: MarketConfig | null = null;
@@ -35,9 +27,8 @@ export class MarketService {
     // Utiliser un service de géolocalisation IP
     return fetch('https://ipapi.co/json/')
       .then(response => response.json())
-  .then(data => this.detectMarketFromCountry(data.country_code))
-  .then(cfg => cfg ?? null)
-  .catch(() => MARKET_CONFIGS.find(m => m.id === 'france') || null); // Fallback France
+      .then(data => this.detectMarketFromCountry(data.country_code))
+      .catch(() => MARKET_CONFIGS.find(m => m.id === 'france')); // Fallback France
   }
 
   setCurrentMarket(marketId: string): boolean {
@@ -75,8 +66,7 @@ export class MarketService {
     if (market.accountingStandard === 'SYSCOHADA') {
       accountingService.setAccountPlan(SYSCOHADA_PLAN);
     } else if (market.accountingStandard === 'PCG') {
-      // PCG par défaut déjà configuré dans AccountingService
-      // pas de changement nécessaire ici
+      accountingService.setAccountPlan(PCG_PLAN);
     }
 
     // 3. Configurer la localisation
@@ -92,7 +82,7 @@ export class MarketService {
     
     // Configuration du fuseau horaire
     // Peut être utilisé par les bibliothèques de date
-  window.CASSKAI_TIMEZONE = localization.timezone;
+    (window as any).CASSKAI_TIMEZONE = localization.timezone;
   }
 
   getMarketPricing(marketId: string): MarketPricing | null {

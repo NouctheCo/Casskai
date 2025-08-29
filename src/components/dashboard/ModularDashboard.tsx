@@ -8,6 +8,8 @@ import {
   Plus, 
   Settings, 
   Move,
+  // Maximize2,
+  // Minimize2,
   MoreVertical,
   Trash2,
   Copy,
@@ -16,9 +18,9 @@ import {
 import { useDashboard } from '../../contexts/DashboardContext';
 import { WidgetLibrary } from '../widgets/WidgetLibrary';
 import { WidgetRenderer } from '../widgets/WidgetRenderer';
-import { Button } from '@/components/ui/button';
+import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '../ui/card';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -26,7 +28,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '../ui/dropdown-menu';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { cn } from '../../lib/utils';
 import { WidgetConfig, WidgetLayout, WIDGET_SIZE_MAP, DEFAULT_BREAKPOINTS, DEFAULT_COLS } from '../../types/dashboard.types';
 
@@ -46,27 +48,24 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
   onEditModeChange
 }) => {
   const {
-    state,
+    state: { 
+      currentDashboard, 
+      widgets, 
+      isEditing, 
+      isLoading,
+      collaborators,
+      isConnected 
+    },
     updateLayout,
     addWidget,
+    updateWidget: _updateWidget,
     removeWidget,
     startEditing,
     stopEditing,
+    selectWidget: _selectWidget,
     subscribeToRealtime,
     unsubscribeFromRealtime
   } = useDashboard();
-
-  const {
-    currentDashboard,
-    widgets = [],
-    collaborators = [],
-    isEditing = false,
-    isLoading = false,
-    isConnected = false
-  } = state || {};
-
-  // Variable sécurisée pour layout
-  const layoutArr = Array.isArray(currentDashboard?.layout) ? currentDashboard!.layout : [];
 
   const [showWidgetLibrary, setShowWidgetLibrary] = useState(false);
   const [selectedWidget, setSelectedWidget] = useState<string | null>(null);
@@ -74,15 +73,15 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
   const gridRef = useRef<any>(null);
 
   // Configuration responsive pour react-grid-layout
-  const breakpoints = DEFAULT_BREAKPOINTS as unknown as { [key: string]: number };
-  const cols = DEFAULT_COLS as unknown as { [key: string]: number };
+  const breakpoints = DEFAULT_BREAKPOINTS;
+  const cols = DEFAULT_COLS;
 
   // Convertir les widgets en layout pour react-grid-layout
-  const layouts = layoutArr.reduce((acc, item) => {
+  const layouts = currentDashboard?.layout.reduce((acc, item) => {
     Object.keys(breakpoints).forEach(breakpoint => {
       if (!acc[breakpoint]) acc[breakpoint] = [];
       acc[breakpoint].push({
-        i: item.i ? String(item.i) : `widget-${Date.now()}`,
+        i: item.i ? String(item.i) : `widget-${Date.now()}`, // ✅ Sécurise la conversion en string
         x: Number(item.x) || 0,
         y: Number(item.y) || 0,
         w: Number(item.w) || 1,
@@ -100,7 +99,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
   }, {} as { [key: string]: Layout[] }) || {};
 
   // Gestionnaire de changement de layout
-  const handleLayoutChange = useCallback((currentLayout: Layout[]) => {
+  const handleLayoutChange = useCallback((currentLayout: Layout[], allLayouts: { [key: string]: Layout[] }) => {
     if (!isEditing || !currentDashboard) return;
 
     const newLayout: WidgetLayout[] = currentLayout.map(item => ({
@@ -125,11 +124,10 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
   const handleAddWidget = useCallback(async (libraryItem: any) => {
     if (!currentDashboard) return;
 
-    const defaultSizeKey = (libraryItem.defaultSize ?? 'medium') as keyof typeof WIDGET_SIZE_MAP;
-    const size = WIDGET_SIZE_MAP[defaultSizeKey] || WIDGET_SIZE_MAP.medium;
+    const size = WIDGET_SIZE_MAP[libraryItem.defaultSize] || WIDGET_SIZE_MAP.medium;
     
     // Trouver la première position disponible
-    const existingLayouts = layoutArr;
+    const existingLayouts = currentDashboard.layout;
     let x = 0, y = 0;
     
     for (let row = 0; row < 20; row++) {
@@ -173,7 +171,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
       isResizable: true
     };
 
-    const updatedLayout = [...layoutArr, newLayout];
+    const updatedLayout = [...currentDashboard.layout, newLayout];
     updateLayout(updatedLayout);
 
     setShowWidgetLibrary(false);
@@ -199,38 +197,33 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
   }, [stopEditing, onEditModeChange, unsubscribeFromRealtime]);
 
   // Gestionnaire de drag start/stop pour les effets visuels
-  const handleDragStart = useCallback((_layout: Layout[], _oldItem: Layout, newItem: Layout) => {
+  const handleDragStart = useCallback((_layout: Layout[], _oldItem: Layout, newItem: Layout, _placeholder: Layout, _e: MouseEvent) => {
     setDraggedItem(newItem.i);
   }, []);
 
-  const handleDragStop = useCallback((layout: Layout[]) => {
+  const handleDragStop = useCallback((_layout: Layout[], _oldItem: Layout, _newItem: Layout, _placeholder: Layout, _e: MouseEvent) => {
     setDraggedItem(null);
-    handleLayoutChange(layout);
+    handleLayoutChange(_layout, {});
   }, [handleLayoutChange]);
 
   // Rendu des widgets avec wrapper animé
-  const renderWidget = (widget: WidgetConfig, _layout: WidgetLayout) => {
+  const renderWidget = (widget: WidgetConfig, layout: WidgetLayout) => {
     // Validation et sécurisation des données
     if (!widget || !widget.id || !widget.type) {
       console.warn('Widget invalide:', widget);
-      // Retourner un placeholder au lieu de null
-      return (
-        <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
-          <p className="text-sm text-gray-500">Widget non disponible</p>
-        </div>
-      );
+      return null;
     }
 
     const widgetId = String(widget.id);
     const isSelected = selectedWidget === widgetId;
     const isDragged = draggedItem === widgetId;
-    const collaborator = (collaborators ?? []).find(c => c.selection === widgetId);
+    const collaborator = collaborators.find(c => c.selection === widgetId);
 
     return (
       <motion.div
         key={widgetId}
         className={cn(
-          "relative group h-full",
+          "relative group",
           isDragged && "z-50",
           isSelected && "ring-2 ring-blue-500 ring-opacity-50"
         )}
@@ -258,10 +251,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
                   size="sm"
                   variant="outline"
                   className="h-6 w-6 p-0 bg-white shadow-sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemoveWidget(widgetId);
-                  }}
+                  onClick={() => handleRemoveWidget(widgetId)}
                 >
                   <X className="w-3 h-3" />
                 </Button>
@@ -292,10 +282,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
                       className="text-red-600"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveWidget(widgetId);
-                      }}
+                      onClick={() => handleRemoveWidget(widgetId)}
                     >
                       <Trash2 className="w-4 h-4 mr-2" />
                       Supprimer
@@ -360,7 +347,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
     return (
       <div className="text-center py-12">
         <p className="text-gray-500 dark:text-gray-400">
-          Configuration du dashboard en cours...
+          Aucun dashboard sélectionné
         </p>
       </div>
     );
@@ -389,9 +376,9 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
               </Badge>
             )}
             
-            {(collaborators ?? []).length > 0 && (
+            {collaborators.length > 0 && (
               <Badge variant="outline">
-                {(collaborators ?? []).length} collaborateur(s)
+                {collaborators.length} collaborateur(s)
               </Badge>
             )}
           </div>
@@ -433,7 +420,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
       {/* Dashboard grid */}
       <motion.div
         className={cn(
-          "relative min-h-[400px]",
+          "relative",
           isEditing && "bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4"
         )}
         animate={{
@@ -441,47 +428,33 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
         }}
         transition={{ duration: 0.3 }}
       >
-        {layoutArr.length > 0 && widgets.length > 0 ? (
-          <ResponsiveGridLayout
-            ref={gridRef}
-            className="layout"
-            layouts={layouts}
-            breakpoints={breakpoints}
-            cols={cols}
-            rowHeight={60}
-            margin={[12, 12]}
-            containerPadding={[0, 0]}
-            isDraggable={isEditing}
-            isResizable={isEditing}
-            compactType={currentDashboard?.settings?.compactType ?? 'vertical'}
-            preventCollision={false}
-            useCSSTransforms
-            onLayoutChange={handleLayoutChange}
-            onDragStart={handleDragStart}
-            onDragStop={handleDragStop}
-            onResizeStop={(layout) => handleLayoutChange(layout)}
-          >
-            {(widgets ?? [])
-              .filter(widget => widget && widget.id && widget.type)
-              .map(widget => {
-                const widgetId = String(widget.id);
-                const layout = layoutArr.find(
-                  l => l.i && String(l.i) === widgetId
-                );
-                
-                // IMPORTANT: Toujours retourner un div avec la clé
-                if (!layout) {
-                  return <div key={widgetId} style={{ display: 'none' }} />;
-                }
-                
-                const rendered = renderWidget(widget, layout);
-                
-                // Si renderWidget retourne null, retourner un placeholder
-                return rendered || <div key={widgetId} style={{ display: 'none' }} />;
-              })}
-          </ResponsiveGridLayout>
-        ) : (
-          /* État vide */
+        <ResponsiveGridLayout
+          ref={gridRef}
+          className="layout"
+          layouts={layouts}
+          breakpoints={breakpoints}
+          cols={cols}
+          rowHeight={60}
+          margin={[12, 12]}
+          containerPadding={[0, 0]}
+          isDraggable={isEditing}
+          isResizable={isEditing}
+          compactType={currentDashboard.settings.compactType}
+          preventCollision={false}
+          useCSSTransforms
+          onLayoutChange={handleLayoutChange}
+          onDragStart={handleDragStart}
+          onDragStop={handleDragStop}
+          onResizeStop={handleLayoutChange}
+        >
+          {widgets.filter(widget => widget && widget.id).map(widget => {
+            const layout = currentDashboard.layout.find(l => l.i && widget.id && String(l.i) === String(widget.id));
+            return layout ? renderWidget(widget, layout) : null;
+          })}
+        </ResponsiveGridLayout>
+
+        {/* État vide */}
+        {widgets.length === 0 && (
           <motion.div
             className="flex flex-col items-center justify-center py-16 text-center"
             initial={{ opacity: 0, y: 20 }}
@@ -520,7 +493,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
 
       {/* Effets de collaboration en temps réel */}
       <AnimatePresence>
-        {(collaborators ?? []).map(collaborator => 
+        {collaborators.map(collaborator => 
           collaborator.cursor && collaborator.color && (
             <motion.div
               key={collaborator.userId}

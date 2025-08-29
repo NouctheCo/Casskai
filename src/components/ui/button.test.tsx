@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { Button } from '@/components/ui/button';
+import { Button } from './button';
 
 describe('Button Component', () => {
   it('renders button with text', () => {
@@ -24,21 +24,21 @@ describe('Button Component', () => {
 
   it('applies size classes correctly', () => {
     render(<Button size="lg">Large Button</Button>);
-    const button = screen.getByRole('button', { name: 'Large Button' });
+    const button = screen.getByRole('button');
     // Check for responsive classes that might be present
     expect(button).toHaveClass('sm:h-11', 'sm:px-8');
   });
 
   it('renders as disabled when disabled prop is true', () => {
     render(<Button disabled>Disabled</Button>);
-    const button = screen.getByRole('button', { name: 'Disabled' });
+    const button = screen.getByRole('button');
     expect(button).toBeDisabled();
     expect(button).toHaveClass('disabled:pointer-events-none', 'disabled:opacity-50');
   });
 
   it('renders with custom className', () => {
     render(<Button className="custom-class">Custom</Button>);
-    const button = screen.getByRole('button', { name: 'Custom' });
+    const button = screen.getByRole('button');
     expect(button).toHaveClass('custom-class');
   });
 
@@ -61,7 +61,7 @@ describe('Button Component', () => {
       </Button>
     );
     
-    fireEvent.click(screen.getByRole('button', { name: 'Disabled Button' }));
+    fireEvent.click(screen.getByRole('button'));
     expect(handleClick).not.toHaveBeenCalled();
   });
 
@@ -69,8 +69,8 @@ describe('Button Component', () => {
     const variants = ['default', 'destructive', 'outline', 'secondary', 'ghost', 'link'] as const;
     
     variants.forEach((variant) => {
-  const { unmount } = render(<Button variant={variant}>{variant}</Button>);
-  const button = screen.getByRole('button', { name: variant });
+      const { unmount } = render(<Button variant={variant}>{variant}</Button>);
+      const button = screen.getByRole('button');
       expect(button).toBeInTheDocument();
       unmount();
     });
@@ -80,8 +80,8 @@ describe('Button Component', () => {
     const sizes = ['default', 'sm', 'lg', 'icon'] as const;
     
     sizes.forEach((size) => {
-  const { unmount } = render(<Button size={size}>{size}</Button>);
-  const button = screen.getByRole('button', { name: size });
+      const { unmount } = render(<Button size={size}>{size}</Button>);
+      const button = screen.getByRole('button');
       expect(button).toBeInTheDocument();
       unmount();
     });

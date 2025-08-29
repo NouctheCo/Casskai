@@ -3,11 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Purchase, PurchaseFormData, PurchaseFilters, Supplier } from '../types/purchase.types';
 import { purchasesService } from '../services/purchasesService';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/components/ui/use-toast';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
+import { Badge } from '../components/ui/badge';
+import { useToast } from '../components/ui/use-toast.js';
 import { useEnterprise } from '../contexts/EnterpriseContext';
+import { useConfirmDialog } from '../components/ui/ConfirmDialog';
 import PurchaseStatsComponent from '../components/purchases/PurchaseStats';
 import PurchasesTable from '../components/purchases/PurchasesTable';
 import PurchasesFilters from '../components/purchases/PurchasesFilters';
@@ -26,6 +27,7 @@ export default function PurchasesPage() {
   }, [i18n]);
   const { toast } = useToast();
   const { currentEnterpriseId, currentEnterprise } = useEnterprise();
+  const { ConfirmDialog, confirm } = useConfirmDialog();
   
   // State management
   const [purchases, setPurchases] = useState<Purchase[]>([]);
@@ -194,8 +196,15 @@ export default function PurchasesPage() {
   };
 
   const handleDeletePurchase = async (id: string) => {
-    // eslint-disable-next-line no-alert
-    if (window.confirm(t('purchases.notifications.deleteConfirm'))) {
+    const confirmed = await confirm({
+      title: t('purchases.notifications.deleteTitle') || 'Supprimer l\'achat',
+      description: t('purchases.notifications.deleteConfirm') || 'Êtes-vous sûr de vouloir supprimer cet achat ? Cette action est irréversible.',
+      confirmText: t('common.delete') || 'Supprimer',
+      cancelText: t('common.cancel') || 'Annuler',
+      variant: 'destructive'
+    });
+    
+    if (confirmed) {
       try {
         const result = await purchasesService.deletePurchase(id);
         if (result.error) {
@@ -416,6 +425,9 @@ export default function PurchasesPage() {
         suppliers={suppliers}
         loading={formLoading}
       />
+      
+      {/* Render confirmation dialog */}
+      <ConfirmDialog />
     </motion.div>
   );
 }

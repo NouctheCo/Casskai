@@ -8,6 +8,10 @@ import {
   ForecastServiceResponse,
   ForecastDashboardData,
   WhatIfAnalysis,
+  ForecastComparison,
+  ForecastChart,
+  ForecastReport,
+  ChartDataPoint,
   RevenueLineItem,
   ExpenseLineItem,
   CashFlowItem
@@ -246,7 +250,7 @@ class ForecastsService {
   async getScenarios(): Promise<ForecastServiceResponse<ForecastScenario[]>> {
     try {
       return { data: mockScenarios };
-  } catch {
+    } catch (error) {
       return {
         data: [],
         error: { message: 'Erreur lors de la récupération des scénarios' }
@@ -265,7 +269,7 @@ class ForecastsService {
       
       mockScenarios.push(newScenario);
       return { data: newScenario };
-  } catch {
+    } catch (error) {
       return {
         data: {} as ForecastScenario,
         error: { message: 'Erreur lors de la création du scénario' }
@@ -278,7 +282,7 @@ class ForecastsService {
     try {
       const filteredPeriods = mockPeriods.filter(period => period.enterprise_id === enterpriseId);
       return { data: filteredPeriods };
-  } catch {
+    } catch (error) {
       return {
         data: [],
         error: { message: 'Erreur lors de la récupération des périodes' }
@@ -313,7 +317,7 @@ class ForecastsService {
       }
       
       return { data: filteredForecasts };
-  } catch {
+    } catch (error) {
       return {
         data: [],
         error: { message: 'Erreur lors de la récupération des prévisions' }
@@ -369,7 +373,7 @@ class ForecastsService {
       
       mockForecasts.push(newForecast);
       return { data: newForecast };
-  } catch {
+    } catch (error) {
       return {
         data: {} as ForecastData,
         error: { message: 'Erreur lors de la création de la prévision' }
@@ -424,7 +428,7 @@ class ForecastsService {
       };
       
       return { data: mockForecasts[forecastIndex] };
-  } catch {
+    } catch (error) {
       return {
         data: {} as ForecastData,
         error: { message: 'Erreur lors de la mise à jour de la prévision' }
@@ -444,7 +448,7 @@ class ForecastsService {
       
       mockForecasts.splice(forecastIndex, 1);
       return { data: true };
-  } catch {
+    } catch (error) {
       return {
         data: false,
         error: { message: 'Erreur lors de la suppression de la prévision' }
@@ -499,7 +503,7 @@ class ForecastsService {
       };
       
       return { data: dashboardData };
-  } catch {
+    } catch (error) {
       return {
         data: {} as ForecastDashboardData,
         error: { message: 'Erreur lors de la récupération des données du tableau de bord' }
@@ -545,7 +549,7 @@ class ForecastsService {
       };
       
       return { data: analysis };
-  } catch {
+    } catch (error) {
       return {
         data: {} as WhatIfAnalysis,
         error: { message: 'Erreur lors de l\'analyse what-if' }
@@ -595,7 +599,7 @@ class ForecastsService {
 
   generatePDFReport(forecast: ForecastData): void {
     // Mock PDF generation
-  console.warn(`Génération du rapport PDF pour: ${forecast.name}`);
+    console.log(`Génération du rapport PDF pour: ${forecast.name}`);
     // In a real implementation, you would use a library like jsPDF or call a backend service
   }
 }

@@ -15,7 +15,7 @@ export interface BankConnection {
   lastSync?: Date;
   createdAt: Date;
   updatedAt: Date;
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, any>;
 }
 
 export interface BankAccount {
@@ -34,7 +34,7 @@ export interface BankAccount {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, any>;
 }
 
 export interface BankTransaction {
@@ -61,7 +61,7 @@ export interface BankTransaction {
   reconciledAt?: Date;
   createdAt: Date;
   updatedAt: Date;
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, any>;
 }
 
 export interface MerchantInfo {
@@ -90,8 +90,7 @@ export interface BankingProvider {
   supportedBanks: SupportedBank[];
   features: ProviderFeatures;
   isActive: boolean;
-  // Provider-specific configuration (Bridge, Budget Insight, etc.)
-  config: BridgeConfig | BudgetInsightConfig | CustomProviderConfig;
+  config: ProviderConfig;
 }
 
 export interface SupportedBank {
@@ -130,6 +129,8 @@ export interface ProviderConfig {
   clientId: string;
   clientSecret: string;
   webhookUrl?: string;
+  // Secret used to validate incoming webhook signatures (if provider supports it)
+  webhookSecret?: string;
   scopes: string[];
   environment: 'sandbox' | 'production';
   rateLimit?: {
@@ -155,7 +156,7 @@ export interface PSD2AuthFlow {
 export interface SCAMethod {
   type: 'sms' | 'app' | 'hardware_token' | 'biometric';
   description: string;
-  challengeData?: Record<string, unknown>;
+  challengeData?: Record<string, any>;
 }
 
 export interface ChallengeData {
@@ -188,7 +189,7 @@ export interface ReconciliationCondition {
 
 export interface ReconciliationAction {
   type: 'match' | 'categorize' | 'split' | 'merge' | 'flag' | 'create_entry';
-  parameters: Record<string, unknown>;
+  parameters: Record<string, any>;
 }
 
 export interface ReconciliationMatch {
@@ -230,10 +231,17 @@ export interface AccountingEntry {
 // Types pour les webhooks
 export interface WebhookEvent {
   id: string;
-  type: 'transaction.created' | 'transaction.updated' | 'account.updated' | 'connection.status_changed';
+  type:
+    | 'transaction.created'
+    | 'transaction.updated'
+    | 'account.updated'
+    | 'connection.status_changed'
+    | 'connection.error'
+    | 'connection.expired'
+    | 'unknown';
   providerId: string;
   connectionId: string;
-  data: Record<string, unknown>;
+  data: Record<string, any>;
   timestamp: Date;
   processed: boolean;
   processedAt?: Date;
@@ -280,7 +288,7 @@ export interface AuditLog {
   userAgent: string;
   success: boolean;
   errorMessage?: string;
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, any>;
   timestamp: Date;
 }
 
@@ -318,7 +326,7 @@ export interface FieldMapping {
 
 export interface FieldTransformation {
   type: 'format_date' | 'format_currency' | 'truncate' | 'uppercase' | 'lowercase' | 'regex_replace' | 'lookup';
-  parameters: Record<string, unknown>;
+  parameters: Record<string, any>;
 }
 
 export interface ValidationRule {
@@ -414,7 +422,6 @@ export interface BridgeConfig {
   baseUrl: string;
   version: string;
   webhookSecret: string;
-  rateLimit?: { requests: number; windowMs: number };
 }
 
 export interface BudgetInsightConfig {
@@ -423,11 +430,10 @@ export interface BudgetInsightConfig {
   baseUrl: string;
   manageUrl: string;
   webhookSecret: string;
-  rateLimit?: { requests: number; windowMs: number };
 }
 
 export interface CustomProviderConfig {
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
 // Types pour les statistiques

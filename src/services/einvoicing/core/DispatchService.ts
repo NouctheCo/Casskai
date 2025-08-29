@@ -9,7 +9,7 @@ import {
   ChannelResponse,
   EInvoicingError,
   SubmissionError
-} from '@/types/einvoicing.types';
+} from '../../../types/einvoicing.types';
 import { ChannelProvider } from '../adapters/ChannelProviders/base/ChannelProvider';
 import { PPFProvider } from '../adapters/ChannelProviders/PPFProvider';
 

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import { useToast } from '@/components/ui/use-toast';
+import GDPRService from '@/services/gdprService';
 import { 
   Shield, 
   Eye, 
@@ -26,11 +28,15 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { PageContainer } from '@/components/ui/PageContainer';
 
 const GDPRPage = () => {
   const { t } = useTranslation();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formErrors, setFormErrors] = useState<string[]>([]);
   const [requestForm, setRequestForm] = useState({
     type: '',
     email: '',
@@ -186,23 +192,85 @@ const GDPRPage = () => {
     }
   ];
 
-  const handleRequestSubmit = (e) => {
+  const handleRequestSubmit = async (e) => {
     e.preventDefault();
-    console.log('Demande RGPD soumise:', requestForm);
-  // eslint-disable-next-line no-alert
-  alert('Votre demande a été envoyée. Vous recevrez une réponse sous 72 heures.');
-    setRequestForm({
-      type: '',
-      email: '',
-      firstName: '',
-      lastName: '',
-      company: '',
-      description: ''
-    });
+    
+    // Validation des données
+    const validationErrors = GDPRService.validateGDPRRequest(requestForm);
+    if (validationErrors.length > 0) {
+      setFormErrors(validationErrors);
+      toast({
+        variant: "destructive",
+        title: "Erreurs de validation",
+        description: validationErrors.join(', ')
+      });
+      return;
+    }
+    
+    setFormErrors([]);
+
+    setIsSubmitting(true);
+    
+    try {
+      // Créer la demande RGPD via le service
+      const gdprRequest = await GDPRService.createGDPRRequest(requestForm);
+      
+      // Envoyer l'email de confirmation
+      await GDPRService.sendConfirmationEmail(gdprRequest);
+      
+      // Afficher la confirmation avec toast
+      toast({
+        title: "Demande RGPD envoyée",
+        description: `Votre demande de ${getRequestTypeLabel(requestForm.type)} a été enregistrée. Vous recevrez une réponse sous ${GDPRService.getLegalTimeframe(requestForm.type)}.`,
+        duration: 6000
+      });
+      
+      // Réinitialiser le formulaire
+      setRequestForm({
+        type: '',
+        email: '',
+        firstName: '',
+        lastName: '',
+        company: '',
+        description: ''
+      });
+      
+    } catch (error) {
+      console.error('Error submitting GDPR request:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible d'envoyer votre demande. Veuillez réessayer ou nous contacter directement."
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Fonction utilitaire pour obtenir le libellé du type de demande
+  const getRequestTypeLabel = (type: string): string => {
+    const typeLabels = {
+      'access': 'droit d\'accès',
+      'rectification': 'droit de rectification',
+      'erasure': 'droit à l\'effacement',
+      'portability': 'droit à la portabilité',
+      'restriction': 'droit de limitation',
+      'objection': 'droit d\'opposition'
+    };
+    return typeLabels[type] || 'demande RGPD';
+  };
+
+  // Fonction pour gérer les changements de formulaire et effacer les erreurs
+  const handleFormChange = (field: string, value: string) => {
+    setRequestForm({...requestForm, [field]: value});
+    // Effacer les erreurs quand l'utilisateur commence à corriger
+    if (formErrors.length > 0) {
+      setFormErrors([]);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <PageContainer variant="legal">
       {/* Header */}
       <div className="bg-gradient-to-br from-blue-900 to-indigo-900 text-white py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -220,7 +288,7 @@ const GDPRPage = () => {
             </p>
             <Badge className="bg-blue-800/50 text-blue-200 border-blue-700">
               <Calendar className="w-4 h-4 mr-2" />
-              Mise à jour : {lastUpdated}
+              {t('gdpr.updated', { defaultValue: 'Mise à jour' })} : {lastUpdated}
             </Badge>
           </motion.div>
         </div>
@@ -232,36 +300,34 @@ const GDPRPage = () => {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Info className="w-6 h-6 mr-3 text-blue-600" />
-              Qu'est-ce que le RGPD ?
+              {t('gdpr.whatIsGDPR', { defaultValue: 'Qu\'est-ce que le RGPD ?' })}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="mb-4">
-              Le Règlement Général sur la Protection des Données (RGPD) est une réglementation 
-              européenne qui renforce et unifie la protection des données personnelles. 
-              Chez CassKai, nous nous engageons à respecter scrupuleusement vos droits.
+              {t('gdpr.description', { defaultValue: 'Le Règlement Général sur la Protection des Données (RGPD) est une réglementation européenne qui renforce et unifie la protection des données personnelles. Chez CassKai, nous nous engageons à respecter scrupuleusement vos droits.' })}
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
               <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
                 <Shield className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                <h4 className="font-semibold text-sm mb-1">Protection renforcée</h4>
+                <h4 className="font-semibold text-sm mb-1">{t('gdpr.protectionTitle', { defaultValue: 'Protection renforcée' })}</h4>
                 <p className="text-xs text-gray-600 dark:text-gray-300">
-                  Vos données sont protégées par des standards stricts
+                  {t('gdpr.protectionDesc', { defaultValue: 'Vos données sont protégées par des standards stricts' })}
                 </p>
               </div>
               <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
                 <UserCheck className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                <h4 className="font-semibold text-sm mb-1">Droits étendus</h4>
+                <h4 className="font-semibold text-sm mb-1">{t('gdpr.rightsTitle', { defaultValue: 'Droits étendus' })}</h4>
                 <p className="text-xs text-gray-600 dark:text-gray-300">
-                  6 droits fondamentaux à votre disposition
+                  {t('gdpr.rightsDesc', { defaultValue: '6 droits fondamentaux à votre disposition' })}
                 </p>
               </div>
               <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center">
                 <Globe className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-                <h4 className="font-semibold text-sm mb-1">Norme européenne</h4>
+                <h4 className="font-semibold text-sm mb-1">{t('gdpr.europeTitle', { defaultValue: 'Norme européenne' })}</h4>
                 <p className="text-xs text-gray-600 dark:text-gray-300">
-                  Applicable dans toute l'Union Européenne
+                  {t('gdpr.europeDesc', { defaultValue: 'Applicable dans toute l\'Union Européenne' })}
                 </p>
               </div>
             </div>
@@ -273,12 +339,12 @@ const GDPRPage = () => {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Database className="w-6 h-6 mr-3 text-purple-600" />
-              Données que nous traitons
+              {t('gdpr.dataWeProcess', { defaultValue: 'Données que nous traitons' })}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="mb-6">
-              Voici un aperçu transparent des données personnelles que CassKai collecte et traite :
+              {t('gdpr.dataDescription', { defaultValue: 'Voici un aperçu transparent des données personnelles que CassKai collecte et traite :' })}
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -386,13 +452,32 @@ const GDPRPage = () => {
               Nous traiterons votre demande dans les meilleurs délais.
             </p>
             
+            {/* Affichage des erreurs de validation */}
+            {formErrors.length > 0 && (
+              <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <div className="flex">
+                  <AlertTriangle className="h-5 w-5 text-red-600 mr-2 mt-0.5" />
+                  <div>
+                    <h4 className="text-sm font-medium text-red-800 dark:text-red-200 mb-1">
+                      Veuillez corriger les erreurs suivantes :
+                    </h4>
+                    <ul className="text-sm text-red-700 dark:text-red-300 list-disc list-inside space-y-1">
+                      {formErrors.map((error, index) => (
+                        <li key={index}>{error}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <form onSubmit={handleRequestSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">Type de demande</label>
                   <select
                     value={requestForm.type}
-                    onChange={(e) => setRequestForm({...requestForm, type: e.target.value})}
+                    onChange={(e) => handleFormChange('type', e.target.value)}
                     className="w-full p-3 border rounded-lg dark:bg-gray-800 dark:border-gray-600"
                     required
                   >
@@ -412,7 +497,7 @@ const GDPRPage = () => {
                   <Input
                     type="email"
                     value={requestForm.email}
-                    onChange={(e) => setRequestForm({...requestForm, email: e.target.value})}
+                    onChange={(e) => handleFormChange('email', e.target.value)}
                     placeholder="votre@email.com"
                     required
                   />
@@ -425,7 +510,7 @@ const GDPRPage = () => {
                   <Input
                     type="text"
                     value={requestForm.firstName}
-                    onChange={(e) => setRequestForm({...requestForm, firstName: e.target.value})}
+                    onChange={(e) => handleFormChange('firstName', e.target.value)}
                     placeholder="Votre prénom"
                     required
                   />
@@ -436,7 +521,7 @@ const GDPRPage = () => {
                   <Input
                     type="text"
                     value={requestForm.lastName}
-                    onChange={(e) => setRequestForm({...requestForm, lastName: e.target.value})}
+                    onChange={(e) => handleFormChange('lastName', e.target.value)}
                     placeholder="Votre nom"
                     required
                   />
@@ -448,7 +533,7 @@ const GDPRPage = () => {
                 <Input
                   type="text"
                   value={requestForm.company}
-                  onChange={(e) => setRequestForm({...requestForm, company: e.target.value})}
+                  onChange={(e) => handleFormChange('company', e.target.value)}
                   placeholder="Nom de votre entreprise"
                 />
               </div>
@@ -457,7 +542,7 @@ const GDPRPage = () => {
                 <label className="block text-sm font-medium mb-2">Description de votre demande</label>
                 <Textarea
                   value={requestForm.description}
-                  onChange={(e) => setRequestForm({...requestForm, description: e.target.value})}
+                  onChange={(e) => handleFormChange('description', e.target.value)}
                   placeholder="Décrivez précisément votre demande..."
                   rows={4}
                   required
@@ -465,9 +550,13 @@ const GDPRPage = () => {
               </div>
               
               <div className="flex gap-4">
-                <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                <Button 
+                  type="submit" 
+                  className="bg-blue-600 hover:bg-blue-700"
+                  disabled={isSubmitting}
+                >
                   <Mail className="w-4 h-4 mr-2" />
-                  Envoyer ma demande
+                  {isSubmitting ? 'Envoi en cours...' : 'Envoyer ma demande'}
                 </Button>
                 <Button 
                   type="button" 
@@ -646,7 +735,7 @@ const GDPRPage = () => {
           </div>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 };
 

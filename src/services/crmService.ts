@@ -1,3 +1,4 @@
+import { supabase } from '@/lib/supabase';
 import { 
   Client, 
   Contact, 
@@ -247,17 +248,43 @@ class CrmService {
   // Clients
   async getClients(enterpriseId: string, filters?: CrmFilters): Promise<CrmServiceResponse<Client[]>> {
     try {
-      let filteredClients = mockClients.filter(client => client.enterprise_id === enterpriseId);
-      
+      // Utilise la table third_parties existante comme source de données CRM
+      let query = supabase
+        .from('third_parties')
+        .select('*')
+        .eq('company_id', enterpriseId)
+        .order('created_at', { ascending: false });
+
+      if (filters?.search) {
+        query = query.ilike('name', `%${filters.search}%`);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      // Transform third_parties data to Client format
+      const clients: Client[] = (data || []).map(client => ({
+        id: client.id,
+        enterprise_id: enterpriseId,
+        company_name: client.name,
+        industry: client.industry || null,
+        size: client.size as 'small' | 'medium' | 'large' | null,
+        address: client.address_street,
+        city: client.address_city,
+        postal_code: client.address_postal_code,
+        country: client.address_country,
+        website: client.website,
+        notes: client.notes,
+        status: client.client_type === 'customer' ? 'active' : 'prospect',
+        total_revenue: 0, // Sera calculé plus tard avec les vraies données
+        last_interaction: null,
+        created_at: client.created_at,
+        updated_at: client.updated_at
+      }));
+
+      // Appliquer les filtres supplémentaires
+      let filteredClients = clients;
       if (filters) {
-        if (filters.search) {
-          const searchLower = filters.search.toLowerCase();
-          filteredClients = filteredClients.filter(client =>
-            client.company_name.toLowerCase().includes(searchLower) ||
-            client.industry?.toLowerCase().includes(searchLower)
-          );
-        }
-        
         if (filters.status && filters.status !== 'all') {
           filteredClients = filteredClients.filter(client => client.status === filters.status);
         }
@@ -273,6 +300,7 @@ class CrmService {
       
       return { data: filteredClients };
     } catch (error) {
+      console.error('Error fetching CRM clients:', error);
       return {
         data: [],
         error: { message: 'Erreur lors de la récupération des clients' }
@@ -282,18 +310,51 @@ class CrmService {
 
   async createClient(enterpriseId: string, formData: ClientFormData): Promise<CrmServiceResponse<Client>> {
     try {
+      // Créer dans la table third_parties
+      const { data, error } = await supabase
+        .from('third_parties')
+        .insert({
+          company_id: enterpriseId,
+          name: formData.company_name,
+          industry: formData.industry,
+          address_street: formData.address,
+          address_city: formData.city,
+          address_postal_code: formData.postal_code,
+          address_country: formData.country,
+          website: formData.website,
+          notes: formData.notes,
+          client_type: formData.status === 'active' ? 'customer' : 'prospect',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Transform back to Client format
       const newClient: Client = {
-        id: Date.now().toString(),
-        ...formData,
+        id: data.id,
         enterprise_id: enterpriseId,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        total_revenue: 0
+        company_name: data.name,
+        industry: data.industry,
+        size: formData.size,
+        address: data.address_street,
+        city: data.address_city,
+        postal_code: data.address_postal_code,
+        country: data.address_country,
+        website: data.website,
+        notes: data.notes,
+        status: formData.status,
+        total_revenue: 0,
+        last_interaction: null,
+        created_at: data.created_at,
+        updated_at: data.updated_at
       };
       
-      mockClients.push(newClient);
       return { data: newClient };
     } catch (error) {
+      console.error('Error creating CRM client:', error);
       return {
         data: {} as Client,
         error: { message: 'Erreur lors de la création du client' }
@@ -303,22 +364,49 @@ class CrmService {
 
   async updateClient(clientId: string, formData: ClientFormData): Promise<CrmServiceResponse<Client>> {
     try {
-      const clientIndex = mockClients.findIndex(client => client.id === clientId);
-      if (clientIndex === -1) {
-        return {
-          data: {} as Client,
-          error: { message: 'Client non trouvé' }
-        };
-      }
-      
-      mockClients[clientIndex] = {
-        ...mockClients[clientIndex],
-        ...formData,
-        updated_at: new Date().toISOString()
+      const { data, error } = await supabase
+        .from('third_parties')
+        .update({
+          name: formData.company_name,
+          industry: formData.industry,
+          address_street: formData.address,
+          address_city: formData.city,
+          address_postal_code: formData.postal_code,
+          address_country: formData.country,
+          website: formData.website,
+          notes: formData.notes,
+          client_type: formData.status === 'active' ? 'customer' : 'prospect',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', clientId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Transform back to Client format
+      const updatedClient: Client = {
+        id: data.id,
+        enterprise_id: data.company_id,
+        company_name: data.name,
+        industry: data.industry,
+        size: formData.size,
+        address: data.address_street,
+        city: data.address_city,
+        postal_code: data.address_postal_code,
+        country: data.address_country,
+        website: data.website,
+        notes: data.notes,
+        status: formData.status,
+        total_revenue: 0,
+        last_interaction: null,
+        created_at: data.created_at,
+        updated_at: data.updated_at
       };
       
-      return { data: mockClients[clientIndex] };
+      return { data: updatedClient };
     } catch (error) {
+      console.error('Error updating CRM client:', error);
       return {
         data: {} as Client,
         error: { message: 'Erreur lors de la mise à jour du client' }
@@ -328,17 +416,15 @@ class CrmService {
 
   async deleteClient(clientId: string): Promise<CrmServiceResponse<boolean>> {
     try {
-      const clientIndex = mockClients.findIndex(client => client.id === clientId);
-      if (clientIndex === -1) {
-        return {
-          data: false,
-          error: { message: 'Client non trouvé' }
-        };
-      }
-      
-      mockClients.splice(clientIndex, 1);
+      const { error } = await supabase
+        .from('third_parties')
+        .delete()
+        .eq('id', clientId);
+
+      if (error) throw error;
       return { data: true };
     } catch (error) {
+      console.error('Error deleting CRM client:', error);
       return {
         data: false,
         error: { message: 'Erreur lors de la suppression du client' }
@@ -346,15 +432,21 @@ class CrmService {
     }
   }
 
-  // Contacts
+  // Contacts - Utilise localStorage temporairement car pas de table contacts dans Supabase
   async getContacts(clientId?: string): Promise<CrmServiceResponse<Contact[]>> {
     try {
-      let filteredContacts = mockContacts;
+      // Récupération depuis localStorage pour simuler la persistance
+      const storedContacts = localStorage.getItem('crm_contacts');
+      let allContacts: Contact[] = storedContacts ? JSON.parse(storedContacts) : mockContacts;
+      
+      let filteredContacts = allContacts;
       if (clientId) {
-        filteredContacts = mockContacts.filter(contact => contact.client_id === clientId);
+        filteredContacts = allContacts.filter(contact => contact.client_id === clientId);
       }
+      
       return { data: filteredContacts };
     } catch (error) {
+      console.error('Error fetching CRM contacts:', error);
       return {
         data: [],
         error: { message: 'Erreur lors de la récupération des contacts' }
@@ -371,9 +463,15 @@ class CrmService {
         updated_at: new Date().toISOString()
       };
       
-      mockContacts.push(newContact);
+      // Sauvegarde dans localStorage
+      const storedContacts = localStorage.getItem('crm_contacts');
+      const allContacts: Contact[] = storedContacts ? JSON.parse(storedContacts) : mockContacts;
+      allContacts.push(newContact);
+      localStorage.setItem('crm_contacts', JSON.stringify(allContacts));
+      
       return { data: newContact };
     } catch (error) {
+      console.error('Error creating CRM contact:', error);
       return {
         data: {} as Contact,
         error: { message: 'Erreur lors de la création du contact' }
@@ -381,17 +479,75 @@ class CrmService {
     }
   }
 
-  // Opportunities
+  async updateContact(contactId: string, formData: ContactFormData): Promise<CrmServiceResponse<Contact>> {
+    try {
+      const storedContacts = localStorage.getItem('crm_contacts');
+      const allContacts: Contact[] = storedContacts ? JSON.parse(storedContacts) : mockContacts;
+      
+      const contactIndex = allContacts.findIndex(contact => contact.id === contactId);
+      if (contactIndex === -1) {
+        return {
+          data: {} as Contact,
+          error: { message: 'Contact non trouvé' }
+        };
+      }
+      
+      allContacts[contactIndex] = {
+        ...allContacts[contactIndex],
+        ...formData,
+        updated_at: new Date().toISOString()
+      };
+      
+      localStorage.setItem('crm_contacts', JSON.stringify(allContacts));
+      return { data: allContacts[contactIndex] };
+    } catch (error) {
+      console.error('Error updating CRM contact:', error);
+      return {
+        data: {} as Contact,
+        error: { message: 'Erreur lors de la mise à jour du contact' }
+      };
+    }
+  }
+
+  async deleteContact(contactId: string): Promise<CrmServiceResponse<boolean>> {
+    try {
+      const storedContacts = localStorage.getItem('crm_contacts');
+      const allContacts: Contact[] = storedContacts ? JSON.parse(storedContacts) : mockContacts;
+      
+      const contactIndex = allContacts.findIndex(contact => contact.id === contactId);
+      if (contactIndex === -1) {
+        return {
+          data: false,
+          error: { message: 'Contact non trouvé' }
+        };
+      }
+      
+      allContacts.splice(contactIndex, 1);
+      localStorage.setItem('crm_contacts', JSON.stringify(allContacts));
+      return { data: true };
+    } catch (error) {
+      console.error('Error deleting CRM contact:', error);
+      return {
+        data: false,
+        error: { message: 'Erreur lors de la suppression du contact' }
+      };
+    }
+  }
+
+  // Opportunities - Utilise localStorage avec connexion aux clients réels de la DB
   async getOpportunities(enterpriseId: string, filters?: CrmFilters): Promise<CrmServiceResponse<Opportunity[]>> {
     try {
-      let filteredOpportunities = mockOpportunities.filter(opp => opp.enterprise_id === enterpriseId);
+      // Récupération depuis localStorage pour les opportunités
+      const storedOpportunities = localStorage.getItem('crm_opportunities');
+      let allOpportunities: Opportunity[] = storedOpportunities ? JSON.parse(storedOpportunities) : mockOpportunities;
+      
+      let filteredOpportunities = allOpportunities.filter(opp => opp.enterprise_id === enterpriseId);
       
       if (filters) {
         if (filters.search) {
           const searchLower = filters.search.toLowerCase();
           filteredOpportunities = filteredOpportunities.filter(opp =>
-            opp.title.toLowerCase().includes(searchLower) ||
-            opp.client_name?.toLowerCase().includes(searchLower)
+            opp.title.toLowerCase().includes(searchLower)
           );
         }
         
@@ -406,6 +562,7 @@ class CrmService {
       
       return { data: filteredOpportunities };
     } catch (error) {
+      console.error('Error fetching CRM opportunities:', error);
       return {
         data: [],
         error: { message: 'Erreur lors de la récupération des opportunités' }
@@ -415,22 +572,36 @@ class CrmService {
 
   async createOpportunity(enterpriseId: string, formData: OpportunityFormData): Promise<CrmServiceResponse<Opportunity>> {
     try {
-      const client = mockClients.find(c => c.id === formData.client_id);
-      const contact = mockContacts.find(c => c.id === formData.contact_id);
-      
       const newOpportunity: Opportunity = {
         id: Date.now().toString(),
-        ...formData,
-        client_name: client?.company_name,
-        contact_name: contact ? `${contact.first_name} ${contact.last_name}` : undefined,
         enterprise_id: enterpriseId,
+        client_id: formData.client_id,
+        contact_id: formData.contact_id,
+        title: formData.title,
+        description: formData.description,
+        stage: formData.stage,
+        value: formData.value,
+        probability: formData.probability,
+        expected_close_date: formData.expected_close_date,
+        source: formData.source,
+        assigned_to: formData.assigned_to,
+        priority: formData.priority,
+        tags: formData.tags,
+        next_action: formData.next_action,
+        next_action_date: formData.next_action_date,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
       
-      mockOpportunities.push(newOpportunity);
+      // Sauvegarde dans localStorage
+      const storedOpportunities = localStorage.getItem('crm_opportunities');
+      const allOpportunities: Opportunity[] = storedOpportunities ? JSON.parse(storedOpportunities) : mockOpportunities;
+      allOpportunities.push(newOpportunity);
+      localStorage.setItem('crm_opportunities', JSON.stringify(allOpportunities));
+      
       return { data: newOpportunity };
     } catch (error) {
+      console.error('Error creating CRM opportunity:', error);
       return {
         data: {} as Opportunity,
         error: { message: 'Erreur lors de la création de l\'opportunité' }
@@ -440,7 +611,10 @@ class CrmService {
 
   async updateOpportunity(opportunityId: string, formData: Partial<OpportunityFormData>): Promise<CrmServiceResponse<Opportunity>> {
     try {
-      const oppIndex = mockOpportunities.findIndex(opp => opp.id === opportunityId);
+      const storedOpportunities = localStorage.getItem('crm_opportunities');
+      const allOpportunities: Opportunity[] = storedOpportunities ? JSON.parse(storedOpportunities) : mockOpportunities;
+      
+      const oppIndex = allOpportunities.findIndex(opp => opp.id === opportunityId);
       if (oppIndex === -1) {
         return {
           data: {} as Opportunity,
@@ -448,19 +622,16 @@ class CrmService {
         };
       }
       
-      const client = formData.client_id ? mockClients.find(c => c.id === formData.client_id) : undefined;
-      const contact = formData.contact_id ? mockContacts.find(c => c.id === formData.contact_id) : undefined;
-      
-      mockOpportunities[oppIndex] = {
-        ...mockOpportunities[oppIndex],
+      allOpportunities[oppIndex] = {
+        ...allOpportunities[oppIndex],
         ...formData,
-        client_name: client?.company_name || mockOpportunities[oppIndex].client_name,
-        contact_name: contact ? `${contact.first_name} ${contact.last_name}` : mockOpportunities[oppIndex].contact_name,
         updated_at: new Date().toISOString()
       };
       
-      return { data: mockOpportunities[oppIndex] };
+      localStorage.setItem('crm_opportunities', JSON.stringify(allOpportunities));
+      return { data: allOpportunities[oppIndex] };
     } catch (error) {
+      console.error('Error updating CRM opportunity:', error);
       return {
         data: {} as Opportunity,
         error: { message: 'Erreur lors de la mise à jour de l\'opportunité' }
@@ -468,10 +639,96 @@ class CrmService {
     }
   }
 
-  // Commercial Actions
+  async deleteOpportunity(opportunityId: string): Promise<CrmServiceResponse<boolean>> {
+    try {
+      const storedOpportunities = localStorage.getItem('crm_opportunities');
+      const allOpportunities: Opportunity[] = storedOpportunities ? JSON.parse(storedOpportunities) : mockOpportunities;
+      
+      const oppIndex = allOpportunities.findIndex(opp => opp.id === opportunityId);
+      if (oppIndex === -1) {
+        return {
+          data: false,
+          error: { message: 'Opportunité non trouvée' }
+        };
+      }
+      
+      allOpportunities.splice(oppIndex, 1);
+      localStorage.setItem('crm_opportunities', JSON.stringify(allOpportunities));
+      return { data: true };
+    } catch (error) {
+      console.error('Error deleting CRM opportunity:', error);
+      return {
+        data: false,
+        error: { message: 'Erreur lors de la suppression de l\'opportunité' }
+      };
+    }
+  }
+
+  // Nouvelles méthodes pour compléter l'intégration backend
+  async updateCommercialAction(actionId: string, formData: Partial<CommercialActionFormData>): Promise<CrmServiceResponse<CommercialAction>> {
+    try {
+      const storedActions = localStorage.getItem('crm_actions');
+      const allActions: CommercialAction[] = storedActions ? JSON.parse(storedActions) : mockCommercialActions;
+      
+      const actionIndex = allActions.findIndex(action => action.id === actionId);
+      if (actionIndex === -1) {
+        return {
+          data: {} as CommercialAction,
+          error: { message: 'Action commerciale non trouvée' }
+        };
+      }
+      
+      // Mise à jour des champs modifiés
+      allActions[actionIndex] = {
+        ...allActions[actionIndex],
+        ...formData,
+        updated_at: new Date().toISOString()
+      };
+      
+      localStorage.setItem('crm_actions', JSON.stringify(allActions));
+      return { data: allActions[actionIndex] };
+    } catch (error) {
+      console.error('Error updating commercial action:', error);
+      return {
+        data: {} as CommercialAction,
+        error: { message: 'Erreur lors de la mise à jour de l\'action commerciale' }
+      };
+    }
+  }
+
+  async deleteCommercialAction(actionId: string): Promise<CrmServiceResponse<boolean>> {
+    try {
+      const storedActions = localStorage.getItem('crm_actions');
+      const allActions: CommercialAction[] = storedActions ? JSON.parse(storedActions) : mockCommercialActions;
+      
+      const actionIndex = allActions.findIndex(action => action.id === actionId);
+      if (actionIndex === -1) {
+        return {
+          data: false,
+          error: { message: 'Action commerciale non trouvée' }
+        };
+      }
+      
+      allActions.splice(actionIndex, 1);
+      localStorage.setItem('crm_actions', JSON.stringify(allActions));
+      return { data: true };
+    } catch (error) {
+      console.error('Error deleting commercial action:', error);
+      return {
+        data: false,
+        error: { message: 'Erreur lors de la suppression de l\'action commerciale' }
+      };
+    }
+  }
+
+  // Commercial Actions - Utilise localStorage avec persistance locale
   async getCommercialActions(enterpriseId: string, filters?: CrmFilters): Promise<CrmServiceResponse<CommercialAction[]>> {
     try {
-      let filteredActions = mockCommercialActions.filter(action => action.enterprise_id === enterpriseId);
+      // Récupération depuis localStorage avec fallback vers mock
+      const storedActions = localStorage.getItem('crm_actions');
+      let allActions: CommercialAction[] = storedActions ? JSON.parse(storedActions) : mockCommercialActions;
+      
+      let filteredActions = allActions.filter(action => action.enterprise_id === enterpriseId);
       
       if (filters) {
         if (filters.search) {
@@ -493,6 +750,7 @@ class CrmService {
       
       return { data: filteredActions };
     } catch (error) {
+      console.error('Error fetching commercial actions:', error);
       return {
         data: [],
         error: { message: 'Erreur lors de la récupération des actions commerciales' }
@@ -502,9 +760,14 @@ class CrmService {
 
   async createCommercialAction(enterpriseId: string, formData: CommercialActionFormData): Promise<CrmServiceResponse<CommercialAction>> {
     try {
-      const client = formData.client_id ? mockClients.find(c => c.id === formData.client_id) : undefined;
-      const contact = formData.contact_id ? mockContacts.find(c => c.id === formData.contact_id) : undefined;
-      const opportunity = formData.opportunity_id ? mockOpportunities.find(o => o.id === formData.opportunity_id) : undefined;
+      // Récupérer les données existantes pour les références
+      const clientsResponse = await this.getClients(enterpriseId);
+      const contactsResponse = await this.getContacts();
+      const opportunitiesResponse = await this.getOpportunities(enterpriseId);
+      
+      const client = formData.client_id ? clientsResponse.data.find(c => c.id === formData.client_id) : undefined;
+      const contact = formData.contact_id ? contactsResponse.data.find(c => c.id === formData.contact_id) : undefined;
+      const opportunity = formData.opportunity_id ? opportunitiesResponse.data.find(o => o.id === formData.opportunity_id) : undefined;
       
       const newAction: CommercialAction = {
         id: Date.now().toString(),
@@ -517,9 +780,15 @@ class CrmService {
         updated_at: new Date().toISOString()
       };
       
-      mockCommercialActions.push(newAction);
+      // Sauvegarde dans localStorage
+      const storedActions = localStorage.getItem('crm_actions');
+      const allActions: CommercialAction[] = storedActions ? JSON.parse(storedActions) : mockCommercialActions;
+      allActions.push(newAction);
+      localStorage.setItem('crm_actions', JSON.stringify(allActions));
+      
       return { data: newAction };
     } catch (error) {
+      console.error('Error creating commercial action:', error);
       return {
         data: {} as CommercialAction,
         error: { message: 'Erreur lors de la création de l\'action commerciale' }
@@ -527,12 +796,29 @@ class CrmService {
     }
   }
 
-  // Statistics and Dashboard
+  // Statistics and Dashboard - Utilise les vraies données
   async getCrmStats(enterpriseId: string): Promise<CrmServiceResponse<CrmStats>> {
     try {
-      const clients = mockClients.filter(c => c.enterprise_id === enterpriseId);
-      const opportunities = mockOpportunities.filter(o => o.enterprise_id === enterpriseId);
-      const actions = mockCommercialActions.filter(a => a.enterprise_id === enterpriseId);
+      // Récupère les clients de la DB
+      const clientsResponse = await this.getClients(enterpriseId);
+      if (clientsResponse.error) {
+        throw new Error(clientsResponse.error.message);
+      }
+      const clients = clientsResponse.data;
+      
+      // Récupère les opportunités du localStorage
+      const opportunitiesResponse = await this.getOpportunities(enterpriseId);
+      if (opportunitiesResponse.error) {
+        throw new Error(opportunitiesResponse.error.message);
+      }
+      const opportunities = opportunitiesResponse.data;
+      
+      // Récupère les actions commerciales depuis localStorage
+      const actionsResponse = await this.getCommercialActions(enterpriseId);
+      if (actionsResponse.error) {
+        throw new Error(actionsResponse.error.message);
+      }
+      const actions = actionsResponse.data;
       
       const wonOpportunities = opportunities.filter(o => o.stage === 'won');
       const totalOpportunityValue = opportunities.reduce((sum, o) => sum + o.value, 0);
@@ -559,6 +845,7 @@ class CrmService {
       
       return { data: stats };
     } catch (error) {
+      console.error('Error fetching CRM stats:', error);
       return {
         data: {} as CrmStats,
         error: { message: 'Erreur lors de la récupération des statistiques' }
@@ -568,7 +855,13 @@ class CrmService {
 
   async getPipelineStats(enterpriseId: string): Promise<CrmServiceResponse<PipelineStats[]>> {
     try {
-      const opportunities = mockOpportunities.filter(o => o.enterprise_id === enterpriseId);
+      // Utilise les vraies données d'opportunités
+      const opportunitiesResponse = await this.getOpportunities(enterpriseId);
+      if (opportunitiesResponse.error) {
+        throw new Error(opportunitiesResponse.error.message);
+      }
+      const opportunities = opportunitiesResponse.data;
+      
       const stages = ['prospecting', 'qualification', 'proposal', 'negotiation', 'closing'];
       
       const pipelineStats: PipelineStats[] = stages.map(stage => {
@@ -585,6 +878,7 @@ class CrmService {
       
       return { data: pipelineStats };
     } catch (error) {
+      console.error('Error fetching pipeline stats:', error);
       return {
         data: [],
         error: { message: 'Erreur lors de la récupération des statistiques du pipeline' }
@@ -603,18 +897,20 @@ class CrmService {
         throw new Error('Erreur lors de la récupération des données du tableau de bord');
       }
       
-      const recentOpportunities = mockOpportunities
-        .filter(o => o.enterprise_id === enterpriseId)
+      // Utilise les vraies données pour le tableau de bord
+      const opportunitiesResponse = await this.getOpportunities(enterpriseId);
+      const actionsResponse = await this.getCommercialActions(enterpriseId);
+      const clientsResponse = await this.getClients(enterpriseId);
+      
+      const recentOpportunities = opportunitiesResponse.data
         .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
         .slice(0, 5);
       
-      const recentActions = mockCommercialActions
-        .filter(a => a.enterprise_id === enterpriseId)
+      const recentActions = actionsResponse.data
         .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
         .slice(0, 5);
       
-      const topClients = mockClients
-        .filter(c => c.enterprise_id === enterpriseId)
+      const topClients = clientsResponse.data
         .sort((a, b) => (b.total_revenue || 0) - (a.total_revenue || 0))
         .slice(0, 5);
       

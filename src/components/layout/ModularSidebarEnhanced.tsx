@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useModules } from '@/contexts/ModulesContext';
-// import { icons, getModuleIcon, iconSizes } from '@/lib/icons';
+import { icons, getModuleIcon, iconSizes } from '@/lib/icons';
 
 // Import direct des icônes spécifiques utilisées
 import { 
@@ -18,7 +18,7 @@ import {
   ChevronDown,
   ChevronRight,
   Zap,
-  // Star,
+  Star,
   Store,
   UserCog,
   Briefcase,
@@ -142,7 +142,7 @@ const moduleNavItems = {
 };
 
 // Couleurs pour les badges
-const badgeColors: Record<'blue'|'green'|'purple'|'orange', string> = {
+const badgeColors = {
   blue: 'bg-blue-100 text-blue-800 border-blue-200',
   green: 'bg-green-100 text-green-800 border-green-200',
   purple: 'bg-purple-100 text-purple-800 border-purple-200',
@@ -202,7 +202,7 @@ const ModularSidebarEnhanced: React.FC = () => {
                   variant="secondary" 
                   className={cn(
                     'ml-2 text-xs',
-                    badgeColors[(item.color as keyof typeof badgeColors)] || 'bg-gray-100 text-gray-800'
+                    badgeColors[item.color] || 'bg-gray-100 text-gray-800'
                   )}
                 >
                   {item.badge}
@@ -255,7 +255,7 @@ const ModularSidebarEnhanced: React.FC = () => {
               variant="secondary" 
               className={cn(
                 'ml-2 text-xs',
-                badgeColors[(item.color as keyof typeof badgeColors)] || 'bg-gray-100 text-gray-800'
+                badgeColors[item.color] || 'bg-gray-100 text-gray-800'
               )}
             >
               {item.badge}
@@ -345,7 +345,7 @@ const ModularSidebarEnhanced: React.FC = () => {
         {inactiveModulesCount > 0 && (
           <Button
             variant="ghost"
-            className="w-full justify-start py-3 text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-all duration-200 h-auto min-h-[56px] items-start whitespace-normal"
+            className="w-full justify-start py-3 text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-all duration-200"
             asChild
           >
             <Link to="/settings/modules">
@@ -353,8 +353,8 @@ const ModularSidebarEnhanced: React.FC = () => {
                 <Zap className="h-4 w-4 text-blue-600" />
               </div>
               <div className="flex-1 text-left">
-                <div className="font-medium leading-tight">Extensions disponibles</div>
-                <div className="text-xs text-blue-500 leading-tight">
+                <div className="font-medium">Extensions disponibles</div>
+                <div className="text-xs text-blue-500">
                   {inactiveModulesCount} module{inactiveModulesCount > 1 ? 's' : ''} à découvrir
                 </div>
               </div>

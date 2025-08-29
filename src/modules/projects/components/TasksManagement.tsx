@@ -1,1 +1,0 @@
-import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const TasksManagement: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>TasksManagement</CardTitle> </CardHeader> <CardContent> <p>Composant TasksManagement en développement.</p> </CardContent> </Card> ); }; export default TasksManagement;

@@ -3,7 +3,7 @@
  * Orchestrates the complete e-invoicing workflow
  */
 
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../../lib/supabase';
 import {
   EInvoiceFormat,
   EInvoiceChannel,
@@ -13,7 +13,7 @@ import {
   EInvDocument,
   EInvoicingError,
   FeatureDisabledError
-} from '@/types/einvoicing.types';
+} from '../../types/einvoicing.types';
 
 import { FormattingService } from './core/FormattingService';
 import { ValidationService } from './core/ValidationService';
@@ -112,13 +112,20 @@ export class EInvoicingService {
       let xmlUrl: string | undefined;
       
       if (archive && formattingResult.pdf_content) {
-        const archiveResult = await this.archiveService.storeDocuments(
-          document.id,
-          formattingResult.pdf_content,
-          Buffer.from(formattingResult.xml_content, 'utf-8')
-        );
-        pdfUrl = archiveResult.pdf_url;
-        xmlUrl = archiveResult.xml_url;
+        try {
+          const archiveResult = await this.archiveService.storeDocuments(
+            document.id,
+            formattingResult.pdf_content,
+            Buffer.from(formattingResult.xml_content, 'utf-8')
+          );
+          if (archiveResult) {
+            pdfUrl = (archiveResult as any).pdf_url;
+            xmlUrl = (archiveResult as any).xml_url;
+          }
+        } catch (e) {
+          // Archiving is optional; continue without URLs if it fails
+          console.warn('Archiving documents failed:', e);
+        }
       }
 
       // Step 9: Update document with file URLs and hashes
@@ -406,14 +413,6 @@ export class EInvoicingService {
           documentId
         );
 
-        // Sécurité: si le mock ne renvoie pas d'objet pendant les tests, sortir sans bruit
-        if (!submissionResult || typeof submissionResult.success !== 'boolean') {
-          if (process.env.NODE_ENV !== 'test') {
-            console.warn('Async submission returned no result; skipping status update');
-          }
-          return;
-        }
-
         const status: EInvoiceLifecycleStatus = submissionResult.success ? 'SUBMITTED' : 'DRAFT';
         
         await this.updateDocument(documentId, {
@@ -439,13 +438,11 @@ export class EInvoicingService {
         }
 
       } catch (error) {
-        if (process.env.NODE_ENV !== 'test') {
-          console.error('Async submission failed:', error);
-        }
+        console.error('Async submission failed:', error);
         
         await this.updateDocument(documentId, {
           lifecycle_status: 'DRAFT',
-          lifecycle_reason: `Async submission failed: ${  (error as Error).message}`
+          lifecycle_reason: 'Async submission failed: ' + (error as Error).message
         });
       }
     }, 100); // Small delay to return response quickly

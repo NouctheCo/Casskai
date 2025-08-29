@@ -2,13 +2,14 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocale } from '@/contexts/LocaleContext';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { LanguageToggle } from '@/components/LanguageToggle';
+import { PageContainer } from '@/components/ui/PageContainer';
 import { 
   Loader2, 
   ArrowLeft, 
@@ -194,7 +195,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 relative overflow-hidden">
+    <PageContainer variant="auth" className="relative overflow-hidden">
 
       {/* Contrôles thème et langue */}
       <motion.div 
@@ -508,6 +509,6 @@ export default function ForgotPasswordPage() {
       >
         © {new Date().getFullYear()} {t('auth.appName', { defaultValue: 'CassKai' })}. {t('auth.allRightsReserved', { defaultValue: 'Tous droits réservés' })}
       </motion.p>
-    </div>
+    </PageContainer>
   );
 }

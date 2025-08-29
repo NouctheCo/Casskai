@@ -8,8 +8,8 @@ import { Shield, Eye, EyeOff, Settings } from 'lucide-react';
 // Context pour les analytics
 interface AnalyticsContextType {
   trackPageview: (url?: string) => void;
-  trackEvent: (eventName: string, props?: Record<string, any>) => void;
-  trackGoal: (goalName: string, props?: Record<string, any>) => void;
+  trackEvent: (eventName: string, props?: Record<string, unknown>) => void;
+  trackGoal: (goalName: string, props?: Record<string, unknown>) => void;
   hasConsent: boolean;
   isReady: boolean;
   isConsentLoaded: boolean;
@@ -66,13 +66,13 @@ export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
     }
   };
 
-  const conditionalTrackEvent = (eventName: string, props?: Record<string, any>) => {
+  const conditionalTrackEvent = (eventName: string, props?: Record<string, unknown>) => {
     if (!enablePrivacyMode || hasConsent) {
       trackEvent(eventName, props);
     }
   };
 
-  const conditionalTrackGoal = (goalName: string, props?: Record<string, any>) => {
+  const conditionalTrackGoal = (goalName: string, props?: Record<string, unknown>) => {
     if (!enablePrivacyMode || hasConsent) {
       trackGoal(goalName, props);
     }

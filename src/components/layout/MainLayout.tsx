@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import ModularSidebarEnhanced from '@/components/layout/ModularSidebarEnhanced';
 import { Header } from '@/components/layout/Header';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
@@ -26,12 +26,28 @@ function useIsMobile() {
 }
 
 export function MainLayout() {
-  const [isSidebarStoredCollapsed] = useLocalStorage('sidebarCollapsed', false);
+  const isE2EMinimal = (import.meta as unknown as { env: Record<string, string | undefined> }).env?.VITE_E2E_MINIMAL === 'true';
+  if (isE2EMinimal) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <main className="main-content flex-1 overflow-y-auto">
+            <div className="page-content container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              <PageTransition>
+                <Outlet />
+              </PageTransition>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+  const [isSidebarStoredCollapsed, setIsSidebarStoredCollapsed] = useLocalStorage('sidebarCollapsed', false);
   const isMobile = useIsMobile();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const location = useLocation();
-  const { isLoading: modulesLoading } = useModules();
+  const { activeModules, isLoading: modulesLoading } = useModules();
   const { user, loading: authLoading } = useAuth();
   const { t } = useLocale();
 
@@ -46,16 +62,20 @@ export function MainLayout() {
   }, [location.pathname, isMobile]);
 
   // Gestion du collapse sur desktop
-  const [isDesktopCollapsed] = useState(isSidebarStoredCollapsed);
+  const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(isSidebarStoredCollapsed);
 
-  // Collapse handled via UI; keep hook state only
+  const toggleDesktopSidebar = () => {
+    const newCollapsed = !isDesktopCollapsed;
+    setIsDesktopCollapsed(newCollapsed);
+    setIsSidebarStoredCollapsed(newCollapsed);
+  };
 
   // Loading state
   if (modulesLoading || authLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="flex items-center space-x-2" role="status" aria-live="polite">
-          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-4 w-4 animate-spin" />
           <span className="text-sm text-gray-600 dark:text-gray-300">
             {t('common.loading', { defaultValue: 'Chargement...' })}
           </span>
@@ -67,7 +87,7 @@ export function MainLayout() {
   // Layout pour les pages publiques (sans sidebar)
   if (isPublicPage) {
     return (
-  <AnalyticsProvider domain={import.meta.env?.VITE_PLAUSIBLE_DOMAIN || window.location.host} showConsentBanner={true}>
+      <AnalyticsProvider domain="app.casskai.fr" showConsentBanner={true}>
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
           <PageTransition>
             <Outlet />
@@ -79,7 +99,7 @@ export function MainLayout() {
 
   // Layout principal avec sidebar pour les utilisateurs connectés
   return (
-  <AnalyticsProvider domain={import.meta.env?.VITE_PLAUSIBLE_DOMAIN || window.location.host} showConsentBanner={true}>
+    <AnalyticsProvider domain="app.casskai.fr" showConsentBanner={true}>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
         {/* Sidebar Desktop */}
         {showSidebar && (

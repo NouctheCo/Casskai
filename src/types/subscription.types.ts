@@ -28,7 +28,7 @@ export interface UserSubscription {
   currentPeriodEnd: Date;
   cancelAtPeriodEnd: boolean;
   trialEnd?: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -89,7 +89,7 @@ export interface StripeWebhookEvent {
   id: string;
   type: string;
   data: {
-    object: any;
+    object: Record<string, unknown>;
   };
   created: number;
 }
@@ -244,4 +244,107 @@ export const getSubscriptionStatusLabel = (status: UserSubscription['status']): 
     default:
       return 'Inconnu';
   }
+};
+
+// Configuration des modules par plan d'abonnement
+export interface PlanModules {
+  planId: string;
+  modules: string[];
+}
+
+export const PLAN_MODULES: PlanModules[] = [
+  {
+    planId: 'starter',
+    modules: [
+      'dashboard',
+      'accounting',
+      'invoicing',
+      'banking',
+      'reports',
+      'users',
+      'settings',
+      'security'
+    ]
+  },
+  {
+    planId: 'professional',
+    modules: [
+      'dashboard',
+      'accounting',
+      'invoicing',
+      'purchases',
+      'banking',
+      'salesCrm',
+      'inventory',
+      'reports',
+      'forecasts',
+      'thirdParties',
+      'contracts',
+      'users',
+      'settings',
+      'security'
+    ]
+  },
+  {
+    planId: 'enterprise',
+    modules: [
+      'dashboard',
+      'accounting',
+      'invoicing',
+      'purchases',
+      'banking',
+      'salesCrm',
+      'humanResources',
+      'projects',
+      'inventory',
+      'reports',
+      'forecasts',
+      'thirdParties',
+      'tax',
+      'contracts',
+      'users',
+      'settings',
+      'security'
+    ]
+  },
+  {
+    planId: 'trial', // Période d'essai - tous les modules
+    modules: [
+      'dashboard',
+      'accounting',
+      'invoicing',
+      'purchases',
+      'banking',
+      'salesCrm',
+      'humanResources',
+      'projects',
+      'inventory',
+      'reports',
+      'forecasts',
+      'thirdParties',
+      'tax',
+      'contracts',
+      'users',
+      'settings',
+      'security'
+    ]
+  }
+];
+
+// Fonction utilitaire pour obtenir les modules autorisés pour un plan
+export const getModulesForPlan = (planId: string): string[] => {
+  const planModules = PLAN_MODULES.find(p => p.planId === planId);
+  return planModules?.modules || [];
+};
+
+// Fonction pour vérifier si un module est autorisé pour un plan
+export const isModuleAllowedForPlan = (moduleId: string, planId: string): boolean => {
+  const allowedModules = getModulesForPlan(planId);
+  return allowedModules.includes(moduleId);
+};
+
+// Fonction pour détecter si un utilisateur est en période d'essai
+export const isTrialUser = (subscription: UserSubscription | null): boolean => {
+  if (!subscription) return true; // Nouvel utilisateur = essai
+  return subscription.status === 'trialing';
 };

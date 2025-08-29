@@ -129,8 +129,20 @@ const TaxPage: React.FC = () => {
       if (response.data) {
         setDashboardData(response.data);
       }
+      if (response.error) {
+        toast({
+          title: 'Erreur de chargement',
+          description: 'Impossible de charger les données du tableau de bord',
+          variant: 'destructive'
+        });
+      }
     } catch (error) {
       console.error('Error loading dashboard data:', error);
+      toast({
+        title: 'Erreur de chargement',
+        description: 'Impossible de charger les données du tableau de bord',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -140,8 +152,20 @@ const TaxPage: React.FC = () => {
       if (response.data) {
         setDeclarations(response.data);
       }
+      if (response.error) {
+        toast({
+          title: 'Erreur de chargement',
+          description: 'Impossible de charger les déclarations',
+          variant: 'destructive'
+        });
+      }
     } catch (error) {
       console.error('Error loading declarations:', error);
+      toast({
+        title: 'Erreur de chargement',
+        description: 'Impossible de charger les déclarations',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -207,15 +231,21 @@ const TaxPage: React.FC = () => {
     }
     
     if (filters.due_date_from) {
-      filtered = filtered.filter(d =>
-        d.dueDate >= new Date(filters.due_date_from!)
-      );
+      const fromDate = new Date(filters.due_date_from);
+      if (!isNaN(fromDate.getTime())) {
+        filtered = filtered.filter(d =>
+          d.dueDate >= fromDate
+        );
+      }
     }
     
     if (filters.due_date_to) {
-      filtered = filtered.filter(d =>
-        d.dueDate <= new Date(filters.due_date_to!)
-      );
+      const toDate = new Date(filters.due_date_to);
+      if (!isNaN(toDate.getTime())) {
+        filtered = filtered.filter(d =>
+          d.dueDate <= toDate
+        );
+      }
     }
     
     setFilteredDeclarations(filtered);
@@ -255,6 +285,76 @@ const TaxPage: React.FC = () => {
       style: 'currency',
       currency: 'EUR'
     }).format(amount);
+  };
+
+  const handleViewDeclaration = (declaration: TaxDeclaration) => {
+    toast({
+      title: 'Affichage de la déclaration',
+      description: `Détails de ${declaration.name}`,
+    });
+    // TODO: Open modal or navigate to detail view
+  };
+
+  const handleEditDeclaration = (declaration: TaxDeclaration) => {
+    toast({
+      title: 'Modification de la déclaration',
+      description: `Édition de ${declaration.name}`,
+    });
+    // TODO: Open edit modal or navigate to edit form
+  };
+
+  const handleDeleteDeclaration = async (declarationId: string, declarationName: string) => {
+    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer la déclaration "${declarationName}" ?`)) {
+      return;
+    }
+    
+    try {
+      // TODO: Implement delete API call
+      // await taxService.deleteDeclaration(declarationId);
+      await loadDeclarations();
+      toast({
+        title: 'Suppression réussie',
+        description: 'La déclaration a été supprimée avec succès',
+      });
+    } catch (error) {
+      console.error('Error deleting declaration:', error);
+      toast({
+        title: 'Erreur de suppression',
+        description: 'Impossible de supprimer la déclaration',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleEditObligation = (obligation: TaxObligation) => {
+    toast({
+      title: 'Modification de l\'obligation',
+      description: `Édition de ${obligation.name}`,
+    });
+    // TODO: Open edit modal or navigate to edit form
+  };
+
+  const handleDeleteObligation = async (obligationId: string, obligationName: string) => {
+    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer l'obligation "${obligationName}" ?`)) {
+      return;
+    }
+    
+    try {
+      // TODO: Implement delete API call
+      // await taxService.deleteObligation(obligationId);
+      await loadObligations();
+      toast({
+        title: 'Suppression réussie',
+        description: 'L\'obligation a été supprimée avec succès',
+      });
+    } catch (error) {
+      console.error('Error deleting obligation:', error);
+      toast({
+        title: 'Erreur de suppression',
+        description: 'Impossible de supprimer l\'obligation',
+        variant: 'destructive'
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -708,13 +808,28 @@ const TaxPage: React.FC = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleViewDeclaration(declaration)}
+                          title="Voir les détails"
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEditDeclaration(declaration)}
+                          title="Modifier"
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleDeleteDeclaration(declaration.id, declaration.name)}
+                          title="Supprimer"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -902,10 +1017,20 @@ const TaxPage: React.FC = () => {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEditObligation(obligation)}
+                          title="Modifier"
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleDeleteObligation(obligation.id, obligation.tax_type_name)}
+                          title="Supprimer"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>

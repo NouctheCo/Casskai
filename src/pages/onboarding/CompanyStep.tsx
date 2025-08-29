@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,14 +13,15 @@ import {
   Mail,
   Globe,
   Users,
+  Calendar,
+  DollarSign,
   ArrowRight,
   ArrowLeft,
   AlertCircle,
-  Loader2
+  CheckCircle
 } from 'lucide-react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useTranslation } from 'react-i18next';
-import { SUPPORTED_COUNTRIES } from '@/utils/constants';
 
 const sectors = [
   { code: 'services', name: 'Services aux entreprises', icon: '💼' },
@@ -38,30 +39,18 @@ const sectors = [
   { code: 'autres', name: 'Autres secteurs', icon: '⚙️' }
 ];
 
-// --
+const companySizes = [
+  { code: 'micro', name: 'Micro-entreprise (1 personne)', range: '1 employé' },
+  { code: 'tpe', name: 'Très petite entreprise', range: '2-9 employés' },
+  { code: 'pe', name: 'Petite entreprise', range: '10-49 employés' },
+  { code: 'me', name: 'Moyenne entreprise', range: '50-249 employés' },
+  { code: 'ge', name: 'Grande entreprise', range: '250+ employés' }
+];
 
 export default function CompanyStep() {
   const { nextStep, prevStep, companyData, setCompanyData } = useOnboarding();
   const { t } = useTranslation();
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleInputChange = (field: string) => (e: ChangeEvent<HTMLInputElement>) => {
-    updateField(field, e.target.value);
-  };
-  const handleTextareaChange = (field: string) => (e: ChangeEvent<HTMLTextAreaElement>) => {
-    updateField(field, e.target.value);
-  };
-
-  const applyCountryDefaults = (countryCode: string) => {
-    const info = SUPPORTED_COUNTRIES.find(c => c.code === countryCode);
-    if (!info) return;
-    setCompanyData(prev => ({
-      ...prev,
-      currency: info.currency,
-      accountingStandard: info.accountingStandard,
-    }));
-  };
 
   const updateField = (field: string, value: string) => {
     setCompanyData(prev => ({
@@ -105,9 +94,7 @@ export default function CompanyStep() {
   };
 
   const handleNext = () => {
-    if (isSubmitting) return;
     if (validateForm()) {
-      setIsSubmitting(true);
       nextStep();
     }
   };
@@ -166,14 +153,12 @@ export default function CompanyStep() {
                 <Input
                   id="company-name"
                   value={companyData.name}
-                  onChange={handleInputChange('name')}
+                  onChange={(e) => updateField('name', e.target.value)}
                   placeholder="Ex: Mon Entreprise SAS"
-                  aria-invalid={!!errors.name}
-                  aria-describedby={errors.name ? 'error-company-name' : undefined}
                   className={errors.name ? 'border-red-500' : ''}
                 />
                 {errors.name && (
-                  <div id="error-company-name" className="flex items-center space-x-1 text-red-500 text-xs">
+                  <div className="flex items-center space-x-1 text-red-500 text-xs">
                     <AlertCircle className="w-3 h-3" />
                     <span>{errors.name}</span>
                   </div>
@@ -184,8 +169,8 @@ export default function CompanyStep() {
                 <Label htmlFor="sector">
                   Secteur d'activité <span className="text-red-500">*</span>
                 </Label>
-                <Select value={companyData.sector} onValueChange={(value: string) => updateField('sector', value)}>
-                  <SelectTrigger className={errors.sector ? 'border-red-500' : ''} aria-invalid={!!errors.sector} aria-describedby={errors.sector ? 'error-sector' : undefined}>
+                <Select value={companyData.sector} onValueChange={(value) => updateField('sector', value)}>
+                  <SelectTrigger className={errors.sector ? 'border-red-500' : ''}>
                     <SelectValue placeholder="Sélectionnez votre secteur" />
                   </SelectTrigger>
                   <SelectContent>
@@ -200,7 +185,7 @@ export default function CompanyStep() {
                   </SelectContent>
                 </Select>
                 {errors.sector && (
-                  <div id="error-sector" className="flex items-center space-x-1 text-red-500 text-xs">
+                  <div className="flex items-center space-x-1 text-red-500 text-xs">
                     <AlertCircle className="w-3 h-3" />
                     <span>{errors.sector}</span>
                   </div>
@@ -214,7 +199,7 @@ export default function CompanyStep() {
                 <Input
                   id="siret"
                   value={companyData.siret}
-                  onChange={handleInputChange('siret')}
+                  onChange={(e) => updateField('siret', e.target.value)}
                   placeholder="Ex: 12345678901234"
                 />
               </div>
@@ -224,7 +209,7 @@ export default function CompanyStep() {
                 <Input
                   id="vat-number"
                   value={companyData.vatNumber}
-                  onChange={handleInputChange('vatNumber')}
+                  onChange={(e) => updateField('vatNumber', e.target.value)}
                   placeholder="Ex: FR12345678901"
                 />
               </div>
@@ -251,7 +236,7 @@ export default function CompanyStep() {
                 <Textarea
                   id="address"
                   value={companyData.address}
-                  onChange={handleTextareaChange('address')}
+                  onChange={(e) => updateField('address', e.target.value)}
                   placeholder="Ex: 123 Rue de la Paix"
                   rows={2}
                 />
@@ -263,7 +248,7 @@ export default function CompanyStep() {
                   <Input
                     id="city"
                     value={companyData.city}
-                    onChange={handleInputChange('city')}
+                    onChange={(e) => updateField('city', e.target.value)}
                     placeholder="Ex: Paris"
                   />
                 </div>
@@ -273,7 +258,7 @@ export default function CompanyStep() {
                   <Input
                     id="postal-code"
                     value={companyData.postalCode}
-                    onChange={handleInputChange('postalCode')}
+                    onChange={(e) => updateField('postalCode', e.target.value)}
                     placeholder="Ex: 75001"
                   />
                 </div>
@@ -282,8 +267,8 @@ export default function CompanyStep() {
                   <Label htmlFor="country">
                     Pays <span className="text-red-500">*</span>
                   </Label>
-                  <Select value={companyData.country} onValueChange={(value: string) => { updateField('country', value); applyCountryDefaults(value); }}>
-                    <SelectTrigger className={errors.country ? 'border-red-500' : ''} aria-invalid={!!errors.country} aria-describedby={errors.country ? 'error-country' : undefined}>
+                  <Select value={companyData.country} onValueChange={(value) => updateField('country', value)}>
+                    <SelectTrigger className={errors.country ? 'border-red-500' : ''}>
                       <SelectValue placeholder="Sélectionnez un pays" />
                     </SelectTrigger>
                     <SelectContent>
@@ -298,7 +283,7 @@ export default function CompanyStep() {
                     </SelectContent>
                   </Select>
                   {errors.country && (
-                    <div id="error-country" className="flex items-center space-x-1 text-red-500 text-xs">
+                    <div className="flex items-center space-x-1 text-red-500 text-xs">
                       <AlertCircle className="w-3 h-3" />
                       <span>{errors.country}</span>
                     </div>
@@ -333,15 +318,13 @@ export default function CompanyStep() {
                     id="email"
                     type="email"
                     value={companyData.email}
-                    onChange={handleInputChange('email')}
+                    onChange={(e) => updateField('email', e.target.value)}
                     placeholder="contact@monentreprise.com"
-                    aria-invalid={!!errors.email}
-                    aria-describedby={errors.email ? 'error-email' : undefined}
                     className={`pl-10 ${errors.email ? 'border-red-500' : ''}`}
                   />
                 </div>
                 {errors.email && (
-                  <div id="error-email" className="flex items-center space-x-1 text-red-500 text-xs">
+                  <div className="flex items-center space-x-1 text-red-500 text-xs">
                     <AlertCircle className="w-3 h-3" />
                     <span>{errors.email}</span>
                   </div>
@@ -356,7 +339,7 @@ export default function CompanyStep() {
                     id="phone"
                     type="tel"
                     value={companyData.phone}
-                    onChange={handleInputChange('phone')}
+                    onChange={(e) => updateField('phone', e.target.value)}
                     placeholder="+33 1 23 45 67 89"
                     className="pl-10"
                   />
@@ -372,7 +355,7 @@ export default function CompanyStep() {
                   id="website"
                   type="url"
                   value={companyData.website}
-                  onChange={handleInputChange('website')}
+                  onChange={(e) => updateField('website', e.target.value)}
                   placeholder="https://www.monentreprise.com"
                   className="pl-10"
                 />
@@ -400,14 +383,14 @@ export default function CompanyStep() {
                 <Input
                   id="ceo-name"
                   value={companyData.ceoName}
-                  onChange={handleInputChange('ceoName')}
+                  onChange={(e) => updateField('ceoName', e.target.value)}
                   placeholder="Ex: Jean Dupont"
                 />
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="ceo-title">Fonction</Label>
-                <Select value={companyData.ceoTitle} onValueChange={(value: string) => updateField('ceoTitle', value)}>
+                <Select value={companyData.ceoTitle} onValueChange={(value) => updateField('ceoTitle', value)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -434,23 +417,12 @@ export default function CompanyStep() {
               <span>Précédent</span>
             </Button>
             
-  <Button
+            <Button
               onClick={handleNext}
-              disabled={isSubmitting}
-        data-testid="onboarding-continue"
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white flex items-center space-x-2 disabled:opacity-70"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white flex items-center space-x-2"
             >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>En cours…</span>
-                </>
-              ) : (
-                <>
-      <span>Continuer</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
+              <span>Finaliser</span>
+              <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
         </CardContent>

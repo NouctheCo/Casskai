@@ -66,8 +66,6 @@ interface UseCurrencyReturn {
   setCurrentCurrency: (currency: string) => void;
   currencies: Currency[];
   africanCurrencies: Currency[];
-  // Devise de base déduite de la configuration (exposée pour les consommateurs)
-  baseCurrency: string;
   
   // État étendu
   isLoading: boolean;
@@ -287,8 +285,12 @@ export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
 
   // Historique des taux (placeholder - à implémenter si base de données disponible)
   const getExchangeRateHistory = useCallback(async (): Promise<ExchangeRate[]> => {
-    // Placeholder pour l'historique des taux
-    return [];
+    try {
+      return []; // Placeholder pour l'historique des taux
+    } catch (err) {
+      console.warn('Historique des taux non disponible:', err);
+      return [];
+    }
   }, []);
 
   // Rafraîchir tous les taux avec meilleure gestion des erreurs
@@ -330,7 +332,6 @@ export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
     setCurrentCurrency,
     currencies: currencyService.getAllCurrencies(),
     africanCurrencies: currencyService.getAfricanCurrencies(),
-  baseCurrency,
     isLoading,
     error,
     lastUpdate,

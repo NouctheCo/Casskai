@@ -13,7 +13,7 @@ if (!STRIPE_SECRET_KEY || STRIPE_SECRET_KEY.includes('YOUR_SECRET_KEY_HERE')) {
 }
 
 const stripe = new Stripe(STRIPE_SECRET_KEY, {
-  apiVersion: '2024-06-20',
+  apiVersion: '2025-07-30.basil',
 });
 
 // ================================
@@ -22,7 +22,7 @@ const stripe = new Stripe(STRIPE_SECRET_KEY, {
 
 export async function setupStripeProducts(plans: any[]) {
   try {
-    const results = [];
+    const results: any[] = [];
 
     for (const plan of plans) {
       // Créer le produit
@@ -325,8 +325,8 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
         ? subscription.customer 
         : subscription.customer?.id,
       status: subscription.status,
-      current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-      current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+      current_period_start: new Date((subscription as any).current_period_start * 1000).toISOString(),
+      current_period_end: new Date((subscription as any).current_period_end * 1000).toISOString(),
       cancel_at_period_end: subscription.cancel_at_period_end,
       trial_start: subscription.trial_start 
         ? new Date(subscription.trial_start * 1000).toISOString()
@@ -369,9 +369,9 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   try {
-    const subscriptionId = typeof invoice.subscription === 'string' 
-      ? invoice.subscription 
-      : invoice.subscription?.id;
+    const subscriptionId = typeof (invoice as any).subscription === 'string' 
+      ? (invoice as any).subscription 
+      : (invoice as any).subscription?.id;
 
     if (!subscriptionId) return;
 
@@ -408,9 +408,9 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
   try {
-    const subscriptionId = typeof invoice.subscription === 'string' 
-      ? invoice.subscription 
-      : invoice.subscription?.id;
+    const subscriptionId = typeof (invoice as any).subscription === 'string' 
+      ? (invoice as any).subscription 
+      : (invoice as any).subscription?.id;
 
     if (subscriptionId) {
       await supabase

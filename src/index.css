@@ -460,3 +460,106 @@
     }
   }
 }
+
+/* ====================================
+   CassKai UX/UI Consistency Classes 
+   ================================== */
+
+@layer components {
+  /* Page transitions consistency */
+  .page-transition {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  
+  /* Loading states unified */
+  .loading-spinner {
+    @apply animate-spin rounded-full border-b-2 border-blue-600;
+  }
+  
+  .loading-skeleton {
+    @apply animate-pulse bg-gray-200 dark:bg-gray-700 rounded;
+  }
+  
+  /* Button states consistency */
+  .btn-loading {
+    @apply opacity-70 pointer-events-none;
+  }
+  
+  .btn-disabled {
+    @apply opacity-50 pointer-events-none;
+  }
+  
+  /* Form error states */
+  .input-error {
+    @apply border-red-500 focus:border-red-500 focus:ring-red-500/20;
+  }
+  
+  .error-message {
+    @apply text-red-600 dark:text-red-400 text-sm mt-1;
+  }
+  
+  /* Success states */
+  .input-success {
+    @apply border-green-500 focus:border-green-500 focus:ring-green-500/20;
+  }
+  
+  .success-message {
+    @apply text-green-600 dark:text-green-400 text-sm mt-1;
+  }
+  
+  /* Card hover states */
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-md hover:-translate-y-0.5;
+  }
+  
+  /* Focus states consistency */
+  .focus-outline {
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500;
+  }
+  
+  /* Modal backdrop */
+  .modal-backdrop {
+    @apply fixed inset-0 bg-black/50 backdrop-blur-sm z-40;
+  }
+  
+  /* Overlay consistent styling */
+  .overlay-dark {
+    @apply bg-black/20 backdrop-blur-sm;
+  }
+  
+  /* Text truncation helpers */
+  .text-truncate {
+    @apply truncate max-w-full;
+  }
+  
+  .text-clamp-2 {
+    @apply line-clamp-2;
+  }
+  
+  .text-clamp-3 {
+    @apply line-clamp-3;
+  }
+  
+  /* Spacing consistency */
+  .section-spacing {
+    @apply py-8 sm:py-12 lg:py-16;
+  }
+  
+  .content-spacing {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+  
+  /* Border consistency */
+  .border-subtle {
+    @apply border border-gray-200 dark:border-gray-700;
+  }
+  
+  /* Shadow consistency */
+  .shadow-card {
+    @apply shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+  
+  .shadow-modal {
+    @apply shadow-2xl;
+  }
+}

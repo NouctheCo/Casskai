@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { 
@@ -13,10 +13,13 @@ import {
   Download,
   Clock,
   Star,
+  HelpCircle,
   Phone,
   Mail,
   Zap,
+  CheckCircle,
   ArrowRight,
+  Lightbulb,
   Settings,
   CreditCard,
   Shield
@@ -24,8 +27,10 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui';
+import { Input } from '@/components/ui/input';
+import { PageContainer } from '@/components/ui/PageContainer';
 import { useNavigate } from 'react-router-dom';
+import { generateDocPath } from '@/utils/slugUtils';
 
 const HelpCenterPage = () => {
   const { t } = useTranslation();
@@ -194,8 +199,35 @@ const HelpCenterPage = () => {
     category.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Event handlers for non-functional buttons
+  const handleViewAllArticles = () => {
+    navigate('/docs/articles');
+  };
+
+  const handleSupportOption = (optionName: string) => {
+    console.log(`Support option selected: ${optionName}`);
+    // TODO: Implement specific support actions
+  };
+
+  const handleViewSchedule = () => {
+    navigate('/docs/schedule');
+  };
+
+  const handleDownloadGuides = () => {
+    // TODO: Implement download functionality
+    console.log('Download guides clicked');
+  };
+
+  const handleJoinCommunity = () => {
+    window.open('https://community.casskai.fr', '_blank');
+  };
+
+  const handleContactSupport = () => {
+    navigate('/support/contact');
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <PageContainer variant="default">
       {/* Header */}
       <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -279,7 +311,7 @@ const HelpCenterPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                onClick={() => navigate(`/docs/category/${category.title.toLowerCase().replace(/\s+/g, '-').replace(/'/g, '').replace(/'/g, '').replace(/à/g, 'a').replace(/é/g, 'e').replace(/è/g, 'e').replace(/ê/g, 'e')}`)}
+                onClick={() => navigate(generateDocPath(category.title, 'category'))}
               >
                 <Card className="h-full hover:shadow-xl transition-all duration-300 cursor-pointer group">
                   <CardHeader>
@@ -379,7 +411,11 @@ const HelpCenterPage = () => {
           </div>
 
           <div className="text-center mt-12">
-            <Button variant="outline" size="lg">
+            <Button 
+              variant="outline" 
+              size="lg"
+              onClick={handleViewAllArticles}
+            >
               Voir tous les articles
               <BookOpen className="w-5 h-5 ml-2" />
             </Button>
@@ -421,7 +457,11 @@ const HelpCenterPage = () => {
                     <div className="text-sm text-gray-500 mb-6">
                       {option.availability}
                     </div>
-                    <Button className="w-full" variant="outline">
+                    <Button 
+                      className="w-full" 
+                      variant="outline"
+                      onClick={() => handleSupportOption(option.title)}
+                    >
                       {option.action}
                     </Button>
                   </CardContent>
@@ -449,7 +489,12 @@ const HelpCenterPage = () => {
                 <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
                   Sessions de formation en direct sur les nouvelles fonctionnalités.
                 </p>
-                <Button variant="outline" size="sm" className="w-full">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={handleViewSchedule}
+                >
                   <Play className="w-4 h-4 mr-2" />
                   Voir le planning
                 </Button>
@@ -463,7 +508,12 @@ const HelpCenterPage = () => {
                 <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
                   Téléchargez nos guides détaillés pour une utilisation hors-ligne.
                 </p>
-                <Button variant="outline" size="sm" className="w-full">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={handleDownloadGuides}
+                >
                   <Download className="w-4 h-4 mr-2" />
                   Télécharger
                 </Button>
@@ -477,7 +527,12 @@ const HelpCenterPage = () => {
                 <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
                   Échangez avec d'autres utilisateurs et partagez vos conseils.
                 </p>
-                <Button variant="outline" size="sm" className="w-full">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={handleJoinCommunity}
+                >
                   <Users className="w-4 h-4 mr-2" />
                   Rejoindre
                 </Button>
@@ -500,6 +555,7 @@ const HelpCenterPage = () => {
             <Button
               size="lg"
               className="bg-white text-blue-600 hover:bg-gray-100"
+              onClick={handleContactSupport}
             >
               <MessageCircle className="w-5 h-5 mr-2" />
               Contacter le support
@@ -515,7 +571,7 @@ const HelpCenterPage = () => {
           </div>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 };
 

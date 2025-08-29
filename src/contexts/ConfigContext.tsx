@@ -50,17 +50,17 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('🔧 Chargement de la configuration...');
+    console.warn('🔧 Chargement de la configuration...');
     
     try {
       // Charger la configuration depuis localStorage
       const savedConfig = localStorage.getItem('casskai_config');
       
       if (savedConfig) {
-        console.log('📦 Configuration trouvée dans localStorage');
+        console.warn('📦 Configuration trouvée dans localStorage');
         setConfig(JSON.parse(savedConfig));
       } else {
-        console.log('📦 Utilisation de la configuration par défaut');
+        console.warn('📦 Utilisation de la configuration par défaut');
         setConfig(DEFAULT_CONFIG);
         localStorage.setItem('casskai_config', JSON.stringify(DEFAULT_CONFIG));
       }

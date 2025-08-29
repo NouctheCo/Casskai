@@ -16,7 +16,7 @@ import {
   Control
 } from 'react-hook-form';
 import { cn } from '@/lib/utils';
-import { Input } from '@/components/ui';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { 
@@ -521,8 +521,7 @@ export function ValidationCounter({
  * Hook pour intégrer la validation avec les toasts existants
  */
 export function useValidationToasts() {
-  const { useToast } = await import('@/components/ui/use-toast');
-  const { toast } = useToast();
+  const { toast } = require('@/components/ui/toast').useToast();
   
   const showValidationErrors = useCallback((errors: ValidationError[]) => {
     if (errors.length === 0) return;

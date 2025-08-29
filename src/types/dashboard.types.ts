@@ -150,7 +150,7 @@ export interface TableColumn {
   width?: number;
   sortable?: boolean;
   filterable?: boolean;
-  render?: (value: any, record: any) => React.ReactNode;
+  render?: (value: unknown, record: Record<string, unknown>) => React.ReactNode;
 }
 
 export interface DataSource {
@@ -158,9 +158,9 @@ export interface DataSource {
   endpoint?: string;
   query?: string;
   table?: string;
-  filters?: Record<string, any>;
-  params?: Record<string, any>;
-  transform?: (data: any) => any;
+  filters?: Record<string, unknown>;
+  params?: Record<string, unknown>;
+  transform?: (data: unknown) => unknown;
 }
 
 export interface WidgetPermissions {
@@ -177,7 +177,7 @@ export interface RealtimeEvent {
   type: 'data_update' | 'user_action' | 'system_alert' | 'collaboration';
   timestamp: string;
   userId?: string;
-  data: any;
+  data: Record<string, unknown>;
   priority: 'low' | 'medium' | 'high' | 'critical';
   widgetId?: string;
   dashboardId?: string;

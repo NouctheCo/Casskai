@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { useToast } from '@/components/ui/use-toast';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import { useToast } from '@/components/ui/use-toast';
+import CookiesService, { CookiePreferences } from '@/services/cookiesService';
 import { 
   Cookie, 
   Settings, 
@@ -20,9 +21,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { PageContainer } from '@/components/ui/PageContainer';
 
 const CookiesPolicyPage = () => {
   const { t } = useTranslation();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [cookieSettings, setCookieSettings] = useState({
     essential: true, // Toujours activé
     analytics: false,
@@ -31,6 +36,35 @@ const CookiesPolicyPage = () => {
   });
 
   const lastUpdated = "8 août 2025";
+
+  // Charger les préférences existantes
+  useEffect(() => {
+    const loadPreferences = async () => {
+      setIsLoading(true);
+      try {
+        const preferences = await CookiesService.getCookiePreferences();
+        if (preferences) {
+          setCookieSettings({
+            essential: preferences.essential,
+            functional: preferences.functional,
+            analytics: preferences.analytics,
+            marketing: preferences.marketing
+          });
+        }
+      } catch (error) {
+        console.error('Error loading cookie preferences:', error);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible de charger vos préférences de cookies"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadPreferences();
+  }, [toast]);
 
   const cookieTypes = [
     {
@@ -108,15 +142,107 @@ const CookiesPolicyPage = () => {
     }));
   };
 
-  const { toast } = useToast();
-  const savePreferences = () => {
-    // Ici on sauvegarderait les préférences
-    console.log('Préférences sauvegardées:', cookieSettings);
-  toast({ title: 'Vos préférences ont été sauvegardées' });
+  const savePreferences = async () => {
+    setIsSaving(true);
+    try {
+      const preferences: CookiePreferences = {
+        essential: cookieSettings.essential,
+        functional: cookieSettings.functional,
+        analytics: cookieSettings.analytics,
+        marketing: cookieSettings.marketing,
+        consent_date: new Date().toISOString(),
+        consent_version: '1.0'
+      };
+
+      await CookiesService.saveCookiePreferences(preferences);
+      
+      // Appliquer les préférences (configurer les scripts de tracking)
+      CookiesService.applyCookiePreferences(preferences);
+      
+      toast({
+        title: "Préférences sauvegardées",
+        description: "Vos préférences de cookies ont été mises à jour avec succès",
+        duration: 4000
+      });
+    } catch (error) {
+      console.error('Error saving cookie preferences:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de sauvegarder vos préférences. Veuillez réessayer."
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const acceptAllCookies = async () => {
+    setIsSaving(true);
+    try {
+      const preferences = await CookiesService.acceptAllCookies();
+      setCookieSettings({
+        essential: preferences.essential,
+        functional: preferences.functional,
+        analytics: preferences.analytics,
+        marketing: preferences.marketing
+      });
+      
+      CookiesService.applyCookiePreferences(preferences);
+      
+      toast({
+        title: "Tous les cookies acceptés",
+        description: "Toutes les catégories de cookies ont été activées",
+        duration: 4000
+      });
+    } catch (error) {
+      console.error('Error accepting all cookies:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible d'accepter tous les cookies"
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const rejectOptionalCookies = async () => {
+    setIsSaving(true);
+    try {
+      const preferences = await CookiesService.rejectOptionalCookies();
+      setCookieSettings({
+        essential: preferences.essential,
+        functional: preferences.functional,
+        analytics: preferences.analytics,
+        marketing: preferences.marketing
+      });
+      
+      CookiesService.applyCookiePreferences(preferences);
+      
+      // Nettoyer les cookies existants
+      CookiesService.clearCookiesByType('functional');
+      CookiesService.clearCookiesByType('analytics');
+      CookiesService.clearCookiesByType('marketing');
+      
+      toast({
+        title: "Cookies optionnels refusés",
+        description: "Seuls les cookies essentiels sont activés",
+        duration: 4000
+      });
+    } catch (error) {
+      console.error('Error rejecting optional cookies:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de refuser les cookies optionnels"
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <PageContainer variant="legal">
       {/* Header */}
       <div className="bg-gradient-to-br from-orange-900 to-red-900 text-white py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -172,6 +298,7 @@ const CookiesPolicyPage = () => {
                         <Switch
                           checked={cookieSettings[type.id]}
                           onCheckedChange={() => handleCookieToggle(type.id)}
+                          disabled={isLoading || isSaving}
                         />
                       )}
                     </div>
@@ -187,15 +314,30 @@ const CookiesPolicyPage = () => {
             </div>
             
             <div className="flex gap-4 mt-6">
-              <Button onClick={savePreferences} className="bg-blue-600 hover:bg-blue-700">
+              <Button 
+                onClick={savePreferences} 
+                className="bg-blue-600 hover:bg-blue-700"
+                disabled={isSaving || isLoading}
+              >
                 <CheckCircle className="w-4 h-4 mr-2" />
-                Sauvegarder mes préférences
+                {isSaving ? 'Sauvegarde...' : 'Sauvegarder mes préférences'}
               </Button>
               <Button 
                 variant="outline" 
-                onClick={() => setCookieSettings({ essential: true, analytics: false, marketing: false, functional: false })}
+                onClick={rejectOptionalCookies}
+                disabled={isSaving || isLoading}
               >
-                Refuser tous les cookies optionnels
+                <XCircle className="w-4 h-4 mr-2" />
+                {isSaving ? 'Traitement...' : 'Refuser tous les cookies optionnels'}
+              </Button>
+              <Button 
+                variant="default" 
+                onClick={acceptAllCookies}
+                disabled={isSaving || isLoading}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <CheckCircle className="w-4 h-4 mr-2" />
+                {isSaving ? 'Traitement...' : 'Accepter tous les cookies'}
               </Button>
             </div>
           </CardContent>
@@ -465,7 +607,7 @@ const CookiesPolicyPage = () => {
           </div>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 };
 

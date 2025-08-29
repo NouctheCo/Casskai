@@ -129,6 +129,12 @@ export const AnimatedChart: React.FC<AnimatedChartProps> = ({
     pie: Pie
   }[type];
 
+  // FIX: Protection des données pour éviter l'erreur "Cannot read properties of undefined (reading 'map')"
+  const safeData = {
+    labels: data?.labels || [],
+    datasets: data?.datasets || []
+  };
+
   return (
     <motion.div
       ref={ref}
@@ -142,7 +148,7 @@ export const AnimatedChart: React.FC<AnimatedChartProps> = ({
       }}
     >
       {shouldAnimate && (
-        <ChartComponent data={data} options={chartOptions} />
+        <ChartComponent data={safeData} options={chartOptions} />
       )}
     </motion.div>
   );
@@ -165,28 +171,35 @@ export const AnimatedBarChart: React.FC<{
 }> = ({ data, className, showAnimation = true }) => {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
-  const [animatedData, setAnimatedData] = useState(data);
+  
+  // FIX: Protection des données entrantes
+  const safeInitialData = {
+    labels: data?.labels || [],
+    datasets: data?.datasets || []
+  };
+  
+  const [animatedData, setAnimatedData] = useState(safeInitialData);
 
   useEffect(() => {
-    if (showAnimation && isInView) {
+    if (showAnimation && isInView && safeInitialData.datasets.length > 0) {
       // Animation séquentielle des barres
       const animateSequentially = async () => {
-        const datasets = data.datasets.map(dataset => ({
+        const datasets = safeInitialData.datasets.map(dataset => ({
           ...dataset,
-          data: new Array(dataset.data.length).fill(0)
+          data: new Array((dataset.data || []).length).fill(0)
         }));
 
-        setAnimatedData({ ...data, datasets });
+        setAnimatedData({ ...safeInitialData, datasets });
 
-        for (let i = 0; i < data.labels.length; i++) {
+        for (let i = 0; i < safeInitialData.labels.length; i++) {
           await new Promise(resolve => setTimeout(resolve, 200));
           
           setAnimatedData(prev => ({
             ...prev,
             datasets: prev.datasets.map((dataset, datasetIndex) => ({
               ...dataset,
-              data: dataset.data.map((value, index) => 
-                index <= i ? data.datasets[datasetIndex].data[index] : 0
+              data: (dataset.data || []).map((value, index) => 
+                index <= i ? (safeInitialData.datasets[datasetIndex]?.data?.[index] || 0) : 0
               )
             }))
           }));
@@ -195,7 +208,7 @@ export const AnimatedBarChart: React.FC<{
 
       animateSequentially();
     }
-  }, [isInView, data, showAnimation]);
+  }, [isInView, safeInitialData, showAnimation]);
 
   return (
     <div ref={ref} className={className}>
@@ -228,7 +241,13 @@ export const LiveChart: React.FC<{
   className,
   onDataUpdate
 }) => {
-  const [chartData, setChartData] = useState(initialData);
+  // FIX: Protection des données initiales
+  const safeInitialData = {
+    labels: initialData?.labels || [],
+    datasets: initialData?.datasets || []
+  };
+  
+  const [chartData, setChartData] = useState(safeInitialData);
   const [isLive, setIsLive] = useState(false);
 
   useEffect(() => {
@@ -329,6 +348,12 @@ export const EnhancedChart: React.FC<{
   onChartClick
 }) => {
   const chartRef = useRef<any>(null);
+  
+  // FIX: Protection des données pour EnhancedChart
+  const safeData = {
+    labels: data?.labels || [],
+    datasets: data?.datasets || []
+  };
 
   const themeOptions = theme === 'dark' ? {
     color: 'white',
@@ -411,7 +436,7 @@ export const EnhancedChart: React.FC<{
         <AnimatedChart
           ref={chartRef}
           type={type}
-          data={data}
+          data={safeData}
           options={options}
           animationDelay={300}
           staggerDelay={150}

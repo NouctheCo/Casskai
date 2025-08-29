@@ -108,7 +108,7 @@ export interface SmartAlert {
   severity: 'info' | 'warning' | 'error' | 'critical';
   title: string;
   message: string;
-  data: any;
+  data: Record<string, unknown>;
   timestamp: Date;
   isRead: boolean;
   actions?: AlertAction[];
@@ -119,7 +119,7 @@ export interface SmartAlert {
 export interface AlertAction {
   label: string;
   action: string;
-  params?: any;
+  params?: Record<string, unknown>;
   style?: 'primary' | 'secondary' | 'danger';
 }
 
@@ -165,7 +165,7 @@ export interface MLModelConfig {
     f1Score?: number;
     mse?: number;
   };
-  hyperparameters: Record<string, any>;
+  hyperparameters: Record<string, unknown>;
   isActive: boolean;
 }
 
@@ -223,7 +223,7 @@ export interface FinancialTimeSeriesData {
 }
 
 // AI Service responses
-export interface AIServiceResponse<T = any> {
+export interface AIServiceResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -236,7 +236,7 @@ export interface BatchPredictionResult {
   processed: number;
   successful: number;
   failed: number;
-  results: any[];
+  results: unknown[];
   errors: string[];
   processingTime: number;
 }

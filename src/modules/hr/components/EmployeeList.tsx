@@ -1,1 +1,0 @@
-import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const EmployeeList: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>EmployeeList</CardTitle> </CardHeader> <CardContent> <p>Composant EmployeeList en développement.</p> </CardContent> </Card> ); }; export default EmployeeList;

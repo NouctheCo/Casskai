@@ -50,7 +50,7 @@ export interface EInvDocument {
   pdf_url?: string;
   sha256_xml?: string;
   sha256_pdf?: string;
-  metadata_json: Record<string, any>;
+  metadata_json: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
@@ -63,7 +63,7 @@ export interface EInvAuditLog {
   actor_id?: string;
   actor_type: 'user' | 'system' | 'webhook';
   company_id: string;
-  meta_json: Record<string, any>;
+  meta_json: Record<string, unknown>;
   created_at: string;
 }
 
@@ -76,7 +76,7 @@ export interface EInvInboundQueue {
   parsed_status: ParsedStatus;
   error_message?: string;
   processed_invoice_id?: string;
-  metadata_json: Record<string, any>;
+  metadata_json: Record<string, unknown>;
   created_at: string;
   processed_at?: string;
 }
@@ -365,7 +365,7 @@ export interface FormattingResult {
   xml_url?: string;
   sha256_pdf?: string;
   sha256_xml: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ChannelResponse {
@@ -373,7 +373,7 @@ export interface ChannelResponse {
   message_id?: string;
   tracking_id?: string;
   errors?: string[];
-  raw_response?: any;
+  raw_response?: Record<string, unknown>;
 }
 
 // ================================
@@ -386,8 +386,8 @@ export interface StatusWebhookPayload {
   lifecycle_reason?: string;
   timestamp: string;
   channel: EInvoiceChannel;
-  metadata?: Record<string, any>;
-  raw?: any;
+  metadata?: Record<string, unknown>;
+  raw?: Record<string, unknown>;
 }
 
 export interface InboundWebhookPayload {
@@ -395,7 +395,7 @@ export interface InboundWebhookPayload {
   document_type: 'invoice' | 'credit_note';
   content_type: 'application/xml' | 'application/pdf';
   payload: string; // Base64 encoded XML/PDF
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // ================================
@@ -444,7 +444,7 @@ export class EInvoicingError extends Error {
   constructor(
     message: string,
     public code: string,
-    public context?: Record<string, any>
+    public context?: Record<string, unknown>
   ) {
     super(message);
     this.name = 'EInvoicingError';
@@ -452,14 +452,14 @@ export class EInvoicingError extends Error {
 }
 
 export class ValidationError extends EInvoicingError {
-  constructor(message: string, public field?: string, context?: Record<string, any>) {
+  constructor(message: string, public field?: string, context?: Record<string, unknown>) {
     super(message, 'VALIDATION_ERROR', context);
     this.name = 'ValidationError';
   }
 }
 
 export class SubmissionError extends EInvoicingError {
-  constructor(message: string, public channel: EInvoiceChannel, context?: Record<string, any>) {
+  constructor(message: string, public channel: EInvoiceChannel, context?: Record<string, unknown>) {
     super(message, 'SUBMISSION_ERROR', context);
     this.name = 'SubmissionError';
   }

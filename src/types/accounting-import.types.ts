@@ -30,7 +30,7 @@ export interface CSVMapping {
   isRequired: boolean;
   dataType: 'string' | 'number' | 'date' | 'amount';
   defaultValue?: string;
-  transform?: (value: string) => any;
+  transform?: (value: string) => unknown;
 }
 
 export interface ImportResult {
@@ -38,8 +38,8 @@ export interface ImportResult {
   totalRows: number;
   validRows: number;
   errors: ImportError[];
-  entries: JournalEntry[];
-  duplicates: JournalEntry[];
+  entries: FECEntry[];
+  duplicates: FECEntry[];
   warnings: ImportWarning[];
 }
 
@@ -153,7 +153,7 @@ export interface VATRule {
 export interface TemplateCondition {
   field: string;
   operator: 'eq' | 'ne' | 'gt' | 'lt' | 'gte' | 'lte' | 'contains';
-  value: any;
+  value: unknown;
   action: 'include' | 'exclude' | 'modify';
 }
 
@@ -193,7 +193,7 @@ export interface ImportSession {
   errors: number;
   warnings: number;
   mapping?: CSVMapping[];
-  preview?: any[];
+  preview?: unknown[];
   result?: ImportResult;
   createdAt: string;
   completedAt?: string;

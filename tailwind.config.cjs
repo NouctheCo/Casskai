@@ -5,17 +5,6 @@ module.exports = {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  safelist: [
-    // Conserve les classes dynamiques utilisées (ex: bg-${color}-400, border-${color}-400, from-${color}-500/5)
-    {
-      pattern: /^(bg|text|border|ring|from|to|via)-(red|green|blue|yellow|amber|purple|pink|indigo|emerald|teal|orange|gray)-(50|100|200|300|400|500|600|700|800|900)(\/([5]|10|20|25|30|40|50|60|70|75|80|90|95))?$/,
-    },
-    // Variantes dark
-    {
-      pattern: /^(bg|text|border|ring|from|to|via)-(red|green|blue|yellow|amber|purple|pink|indigo|emerald|teal|orange|gray)-(50|100|200|300|400|500|600|700|800|900)(\/([5]|10|20|25|30|40|50|60|70|75|80|90|95))?$/,
-      variants: ['dark']
-    },
-  ],
   theme: {
     extend: {
       colors: {

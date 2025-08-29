@@ -1,5 +1,10 @@
 /* eslint-disable max-lines */
-import { WebhookEvent, WebhookConfig, BankTransaction, OpenBankingResponse } from '../../../types/openBanking.types';
+import {
+  WebhookEvent,
+  WebhookConfig,
+  BankTransaction,
+  OpenBankingResponse
+} from '../../../types/openBanking.types';
 import { EncryptionService } from '../security/EncryptionService';
 
 // Gestionnaire de webhooks temps réel
@@ -10,9 +15,6 @@ export class WebhookManager {
   private processingQueue = false;
   private encryptionService: EncryptionService;
   private isInitialized = false;
-  private updateEvent(event: WebhookEvent, patch: Partial<WebhookEvent>): void {
-    Object.assign(event, patch);
-  }
 
   private constructor() {
     this.encryptionService = EncryptionService.getInstance();
@@ -35,11 +37,11 @@ export class WebhookManager {
       // Démarrer le processeur de queue
       this.startQueueProcessor();
       
-      this.isInitialized = true;
-      console.warn(`Webhook manager initialized with ${configs.length} providers`);
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to initialize webhook manager: ${msg}`);
+  this.isInitialized = true;
+  console.warn(`Webhook manager initialized with ${configs.length} providers`);
+    } catch (error) {
+  const message = (error as { message?: string })?.message || 'unknown';
+  throw new Error(`Failed to initialize webhook manager: ${message}`);
     }
   }
 
@@ -51,17 +53,6 @@ export class WebhookManager {
     _headers: Record<string, string>
   ): Promise<OpenBankingResponse<void>> {
     try {
-      type WebhookPayload = Record<string, unknown> & {
-        type?: string;
-        connection_id?: string;
-        item_id?: string;
-        transaction?: Record<string, unknown>;
-        account?: Record<string, unknown>;
-        status?: string;
-        state?: string;
-        error?: unknown;
-      };
-      const p = (payload || {}) as WebhookPayload;
       const config = this.configs.get(providerId);
       if (!config) {
         return {
@@ -84,7 +75,7 @@ export class WebhookManager {
       }
 
       // Vérifier la signature
-  const isValidSignature = await this.validateSignature(p, signature, config.secret);
+      const isValidSignature = await this.validateSignature(payload, signature, config.secret);
       if (!isValidSignature) {
         return {
           success: false,
@@ -95,22 +86,16 @@ export class WebhookManager {
         };
       }
 
+      // Normaliser le payload inconnu
+      const p = (payload as Record<string, unknown>) || {};
+
       // Créer l'événement webhook
-      const allowedTypes = new Set<WebhookEvent['type']>([
-        'transaction.created',
-        'transaction.updated',
-        'account.updated',
-        'connection.status_changed'
-      ]);
-      const eventType: WebhookEvent['type'] = allowedTypes.has((p.type || 'connection.status_changed') as WebhookEvent['type'])
-        ? (p.type as WebhookEvent['type'])
-        : 'connection.status_changed';
       const event: WebhookEvent = {
         id: crypto.randomUUID(),
-        type: eventType,
+        type: (p.type as WebhookEvent['type']) || 'unknown',
         providerId,
-        connectionId: (p.connection_id || p.item_id || crypto.randomUUID()) as string,
-        data: p,
+        connectionId: (p.connection_id as string) || (p.item_id as string) || '',
+        data: p as Record<string, unknown>,
         timestamp: new Date(),
         processed: false,
         retryCount: 0
@@ -128,14 +113,14 @@ export class WebhookManager {
         success: true,
         data: undefined
       };
-  } catch (error) {
+    } catch (error) {
       console.error('Webhook processing error:', error);
+      const message = (error as { message?: string })?.message || 'unknown';
       return {
         success: false,
         error: {
           code: 'WEBHOOK_PROCESSING_ERROR',
-      message: `Failed to process webhook: ${(error as Error).message}`,
-      details: { message: (error as Error).message }
+          message: `Failed to process webhook: ${message}`
         }
       };
     }
@@ -147,49 +132,59 @@ export class WebhookManager {
 
     this.processingQueue = true;
 
-  const processQueue = async () => {
-      while (this.eventQueue.length > 0 && this.processingQueue) {
-        const event = this.eventQueue.shift();
-        if (event && !event.processed) {
-          try {
-            // eslint-disable-next-line no-await-in-loop
-            await this.processEvent(event);
-          } catch (error) {
-            console.error(`Failed to process event ${event.id}:`, error);
-            // eslint-disable-next-line no-await-in-loop
-            await this.handleEventError(event, error);
-          }
-        }
+    const processQueue = () => {
+      if (!this.processingQueue) return;
+
+      // Constituer un lot jusqu'à 50 événements
+      const batch: WebhookEvent[] = [];
+      while (this.eventQueue.length > 0 && batch.length < 50) {
+        const e = this.eventQueue.shift();
+        if (e && !e.processed) batch.push(e);
       }
 
-      if (this.processingQueue) {
-        setTimeout(processQueue, 1000); // Vérifier toutes les secondes
+      if (batch.length === 0) {
+        // Rien à traiter maintenant, replanifier plus tard
+        if (this.processingQueue) setTimeout(processQueue, 1000);
+        return;
       }
+
+      const tasks = batch.map((event) =>
+        this.processEvent(event).catch(async (error) => {
+          console.error(`Failed to process event ${event.id}:`, error);
+          await this.handleEventError(event, error as Error);
+        })
+      );
+
+      // Traiter le lot puis replanifier immédiatement pour drainer la queue sans await dans une boucle
+      Promise.allSettled(tasks).finally(() => {
+        if (this.processingQueue) setTimeout(processQueue, 0);
+      });
     };
 
+    // Lancer le premier cycle
     processQueue();
   }
 
   // Traiter un événement webhook
   private async processEvent(event: WebhookEvent): Promise<void> {
     console.warn(`Processing webhook event: ${event.type} for provider: ${event.providerId}`);
-    const type = event.type as string;
-    switch (type) {
-        case 'transaction.created':
-          await this.handleTransactionCreated(event);
-          break;
 
-        case 'transaction.updated':
-          await this.handleTransactionUpdated(event);
-          break;
+    switch (event.type) {
+      case 'transaction.created':
+        await this.handleTransactionCreated(event);
+        break;
 
-        case 'account.updated':
-          await this.handleAccountUpdated(event);
-          break;
+      case 'transaction.updated':
+        await this.handleTransactionUpdated(event);
+        break;
 
-        case 'connection.status_changed':
-          await this.handleConnectionStatusChanged(event);
-          break;
+      case 'account.updated':
+        await this.handleAccountUpdated(event);
+        break;
+
+      case 'connection.status_changed':
+        await this.handleConnectionStatusChanged(event);
+        break;
 
       case 'connection.error':
         await this.handleConnectionError(event);
@@ -199,11 +194,15 @@ export class WebhookManager {
         await this.handleConnectionExpired(event);
         break;
 
-        default:
-          console.warn(`Unhandled webhook event type: ${event.type}`);
+      default:
+        console.warn(`Unhandled webhook event type: ${event.type}`);
     }
-  // Marquer comme traité
-  this.updateEvent(event, { processed: true, processedAt: new Date() });
+
+    // Marquer comme traité
+    // eslint-disable-next-line require-atomic-updates
+    event.processed = true;
+    // eslint-disable-next-line require-atomic-updates
+    event.processedAt = new Date();
   }
 
   // Gestionnaires d'événements spécifiques
@@ -343,16 +342,15 @@ export class WebhookManager {
           await this.scheduleConnectionRenewal(connectionId);
           break;
           
-        case 'error':
+        case 'error': {
           // Analyser l'erreur et prendre des mesures
-          {
-            const code = (errorInfo as { code?: string } | undefined)?.code;
-            if (code === 'invalid_credentials') {
+          const info = errorInfo as { code?: string } | undefined;
+          if (info?.code === 'invalid_credentials') {
             // Notifier l'utilisateur pour re-authentification
-              await this.requestReAuthentication(connectionId);
-            }
+            await this.requestReAuthentication(connectionId);
           }
           break;
+        }
       }
     } catch (error) {
       console.error('Error handling connection issue:', error);
@@ -362,24 +360,79 @@ export class WebhookManager {
   // Normaliser les données de transaction selon le provider
   private async normalizeTransactionData(
     providerId: string,
-  transactionData: Record<string, unknown>
+    transactionData: {
+      id?: string | number;
+      account_id?: string;
+      date?: string;
+      created_at?: string;
+      value_date?: string;
+      amount?: string | number;
+      value?: string | number;
+      currency_code?: string;
+      currency?: string;
+      description?: string;
+      wording?: string;
+      raw_description?: string;
+      original_wording?: string;
+      category?: string;
+      status?: string;
+      counterparty?: string;
+      account_name?: string;
+      reference?: string;
+    }
   ): Promise<BankTransaction> {
-    // Cette fonction devrait utiliser les mappers spécifiques à chaque provider
-    const normalizedTransaction: BankTransaction = {
+    return Promise.resolve(this.mapToBankTransaction(providerId, transactionData));
+  }
+
+  private mapToBankTransaction(
+    providerId: string,
+    transactionData: {
+      id?: string | number;
+      account_id?: string;
+      date?: string;
+      created_at?: string;
+      value_date?: string;
+      amount?: string | number;
+      value?: string | number;
+      currency_code?: string;
+      currency?: string;
+      description?: string;
+      wording?: string;
+      raw_description?: string;
+      original_wording?: string;
+      category?: string;
+      status?: string;
+      counterparty?: string;
+      account_name?: string;
+      reference?: string;
+    }
+  ): BankTransaction {
+  const id = String(this.firstDefined(transactionData.id, ''));
+  const accountId = this.firstTruthy(transactionData.account_id) ?? '';
+  const dateStr = this.firstTruthy(transactionData.date, transactionData.created_at) ?? new Date().toISOString();
+  const valueDateStr = this.firstTruthy(transactionData.value_date, transactionData.date) ?? dateStr;
+  const amountRaw = this.firstDefined(transactionData.amount, transactionData.value, '0');
+  const amountStr = String(amountRaw);
+    const amountNum = parseFloat(amountStr);
+  const currency = this.firstTruthy(transactionData.currency_code, transactionData.currency) ?? 'EUR';
+  const description = this.firstTruthy(transactionData.description, transactionData.wording) ?? '';
+  const originalDescription = this.firstTruthy(transactionData.raw_description, transactionData.original_wording) ?? '';
+
+    return {
       id: crypto.randomUUID(),
-  accountId: transactionData.account_id as string,
-  transactionId: (transactionData.id != null ? String(transactionData.id) : crypto.randomUUID()),
-  date: new Date((transactionData.date as string) || (transactionData.created_at as string)),
-  valueDate: new Date((transactionData.value_date as string) || (transactionData.date as string)),
-  amount: parseFloat((transactionData.amount as string) || (transactionData.value as string)),
-  currency: (transactionData.currency_code as string) || (transactionData.currency as string) || 'EUR',
-  description: (transactionData.description as string) || (transactionData.wording as string) || '',
-  originalDescription: (transactionData.raw_description as string) || (transactionData.original_wording as string) || '',
-  category: transactionData.category as string,
-  type: parseFloat((transactionData.amount as string) || (transactionData.value as string)) >= 0 ? 'credit' : 'debit',
-  status: (transactionData.status as string) === 'pending' ? 'pending' : 'posted',
-  counterparty: (transactionData.counterparty as string) || (transactionData.account_name as string),
-  reference: transactionData.reference as string,
+      accountId,
+      transactionId: id,
+      date: new Date(dateStr),
+      valueDate: new Date(valueDateStr),
+      amount: Number.isFinite(amountNum) ? amountNum : 0,
+      currency,
+      description,
+      originalDescription,
+      category: transactionData.category,
+      type: amountNum >= 0 ? 'credit' : 'debit',
+      status: transactionData.status === 'pending' ? 'pending' : 'posted',
+      counterparty: transactionData.counterparty || transactionData.account_name,
+      reference: transactionData.reference,
       isReconciled: false,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -388,8 +441,21 @@ export class WebhookManager {
         originalData: transactionData
       }
     };
+  }
 
-    return normalizedTransaction;
+  // Helpers to reduce complexity in mapping
+  private firstDefined<T>(...vals: Array<T | undefined | null>): T | undefined {
+    for (const v of vals) {
+      if (v !== undefined && v !== null) return v as T;
+    }
+    return undefined;
+  }
+
+  private firstTruthy<T>(...vals: Array<T | undefined | null | ''>): T | undefined {
+    for (const v of vals) {
+      if (v) return v as T;
+    }
+    return undefined;
   }
 
   // Déclencher la réconciliation automatique
@@ -406,10 +472,10 @@ export class WebhookManager {
   }
 
   // Notifier les clients connectés via WebSocket
-  private async notifyClients(eventType: string, _data: Record<string, unknown>): Promise<void> {
+  private async notifyClients(eventType: string, data: unknown): Promise<void> {
     try {
       // En production, utiliser un service de WebSocket (comme Socket.io)
-      console.warn(`Broadcasting ${eventType} to clients.`);
+  console.warn(`Broadcasting ${eventType} to clients:`, data);
       
       // Exemple avec Supabase Realtime
       // supabase.channel('banking').send({
@@ -473,7 +539,7 @@ export class WebhookManager {
   // Gérer les erreurs d'événements
   private async handleEventError(event: WebhookEvent, error: unknown): Promise<void> {
     event.retryCount++;
-  event.lastError = (error as Error).message;
+    event.lastError = (error as { message?: string })?.message || 'unknown';
 
     const config = this.configs.get(event.providerId);
     const maxRetries = config?.retryPolicy.maxRetries || 3;
@@ -489,7 +555,7 @@ export class WebhookManager {
         this.eventQueue.push(event);
       }, delay);
     } else {
-      console.error(`Event ${event.id} failed after ${maxRetries} retries:`, error);
+  console.error(`Event ${event.id} failed after ${maxRetries} retries:`, error);
       
       // En production, sauvegarder l'événement en échec pour analyse
       await this.saveFailedEvent(event);
@@ -580,10 +646,13 @@ export class WebhookMiddleware {
 
   // Créer un middleware Express pour recevoir les webhooks
   createExpressMiddleware() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return async (req: any, res: any, _next: any) => {
+    return async (
+      req: { params?: Record<string, string>; headers: Record<string, string>; body?: unknown },
+      res: { status: (code: number) => { json: (body: unknown) => void } },
+      _next: unknown
+    ) => {
       try {
-        const providerId = req.params.providerId || req.headers['x-provider-id'];
+        const providerId = req.params?.providerId || req.headers['x-provider-id'];
         const signature = req.headers['x-signature'] || req.headers['x-hub-signature-256'];
         
         if (!providerId) {
@@ -595,7 +664,7 @@ export class WebhookMiddleware {
         const result = await this.webhookManager.receiveWebhook(
           providerId,
           req.body,
-          signature,
+          String(signature),
           req.headers
         );
 
@@ -606,8 +675,8 @@ export class WebhookMiddleware {
             error: result.error?.message || 'Webhook processing failed'
           });
         }
-      } catch (error) {
-        console.error('Webhook middleware error:', error);
+      } catch (_error) {
+        console.error('Webhook middleware error');
         res.status(500).json({
           error: 'Internal server error'
         });
@@ -617,8 +686,11 @@ export class WebhookMiddleware {
 
   // Middleware de validation pour les webhooks
   createValidationMiddleware() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return async (req: any, res: any, next: any) => {
+    return async (
+      req: { headers: Record<string, string>; body?: unknown },
+      res: { status: (code: number) => { json: (body: unknown) => void } },
+      next: () => void
+    ) => {
       try {
         // Vérifier le Content-Type
         if (!req.headers['content-type']?.includes('application/json')) {
@@ -635,7 +707,7 @@ export class WebhookMiddleware {
         }
 
         next();
-  } catch {
+      } catch (_error) {
         res.status(500).json({
           error: 'Validation failed'
         });

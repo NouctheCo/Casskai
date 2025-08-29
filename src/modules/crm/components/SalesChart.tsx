@@ -1,1 +1,0 @@
-import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const SalesChart: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>SalesChart</CardTitle> </CardHeader> <CardContent> <p>Composant SalesChart en développement.</p> </CardContent> </Card> ); }; export default SalesChart;

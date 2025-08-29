@@ -1,10 +1,12 @@
+/** @vitest-environment node */
+
 /**
  * FormattingService Unit Tests
  * Test suite for document formatting to various e-invoicing formats
  */
 
 import { FormattingService } from '../core/FormattingService';
-import { EN16931Invoice } from '@/types/einvoicing.types';
+import { EN16931Invoice } from '../../../types/einvoicing.types';
 
 describe('FormattingService', () => {
   let formattingService: FormattingService;

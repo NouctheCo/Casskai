@@ -1,1 +1,0 @@
-import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const ResourcesManagement: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>ResourcesManagement</CardTitle> </CardHeader> <CardContent> <p>Composant ResourcesManagement en développement.</p> </CardContent> </Card> ); }; export default ResourcesManagement;

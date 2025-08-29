@@ -300,6 +300,45 @@ const ReportsPage: React.FC = () => {
             <Badge variant="secondary" className="text-xs">
               En temps réel
             </Badge>
+            <Badge variant="outline" className="text-xs">
+              Période: {dateRange.start} → {dateRange.end}
+            </Badge>
+          </div>
+          
+          {/* Dynamic Date Range Selector */}
+          <div className="flex items-center space-x-4 mt-4">
+            <div className="flex items-center space-x-2">
+              <Calendar className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium">Période:</span>
+            </div>
+            <Select value={dateRange.preset} onValueChange={handleDateRangePreset}>
+              <SelectTrigger className="w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="current_year">Année en cours</SelectItem>
+                <SelectItem value="last_year">Année précédente</SelectItem>
+                <SelectItem value="current_quarter">Trimestre en cours</SelectItem>
+                <SelectItem value="current_month">Mois en cours</SelectItem>
+                <SelectItem value="last_30_days">30 derniers jours</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <div className="flex items-center space-x-2">
+              <Input
+                type="date"
+                value={dateRange.start}
+                onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value, preset: 'custom' }))}
+                className="w-40"
+              />
+              <span className="text-gray-500">à</span>
+              <Input
+                type="date"
+                value={dateRange.end}
+                onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value, preset: 'custom' }))}
+                className="w-40"
+              />
+            </div>
           </div>
         </div>
         
@@ -775,14 +814,26 @@ const ReportsPage: React.FC = () => {
                         )}
                       </div>
                       <div className="flex gap-1">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleViewReport(template.id)}
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEditReport(template.id)}
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
                         {!template.is_default && (
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleDeleteReport(template.id)}
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         )}
@@ -810,7 +861,11 @@ const ReportsPage: React.FC = () => {
                       </div>
                     </div>
                     <div className="mt-4">
-                      <Button className="w-full" size="sm">
+                      <Button 
+                        className="w-full" 
+                        size="sm"
+                        onClick={() => handleGenerateReport(template.type)}
+                      >
                         Utiliser ce modèle
                       </Button>
                     </div>
@@ -858,13 +913,25 @@ const ReportsPage: React.FC = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleScheduleReport(schedule.id)}
+                        >
                           {schedule.is_active ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEditReport(schedule.id)}
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleDeleteReport(schedule.id)}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>

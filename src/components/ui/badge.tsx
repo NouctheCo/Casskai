@@ -22,9 +22,15 @@ const badgeVariants = cva(
         info:
           "border-transparent bg-blue-500 text-white hover:bg-blue-500/80",
       },
+      size: { // Add size variant
+        default: "h-6 px-2.5 py-0.5", // Adjust as needed for badge
+        sm: "h-5 px-2 py-0.5 text-xs",
+        lg: "h-7 px-3 py-0.5 text-sm",
+      },
     },
     defaultVariants: {
       variant: "default",
+      size: "default", // Set default size
     },
   }
 )
