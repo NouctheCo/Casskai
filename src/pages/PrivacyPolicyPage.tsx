@@ -1,15 +1,18 @@
-/* eslint-disable max-lines-per-function */
-// Note: React import not needed with automatic JSX runtime; no translations used here
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Shield, Eye, Lock, Database, Users, FileText, Calendar, Mail, Phone } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { PageContainer } from '@/components/ui/PageContainer';
 
 const PrivacyPolicyPage = () => {
+  const { t } = useTranslation();
+
   const lastUpdated = "8 août 2025";
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <PageContainer variant="legal">
       {/* Header */}
       <div className="bg-gradient-to-br from-blue-900 to-indigo-900 text-white py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -20,14 +23,14 @@ const PrivacyPolicyPage = () => {
           >
             <Shield className="w-16 h-16 mx-auto mb-6 text-blue-200" />
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Politique de Confidentialité
+              {t('privacyPolicy.title')}
             </h1>
             <p className="text-xl text-blue-100 mb-4">
-              CassKai s'engage à protéger et respecter votre vie privée
+              {t('privacyPolicy.subtitle')}
             </p>
             <Badge className="bg-blue-800/50 text-blue-200 border-blue-700">
               <Calendar className="w-4 h-4 mr-2" />
-              Dernière mise à jour : {lastUpdated}
+              {t('privacyPolicy.lastUpdated')} : {lastUpdated}
             </Badge>
           </motion.div>
         </div>
@@ -42,24 +45,21 @@ const PrivacyPolicyPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Eye className="w-6 h-6 mr-3 text-blue-600" />
-                Introduction
+                {t('privacyPolicy.introduction.title')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p>
-                Noutche Conseil SASU, société éditrice de CassKai (ci-après "nous", "notre" ou "CassKai"), 
-                s'engage à protéger et à respecter votre vie privée. Cette politique de confidentialité 
-                explique comment nous collectons, utilisons, partageons et protégeons vos informations 
-                personnelles lorsque vous utilisez notre plateforme de gestion d'entreprise.
+                {t('privacyPolicy.introduction.content')}
               </p>
               <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <h4 className="font-semibold mb-2">Informations sur l'entreprise :</h4>
+                <h4 className="font-semibold mb-2">{t('privacyPolicy.introduction.companyInfo')}</h4>
                 <ul className="text-sm space-y-1">
-                  <li><strong>Raison sociale :</strong> Noutche Conseil SASU</li>
-                  <li><strong>SIREN :</strong> 909 672 685</li>
-                  <li><strong>SIRET :</strong> 909 672 685 00023</li>
-                  <li><strong>RCS :</strong> 909 672 685 R.C.S. Evry</li>
-                  <li><strong>Adresse :</strong> Inscrit au greffe d'Evry</li>
+                  <li><strong>{t('privacyPolicy.introduction.legalName')}</strong> {t('privacyPolicy.company.name')}</li>
+                  <li><strong>{t('privacyPolicy.introduction.registrationNumber')}</strong> {t('privacyPolicy.company.siren')}</li>
+                  <li><strong>{t('privacyPolicy.introduction.businessNumber')}</strong> {t('privacyPolicy.company.siret')}</li>
+                  <li><strong>{t('privacyPolicy.introduction.commercialRegister')}</strong> {t('privacyPolicy.company.rcs')}</li>
+                  <li><strong>{t('privacyPolicy.introduction.registeredAddress')}</strong> {t('privacyPolicy.company.address')}</li>
                 </ul>
               </div>
             </CardContent>
@@ -70,31 +70,29 @@ const PrivacyPolicyPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Database className="w-6 h-6 mr-3 text-green-600" />
-                Données que nous collectons
+                {t('privacyPolicy.dataCollection.title')}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <h4 className="font-semibold mb-3">1. Informations d'identification :</h4>
+              <h4 className="font-semibold mb-3">{t('privacyPolicy.dataCollection.identification.title')}</h4>
               <ul className="mb-4 space-y-1">
-                <li>• Nom, prénom, adresse email</li>
-                <li>• Numéro de téléphone</li>
-                <li>• Informations de l'entreprise (nom, SIREN, adresse)</li>
-                <li>• Photo de profil (optionnelle)</li>
+                {t('privacyPolicy.dataCollection.identification.items', { returnObjects: true }).map((item: string, index: number) => (
+                  <li key={index}>• {item}</li>
+                ))}
               </ul>
 
-              <h4 className="font-semibold mb-3">2. Données d'utilisation :</h4>
+              <h4 className="font-semibold mb-3">{t('privacyPolicy.dataCollection.usage.title')}</h4>
               <ul className="mb-4 space-y-1">
-                <li>• Logs de connexion et d'activité</li>
-                <li>• Adresse IP et informations sur l'appareil</li>
-                <li>• Pages visitées et fonctionnalités utilisées</li>
-                <li>• Préférences et paramètres</li>
+                {t('privacyPolicy.dataCollection.usage.items', { returnObjects: true }).map((item: string, index: number) => (
+                  <li key={index}>• {item}</li>
+                ))}
               </ul>
 
-              <h4 className="font-semibold mb-3">3. Données métier :</h4>
+              <h4 className="font-semibold mb-3">{t('privacyPolicy.dataCollection.business.title')}</h4>
               <ul className="mb-4 space-y-1">
-                <li>• Données comptables et financières</li>
-                <li>• Informations clients et fournisseurs</li>
-                <li>• Factures et devis</li>
+                {t('privacyPolicy.dataCollection.business.items', { returnObjects: true }).map((item: string, index: number) => (
+                  <li key={index}>• {item}</li>
+                ))}
                 <li>• Données RH (si module activé)</li>
               </ul>
 
@@ -346,7 +344,7 @@ const PrivacyPolicyPage = () => {
           </div>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 };
 

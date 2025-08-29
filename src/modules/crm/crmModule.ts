@@ -440,27 +440,47 @@ Cordialement,
     return [
       {
         path: '/crm',
-        component: () => import('./components/CRMDashboard'),
+        component: () => {
+          const p = './components/CRMDashboard';
+          // @vite-ignore
+          return import(p);
+        },
         permissions: [ModulePermissionService.PERMISSIONS.CRM_VIEW],
       },
       {
         path: '/crm/contacts',
-        component: () => import('./components/ContactsManagement'),
+        component: () => {
+          const p = './components/ContactsManagement';
+          // @vite-ignore
+          return import(p);
+        },
         permissions: [ModulePermissionService.PERMISSIONS.CRM_MANAGE_CONTACTS],
       },
       {
         path: '/crm/deals',
-        component: () => import('./components/DealsManagement'),
+        component: () => {
+          const p = './components/DealsManagement';
+          // @vite-ignore
+          return import(p);
+        },
         permissions: [ModulePermissionService.PERMISSIONS.CRM_MANAGE_DEALS],
       },
       {
         path: '/crm/pipeline',
-        component: () => import('./components/PipelineView'),
+        component: () => {
+          const p = './components/PipelineView';
+          // @vite-ignore
+          return import(p);
+        },
         permissions: [ModulePermissionService.PERMISSIONS.CRM_VIEW],
       },
       {
         path: '/crm/quotes',
-        component: () => import('./components/QuotesManagement'),
+        component: () => {
+          const p = './components/QuotesManagement';
+          // @vite-ignore
+          return import(p);
+        },
         permissions: [ModulePermissionService.PERMISSIONS.CRM_MANAGE_DEALS],
       },
     ];
@@ -468,9 +488,21 @@ Cordialement,
 
   getComponents() {
     return {
-      CRMWidget: () => import('./components/CRMWidget'),
-      SalesChart: () => import('./components/SalesChart'),
-      RecentDeals: () => import('./components/RecentDeals'),
+      CRMWidget: () => {
+        const p = './components/CRMWidget';
+        // @vite-ignore
+        return import(p);
+      },
+      SalesChart: () => {
+        const p = './components/SalesChart';
+        // @vite-ignore
+        return import(p);
+      },
+      RecentDeals: () => {
+        const p = './components/RecentDeals';
+        // @vite-ignore
+        return import(p);
+      },
     };
   }
 
@@ -554,17 +586,17 @@ Cordialement,
 
   // Tâches automatisées
   private async sendFollowUpReminders(): Promise<void> {
-    console.warn('[CRM] Envoi des relances automatiques');
+    console.log('[CRM] Envoi des relances automatiques');
     // Logique de relance automatique
   }
 
   private async checkQuoteExpirations(): Promise<void> {
-    console.warn('[CRM] Vérification des expirations de devis');
+    console.log('[CRM] Vérification des expirations de devis');
     // Logique de vérification d'expiration
   }
 
   private async generatePipelineAnalytics(): Promise<void> {
-    console.warn('[CRM] Génération des analytics pipeline');
+    console.log('[CRM] Génération des analytics pipeline');
     // Logique d'analytics
   }
 }

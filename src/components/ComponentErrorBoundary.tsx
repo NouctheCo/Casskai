@@ -28,10 +28,9 @@ export class ComponentErrorBoundary extends Component<Props, State> {
     
     // Log error details for debugging
     if (process.env.NODE_ENV === 'development') {
-      console.group(`🔴 Component Error: ${componentName}`);
+      console.warn(`🔴 Component Error: ${componentName}`);
       console.error('Error:', error);
       console.error('Error Info:', errorInfo);
-      console.groupEnd();
     }
   }
 

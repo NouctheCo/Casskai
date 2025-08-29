@@ -3,13 +3,15 @@ import {
   BankConnection,
   BankAccount,
   BankTransaction,
-  AccountingEntry,
   OpenBankingResponse,
   OpenBankingConfig,
+  ProviderConfig,
   SyncStatistics,
   ReconciliationStatistics,
   ExportJob,
-  ReconciliationMatch
+  ReconciliationMatch,
+  AccountingEntry,
+  SyncResult
 } from '../../types/openBanking.types';
 
 import { BankingProvider, BankingProviderFactory } from './base/BankingProvider';
@@ -49,7 +51,7 @@ export class OpenBankingManager {
   // Initialisation complète du système Open Banking
   async initialize(config: OpenBankingConfig): Promise<void> {
     try {
-      this.config = config;
+  this.config = config;
 
       // Initialiser le service de chiffrement
       await this.encryptionService.initialize(config.security.encryptionKey);
@@ -63,11 +65,11 @@ export class OpenBankingManager {
       // Initialiser les services auxiliaires
       await this.initializeServices();
 
-  this.isInitialized = true;
-  console.warn('Open Banking Manager initialized successfully');
+      this.isInitialized = true;
+      console.warn('Open Banking Manager initialized');
     } catch (error) {
-  const e = error as Error;
-  throw new Error(`Failed to initialize Open Banking Manager: ${e.message}`);
+      const message = (error as { message?: string })?.message || 'unknown';
+      throw new Error(`Failed to initialize Open Banking Manager: ${message}`);
     }
   }
 
@@ -79,11 +81,24 @@ export class OpenBankingManager {
 
   // Initialiser tous les providers configurés
   private async initializeProviders(): Promise<void> {
-    if (!this.config) {
-      throw new Error('OpenBanking configuration is not set');
-    }
-    const cfg = this.config;
-  const providerConfigs = [
+    const providerConfigs: Array<{
+      id: string;
+      name: string;
+      displayName: string;
+      type: 'aggregator';
+      supportedCountries: string[];
+      supportedBanks: never[];
+      features: {
+        psd2Compliance: boolean;
+        strongCustomerAuth: boolean;
+        realTimeTransactions: boolean;
+        webhookSupport: boolean;
+        categorization: boolean;
+        merchantEnrichment: boolean;
+      };
+      isActive: boolean;
+      config: OpenBankingConfig['providers'][keyof OpenBankingConfig['providers']];
+    }> = [
       {
         id: 'bridge',
         name: 'Bridge',
@@ -99,8 +114,8 @@ export class OpenBankingManager {
           categorization: true,
           merchantEnrichment: true
         },
-  isActive: true,
-  config: cfg.providers.bridge
+        isActive: true,
+  config: (this.config as OpenBankingConfig).providers.bridge
       },
       {
         id: 'budget_insight',
@@ -117,22 +132,30 @@ export class OpenBankingManager {
           categorization: true,
           merchantEnrichment: true
         },
-  isActive: true,
-  config: cfg.providers.budgetInsight
+        isActive: true,
+  config: (this.config as OpenBankingConfig).providers.budgetInsight
       }
     ];
-    await Promise.all(
-      providerConfigs.map(async (providerConfig) => {
-        try {
-          const provider = BankingProviderFactory.create(providerConfig);
-          await provider.initialize();
-          this.providers.set(providerConfig.id, provider);
-          console.warn(`Provider ${providerConfig.id} initialized successfully`);
-        } catch (error) {
-          console.error(`Failed to initialize provider ${providerConfig.id}:`, error);
-        }
-      })
-    );
+    await Promise.all(providerConfigs.map(async (providerConfig) => {
+      try {
+        const provider = BankingProviderFactory.create({
+          id: providerConfig.id,
+          name: providerConfig.name,
+          displayName: providerConfig.displayName,
+          type: providerConfig.type,
+          supportedCountries: providerConfig.supportedCountries,
+          supportedBanks: providerConfig.supportedBanks,
+          features: providerConfig.features,
+          isActive: providerConfig.isActive,
+          config: providerConfig.config as ProviderConfig
+        });
+        await provider.initialize();
+        this.providers.set(providerConfig.id, provider);
+        console.warn(`Provider ${providerConfig.id} initialized`);
+      } catch (error) {
+        console.error(`Failed to initialize provider ${providerConfig.id}:`, error);
+      }
+    }));
   }
 
   // Initialiser les services auxiliaires
@@ -152,10 +175,10 @@ export class OpenBankingManager {
       ];
       await this.exportService.initialize(exportFormats);
 
-  console.warn('Auxiliary services initialized successfully');
+      console.warn('Auxiliary services initialized');
     } catch (error) {
-  const e = error as Error;
-  throw new Error(`Failed to initialize services: ${e.message}`);
+      const message = (error as { message?: string })?.message || 'unknown';
+      throw new Error(`Failed to initialize services: ${message}`);
     }
   }
 
@@ -199,8 +222,8 @@ export class OpenBankingManager {
 
       return result;
     } catch (error) {
-      const e = error as Error;
-      return this.createErrorResponse('CONNECTION_CREATION_ERROR', e.message);
+      const message = (error as { message?: string })?.message || 'unknown';
+      return this.createErrorResponse('CONNECTION_CREATION_ERROR', message);
     }
   }
 
@@ -218,8 +241,8 @@ export class OpenBankingManager {
 
       return this.createErrorResponse('CONNECTION_NOT_FOUND', 'Connection not found');
     } catch (error) {
-      const e = error as Error;
-      return this.createErrorResponse('CONNECTION_RETRIEVAL_ERROR', e.message);
+      const message = (error as { message?: string })?.message || 'unknown';
+      return this.createErrorResponse('CONNECTION_RETRIEVAL_ERROR', message);
     }
   }
 
@@ -230,17 +253,16 @@ export class OpenBankingManager {
         .filter(conn => conn.userId === userId);
 
       // Mettre à jour le statut de chaque connexion
-      const updatedConnections: BankConnection[] = [];
-      await Promise.all(
+      const updatedConnectionsResults = await Promise.all(
         userConnections.map(async (connection) => {
           const provider = this.providers.get(connection.providerId);
-          if (provider) {
-            const result = await provider.getConnection(connection.id);
-            if (result.success && result.data) {
-              updatedConnections.push(result.data);
-            }
-          }
+          if (!provider) return null;
+          const result = await provider.getConnection(connection.id);
+          return result.success && result.data ? result.data : null;
         })
+      );
+      const updatedConnections: BankConnection[] = updatedConnectionsResults.filter(
+        (c): c is BankConnection => c !== null
       );
 
       return {
@@ -248,8 +270,8 @@ export class OpenBankingManager {
         data: updatedConnections
       };
     } catch (error) {
-      const e = error as Error;
-      return this.createErrorResponse('USER_CONNECTIONS_ERROR', e.message);
+      const message = (error as { message?: string })?.message || 'unknown';
+      return this.createErrorResponse('USER_CONNECTIONS_ERROR', message);
     }
   }
 
@@ -268,8 +290,8 @@ export class OpenBankingManager {
 
       return await provider.refreshConnection(connectionId);
     } catch (error) {
-      const e = error as Error;
-      return this.createErrorResponse('CONNECTION_REFRESH_ERROR', e.message);
+  const message = (error as { message?: string })?.message || 'unknown';
+  return this.createErrorResponse('CONNECTION_REFRESH_ERROR', message);
     }
   }
 
@@ -300,8 +322,8 @@ export class OpenBankingManager {
 
       return result;
     } catch (error) {
-      const e = error as Error;
-      return this.createErrorResponse('CONNECTION_DELETION_ERROR', e.message);
+  const message = (error as { message?: string })?.message || 'unknown';
+  return this.createErrorResponse('CONNECTION_DELETION_ERROR', message);
     }
   }
 
@@ -322,8 +344,8 @@ export class OpenBankingManager {
 
       return await provider.getAccounts(connectionId);
     } catch (error) {
-      const e = error as Error;
-      return this.createErrorResponse('ACCOUNTS_RETRIEVAL_ERROR', e.message);
+  const message = (error as { message?: string })?.message || 'unknown';
+  return this.createErrorResponse('ACCOUNTS_RETRIEVAL_ERROR', message);
     }
   }
 
@@ -353,13 +375,13 @@ export class OpenBankingManager {
 
       return await provider.getTransactions(connectionId, accountId, options);
     } catch (error) {
-      const e = error as Error;
-      return this.createErrorResponse('TRANSACTIONS_RETRIEVAL_ERROR', e.message);
+  const message = (error as { message?: string })?.message || 'unknown';
+  return this.createErrorResponse('TRANSACTIONS_RETRIEVAL_ERROR', message);
     }
   }
 
   // Synchroniser les transactions
-  async syncTransactions(connectionId: string, accountId: string): Promise<OpenBankingResponse<unknown>> {
+  async syncTransactions(connectionId: string, accountId: string): Promise<OpenBankingResponse<SyncResult>> {
     try {
       const connection = this.connections.get(connectionId);
       if (!connection) {
@@ -381,8 +403,8 @@ export class OpenBankingManager {
 
       return result;
     } catch (error) {
-      const e = error as Error;
-      return this.createErrorResponse('SYNC_ERROR', e.message);
+      const message = (error as { message?: string })?.message || 'unknown';
+      return this.createErrorResponse('SYNC_ERROR', message);
     }
   }
 
@@ -413,8 +435,8 @@ export class OpenBankingManager {
 
       return await this.reconciliationService.reconcileTransaction(mockTransaction, accountingEntries);
     } catch (error) {
-      const e = error as Error;
-      return this.createErrorResponse('RECONCILIATION_ERROR', e.message);
+      const message = (error as { message?: string })?.message || 'unknown';
+      return this.createErrorResponse('RECONCILIATION_ERROR', message);
     }
   }
 
@@ -423,15 +445,15 @@ export class OpenBankingManager {
   // Traiter un webhook entrant
   async processWebhook(
     providerId: string,
-  payload: unknown,
+    payload: unknown,
     signature: string,
     headers: Record<string, string>
   ): Promise<OpenBankingResponse<void>> {
     try {
       return await this.webhookManager.receiveWebhook(providerId, payload, signature, headers);
     } catch (error) {
-      const e = error as Error;
-      return this.createErrorResponse('WEBHOOK_PROCESSING_ERROR', e.message);
+      const message = (error as { message?: string })?.message || 'unknown';
+      return this.createErrorResponse('WEBHOOK_PROCESSING_ERROR', message);
     }
   }
 
@@ -446,8 +468,8 @@ export class OpenBankingManager {
     try {
       return await this.exportService.createExportJob(userId, formatId, parameters);
     } catch (error) {
-      const e = error as Error;
-      return this.createErrorResponse('EXPORT_CREATION_ERROR', e.message);
+      const message = (error as { message?: string })?.message || 'unknown';
+      return this.createErrorResponse('EXPORT_CREATION_ERROR', message);
     }
   }
 
@@ -456,8 +478,8 @@ export class OpenBankingManager {
     try {
       return await this.exportService.getExportJob(jobId);
     } catch (error) {
-      const e = error as Error;
-      return this.createErrorResponse('EXPORT_STATUS_ERROR', e.message);
+      const message = (error as { message?: string })?.message || 'unknown';
+      return this.createErrorResponse('EXPORT_STATUS_ERROR', message);
     }
   }
 
@@ -502,17 +524,16 @@ export class OpenBankingManager {
     const providerHealth: Record<string, boolean> = {};
     let healthyProviders = 0;
 
-    await Promise.all(
-      Array.from(this.providers.entries()).map(async ([providerId, provider]) => {
-        try {
-          const isHealthy = await provider.isHealthy();
-          providerHealth[providerId] = isHealthy;
-          if (isHealthy) healthyProviders++;
-  } catch {
-          providerHealth[providerId] = false;
-        }
-      })
-    );
+    for (const [providerId, provider] of this.providers) {
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        const isHealthy = await provider.isHealthy();
+        providerHealth[providerId] = isHealthy;
+        if (isHealthy) healthyProviders++;
+      } catch (_error) {
+        providerHealth[providerId] = false;
+      }
+    }
 
     const services = {
       encryption: this.encryptionService.initialized,
@@ -563,7 +584,7 @@ export class OpenBankingManager {
   // Nettoyage des ressources
   async dispose(): Promise<void> {
     // Arrêter tous les providers
-  await Promise.all(Array.from(this.providers.values()).map((p) => p.dispose()));
+  await Promise.all(Array.from(this.providers.values()).map((provider) => provider.dispose()));
 
     // Nettoyer les services
     this.encryptionService.dispose();

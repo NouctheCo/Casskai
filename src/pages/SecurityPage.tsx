@@ -19,6 +19,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { PageContainer } from '@/components/ui/PageContainer';
 import { useNavigate } from 'react-router-dom';
 
 const SecurityPage = () => {
@@ -129,7 +130,7 @@ const SecurityPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <PageContainer variant="default">
       {/* Header */}
       <div className="bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -338,7 +339,7 @@ const SecurityPage = () => {
           </div>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 };
 

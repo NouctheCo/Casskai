@@ -3,8 +3,13 @@
  * Manages e-invoicing feature flags for backward compatibility
  */
 
-import { supabase } from '@/lib/supabase';
-import { EInvoiceFormat, EInvoiceChannel, EInvoicingError } from '@/types/einvoicing.types';
+import { supabase } from '../../../lib/supabase';
+import {
+  EInvoicingFeatureFlags,
+  EInvoiceFormat,
+  EInvoiceChannel,
+  EInvoicingError
+} from '../../../types/einvoicing.types';
 
 interface CompanyFeatureFlags {
   company_id: string;
@@ -26,12 +31,12 @@ export class FeatureFlagService {
    */
   async isEInvoicingEnabled(companyId: string): Promise<boolean> {
     try {
-  console.warn(`🔍 Checking e-invoicing feature flag for company ${companyId}`);
+      console.log(`🔍 Checking e-invoicing feature flag for company ${companyId}`);
 
       const flags = await this.getFeatureFlags(companyId);
       const enabled = flags.einvoicing_v1_enabled;
 
-  console.warn(`🏁 E-invoicing ${enabled ? 'enabled' : 'disabled'} for company ${companyId}`);
+      console.log(`🏁 E-invoicing ${enabled ? 'enabled' : 'disabled'} for company ${companyId}`);
       return enabled;
 
     } catch (error) {
@@ -104,7 +109,7 @@ export class FeatureFlagService {
         return cached;
       }
 
-  console.warn(`📥 Loading feature flags for company ${companyId}`);
+      console.log(`📥 Loading feature flags for company ${companyId}`);
 
       // Load from database
       const { data, error } = await supabase
@@ -144,7 +149,7 @@ export class FeatureFlagService {
       // Cache the flags
       this.cacheFlags(companyId, flags);
 
-  console.warn(`✅ Feature flags loaded for company ${companyId}:`, {
+      console.log(`✅ Feature flags loaded for company ${companyId}:`, {
         einvoicing_enabled: flags.einvoicing_v1_enabled,
         formats: flags.formats_enabled,
         channels: flags.channels_enabled
@@ -172,7 +177,7 @@ export class FeatureFlagService {
    */
   async enableEInvoicing(companyId: string): Promise<void> {
     try {
-  console.warn(`🟢 Enabling e-invoicing for company ${companyId}`);
+      console.log(`🟢 Enabling e-invoicing for company ${companyId}`);
 
       const { error } = await supabase
         .from('companies')
@@ -196,7 +201,7 @@ export class FeatureFlagService {
       // Log audit event
       await this.logFeatureFlagChange(companyId, 'enabled', 'einvoicing_v1');
 
-  console.warn(`✅ E-invoicing enabled for company ${companyId}`);
+      console.log(`✅ E-invoicing enabled for company ${companyId}`);
 
     } catch (error) {
       console.error('Error enabling e-invoicing:', error);
@@ -218,7 +223,7 @@ export class FeatureFlagService {
    */
   async disableEInvoicing(companyId: string): Promise<void> {
     try {
-  console.warn(`🔴 Disabling e-invoicing for company ${companyId}`);
+      console.log(`🔴 Disabling e-invoicing for company ${companyId}`);
 
       const { error } = await supabase
         .from('companies')
@@ -242,7 +247,7 @@ export class FeatureFlagService {
       // Log audit event
       await this.logFeatureFlagChange(companyId, 'disabled', 'einvoicing_v1');
 
-  console.warn(`✅ E-invoicing disabled for company ${companyId}`);
+      console.log(`✅ E-invoicing disabled for company ${companyId}`);
 
     } catch (error) {
       console.error('Error disabling e-invoicing:', error);
@@ -269,7 +274,7 @@ export class FeatureFlagService {
     adoption_rate: number;
   }> {
     try {
-  console.warn('📊 Getting feature flag statistics');
+      console.log('📊 Getting feature flag statistics');
 
       const { data, error } = await supabase
         .from('companies')
@@ -295,7 +300,7 @@ export class FeatureFlagService {
         adoption_rate: Math.round(adoptionRate * 100) / 100 // Round to 2 decimal places
       };
 
-  console.warn('📊 Feature flag statistics:', stats);
+      console.log('📊 Feature flag statistics:', stats);
       return stats;
 
     } catch (error) {
@@ -319,11 +324,11 @@ export class FeatureFlagService {
     if (companyId) {
       this.cache.delete(companyId);
       this.cacheExpiry.delete(companyId);
-  console.warn(`🗑️ Cleared feature flag cache for company ${companyId}`);
+      console.log(`🗑️ Cleared feature flag cache for company ${companyId}`);
     } else {
       this.cache.clear();
       this.cacheExpiry.clear();
-  console.warn('🗑️ Cleared all feature flag cache');
+      console.log('🗑️ Cleared all feature flag cache');
     }
   }
 
@@ -334,7 +339,7 @@ export class FeatureFlagService {
     const expiry = this.cacheExpiry.get(companyId);
 
     if (cached && expiry && Date.now() < expiry) {
-      console.warn(`📋 Using cached feature flags for company ${companyId}`);
+      console.log(`📋 Using cached feature flags for company ${companyId}`);
       return cached;
     }
 
@@ -386,7 +391,7 @@ export class FeatureFlagService {
         p_actor_type: 'system',
         p_meta_json: {
           feature_name: feature,
-          action,
+          action: action,
           timestamp: new Date().toISOString()
         }
       });

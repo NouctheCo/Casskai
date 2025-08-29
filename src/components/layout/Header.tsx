@@ -1,11 +1,12 @@
-import { useState } from 'react';
-import { Menu, Settings, Bell, User, Search, ChevronDown, Shield } from 'lucide-react';
+import React, { useState } from 'react';
+import { Menu, Settings, Bell, User, Search, Command, ChevronDown, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { LanguageToggle } from '@/components/LanguageToggle';
 import { useEnterprise } from '@/contexts/EnterpriseContext';
 import { useLocale } from '@/contexts/LocaleContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   DropdownMenu, 
@@ -15,7 +16,6 @@ import {
   DropdownMenuSeparator 
 } from '@/components/ui/dropdown-menu';
 import { useNavigate } from 'react-router-dom';
-import { SupabaseStatusBadge } from '@/components/status/SupabaseStatusBadge';
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -42,7 +42,6 @@ export function Header({
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      data-sidebar-collapsed={isDesktopSidebarCollapsed ? 'true' : 'false'}
     >
       <div className="header-content flex items-center justify-between h-16 px-4">
         {/* Left side - Menu and branding */}
@@ -71,7 +70,7 @@ export function Header({
             >
               CassKai
             </motion.h1>
-            {currentEnterprise && user?.user_metadata?.onboarding_completed && (
+            {currentEnterprise && (
               <motion.div
                 className="flex items-center space-x-2"
                 initial={{ opacity: 0, x: -10 }}
@@ -87,8 +86,8 @@ export function Header({
           </div>
         </div>
 
-  {/* Center - Search bar */}
-  <div className="hidden lg:flex flex-1 max-w-xl xl:max-w-2xl mx-4 lg:mx-8">
+        {/* Center - Search bar */}
+        <div className="hidden lg:flex flex-1 max-w-md mx-4 lg:mx-8">
           <motion.div
             className="relative w-full"
             animate={{ scale: searchFocused ? 1.02 : 1 }}
@@ -100,7 +99,7 @@ export function Header({
             <input
               type="text"
               placeholder={t('header.search', { defaultValue: 'Rechercher...' })}
-              className="w-full pl-10 pr-16 py-2 bg-white/50 dark:bg-gray-800/50 border border-white/20 dark:border-gray-700/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm transition-all duration-200"
+              className="w-full pl-10 pr-12 py-2 bg-white/50 dark:bg-gray-800/50 border border-white/20 dark:border-gray-700/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm transition-all duration-200"
               onFocus={() => setSearchFocused(true)}
               onBlur={() => setSearchFocused(false)}
             />
@@ -127,10 +126,6 @@ export function Header({
 
         {/* Right side - Actions */}
         <div className="button-group flex items-center space-x-1 sm:space-x-2">
-          {/* Status badge */}
-          <div className="hidden md:block">
-            <SupabaseStatusBadge />
-          </div>
           {/* Mobile search */}
           <div className="lg:hidden">
             <motion.div

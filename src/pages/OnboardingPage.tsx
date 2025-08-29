@@ -5,6 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/contexts/AuthContext';
 import { OnboardingProvider, useOnboarding } from '@/contexts/OnboardingContext';
 import { useTranslation } from 'react-i18next';
+import { PageContainer } from '@/components/ui/PageContainer';
 
 // Step Components
 import WelcomeStep from './onboarding/WelcomeStep';
@@ -25,7 +26,7 @@ const steps = [
 // Inner component that uses the onboarding context
 function OnboardingContent() {
   const { currentStep } = useOnboarding();
-  const { user } = useAuth();
+  const { user, currentCompany } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -38,22 +39,29 @@ function OnboardingContent() {
 
   // Redirect if onboarding is already completed AND company is configured
   useEffect(() => {
-    if (user?.user_metadata?.onboarding_completed && user?.user_metadata?.company_id) {
-      // User has completed onboarding and has a company - go to dashboard
+    console.log('🔍 OnboardingPage: Checking redirect conditions:', {
+      onboardingCompleted: user?.user_metadata?.onboarding_completed,
+      hasCurrentCompany: !!currentCompany,
+      currentCompanyId: currentCompany?.id,
+      userId: user?.id
+    });
+
+    if (user?.user_metadata?.onboarding_completed && currentCompany) {
+      console.log('✅ OnboardingPage: Redirecting to dashboard - both onboarding completed and currentCompany available');
       navigate('/dashboard', { replace: true });
     }
-  }, [user, navigate]);
+  }, [user?.user_metadata?.onboarding_completed, currentCompany, navigate]);
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+      <PageContainer variant="onboarding" className="flex items-center justify-center">
         <div className="text-center" role="status" aria-live="polite">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4" aria-hidden="true"></div>
           <p className="text-gray-600 dark:text-gray-400">
             {t('common.loading', { defaultValue: 'Chargement...' })}
           </p>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
@@ -62,7 +70,7 @@ function OnboardingContent() {
   const progressPercentage = ((currentStep - 1) / (steps.length - 1)) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 relative overflow-hidden">
+    <PageContainer variant="onboarding" className="relative overflow-hidden">
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-3xl animate-pulse"></div>
@@ -102,7 +110,7 @@ function OnboardingContent() {
           </AnimatePresence>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }
 

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle, AlertCircle, Database, Building, Globe, Shield, MapPin, Languages } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { changeLanguageAndDetectCountry } from '@/i18n';
+import { changeLanguageAndDetectCountry } from '../lib/i18n';
 
 // Composant Sélecteur de Langue
 const LanguageSwitcher = ({ className = "" }) => {
@@ -637,10 +637,10 @@ const UniversalSetupWizard = () => {
   const handleFinish = async () => {
     try {
       console.log('Configuration finale:', config);
-  toast({ title: t('setup.installation.completed') });
+      alert(t('setup.installation.completed'));
     } catch (error) {
       console.error('Erreur lors de l\'installation:', error);
-  toast({ title: t('setup.installation.error'), variant: 'destructive' });
+      alert(t('setup.installation.error'));
     }
   };
 

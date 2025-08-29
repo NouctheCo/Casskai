@@ -20,7 +20,7 @@ export default [
       'supabase/functions/**/*',
       'tests/e2e/test-results/**/*',
       'playwright-report/**/*',
-    ],
+    ]
   },
 
   // TypeScript/TSX files configuration (main app files)
@@ -36,45 +36,46 @@ export default [
       },
       parser: tsparser,
       parserOptions: {
-        ecmaFeatures: { jsx: true },
-        project: './tsconfig.app.json',
+        ecmaFeatures: {
+          jsx: true,
+        },
+        project: './tsconfig.json', // Pointez vers le tsconfig racine
       },
     },
     settings: {
       'import/resolver': {
-        typescript: {
-          alwaysTryTypes: true,
-          project: './tsconfig.app.json',
-        },
         node: {
           extensions: ['.js', '.jsx', '.ts', '.tsx'],
-          moduleDirectory: ['node_modules', 'src'],
         },
-        alias: {
-          map: [['@', './src']],
-          extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
+        typescript: {
+          alwaysTryTypes: true,
+          project: './tsconfig.json',
         },
+      },
+      'import/parsers': {
+        '@typescript-eslint/parser': ['.ts', '.tsx'],
       },
     },
     plugins: {
       '@typescript-eslint': tseslint,
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
-      import: importPlugin,
+      'import': importPlugin,
     },
-  rules: {
-      // Extend recommended configs
+    rules: {
+      // ... la section 'rules' reste exactement la même qu'avant ...
       ...js.configs.recommended.rules,
       ...tseslint.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
-
-      // TypeScript specific rules
+      'no-undef': 'off',
       '@typescript-eslint/no-unused-vars': [
-        'warn',
+        'error',
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
           ignoreRestSiblings: true,
+          caughtErrors: 'all',
+          caughtErrorsIgnorePattern: '^_',
         },
       ],
       '@typescript-eslint/no-explicit-any': 'warn',
@@ -85,60 +86,68 @@ export default [
         {
           'ts-expect-error': 'allow-with-description',
           'ts-ignore': 'allow-with-description',
-        },
+        }
       ],
-
-      // React specific rules
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
       ],
-
-      // General code quality rules
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'no-debugger': 'error',
-      // Let TypeScript handle undefined variables in TS/TSX
-      'no-undef': 'off',
       'no-alert': 'error',
       'prefer-const': 'error',
       'no-var': 'error',
       'object-shorthand': 'error',
       'prefer-template': 'error',
-
-      // Import/Export rules for Linux compatibility
       'no-duplicate-imports': 'error',
       'import/no-unresolved': 'error',
       'import/no-useless-path-segments': 'error',
-      'import/extensions': [
-        'error',
-        'never',
-        { json: 'always', jsx: 'never', tsx: 'never', js: 'never', ts: 'never' },
-      ],
+      'import/extensions': ['warn', 'never', { 
+        'json': 'always',
+        'jsx': 'never',
+        'tsx': 'never',
+        'js': 'never',
+        'ts': 'never'
+      }],
       'import/no-self-import': 'error',
       'import/no-cycle': 'warn',
-
-  // Complexity rules
-      complexity: ['warn', 15],
+      'complexity': ['warn', 15],
       'max-depth': ['warn', 4],
       'max-lines': ['warn', 500],
       'max-lines-per-function': ['warn', 100],
       'max-params': ['warn', 5],
-
-  // Relax a few broadly-triggered patterns to warnings during cleanup
-  'no-case-declarations': 'warn',
-  'no-useless-escape': 'warn',
-
-      // Security rules
       'no-eval': 'error',
       'no-implied-eval': 'error',
       'no-new-func': 'error',
       'no-script-url': 'error',
-
-      // Performance rules
       'no-await-in-loop': 'warn',
       'require-atomic-updates': 'error',
+      
+      // Enforce TypeScript-only in src directory
+      '@typescript-eslint/no-require-imports': 'error',
+      
+      // File naming enforced manually during code reviews
+      // Prefer camelCase for components, PascalCase for React components
+      
+      // Additional code style rules
+      'prefer-arrow-callback': 'error',
+      'arrow-spacing': 'error',
+    },
+  },
+
+  // Forbid .jsx files in src directory
+  {
+    files: ['src/**/*.jsx'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: '*',
+          message: 'JSX files are not allowed in src directory. Use .tsx files instead for TypeScript safety.',
+        },
+      ],
     },
   },
 
@@ -149,7 +158,11 @@ export default [
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
-      globals: { ...globals.browser, ...globals.node, ...globals.es2022 },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        ...globals.es2022,
+      },
     },
     rules: {
       // Extend recommended configs
@@ -163,12 +176,12 @@ export default [
       'no-var': 'error',
       'object-shorthand': 'error',
       'prefer-template': 'error',
-
+      
       // Import/Export rules
       'no-duplicate-imports': 'error',
-
+      
       // Complexity rules
-      complexity: ['warn', 20], // More lenient for config files
+      'complexity': ['warn', 20], // More lenient for config files
       'max-depth': ['warn', 5],
       'max-lines': 'off',
       'max-lines-per-function': 'off',
@@ -182,14 +195,15 @@ export default [
     },
   },
 
-  // Test files specific configuration - TypeScript tests
+  // Test files specific configuration
   {
-    files: ['**/*.{test,spec}.ts', '**/*.{test,spec}.tsx', '**/tests/**/*.{ts,tsx}'],
+    files: ['**/*.{test,spec}.{js,jsx,ts,tsx}', '**/tests/**/*.{js,jsx,ts,tsx}', 'src/test/**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
-      ecmaVersion: 2022,
-      sourceType: 'module',
       parser: tsparser,
-      parserOptions: { ecmaFeatures: { jsx: true } }, // no project for tests
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+        project: './tsconfig.app.json',
+      },
       globals: {
         ...globals.jest,
         ...globals.node,
@@ -205,26 +219,56 @@ export default [
       },
     },
     rules: {
+      // Allow more flexible rules in tests
+      '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
-      '@typescript-eslint/no-var-requires': 'off',
-      '@typescript-eslint/no-require-imports': 'off',
+      'no-undef': 'off',
       'no-console': 'off',
       'max-lines': 'off',
       'max-lines-per-function': 'off',
     },
   },
 
-  // Test files specific configuration - JavaScript tests
+  // Specific utils TSX that isn't part of TS project graph (avoid parserOptions.project error)
   {
-    files: ['**/*.{test,spec}.js', '**/*.{test,spec}.jsx', '**/tests/**/*.{js,jsx}'],
+    files: ['src/utils/animationOptimization.tsx'],
     languageOptions: {
-      ecmaVersion: 2022,
-      sourceType: 'module',
-      parserOptions: { ecmaFeatures: { jsx: true } },
-      globals: { ...globals.jest, ...globals.node },
+      parser: tsparser,
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+        project: null,
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
     },
     rules: {
+      // Keep sensible rules, but avoid type-aware only checks here
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+
+  // E2E (Playwright) tests: disable type-aware parsing to avoid tsconfig project issues
+  {
+    files: ['tests/e2e/**/*.{ts,tsx,js,jsx}'],
+    languageOptions: {
+      parser: tsparser,
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+        // Use non-type-aware linting for e2e specs
+        project: null,
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-var-requires': 'off',
+      'no-undef': 'off',
       'no-console': 'off',
       'max-lines': 'off',
       'max-lines-per-function': 'off',
@@ -234,7 +278,11 @@ export default [
   // Configuration files
   {
     files: ['**/*.config.{js,ts}', '**/*.setup.{js,ts}'],
-    languageOptions: { globals: { ...globals.node } },
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
     rules: {
       'no-console': 'off',
       '@typescript-eslint/no-var-requires': 'off',
@@ -244,7 +292,11 @@ export default [
   // Scripts directory
   {
     files: ['scripts/**/*.{js,ts}'],
-    languageOptions: { globals: { ...globals.node } },
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
     rules: {
       'no-console': 'off',
       '@typescript-eslint/no-var-requires': 'off',

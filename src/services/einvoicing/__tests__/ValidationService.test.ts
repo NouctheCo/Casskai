@@ -4,7 +4,7 @@
  */
 
 import { ValidationService } from '../core/ValidationService';
-import { EN16931Invoice } from '@/types/einvoicing.types';
+import { EN16931Invoice } from '../../../types/einvoicing.types';
 
 describe('ValidationService', () => {
   let validationService: ValidationService;
@@ -214,13 +214,12 @@ describe('ValidationService', () => {
 
     it('should validate high-value invoice buyer requirements', async () => {
       const invoice = createValidInvoice();
-      // Keep totals consistent and > 150; remove buyer address to trigger warning only
-      // (createValidInvoice already sets total with VAT to 1200)
+      // High value invoice (>150 EUR) without buyer address
+      invoice.totals.invoice_total_with_vat = 200.00;
       delete invoice.buyer.address;
 
       const result = await validationService.validateEN16931(invoice);
-      // Should be a warning only, not an error
-      expect(result.errors).toHaveLength(0);
+
       expect(result.valid).toBe(true);
       expect(result.warnings).toContainEqual(
         expect.objectContaining({

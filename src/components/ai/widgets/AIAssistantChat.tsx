@@ -187,7 +187,7 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
   };
 
   const handleFeedback = (messageId: string, positive: boolean) => {
-    console.log('Feedback:', messageId, positive);
+    console.warn('Feedback:', messageId, positive);
     // Ici on pourrait envoyer le feedback au service
   };
 
@@ -423,7 +423,7 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="Posez votre question financière..."
             className="flex-1 border-0 bg-transparent focus:ring-0 focus:ring-offset-0"
-            onKeyPress={(e) => {
+            onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 handleSendMessage(inputValue);

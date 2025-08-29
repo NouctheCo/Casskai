@@ -35,7 +35,7 @@ import {
   EInvoiceLifecycleStatus, 
   EInvoiceFormat, 
   EInvoiceChannel 
-} from '@/types/einvoicing.types';
+} from '../../types/einvoicing.types';
 
 interface EInvoiceDocumentsListProps {
   companyId: string;

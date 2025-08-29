@@ -89,7 +89,7 @@ export interface ContractHistory {
   id: string;
   contract_id: string;
   action_type: ContractActionType;
-  changes: Record<string, any>;
+  changes: Record<string, unknown>;
   user_id?: string;
   user_name?: string;
   created_at: string;

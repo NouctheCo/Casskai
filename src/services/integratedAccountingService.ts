@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { FECParser } from './fecParser';
 import { CSVImportService } from './csvImportService';
 import { AccountingValidationService } from './accountingValidationService';
@@ -6,16 +7,111 @@ import { VATCalculationService } from './vatCalculationService';
 import { AutomaticLetterageService } from './automaticLetterageService';
 
 import { supabase } from '../lib/supabase';
-import { ImportResult, ImportSession } from '../types/accounting-import.types';
+import { ImportResult, ImportSession, JournalEntryType, FECEntry } from '../types/accounting-import.types';
+
+// Shape of rows returned by FEC export query
+type FECQueryRow = {
+  debit_amount: number | null;
+  credit_amount: number | null;
+  description: string | null;
+  auxiliary_account?: string | null;
+  letterage?: string | null;
+  accounts: { number: string; name: string } | null;
+  journal_entries: {
+    entry_number: string;
+    date: string;
+    reference?: string | null;
+    description?: string | null;
+    journals: { code: string; name: string } | null;
+  } | null;
+};
 
 /**
  * Service intégré pour toutes les opérations d'import/export comptable
  */
 export class IntegratedAccountingService {
+  // Row shape for FEC export query
+  private static readonly FEC_FIELDS_HEADER = [
+    'JournalCode',
+    'JournalLib',
+    'EcritureNum',
+    'EcritureDate',
+    'CompteNum',
+    'CompteLib',
+    'CompAuxNum',
+    'CompAuxLib',
+    'PieceRef',
+    'PieceDate',
+    'EcritureLib',
+    'Debit',
+    'Credit',
+    'EcritureLet',
+    'DateLet',
+    'ValidDate',
+    'Montantdevise',
+    'Idevise'
+  ] as const;
+
+  private static buildFECHeader(): string {
+    return (this.FEC_FIELDS_HEADER as readonly string[]).join('|');
+  }
+
+  // eslint-disable-next-line complexity
+  private static mapRowToFECLine(item: FECQueryRow): string {
+    const entry = (item?.journal_entries ?? {
+          entry_number: '',
+          date: new Date().toISOString(),
+          reference: '',
+          description: '',
+          journals: null
+    }) as NonNullable<FECQueryRow['journal_entries']>;
+    const journal = entry.journals ?? { code: '', name: '' };
+    const account = item?.accounts ?? { number: '', name: '' };
+
+    const journalCode = String(journal.code || '');
+    const journalName = String(journal.name || '');
+    const entryNumber = String(entry.entry_number || '');
+    const entryDate = this.formatFECDate(String(entry.date || new Date().toISOString()));
+    const accountNum = String(account.number || '');
+    const accountName = String(account.name || '');
+    const compAuxNum = String(item.auxiliary_account || '');
+    const pieceRef = String(entry.reference || '');
+    const pieceDate = entryDate;
+    const label = String(item.description || entry.description || '');
+    const debit = this.formatFECAmount(Number(item.debit_amount || 0));
+    const credit = this.formatFECAmount(Number(item.credit_amount || 0));
+    const ecritureLet = String(item.letterage || '');
+    const dateLet = '';
+    const validDate = entryDate;
+    const montantDevise = '';
+    const iDevise = '';
+
+    return [
+      journalCode,
+      journalName,
+      entryNumber,
+      entryDate,
+      accountNum,
+      accountName,
+      compAuxNum,
+      '',
+      pieceRef,
+      pieceDate,
+      label,
+      debit,
+      credit,
+      ecritureLet,
+      dateLet,
+      validDate,
+      montantDevise,
+      iDevise
+    ].join('|');
+  }
 
   /**
    * Orchestrateur principal d'import
    */
+  // eslint-disable-next-line complexity
   static async performCompleteImport(config: {
     file: File;
     format: 'FEC' | 'CSV' | 'Excel' | 'auto';
@@ -43,9 +139,7 @@ export class IntegratedAccountingService {
     const session: ImportSession = {
       id: crypto.randomUUID(),
       filename: file.name,
-      format: ((): 'FEC' | 'CSV' | 'Excel' => (
-        format === 'auto' ? this.detectFormat(file) : (format as 'FEC' | 'CSV' | 'Excel')
-      ))(),
+  format: format === 'auto' ? this.detectFormat(file) : (format as 'FEC' | 'CSV' | 'Excel'),
       status: 'parsing',
       totalRows: 0,
       validRows: 0,
@@ -57,42 +151,11 @@ export class IntegratedAccountingService {
     try {
       // PHASE 1: Parsing
       onProgress?.(5, 'Analyse du fichier...');
-      let result: ImportResult;
-
-      switch (session.format) {
-        case 'FEC': {
-          result = await FECParser.parseFEC(file, {
-            encoding: options.encoding,
-            skipFirstRow: options.skipFirstRow,
-            skipEmptyLines: true
-          });
-          break;
-        }
-        case 'CSV': {
-          const analysis = await CSVImportService.analyzeFile(file);
-          result = await CSVImportService.importWithMapping(
-            file,
-            analysis.suggestedMapping,
-            {
-              encoding: options.encoding,
-              delimiter: options.delimiter,
-              skipFirstRow: options.skipFirstRow
-            }
-          );
-          break;
-        }
-        case 'Excel': {
-          const excelAnalysis = await CSVImportService.analyzeFile(file);
-          result = await CSVImportService.importWithMapping(
-            file,
-            excelAnalysis.suggestedMapping
-          );
-          break;
-        }
-        default: {
-          throw new Error(`Format ${session.format} non supporté`);
-        }
-      }
+      const result: ImportResult = await this.parseImport(
+        file,
+        session.format,
+        { encoding: options.encoding, delimiter: options.delimiter, skipFirstRow: options.skipFirstRow }
+      );
 
       onProgress?.(25, `${result.entries.length} écritures parsées`);
 
@@ -103,6 +166,7 @@ export class IntegratedAccountingService {
       }
 
       // PHASE 3: Validation
+      let validated: JournalEntryType[] = [];
       if (options.validateBeforeImport !== false) {
         onProgress?.(35, 'Validation des écritures...');
         
@@ -111,19 +175,17 @@ export class IntegratedAccountingService {
           companyId
         );
 
-        result = {
-          ...result,
-          entries: validation.valid,
-          errors: [...result.errors, ...validation.invalid.flatMap(inv => inv.errors)],
-          warnings: [...result.warnings, ...validation.warnings]
-        };
+        validated = validation.valid;
+        // Agréger erreurs/avertissements dans result
+        result.errors.push(...validation.invalid.flatMap(inv => inv.errors));
+        result.warnings.push(...validation.warnings);
       }
 
-      onProgress?.(60, `${result.entries.length} écritures validées`);
+      onProgress?.(60, `${validated.length} écritures validées`);
 
       // PHASE 4: Sauvegarde
       onProgress?.(65, 'Sauvegarde en base...');
-      const savedEntries = await this.saveJournalEntries(result.entries, journalId);
+      const savedEntries = await this.saveJournalEntries(validated, journalId);
       
       onProgress?.(85, `${savedEntries.length} écritures sauvegardées`);
 
@@ -137,13 +199,49 @@ export class IntegratedAccountingService {
 
       return {
         ...result,
-        entries: savedEntries,
         validRows: savedEntries.length
       };
 
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
+    } catch (error) {
+      const message = (error as { message?: string })?.message || 'inconnu';
       throw new Error(`Erreur import: ${message}`);
+    }
+  }
+
+  // Helper parsing
+  private static async parseImport(
+    file: File,
+    format: 'FEC' | 'CSV' | 'Excel',
+    options: { encoding?: string; delimiter?: string; skipFirstRow?: boolean }
+  ): Promise<ImportResult> {
+    switch (format) {
+      case 'FEC':
+        return FECParser.parseFEC(file, {
+          encoding: options.encoding,
+          skipFirstRow: options.skipFirstRow,
+          skipEmptyLines: true
+        });
+      case 'CSV': {
+        const analysis = await CSVImportService.analyzeFile(file);
+        return CSVImportService.importWithMapping(
+          file,
+          analysis.suggestedMapping,
+          {
+            encoding: options.encoding,
+            delimiter: options.delimiter,
+            skipFirstRow: options.skipFirstRow
+          }
+        );
+      }
+      case 'Excel': {
+        const excelAnalysis = await CSVImportService.analyzeFile(file);
+        return CSVImportService.importWithMapping(
+          file,
+          excelAnalysis.suggestedMapping
+        );
+      }
+      default:
+        throw new Error(`Format ${format} non supporté`);
     }
   }
 
@@ -162,29 +260,14 @@ export class IntegratedAccountingService {
   /**
    * Assure que tous les comptes nécessaires existent
    */
-  private static async ensureAccountsExist(
-    entries: Array<{ items?: Array<{ accountNumber?: string }>; accountNumber?: string }>,
-    companyId: string
-  ): Promise<void> {
+  private static async ensureAccountsExist(entries: FECEntry[], companyId: string): Promise<void> {
     const accountNumbers = new Set<string>();
-    
-    // Collecte tous les numéros de compte
-  entries.forEach(entry => {
-      if (entry.items) {
-    entry.items.forEach((item) => {
-          if (item.accountNumber) {
-            accountNumbers.add(item.accountNumber);
-          }
-        });
-      } else if (entry.accountNumber) {
-        accountNumbers.add(entry.accountNumber);
-      }
+    entries.forEach((entry) => {
+      if (entry.accountNumber) accountNumbers.add(entry.accountNumber);
     });
-
-    // Vérification et création des comptes manquants
-    for (const accountNumber of accountNumbers) {
-      await this.ensureAccountExists(accountNumber, companyId);
-    }
+    await Promise.all(
+      Array.from(accountNumbers).map((acc) => this.ensureAccountExists(acc, companyId))
+    );
   }
 
   /**
@@ -247,7 +330,7 @@ export class IntegratedAccountingService {
       '101': 'Capital',
       '106': 'Réserves',
       '110': 'Report à nouveau',
-  '120': 'Résultat de l\'exercice',
+  "120": "Résultat de l'exercice",
 
       // Classe 4 - Comptes de tiers
       '401': 'Fournisseurs',
@@ -263,7 +346,7 @@ export class IntegratedAccountingService {
       // Classe 6 - Comptes de charges
       '607': 'Achats de marchandises',
       '641': 'Salaires',
-  '661': 'Charges d\'intérêts',
+  "661": "Charges d'intérêts",
 
       // Classe 7 - Comptes de produits
       '707': 'Ventes de marchandises',
@@ -321,12 +404,9 @@ export class IntegratedAccountingService {
   /**
    * Sauvegarde les écritures en base
    */
-  private static async saveJournalEntries(entries: any[], journalId: string): Promise<any[]> {
-    const savedEntries: any[] = [];
-
-    for (const entry of entries) {
+  private static async saveJournalEntries(entries: JournalEntryType[], journalId: string): Promise<JournalEntryType[]> {
+    const tasks = entries.map(async (entry) => {
       try {
-        // Sauvegarde de l'écriture principale
         const { data: journalEntry, error: entryError } = await supabase
           .from('journal_entries')
           .insert({
@@ -345,8 +425,7 @@ export class IntegratedAccountingService {
           throw new Error(`Erreur sauvegarde écriture: ${entryError.message}`);
         }
 
-        // Sauvegarde des lignes d'écriture
-        const entryItems = entry.items?.map((item: any) => ({
+        const entryItems = entry.items.map((item) => ({
           journal_entry_id: journalEntry.id,
           account_id: item.accountId,
           debit_amount: item.debitAmount,
@@ -354,7 +433,7 @@ export class IntegratedAccountingService {
           description: item.description,
           auxiliary_account: item.auxiliaryAccount,
           letterage: item.letterage
-        })) || [];
+        }));
 
         if (entryItems.length > 0) {
           const { error: itemsError } = await supabase
@@ -366,18 +445,14 @@ export class IntegratedAccountingService {
           }
         }
 
-        savedEntries.push({
-          ...entry,
-          id: journalEntry.id
-        });
-
+        return { ...entry, id: journalEntry.id } as JournalEntryType;
       } catch (error) {
         console.error(`Erreur sauvegarde écriture ${entry.entryNumber}:`, error);
-        // Continue avec les autres écritures
+        return entry; // fallback
       }
-    }
+    });
 
-    return savedEntries;
+    return Promise.all(tasks);
   }
 
   /**
@@ -385,7 +460,7 @@ export class IntegratedAccountingService {
    */
   static async exportFEC(companyId: string, year: number): Promise<string> {
     // Récupération des écritures de l'année
-  const { data: entries, error } = await supabase
+    const { data: entries, error } = await supabase
       .from('journal_entry_items')
       .select(`
         debit_amount,
@@ -408,81 +483,14 @@ export class IntegratedAccountingService {
       .order('journal_entries.date');
 
     if (error || !entries) {
-      throw new Error(`Erreur export FEC: ${error?.message}`);
+      const message = (error as { message?: string })?.message || 'inconnu';
+      throw new Error(`Erreur export FEC: ${message}`);
     }
 
-    // Génération du contenu FEC
-    const fecLines: string[] = [];
-    
-    // En-tête FEC
-    fecLines.push([
-      'JournalCode',
-      'JournalLib',
-      'EcritureNum',
-      'EcritureDate',
-      'CompteNum',
-      'CompteLib',
-      'CompAuxNum',
-      'CompAuxLib',
-      'PieceRef',
-      'PieceDate',
-      'EcritureLib',
-      'Debit',
-      'Credit',
-      'EcritureLet',
-      'DateLet',
-      'ValidDate',
-      'Montantdevise',
-      'Idevise'
-    ].join('|'));
-
-    // Données
-    type Journal = { code: string; name: string } | null;
-    type JournalEntry = { entry_number: string; date: string; reference?: string | null; description?: string | null; journals: Journal | Journal[] | null } | null;
-    type AccountRow = { number?: string; name?: string } | null;
-    type ItemRow = {
-      debit_amount?: number;
-      credit_amount?: number;
-      description?: string | null;
-      auxiliary_account?: string | null;
-      letterage?: string | null;
-      accounts?: AccountRow | AccountRow[] | null;
-      journal_entries?: JournalEntry | JournalEntry[] | null;
-    };
-
-    (entries as ItemRow[]).forEach((item) => {
-      const jeRaw = Array.isArray(item.journal_entries) ? item.journal_entries[0] : item.journal_entries;
-      const journalRaw = jeRaw?.journals;
-      const journal = Array.isArray(journalRaw) ? journalRaw[0] : journalRaw;
-      const accountRaw = item.accounts;
-      const account = Array.isArray(accountRaw) ? accountRaw[0] : accountRaw;
-      const entry = jeRaw;
-      
-      const fecLine = [
-        journal?.code || '',
-        journal?.name || '',
-        entry?.entry_number || '',
-        this.formatFECDate(entry?.date || new Date().toISOString()),
-        account?.number || '',
-        account?.name || '',
-        item.auxiliary_account || '',
-        '', // CompAuxLib - à implémenter si nécessaire
-        entry?.reference || '',
-        this.formatFECDate(entry?.date || new Date().toISOString()), // PieceDate = EcritureDate par défaut
-        item.description || entry?.description || '',
-        this.formatFECAmount(item.debit_amount ?? 0),
-        this.formatFECAmount(item.credit_amount ?? 0),
-        item.letterage || '',
-        '', // DateLet - à implémenter si nécessaire
-        this.formatFECDate(entry?.date || new Date().toISOString()), // ValidDate
-        '', // Montantdevise - à implémenter si nécessaire
-        ''  // Idevise - à implémenter si nécessaire
-      ].join('|');
-      
-      fecLines.push(fecLine);
-    });
-
-    return fecLines.join('\\n');
+  // Génération du contenu FEC
+  const header = this.buildFECHeader();
+  const body = (entries as unknown as FECQueryRow[]).map((row) => this.mapRowToFECLine(row));
+  return [header, ...body].join('\n');
   }
 
   /**
@@ -509,9 +517,9 @@ export class IntegratedAccountingService {
   static async generateEntriesFromTemplate(
     companyId: string,
     templateId: string,
-    variables: Record<string, any>,
+    variables: Record<string, unknown>,
     journalId: string
-  ): Promise<any> {
+  ): Promise<JournalEntryType> {
     try {
       const entry = await EntryTemplatesService.applyTemplate(
         templateId,
@@ -531,12 +539,14 @@ export class IntegratedAccountingService {
       }
 
       // Sauvegarde
-      const savedEntries = await this.saveJournalEntries([validation.validatedEntry], journalId);
-      
-      return savedEntries[0];
+  if (!validation.validatedEntry) {
+    throw new Error('Validation échoué: écriture invalide');
+  }
+  const savedEntries = await this.saveJournalEntries([validation.validatedEntry], journalId);
+  return savedEntries[0];
 
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
+    } catch (error) {
+      const message = (error as { message?: string })?.message || 'inconnu';
       throw new Error(`Erreur génération template: ${message}`);
     }
   }
@@ -549,7 +559,7 @@ export class IntegratedAccountingService {
     startDate: string,
     endDate: string,
     journalId: string
-  ): Promise<any> {
+  ): Promise<{ declaration: unknown; entry: JournalEntryType }> {
     try {
       // Calcul de la déclaration
       const declaration = await VATCalculationService.calculateVATDeclaration({
@@ -572,15 +582,18 @@ export class IntegratedAccountingService {
         throw new Error(`Validation TVA échouée: ${validation.errors.map(e => e.message).join(', ')}`);
       }
 
-      const savedEntries = await this.saveJournalEntries([validation.validatedEntry], journalId);
+  if (!validation.validatedEntry) {
+    throw new Error('Validation TVA échouée: écriture invalide');
+  }
+  const savedEntries = await this.saveJournalEntries([validation.validatedEntry], journalId);
 
       return {
         declaration,
         entry: savedEntries[0]
       };
 
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
+    } catch (error) {
+      const message = (error as { message?: string })?.message || 'inconnu';
       throw new Error(`Erreur déclaration TVA: ${message}`);
     }
   }

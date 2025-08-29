@@ -1,1 +1,0 @@
-import React from 'react'; import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; const MarketplaceItemDetail: React.FC = () => { return ( <Card> <CardHeader> <CardTitle>MarketplaceItemDetail</CardTitle> </CardHeader> <CardContent> <p>Composant MarketplaceItemDetail en développement.</p> </CardContent> </Card> ); }; export default MarketplaceItemDetail;

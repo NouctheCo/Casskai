@@ -13,7 +13,7 @@ import {
   CurrencyCode,
   UnitCode,
   DocumentTypeCode,
-  EInvoicingError 
+  EInvoicingError
 } from '@/types/einvoicing.types';
 
 interface CassKaiInvoice {
@@ -59,43 +59,63 @@ interface CassKaiInvoice {
   }>;
 }
 
+// Constant lookups for mapping and validation
+const VALID_CURRENCIES: ReadonlyArray<CurrencyCode> = [
+  'EUR', 'USD', 'GBP', 'XOF', 'XAF', 'CAD'
+] as const;
+
+const VALID_COUNTRY_CODES: ReadonlyArray<CountryCode> = [
+  'FR', 'BE', 'BJ', 'CI', 'BF', 'ML', 'SN', 'TG', 'CM', 'GA'
+] as const;
+
+const COUNTRY_MAP: Record<string, CountryCode> = {
+  'FRANCE': 'FR',
+  'BELGIUM': 'BE',
+  'BENIN': 'BJ',
+  "COTE D'IVOIRE": 'CI',
+  'IVORY COAST': 'CI',
+  'BURKINA FASO': 'BF',
+  'MALI': 'ML',
+  'SENEGAL': 'SN',
+  'TOGO': 'TG',
+  'CAMEROON': 'CM',
+  'GABON': 'GA'
+};
+
 export class InvoiceToEN16931Mapper {
   /**
    * Map CassKai invoice to EN 16931 format
    */
   async mapInvoiceToEN16931(invoice: CassKaiInvoice): Promise<EN16931Invoice> {
     try {
-  console.warn(`🔄 Mapping invoice ${invoice.invoice_number} to EN16931 format`);
+      // Préparer en parallèle les sections indépendantes
+      const [seller, buyer, lines, totals, payment_terms, references] = await Promise.all([
+        this.mapSellerParty(invoice.companies),
+        this.mapBuyerParty(invoice.third_parties),
+        this.mapInvoiceLines(invoice.invoice_lines),
+        this.calculateTotals(invoice),
+        this.mapPaymentTerms(invoice),
+        this.mapReferences(invoice),
+      ]);
 
-      // Map core document information
+      // Assembler le document EN16931
       const en16931Invoice: EN16931Invoice = {
         invoice_number: invoice.invoice_number,
         issue_date: this.formatDate(invoice.issue_date),
         type_code: this.determineDocumentType(invoice),
         currency_code: this.mapCurrencyCode(invoice.currency),
-        
-        // Map parties
-        seller: await this.mapSellerParty(invoice.companies),
-        buyer: await this.mapBuyerParty(invoice.third_parties),
-        
-        // Map lines
-        lines: await this.mapInvoiceLines(invoice.invoice_lines),
-        
-        // Calculate totals
-        totals: await this.calculateTotals(invoice),
-        
-        // Map payment terms
-        payment_terms: await this.mapPaymentTerms(invoice),
-        
-        // Map references and notes
-        references: await this.mapReferences(invoice),
-        notes: invoice.notes ? [invoice.notes] : undefined
+        seller,
+        buyer,
+        lines,
+        totals,
+        payment_terms,
+        references,
+        notes: invoice.notes ? [invoice.notes] : undefined,
       };
 
       // Validate the mapped invoice
       await this.validateMappedInvoice(en16931Invoice);
 
-  console.warn(`✅ Invoice ${invoice.invoice_number} mapped successfully to EN16931`);
       return en16931Invoice;
 
     } catch (error) {
@@ -304,14 +324,9 @@ export class InvoiceToEN16931Mapper {
 
   private mapCurrencyCode(currency: string): CurrencyCode {
     const normalizedCurrency = currency?.toUpperCase() || 'EUR';
-    
-    // Map common currency codes
-    const validCurrencies: CurrencyCode[] = ['EUR', 'USD', 'GBP', 'XOF', 'XAF', 'CAD'];
-    
-    if (validCurrencies.includes(normalizedCurrency as CurrencyCode)) {
+    if (VALID_CURRENCIES.includes(normalizedCurrency as CurrencyCode)) {
       return normalizedCurrency as CurrencyCode;
     }
-    
     console.warn(`Unknown currency code: ${currency}, defaulting to EUR`);
     return 'EUR';
   }
@@ -320,31 +335,14 @@ export class InvoiceToEN16931Mapper {
     if (!country) return 'FR';
     
     const normalizedCountry = country.toUpperCase();
-    
-    // Common country mappings
-    const countryMap: Record<string, CountryCode> = {
-      'FRANCE': 'FR',
-      'BELGIUM': 'BE',
-      'BENIN': 'BJ',
-      'COTE D\'IVOIRE': 'CI',
-      'IVORY COAST': 'CI',
-      'BURKINA FASO': 'BF',
-      'MALI': 'ML',
-      'SENEGAL': 'SN',
-      'TOGO': 'TG',
-      'CAMEROON': 'CM',
-      'GABON': 'GA'
-    };
-
-    // Check if it's already a 2-letter code
-    const validCodes: CountryCode[] = ['FR', 'BE', 'BJ', 'CI', 'BF', 'ML', 'SN', 'TG', 'CM', 'GA'];
-    if (validCodes.includes(normalizedCountry as CountryCode)) {
+    // Déjà un code à 2 lettres
+    if (VALID_COUNTRY_CODES.includes(normalizedCountry as CountryCode)) {
       return normalizedCountry as CountryCode;
     }
 
     // Try to map from country name
-    if (countryMap[normalizedCountry]) {
-      return countryMap[normalizedCountry];
+    if (COUNTRY_MAP[normalizedCountry]) {
+      return COUNTRY_MAP[normalizedCountry];
     }
 
     console.warn(`Unknown country: ${country}, defaulting to FR`);

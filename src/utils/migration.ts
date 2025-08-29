@@ -14,18 +14,15 @@ export class ConfigMigration {
    */
   async migrateFromHardcodedConfig(): Promise<boolean> {
     try {
-  console.warn('🔄 Début de la migration de configuration...');
-
       // Vérifier si une configuration existe déjà
       if (this.configService.isConfigured()) {
-  console.warn('✅ Configuration dynamique déjà présente, migration non nécessaire');
         return true;
       }
 
       // Récupérer les variables d'environnement existantes
       const existingConfig = this.extractEnvConfig();
       if (!existingConfig) {
-  console.warn('ℹ️  Aucune configuration existante trouvée, configuration manuelle requise');
+        console.warn('ℹ️  Aucune configuration existante trouvée, configuration manuelle requise');
         return false;
       }
 
@@ -33,7 +30,7 @@ export class ConfigMigration {
       const newConfig = await this.createNewConfig(existingConfig);
       
       // Valider la configuration
-  const isValid = await this.configService.validateSupabaseConfig();
+      const isValid = await this.configService.validateSupabaseConfig();
 
       if (!isValid) {
         console.error('❌ Configuration Supabase invalide');
@@ -43,7 +40,6 @@ export class ConfigMigration {
       // Sauvegarder la nouvelle configuration
       await this.configService.saveConfig(newConfig);
       
-  console.warn('✅ Migration terminée avec succès!');
       return true;
 
     } catch (error) {
@@ -110,7 +106,6 @@ export class ConfigMigration {
     oldKeys.forEach(key => {
       if (localStorage.getItem(key)) {
         localStorage.removeItem(key);
-  console.warn(`🧹 Suppression de l'ancienne clé: ${key}`);
       }
     });
   }
@@ -124,41 +119,41 @@ export class ConfigMigration {
     suggestedActions: string[];
   }> {
     try {
-      // ✅ CORRECTION: Vérification du client
       if (!supabase) {
         return {
           isCompatible: false,
           missingTables: [],
-          suggestedActions: ['Vérifier la connexion à la base de données']
+          suggestedActions: ['Vérifier la connexion à la base de données'],
         };
       }
 
-      const missingTables: string[] = [];
-      const suggestedActions: string[] = [];
-
-      // Tables requises
       const requiredTables = [
         'companies',
         'user_profiles',
         'accounts',
         'journal_entries',
-        'journal_lines'
+        'journal_lines',
       ];
 
-      // Vérifier chaque table
-      for (const table of requiredTables) {
-        try {
-          // eslint-disable-next-line no-await-in-loop
-          const { error } = await supabase.from(table).select('*').limit(1);
-          if (error && error.code === 'PGRST116') {
-            missingTables.push(table);
+      const tableChecks = await Promise.all(
+        requiredTables.map(async (table) => {
+          try {
+            const { error } = await supabase.from(table).select('*').limit(1);
+            if (error && error.code === 'PGRST116') {
+              return table; // La table est manquante
+            }
+            return null; // La table existe
+          } catch (_error) {
+            return table; // La table est manquante
           }
-        } catch {
-          missingTables.push(table);
-        }
-      }
+        })
+      );
 
-      // Générer les actions suggérées
+      const missingTables = tableChecks.filter(
+        (table): table is string => table !== null
+      );
+      const suggestedActions: string[] = [];
+
       if (missingTables.length > 0) {
         suggestedActions.push('Exécuter les migrations de base de données');
         suggestedActions.push('Initialiser le schéma de base');
@@ -170,14 +165,13 @@ export class ConfigMigration {
       return {
         isCompatible: missingTables.length === 0,
         missingTables,
-        suggestedActions
+        suggestedActions,
       };
-
-  } catch {
+    } catch (_error) {
       return {
         isCompatible: false,
         missingTables: [],
-        suggestedActions: ['Vérifier la connexion à la base de données']
+        suggestedActions: ['Vérifier la connexion à la base de données'],
       };
     }
   }

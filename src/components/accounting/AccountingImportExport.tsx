@@ -112,7 +112,11 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
       const loadedTemplates = await EntryTemplatesService.getAllTemplates(companyId);
       setTemplates(loadedTemplates);
     } catch (error) {
-      onError?.(`Erreur chargement templates: ${error.message}`);
+      if (error instanceof Error) {
+        onError?.(`Erreur chargement templates: ${error.message}`);
+      } else {
+        onError?.(`Erreur chargement templates: ${String(error)}`);
+      }
     }
   };
 
@@ -146,7 +150,11 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
       setCsvMapping(analysis.suggestedMapping || []);
       
     } catch (error) {
-      onError?.(`Erreur analyse fichier: ${error.message}`);
+      if (error instanceof Error) {
+        onError?.(`Erreur analyse fichier: ${error.message}`);
+      } else {
+        onError?.(`Erreur analyse fichier: ${String(error)}`);
+      }
     }
   }, [importForm, onError]);
 
@@ -206,7 +214,7 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
           companyId
         );
 
-        result.entries = validation.valid;
+        // result.entries = validation.valid;
         result.errors.push(...validation.invalid.flatMap(inv => inv.errors));
         result.warnings.push(...validation.warnings);
       }
@@ -238,7 +246,11 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
 
     } catch (error) {
       setImportSession(prev => prev ? { ...prev, status: 'failed' } : null);
-      onError?.(`Erreur import: ${error.message}`);
+      if (error instanceof Error) {
+        onError?.(`Erreur import: ${error.message}`);
+      } else {
+        onError?.(`Erreur import: ${String(error)}`);
+      }
     }
   };
 
@@ -253,14 +265,18 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
       );
 
       // TODO: Sauvegarde de l'écriture générée
-      console.log('Écriture générée:', entry);
+      console.warn('Écriture générée:', entry);
       
       if (data.generateRecurring) {
         await EntryTemplatesService.processRecurringEntries(companyId);
       }
 
     } catch (error) {
-      onError?.(`Erreur application template: ${error.message}`);
+      if (error instanceof Error) {
+        onError?.(`Erreur application template: ${error.message}`);
+      } else {
+        onError?.(`Erreur application template: ${String(error)}`);
+      }
     }
   };
 
@@ -268,9 +284,13 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
   const handleAutoLetterage = async () => {
     try {
       const result = await AutomaticLetterageService.performAutoLetterage(companyId);
-      console.log('Résultat lettrage:', result);
+      console.warn('Résultat lettrage:', result);
     } catch (error) {
-      onError?.(`Erreur lettrage: ${error.message}`);
+      if (error instanceof Error) {
+        onError?.(`Erreur lettrage: ${error.message}`);
+      } else {
+        onError?.(`Erreur lettrage: ${String(error)}`);
+      }
     }
   };
 
@@ -492,7 +512,7 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            Templates d'écritures
+            Templates d\'écritures
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -609,7 +629,7 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Import/Export Comptable</h1>
         <p className="text-gray-600">
-          Gestion avancée des imports de fichiers comptables, templates d'écritures et lettrage automatique.
+          Gestion avancée des imports de fichiers comptables, templates d\'écritures et lettrage automatique.
         </p>
       </div>
 
@@ -634,7 +654,7 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600">Fonctionnalité d'export à implémenter...</p>
+              <p className="text-gray-600">Fonctionnalité d\'export à implémenter...</p>
             </CardContent>
           </Card>
         </TabsContent>

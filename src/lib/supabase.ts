@@ -186,6 +186,357 @@ export interface Database {
           updated_at?: string;
         };
       };
+      invoices: {
+        Row: {
+          id: string;
+          company_id: string;
+          third_party_id: string;
+          invoice_number: string;
+          type: 'sale' | 'purchase' | 'credit_note' | 'debit_note';
+          status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+          issue_date: string;
+          due_date: string;
+          subtotal: number;
+          tax_amount: number;
+          total_amount: number;
+          paid_amount: number;
+          currency: string;
+          notes?: string;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          third_party_id: string;
+          invoice_number: string;
+          type?: 'sale' | 'purchase' | 'credit_note' | 'debit_note';
+          status?: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+          issue_date: string;
+          due_date: string;
+          subtotal?: number;
+          tax_amount?: number;
+          total_amount: number;
+          paid_amount?: number;
+          currency?: string;
+          notes?: string;
+          created_by: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          third_party_id?: string;
+          invoice_number?: string;
+          type?: 'sale' | 'purchase' | 'credit_note' | 'debit_note';
+          status?: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+          issue_date?: string;
+          due_date?: string;
+          subtotal?: number;
+          tax_amount?: number;
+          total_amount?: number;
+          paid_amount?: number;
+          currency?: string;
+          notes?: string;
+          updated_at?: string;
+        };
+      };
+      invoice_lines: {
+        Row: {
+          id: string;
+          company_id: string;
+          invoice_id: string;
+          description: string;
+          quantity: number;
+          unit_price: number;
+          discount_percent?: number;
+          tax_rate?: number;
+          line_total: number;
+          account_id?: string;
+          line_order: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          invoice_id: string;
+          description: string;
+          quantity: number;
+          unit_price: number;
+          discount_percent?: number;
+          tax_rate?: number;
+          line_total: number;
+          account_id?: string;
+          line_order?: number;
+          created_at?: string;
+        };
+        Update: {
+          description?: string;
+          quantity?: number;
+          unit_price?: number;
+          discount_percent?: number;
+          tax_rate?: number;
+          line_total?: number;
+          account_id?: string;
+          line_order?: number;
+        };
+      };
+      payments: {
+        Row: {
+          id: string;
+          company_id: string;
+          invoice_id?: string;
+          third_party_id?: string;
+          reference: string;
+          amount: number;
+          payment_date: string;
+          payment_method: 'card' | 'bank_transfer' | 'cash' | 'check' | 'other';
+          status: 'completed' | 'pending' | 'failed' | 'cancelled';
+          type: 'income' | 'expense';
+          description?: string;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          invoice_id?: string;
+          third_party_id?: string;
+          reference: string;
+          amount: number;
+          payment_date: string;
+          payment_method: 'card' | 'bank_transfer' | 'cash' | 'check' | 'other';
+          status?: 'completed' | 'pending' | 'failed' | 'cancelled';
+          type: 'income' | 'expense';
+          description?: string;
+          created_by: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          invoice_id?: string;
+          third_party_id?: string;
+          reference?: string;
+          amount?: number;
+          payment_date?: string;
+          payment_method?: 'card' | 'bank_transfer' | 'cash' | 'check' | 'other';
+          status?: 'completed' | 'pending' | 'failed' | 'cancelled';
+          type?: 'income' | 'expense';
+          description?: string;
+          updated_at?: string;
+        };
+      };
+      bank_transactions: {
+        Row: {
+          id: string;
+          bank_account_id: string;
+          company_id: string;
+          transaction_date: string;
+          value_date?: string;
+          amount: number;
+          currency: string;
+          description: string;
+          reference?: string;
+          category?: string;
+          reconciled: boolean;
+          imported_from?: 'csv' | 'ofx' | 'qif' | 'api';
+          raw_data?: any;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          bank_account_id: string;
+          company_id: string;
+          transaction_date: string;
+          value_date?: string;
+          amount: number;
+          currency: string;
+          description: string;
+          reference?: string;
+          category?: string;
+          reconciled?: boolean;
+          imported_from?: 'csv' | 'ofx' | 'qif' | 'api';
+          raw_data?: any;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          transaction_date?: string;
+          value_date?: string;
+          amount?: number;
+          currency?: string;
+          description?: string;
+          reference?: string;
+          category?: string;
+          reconciled?: boolean;
+          updated_at?: string;
+        };
+      };
+      bank_accounts: {
+        Row: {
+          id: string;
+          company_id: string;
+          bank_name: string;
+          account_name: string;
+          account_number: string;
+          iban?: string;
+          bic?: string;
+          currency: string;
+          balance: number;
+          account_type: 'checking' | 'savings' | 'business' | 'other';
+          status: 'active' | 'closed' | 'suspended';
+          last_import?: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          bank_name: string;
+          account_name: string;
+          account_number: string;
+          iban?: string;
+          bic?: string;
+          currency: string;
+          balance?: number;
+          account_type: 'checking' | 'savings' | 'business' | 'other';
+          status?: 'active' | 'closed' | 'suspended';
+          last_import?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          bank_name?: string;
+          account_name?: string;
+          account_number?: string;
+          iban?: string;
+          bic?: string;
+          currency?: string;
+          balance?: number;
+          account_type?: 'checking' | 'savings' | 'business' | 'other';
+          status?: 'active' | 'closed' | 'suspended';
+          last_import?: string;
+          updated_at?: string;
+        };
+      };
+      accounting_entries: {
+        Row: {
+          id: string;
+          company_id: string;
+          journal_id: string;
+          account_id: string;
+          date: string;
+          debit: number;
+          credit: number;
+          description: string;
+          reference?: string;
+          reconciled: boolean;
+          bank_transaction_id?: string;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          journal_id: string;
+          account_id: string;
+          date: string;
+          debit?: number;
+          credit?: number;
+          description: string;
+          reference?: string;
+          reconciled?: boolean;
+          bank_transaction_id?: string;
+          created_by: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          journal_id?: string;
+          account_id?: string;
+          date?: string;
+          debit?: number;
+          credit?: number;
+          description?: string;
+          reference?: string;
+          reconciled?: boolean;
+          bank_transaction_id?: string;
+          updated_at?: string;
+        };
+      };
+      reconciliation_rules: {
+        Row: {
+          id: string;
+          company_id: string;
+          name: string;
+          description?: string;
+          conditions: any;
+          actions: any;
+          priority: number;
+          active: boolean;
+          auto_apply: boolean;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          name: string;
+          description?: string;
+          conditions: any;
+          actions: any;
+          priority?: number;
+          active?: boolean;
+          auto_apply?: boolean;
+          created_by: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          name?: string;
+          description?: string;
+          conditions?: any;
+          actions?: any;
+          priority?: number;
+          active?: boolean;
+          auto_apply?: boolean;
+          updated_at?: string;
+        };
+      };
+      reconciliation_log: {
+        Row: {
+          id: string;
+          company_id: string;
+          bank_transaction_id: string;
+          accounting_entry_id?: string;
+          action: 'match' | 'unmatch' | 'ignore';
+          confidence?: number;
+          match_reason?: string;
+          user_id?: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          bank_transaction_id: string;
+          accounting_entry_id?: string;
+          action: 'match' | 'unmatch' | 'ignore';
+          confidence?: number;
+          match_reason?: string;
+          user_id?: string;
+          created_at?: string;
+        };
+        Update: {
+          accounting_entry_id?: string;
+          action?: 'match' | 'unmatch' | 'ignore';
+          confidence?: number;
+          match_reason?: string;
+        };
+      };
     };
   };
 }
@@ -206,11 +557,14 @@ export const handleSupabaseError = (error: any) => {
 };
 
 // Helper function to get current user's companies
-export const getUserCompanies = async () => {
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  if (!user) {
-    throw new Error('User not authenticated');
+export const getUserCompanies = async (userId?: string) => {
+  let resolvedUserId = userId;
+  if (!resolvedUserId) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+    resolvedUserId = user.id;
   }
 
   const { data, error } = await supabase
@@ -227,7 +581,7 @@ export const getUserCompanies = async () => {
         is_active
       )
     `)
-    .eq('user_id', user.id);
+  .eq('user_id', resolvedUserId);
 
   if (error) {
     throw new Error(handleSupabaseError(error));
@@ -237,8 +591,8 @@ export const getUserCompanies = async () => {
 };
 
 // Helper function to get current user's default company
-export const getCurrentCompany = async () => {
-  const companies = await getUserCompanies();
+export const getCurrentCompany = async (userId?: string) => {
+  const companies = await getUserCompanies(userId);
   const defaultCompany = companies.find(uc => uc.is_default);
   return defaultCompany?.companies || companies[0]?.companies || null;
 };

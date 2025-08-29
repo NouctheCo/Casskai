@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
-import { ALL_MODULES } from '@/contexts/ModulesContext';
+import { ALL_MODULES } from '@/contexts/ModulesContext.jsx';
 
 // Types
 interface CompanyData {
@@ -63,7 +63,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     
     // Année fiscale
     fiscalYearStart: 1,
-  fiscalYearEnd: '12',
+    fiscalYearEnd: '12-31',
     
     // Capital
     shareCapital: '',
@@ -76,7 +76,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   // Initialize modules state once - start with empty selection for onboarding
   const [modules, setModules] = useState<ModulesState>(() => {
     const initial: ModulesState = {};
-    ALL_MODULES.forEach((mod: { key: string; isGlobal?: boolean }) => {
+    ALL_MODULES.forEach(mod => {
       if (!mod.isGlobal) {
         // Start with false for onboarding, user will choose
         initial[mod.key] = false;
@@ -87,8 +87,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   // Memoize navigation functions to prevent unnecessary re-renders
   const nextStep = useCallback(() => {
-  // Allow navigating up to step 5 (CompleteStep) so finalization runs
-  setCurrentStep(prev => Math.min(prev + 1, 5));
+    setCurrentStep(prev => Math.min(prev + 1, 5)); // Correction: 5 étapes maintenant
   }, []);
 
   const prevStep = useCallback(() => {
@@ -96,8 +95,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   }, []);
 
   const goToStep = useCallback((step: number) => {
-  // Clamp between 1 and 5 (inclusive)
-  setCurrentStep(Math.max(1, Math.min(step, 5)));
+    setCurrentStep(Math.max(1, Math.min(step, 5))); // Correction: 5 étapes maintenant
   }, []);
 
   // Memoize the context value to prevent unnecessary re-renders

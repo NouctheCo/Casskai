@@ -388,16 +388,16 @@ export function getAfricanCountries(): MarketPricing[] {
 export function getDefaultCountryCode(browserLanguage: string): string {
   const lang = browserLanguage.toLowerCase();
   
-  // Priorité aux marchés africains francophones
+  // France par défaut pour afficher les prix en euros
   if (lang.includes('fr')) {
-    return 'fr-CI'; // Côte d'Ivoire comme hub économique
+    return 'fr'; // France pour les prix en euros
   }
   
-  // Marchés anglophones africains
+  // Marchés anglophones
   if (lang.includes('en')) {
-    return 'en-NG'; // Nigeria comme plus grand marché anglophone africain
+    return 'en'; // États-Unis par défaut
   }
   
-  // Par défaut
-  return 'fr-CI';
+  // Par défaut France (euros)
+  return 'fr';
 }

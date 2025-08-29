@@ -181,26 +181,40 @@ export class CurrencyService {
   private configService = ConfigService.getInstance();
   private lastUpdate: Date | null = null;
 
-  // Providers d'APIs de taux de change
+  // Providers d'APIs de taux de change - Priorité pour taux critiques
   private exchangeProviders = [
     {
       name: 'ExchangeRate-API',
       url: 'https://api.exchangerate-api.com/v4/latest/',
       priority: 1,
-      isActive: true
+      isActive: true,
+      supportsCritical: true, // EUR, USD, XOF, XAF
+      dailyLimit: 1500 // Gratuit
     },
     {
       name: 'Fixer.io',
       url: 'https://api.fixer.io/latest',
       priority: 2,
-      isActive: true
+      isActive: false, // Nécessite clé API
+      supportsCritical: true,
+      dailyLimit: 100 // Plan gratuit limité
     }
+  ];
+
+  // Taux critiques nécessitant une mise à jour quotidienne
+  private criticalCurrencyPairs = [
+    'EUR-USD', 'USD-EUR', // USD/EUR (volume mondial)
+    'EUR-XOF', 'XOF-EUR', // CFA BCEAO (déjà fixe mais validation)
+    'EUR-XAF', 'XAF-EUR', // CFA BEAC (déjà fixe mais validation)
+    'USD-XOF', 'XOF-USD', // USD vers devises africaines
+    'USD-XAF', 'XAF-USD'
   ];
   setDefaultCurrency: any;
 
   constructor() {
     this.initializeCurrencies();
     this.initializeFixedRates();
+    this.startCriticalRatesUpdater(); // Démarrer la mise à jour automatique
   }
 
   static getInstance(): CurrencyService {
@@ -218,12 +232,13 @@ export class CurrencyService {
   }
 
   private initializeFixedRates(): void {
-    // Taux fixes (XOF/EUR, XAF/EUR, etc.)
+    // Taux fixes (XOF/EUR, XAF/EUR - taux officiels BCEAO/BEAC)
     const fixedRates = [
+      // XOF ↔ EUR (Franc CFA BCEAO - Taux fixe officiel)
       {
         from: 'XOF',
         to: 'EUR',
-        rate: 0.001524, // 1 XOF = 0.001524 EUR
+        rate: 0.001524, // 1 XOF = 0.001524 EUR (655.957 XOF = 1 EUR)
         lastUpdated: new Date(),
         source: 'BCEAO_FIXED',
         is_fixed: true
@@ -231,15 +246,16 @@ export class CurrencyService {
       {
         from: 'EUR',
         to: 'XOF',
-        rate: 655.957, // 1 EUR = 655.957 XOF
+        rate: 655.957, // 1 EUR = 655.957 XOF (taux fixe officiel)
         lastUpdated: new Date(),
         source: 'BCEAO_FIXED',
         is_fixed: true
       },
+      // XAF ↔ EUR (Franc CFA BEAC - Taux fixe officiel)
       {
         from: 'XAF',
         to: 'EUR',
-        rate: 0.001524, // 1 XAF = 0.001524 EUR
+        rate: 0.001524, // 1 XAF = 0.001524 EUR (655.957 XAF = 1 EUR)
         lastUpdated: new Date(),
         source: 'BEAC_FIXED',
         is_fixed: true
@@ -247,7 +263,7 @@ export class CurrencyService {
       {
         from: 'EUR',
         to: 'XAF',
-        rate: 655.957, // 1 EUR = 655.957 XAF
+        rate: 655.957, // 1 EUR = 655.957 XAF (taux fixe officiel)
         lastUpdated: new Date(),
         source: 'BEAC_FIXED',
         is_fixed: true
@@ -366,31 +382,37 @@ export class CurrencyService {
     return amount; // Fallback
   }
 
-  // Obtenir un taux de change (avec cache et APIs)
+  // Obtenir un taux de change (avec cache et APIs) - Version optimisée pour taux critiques
   async getExchangeRate(fromCurrency: string, toCurrency: string): Promise<number> {
     const key = `${fromCurrency}-${toCurrency}`;
     
-    // Vérifier le cache local
+    // 1. PRIORITÉ : Vérifier les taux fixes d'abord (XOF/XAF ↔ EUR)
     const cachedRate = this.exchangeRates.get(key);
-    if (cachedRate && this.isRateValid(cachedRate)) {
+    if (cachedRate && cachedRate.source?.includes('FIXED')) {
+      return cachedRate.rate; // Les taux fixes sont toujours valides
+    }
+    
+    // 2. Vérifier le cache local pour les taux critiques (validation plus stricte)
+    if (cachedRate && this.isRateValid(cachedRate, this.isCriticalPair(key))) {
       return cachedRate.rate;
     }
 
-    // Vérifier le taux inverse
+    // 3. Vérifier le taux inverse
     const inverseKey = `${toCurrency}-${fromCurrency}`;
     const inverseRate = this.exchangeRates.get(inverseKey);
-    if (inverseRate && this.isRateValid(inverseRate)) {
+    if (inverseRate && this.isRateValid(inverseRate, this.isCriticalPair(inverseKey))) {
       const rate = 1 / inverseRate.rate;
       this.exchangeRates.set(key, {
         from: fromCurrency,
         to: toCurrency,
         rate,
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
+        source: `CALCULATED_FROM_${inverseRate.source}`
       });
       return rate;
     }
 
-    // Récupérer depuis les APIs externes
+    // 4. Récupérer depuis les APIs externes (priorité aux taux critiques)
     try {
       const newRate = await this.fetchExchangeRateFromAPI(fromCurrency, toCurrency);
       this.exchangeRates.set(key, newRate);
@@ -404,7 +426,7 @@ export class CurrencyService {
       
       return newRate.rate;
     } catch (error) {
-      console.error('Impossible de récupérer le taux de change:', error);
+      console.error(`❌ Impossible de récupérer le taux ${fromCurrency}/${toCurrency}:`, error);
       throw new Error(`Taux de change indisponible pour ${fromCurrency}/${toCurrency}`);
     }
   }
@@ -497,17 +519,131 @@ export class CurrencyService {
     };
   }
 
-  private isRateValid(rate: ExchangeRate): boolean {
+  private isRateValid(rate: ExchangeRate, isCritical: boolean = false): boolean {
     const now = new Date();
     const rateAge = now.getTime() - rate.lastUpdated.getTime();
-    const maxAge = 24 * 60 * 60 * 1000; // 24 heures
     
     // Les taux fixes sont toujours valides
     if (rate.source?.includes('FIXED')) {
       return true;
     }
     
+    // Taux critiques : mise à jour plus fréquente (6 heures)
+    if (isCritical) {
+      const maxAge = 6 * 60 * 60 * 1000; // 6 heures
+      return rateAge < maxAge;
+    }
+    
+    // Autres devises : 24 heures
+    const maxAge = 24 * 60 * 60 * 1000;
     return rateAge < maxAge;
+  }
+
+  private isCriticalPair(currencyPair: string): boolean {
+    return this.criticalCurrencyPairs.includes(currencyPair);
+  }
+
+  // Méthode de mise à jour automatique des taux critiques
+  private startCriticalRatesUpdater(): void {
+    // Mise à jour immédiate
+    this.updateCriticalRates().catch(error => 
+      console.warn('Erreur mise à jour initiale taux critiques:', error)
+    );
+    
+    // Mise à jour toutes les 6 heures
+    setInterval(() => {
+      this.updateCriticalRates().catch(error =>
+        console.warn('Erreur mise à jour automatique taux critiques:', error)
+      );
+    }, 6 * 60 * 60 * 1000); // 6 heures
+  }
+
+  // Mise à jour spécifique des taux critiques
+  async updateCriticalRates(): Promise<void> {
+    console.log('🔄 Mise à jour des taux critiques (EUR/USD/XOF/XAF)...');
+    
+    try {
+      // Récupérer EUR/USD en priorité
+      await this.fetchAndCacheCriticalRate('EUR', 'USD');
+      await this.fetchAndCacheCriticalRate('USD', 'EUR');
+      
+      // Calculer USD vers devises africaines via EUR (utilise les taux fixes)
+      await this.calculateCrossRates();
+      
+      console.log('✅ Taux critiques mis à jour avec succès');
+    } catch (error) {
+      console.error('❌ Erreur mise à jour taux critiques:', error);
+    }
+  }
+
+  private async fetchAndCacheCriticalRate(from: string, to: string): Promise<void> {
+    try {
+      const rate = await this.fetchExchangeRateFromAPI(from, to);
+      this.exchangeRates.set(`${from}-${to}`, {
+        ...rate,
+        source: `${rate.source}_CRITICAL`
+      });
+    } catch (error) {
+      console.warn(`Impossible de récupérer ${from}/${to}:`, error);
+    }
+  }
+
+  // Calculer les taux croisés USD/XOF et USD/XAF via EUR
+  private async calculateCrossRates(): Promise<void> {
+    try {
+      const usdEurRate = this.exchangeRates.get('USD-EUR');
+      const eurXofRate = this.exchangeRates.get('EUR-XOF'); // Taux fixe
+      const eurXafRate = this.exchangeRates.get('EUR-XAF'); // Taux fixe
+      
+      if (usdEurRate && eurXofRate) {
+        // USD -> XOF : USD -> EUR -> XOF
+        const usdXofRate = usdEurRate.rate * eurXofRate.rate;
+        this.exchangeRates.set('USD-XOF', {
+          from: 'USD',
+          to: 'XOF',
+          rate: usdXofRate,
+          lastUpdated: new Date(),
+          source: 'CALCULATED_VIA_EUR_CRITICAL',
+          is_fixed: false
+        });
+        
+        // XOF -> USD (inverse)
+        this.exchangeRates.set('XOF-USD', {
+          from: 'XOF',
+          to: 'USD',
+          rate: 1 / usdXofRate,
+          lastUpdated: new Date(),
+          source: 'CALCULATED_VIA_EUR_CRITICAL',
+          is_fixed: false
+        });
+      }
+      
+      if (usdEurRate && eurXafRate) {
+        // USD -> XAF : USD -> EUR -> XAF
+        const usdXafRate = usdEurRate.rate * eurXafRate.rate;
+        this.exchangeRates.set('USD-XAF', {
+          from: 'USD',
+          to: 'XAF',
+          rate: usdXafRate,
+          lastUpdated: new Date(),
+          source: 'CALCULATED_VIA_EUR_CRITICAL',
+          is_fixed: false
+        });
+        
+        // XAF -> USD (inverse)
+        this.exchangeRates.set('XAF-USD', {
+          from: 'XAF',
+          to: 'USD',
+          rate: 1 / usdXafRate,
+          lastUpdated: new Date(),
+          source: 'CALCULATED_VIA_EUR_CRITICAL',
+          is_fixed: false
+        });
+      }
+      
+    } catch (error) {
+      console.warn('Erreur calcul taux croisés USD:', error);
+    }
   }
 
   private async saveExchangeRateToDB(rate: ExchangeRate): Promise<void> {
@@ -582,5 +718,78 @@ export class CurrencyService {
     );
     
     return Promise.all(promises);
+  }
+
+  // === NOUVELLES MÉTHODES POUR TAUX CRITIQUES ===
+
+  // Obtenir les taux critiques actuels
+  getCriticalRates(): { [key: string]: ExchangeRate } {
+    const criticalRates: { [key: string]: ExchangeRate } = {};
+    
+    this.criticalCurrencyPairs.forEach(pair => {
+      const rate = this.exchangeRates.get(pair);
+      if (rate) {
+        criticalRates[pair] = rate;
+      }
+    });
+    
+    return criticalRates;
+  }
+
+  // Force la mise à jour des taux critiques (pour les tests/debug)
+  async forceCriticalRatesUpdate(): Promise<void> {
+    console.log('🔄 FORCE: Mise à jour des taux critiques...');
+    await this.updateCriticalRates();
+  }
+
+  // Vérifier la santé du service de taux de change
+  getHealthStatus(): {
+    isHealthy: boolean;
+    lastUpdate: Date | null;
+    criticalRatesCount: number;
+    fixedRatesCount: number;
+    apiRatesCount: number;
+  } {
+    const criticalRates = this.getCriticalRates();
+    let fixedCount = 0;
+    let apiCount = 0;
+
+    Object.values(criticalRates).forEach(rate => {
+      if (rate.source?.includes('FIXED')) {
+        fixedCount++;
+      } else {
+        apiCount++;
+      }
+    });
+
+    return {
+      isHealthy: Object.keys(criticalRates).length >= 4, // Au moins EUR-USD et taux fixes
+      lastUpdate: this.lastUpdate,
+      criticalRatesCount: Object.keys(criticalRates).length,
+      fixedRatesCount: fixedCount,
+      apiRatesCount: apiCount
+    };
+  }
+
+  // Obtenir un aperçu des taux pour debugging
+  getDebugInfo(): {
+    allRates: string[];
+    criticalRates: string[];
+    outdatedRates: string[];
+    providers: any[];
+  } {
+    const allRates = Array.from(this.exchangeRates.keys());
+    const criticalRates = allRates.filter(key => this.isCriticalPair(key));
+    const outdatedRates = allRates.filter(key => {
+      const rate = this.exchangeRates.get(key);
+      return rate && !this.isRateValid(rate, this.isCriticalPair(key));
+    });
+
+    return {
+      allRates,
+      criticalRates,
+      outdatedRates,
+      providers: this.exchangeProviders
+    };
   }
 }

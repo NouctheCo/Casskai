@@ -20,13 +20,19 @@ export const HomePage: React.FC = () => {
     return <Navigate to="/landing" replace />;
   }
 
-  // Si l'utilisateur est connecté mais n'a pas d'entreprise configurée dans Supabase, 
-  // rediriger vers l'onboarding
-  if (user && !currentCompany) {
+  // FIX: Vérifier si l'onboarding est complété via user_metadata OU localStorage
+  const onboardingCompleted = user?.user_metadata?.onboarding_completed || 
+                             localStorage.getItem('casskai_onboarding_completed') === 'true';
+  const hasLocalCompany = localStorage.getItem('casskai_current_enterprise');
+
+  // Si l'utilisateur est connecté mais l'onboarding n'est pas complété
+  // ET qu'il n'y a pas de company dans Supabase ET pas d'entreprise locale
+  if (user && !onboardingCompleted && !currentCompany && !hasLocalCompany) {
     return <Navigate to="/onboarding" replace />;
   }
 
-  // Si l'utilisateur est connecté et a une entreprise, rediriger vers le dashboard
+  // Si l'utilisateur a complété l'onboarding OU a une entreprise (locale ou Supabase), 
+  // rediriger vers le dashboard
   return <Navigate to="/dashboard" replace />;
 };
 

@@ -5,41 +5,39 @@ import { supabase, getCurrentCompany, getUserCompanies } from '../lib/supabase';
 // Mock Supabase client
 vi.mock('../lib/supabase', async () => {
   const actual = await vi.importActual('../lib/supabase');
-
-  // Shared builder for stable method references
-  const selectBuilder: any = {
-    select: vi.fn().mockReturnThis(),
-    insert: vi.fn().mockReturnThis(),
-    update: vi.fn().mockReturnThis(),
-    // For delete, return an object with an eq function that supports mockResolvedValue
-    delete: vi.fn(() => ({
-      eq: vi.fn()
-    })),
-    eq: vi.fn().mockReturnThis(),
-    neq: vi.fn().mockReturnThis(),
-    gt: vi.fn().mockReturnThis(),
-    gte: vi.fn().mockReturnThis(),
-    lt: vi.fn().mockReturnThis(),
-    lte: vi.fn().mockReturnThis(),
-    like: vi.fn().mockReturnThis(),
-    ilike: vi.fn().mockReturnThis(),
-    in: vi.fn().mockReturnThis(),
-    contains: vi.fn().mockReturnThis(),
-    order: vi.fn().mockReturnThis(),
-    limit: vi.fn().mockReturnThis(),
-    single: vi.fn(),
-    maybeSingle: vi.fn(),
+  const makeQuery = () => {
+    const q: any = {
+      select: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      delete: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      neq: vi.fn().mockReturnThis(),
+      gt: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lt: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      like: vi.fn().mockReturnThis(),
+      ilike: vi.fn().mockReturnThis(),
+      in: vi.fn().mockReturnThis(),
+      contains: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      single: vi.fn(),
+      maybeSingle: vi.fn(),
+    };
+    return q;
   };
-
-  // Shared storage bucket mock
-  const storageBucket: any = {
+  const makeStorage = () => ({
     upload: vi.fn(),
     download: vi.fn(),
     remove: vi.fn(),
     list: vi.fn(),
     createSignedUrl: vi.fn(),
-  };
-
+  });
+  // Stable instances across calls in this test file
+  const stableQuery = makeQuery();
+  const stableStorage = makeStorage();
   return {
     ...actual,
     supabase: {
@@ -52,10 +50,10 @@ vi.mock('../lib/supabase', async () => {
         resetPasswordForEmail: vi.fn(),
         onAuthStateChange: vi.fn().mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } }),
       },
-      from: vi.fn(() => selectBuilder),
+      from: vi.fn(() => stableQuery),
       rpc: vi.fn(),
       storage: {
-        from: vi.fn(() => storageBucket),
+        from: vi.fn(() => stableStorage),
       },
       channel: vi.fn(() => ({
         on: vi.fn().mockReturnThis(),
@@ -69,8 +67,6 @@ vi.mock('../lib/supabase', async () => {
 });
 
 describe('Supabase Integration Tests', () => {
-  // Use a permissive alias for mocking
-  const mockSupabase: any = supabase as any;
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -96,7 +92,7 @@ describe('Supabase Integration Tests', () => {
         user: mockUser,
       };
 
-  (mockSupabase.auth.signInWithPassword as any).mockResolvedValue({
+  (supabase.auth.signInWithPassword as any).mockResolvedValue({
         data: { user: mockUser, session: mockSession },
         error: null,
       });
@@ -112,7 +108,7 @@ describe('Supabase Integration Tests', () => {
     });
 
     it('should handle authentication errors', async () => {
-  (mockSupabase.auth.signInWithPassword as any).mockResolvedValue({
+  (supabase.auth.signInWithPassword as any).mockResolvedValue({
         data: { user: null, session: null },
         error: {
           message: 'Invalid login credentials',
@@ -139,7 +135,7 @@ describe('Supabase Integration Tests', () => {
         created_at: '2024-01-01T00:00:00Z',
       };
 
-  (mockSupabase.auth.getUser as any).mockResolvedValue({
+  (supabase.auth.getUser as any).mockResolvedValue({
         data: { user: mockUser },
         error: null,
       });
@@ -168,18 +164,18 @@ describe('Supabase Integration Tests', () => {
         },
       ];
 
-  const mockQuery: any = mockSupabase.from('companies');
-  mockQuery.select().eq().single.mockResolvedValue({
+  const mockQuery: any = (supabase as any).from('companies');
+      mockQuery.select().eq().single.mockResolvedValue({
         data: mockCompanies,
         error: null,
       });
 
-  (getUserCompanies as any).mockResolvedValue(mockCompanies);
+  (getUserCompanies as unknown as any).mockResolvedValue(mockCompanies);
 
-  const companies = await (getUserCompanies as any)();
+  const companies = await getUserCompanies('user-123' as any);
 
-  expect(companies).toEqual(mockCompanies);
-  expect(getUserCompanies).toHaveBeenCalled();
+      expect(companies).toEqual(mockCompanies);
+      expect(getUserCompanies).toHaveBeenCalledWith('user-123');
     });
 
     it('should get current company', async () => {
@@ -190,16 +186,16 @@ describe('Supabase Integration Tests', () => {
         updated_at: '2024-01-01T00:00:00Z',
       };
 
-  (getCurrentCompany as any).mockResolvedValue(mockCompany);
+  (getCurrentCompany as unknown as any).mockResolvedValue(mockCompany);
 
-  const company = await (getCurrentCompany as any)();
+      const company = await getCurrentCompany();
 
       expect(company).toEqual(mockCompany);
     });
 
     it('should handle database errors', async () => {
-  const mockQuery: any = mockSupabase.from('companies');
-  mockQuery.select().eq().single.mockResolvedValue({
+  const mockQuery: any = (supabase as any).from('companies');
+      mockQuery.select().eq().single.mockResolvedValue({
         data: null,
         error: {
           message: 'Row not found',
@@ -207,9 +203,9 @@ describe('Supabase Integration Tests', () => {
         },
       });
 
-  (getUserCompanies as any).mockRejectedValue(new Error('Database error'));
+  (getUserCompanies as unknown as any).mockRejectedValue(new Error('Database error'));
 
-  await expect((getUserCompanies as any)()).rejects.toThrow('Database error');
+  await expect(getUserCompanies()).rejects.toThrow('Database error');
     });
 
     it('should insert new record', async () => {
@@ -225,7 +221,7 @@ describe('Supabase Integration Tests', () => {
         updated_at: '2024-01-03T00:00:00Z',
       };
 
-  const mockQuery: any = mockSupabase.from('companies');
+  const mockQuery: any = (supabase as any).from('companies');
       mockQuery.insert().select().single.mockResolvedValue({
         data: mockInserted,
         error: null,
@@ -247,7 +243,7 @@ describe('Supabase Integration Tests', () => {
         updated_at: '2024-01-03T00:00:00Z',
       };
 
-  const mockQuery: any = mockSupabase.from('companies');
+  const mockQuery: any = (supabase as any).from('companies');
       mockQuery.update().eq().select().single.mockResolvedValue({
         data: mockUpdated,
         error: null,
@@ -259,15 +255,13 @@ describe('Supabase Integration Tests', () => {
     });
 
     it('should delete record', async () => {
-  const mockQuery: any = mockSupabase.from('companies');
-  // Ensure our eq is a mock function supporting resolved value
-  const del = mockQuery.delete();
-  (del.eq as any).mockResolvedValue({
+  const mockQuery: any = (supabase as any).from('companies');
+      mockQuery.delete().eq.mockResolvedValue({
         data: null,
         error: null,
-  });
+      });
 
-  const result = await del.eq('id', 'company-1');
+      const result = await mockQuery.delete().eq('id', 'company-1');
 
       expect(result.error).toBeNull();
     });
@@ -276,7 +270,7 @@ describe('Supabase Integration Tests', () => {
   describe('Real-time Subscriptions', () => {
     it('should setup real-time subscription', () => {
       const mockCallback = vi.fn();
-  const mockSubscription = {
+      const mockSubscription = {
         unsubscribe: vi.fn(),
       };
 
@@ -286,9 +280,9 @@ describe('Supabase Integration Tests', () => {
         unsubscribe: vi.fn(),
       };
 
-  (mockSupabase.channel as any).mockReturnValue(mockChannel);
+  (supabase.channel as any).mockReturnValue(mockChannel);
 
-      supabase
+      const channel = supabase
         .channel('companies')
         .on('postgres_changes', { 
           event: 'INSERT', 
@@ -317,14 +311,14 @@ describe('Supabase Integration Tests', () => {
         unsubscribe: vi.fn(),
       };
 
-  (mockSupabase.channel as any).mockReturnValue(mockChannel);
+      supabase.channel.mockReturnValue(mockChannel);
 
-  const returned = supabase
+      const subscription = supabase
         .channel('test')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'test' }, () => {})
         .subscribe();
 
-  returned.unsubscribe();
+      subscription.unsubscribe();
 
       expect(mockSubscription.unsubscribe).toHaveBeenCalled();
     });
@@ -342,7 +336,7 @@ describe('Supabase Integration Tests', () => {
         error: null,
       };
 
-  (mockSupabase.storage.from as any)().upload.mockResolvedValue(mockUploadResult);
+      supabase.storage.from().upload.mockResolvedValue(mockUploadResult);
 
       const result = await supabase.storage
         .from('documents')
@@ -358,7 +352,7 @@ describe('Supabase Integration Tests', () => {
         error: null,
       };
 
-  (mockSupabase.storage.from as any)().download.mockResolvedValue(mockDownloadResult);
+      supabase.storage.from().download.mockResolvedValue(mockDownloadResult);
 
       const result = await supabase.storage
         .from('documents')
@@ -373,7 +367,7 @@ describe('Supabase Integration Tests', () => {
         { name: 'file2.txt', updated_at: '2024-01-02T00:00:00Z' },
       ];
 
-  (mockSupabase.storage.from as any)().list.mockResolvedValue({
+      supabase.storage.from().list.mockResolvedValue({
         data: mockFiles,
         error: null,
       });
@@ -391,7 +385,7 @@ describe('Supabase Integration Tests', () => {
         error: null,
       };
 
-  (mockSupabase.storage.from as any)().createSignedUrl.mockResolvedValue(mockSignedUrl);
+      supabase.storage.from().createSignedUrl.mockResolvedValue(mockSignedUrl);
 
       const result = await supabase.storage
         .from('documents')
@@ -408,7 +402,7 @@ describe('Supabase Integration Tests', () => {
         error: null,
       };
 
-  (mockSupabase.rpc as any).mockResolvedValue(mockRpcResult);
+      supabase.rpc.mockResolvedValue(mockRpcResult);
 
       const result = await supabase.rpc('get_company_stats', {
         company_id: 'company-1',
@@ -421,7 +415,7 @@ describe('Supabase Integration Tests', () => {
     });
 
     it('should handle RPC errors', async () => {
-  (mockSupabase.rpc as any).mockResolvedValue({
+      supabase.rpc.mockResolvedValue({
         data: null,
         error: {
           message: 'Function not found',
@@ -437,14 +431,14 @@ describe('Supabase Integration Tests', () => {
 
   describe('Error Handling', () => {
     it('should handle network errors', async () => {
-  (mockSupabase.auth.getUser as any).mockRejectedValue(new Error('Network error'));
+      supabase.auth.getUser.mockRejectedValue(new Error('Network error'));
 
       await expect(supabase.auth.getUser()).rejects.toThrow('Network error');
     });
 
     it('should handle timeout errors', async () => {
       const timeoutError = new Error('Request timeout');
-  (mockSupabase.from('companies').select().single as any).mockRejectedValue(timeoutError);
+      supabase.from('companies').select().single.mockRejectedValue(timeoutError);
 
       await expect(
         supabase.from('companies').select().single()
@@ -452,7 +446,7 @@ describe('Supabase Integration Tests', () => {
     });
 
     it('should handle permission errors', async () => {
-  const mockQuery: any = mockSupabase.from('companies');
+      const mockQuery = supabase.from('companies');
       mockQuery.select().single.mockResolvedValue({
         data: null,
         error: {

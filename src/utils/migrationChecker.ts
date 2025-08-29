@@ -53,8 +53,6 @@ export class MigrationChecker {
    * Vérifie le statut complet des migrations
    */
   async checkMigrationStatus(): Promise<MigrationStatus> {
-    console.warn('🔍 Vérification du statut des migrations...');
-
     const status: MigrationStatus = {
       isConnected: false,
       hasRequiredTables: false,
@@ -64,35 +62,30 @@ export class MigrationChecker {
       missingFunctions: [],
       missingData: [],
       overallStatus: 'error',
-      message: ''
+      message: '',
     };
 
     try {
       // 1. Test de connexion
-      console.warn('📡 Test de connexion à Supabase...');
       const connectionTest = await this.testConnection();
       status.isConnected = connectionTest.success;
-      
+
       if (!status.isConnected) {
-        status.message = `Erreur de connexion: ${connectionTest.error}`;
+        status.message = `Erreur de connexion: ${connectionTest.error || 'inconnue'}`;
         return status;
       }
 
-      // 2. Vérification des tables
-      console.warn('🗄️ Vérification des tables...');
-      const tablesCheck = await this.checkRequiredTables();
+      // 2. Vérifications en parallèle
+      const [tablesCheck, functionsCheck, dataCheck] = await Promise.all([
+        this.checkRequiredTables(),
+        this.checkRequiredFunctions(),
+        this.checkRequiredData(),
+      ]);
+
       status.hasRequiredTables = tablesCheck.allPresent;
       status.missingTables = tablesCheck.missing;
-
-      // 3. Vérification des fonctions
-      console.warn('⚙️ Vérification des fonctions...');
-      const functionsCheck = await this.checkRequiredFunctions();
       status.hasRequiredFunctions = functionsCheck.allPresent;
       status.missingFunctions = functionsCheck.missing;
-
-      // 4. Vérification des données par défaut
-      console.warn('📊 Vérification des données par défaut...');
-      const dataCheck = await this.checkRequiredData();
       status.hasDefaultData = dataCheck.allPresent;
       status.missingData = dataCheck.missing;
 
@@ -109,10 +102,10 @@ export class MigrationChecker {
       }
 
       return status;
-
     } catch (error) {
-      console.error('❌ Erreur lors de la vérification des migrations:', error);
-      status.message = `Erreur de vérification: ${error.message}`;
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      console.error('❌ Erreur lors de la vérification des migrations:', errorMessage);
+      status.message = `Erreur de vérification: ${errorMessage}`;
       return status;
     }
   }
@@ -143,27 +136,25 @@ export class MigrationChecker {
    * Vérifie la présence des tables requises
    */
   private async checkRequiredTables(): Promise<{ allPresent: boolean; missing: string[] }> {
-    const missing: string[] = [];
-
-    for (const tableName of this.requiredTables) {
+    const checks = this.requiredTables.map(async (tableName) => {
       try {
-        const { error } = await supabase.from(tableName).select('*').limit(1);
-        
+        const { error } = await supabase.from(tableName).select('*', { head: true, count: 'exact' });
         if (error && error.code === 'PGRST116') {
-          // Table n'existe pas
-          missing.push(tableName);
-        } else if (error && !error.code) {
-          // Autre erreur (permissions, etc.) - on considère que la table existe
-          console.warn(`Table ${tableName}: ${error.message}`);
+          return tableName; // La table n'existe pas
         }
+        if (error) {
+          console.warn(`Avertissement pour la table ${tableName}: ${error.message}`);
+        }
+        return null; // La table existe
       } catch {
-        missing.push(tableName);
+        return tableName;
       }
-    }
+    });
 
+    const missing = (await Promise.all(checks)).filter((t): t is string => t !== null);
     return {
       allPresent: missing.length === 0,
-      missing
+      missing,
     };
   }
 
@@ -171,27 +162,26 @@ export class MigrationChecker {
    * Vérifie la présence des fonctions RPC requises
    */
   private async checkRequiredFunctions(): Promise<{ allPresent: boolean; missing: string[] }> {
-    const missing: string[] = [];
-
-    for (const functionName of this.requiredFunctions) {
+    const checks = this.requiredFunctions.map(async (functionName) => {
       try {
-        // Test avec des paramètres valides mais inoffensifs
         const testParams = this.getTestParamsForFunction(functionName);
         const { error } = await supabase.rpc(functionName, testParams);
-        
-        if (error && error.message?.includes(`function ${functionName}`)) {
-          missing.push(functionName);
+        if (error && error.message?.includes(`function "${functionName}" does not exist`)) {
+          return functionName;
         }
+        return null;
       } catch (error) {
-        if (error.message?.includes(`function ${functionName}`)) {
-          missing.push(functionName);
+        if (error instanceof Error && error.message?.includes(`function "${functionName}" does not exist`)) {
+          return functionName;
         }
+        return null;
       }
-    }
+    });
 
+    const missing = (await Promise.all(checks)).filter((f): f is string => f !== null);
     return {
       allPresent: missing.length === 0,
-      missing
+      missing,
     };
   }
 
@@ -199,47 +189,49 @@ export class MigrationChecker {
    * Vérifie la présence des données par défaut
    */
   private async checkRequiredData(): Promise<{ allPresent: boolean; missing: string[] }> {
-    const missing: string[] = [];
-
-    for (const dataCheck of this.requiredData) {
+    const checks = this.requiredData.map(async (dataCheck) => {
       try {
         const { count, error } = await supabase
           .from(dataCheck.table)
           .select('*', { count: 'exact', head: true });
 
         if (error) {
-          missing.push(`${dataCheck.table} (error: ${error.message})`);
-        } else if ((count || 0) < dataCheck.minCount) {
-          missing.push(`${dataCheck.table} (${count}/${dataCheck.minCount})`);
+          return `${dataCheck.table} (erreur: ${error.message})`;
         }
+        if ((count || 0) < dataCheck.minCount) {
+          return `${dataCheck.table} (données insuffisantes: ${count}/${dataCheck.minCount})`;
+        }
+        return null;
       } catch {
-        missing.push(`${dataCheck.table} (exception)`);
+        return `${dataCheck.table} (exception)`;
       }
-    }
+    });
 
+    const missing = (await Promise.all(checks)).filter((d): d is string => d !== null);
     return {
       allPresent: missing.length === 0,
-      missing
+      missing,
     };
   }
 
   /**
    * Obtient les paramètres de test pour une fonction RPC
    */
-  private getTestParamsForFunction(functionName: string): Record<string, any> {
+  private getTestParamsForFunction(functionName: string): Record<string, unknown> {
     const dummyUuid = '00000000-0000-0000-0000-000000000000';
     
     switch (functionName) {
       case 'get_dashboard_stats':
-        return { p_company_id: dummyUuid };
       case 'get_balance_sheet':
-        return { p_company_id: dummyUuid };
       case 'get_income_statement':
-        return { p_company_id: dummyUuid };
       case 'get_cash_flow_data':
+      case 'validate_accounting_data':
+      case 'recalculate_all_account_balances':
         return { p_company_id: dummyUuid };
+      
       case 'validate_journal_entry_balance':
         return { p_journal_entry_id: dummyUuid };
+      
       case 'create_company_with_defaults':
         return { 
           p_user_id: dummyUuid, 
@@ -248,10 +240,7 @@ export class MigrationChecker {
           p_currency: 'EUR',
           p_accounting_standard: 'PCG'
         };
-      case 'validate_accounting_data':
-        return { p_company_id: dummyUuid };
-      case 'recalculate_all_account_balances':
-        return { p_company_id: dummyUuid };
+        
       default:
         return {};
     }
@@ -261,27 +250,45 @@ export class MigrationChecker {
    * Affiche un rapport détaillé dans la console
    */
   logDetailedReport(status: MigrationStatus): void {
-    console.warn('📋 === RAPPORT DE MIGRATION CASSKAI ===');
-    console.warn(`🔗 Connexion: ${status.isConnected ? '✅' : '❌'}`);
-    console.warn(`🗄️ Tables: ${status.hasRequiredTables ? '✅' : '❌'}`);
-    console.warn(`⚙️ Fonctions: ${status.hasRequiredFunctions ? '✅' : '❌'}`);
-    console.warn(`📊 Données: ${status.hasDefaultData ? '✅' : '❌'}`);
-    
-    if (status.missingTables.length > 0) {
-      console.error('❌ Tables manquantes:', status.missingTables);
+    const {
+      isConnected,
+      hasRequiredTables,
+      hasRequiredFunctions,
+      hasDefaultData,
+      missingTables,
+      missingFunctions,
+      missingData,
+      overallStatus,
+      message,
+    } = status;
+
+    const report = [
+      '📋 === RAPPORT DE MIGRATION CASSKAI ===',
+      `🔗 Connexion: ${isConnected ? '✅' : '❌'}`,
+      `🗄️ Tables: ${hasRequiredTables ? '✅' : '❌'}`,
+      `⚙️ Fonctions: ${hasRequiredFunctions ? '✅' : '❌'}`,
+      `📊 Données: ${hasDefaultData ? '✅' : '❌'}`,
+    ];
+
+    if (missingTables.length > 0) {
+      report.push(`❌ Tables manquantes: ${missingTables.join(', ')}`);
     }
-    
-    if (status.missingFunctions.length > 0) {
-      console.error('❌ Fonctions manquantes:', status.missingFunctions);
+    if (missingFunctions.length > 0) {
+      report.push(`❌ Fonctions manquantes: ${missingFunctions.join(', ')}`);
     }
-    
-    if (status.missingData.length > 0) {
-      console.error('❌ Données manquantes:', status.missingData);
+    if (missingData.length > 0) {
+      report.push(`❌ Données manquantes: ${missingData.join(', ')}`);
     }
-    
-    console.warn(`📊 Statut global: ${status.overallStatus.toUpperCase()}`);
-    console.warn(`💬 Message: ${status.message}`);
-    console.warn('=====================================');
+
+    report.push(`📊 Statut global: ${overallStatus.toUpperCase()}`);
+    report.push(`💬 Message: ${message}`);
+    report.push('=====================================');
+
+    if (overallStatus === 'error') {
+      console.error(report.join('\n'));
+    } else {
+      console.warn(report.join('\n'));
+    }
   }
 
   /**

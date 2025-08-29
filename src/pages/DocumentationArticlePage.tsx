@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useToast } from '@/components/ui/use-toast';
 import { motion } from 'framer-motion';
 import { 
   ArrowLeft, 
@@ -20,6 +21,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { PageContainer } from '@/components/ui/PageContainer';
 
 // Base de données simplifiée des articles
 const articlesDatabase = {
@@ -529,6 +531,75 @@ const DocumentationArticlePage = () => {
   const { articleId } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { toast } = useToast();
+  const [hasRated, setHasRated] = useState(false);
+  const [userRating, setUserRating] = useState<'positive' | 'negative' | null>(null);
+
+  // Gestionnaires d'événements
+  const handleRating = (rating: 'positive' | 'negative') => {
+    setHasRated(true);
+    setUserRating(rating);
+    
+    toast({
+      title: "Merci pour votre retour !",
+      description: rating === 'positive' 
+        ? "Nous sommes ravis que cet article vous ait été utile." 
+        : "Nous prendrons en compte votre retour pour améliorer cet article.",
+      duration: 3000
+    });
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: article?.title || 'Article CassKai',
+          text: article?.description || '',
+          url: window.location.href
+        });
+      } catch (error) {
+        console.log('Partage annulé');
+      }
+    } else {
+      toast({
+        title: "Partage",
+        description: "Fonctionnalité de partage non disponible sur votre navigateur"
+      });
+    }
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: "Lien copié !",
+        description: "Le lien de l'article a été copié dans le presse-papiers"
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de copier le lien"
+      });
+    }
+  };
+
+  const handleLiveChat = () => {
+    toast({
+      title: "Chat en direct",
+      description: "Ouverture du chat en cours...",
+      duration: 2000
+    });
+    // Ici on pourrait intégrer un widget de chat comme Intercom, Crisp, etc.
+  };
+
+  const handleContactSupport = () => {
+    window.open('mailto:support@casskai.app?subject=' + encodeURIComponent('Question sur: ' + (article?.title || 'Documentation')));
+    toast({
+      title: "Contact support",
+      description: "Votre client email va s'ouvrir"
+    });
+  };
 
   // Récupérer l'article depuis la base de données
   const article = articlesDatabase[articleId];
@@ -536,7 +607,7 @@ const DocumentationArticlePage = () => {
   // Si l'article n'existe pas, afficher une page 404
   if (!article) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Article non trouvé
@@ -581,7 +652,7 @@ const DocumentationArticlePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <PageContainer variant="default">
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -645,22 +716,32 @@ const DocumentationArticlePage = () => {
                 <span className="text-sm text-gray-600 dark:text-gray-300">
                   Cet article vous a-t-il été utile ?
                 </span>
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant={userRating === 'positive' ? 'default' : 'outline'} 
+                  size="sm"
+                  onClick={() => handleRating('positive')}
+                  disabled={hasRated}
+                >
                   <ThumbsUp className="w-4 h-4 mr-2" />
                   Oui
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant={userRating === 'negative' ? 'default' : 'outline'} 
+                  size="sm"
+                  onClick={() => handleRating('negative')}
+                  disabled={hasRated}
+                >
                   <ThumbsDown className="w-4 h-4 mr-2" />
                   Non
                 </Button>
               </div>
               
               <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={handleShare}>
                   <Share2 className="w-4 h-4 mr-2" />
                   Partager
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={handleCopyLink}>
                   <Copy className="w-4 h-4 mr-2" />
                   Copier le lien
                 </Button>
@@ -705,11 +786,11 @@ const DocumentationArticlePage = () => {
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                   Vous ne trouvez pas la réponse à votre question ?
                 </p>
-                <Button className="w-full mb-3">
+                <Button className="w-full mb-3" onClick={handleLiveChat}>
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Chat en direct
                 </Button>
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" onClick={handleContactSupport}>
                   Contacter le support
                 </Button>
               </CardContent>
@@ -717,7 +798,7 @@ const DocumentationArticlePage = () => {
           </div>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 };
 

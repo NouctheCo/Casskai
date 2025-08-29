@@ -1,52 +1,18 @@
-/* eslint-disable max-lines-per-function */
 /**
- * E-invoicing API Routes (server-side only)
- * Framework-agnostic wiring: pass in a Router-like instance to attach routes.
+ * E-invoicing API Routes
+ * Express.js routes for e-invoicing endpoints
  */
 
-// Minimal interfaces to avoid hard dependency on Express types
-interface MinimalRequest {
-  headers: Record<string, string | string[] | undefined>;
-  params: Record<string, string>;
-  query: Record<string, unknown>;
-  body: Record<string, unknown>;
-}
-
-interface MinimalResponse {
-  status: (code: number) => { json: (body: unknown) => void };
-  json: (body: unknown) => void;
-}
-
-type MinimalNextFunction = () => void;
-
-interface MinimalRouter {
-  get: (
-    path: string,
-    ...handlers: Array<(
-      req: AuthenticatedRequest,
-      res: MinimalResponse,
-      next: MinimalNextFunction
-    ) => unknown>
-  ) => unknown;
-  post: (
-    path: string,
-    ...handlers: Array<(
-      req: AuthenticatedRequest,
-      res: MinimalResponse,
-      next: MinimalNextFunction
-    ) => unknown>
-  ) => unknown;
-  use: (...args: unknown[]) => unknown;
-}
+import { Router, Request, Response, NextFunction } from 'express';
 import { EInvoicingAPI, APIResponse } from './EInvoicingAPI';
 import { 
   EInvoiceLifecycleStatus, 
   EInvoiceFormat, 
   EInvoiceChannel,
   EInvoicingError 
-} from '@/types/einvoicing.types';
+} from '../../../types/einvoicing.types';
 
-export interface AuthenticatedRequest extends MinimalRequest {
+export interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
     email: string;
@@ -62,16 +28,15 @@ const einvoicingAPI = new EInvoicingAPI({
   }
 });
 
-// Create a setup function to attach routes to a provided router (Express/Koa-like)
-export function setupEInvoicingRoutes(router: MinimalRouter) {
+// Create router
+const router = Router();
 
 // Middleware for authentication and company extraction
-const authenticate = async (req: AuthenticatedRequest, res: MinimalResponse, next: MinimalNextFunction) => {
+const authenticate = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     // In a real implementation, you would verify JWT token here
-  const rawAuth = req.headers.authorization;
-  const authHeader = Array.isArray(rawAuth) ? rawAuth[0] : rawAuth;
-  if (!authHeader || !authHeader.toString().startsWith('Bearer ')) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({
         success: false,
         error: 'Authentication required',
@@ -87,7 +52,7 @@ const authenticate = async (req: AuthenticatedRequest, res: MinimalResponse, nex
     };
 
     next();
-  } catch {
+  } catch (error) {
     res.status(401).json({
       success: false,
       error: 'Invalid authentication',
@@ -98,8 +63,8 @@ const authenticate = async (req: AuthenticatedRequest, res: MinimalResponse, nex
 };
 
 // Middleware to extract and validate company ID
-const extractCompanyId = (req: AuthenticatedRequest, res: MinimalResponse, next: MinimalNextFunction) => {
-  const companyId = req.params.companyId || (req.query.company_id as string | undefined) || (req.body.company_id as string | undefined);
+const extractCompanyId = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  const companyId = req.params.companyId || req.query.company_id || req.body.company_id;
   
   if (!companyId) {
     return res.status(400).json({
@@ -115,8 +80,8 @@ const extractCompanyId = (req: AuthenticatedRequest, res: MinimalResponse, next:
 };
 
 // Middleware for request validation
-const validateSubmissionRequest = (req: MinimalRequest, res: MinimalResponse, next: MinimalNextFunction) => {
-  const { invoice_id } = req.body as { invoice_id?: string };
+const validateSubmissionRequest = (req: Request, res: Response, next: NextFunction) => {
+  const { invoice_id } = req.body;
   
   if (!invoice_id) {
     return res.status(400).json({
@@ -131,10 +96,10 @@ const validateSubmissionRequest = (req: MinimalRequest, res: MinimalResponse, ne
 };
 
 // Error handler middleware
-const handleAPIResponse = <T>(apiCallFactory: (req: AuthenticatedRequest, res: MinimalResponse) => Promise<APIResponse<T>>) => {
-  return async (req: AuthenticatedRequest, res: MinimalResponse) => {
+const handleAPIResponse = (apiCall: Promise<APIResponse>) => {
+  return async (req: Request, res: Response) => {
     try {
-      const result = await apiCallFactory(req, res);
+      const result = await apiCall;
       const statusCode = result.success ? 200 : 400;
       res.status(statusCode).json(result);
     } catch (error) {
@@ -160,21 +125,13 @@ router.post(
   authenticate,
   extractCompanyId,
   validateSubmissionRequest,
-  handleAPIResponse(async (req: AuthenticatedRequest) => {
-    const { invoice_id, format, channel, async, validate, archive } = req.body as {
-      invoice_id: string;
-      format?: EInvoiceFormat;
-      channel?: EInvoiceChannel;
-      async?: boolean;
-      validate?: boolean;
-      archive?: boolean;
-    };
+  handleAPIResponse(async (req: AuthenticatedRequest, res: Response) => {
+    const { invoice_id, format, channel, async, validate, archive } = req.body;
     const requestId = req.headers['x-request-id'] as string;
-    const companyId = req.companyId ?? (() => { throw new EInvoicingError('Company ID is required', 'BAD_REQUEST'); })();
 
     return einvoicingAPI.submitInvoice(
       invoice_id,
-      companyId,
+      req.companyId!,
       { format, channel, async, validate, archive },
       requestId
     );
@@ -189,14 +146,13 @@ router.get(
   '/companies/:companyId/einvoicing/documents/:documentId',
   authenticate,
   extractCompanyId,
-  handleAPIResponse(async (req: AuthenticatedRequest) => {
+  handleAPIResponse(async (req: AuthenticatedRequest, res: Response) => {
     const { documentId } = req.params;
     const requestId = req.headers['x-request-id'] as string;
 
-    const companyId = req.companyId ?? (() => { throw new EInvoicingError('Company ID is required', 'BAD_REQUEST'); })();
     return einvoicingAPI.getDocumentStatus(
       documentId,
-      companyId,
+      req.companyId!,
       requestId
     );
   })
@@ -210,7 +166,7 @@ router.get(
   '/companies/:companyId/einvoicing/documents',
   authenticate,
   extractCompanyId,
-  handleAPIResponse(async (req: AuthenticatedRequest) => {
+  handleAPIResponse(async (req: AuthenticatedRequest, res: Response) => {
     const pagination = {
       page: parseInt(req.query.page as string) || 1,
       limit: parseInt(req.query.limit as string) || 20,
@@ -228,9 +184,8 @@ router.get(
 
     const requestId = req.headers['x-request-id'] as string;
 
-    const companyId = req.companyId ?? (() => { throw new EInvoicingError('Company ID is required', 'BAD_REQUEST'); })();
     return einvoicingAPI.listDocuments(
-      companyId,
+      req.companyId!,
       pagination,
       filters,
       requestId
@@ -246,12 +201,11 @@ router.get(
   '/companies/:companyId/einvoicing/capabilities',
   authenticate,
   extractCompanyId,
-  handleAPIResponse(async (req: AuthenticatedRequest) => {
+  handleAPIResponse(async (req: AuthenticatedRequest, res: Response) => {
     const requestId = req.headers['x-request-id'] as string;
 
-    const companyId = req.companyId ?? (() => { throw new EInvoicingError('Company ID is required', 'BAD_REQUEST'); })();
     return einvoicingAPI.getCapabilities(
-      companyId,
+      req.companyId!,
       requestId
     );
   })
@@ -265,13 +219,12 @@ router.get(
   '/companies/:companyId/einvoicing/statistics',
   authenticate,
   extractCompanyId,
-  handleAPIResponse(async (req: AuthenticatedRequest) => {
+  handleAPIResponse(async (req: AuthenticatedRequest, res: Response) => {
     const { date_from, date_to } = req.query;
     const requestId = req.headers['x-request-id'] as string;
 
-    const companyId = req.companyId ?? (() => { throw new EInvoicingError('Company ID is required', 'BAD_REQUEST'); })();
     return einvoicingAPI.getStatistics(
-      companyId,
+      req.companyId!,
       date_from as string,
       date_to as string,
       requestId
@@ -287,12 +240,11 @@ router.post(
   '/companies/:companyId/einvoicing/enable',
   authenticate,
   extractCompanyId,
-  handleAPIResponse(async (req: AuthenticatedRequest) => {
+  handleAPIResponse(async (req: AuthenticatedRequest, res: Response) => {
     const requestId = req.headers['x-request-id'] as string;
 
-    const companyId = req.companyId ?? (() => { throw new EInvoicingError('Company ID is required', 'BAD_REQUEST'); })();
     return einvoicingAPI.enableEInvoicing(
-      companyId,
+      req.companyId!,
       requestId
     );
   })
@@ -306,12 +258,11 @@ router.post(
   '/companies/:companyId/einvoicing/disable',
   authenticate,
   extractCompanyId,
-  handleAPIResponse(async (req: AuthenticatedRequest) => {
+  handleAPIResponse(async (req: AuthenticatedRequest, res: Response) => {
     const requestId = req.headers['x-request-id'] as string;
 
-    const companyId = req.companyId ?? (() => { throw new EInvoicingError('Company ID is required', 'BAD_REQUEST'); })();
     return einvoicingAPI.disableEInvoicing(
-      companyId,
+      req.companyId!,
       requestId
     );
   })
@@ -324,8 +275,8 @@ router.post(
 router.post(
   '/einvoicing/webhooks/status',
   // Note: Webhooks typically don't require authentication but should verify signature
-  handleAPIResponse(async (req: AuthenticatedRequest) => {
-    const { message_id, status, reason } = req.body as { message_id?: string; status?: string; reason?: string };
+  handleAPIResponse(async (req: Request, res: Response) => {
+    const { message_id, status, reason } = req.body;
     const requestId = req.headers['x-request-id'] as string;
 
     if (!message_id || !status) {
@@ -345,7 +296,7 @@ router.post(
  * Health check endpoint
  * GET /api/v1/einvoicing/health
  */
-router.get('/einvoicing/health', (_req: MinimalRequest, res: MinimalResponse) => {
+router.get('/einvoicing/health', (req: Request, res: Response) => {
   res.json({
     success: true,
     data: {
@@ -360,7 +311,7 @@ router.get('/einvoicing/health', (_req: MinimalRequest, res: MinimalResponse) =>
 });
 
 // Error handling middleware
-router.use((error: Error, req: MinimalRequest, res: MinimalResponse, _next: MinimalNextFunction) => {
+router.use((error: Error, req: Request, res: Response, next: NextFunction) => {
   console.error('E-invoicing API error:', error);
 
   let statusCode = 500;
@@ -403,11 +354,11 @@ router.use((error: Error, req: MinimalRequest, res: MinimalResponse, _next: Mini
     error: errorMessage,
     code: errorCode,
     timestamp: new Date().toISOString(),
-    request_id: (req.headers['x-request-id'] as string) || `req_${Date.now()}`
+    request_id: req.headers['x-request-id'] || `req_${Date.now()}`
   });
 });
-  return router;
-}
+
+export { router as einvoicingRoutes };
 
 // Export route documentation for API docs generation
 export const routeDocumentation = {

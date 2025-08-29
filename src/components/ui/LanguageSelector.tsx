@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Globe, Check } from 'lucide-react';
 import { SUPPORTED_LOCALES, changeLanguageAndDetectCountry } from '@/i18n/i18n';
+import { useLocale } from '@/contexts/LocaleContext';
 
 interface LanguageSelectorProps {
   variant?: 'select' | 'dropdown' | 'button';
@@ -23,10 +24,12 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   className = ''
 }) => {
   const { i18n } = useTranslation();
-  const currentLanguage = i18n.language;
+  const { locale: currentLanguage, setLocale } = useLocale();
 
   const handleLanguageChange = async (languageCode: string) => {
     try {
+      // Mettre à jour à la fois i18n et le LocaleContext
+      setLocale(languageCode);
       await changeLanguageAndDetectCountry(languageCode);
     } catch (error) {
       console.error('Failed to change language:', error);
@@ -129,13 +132,22 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 // Hook for easy access to current locale information
 export const useCurrentLocale = () => {
   const { i18n } = useTranslation();
-  const currentLanguage = i18n.language;
+  const { locale: currentLanguage, setLocale } = useLocale();
   const currentLocale = SUPPORTED_LOCALES[currentLanguage as keyof typeof SUPPORTED_LOCALES] || SUPPORTED_LOCALES.fr;
+  
+  const changeLanguage = async (languageCode: string) => {
+    try {
+      setLocale(languageCode);
+      await changeLanguageAndDetectCountry(languageCode);
+    } catch (error) {
+      console.error('Failed to change language:', error);
+    }
+  };
   
   return {
     code: currentLanguage,
     locale: currentLocale,
-    changeLanguage: changeLanguageAndDetectCountry,
+    changeLanguage,
     isRTL: false, // None of our supported languages are RTL currently
     formatCurrency: (amount: number) => {
       const currency = currentLocale.currency;
@@ -166,10 +178,12 @@ export const RegionalLanguageSelector: React.FC<LanguageSelectorProps> = ({
   className = ''
 }) => {
   const { i18n } = useTranslation();
-  const currentLanguage = i18n.language;
+  const { locale: currentLanguage, setLocale } = useLocale();
 
   const handleLanguageChange = async (languageCode: string) => {
     try {
+      // Mettre à jour à la fois i18n et le LocaleContext
+      setLocale(languageCode);
       await changeLanguageAndDetectCountry(languageCode);
     } catch (error) {
       console.error('Failed to change language:', error);
