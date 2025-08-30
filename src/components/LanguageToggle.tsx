@@ -25,14 +25,23 @@ const LANGUAGE_DATA = {
   'en-GB': { flag: '🇬🇧', region: 'Europe', currency: 'GBP' },
   'en-CA': { flag: '🇨🇦', region: 'North America', currency: 'CAD' },
   'es': { flag: '🇪🇸', region: 'Europe', currency: 'EUR' }
-};
+} as const;
 
-export function LanguageToggle({ variant = 'icon', showLabel = false, className = '' }) {
+type LanguageCode = keyof typeof LANGUAGE_DATA;
+
+interface LanguageToggleProps {
+  variant?: 'icon' | 'button';
+  showLabel?: boolean;
+  className?: string;
+}
+
+export function LanguageToggle({ variant = 'icon', showLabel = false, className = '' }: LanguageToggleProps) {
   const { setLocale, t, supportedLocales, locale: currentLocale } = useLocale();
 
   // Group languages by region
-  const groupedLocales = supportedLocales.reduce((groups, lang) => {
-    const langData = LANGUAGE_DATA[lang.code] || { region: 'Other' };
+  const groupedLocales = supportedLocales.reduce((groups: Record<string, any[]>, lang) => {
+    const langCode = lang.code as LanguageCode;
+    const langData = LANGUAGE_DATA[langCode] || { region: 'Other' };
     const region = langData.region;
     if (!groups[region]) {
       groups[region] = [];
@@ -41,7 +50,7 @@ export function LanguageToggle({ variant = 'icon', showLabel = false, className 
     return groups;
   }, {});
 
-  const currentLangData = LANGUAGE_DATA[currentLocale] || {};
+  const currentLangData = LANGUAGE_DATA[currentLocale as LanguageCode] || {};
   const currentLangInfo = supportedLocales.find(lang => lang.code === currentLocale);
 
   if (variant === 'button' && showLabel) {
@@ -60,7 +69,7 @@ export function LanguageToggle({ variant = 'icon', showLabel = false, className 
               <DropdownMenuLabel className="text-xs text-muted-foreground font-semibold">
                 {region}
               </DropdownMenuLabel>
-              {languages.map((lang) => (
+              {languages.map((lang: any) => (
                 <DropdownMenuItem 
                   key={lang.code} 
                   onClick={() => setLocale(lang.code)}
@@ -103,7 +112,7 @@ export function LanguageToggle({ variant = 'icon', showLabel = false, className 
             <DropdownMenuLabel className="text-xs text-muted-foreground font-semibold">
               {region}
             </DropdownMenuLabel>
-            {languages.map((lang) => (
+            {languages.map((lang: any) => (
               <DropdownMenuItem 
                 key={lang.code} 
                 onClick={() => setLocale(lang.code)}
