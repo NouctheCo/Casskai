@@ -1,9 +1,21 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useTranslation } from 'react-i18next';
 import i18n from '@/i18n/i18n';
 
-const LocaleContext = createContext();
+interface LocaleContextType {
+  locale: string;
+  setLocale: (locale: string) => void;
+  t: (key: string, defaultValueOrParams?: any, paramsIfDefaultValue?: any) => string;
+  tSafe: (key: string, fallback?: string) => string;
+  supportedLocales: { code: string; name: string; nameKey: string }[];
+  getLocaleName: (code: string) => string;
+  loadingLocale: boolean;
+  formatDate: (date: Date | string, options?: Intl.DateTimeFormatOptions) => string;
+  formatCurrency: (amount: number, currency?: string) => string;
+}
+
+const LocaleContext = createContext<LocaleContextType | undefined>(undefined);
 
 const supportedLocales = [
   { code: 'fr', name: 'Français', nameKey: 'french' },
@@ -11,7 +23,7 @@ const supportedLocales = [
   { code: 'es', name: 'Español', nameKey: 'spanish' }
 ];
 
-export const LocaleProvider = ({ children }) => {
+export const LocaleProvider = ({ children }: { children: ReactNode }) => {
   const [browserLocale] = useState(navigator.language.split('-')[0]);
   const defaultLocale = supportedLocales.some(l => l.code === browserLocale) ? browserLocale : 'fr';
   const [locale, setLocale] = useLocalStorage('casskai-locale', defaultLocale);
@@ -51,7 +63,7 @@ export const LocaleProvider = ({ children }) => {
     initializeLanguage();
   }, [locale]);
 
-  const t = (key, defaultValueOrParams, paramsIfDefaultValue) => {
+  const t = (key: string, defaultValueOrParams?: any, paramsIfDefaultValue?: any): string => {
     let currentParams = {};
     let currentDefaultValue = key;
 
@@ -100,7 +112,7 @@ export const LocaleProvider = ({ children }) => {
   };
 
   // Version sécurisée pour les cas spéciaux
-  const tSafe = (key, fallback = key) => {
+  const tSafe = (key: string, fallback: string = key): string => {
     const result = t(key, fallback);
     
     // Double vérification pour s'assurer qu'on n'a pas de message d'erreur
@@ -112,7 +124,7 @@ export const LocaleProvider = ({ children }) => {
     return result;
   };
 
-  const formatDate = (date, options = {}) => {
+  const formatDate = (date: Date | string, options: Intl.DateTimeFormatOptions = {}): string => {
     if (!date) return '';
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     return new Intl.DateTimeFormat(locale, {
@@ -123,7 +135,7 @@ export const LocaleProvider = ({ children }) => {
     }).format(dateObj);
   };
 
-  const formatCurrency = (amount, currency = 'EUR') => {
+  const formatCurrency = (amount: number, currency: string = 'EUR'): string => {
     if (typeof amount !== 'number') return '';
     return new Intl.NumberFormat(locale, {
       style: 'currency',
@@ -131,7 +143,7 @@ export const LocaleProvider = ({ children }) => {
     }).format(amount);
   };
 
-  const getLocaleName = (code) => {
+  const getLocaleName = (code: string): string => {
     const lang = supportedLocales.find(l => l.code === code);
     return lang ? tSafe(`common.${lang.nameKey}`, tSafe(lang.nameKey, lang.name)) : code;
   };
@@ -161,7 +173,7 @@ export const LocaleProvider = ({ children }) => {
   );
 };
 
-export const useLocale = () => {
+export const useLocale = (): LocaleContextType => {
   const context = useContext(LocaleContext);
   if (!context) {
     throw new Error('useLocale must be used within a LocaleProvider');
