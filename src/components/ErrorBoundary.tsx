@@ -351,11 +351,11 @@ export function withErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
   errorBoundaryConfig?: Omit<ErrorBoundaryProps, 'children'>
 ) {
-  const WrappedComponent = React.forwardRef<any, P>((props, ref) => (
+  const WrappedComponent = (props: P) => (
     <ErrorBoundary {...errorBoundaryConfig}>
-      <Component {...props} ref={ref} />
+      <Component {...props} />
     </ErrorBoundary>
-  ));
+  );
 
   WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`;
 
