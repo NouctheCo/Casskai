@@ -53,7 +53,7 @@ export function useAccountingImport({
   const [fileAnalysis, setFileAnalysis] = useState<any>(null);
 
   // Form pour la configuration d'import
-  const form = useForm<ImportConfig>({
+  const form = useForm({
     resolver: zodResolver(ImportConfigSchema),
     defaultValues: {
       format: 'auto',

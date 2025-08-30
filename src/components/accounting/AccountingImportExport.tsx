@@ -82,7 +82,7 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
   const [templates, setTemplates] = useState<EntryTemplate[]>([]);
   
   // Forms
-  const importForm = useForm<ImportConfigType>({
+  const importForm = useForm({
     resolver: zodResolver(ImportConfigSchema),
     defaultValues: {
       format: 'auto',
@@ -94,7 +94,7 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
     }
   });
 
-  const templateForm = useForm<TemplateConfigType>({
+  const templateForm = useForm({
     resolver: zodResolver(TemplateConfigSchema),
     defaultValues: {
       variables: {},

@@ -64,11 +64,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
     { id: 'client_4', name: 'Innovation Labs' }
   ]);
 
-  const form = useForm<ContractFormData & { 
-    fixed_rate?: number; 
-    fixed_amount?: number; 
-    tiers?: DiscountTier[] 
-  }>({
+  const form = useForm({
     resolver: zodResolver(contractSchema),
     defaultValues: {
       client_id: contract?.client_id || '',
