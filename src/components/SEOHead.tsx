@@ -146,7 +146,7 @@ export const useDynamicSEOHead = () => {
     setSEO({
       title: `${enterprise.name} - Gestion avec CassKai`,
       description: `Découvrez comment ${enterprise.name} utilise CassKai pour optimiser sa gestion financière${enterprise.sector ? ` dans le secteur ${enterprise.sector}` : ''}.`,
-      keywords: ['entreprise', enterprise.sector, 'gestion financière', 'client CassKai'].filter(Boolean),
+      keywords: ['entreprise', enterprise.sector, 'gestion financière', 'client CassKai'].filter(Boolean) as string[],
       type: 'profile',
       structuredData: {
         '@context': 'https://schema.org',

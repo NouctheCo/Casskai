@@ -1,7 +1,12 @@
 import React, { createContext, useContext, useEffect } from 'react';
     import { useLocalStorage } from '@/hooks/useLocalStorage.tsx';
 
-    const ThemeContext = createContext();
+    interface ThemeContextType {
+      theme: string;
+      setTheme: (theme: string) => void;
+    }
+    
+    const ThemeContext = createContext<ThemeContextType | null>(null);
 
     export const ThemeProvider = ({ children, defaultTheme = 'system', storageKey = 'vite-ui-theme' }) => {
       const [theme, setTheme] = useLocalStorage(storageKey, defaultTheme);
@@ -31,7 +36,7 @@ import React, { createContext, useContext, useEffect } from 'react';
 
     export const useTheme = () => {
       const context = useContext(ThemeContext);
-      if (context === undefined) {
+      if (!context) {
         throw new Error('useTheme must be used within a ThemeProvider');
       }
       return context;
