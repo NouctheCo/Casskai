@@ -13,7 +13,7 @@ if (!STRIPE_SECRET_KEY || STRIPE_SECRET_KEY.includes('YOUR_SECRET_KEY_HERE')) {
 }
 
 const stripe = new Stripe(STRIPE_SECRET_KEY, {
-  apiVersion: '2025-07-30.basil',
+  apiVersion: '2025-08-27.basil',
 });
 
 // ================================
