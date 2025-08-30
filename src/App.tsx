@@ -19,28 +19,26 @@ import ProtectedRoute from '@/components/guards/ProtectedRoute';
 import { UpdateNotification, OfflineIndicator } from '@/hooks/useServiceWorker';
 import HomePage from '@/components/HomePage';
 
-// Import des composants lazy intelligents
-import {
-  LazyAuthPage,
-  LazyOnboardingPage,
-  LazyLandingPage,
-  LazyDashboardPage,
-  LazyAccountingPage,
-  LazyBanksPage,
-  LazyThirdPartiesPage,
-  LazyPurchasesPage,
-  LazyInvoicingPage,
-  LazySalesCrmPage,
-  LazyHumanResourcesPage,
-  LazyProjectsPage,
-  LazyInventoryPage,
-  LazyReportsPage,
-  LazyForecastsPage,
-  LazyTaxPage,
-  LazyContractsPage,
-  LazySettingsPage,
-  LazyBillingPage
-} from '@/utils/lazyComponents';
+// Direct lazy imports - temporary fix for deployment
+const LazyAuthPage = lazy(() => import('@/pages/AuthPage'));
+const LazyOnboardingPage = lazy(() => import('@/pages/OnboardingPage'));
+const LazyLandingPage = lazy(() => import('@/pages/LandingPage'));
+const LazyDashboardPage = lazy(() => import('@/pages/DashboardPage'));
+const LazyAccountingPage = lazy(() => import('@/pages/AccountingPage'));
+const LazyBanksPage = lazy(() => import('@/pages/BanksPage'));
+const LazyThirdPartiesPage = lazy(() => import('@/pages/ThirdPartiesPage'));
+const LazyPurchasesPage = lazy(() => import('@/pages/PurchasesPage'));
+const LazyInvoicingPage = lazy(() => import('@/pages/InvoicingPage'));
+const LazySalesCrmPage = lazy(() => import('@/pages/SalesCrmPage'));
+const LazyHumanResourcesPage = lazy(() => import('@/pages/HumanResourcesPage'));
+const LazyProjectsPage = lazy(() => import('@/pages/ProjectsPage'));
+const LazyInventoryPage = lazy(() => import('@/pages/InventoryPage'));
+const LazyReportsPage = lazy(() => import('@/pages/ReportsPage'));
+const LazyForecastsPage = lazy(() => import('@/pages/ForecastsPage'));
+const LazyTaxPage = lazy(() => import('@/pages/TaxPage'));
+const LazyContractsPage = lazy(() => import('@/pages/ContractsPage'));
+const LazySettingsPage = lazy(() => import('@/pages/SettingsPage'));
+const LazyBillingPage = lazy(() => import('@/pages/BillingPage'));
 
 // Pages spécifiques qui n'ont pas besoin de préchargement intelligent
 const AccountingImportPage = lazy(() => import('@/pages/AccountingImportPage'));

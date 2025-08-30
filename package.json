@@ -130,6 +130,8 @@
     "@types/d3-hierarchy": "^3.1.7",
     "@types/d3-sankey": "^0.12.4",
     "@types/express": "^5.0.3",
+    "@types/jest": "^30.0.0",
+    "@types/lodash": "^4.17.20",
     "@types/node": "^22.0.0",
     "@types/react": "^18.3.3",
     "@types/react-big-calendar": "^1.16.2",
