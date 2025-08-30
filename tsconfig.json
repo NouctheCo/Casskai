@@ -10,7 +10,7 @@
     "noEmit": true,
     "allowJs": true,
     "strict": false,
-    "skipLibCheck": false,
+    "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
