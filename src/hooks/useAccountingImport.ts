@@ -26,7 +26,7 @@ const ImportConfigSchema = z.object({
   skipEmptyLines: z.boolean().default(true),
   validateBeforeImport: z.boolean().default(true),
   autoLetterage: z.boolean().default(false),
-  journalId: z.string().uuid('ID journal invalide'),
+  journalId: z.string().uuid('ID journal invalide').optional(),
 });
 
 export type ImportConfig = z.infer<typeof ImportConfigSchema>;
