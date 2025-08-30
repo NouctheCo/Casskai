@@ -6,26 +6,24 @@ import RouteErrorBoundary from '@/components/RouteErrorBoundary';
 import ProtectedRoute from '@/components/guards/ProtectedRoute';
 import HomePage from '@/components/HomePage';
 
-// Import des composants lazy intelligents
-import {
-  LazyAuthPage,
-  LazyOnboardingPage,
-  LazyLandingPage,
-  LazyDashboardPage,
-  LazyAccountingPage,
-  LazyBanksPage,
-  LazyThirdPartiesPage,
-  LazyPurchasesPage,
-  LazyInvoicingPage,
-  LazyInventoryPage,
-  LazyReportsPage,
-  LazyForecastsPage,
-  LazyTaxPage,
-  LazyContractsPage,
-  LazySettingsPage,
-  LazyBillingPage,
-  LazyModulesManagementPage,
-} from '@/utils/lazyComponents';
+// Direct lazy imports - temporary fix for deployment
+const LazyAuthPage = lazy(() => import('@/pages/AuthPage'));
+const LazyOnboardingPage = lazy(() => import('@/pages/OnboardingPage'));
+const LazyLandingPage = lazy(() => import('@/pages/LandingPage'));
+const LazyDashboardPage = lazy(() => import('@/pages/DashboardPage'));
+const LazyAccountingPage = lazy(() => import('@/pages/AccountingPage'));
+const LazyBanksPage = lazy(() => import('@/pages/BanksPage'));
+const LazyThirdPartiesPage = lazy(() => import('@/pages/ThirdPartiesPage'));
+const LazyPurchasesPage = lazy(() => import('@/pages/PurchasesPage'));
+const LazyInvoicingPage = lazy(() => import('@/pages/InvoicingPage'));
+const LazyInventoryPage = lazy(() => import('@/pages/InventoryPage'));
+const LazyReportsPage = lazy(() => import('@/pages/ReportsPage'));
+const LazyForecastsPage = lazy(() => import('@/pages/ForecastsPage'));
+const LazyTaxPage = lazy(() => import('@/pages/TaxPage'));
+const LazyContractsPage = lazy(() => import('@/pages/ContractsPage'));
+const LazySettingsPage = lazy(() => import('@/pages/SettingsPage'));
+const LazyBillingPage = lazy(() => import('@/pages/BillingPage'));
+const LazyModulesManagementPage = lazy(() => import('@/components/modules/ModulesManagementPage'));
 
 // Pages spécifiques
 const AccountingImportPage = lazy(() => import('@/pages/AccountingImportPage'));
