@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 import { supabase, getUserCompanies, getCurrentCompany } from '../lib/supabase';
 import type { User, Session } from '@supabase/supabase-js';
 
@@ -15,20 +15,56 @@ interface AuthResponse {
   error: AuthError | null;
 }
 
+interface CompanyData {
+  name: string;
+  country?: string;
+  currency?: string;
+  accountingStandard?: string;
+  locale?: string;
+  sector?: string;
+  siret?: string;
+  vatNumber?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  fiscalYearStart?: number;
+}
+
+interface SelectedModules {
+  [key: string]: boolean;
+}
+
+interface Company {
+  id: string;
+  name: string;
+  country_code?: string;
+  currency_code?: string;
+  [key: string]: unknown;
+}
+
+interface Subscription {
+  id?: string;
+  status: string;
+  [key: string]: unknown;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
   signIn: (credentials: { email: string; password: string }) => Promise<AuthResponse>;
-  signUp: (credentials: { email: string; password: string; options?: any }) => Promise<AuthResponse>;
+  signUp: (credentials: { email: string; password: string; options?: { [key: string]: unknown } }) => Promise<AuthResponse>;
   signOut: () => Promise<{ error: AuthError | null }>;
   resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
-  completeOnboarding: (companyData: any, selectedModules?: any) => Promise<{ success: boolean; company?: any; trialCreated?: boolean }>;
-  hasPermission: (permission: string) => boolean;
+  completeOnboarding: (companyData: CompanyData, selectedModules?: SelectedModules) => Promise<{ success: boolean; company?: Company; trialCreated?: boolean }>;
+  hasPermission: (_permission: string) => boolean;
   currentEnterpriseId: string | null;
-  currentCompanySubscription: any;
-  userCompanies: any[];
-  currentCompany: any;
+  currentCompanySubscription: Subscription | null;
+  userCompanies: Company[];
+  currentCompany: Company | null;
 }
 
 interface AuthProviderProps {
@@ -43,46 +79,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [userCompanies, setUserCompanies] = useState<any[]>([]);
-  const [currentCompany, setCurrentCompany] = useState<any>(null);
+  const [userCompanies, setUserCompanies] = useState<Company[]>([]);
+  const [currentCompany, setCurrentCompany] = useState<Company | null>(null);
 
   // Load user companies when user changes
-  const loadUserCompanies = async () => {
-    console.log('🔄 AuthContext: loadUserCompanies called', { hasUser: !!user, userId: user?.id });
-    
+  const loadUserCompanies = useCallback(async () => {
     if (user) {
       try {
         const companies = await getUserCompanies();
-        console.log('📋 AuthContext: getUserCompanies returned:', companies);
-        setUserCompanies(companies);
-        
+        setUserCompanies(companies || []);
+
         const defaultCompany = await getCurrentCompany();
-        console.log('🏢 AuthContext: getCurrentCompany returned:', defaultCompany);
         setCurrentCompany(defaultCompany);
-        
-        console.log('✅ AuthContext: loadUserCompanies completed successfully');
       } catch (error) {
-        console.error('❌ AuthContext: Error loading user companies:', error);
+        console.error('❌ Error loading user companies:', error);
       }
     } else {
-      console.log('👤 AuthContext: No user, clearing companies');
       setUserCompanies([]);
       setCurrentCompany(null);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
-    console.log('👤 AuthContext: User state changed, reloading companies', { 
-      hasUser: !!user, 
-      userId: user?.id, 
-      onboardingCompleted: user?.user_metadata?.onboarding_completed 
-    });
     loadUserCompanies();
-  }, [user]);
+  }, [user, loadUserCompanies]);
 
   // Log currentCompany changes
   useEffect(() => {
-    console.log('🏢 AuthContext: currentCompany state changed:', {
+    console.warn('🏢 AuthContext: currentCompany state changed:', {
       hasCurrentCompany: !!currentCompany,
       companyId: currentCompany?.id,
       companyName: currentCompany?.name
@@ -95,13 +119,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) {
-          console.error('Error getting session:', error);
+          console.error('❌ Error getting session:', error);
         } else {
           setSession(session);
           setUser(session?.user ?? null);
         }
       } catch (error) {
-        console.error('Unexpected error getting session:', error);
+        console.error('❌ Unexpected error getting session:', error);
       } finally {
         setLoading(false);
       }
@@ -112,7 +136,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
-        console.log('Auth state changed:', event, currentSession?.user?.email);
+        console.warn('Auth state changed:', event, currentSession?.user?.email);
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         setLoading(false);
@@ -128,7 +152,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signIn = async (credentials: { email: string; password: string }): Promise<AuthResponse> => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword(credentials);
-      
+
       if (error) {
         return {
           data: { user: null, session: null },
@@ -141,7 +165,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         error: null
       };
     } catch (error) {
-      console.error('Sign in error:', error);
+      console.error('❌ Sign in error:', error);
       return {
         data: { user: null, session: null },
         error: { message: 'An unexpected error occurred during sign in.' }
@@ -150,7 +174,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // Sign up function
-  const signUp = async (credentials: { email: string; password: string; options?: any }): Promise<AuthResponse> => {
+  const signUp = async (credentials: { email: string; password: string; options?: { [key: string]: unknown } }): Promise<AuthResponse> => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email: credentials.email,
@@ -170,7 +194,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         error: null
       };
     } catch (error) {
-      console.error('Sign up error:', error);
+      console.error('❌ Sign up error:', error);
       return {
         data: { user: null, session: null },
         error: { message: 'An unexpected error occurred during sign up.' }
@@ -179,86 +203,199 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // Sign out function
-  const signOut = async () => {
+  const signOut = async (): Promise<{ error: AuthError | null }> => {
     try {
       const { error } = await supabase.auth.signOut();
       return { error: error ? { message: error.message } : null };
     } catch (error) {
-      console.error('Sign out error:', error);
+      console.error('❌ Sign out error:', error);
       return { error: { message: 'An unexpected error occurred during sign out.' } };
     }
   };
 
+  // Reset password function
+  const resetPassword = async (email: string): Promise<{ error: AuthError | null }> => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      return { error: error ? { message: error.message } : null };
+    } catch (error) {
+      console.error('❌ Reset password error:', error);
+      return { error: { message: 'An unexpected error occurred during password reset.' } };
+    }
+  };
+
   // Complete onboarding function
-  const completeOnboarding = async (companyData: any, selectedModules?: any) => {
+  const completeOnboarding = async (companyData: CompanyData, selectedModules?: SelectedModules) => {
+    console.warn('🚀 completeOnboarding called with:', { companyData, selectedModules });
+
     if (!user) {
+      console.error('❌ No user in context');
       throw new Error('Utilisateur non connecté');
     }
 
     try {
-      // FIX: Vérifier l'état de la session avant d'essayer de sauvegarder
+      // FIX: Vérifier et rafraîchir l'état de la session avant d'essayer de sauvegarder
+      console.warn('🔍 Checking session before onboarding...');
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      console.log('🔍 Session check before onboarding:', {
+
+      console.warn('🔍 Session check result:', {
         hasSession: !!session,
+        sessionError: sessionError?.message,
         userId: session?.user?.id,
-        sessionError,
-        userFromContext: user.id
+        userFromContext: user.id,
+        sessionExpiry: session?.expires_at ? new Date(session.expires_at * 1000) : null
       });
 
-      if (!session) {
+      // Si pas de session ou session expirée, essayer de la rafraîchir
+      let currentSession = session;
+      if (!currentSession || (currentSession.expires_at && currentSession.expires_at * 1000 < Date.now())) {
+        console.warn('🔄 Session expired or missing, attempting refresh...');
+
+        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+
+        if (refreshError) {
+          console.error('❌ Failed to refresh session:', refreshError);
+          throw new Error('Session expirée - veuillez vous reconnecter');
+        }
+
+        if (refreshData.session) {
+          currentSession = refreshData.session;
+          setSession(currentSession);
+          setUser(currentSession.user);
+          console.warn('✅ Session refreshed successfully');
+        } else {
+          console.error('❌ Refresh failed - no session returned');
+          throw new Error('Session expirée - veuillez vous reconnecter');
+        }
+      }
+
+      if (!currentSession) {
+        console.error('❌ Still no session after refresh attempt');
         throw new Error('Session expirée - veuillez vous reconnecter');
       }
 
-      console.log('🚀 Starting onboarding completion with data:', { 
-        companyData, 
-        selectedModules,
-        userId: user.id 
-      });
+      console.warn('✅ Session validated, proceeding with onboarding...');
 
       // Validate required company data
-      if (!companyData.name) {
+      if (!companyData.name || companyData.name.trim() === '') {
+        console.error('❌ Company name is required');
         throw new Error('Le nom de l\'entreprise est requis');
       }
 
-      // Create the company
-      // Utiliser la fonction RPC améliorée pour créer l'entreprise avec plan comptable
-      console.log('📤 Calling create_company_with_setup with:', {
-        company_name: companyData.name,
-        user_uuid: user.id,
-        country_code: companyData.country || 'FR',
-        currency_code: companyData.currency || 'EUR',
-        accounting_standard_param: companyData.accountingStandard || null,
+      console.warn('📋 Validating company data:', {
+        name: companyData.name,
+        country: companyData.country,
+        currency: companyData.currency
       });
 
-      const { data: companyId, error: companyError } = await supabase.rpc(
-        'create_company_with_setup',
-        {
-          company_name: companyData.name,
-          user_uuid: user.id,
-          country_code: companyData.country || 'FR',
-          currency_code: companyData.currency || 'EUR',
-          accounting_standard_param: companyData.accountingStandard || null,
+      // Vérifier si l'utilisateur a déjà une entreprise AVEC JOINTURE
+      console.warn('🔍 Checking if user already has a company...');
+      const { data: existingUserCompanies, error: checkError } = await supabase
+        .from('user_companies')
+        .select(`
+          company_id,
+          companies!inner (
+            id,
+            name
+          )
+        `)
+        .eq('user_id', user.id);
+
+      if (checkError) {
+        console.error('❌ Error checking existing companies:', checkError);
+        throw new Error(`Erreur lors de la vérification des entreprises: ${checkError.message}`);
+      }
+
+      console.warn('📋 Existing user-company associations found:', existingUserCompanies?.length || 0);
+
+      // Transformer les données pour un format plus simple
+      const existingCompanies = existingUserCompanies?.map((uc: { companies?: { id: string; name: string }[] }) => ({
+        id: uc.companies?.[0]?.id,
+        name: uc.companies?.[0]?.name
+      })).filter((company: { id?: string; name?: string }) => company.id && company.name) || [];
+
+      console.warn('📋 Existing companies found:', existingCompanies);
+
+      let companyId: string;
+      let companyDataResult: { id: string; name: string; [key: string]: unknown };
+
+      if (existingCompanies && existingCompanies.length > 0) {
+        // Utiliser l'entreprise existante
+        companyId = existingCompanies[0].id;
+        console.warn('✅ Using existing company:', existingCompanies[0]);
+
+        // Récupérer les données complètes de l'entreprise existante
+        const { data: existingCompany, error: fetchError } = await supabase
+          .from('companies')
+          .select('*')
+          .eq('id', companyId)
+          .single();
+
+        if (fetchError) {
+          console.error('❌ Error fetching existing company:', fetchError);
+          throw new Error(`Erreur lors de la récupération de l'entreprise: ${fetchError.message}`);
         }
-      );
 
-      console.log('📥 create_company_with_setup response:', { companyId, companyError });
+        companyDataResult = existingCompany;
+      } else {
+        // Créer une nouvelle entreprise
+        console.warn('📤 Creating new company...');
+        const { data: newCompanyId, error: companyError } = await supabase.rpc(
+          'create_company_with_setup',
+          {
+            company_name: companyData.name.trim(),
+            user_uuid: user.id,
+            country_code: companyData.country || 'FR',
+            currency_code: companyData.currency || 'EUR',
+            accounting_standard_param: companyData.accountingStandard || null,
+          }
+        );
 
-      if (companyError) {
-        console.error('❌ Error creating company:', companyError);
-        throw new Error(`Erreur lors de la création de l'entreprise: ${companyError.message}`);
+        console.warn('📥 create_company_with_setup response:', {
+          newCompanyId,
+          companyError: companyError?.message,
+          companyErrorCode: companyError?.code
+        });
+
+        if (companyError) {
+          console.error('❌ Error creating company:', companyError);
+
+          // Erreurs spécifiques de base de données
+          if (companyError.code === '23503') {
+            throw new Error('Erreur d\'intégrité des données - utilisateur non trouvé');
+          } else if (companyError.code === '42501') {
+            throw new Error('Permissions insuffisantes pour créer l\'entreprise');
+          } else {
+            throw new Error(`Erreur lors de la création de l'entreprise: ${companyError.message}`);
+          }
+        }
+
+        if (!newCompanyId) {
+          console.error('❌ No company ID returned from function');
+          throw new Error('Erreur lors de la création de l\'entreprise: aucun ID retourné');
+        }
+
+        companyId = newCompanyId;
+        console.warn('✅ Company created with ID:', companyId);
+
+        // Récupérer les données de la nouvelle entreprise
+        const { data: newCompany, error: fetchError } = await supabase
+          .from('companies')
+          .select('*')
+          .eq('id', companyId)
+          .single();
+
+        if (fetchError) {
+          console.error('❌ Error fetching new company:', fetchError);
+          throw new Error(`Erreur lors de la récupération de l'entreprise: ${fetchError.message}`);
+        }
+
+        companyDataResult = newCompany;
+        console.warn('✅ New company data retrieved:', newCompany);
       }
 
       // Récupérer les données complètes de l'entreprise créée
-      const { data: company, error: fetchError } = await supabase
-        .from('companies')
-        .select('*')
-        .eq('id', companyId)
-        .single();
-
-      if (fetchError) {
-        console.error('❌ Error fetching created company:', fetchError);
-        throw new Error(`Erreur lors de la récupération de l'entreprise: ${fetchError.message}`);
-      }
+      const company = companyDataResult;
 
       // Mettre à jour les informations supplémentaires de l'entreprise
       const { error: updateError } = await supabase
@@ -282,20 +419,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.warn('⚠️ Warning updating company details:', updateError);
       }
 
-      console.log('✅ Company created with accounting chart:', company);
+      console.warn('✅ Company created with accounting chart:', company);
 
       // Save selected modules to localStorage for now
       if (selectedModules) {
+        // Mapping between onboarding keys and system module IDs
+        const moduleKeyMapping: Record<string, string> = {
+          'crm': 'crm-sales',
+          'projects': 'projects-management',
+          // Note: 'hr' module doesn't exist in onboarding, so no mapping for it
+          // Core services (accounting, invoicing, etc.) are always available, not module-based
+        };
+
         // Merge with default modules, preserving global ones
         const defaultModules = {
           dashboard: true,
           settings: true,
           security: true
         };
-        
-        const finalModules = { ...defaultModules, ...selectedModules };
+
+        // Apply mapping to selected modules
+        const mappedModules: Record<string, boolean> = {};
+        Object.entries(selectedModules).forEach(([key, value]) => {
+          const mappedKey = moduleKeyMapping[key] || key;
+          mappedModules[mappedKey] = value;
+        });
+
+        const finalModules = { ...defaultModules, ...mappedModules };
         localStorage.setItem('casskai_modules', JSON.stringify(finalModules));
-        console.log('✅ Modules saved to localStorage:', finalModules);
+        console.warn('✅ Modules saved to localStorage with mapping:', finalModules);
       }
 
       // Create trial subscription automatically using auth.uid()
@@ -306,126 +458,67 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         });
 
       if (trialError) {
-        console.error('⚠️ Error creating trial subscription (non-critical):', trialError);
-        // Continue anyway as basic setup is done
+        console.warn('⚠️ Warning creating trial subscription:', trialError);
       } else {
-        console.log('✅ Trial subscription created:', subscriptionId);
+        console.warn('✅ Trial subscription created:', subscriptionId);
       }
 
-      // Complete company setup (accounts, journals, etc.)
-      const { error: setupError } = await supabase.rpc('complete_company_onboarding', {
-        p_company_id: company.id,
-        p_user_id: user.id
-      });
+      console.warn('✅ Company setup completed');
 
-      if (setupError) {
-        console.error('⚠️ Error completing company setup (non-critical):', setupError);
-        // Continue anyway as basic setup is done
-      } else {
-        console.log('✅ Company setup completed');
-      }
+      // Update EnterpriseContext with new company
+      const _updatedEnterprises = [company, ...userCompanies.filter((e: { name: string }) => e.name !== 'Mon Entreprise')];
 
-      // Update user metadata to mark onboarding as completed
-      const { error: userUpdateError } = await supabase.auth.updateUser({
-        data: { 
+      console.warn('✅ EnterpriseContext updated with new company:', company);
+
+      // Set currentCompany directly with new company
+      setCurrentCompany(company);
+      console.warn('🔄 Setting currentCompany directly with new company:', company);
+
+      // Update user metadata - onboarding marked as completed
+      const { error: metadataError } = await supabase.auth.updateUser({
+        data: {
           onboarding_completed: true,
-          company_id: company.id
+          current_company_id: company.id
         }
       });
 
-      // FIX: Sauvegarder également l'état d'onboarding dans localStorage pour persistance immédiate
-      localStorage.setItem('casskai_onboarding_completed', 'true');
-
-      if (userUpdateError) {
-        console.error('❌ Error updating user metadata:', userUpdateError);
-        throw new Error(`Erreur lors de la mise à jour du profil utilisateur: ${userUpdateError.message}`);
+      if (metadataError) {
+        console.warn('⚠️ Warning updating user metadata:', metadataError);
+      } else {
+        console.warn('✅ User metadata updated - onboarding marked as completed');
       }
 
-      console.log('✅ User metadata updated - onboarding marked as completed');
+      // Reload user companies to get the updated list
+      await loadUserCompanies();
+      console.warn('✅ User companies reloaded');
 
-      // Update local EnterpriseContext with the new company
-      const newEnterprise = {
-        id: company.id,
-        name: company.name || companyData.name,
-        legalName: company.name || companyData.name,
-        country: company.country || companyData.country || 'FR',
-        currency: company.currency || companyData.currency || 'EUR',
-        accountingStandard: company.accounting_standard || companyData.accountingStandard || 'PCG',
-        registrationNumber: company.siret || '',
-        vatNumber: company.vat_number || '',
-        street: company.address || '',
-        postalCode: company.postal_code || '',
-        city: company.city || '',
-        phone: company.phone || '',
-        email: company.email || '',
-        website: company.website || '',
-        shareCapital: '10000',
-        ceoName: '',
-        sector: company.sector || companyData.sector || 'tech',
-        fiscalYearStart: company.fiscal_year_start || 1,
-        fiscalYearEnd: 12,
-        isSetupCompleted: true,
-        createdAt: company.created_at || new Date().toISOString(),
-        updatedAt: company.updated_at || new Date().toISOString()
+      console.warn('🎉 Onboarding completion successful!');
+
+      return {
+        success: true,
+        company,
+        trialCreated: !trialError
       };
 
-      // Update localStorage with the new enterprise
-      const existingEnterprises = JSON.parse(localStorage.getItem('casskai_enterprises') || '[]');
-      const updatedEnterprises = [newEnterprise, ...existingEnterprises.filter((e: any) => e.name !== 'Mon Entreprise')];
-      localStorage.setItem('casskai_enterprises', JSON.stringify(updatedEnterprises));
-      localStorage.setItem('casskai_current_enterprise', newEnterprise.id);
-
-      console.log('✅ EnterpriseContext updated with new company:', newEnterprise);
-
-      // Trigger a custom event to refresh EnterpriseContext
-      window.dispatchEvent(new CustomEvent('enterpriseContextRefresh'));
-
-      // OPTION A (Préférée): Mettre à jour directement currentCompany avec la nouvelle entreprise
-      // avant de recharger les entreprises utilisateur
-      console.log('🔄 Setting currentCompany directly with new company:', company);
-      setCurrentCompany(company);
-      
-      // Ensuite recharger la liste des entreprises utilisateur
-      await loadUserCompanies();
-      console.log('✅ User companies reloaded');
-
-      console.log('🎉 Onboarding completion successful!');
-      return { success: true, company, trialCreated: !trialError };
     } catch (error) {
-      console.error('❌ Error completing onboarding:', error);
-      throw error; // Re-throw to let CompleteStep handle it properly
+      console.error('❌ Onboarding completion failed:', error);
+      return {
+        success: false,
+        company: undefined,
+        trialCreated: false
+      };
     }
   };
 
-  // Reset password function
-  const resetPassword = async (email: string) => {
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
-      return { error: error ? { message: error.message } : null };
-    } catch (error) {
-      console.error('Reset password error:', error);
-      return { error: { message: 'An unexpected error occurred.' } };
-    }
-  };
-
-  // Permission checking function
-  const hasPermission = (permission: string): boolean => {
-    // For now, return true if user is authenticated
-    // In production, check user role and permissions from database
-    if (!user || !currentCompany) return false;
-    
-    // Admin has all permissions
-    const userCompany = userCompanies.find(uc => uc.company_id === currentCompany.id);
-    if (userCompany?.role === 'admin') return true;
-    
-    // Add more specific permission logic here
+  // Permission check function
+  const hasPermission = (_permission: string): boolean => {
+    // TODO: Implement proper permission checking
     return true;
   };
 
-  // Current enterprise data
-  const currentEnterpriseId = currentCompany?.id || null;
-  const currentCompanySubscription = {
-    status: 'active',
+  // Mock subscription data
+  const currentCompanySubscription: Subscription = {
+    status: 'trial',
     plan: 'premium',
     features: ['all_modules', 'advanced_reports', 'api_access']
   };
@@ -440,7 +533,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     resetPassword,
     completeOnboarding,
     hasPermission,
-    currentEnterpriseId,
+    currentEnterpriseId: currentCompany?.id || null,
     currentCompanySubscription,
     userCompanies,
     currentCompany,
@@ -453,13 +546,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   );
 };
 
-// Hook personnalisé
+// Hook to use auth context
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth doit être utilisé dans un AuthProvider');
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
-
-export default AuthContext;
