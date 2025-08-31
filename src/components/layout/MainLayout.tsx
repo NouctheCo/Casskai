@@ -156,8 +156,8 @@ export function MainLayout() {
           <main className={cn(
             "main-content flex-1 overflow-y-auto",
             showSidebar ? "bg-gray-50 dark:bg-gray-900" : "",
-            showSidebar && !isDesktopCollapsed ? "main-content" : "",
-            showSidebar && isDesktopCollapsed ? "main-content-collapsed" : ""
+            showSidebar && !isDesktopCollapsed ? "ml-64" : "",
+            showSidebar && isDesktopCollapsed ? "ml-16" : ""
           )}>
             <div className={cn(
               showSidebar ? "page-content container mx-auto px-4 sm:px-6 lg:px-8 py-8" : ""
