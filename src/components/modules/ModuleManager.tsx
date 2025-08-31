@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';      // Fusionner les modules mockés avec l'état réel depuis localStorage (utilise les vrais IDs maintenant) Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
@@ -112,7 +111,7 @@ const ModuleManager: React.FC = () => {
           category: 'hr',
           icon: 'users-cog',
           status: 'available',
-          isActive: true,
+          isActive: false,
           isPremium: true,
           isCore: false,
           pricing: {
@@ -164,7 +163,7 @@ const ModuleManager: React.FC = () => {
           category: 'marketplace',
           icon: 'store',
           status: 'available',
-          isActive: true,
+          isActive: false,
           isPremium: false,
           isCore: true,
           pricing: {
@@ -229,8 +228,34 @@ const ModuleManager: React.FC = () => {
           permissions: ['ai:use', 'ai:train'],
         },
       ];
+
+      // Charger l'état des modules depuis localStorage
+      const savedModules = localStorage.getItem('casskai_modules');
+      let activeModulesFromStorage: Record<string, boolean> = {};
+
+      if (savedModules) {
+        try {
+          activeModulesFromStorage = JSON.parse(savedModules);
+          console.warn('[ModuleManager] Modules chargés depuis localStorage:', activeModulesFromStorage);
+        } catch (error) {
+          console.error('[ModuleManager] Erreur parsing localStorage modules:', error);
+        }
+      }
+
+      // Fusionner les modules mockés avec l'état réel depuis localStorage
+      const updatedModules = mockModules.map(module => {
+        // Vérifier si ce module est activé dans localStorage (utilise les vrais IDs maintenant)
+        const isActiveFromStorage = activeModulesFromStorage[module.id] || false;
+
+        return {
+          ...module,
+          isActive: isActiveFromStorage || module.isActive // Priorité à localStorage, sinon valeur mockée
+        };
+      });
+
+      console.warn('[ModuleManager] Modules fusionnés:', updatedModules.map(m => ({ id: m.id, isActive: m.isActive })));
       
-      setModules(mockModules);
+      setModules(updatedModules);
     } catch (error) {
       console.error('Erreur de chargement des modules:', error);
     } finally {
@@ -287,9 +312,28 @@ const ModuleManager: React.FC = () => {
       }
 
       // Mettre à jour l'état du module
-      setModules(prev => prev.map(m => 
+      const updatedModules = modules.map(m => 
         m.id === moduleId ? { ...m, isActive: activate } : m
-      ));
+      );
+      setModules(updatedModules);
+
+      // Sauvegarder l'état dans localStorage
+      const savedModules = localStorage.getItem('casskai_modules');
+      let activeModulesFromStorage: Record<string, boolean> = {};
+
+      if (savedModules) {
+        try {
+          activeModulesFromStorage = JSON.parse(savedModules);
+        } catch (error) {
+          console.error('[ModuleManager] Erreur parsing localStorage modules:', error);
+        }
+      }
+
+      // Mapping inverse pour sauvegarder avec les bonnes clés
+      // Mettre à jour l'état dans localStorage (utilise les vrais IDs maintenant)
+      activeModulesFromStorage[moduleId] = activate;
+      localStorage.setItem('casskai_modules', JSON.stringify(activeModulesFromStorage));
+      console.warn(`[ModuleManager] Module ${moduleId} sauvegardé dans localStorage:`, activate);
 
       // Nettoyer le statut d'activation
       setActivationStatuses(prev => {

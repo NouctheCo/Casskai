@@ -80,6 +80,14 @@ const coreNavItems = [
   },
 ];
 
+// Mapping entre les clés simples des modules et les IDs complexes de navigation
+const moduleKeyMapping: Record<string, string> = {
+  'crm': 'crm-sales',
+  'hr': 'hr-light', 
+  'projects': 'projects-management',
+  'marketplace': 'marketplace'
+};
+
 // Configuration des modules premium avec leurs éléments de navigation
 const moduleNavItems = {
   'crm-sales': {
@@ -289,13 +297,39 @@ const ModularSidebarEnhanced: React.FC = () => {
       });
     }
 
-    // Ajouter les modules actifs
+    // Ajouter les modules actifs depuis localStorage (modules sélectionnés lors de l'onboarding)
+    const savedModules = localStorage.getItem('casskai_modules');
+    if (savedModules) {
+      try {
+        const activeModulesFromStorage = JSON.parse(savedModules);
+        Object.keys(activeModulesFromStorage).forEach(moduleId => {
+          if (activeModulesFromStorage[moduleId] && moduleNavItems[moduleId as keyof typeof moduleNavItems]) {
+            const moduleNav = moduleNavItems[moduleId as keyof typeof moduleNavItems];
+            // Éviter les doublons
+            if (!navigation.some(item => item.href === moduleNav.href)) {
+              navigation.push(moduleNav);
+            }
+          }
+        });
+      } catch (error) {
+        console.error('[ModularSidebarEnhanced] Erreur parsing localStorage modules:', error);
+      }
+    }
+
+    // Ajouter les modules actifs du contexte (système de modules)
     activeModules.forEach(module => {
       if (module.isCore) return; // Skip les modules core (déjà ajoutés)
-      
-      const moduleNav = moduleNavItems[module.id as keyof typeof moduleNavItems];
+
+      // Utiliser le mapping pour convertir la clé simple en clé complexe
+      const mappedKey = moduleKeyMapping[module.id] || module.id;
+      const moduleNav = moduleNavItems[mappedKey as keyof typeof moduleNavItems];
       if (moduleNav) {
-        navigation.push(moduleNav);
+        // Éviter les doublons
+        if (!navigation.some(item => item.href === moduleNav.href)) {
+          navigation.push(moduleNav);
+        }
+      } else {
+        console.warn(`[ModularSidebarEnhanced] Module ${module.id} (mapped to ${mappedKey}) not found in moduleNavItems`);
       }
     });
 
