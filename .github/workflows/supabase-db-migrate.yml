@@ -8,9 +8,7 @@ on:
         required: true
         default: 'dev'
         type: choice
-        options:
-          - dev
-          - prod
+  options: [dev, prod]
 
 jobs:
   migrate:
@@ -60,7 +58,6 @@ jobs:
           new_url="${new_url}${sep}host=${host}"
           echo "Using IPv4 address $ipv4 for $host"
           echo "db_url_v4=$new_url" >> "$GITHUB_OUTPUT"
-
       - name: Validate DB URL
         run: |
           if [ -z "${{ steps.select-db.outputs.db_url }}" ]; then
