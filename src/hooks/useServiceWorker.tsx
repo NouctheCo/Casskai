@@ -249,12 +249,14 @@ export const UpdateNotification = () => {
           <p className="text-sm opacity-90 mt-1">Une nouvelle version de CassKai est prête.</p>
           <div className="flex space-x-2 mt-3">
             <button
+              type="button"
               onClick={acceptUpdate}
               className="px-3 py-1 bg-white text-blue-500 text-sm rounded hover:bg-opacity-90 transition-colors"
             >
               Mettre à jour
             </button>
             <button
+              type="button"
               onClick={dismissUpdate}
               className="px-3 py-1 text-sm border border-white border-opacity-50 rounded hover:bg-white hover:bg-opacity-10 transition-colors"
             >

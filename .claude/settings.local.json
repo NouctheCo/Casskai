@@ -80,7 +80,12 @@
       "Bash(dir /b \"C:\\Users\\noutc\\Casskai\\supabase\\migrations\")",
       "Bash(docker volume prune:*)",
       "Bash(docker system prune:*)",
-      "Bash(do if [ -f \"C:\\Users\\noutc\\Casskai\\supabase\\migrations$file\" ])"
+      "Bash(do if [ -f \"C:\\Users\\noutc\\Casskai\\supabase\\migrations$file\" ])",
+      "Bash(ssh:*)",
+      "Bash(rg:*)",
+      "WebFetch(domain:localhost)",
+      "Bash(rsync:*)",
+      "Bash(tar:*)"
     ],
     "deny": []
   }

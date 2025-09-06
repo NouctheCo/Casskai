@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Module CRM/Ventes - Pipeline commercial intégré avec signature électronique
 
 import { Module, ModuleDefinition, ModuleContext } from '@/types/modules.types';

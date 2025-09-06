@@ -1,174 +1,158 @@
 import React, { useState } from 'react';
-import { useSupabase } from '../../hooks';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Loader2, Mail, Lock, User, AlertCircle, CheckCircle } from 'lucide-react';
+import { Loader2, Lock, User, AlertCircle, CheckCircle } from 'lucide-react';
 
-interface AuthGuardProps {
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
-  requireAuth?: boolean;
-}
-
-const AuthGuard: React.FC<AuthGuardProps> = ({ 
-  children, 
-  fallback, 
-  requireAuth = true 
-}) => {
-  const { isAuthenticated, isLoading, signIn, signUp, resetPassword } = useSupabase();
-  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string>('');
-  const [success, setSuccess] = useState<string>('');
+export const AuthForm: React.FC = () => {
+  const { signIn, signUp } = useAuth();
+  const [activeTab, setActiveTab] = useState('signin');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const [signInForm, setSignInForm] = useState({ email: '', password: '' });
-  const [signUpForm, setSignUpForm] = useState({ email: '', password: '', confirmPassword: '', fullName: '' });
-  const [resetEmail, setResetEmail] = useState('');
-  const [showResetForm, setShowResetForm] = useState(false);
-
-  if (!requireAuth) return <>{children}</>;
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-8 text-center">
-            <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-600 mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Vérification...</h2>
-            <p className="text-gray-600 text-sm">Vérification de votre authentification</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (isAuthenticated) return <>{children}</>;
+  const [signUpForm, setSignUpForm] = useState({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setLoading(true);
     setError('');
-    setSuccess('');
     try {
-      const { user, error } = await signIn(signInForm.email, signInForm.password);
-      if (error) setError(error.message || 'Erreur de connexion');
-      else if (user) setSuccess('Connexion réussie !');
-    } catch {
-      setError("Une erreur inattendue s'est produite");
+      await signIn(signInForm);
+    } catch (err: any) {
+      setError(err.message || 'Erreur de connexion.');
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setError('');
-    setSuccess('');
-
     if (signUpForm.password !== signUpForm.confirmPassword) {
-      setError('Les mots de passe ne correspondent pas');
-      setIsSubmitting(false);
+      setError('Les mots de passe ne correspondent pas.');
       return;
     }
-    if (signUpForm.password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères');
-      setIsSubmitting(false);
-      return;
-    }
-
-    try {
-      const { user, error } = await signUp(signUpForm.email, signUpForm.password, { full_name: signUpForm.fullName });
-      if (error) setError(error.message || "Erreur lors de l'inscription");
-      else setSuccess("Inscription réussie ! Vérifiez vos emails pour confirmer votre compte.");
-    } catch {
-      setError("Une erreur inattendue s'est produite");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleResetPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+    setLoading(true);
     setError('');
     setSuccess('');
     try {
-      const { error } = await resetPassword(resetEmail);
-      if (error) setError(error.message || "Erreur lors de l'envoi de l'email");
-      else {
-        setSuccess("Email de réinitialisation envoyé ! Vérifiez votre boîte mail.");
-        setShowResetForm(false);
-        setResetEmail('');
-      }
-    } catch {
-      setError("Une erreur inattendue s'est produite");
+      await signUp({
+        email: signUpForm.email,
+        password: signUpForm.password,
+        options: {
+          data: {
+            first_name: signUpForm.firstName,
+            last_name: signUpForm.lastName,
+          },
+        },
+      });
+      setSuccess("Inscription réussie ! Veuillez vérifier vos e-mails pour confirmer votre compte.");
+      setSignUpForm({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
+      setActiveTab('signin');
+    } catch (err: any) {
+      setError(err.message || "Erreur lors de l'inscription.");
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
-  const renderAuthForm = () => (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Bienvenue sur CassKai</CardTitle>
-          <CardDescription>Connectez-vous pour accéder à votre espace de gestion</CardDescription>
+          <CardDescription>Connectez-vous pour accéder à votre espace</CardDescription>
         </CardHeader>
-
         <CardContent>
-          {error && <Alert className="mb-4 border-red-200 bg-red-50"><AlertCircle className="h-4 w-4 text-red-600" /><AlertDescription className="text-red-800">{error}</AlertDescription></Alert>}
-          {success && <Alert className="mb-4 border-green-200 bg-green-50"><CheckCircle className="h-4 w-4 text-green-600" /><AlertDescription className="text-green-800">{success}</AlertDescription></Alert>}
-
-          {showResetForm ? (
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="reset-email">Email</Label>
-                <Input id="reset-email" type="email" placeholder="votre@email.com" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} />
-              </div>
-              <div className="flex gap-2">
-                <Button onClick={handleResetPassword} disabled={isSubmitting} className="flex-1">
-                  {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />}Envoyer
-                </Button>
-                <Button variant="outline" onClick={() => setShowResetForm(false)}>Annuler</Button>
-              </div>
-            </div>
-          ) : (
-            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'signin' | 'signup')}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">Connexion</TabsTrigger>
-                <TabsTrigger value="signup">Inscription</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="signin">
-                <div className="space-y-4">
-                  <div><Label htmlFor="signin-email">Email</Label><Input id="signin-email" type="email" placeholder="votre@email.com" value={signInForm.email} onChange={(e) => setSignInForm({ ...signInForm, email: e.target.value })} /></div>
-                  <div><Label htmlFor="signin-password">Mot de passe</Label><Input id="signin-password" type="password" value={signInForm.password} onChange={(e) => setSignInForm({ ...signInForm, password: e.target.value })} /></div>
-                  <Button onClick={handleSignIn} className="w-full" disabled={isSubmitting}>{isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Lock className="mr-2 h-4 w-4" />}Se connecter</Button>
-                  <Button variant="link" onClick={() => setShowResetForm(true)} className="w-full">Mot de passe oublié ?</Button>
+          {error && <Alert variant="destructive" className="mb-4"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
+          {success && <Alert className="border-green-500 text-green-700 mb-4"><CheckCircle className="h-4 w-4" /><AlertDescription>{success}</AlertDescription></Alert>}
+          
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="signin">Connexion</TabsTrigger>
+              <TabsTrigger value="signup" data-testid="signup-tab">Inscription</TabsTrigger>
+            </TabsList>
+            <TabsContent value="signin">
+              <form onSubmit={handleSignIn} className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email-signin">Email</Label>
+                  <Input id="email-signin" type="email" placeholder="m@example.com" required value={signInForm.email} onChange={(e) => setSignInForm({...signInForm, email: e.target.value})} data-testid="email-input" />
                 </div>
-              </TabsContent>
-
-              <TabsContent value="signup">
-                <form onSubmit={handleSignUp} className="space-y-4">
-                  <div><Label htmlFor="signup-name">Nom complet</Label><Input id="signup-name" type="text" placeholder="Votre nom" value={signUpForm.fullName} onChange={(e) => setSignUpForm({ ...signUpForm, fullName: e.target.value })} /></div>
-                  <div><Label htmlFor="signup-email">Email</Label><Input id="signup-email" type="email" placeholder="votre@email.com" value={signUpForm.email} onChange={(e) => setSignUpForm({ ...signUpForm, email: e.target.value })} required /></div>
-                  <div><Label htmlFor="signup-password">Mot de passe</Label><Input id="signup-password" type="password" placeholder="Minimum 6 caractères" value={signUpForm.password} onChange={(e) => setSignUpForm({ ...signUpForm, password: e.target.value })} required /></div>
-                  <div><Label htmlFor="signup-confirm">Confirmer le mot de passe</Label><Input id="signup-confirm" type="password" value={signUpForm.confirmPassword} onChange={(e) => setSignUpForm({ ...signUpForm, confirmPassword: e.target.value })} required /></div>
-                  <Button type="submit" className="w-full" disabled={isSubmitting}>{isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <User className="mr-2 h-4 w-4" />}S'inscrire</Button>
-                </form>
-              </TabsContent>
-            </Tabs>
-          )}
+                <div className="space-y-2">
+                  <Label htmlFor="password-signin">Mot de passe</Label>
+                  <Input id="password-signin" type="password" required value={signInForm.password} onChange={(e) => setSignInForm({...signInForm, password: e.target.value})} data-testid="password-input" />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading && activeTab === 'signin' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Lock className="mr-2 h-4 w-4" />}
+                  Se connecter
+                </Button>
+              </form>
+            </TabsContent>
+            <TabsContent value="signup">
+              <form onSubmit={handleSignUp} className="space-y-4 pt-4">
+                 <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName">Prénom</Label>
+                      <Input id="firstName" placeholder="Jean" required value={signUpForm.firstName} onChange={(e) => setSignUpForm({...signUpForm, firstName: e.target.value})} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName">Nom</Label>
+                      <Input id="lastName" placeholder="Dupont" required value={signUpForm.lastName} onChange={(e) => setSignUpForm({...signUpForm, lastName: e.target.value})} />
+                    </div>
+                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email-signup">Email</Label>
+                  <Input id="email-signup" type="email" placeholder="m@example.com" required value={signUpForm.email} onChange={(e) => setSignUpForm({...signUpForm, email: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password-signup">Mot de passe</Label>
+                  <Input id="password-signup" type="password" required value={signUpForm.password} onChange={(e) => setSignUpForm({...signUpForm, password: e.target.value})} />
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+                    <Input id="confirmPassword" type="password" required value={signUpForm.confirmPassword} onChange={(e) => setSignUpForm({...signUpForm, confirmPassword: e.target.value})} />
+                  </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading && activeTab === 'signup' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <User className="mr-2 h-4 w-4" />}
+                  S'inscrire
+                </Button>
+              </form>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>
   );
-
-  return fallback || renderAuthForm();
 };
 
-export default AuthGuard;
+interface AuthGuardProps {
+  children: React.ReactNode;
+}
+
+const AuthGuardComp: React.FC<AuthGuardProps> = ({ children }) => {
+  const { loading, isAuthenticated, onboardingCompleted } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <AuthForm />;
+  }
+
+  if (!onboardingCompleted) {
+    return <Navigate to="/onboarding" replace />;
+  }
+
+  return <>{children}</>;
+};

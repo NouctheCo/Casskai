@@ -1,46 +1,19 @@
 // Financial Reports Types
 export interface FinancialReport {
   id: string;
+  company_id: string;
   name: string;
-  type: 'balance_sheet' | 'income_statement' | 'cash_flow' | 'trial_balance' | 'profit_loss' | 'general_ledger';
-  format: 'detailed' | 'summary' | 'comparative';
-  
-  // Period information
-  period: {
-    start_date: string;
-    end_date: string;
-    type: 'monthly' | 'quarterly' | 'annual' | 'custom';
-  };
-  
-  // Comparison settings
-  comparison?: {
-    enabled: boolean;
-    period_type: 'previous_period' | 'previous_year' | 'budget' | 'custom';
-    comparison_start?: string;
-    comparison_end?: string;
-  };
-  
-  // Status and metadata
+  type: 'balance_sheet' | 'income_statement' | 'cash_flow' | 'trial_balance';
+  format: 'detailed' | 'summary';
+  period_start: string;
+  period_end: string;
   status: 'draft' | 'generating' | 'ready' | 'published' | 'archived';
-  generated_at?: string;
-  generated_by: string;
-  
-  // File information
   file_url?: string;
-  file_format: 'pdf' | 'excel' | 'csv';
+  file_format?: 'pdf' | 'excel' | 'csv';
   file_size?: number;
-  
-  // Enterprise and access
-  enterprise_id: string;
-  is_public: boolean;
-  access_level: 'internal' | 'management' | 'board' | 'external';
-  
-  // Settings
-  include_notes: boolean;
-  include_charts: boolean;
-  show_variance: boolean;
-  currency: string;
-  
+  generated_at?: string;
+  generated_by?: string;
+  currency?: string;
   created_at: string;
   updated_at: string;
 }
@@ -294,18 +267,12 @@ export interface ReportAnalytics {
 // Form data types
 export interface ReportFormData {
   name: string;
-  type: 'balance_sheet' | 'income_statement' | 'cash_flow' | 'trial_balance' | 'profit_loss';
-  format: 'detailed' | 'summary' | 'comparative';
+  type: 'balance_sheet' | 'income_statement' | 'cash_flow' | 'trial_balance';
+  format: 'detailed' | 'summary';
   period_start: string;
   period_end: string;
-  comparison_enabled: boolean;
-  comparison_period_start?: string;
-  comparison_period_end?: string;
-  include_notes: boolean;
-  include_charts: boolean;
-  show_variance: boolean;
-  file_format: 'pdf' | 'excel' | 'csv';
-  access_level: 'internal' | 'management' | 'board' | 'external';
+  file_format?: 'pdf' | 'excel' | 'csv';
+  currency?: string;
 }
 
 export interface ReportTemplateFormData {

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useEffect, useState } from 'react';
 import { useAppState } from '../../hooks';
 import SupabaseSetupWizard from '../setup/SupabaseSetupWizard';

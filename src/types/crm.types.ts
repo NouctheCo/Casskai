@@ -1,3 +1,12 @@
+export interface OpportunityStage {
+  id: string;
+  name: string;
+  order: number;
+  color?: string;
+}
+
+export type OpportunityStatus = 'prospecting' | 'qualification' | 'proposal' | 'negotiation' | 'closing' | 'won' | 'lost';
+
 export interface Contact {
   id: string;
   first_name: string;

@@ -1,2 +1,307 @@
-<testsuites id="" name="" tests="0" failures="0" skipped="0" errors="0" time="44.444411">
+<testsuites id="" name="" tests="9" failures="7" skipped="0" errors="0" time="67.94317699999999">
+<testsuite name="auth.cleanup.ts" timestamp="2025-09-04T20:28:27.590Z" hostname="cleanup" tests="1" failures="0" skipped="0" time="0.006" errors="0">
+<testcase name="remove auth file" classname="auth.cleanup.ts" time="0.006">
+<system-out>
+<![CDATA[🧹 Authentication file removed
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="auth.setup.ts" timestamp="2025-09-04T20:28:27.590Z" hostname="setup" tests="1" failures="0" skipped="0" time="1.025" errors="0">
+<testcase name="authenticate" classname="auth.setup.ts" time="1.025">
+<system-out>
+<![CDATA[ℹ️ User already authenticated or auth form not found
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="auth-flow.spec.ts" timestamp="2025-09-04T20:28:27.590Z" hostname="chromium" tests="1" failures="1" skipped="0" time="11.29" errors="0">
+<testcase name="Full Authentication Flow › should allow a user to sign up, sign out, and sign back in" classname="auth-flow.spec.ts" time="11.29">
+<failure message="auth-flow.spec.ts:18:3 should allow a user to sign up, sign out, and sign back in" type="FAILURE">
+<![CDATA[  [chromium] › auth-flow.spec.ts:18:3 › Full Authentication Flow › should allow a user to sign up, sign out, and sign back in 
+
+    TimeoutError: locator.click: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for getByRole('tab', { name: 'Inscription' })
+
+
+      21 |
+      22 |     // Cliquer sur l'onglet d'inscription
+    > 23 |     await page.getByRole('tab', { name: 'Inscription' }).click();
+         |                                                          ^
+      24 |
+      25 |     // Remplir le formulaire d'inscription
+      26 |     await page.getByPlaceholder('Prénom').fill(user.firstName);
+        at C:\Users\noutc\Casskai\tests\e2e\auth-flow.spec.ts:23:58
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\test-results\auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\test-results\auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\test-results\auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-chromium\video.webm]]
+
+[[ATTACHMENT|auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="auth-flow.spec.ts" timestamp="2025-09-04T20:28:27.590Z" hostname="firefox" tests="1" failures="1" skipped="0" time="30.165" errors="0">
+<testcase name="Full Authentication Flow › should allow a user to sign up, sign out, and sign back in" classname="auth-flow.spec.ts" time="30.165">
+<failure message="auth-flow.spec.ts:18:3 should allow a user to sign up, sign out, and sign back in" type="FAILURE">
+<![CDATA[  [firefox] › auth-flow.spec.ts:18:3 › Full Authentication Flow › should allow a user to sign up, sign out, and sign back in 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.goto: Test timeout of 30000ms exceeded.
+    Call log:
+      - navigating to "http://localhost:5173/auth", waiting until "load"
+
+
+      18 |   test('should allow a user to sign up, sign out, and sign back in', async ({ page }) => {
+      19 |     // 1. Phase d'inscription (Sign Up)
+    > 20 |     await page.goto('/auth'); // Assurez-vous que '/auth' est la bonne route pour votre formulaire
+         |                ^
+      21 |
+      22 |     // Cliquer sur l'onglet d'inscription
+      23 |     await page.getByRole('tab', { name: 'Inscription' }).click();
+        at C:\Users\noutc\Casskai\tests\e2e\auth-flow.spec.ts:20:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\test-results\auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-firefox\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\test-results\auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-firefox\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\test-results\auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-firefox\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-firefox\test-failed-1.png]]
+
+[[ATTACHMENT|auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-firefox\video.webm]]
+
+[[ATTACHMENT|auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-firefox\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="auth-flow.spec.ts" timestamp="2025-09-04T20:28:27.590Z" hostname="webkit" tests="1" failures="1" skipped="0" time="12.127" errors="0">
+<testcase name="Full Authentication Flow › should allow a user to sign up, sign out, and sign back in" classname="auth-flow.spec.ts" time="12.127">
+<failure message="auth-flow.spec.ts:18:3 should allow a user to sign up, sign out, and sign back in" type="FAILURE">
+<![CDATA[  [webkit] › auth-flow.spec.ts:18:3 › Full Authentication Flow › should allow a user to sign up, sign out, and sign back in 
+
+    TimeoutError: locator.click: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for getByRole('tab', { name: 'Inscription' })
+
+
+      21 |
+      22 |     // Cliquer sur l'onglet d'inscription
+    > 23 |     await page.getByRole('tab', { name: 'Inscription' }).click();
+         |                                                          ^
+      24 |
+      25 |     // Remplir le formulaire d'inscription
+      26 |     await page.getByPlaceholder('Prénom').fill(user.firstName);
+        at C:\Users\noutc\Casskai\tests\e2e\auth-flow.spec.ts:23:58
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\test-results\auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-webkit\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\test-results\auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-webkit\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\test-results\auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-webkit\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-webkit\test-failed-1.png]]
+
+[[ATTACHMENT|auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-webkit\video.webm]]
+
+[[ATTACHMENT|auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-webkit\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="auth-flow.spec.ts" timestamp="2025-09-04T20:28:27.590Z" hostname="Mobile Chrome" tests="1" failures="1" skipped="0" time="11.716" errors="0">
+<testcase name="Full Authentication Flow › should allow a user to sign up, sign out, and sign back in" classname="auth-flow.spec.ts" time="11.716">
+<failure message="auth-flow.spec.ts:18:3 should allow a user to sign up, sign out, and sign back in" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › auth-flow.spec.ts:18:3 › Full Authentication Flow › should allow a user to sign up, sign out, and sign back in 
+
+    TimeoutError: locator.click: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for getByRole('tab', { name: 'Inscription' })
+
+
+      21 |
+      22 |     // Cliquer sur l'onglet d'inscription
+    > 23 |     await page.getByRole('tab', { name: 'Inscription' }).click();
+         |                                                          ^
+      24 |
+      25 |     // Remplir le formulaire d'inscription
+      26 |     await page.getByPlaceholder('Prénom').fill(user.firstName);
+        at C:\Users\noutc\Casskai\tests\e2e\auth-flow.spec.ts:23:58
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\test-results\auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Mobile-Chrome\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\test-results\auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Mobile-Chrome\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\test-results\auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Mobile-Chrome\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Mobile-Chrome\test-failed-1.png]]
+
+[[ATTACHMENT|auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Mobile-Chrome\video.webm]]
+
+[[ATTACHMENT|auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Mobile-Chrome\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="auth-flow.spec.ts" timestamp="2025-09-04T20:28:27.590Z" hostname="Mobile Safari" tests="1" failures="1" skipped="0" time="12.069" errors="0">
+<testcase name="Full Authentication Flow › should allow a user to sign up, sign out, and sign back in" classname="auth-flow.spec.ts" time="12.069">
+<failure message="auth-flow.spec.ts:18:3 should allow a user to sign up, sign out, and sign back in" type="FAILURE">
+<![CDATA[  [Mobile Safari] › auth-flow.spec.ts:18:3 › Full Authentication Flow › should allow a user to sign up, sign out, and sign back in 
+
+    TimeoutError: locator.click: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for getByRole('tab', { name: 'Inscription' })
+
+
+      21 |
+      22 |     // Cliquer sur l'onglet d'inscription
+    > 23 |     await page.getByRole('tab', { name: 'Inscription' }).click();
+         |                                                          ^
+      24 |
+      25 |     // Remplir le formulaire d'inscription
+      26 |     await page.getByPlaceholder('Prénom').fill(user.firstName);
+        at C:\Users\noutc\Casskai\tests\e2e\auth-flow.spec.ts:23:58
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\test-results\auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Mobile-Safari\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\test-results\auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Mobile-Safari\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\test-results\auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Mobile-Safari\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Mobile-Safari\test-failed-1.png]]
+
+[[ATTACHMENT|auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Mobile-Safari\video.webm]]
+
+[[ATTACHMENT|auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Mobile-Safari\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="auth-flow.spec.ts" timestamp="2025-09-04T20:28:27.590Z" hostname="Microsoft Edge" tests="1" failures="1" skipped="0" time="11.802" errors="0">
+<testcase name="Full Authentication Flow › should allow a user to sign up, sign out, and sign back in" classname="auth-flow.spec.ts" time="11.802">
+<failure message="auth-flow.spec.ts:18:3 should allow a user to sign up, sign out, and sign back in" type="FAILURE">
+<![CDATA[  [Microsoft Edge] › auth-flow.spec.ts:18:3 › Full Authentication Flow › should allow a user to sign up, sign out, and sign back in 
+
+    TimeoutError: locator.click: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for getByRole('tab', { name: 'Inscription' })
+
+
+      21 |
+      22 |     // Cliquer sur l'onglet d'inscription
+    > 23 |     await page.getByRole('tab', { name: 'Inscription' }).click();
+         |                                                          ^
+      24 |
+      25 |     // Remplir le formulaire d'inscription
+      26 |     await page.getByPlaceholder('Prénom').fill(user.firstName);
+        at C:\Users\noutc\Casskai\tests\e2e\auth-flow.spec.ts:23:58
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\test-results\auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Microsoft-Edge\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\test-results\auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Microsoft-Edge\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\test-results\auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Microsoft-Edge\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Microsoft-Edge\test-failed-1.png]]
+
+[[ATTACHMENT|auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Microsoft-Edge\video.webm]]
+
+[[ATTACHMENT|auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Microsoft-Edge\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="auth-flow.spec.ts" timestamp="2025-09-04T20:28:27.590Z" hostname="Google Chrome" tests="1" failures="1" skipped="0" time="11.556" errors="0">
+<testcase name="Full Authentication Flow › should allow a user to sign up, sign out, and sign back in" classname="auth-flow.spec.ts" time="11.556">
+<failure message="auth-flow.spec.ts:18:3 should allow a user to sign up, sign out, and sign back in" type="FAILURE">
+<![CDATA[  [Google Chrome] › auth-flow.spec.ts:18:3 › Full Authentication Flow › should allow a user to sign up, sign out, and sign back in 
+
+    TimeoutError: locator.click: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for getByRole('tab', { name: 'Inscription' })
+
+
+      21 |
+      22 |     // Cliquer sur l'onglet d'inscription
+    > 23 |     await page.getByRole('tab', { name: 'Inscription' }).click();
+         |                                                          ^
+      24 |
+      25 |     // Remplir le formulaire d'inscription
+      26 |     await page.getByPlaceholder('Prénom').fill(user.firstName);
+        at C:\Users\noutc\Casskai\tests\e2e\auth-flow.spec.ts:23:58
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\test-results\auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Google-Chrome\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\test-results\auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Google-Chrome\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\test-results\auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Google-Chrome\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Google-Chrome\test-failed-1.png]]
+
+[[ATTACHMENT|auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Google-Chrome\video.webm]]
+
+[[ATTACHMENT|auth-flow-Full-Authenticat-6dbb8-p-sign-out-and-sign-back-in-Google-Chrome\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
 </testsuites>

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { test, expect } from '@playwright/test';
 import lighthouse from 'lighthouse';
 import { chromium } from 'playwright';

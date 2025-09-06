@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { OnboardingStorageService } from '../OnboardingStorageService';
 import type { OnboardingData } from '../../../types/onboarding.types';

@@ -21,7 +21,7 @@ import { Button } from '../../ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { Alert, AlertDescription } from '../../ui/alert';
 import { cn } from '../../../lib/utils';
-import { AnomalyDetection } from '../../../types/ai.types';
+import { AnomalyDetection } from '../../../types/ai-types';
 
 interface AnomalyDetectionWidgetProps {
   anomalies: AnomalyDetection[];

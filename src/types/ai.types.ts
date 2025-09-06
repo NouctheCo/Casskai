@@ -95,7 +95,7 @@ export interface TaxOptimization {
   type: 'deduction' | 'credit' | 'timing' | 'structure';
   title: string;
   description: string;
-  potentialSaving: number;
+  potentialSavings: number;
   effort: 'low' | 'medium' | 'high';
   deadline?: Date;
   requirements: string[];

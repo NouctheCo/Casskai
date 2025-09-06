@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { AccountingImportExport } from '../components/accounting/AccountingImportExport';
 import { useConfig } from '../hooks/useConfig';

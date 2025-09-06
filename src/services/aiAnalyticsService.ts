@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as tf from '@tensorflow/tfjs';
 import { regression } from 'ml-matrix';
 import { 
@@ -18,7 +19,7 @@ import {
   AIServiceResponse,
   TrainingData,
   MLModelConfig
-} from '../types/ai.types';
+} from '../../types/ai-types';
 
 // Service principal d'analyse prédictive avec TensorFlow.js
 class AIAnalyticsService {

@@ -37,7 +37,7 @@ export type {
   MarketplaceStats,
   ModuleInstallation,
   ModuleUpdate
-} from './module-marketplace.types'
+} from './module-base.types'
 
 // Types d'événements et hooks
 export type {
@@ -49,7 +49,6 @@ export type {
 
 // Types utilitaires
 export type {
-  ModuleCategory,
   ModulePermission,
   ModuleMetrics
 } from './module-utils.types'

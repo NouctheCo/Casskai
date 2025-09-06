@@ -26,7 +26,7 @@ import {
   Cpu
 } from 'lucide-react';
 
-import { useModules } from '@/contexts/ModulesContext';
+import { useModulesSafe, useModules } from '@/contexts/ModulesContext';
 import { ModuleTestService } from '@/services/moduleTestService';
 import { ModuleDefinition } from '@/types/modules.types';
 
@@ -47,7 +47,7 @@ interface SystemHealth {
 }
 
 const ModuleDiagnostics: React.FC = () => {
-  const { availableModules, activeModules, isLoading, refreshModules } = useModules();
+  const { availableModules, activeModules, isLoading, refreshModules } = useModulesSafe();
   const [tests, setTests] = useState<TestResult[]>([]);
   const [isRunningTests, setIsRunningTests] = useState(false);
   const [systemHealth, setSystemHealth] = useState<SystemHealth | null>(null);
@@ -535,17 +535,20 @@ const ModuleDiagnostics: React.FC = () => {
                 <CardTitle>Répartition par Catégorie</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {Object.entries(
-                  availableModules.reduce((acc, module) => {
-                    acc[module.category] = (acc[module.category] || 0) + 1;
-                    return acc;
-                  }, {} as Record<string, number>)
-                ).map(([category, count]) => (
+                {(() => {
+                  const categoryCount: Record<string, number> = {};
+                  availableModules.forEach((module: unknown) => {
+                    const category = (module as { category?: string }).category || 'unknown';
+                    categoryCount[category] = (categoryCount[category] || 0) + 1;
+                  });
+                  
+                  return Object.entries(categoryCount).map(([category, count]) => (
                   <div key={category} className="flex justify-between">
                     <span className="capitalize">{category}:</span>
                     <span className="font-medium">{count}</span>
                   </div>
-                ))}
+                ));
+                })()}
               </CardContent>
             </Card>
           </div>

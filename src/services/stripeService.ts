@@ -14,12 +14,20 @@ import {
 const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
+if (!STRIPE_PUBLISHABLE_KEY) {
+  console.warn('[StripeService] ⚠️ VITE_STRIPE_PUBLISHABLE_KEY is not configured. Stripe features will not work.');
+}
+
 class RealStripeService {
-  private stripe: Promise<Stripe | null>;
+  private stripe: Promise<Stripe | null> | null = null;
   private initialized = false;
 
   constructor() {
-    this.stripe = loadStripe(STRIPE_PUBLISHABLE_KEY);
+    if (STRIPE_PUBLISHABLE_KEY) {
+      this.stripe = loadStripe(STRIPE_PUBLISHABLE_KEY);
+    } else {
+      this.stripe = Promise.resolve(null);
+    }
   }
 
   async initialize(): Promise<Stripe | null> {
@@ -27,6 +35,24 @@ class RealStripeService {
       this.initialized = true;
     }
     return await this.stripe;
+  }
+
+  /**
+   * Vérifie si Stripe est correctement configuré et disponible
+   */
+  isStripeAvailable(): boolean {
+    return !!STRIPE_PUBLISHABLE_KEY && !!this.stripe;
+  }
+
+  /**
+   * Obtient l'instance Stripe, ou null si non disponible
+   */
+  async getStripe(): Promise<Stripe | null> {
+    if (!this.isStripeAvailable()) {
+      console.warn('[StripeService] Stripe is not available - check VITE_STRIPE_PUBLISHABLE_KEY configuration');
+      return null;
+    }
+    return await this.initialize();
   }
 
   // ================================
@@ -538,9 +564,10 @@ class RealStripeService {
    */
   async redirectToCheckout(sessionId: string): Promise<{ error?: any }> {
     try {
-      const stripe = await this.initialize();
+      const stripe = await this.getStripe();
       if (!stripe) {
-        throw new Error('Stripe not initialized');
+        console.warn('[StripeService] Cannot redirect to checkout - Stripe not available');
+        return { error: 'Stripe not configured' };
       }
 
       const { error } = await stripe.redirectToCheckout({

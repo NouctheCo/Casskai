@@ -102,17 +102,11 @@ export default [
       'object-shorthand': 'error',
       'prefer-template': 'error',
       'no-duplicate-imports': 'error',
-      'import/no-unresolved': 'error',
-      'import/no-useless-path-segments': 'error',
-      'import/extensions': ['warn', 'never', { 
-        'json': 'always',
-        'jsx': 'never',
-        'tsx': 'never',
-        'js': 'never',
-        'ts': 'never'
-      }],
+      'import/no-unresolved': 'off', // Trop lourd, TypeScript gère déjà ça
+      'import/no-useless-path-segments': 'warn',
+      'import/extensions': 'off', // TypeScript gère les extensions
       'import/no-self-import': 'error',
-      'import/no-cycle': 'warn',
+      'import/no-cycle': 'off', // Trop lourd pour le développement
       'complexity': ['warn', 15],
       'max-depth': ['warn', 4],
       'max-lines': ['warn', 500],

@@ -20,6 +20,10 @@ const alertVariants = cva(
         default: "bg-white dark:bg-gray-900 text-gray-900 dark:text-white",
         destructive:
           "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
+        warning:
+          "border-yellow-300/50 text-yellow-800 dark:border-yellow-700 [&>svg]:text-yellow-600 bg-yellow-50 dark:bg-yellow-950",
+        success:
+          "border-green-300/50 text-green-800 dark:border-green-700 [&>svg]:text-green-600 bg-green-50 dark:bg-green-950",
       },
     },
     defaultVariants: {
@@ -29,7 +33,7 @@ const alertVariants = cva(
 );
 
 
-const Alert = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { variant?: "default" | "destructive" }>(({ className, variant, ...props }, ref) => (
+const Alert = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { variant?: "default" | "destructive" | "warning" | "success" }>(({ className, variant, ...props }, ref) => (
    <AlertContext.Provider value={{ variant }}>
     <div
       ref={ref}

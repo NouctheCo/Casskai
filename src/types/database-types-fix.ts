@@ -41,7 +41,7 @@ export interface Account {
   id: string
   account_number: string
   name: string
-  type: string
+  type: AccountType
   class: number
   company_id: string
   parent_account_id?: string
@@ -84,7 +84,7 @@ export interface JournalEntryLine {
 
 export type AccountType = 'asset' | 'liability' | 'equity' | 'revenue' | 'expense'
 
-export type JournalEntryStatus = 'draft' | 'validated' | 'posted'
+export type JournalEntryStatus = 'draft' | 'validated' | 'pending' | 'posted' | 'cancelled'
 
 // Types FEC
 export interface FECEntry {

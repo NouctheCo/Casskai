@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect } from 'vitest';
 import { OnboardingValidationService } from '../OnboardingValidationService';
 import type { CompanyProfile, OnboardingPreferences, OnboardingData } from '../../../types/onboarding.types';

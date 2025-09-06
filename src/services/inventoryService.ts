@@ -8,18 +8,18 @@ export interface InventoryItem {
   description?: string;
   category: string;
   unit: string;
-  purchase_price: number;
-  selling_price: number;
-  current_stock: number;
-  min_stock: number;
-  max_stock: number;
+  purchasePrice: number;
+  sellingPrice: number;
+  currentStock: number;
+  minStock: number;
+  maxStock: number;
   location?: string;
   supplier?: string;
   barcode?: string;
   status: 'active' | 'inactive' | 'low_stock' | 'out_of_stock';
-  last_movement?: string;
-  avg_cost?: number;
-  total_value?: number;
+  lastMovement?: string;
+  avgCost?: number;
+  totalValue?: number;
   company_id: string;
   created_at: string;
   updated_at: string;
@@ -104,11 +104,27 @@ export class InventoryService {
 
       if (error) throw error;
       
-      // Calculer le statut basé sur le stock
+      // Calculer le statut basé sur le stock et transformer les noms de propriétés
       return (data || []).map(item => ({
         ...item,
         status: this.calculateItemStatus(item.current_stock, item.min_stock),
-        total_value: item.current_stock * (item.avg_cost || item.purchase_price)
+        totalValue: item.current_stock * (item.avg_cost || item.purchase_price),
+        // Transformer les propriétés snake_case en camelCase pour la cohérence
+        sellingPrice: item.selling_price,
+        purchasePrice: item.purchase_price,
+        currentStock: item.current_stock,
+        minStock: item.min_stock,
+        maxStock: item.max_stock,
+        lastMovement: item.last_movement,
+        avgCost: item.avg_cost,
+        total_value: undefined, // Supprimer l'ancienne propriété
+        selling_price: undefined,
+        purchase_price: undefined,
+        current_stock: undefined,
+        min_stock: undefined,
+        max_stock: undefined,
+        last_movement: undefined,
+        avg_cost: undefined
       }));
     } catch (error) {
       console.error('Error fetching inventory items:', error);
@@ -124,11 +140,23 @@ export class InventoryService {
       const { data, error } = await supabase
         .from('inventory_items')
         .insert({
-          ...itemData,
+          reference: itemData.reference,
+          name: itemData.name,
+          description: itemData.description,
+          category: itemData.category,
+          unit: itemData.unit,
+          purchase_price: itemData.purchasePrice,
+          selling_price: itemData.sellingPrice,
+          current_stock: itemData.currentStock,
+          min_stock: itemData.minStock,
+          max_stock: itemData.maxStock,
+          location: itemData.location,
+          supplier: itemData.supplier,
+          barcode: itemData.barcode,
           company_id,
-          status: this.calculateItemStatus(itemData.current_stock, itemData.min_stock),
-          total_value: itemData.current_stock * itemData.purchase_price,
-          avg_cost: itemData.purchase_price
+          status: this.calculateItemStatus(itemData.currentStock, itemData.minStock),
+          total_value: itemData.currentStock * itemData.purchasePrice,
+          avg_cost: itemData.purchasePrice
         })
         .select()
         .single();
@@ -143,18 +171,38 @@ export class InventoryService {
 
   static async updateInventoryItem(id: string, updates: Partial<InventoryItem>): Promise<InventoryItem> {
     try {
+      // Transformer les propriétés camelCase en snake_case pour la base de données
+      const dbUpdates: any = {};
+      
+      if (updates.reference !== undefined) dbUpdates.reference = updates.reference;
+      if (updates.name !== undefined) dbUpdates.name = updates.name;
+      if (updates.description !== undefined) dbUpdates.description = updates.description;
+      if (updates.category !== undefined) dbUpdates.category = updates.category;
+      if (updates.unit !== undefined) dbUpdates.unit = updates.unit;
+      if (updates.purchasePrice !== undefined) dbUpdates.purchase_price = updates.purchasePrice;
+      if (updates.sellingPrice !== undefined) dbUpdates.selling_price = updates.sellingPrice;
+      if (updates.currentStock !== undefined) dbUpdates.current_stock = updates.currentStock;
+      if (updates.minStock !== undefined) dbUpdates.min_stock = updates.minStock;
+      if (updates.maxStock !== undefined) dbUpdates.max_stock = updates.maxStock;
+      if (updates.location !== undefined) dbUpdates.location = updates.location;
+      if (updates.supplier !== undefined) dbUpdates.supplier = updates.supplier;
+      if (updates.barcode !== undefined) dbUpdates.barcode = updates.barcode;
+      if (updates.status !== undefined) dbUpdates.status = updates.status;
+      if (updates.lastMovement !== undefined) dbUpdates.last_movement = updates.lastMovement;
+      if (updates.avgCost !== undefined) dbUpdates.avg_cost = updates.avgCost;
+      if (updates.totalValue !== undefined) dbUpdates.total_value = updates.totalValue;
+
       // Calculer les valeurs dérivées si nécessaire
-      const calculatedUpdates = { ...updates };
-      if (updates.current_stock !== undefined || updates.min_stock !== undefined) {
-        calculatedUpdates.status = this.calculateItemStatus(
-          updates.current_stock ?? 0, 
-          updates.min_stock ?? 0
+      if (updates.currentStock !== undefined || updates.minStock !== undefined) {
+        dbUpdates.status = this.calculateItemStatus(
+          updates.currentStock ?? 0, 
+          updates.minStock ?? 0
         );
       }
       
       const { data, error } = await supabase
         .from('inventory_items')
-        .update(calculatedUpdates)
+        .update(dbUpdates)
         .eq('id', id)
         .select()
         .single();
@@ -378,11 +426,11 @@ export class InventoryService {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
       
-      // Pour l'instant, utiliser un ID de test
-      return 'current-company';
+      // Pour l'instant, utiliser un UUID de test valide
+      return '550e8400-e29b-41d4-a716-446655440000';
     } catch (error) {
       console.error('Error getting current company ID:', error);
-      return 'current-company';
+      return '550e8400-e29b-41d4-a716-446655440000';
     }
   }
 
@@ -396,19 +444,19 @@ export class InventoryService {
         description: 'Laptop professionnel haute performance',
         category: 'Matériel informatique',
         unit: 'Pièce',
-        purchase_price: 1200.00,
-        selling_price: 1800.00,
-        current_stock: 15,
-        min_stock: 5,
-        max_stock: 50,
+        purchasePrice: 1200.00,
+        sellingPrice: 1800.00,
+        currentStock: 15,
+        minStock: 5,
+        maxStock: 50,
         location: 'Entrepôt A - Allée 1',
         supplier: 'Dell France',
         barcode: '123456789012',
         status: 'active',
-        last_movement: '2024-03-15',
-        avg_cost: 1150.00,
-        total_value: 17250.00,
-        company_id: 'current-company',
+        lastMovement: '2024-03-15',
+        avgCost: 1150.00,
+        totalValue: 17250.00,
+        company_id: '550e8400-e29b-41d4-a716-446655440000',
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-03-15T00:00:00Z'
       },
@@ -419,19 +467,19 @@ export class InventoryService {
         description: 'Souris ergonomique sans fil',
         category: 'Accessoires',
         unit: 'Pièce',
-        purchase_price: 25.00,
-        selling_price: 45.00,
-        current_stock: 3,
-        min_stock: 10,
-        max_stock: 100,
+        purchasePrice: 25.00,
+        sellingPrice: 45.00,
+        currentStock: 3,
+        minStock: 10,
+        maxStock: 100,
         location: 'Entrepôt A - Allée 2',
         supplier: 'Logitech International',
         barcode: '234567890123',
         status: 'low_stock',
-        last_movement: '2024-03-12',
-        avg_cost: 23.50,
-        total_value: 70.50,
-        company_id: 'current-company',
+        lastMovement: '2024-03-12',
+        avgCost: 23.50,
+        totalValue: 70.50,
+        company_id: '550e8400-e29b-41d4-a716-446655440000',
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-03-12T00:00:00Z'
       }
@@ -452,7 +500,7 @@ export class InventoryService {
         reference: 'PO-2024-001',
         supplier: 'Dell France',
         location: 'Entrepôt A',
-        company_id: 'current-company',
+        company_id: '550e8400-e29b-41d4-a716-446655440000',
         created_at: '2024-03-15T10:00:00Z',
         updated_at: '2024-03-15T10:00:00Z'
       }
@@ -474,7 +522,7 @@ export class InventoryService {
         payment_terms: 30,
         rating: 4.5,
         status: 'active',
-        company_id: 'current-company',
+        company_id: '550e8400-e29b-41d4-a716-446655440000',
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-01T00:00:00Z'
       }

@@ -17,7 +17,7 @@ import { Badge } from '../../ui/badge';
 import { Button } from '../../ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../ui/tooltip';
 import { cn } from '../../../lib/utils';
-import { FinancialHealthScore } from '../../../types/ai.types';
+import { FinancialHealthScore } from '../../../types/ai-types';
 
 interface HealthScoreWidgetProps {
   healthScore: FinancialHealthScore | null;
