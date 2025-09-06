@@ -1,0 +1,55 @@
+name: Supabase DB Migrate
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Target environment to migrate (dev or prod)'
+        required: true
+        default: 'dev'
+        type: choice
+        options: [dev, prod]
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Select DB URL by target
+        id: select-db
+        run: |
+          if [[ "${{ inputs.target }}" == "prod" ]]; then
+            echo "db_url=${{ secrets.SUPABASE_PROD_DB_URL }}" >> $GITHUB_OUTPUT
+          else
+            echo "db_url=${{ secrets.SUPABASE_DEV_DB_URL }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Validate DB URL
+        run: |
+          if [ -z "${{ steps.select-db.outputs.db_url }}" ]; then
+            echo "Error: Missing DB URL secret. Set SUPABASE_DEV_DB_URL or SUPABASE_PROD_DB_URL." >&2
+            exit 1
+          fi
+
+      - name: Show pending migrations
+        run: |
+          supabase db lint || true
+
+      - name: Push migrations to ${{ inputs.target }}
+        env:
+          DB_URL: ${{ steps.select-db.outputs.db_url }}
+        run: |
+          supabase db push --db-url "$DB_URL"
+
+      - name: Migration status summary
+        run: |
+          echo "Migrations directory: supabase/migrations"
+          echo "Target: ${{ inputs.target }}"
+          echo "Done."
