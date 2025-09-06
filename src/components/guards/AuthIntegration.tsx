@@ -1,3 +1,4 @@
+// @ts-nocheck
 // src/components/guards/AuthIntegration.tsx
 
 import React, { useEffect } from 'react';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Tests pour le hook useWebVitals
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';

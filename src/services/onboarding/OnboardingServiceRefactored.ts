@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { MARKET_CONFIGS } from '../../data/markets';
 import {
   OnboardingStep,

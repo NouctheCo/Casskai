@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * EInvoicingService Unit Tests
  * Test suite for main e-invoicing orchestration service

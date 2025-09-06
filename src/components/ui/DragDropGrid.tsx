@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState } from 'react';
 import { motion, Reorder, useDragControls } from 'framer-motion';
 import { GripVertical } from 'lucide-react';

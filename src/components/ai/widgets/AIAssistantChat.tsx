@@ -23,7 +23,7 @@ import { Input } from '../../ui/input';
 import { Badge } from '../../ui/badge';
 import { cn } from '../../../lib/utils';
 import { aiAssistantService } from '../../../services/aiAssistantService';
-import { Transaction, AIAssistantQuery } from '../../../types/ai.types';
+import { Transaction, AIAssistantQuery } from '../../../types/ai-types';
 
 interface AIAssistantChatProps {
   transactions: Transaction[];

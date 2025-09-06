@@ -34,7 +34,7 @@ import {
   CashFlowPrediction,
   // CategoryPrediction,
   TaxOptimization
-} from '../../types/ai.types';
+} from '../../types/ai-types';
 import { AnomalyDetectionWidget } from './widgets/AnomalyDetectionWidget';
 import { HealthScoreWidget } from './widgets/HealthScoreWidget';
 import { CashFlowPredictionWidget } from './widgets/CashFlowPredictionWidget';
@@ -189,14 +189,14 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
     }
 
     // Alertes d'opportunités fiscales
-    const highValueOptimizations = taxOptimizations.filter(opt => opt.potentialSaving > 1000);
+    const highValueOptimizations = taxOptimizations.filter(opt => opt.potentialSavings > 1000);
     if (highValueOptimizations.length > 0) {
       alerts.push({
         id: crypto.randomUUID(),
         type: 'opportunity',
         severity: 'info',
         title: 'Opportunités d\'optimisation fiscale',
-        message: `Économies potentielles de ${highValueOptimizations.reduce((sum, opt) => sum + opt.potentialSaving, 0).toLocaleString('fr-FR')}€`,
+        message: `Économies potentielles de ${highValueOptimizations.reduce((sum, opt) => sum + opt.potentialSavings, 0).toLocaleString('fr-FR')}€`,
         data: { optimizations: highValueOptimizations },
         timestamp: new Date(),
         isRead: false
@@ -320,7 +320,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Économies pot.</p>
                 <p className="text-xl font-bold text-gray-900 dark:text-white">
-                  {taxOptimizations.reduce((sum, opt) => sum + opt.potentialSaving, 0).toLocaleString('fr-FR')}€
+                  {taxOptimizations.reduce((sum, opt) => sum + opt.potentialSavings, 0).toLocaleString('fr-FR')}€
                 </p>
               </div>
             </motion.div>

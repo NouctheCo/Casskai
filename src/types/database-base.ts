@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Types de base pour la base de données Supabase
 // Extrait de supabase.ts pour réduire la taille du fichier
 

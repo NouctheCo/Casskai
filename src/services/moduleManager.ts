@@ -1,5 +1,6 @@
 // Service de gestion des modules - Architecture modulaire CassKai
 
+import { supabase } from '../lib/supabase';
 import { 
   ModuleDefinition, 
   Module, 
@@ -17,6 +18,7 @@ export class ModuleManager {
   private activations: Map<string, ModuleActivation> = new Map();
   private dependencies: Map<string, string[]> = new Map();
   private isInitialized = false;
+  private tenantId: string | null = null;
 
   private constructor() {}
 
@@ -30,6 +32,9 @@ export class ModuleManager {
   // Initialisation du gestionnaire de modules
   async initialize(context: Partial<ModuleContext>): Promise<void> {
     try {
+      // Stocker le tenantId pour les sauvegardes
+      this.tenantId = context.tenantId || null;
+      
       // Charger les activations depuis la base de données
       await this.loadActivations(context.tenantId!);
       
@@ -37,7 +42,7 @@ export class ModuleManager {
       await this.initializeCoreModules(context);
       
       this.isInitialized = true;
-      console.log('[ModuleManager] Initialisé avec succès');
+      console.warn('[ModuleManager] Initialisé avec succès');
     } catch (error) {
       console.error('[ModuleManager] Erreur d\'initialisation:', error);
       throw error;
@@ -49,7 +54,9 @@ export class ModuleManager {
     const { id } = module.definition;
     
     if (this.modules.has(id)) {
-      throw new ModuleError(`Module ${id} already registered`, id, 'DUPLICATE_REGISTRATION');
+      // Make registration idempotent: warn and ignore duplicate registrations
+      console.warn(`[ModuleManager] Module ${id} already registered - skipping duplicate registration`);
+      return;
     }
 
     // Valider la définition du module
@@ -336,38 +343,201 @@ export class ModuleManager {
   // Persistence des activations
   private async loadActivations(tenantId: string): Promise<void> {
     try {
-      // Charger depuis la base de données
-      // const activations = await db.moduleActivations.findByTenant(tenantId);
-      
-      // Simulation temporaire
+      // D'abord essayer de charger depuis Supabase si disponible
+      if (supabase) {
+        try {
+          console.warn('[ModuleManager] Loading modules from Supabase for tenant:', tenantId);
+          const { data: modules, error } = await supabase
+            .from('company_modules')
+            .select('module_key, is_enabled')
+            .eq('company_id', tenantId);
+
+          if (!error && modules && modules.length > 0) {
+            console.warn('[ModuleManager] Found modules in Supabase:', modules.length);
+
+            // Convertir en activations
+            modules.forEach(module => {
+              const activation: ModuleActivation = {
+                moduleId: module.module_key,
+                isActive: module.is_enabled,
+                activatedAt: new Date(),
+                activatedBy: 'system',
+                configuration: {},
+              };
+              this.activations.set(module.module_key, activation);
+            });
+
+            // Synchroniser avec localStorage comme cache
+            const simpleModules: Record<string, boolean> = {};
+            modules.forEach(module => {
+              simpleModules[module.module_key] = module.is_enabled;
+            });
+
+            // Ajouter les modules par défaut
+            const defaultModules = {
+              dashboard: true,
+              settings: true,
+              security: true,
+              users: true
+            };
+
+            const finalModules = { ...defaultModules, ...simpleModules };
+            localStorage.setItem('casskai_modules', JSON.stringify(finalModules));
+
+            console.warn('[ModuleManager] Modules synchronized from Supabase to localStorage');
+            return;
+          } else if (error) {
+            console.warn('[ModuleManager] Error loading from Supabase, falling back to localStorage:', error.message);
+          }
+        } catch (supabaseError) {
+          console.warn('[ModuleManager] Supabase not available, using localStorage fallback:', supabaseError);
+        }
+      }
+
+      // Fallback vers localStorage
+      const simpleModules = localStorage.getItem('casskai_modules');
+      if (simpleModules) {
+        console.warn('[ModuleManager] Loading modules from localStorage (casskai_modules)');
+        const modulesData = JSON.parse(simpleModules) as Record<string, boolean>;
+
+        // Convertir le format simple en activations
+        Object.entries(modulesData).forEach(([moduleId, isActive]) => {
+          if (isActive) {
+            const activation: ModuleActivation = {
+              moduleId,
+              isActive: true,
+              activatedAt: new Date(),
+              activatedBy: 'system',
+              configuration: {},
+            };
+            this.activations.set(moduleId, activation);
+          }
+        });
+        return;
+      }
+
+      // Fallback vers l'ancien format complexe
       const stored = localStorage.getItem(`casskai-modules-${tenantId}`);
       if (stored) {
+        console.warn('[ModuleManager] Loading modules from complex format (casskai-modules-${tenantId})');
         const activations = JSON.parse(stored) as ModuleActivation[];
         activations.forEach(activation => {
           this.activations.set(activation.moduleId, activation);
         });
+      } else {
+        console.warn('[ModuleManager] No modules found, using default modules');
+
+        // Modules par défaut si rien n'est trouvé
+        const defaultModules = {
+          dashboard: true,
+          settings: true,
+          security: true,
+          users: true,
+          accounting: true,
+          inventory: true
+        };
+
+        Object.entries(defaultModules).forEach(([moduleId, isActive]) => {
+          if (isActive) {
+            const activation: ModuleActivation = {
+              moduleId,
+              isActive: true,
+              activatedAt: new Date(),
+              activatedBy: 'system',
+              configuration: {},
+            };
+            this.activations.set(moduleId, activation);
+          }
+        });
+
+        // Sauvegarder les modules par défaut
+        localStorage.setItem('casskai_modules', JSON.stringify(defaultModules));
       }
     } catch (error) {
-      console.error('[ModuleManager] Erreur chargement activations:', error);
+      console.error('[ModuleManager] Error loading activations:', error);
+
+      // En cas d'erreur, utiliser les modules par défaut
+      const defaultModules = {
+        dashboard: true,
+        settings: true,
+        security: true,
+        users: true
+      };
+
+      Object.entries(defaultModules).forEach(([moduleId, isActive]) => {
+        if (isActive) {
+          const activation: ModuleActivation = {
+            moduleId,
+            isActive: true,
+            activatedAt: new Date(),
+            activatedBy: 'system',
+            configuration: {},
+          };
+          this.activations.set(moduleId, activation);
+        }
+      });
     }
   }
 
-  private async saveActivation(activation: ModuleActivation): Promise<void> {
+  private async saveActivation(_activation: ModuleActivation): Promise<void> {
     try {
-      // Sauvegarder en base de données
-      // await db.moduleActivations.save(activation);
-      
-      // Simulation temporaire
-      const tenantId = 'current-tenant';
+      // Sauvegarder en format simple pour compatibilité avec AuthContext
       const allActivations = Array.from(this.activations.values());
-      localStorage.setItem(`casskai-modules-${tenantId}`, JSON.stringify(allActivations));
+      const simpleModules: Record<string, boolean> = {};
+      
+      allActivations.forEach(act => {
+        simpleModules[act.moduleId] = act.isActive;
+      });
+      
+      localStorage.setItem('casskai_modules', JSON.stringify(simpleModules));
+      console.warn('[ModuleManager] Modules saved to localStorage in simple format');
+
+      // Sauvegarder aussi dans Supabase si tenantId est disponible
+      if (this.tenantId && supabase) {
+        try {
+          console.warn('[ModuleManager] Saving modules to Supabase for tenant:', this.tenantId);
+          
+          // Supprimer les anciens enregistrements pour cette entreprise
+          await supabase
+            .from('company_modules')
+            .delete()
+            .eq('company_id', this.tenantId);
+
+          // Insérer les nouveaux enregistrements
+          const modulesToInsert = allActivations.map(act => ({
+            company_id: this.tenantId,
+            module_key: act.moduleId,
+            is_enabled: act.isActive,
+          }));
+
+          if (modulesToInsert.length > 0) {
+            const { error } = await supabase
+              .from('company_modules')
+              .insert(modulesToInsert);
+
+            if (error) {
+              console.error('[ModuleManager] Error saving to Supabase:', error);
+            } else {
+              console.warn('[ModuleManager] Modules saved to Supabase successfully');
+            }
+          }
+        } catch (supabaseError) {
+          console.error('[ModuleManager] Supabase save error:', supabaseError);
+        }
+      }
     } catch (error) {
       console.error('[ModuleManager] Erreur sauvegarde activation:', error);
     }
   }
 
   // Debugging et monitoring
-  getDebugInfo(): any {
+  getDebugInfo(): {
+    isInitialized: boolean;
+    totalModules: number;
+    activeModules: number;
+    registeredModules: string[];
+    activeModuleIds: string[];
+  } {
     return {
       isInitialized: this.isInitialized,
       totalModules: this.modules.size,

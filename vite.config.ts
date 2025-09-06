@@ -81,6 +81,7 @@ export default defineConfig(({ mode }) => ({
 			'class-variance-authority',
 		],
 		exclude: ['@tensorflow/tfjs'], // Heavy libs that should be loaded on-demand
+		force: true, // Force pre-bundling to avoid runtime issues
 	},
 	
 	build: {
@@ -88,80 +89,46 @@ export default defineConfig(({ mode }) => ({
 		sourcemap: mode !== 'production',
 		// Enhanced build options
 		cssCodeSplit: true,
-		minify: mode === 'production' ? 'terser' : false,
+		minify: true, // Re-enable minification for production builds
 		terserOptions: mode === 'production' ? {
 			compress: {
-				drop_console: true,
+				drop_console: true, // Drop console logs in production
 				drop_debugger: true,
-				pure_funcs: ['console.log', 'console.info'],
+				pure_funcs: ['console.info'],
 			},
+			mangle: {
+				keep_fnames: false, // Mangle function names for size reduction
+			}
 		} : {},
 		rollupOptions: {
 			// Enhanced output configuration
 			output: {
-				// More granular manual chunks for better caching
+				// Conservative chunking strategy to avoid loading issues
 				manualChunks: (id: string) => {
-					// Core React libraries
-					if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
-						return 'react-core';
+					// Keep critical libraries together in vendor
+					if (id.includes('node_modules/react') || 
+						id.includes('node_modules/react-dom') ||
+						id.includes('recharts') || 
+						id.includes('d3-') || 
+						id.includes('chart.js') ||
+						id.includes('framer-motion')) {
+						return 'vendor';
 					}
 					
-					// Router and navigation
-					if (id.includes('node_modules/react-router')) {
-						return 'router';
-					}
-					
-					// UI Framework (Radix UI components)
-					if (id.includes('@radix-ui/') || id.includes('lucide-react')) {
-						return 'ui-framework';
-					}
-					
-					// Supabase and authentication
-					if (id.includes('@supabase/') || id.includes('supabase')) {
+					// Large libraries that can be separate
+					if (id.includes('node_modules/@supabase/') || id.includes('node_modules/supabase')) {
 						return 'auth-db';
 					}
 					
-					// Charts and data visualization
-					if (id.includes('recharts') || id.includes('d3-') || id.includes('chart.js')) {
-						return 'charts';
+					if (id.includes('node_modules/@radix-ui/') || id.includes('node_modules/lucide-react')) {
+						return 'ui-framework';
 					}
 					
-					// AI and ML libraries (loaded on demand)
-					if (id.includes('@tensorflow/') || id.includes('ml-matrix')) {
-						return 'ai-ml';
-					}
-					
-					// Form handling
-					if (id.includes('react-hook-form') || id.includes('@hookform/')) {
-						return 'forms';
-					}
-					
-					// Internationalization
-					if (id.includes('i18next') || id.includes('react-i18next')) {
-						return 'i18n';
-					}
-					
-					// Utilities (date, string manipulation, etc.)
-					if (id.includes('date-fns') || id.includes('clsx') || id.includes('tailwind-merge') || id.includes('class-variance-authority')) {
-						return 'utils';
-					}
-					
-					// Animation libraries
-					if (id.includes('framer-motion') || id.includes('lottie')) {
-						return 'animations';
-					}
-					
-					// PDF and document generation
 					if (id.includes('jspdf') || id.includes('xlsx') || id.includes('exceljs')) {
 						return 'documents';
 					}
 					
-					// Payment integrations
-					if (id.includes('stripe') || id.includes('@stripe/')) {
-						return 'payments';
-					}
-					
-					// Large third-party libraries
+					// Everything else in vendor for safety
 					if (id.includes('node_modules/')) {
 						return 'vendor';
 					}

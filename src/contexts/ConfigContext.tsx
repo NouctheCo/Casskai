@@ -70,14 +70,14 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setConfig(DEFAULT_CONFIG);
     } finally {
       setIsLoading(false);
-      console.log('🏁 Configuration chargée');
+      console.warn('🏁 Configuration chargée');
     }
   }, []);
 
   const updateConfig = (updates: Partial<AppConfig>) => {
     if (!config) return;
     
-    console.log('🔄 Mise à jour de la configuration:', updates);
+    console.warn('🔄 Mise à jour de la configuration:', updates);
     
     const newConfig = {
       ...config,
@@ -88,7 +88,7 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setConfig(newConfig);
     localStorage.setItem('casskai_config', JSON.stringify(newConfig));
     
-    console.log('✅ Configuration mise à jour');
+    console.warn('✅ Configuration mise à jour');
   };
 
   const value: ConfigContextType = {

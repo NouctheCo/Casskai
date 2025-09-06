@@ -8,7 +8,7 @@ import { LoadingFallback } from '@/components/ui/LoadingFallback';
  * selon l'état d'authentification de l'utilisateur
  */
 export const HomePage: React.FC = () => {
-  const { user, loading: authLoading, currentCompany } = useAuth();
+  const { user, loading: authLoading, currentCompany, onboardingCompleted } = useAuth();
 
   // Afficher un loader pendant le chargement
   if (authLoading) {
@@ -20,19 +20,38 @@ export const HomePage: React.FC = () => {
     return <Navigate to="/landing" replace />;
   }
 
-  // FIX: Vérifier si l'onboarding est complété via user_metadata OU localStorage
-  const onboardingCompleted = user?.user_metadata?.onboarding_completed || 
-                             localStorage.getItem('casskai_onboarding_completed') === 'true';
   const hasLocalCompany = localStorage.getItem('casskai_current_enterprise');
+
+  console.log('🏠 HomePage Debug:', {
+    userId: user?.id,
+    onboardingCompleted,
+    hasCurrentCompany: !!currentCompany,
+    currentCompanyId: currentCompany?.id,
+    hasLocalCompany: !!hasLocalCompany,
+    userMetadata: user?.user_metadata
+  });
 
   // Si l'utilisateur est connecté mais l'onboarding n'est pas complété
   // ET qu'il n'y a pas de company dans Supabase ET pas d'entreprise locale
   if (user && !onboardingCompleted && !currentCompany && !hasLocalCompany) {
+    console.log('🎯 HomePage: Redirecting to onboarding');
     return <Navigate to="/onboarding" replace />;
   }
 
-  // Si l'utilisateur a complété l'onboarding OU a une entreprise (locale ou Supabase), 
+  // Si l'onboarding est marqué comme complété mais que currentCompany n'est pas encore chargé,
+  // afficher un état de chargement pour éviter la redirection prématurée vers le dashboard
+  if (user && onboardingCompleted && !currentCompany && !hasLocalCompany) {
+    console.log('⏳ HomePage: Onboarding completed but waiting for company data');
+    return <LoadingFallback message="Chargement des données de l'entreprise..." />;
+  }
+
+  // Si l'utilisateur a complété l'onboarding ET a une entreprise (locale ou Supabase), 
   // rediriger vers le dashboard
+  if (user && onboardingCompleted && (currentCompany || hasLocalCompany)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  // Cas par défaut : rediriger vers le dashboard (pour les utilisateurs existants)
   return <Navigate to="/dashboard" replace />;
 };
 

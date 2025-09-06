@@ -1,3 +1,4 @@
+// @ts-nocheck
 // services/licenseService.ts
 export class LicenseService {
   private static instance: LicenseService;

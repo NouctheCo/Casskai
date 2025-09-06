@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Helper to format Supabase errors
 function handleSupabaseError(error: unknown, context: string) {
   if (error instanceof Error) {

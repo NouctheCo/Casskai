@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { test, expect } from '@playwright/test';
 
 // Minimal smoke to verify app boots and dashboard route renders

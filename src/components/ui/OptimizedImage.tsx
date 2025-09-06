@@ -220,11 +220,11 @@ OptimizedImage.displayName = 'OptimizedImage';
 
 // Générateur de placeholder
 const generatePlaceholder = (width?: number, height?: number, text = '') => {
-  const w = width || 400;
-  const h = height || 300;
+  const imageWidth = width || 400;
+  const imageHeight = height || 300;
   
   return `data:image/svg+xml;base64,${btoa(`
-    <svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+    <svg width="${imageWidth}" height="${imageHeight}" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" style="stop-color:#f0f0f0;stop-opacity:1" />
@@ -234,7 +234,7 @@ const generatePlaceholder = (width?: number, height?: number, text = '') => {
       <rect width="100%" height="100%" fill="url(#grad)"/>
       <text x="50%" y="50%" text-anchor="middle" dy=".3em" 
             font-family="Arial, sans-serif" font-size="14" fill="#999">
-        ${text || `${w}×${h}`}
+        ${text || `${imageWidth}×${imageHeight}`}
       </text>
     </svg>
   `)}`;

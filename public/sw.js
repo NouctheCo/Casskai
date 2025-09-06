@@ -1,5 +1,5 @@
 // Service Worker pour CassKai - Offline-First avec performance optimisée
-const CACHE_VERSION = 'v1.3.1';
+const CACHE_VERSION = 'v1.3.2';
 const CACHE_NAMES = {
   static: `casskai-static-${CACHE_VERSION}`,
   dynamic: `casskai-dynamic-${CACHE_VERSION}`,
@@ -144,6 +144,12 @@ self.addEventListener('fetch', (event) => {
 
   // Ignorer les requêtes de Chrome extensions
   if (request.url.includes('chrome-extension://')) {
+    return;
+  }
+
+  // Ignorer les domaines externes (analytics, APIs tierces, etc.)
+  const externalDomains = ['plausible.io', 'stripe.com', 'google-analytics.com', 'googletagmanager.com'];
+  if (externalDomains.some(domain => url.hostname.includes(domain))) {
     return;
   }
 

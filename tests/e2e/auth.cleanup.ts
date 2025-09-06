@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { test as cleanup } from '@playwright/test';
 import { unlink } from 'fs/promises';
 

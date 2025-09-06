@@ -1,0 +1,88 @@
+name: Supabase DB Migrate
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Target environment to migrate (dev or prod)'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Select DB URL by target
+        id: select-db
+        run: |
+          if [[ "${{ inputs.target }}" == "prod" ]]; then
+            echo "db_url=${{ secrets.SUPABASE_PROD_DB_URL }}" >> $GITHUB_OUTPUT
+          else
+            echo "db_url=${{ secrets.SUPABASE_DEV_DB_URL }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build IPv4 DB URL (fallback)
+        id: ipv4-url
+        env:
+          DB_URL: ${{ steps.select-db.outputs.db_url }}
+        run: |
+          set -euo pipefail
+          url="$DB_URL"
+          # Extract host from the URL (supports postgresql://user:pass@host:port/db?params)
+          host="$(echo "$url" | sed -E 's#^[a-z]+://([^:@/]+)(:([0-9]+))?/.*#\1#')"
+          if [ -z "$host" ]; then
+            echo "db_url_v4=$DB_URL" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Resolve first IPv4 address for the host
+          ipv4="$(getent ahostsv4 "$host" | awk 'NR==1{print $1}')"
+          if [ -z "$ipv4" ]; then
+            echo "No IPv4 found for $host, keeping original URL"
+            echo "db_url_v4=$DB_URL" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Replace hostname with IPv4 but keep SNI/SSL host via extra query param 'host='
+          new_url="$(echo "$url" | sed -E "s#$host#$ipv4#")"
+          sep="?"
+          echo "$new_url" | grep -q "?" && sep="&" || true
+          new_url="${new_url}${sep}host=${host}"
+          echo "Using IPv4 address $ipv4 for $host"
+          echo "db_url_v4=$new_url" >> "$GITHUB_OUTPUT"
+
+      - name: Validate DB URL
+        run: |
+          if [ -z "${{ steps.select-db.outputs.db_url }}" ]; then
+            echo "Error: Missing DB URL secret. Set SUPABASE_DEV_DB_URL or SUPABASE_PROD_DB_URL." >&2
+            exit 1
+          fi
+
+      - name: Show pending migrations
+        run: |
+          supabase db lint || true
+
+      - name: Push migrations to ${{ inputs.target }}
+        env:
+          DB_URL: ${{ steps.ipv4-url.outputs.db_url_v4 }}
+        run: |
+          supabase db push --db-url "$DB_URL"
+
+      - name: Migration status summary
+        env:
+          DB_URL: ${{ steps.ipv4-url.outputs.db_url_v4 }}
+        run: |
+          echo "Migrations directory: supabase/migrations"
+          echo "Target: ${{ inputs.target }}"
+          # Optionally run a smoke query with psql if provided as separate secret
+          echo "Done."

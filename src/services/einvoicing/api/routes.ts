@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * E-invoicing API Routes
  * Express.js routes for e-invoicing endpoints

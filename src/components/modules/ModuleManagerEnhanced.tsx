@@ -38,7 +38,7 @@ import {
 } from 'lucide-react';
 
 // Hooks pour l'intégration avec l'architecture modulaire
-import { useModules } from '@/contexts/ModulesContext';
+import { useModulesSafe, useModules } from '@/contexts/ModulesContext';
 import { ModuleDefinition } from '@/types/modules.types';
 
 interface ActivationStatus {
@@ -68,7 +68,7 @@ const ModuleManagerEnhanced: React.FC = () => {
     isModuleActive,
     canActivateModule,
     refreshModules
-  } = useModules();
+  } = useModulesSafe();
 
   // État local
   const [activationStatuses, setActivationStatuses] = useState<Map<string, ActivationStatus>>(new Map());

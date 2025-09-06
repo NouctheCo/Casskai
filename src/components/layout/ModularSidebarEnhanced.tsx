@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useModules } from '@/contexts/ModulesContext';
-import { icons, getModuleIcon, iconSizes } from '@/lib/icons';
 
 // Import direct des icônes spécifiques utilisées
 import { 
@@ -18,7 +17,6 @@ import {
   ChevronDown,
   ChevronRight,
   Zap,
-  Star,
   Store,
   UserCog,
   Briefcase,
@@ -83,7 +81,7 @@ const coreNavItems = [
 // Mapping entre les clés simples des modules et les IDs complexes de navigation
 const moduleKeyMapping: Record<string, string> = {
   'crm': 'crm-sales',
-  'hr': 'hr-light', 
+  'humanResources': 'hr-light', 
   'projects': 'projects-management',
   'marketplace': 'marketplace'
 };
@@ -175,7 +173,7 @@ const ModularSidebarEnhanced: React.FC = () => {
            (href !== '/' && location.pathname.startsWith(href));
   };
 
-  const renderNavItem = (item: any, isChild: boolean = false) => {
+  const renderNavItem = (item: any, isChild: boolean = false, isInactive: boolean = false) => {
     const hasChildren = item.children && item.children.length > 0;
     const isExpanded = expandedItems.includes(item.title);
     const itemIsActive = isActive(item.href);
@@ -189,13 +187,14 @@ const ModularSidebarEnhanced: React.FC = () => {
               className={cn(
                 'w-full justify-start group hover:bg-gray-50 transition-all duration-200',
                 isChild ? 'pl-8 py-2' : 'py-3 px-3',
-                itemIsActive && 'bg-blue-50 text-blue-700 border-r-2 border-blue-500'
+                itemIsActive && 'bg-blue-50 text-blue-700 border-r-2 border-blue-500',
+                isInactive && 'opacity-60 hover:opacity-80'
               )}
             >
               {item.icon && (
                 <item.icon className={cn(
                   'mr-3 h-4 w-4 transition-colors',
-                  itemIsActive ? 'text-blue-600' : 'text-gray-500 group-hover:text-gray-700'
+                  itemIsActive ? 'text-blue-600' : isInactive ? 'text-gray-400' : 'text-gray-500 group-hover:text-gray-700'
                 )} />
               )}
               <div className="flex-1 text-left">
@@ -227,7 +226,7 @@ const ModularSidebarEnhanced: React.FC = () => {
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-1">
-            {item.children.map((child: any) => renderNavItem(child, true))}
+            {item.children?.map((child: { title: string; href: string; icon?: React.ComponentType<{ className?: string }> }) => renderNavItem(child, true, isInactive))}
           </CollapsibleContent>
         </Collapsible>
       );
@@ -240,7 +239,8 @@ const ModularSidebarEnhanced: React.FC = () => {
         className={cn(
           'w-full justify-start group hover:bg-gray-50 transition-all duration-200',
           isChild ? 'pl-10 py-2 text-sm' : 'py-3 px-3',
-          itemIsActive && 'bg-blue-50 text-blue-700 border-r-2 border-blue-500'
+          itemIsActive && 'bg-blue-50 text-blue-700 border-r-2 border-blue-500',
+          isInactive && 'opacity-60 hover:opacity-80'
         )}
         asChild
       >
@@ -249,13 +249,19 @@ const ModularSidebarEnhanced: React.FC = () => {
             <item.icon className={cn(
               'mr-3 h-4 w-4 transition-colors',
               isChild ? 'h-3 w-3' : 'h-4 w-4',
-              itemIsActive ? 'text-blue-600' : 'text-gray-500 group-hover:text-gray-700'
+              itemIsActive ? 'text-blue-600' : isInactive ? 'text-gray-400' : 'text-gray-500 group-hover:text-gray-700'
             )} />
           )}
           <div className="flex-1 text-left">
-            <div className="font-medium">{item.title}</div>
+            <div className={cn(
+              'font-medium',
+              isInactive && 'text-gray-500'
+            )}>{item.title}</div>
             {!isChild && item.description && (
-              <div className="text-xs text-gray-500 mt-0.5">{item.description}</div>
+              <div className={cn(
+                'text-xs mt-0.5',
+                isInactive ? 'text-gray-400' : 'text-gray-500'
+              )}>{item.description}</div>
             )}
           </div>
           {item.badge && (
@@ -263,7 +269,8 @@ const ModularSidebarEnhanced: React.FC = () => {
               variant="secondary" 
               className={cn(
                 'ml-2 text-xs',
-                badgeColors[item.color] || 'bg-gray-100 text-gray-800'
+                badgeColors[item.color] || 'bg-gray-100 text-gray-800',
+                isInactive && 'opacity-60'
               )}
             >
               {item.badge}
@@ -276,7 +283,21 @@ const ModularSidebarEnhanced: React.FC = () => {
 
   // Construire la navigation complète
   const buildNavigation = () => {
-    const navigation: any[] = [];
+    const navigation: Array<{
+      title?: string;
+      type?: string;
+      href?: string;
+      icon?: React.ComponentType<{ className?: string }>;
+      children?: Array<{
+        title: string;
+        href: string;
+        icon?: React.ComponentType<{ className?: string }>;
+      }>;
+      badge?: string;
+      color?: string;
+      description?: string;
+      isInactive?: boolean;
+    }> = [];
 
     // Ajouter les éléments core (toujours visibles)
     coreNavItems.forEach(item => {
@@ -297,27 +318,8 @@ const ModularSidebarEnhanced: React.FC = () => {
       });
     }
 
-    // Ajouter les modules actifs depuis localStorage (modules sélectionnés lors de l'onboarding)
-    const savedModules = localStorage.getItem('casskai_modules');
-    if (savedModules) {
-      try {
-        const activeModulesFromStorage = JSON.parse(savedModules);
-        Object.keys(activeModulesFromStorage).forEach(moduleId => {
-          if (activeModulesFromStorage[moduleId] && moduleNavItems[moduleId as keyof typeof moduleNavItems]) {
-            const moduleNav = moduleNavItems[moduleId as keyof typeof moduleNavItems];
-            // Éviter les doublons
-            if (!navigation.some(item => item.href === moduleNav.href)) {
-              navigation.push(moduleNav);
-            }
-          }
-        });
-      } catch (error) {
-        console.error('[ModularSidebarEnhanced] Erreur parsing localStorage modules:', error);
-      }
-    }
-
-    // Ajouter les modules actifs du contexte (système de modules)
-    activeModules.forEach(module => {
+    // Ajouter les modules disponibles (actifs et inactifs) du contexte (système de modules)
+    availableModules.forEach(module => {
       if (module.isCore) return; // Skip les modules core (déjà ajoutés)
 
       // Utiliser le mapping pour convertir la clé simple en clé complexe
@@ -326,7 +328,12 @@ const ModularSidebarEnhanced: React.FC = () => {
       if (moduleNav) {
         // Éviter les doublons
         if (!navigation.some(item => item.href === moduleNav.href)) {
-          navigation.push(moduleNav);
+          // Ajouter un indicateur d'état inactif si le module n'est pas actif
+          const navItem = {
+            ...moduleNav,
+            isInactive: !isModuleActive(module.id)
+          };
+          navigation.push(navItem);
         }
       } else {
         console.warn(`[ModularSidebarEnhanced] Module ${module.id} (mapped to ${mappedKey}) not found in moduleNavItems`);

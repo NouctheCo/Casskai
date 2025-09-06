@@ -3,29 +3,20 @@
  * Réutilise les composants et patterns existants de l'application CassKai
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
-import { Progress } from '../components/ui/progress';
 import { Input } from '../components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
-import { useToast } from '../components/ui/use-toast';
 import { useEnterprise } from '../contexts/EnterpriseContext';
 import { useCurrency } from '../hooks/useCurrency';
 import { useContracts } from '../hooks/useContracts';
 import { AmountDisplay } from '../components/currency/AmountDisplay';
 import {
-  ContractData,
-  ContractFormData,
-  RFACalculation,
-  ContractAlert,
-  TurnoverScenario,
-  SimulationResult
+  ContractData
 } from '../types/contracts.types';
 import { 
   FileText, 
@@ -44,7 +35,6 @@ import {
   BarChart3,
   Eye,
   Edit,
-  Archive,
   Activity,
   Sparkles
 } from 'lucide-react';
@@ -54,7 +44,6 @@ import {
  */
 const ContractsPage: React.FC = () => {
   const { t } = useTranslation();
-  const { toast } = useToast();
   const { currentEnterprise } = useEnterprise();
   const { formatAmount } = useCurrency();
 
@@ -86,30 +75,22 @@ const ContractsPage: React.FC = () => {
     contracts,
     dashboardData,
     rfaCalculations,
-    simulationResults,
     loading,
     error,
-    filters,
-    setFilters,
-    loadContracts,
-    createContract,
-    updateContract,
-    archiveContract,
     exportContracts,
-    exportRFACalculations,
-    simulateRFA
+    exportRFACalculations
   } = useContracts();
 
   const [activeTab, setActiveTab] = useState('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedContract, setSelectedContract] = useState<ContractData | null>(null);
-  const [showContractForm, setShowContractForm] = useState(false);
-  const [showRFACalculator, setShowRFACalculator] = useState(false);
+  const [_selectedContract, setSelectedContract] = useState<ContractData | null>(null);
+  const [_showContractForm, setShowContractForm] = useState(false);
+  const [_showRFACalculator, setShowRFACalculator] = useState(false);
 
   // Composant StatCard réutilisé du dashboard
   const StatCard: React.FC<{
     title: string;
-    value: string | number;
+    value: string | number | React.ReactNode;
     change?: number;
     icon: React.ReactNode;
     className?: string;
@@ -279,9 +260,12 @@ const ContractsPage: React.FC = () => {
           <div className="relative flex-1 sm:w-80">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
+              id="contracts-search"
+              name="contracts-search"
               placeholder={t('contracts.search_placeholder', 'Rechercher un contrat ou client...')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              autoComplete="off"
               className="pl-10"
             />
           </div>
@@ -347,7 +331,7 @@ const ContractsPage: React.FC = () => {
                           {contract.discount_config.tiers.map((tier, index) => (
                             <span key={index} className="inline-block mr-2">
                               {(tier.rate * 100).toFixed(1)}%
-                              {index < contract.discount_config.tiers!.length - 1 && ', '}
+                              {contract.discount_config.tiers && index < contract.discount_config.tiers.length - 1 && ', '}
                             </span>
                           ))}
                         </div>
@@ -520,7 +504,7 @@ const ContractsPage: React.FC = () => {
         
         <div className="flex items-center space-x-3">
           <Button 
-            onClick={() => handleExportContracts()}
+            onClick={() => exportContracts()}
             variant="outline"
             className="flex items-center gap-2"
           >

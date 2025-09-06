@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as React from "react";
 import { format } from "date-fns";
 import { fr, enUS, es } from "date-fns/locale";

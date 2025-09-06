@@ -37,7 +37,7 @@ echo "✅ Node.js trouvé ($(node --version))"
 # Étape 1 : Build local
 echo ""
 echo "🔨 Compilation du projet..."
-npm run build
+npm run build:production
 
 if [ ! -d "dist" ]; then
     echo "❌ Le dossier dist n'existe pas après le build"
@@ -49,10 +49,23 @@ echo "✅ Build réussi"
 # Étape 2 : Déploiement Frontend
 echo ""
 echo "📦 Déploiement du Frontend..."
-rsync -avz --delete dist/ $VPS_USER@$VPS_IP:$FRONTEND_PATH/
 
-if [ $? -eq 0 ]; then
+# Essayer rsync d'abord, puis SCP en fallback
+if command -v rsync &> /dev/null; then
+    echo "Utilisation de rsync..."
+    rsync -avz --delete dist/ $VPS_USER@$VPS_IP:$FRONTEND_PATH/
+    DEPLOY_RESULT=$?
+else
+    echo "rsync non disponible, utilisation de SCP..."
+    scp -r dist/* $VPS_USER@$VPS_IP:$FRONTEND_PATH/
+    DEPLOY_RESULT=$?
+fi
+
+if [ $DEPLOY_RESULT -eq 0 ]; then
     echo "✅ Frontend déployé"
+    # Corriger les permissions
+    ssh $VPS_USER@$VPS_IP "chown -R www-data:www-data $FRONTEND_PATH && chmod -R 755 $FRONTEND_PATH"
+    echo "✅ Permissions corrigées"
 else
     echo "❌ Erreur lors du déploiement frontend"
     exit 1

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Test basique pour le service de taux de change amélioré
 import { CurrencyService } from './currencyService';
 

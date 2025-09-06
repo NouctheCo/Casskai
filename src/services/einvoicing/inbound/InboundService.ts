@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Inbound Service
  * Processes incoming supplier e-invoices

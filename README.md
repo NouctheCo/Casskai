@@ -1,235 +1,183 @@
-# 🏢 CassKai - Gestion Financière
+# Supabase CLI
 
-> Plateforme de gestion financière tout-en-un destinée aux PME et indépendants
+[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=main)](https://coveralls.io/github/supabase/cli?branch=main) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
+](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.# 🏢 CassKai - Gestion Financière
+[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
 
-> Plateforme de gestion financière tout-en-un destinée aux PME et indépendants
+This repository contains all the functionality for Supabase CLI.
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/NouctheCo/sb1-gafkau66)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![React](https://img.shields.io/badge/React-18.3.1-61dafb.svg)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.5.4-blue.svg)](https://typescriptlang.org/)
-[![Live Demo](https://img.shields.io/badge/demo-casskai.app-success.svg)](https://casskai.app)
+- [x] Running Supabase locally
+- [x] Managing database migrations
+- [x] Creating and deploying Supabase Functions
+- [x] Generating types directly from your database schema
+- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
 
-## ✨ Fonctionnalités
+## Getting started
 
-### 📊 **Tableau de Bord**
-- Indicateurs clés de performance (KPI)
-- Graphiques interactifs (revenus, dépenses, cash-flow)
-- Échéances à venir et transactions récentes
-- Vue d'ensemble financière en temps réel
+### Install the CLI
 
-### 📚 **Comptabilité Complète**
-- **Plan comptable** français conforme
-- **Journaux comptables** avec recherche et filtres
-- **Écritures comptables** avec validation automatique
-- **Import FEC** pour migration de données
-- **Balance générale** et comptes de résultat
-
-### 🏦 **Gestion Bancaire**
-- Comptes bancaires multiples par société
-- Synchronisation simulée des transactions
-- Rapprochement bancaire automatisé
-- Suivi des soldes en temps réel
-
-### 📈 **Rapports Financiers**
-- **Bilan comptable** (Actif/Passif)
-- **Compte de résultat** (Produits/Charges)
-- **Flux de trésorerie**
-- **Balance générale** avec tous les comptes
-- Export PDF/Excel (préparé)
-
-### 🔮 **Prévisions Financières**
-- Scénarios optimiste/réaliste/pessimiste
-- Projections sur 5 ans
-- Métriques CAGR, marge, cash cumulé
-- Hypothèses visuelles et ajustables
-
-### 👥 **Multi-entreprises & Utilisateurs**
-- Gestion de plusieurs entreprises
-- Système de rôles et permissions
-- Invitations utilisateurs par email
-- Contrôle d'accès granulaire
-
-### 🌍 **International**
-- **Multilingue** : Français, Anglais (extensible)
-- **Thèmes** : Mode clair/sombre
-- **Localisation** des devises et formats de date
-- Interface adaptative et responsive
-
-## 🛠️ Technologies
-
-| Catégorie | Technologies |
-|-----------|-------------|
-| **Frontend** | React 18, TypeScript, Vite |
-| **UI/UX** | Tailwind CSS, shadcn/ui, Framer Motion |
-| **Backend** | Supabase (Auth, Database, Real-time) |
-| **Graphiques** | Recharts, Chart.js |
-| **Routing** | React Router Dom |
-| **Forms** | React Hook Form, Zod |
-| **i18n** | react-i18next |
-| **Dates** | date-fns |
-| **Icons** | Lucide React |
-
-## 🚀 Installation
-
-### Prérequis
-- **Node.js** ≥ 18.0.0
-- **npm** ≥ 8.0.0
-- Compte **Supabase** (gratuit)
-
-### Étapes
+Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
 
 ```bash
-# 1. Cloner le repository
-git clone https://github.com/NouctheCo/sb1-gafkau66.git
-cd sb1-gafkau66
-
-# 2. Installer les dépendances
-npm install
-
-# 3. Configurer l'environnement
-cp .env.example .env
-
-# 4. Éditer .env avec vos clés Supabase
-# VITE_SUPABASE_URL=https://votre-projet.supabase.co
-# VITE_SUPABASE_ANON_KEY=votre-clé-anon
-
-# 5. Démarrer en développement
-npm run dev
-
-# 6. Ouvrir http://localhost:5173
+npm i supabase --save-dev
 ```
 
-### Configuration Supabase
-
-1. Créez un projet sur [supabase.com](https://supabase.com)
-2. Copiez l'URL et la clé anonyme dans `.env`
-3. Exécutez les migrations (si disponibles) :
-   ```bash
-   npx supabase db push
-   ```
-
-## 📦 Scripts Disponibles
+To install the beta release channel:
 
 ```bash
-# Développement
-npm run dev              # Serveur de développement
-npm run preview          # Prévisualiser le build
-
-# Build & Production
-npm run build            # Build production
-npm run build:staging    # Build staging
-
-# Code Quality
-npm run lint             # Linter ESLint
-npm run lint:fix         # Fix automatique
-npm run type-check       # Vérification TypeScript
-npm run format           # Formatage Prettier
-
-# Déploiement
-npm run deploy:netlify   # Déployer sur Netlify
-npm run deploy:vercel    # Déployer sur Vercel
+npm i supabase@beta --save-dev
 ```
 
-## 🏗️ Structure du Projet
+When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
 
 ```
-casskai/
-├── 📁 public/           # Assets statiques
-├── 📁 src/
-│   ├── 📁 components/   # Composants réutilisables
-│   │   ├── 📁 ui/       # Composants shadcn/ui
-│   │   └── 📁 auth/     # Composants d'authentification
-│   ├── 📁 contexts/     # Contextes React (Auth, Theme, Locale)
-│   ├── 📁 hooks/        # Hooks personnalisés
-│   ├── 📁 lib/          # Utilitaires et configuration
-│   ├── 📁 locales/      # Fichiers de traduction (fr.json, en.json)
-│   ├── 📁 pages/        # Pages de l'application
-│   ├── 📁 services/     # Services API et logique métier
-│   └── 📁 types/        # Types TypeScript
-├── 📁 supabase/         # Configuration et migrations Supabase
-├── 📄 .env.example      # Variables d'environnement
-├── 📄 package.json      # Dépendances et scripts
-└── 📄 README.md         # Ce fichier
+NODE_OPTIONS=--no-experimental-fetch yarn add supabase
 ```
 
-## 🚀 **Déploiement Production**
+> **Note**
+For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
 
-> **⚠️ IMPORTANT** : CassKai utilise une architecture VPS dédiée. 
-> 
-> **Ne PAS déployer sur Netlify/Vercel** - Le projet utilise un VPS Hostinger avec architecture complète.
+<details>
+  <summary><b>macOS</b></summary>
 
-### Architecture de Production
-- **Domaine** : https://casskai.app
-- **Infrastructure** : VPS Hostinger (89.116.111.88)
-- **Frontend** : React/Vite + Nginx
-- **Backend** : Node.js + PM2
-- **SSL** : Let's Encrypt automatique
-- **Base de données** : Supabase
-- **Paiements** : Stripe Live
+  Available via [Homebrew](https://brew.sh). To install:
 
-### Procédure de Déploiement
+  ```sh
+  brew install supabase/tap/supabase
+  ```
+
+  To install the beta release channel:
+  
+  ```sh
+  brew install supabase/tap/supabase-beta
+  brew link --overwrite supabase-beta
+  ```
+  
+  To upgrade:
+
+  ```sh
+  brew upgrade supabase
+  ```
+</details>
+
+<details>
+  <summary><b>Windows</b></summary>
+
+  Available via [Scoop](https://scoop.sh). To install:
+
+  ```powershell
+  scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
+  scoop install supabase
+  ```
+
+  To upgrade:
+
+  ```powershell
+  scoop update supabase
+  ```
+</details>
+
+<details>
+  <summary><b>Linux</b></summary>
+
+  Available via [Homebrew](https://brew.sh) and Linux packages.
+
+  #### via Homebrew
+
+  To install:
+
+  ```sh
+  brew install supabase/tap/supabase
+  ```
+
+  To upgrade:
+
+  ```sh
+  brew upgrade supabase
+  ```
+
+  #### via Linux packages
+
+  Linux packages are provided in [Releases](https://github.com/supabase/cli/releases). To install, download the `.apk`/`.deb`/`.rpm`/`.pkg.tar.zst` file depending on your package manager and run the respective commands.
+
+  ```sh
+  sudo apk add --allow-untrusted <...>.apk
+  ```
+
+  ```sh
+  sudo dpkg -i <...>.deb
+  ```
+
+  ```sh
+  sudo rpm -i <...>.rpm
+  ```
+
+  ```sh
+  sudo pacman -U <...>.pkg.tar.zst
+  ```
+</details>
+
+<details>
+  <summary><b>Other Platforms</b></summary>
+
+  You can also install the CLI via [go modules](https://go.dev/ref/mod#go-install) without the help of package managers.
+
+  ```sh
+  go install github.com/supabase/cli@latest
+  ```
+
+  Add a symlink to the binary in `$PATH` for easier access:
+
+  ```sh
+  ln -s "$(go env GOPATH)/bin/cli" /usr/bin/supabase
+  ```
+
+  This works on other non-standard Linux distros.
+</details>
+
+<details>
+  <summary><b>Community Maintained Packages</b></summary>
+
+  Available via [pkgx](https://pkgx.sh/). Package script [here](https://github.com/pkgxdev/pantry/blob/main/projects/supabase.com/cli/package.yml).
+  To install in your working directory:
+
+  ```bash
+  pkgx install supabase
+  ```
+
+  Available via [Nixpkgs](https://nixos.org/). Package script [here](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/tools/supabase-cli/default.nix).
+</details>
+
+### Run the CLI
+
 ```bash
-# 1. Compiler le projet
-npm run build
-
-# 2. Déployer (nécessite accès SSH au VPS)
-scp -r dist/* root@89.116.111.88:/var/www/casskai.app/public/
+supabase bootstrap
 ```
 
-📖 **Voir [DEPLOYMENT.md](./DEPLOYMENT.md) pour le guide complet de déploiement**
+Or using npx:
 
-## 🤝 Contribution
+```bash
+npx supabase bootstrap
+```
 
-Les contributions sont les bienvenues ! Pour contribuer :
+The bootstrap command will guide you through the process of setting up a Supabase project using one of the [starter](https://github.com/supabase-community/supabase-samples/blob/main/samples.json) templates.
 
-1. **Forkez** le projet
-2. Créez une **branche feature** (`git checkout -b feature/AmazingFeature`)
-3. **Committez** vos changements (`git commit -m 'Add some AmazingFeature'`)
-4. **Pushez** vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrez une **Pull Request**
+## Docs
 
-## 📝 Roadmap
+Command & config reference can be found [here](https://supabase.com/docs/reference/cli/about).
 
-- [ ] **Tests unitaires** (Jest, React Testing Library)
-- [ ] **Tests E2E** (Playwright)
-- [ ] **PWA** (Service Worker, mode hors-ligne)
-- [ ] **API mobile** (React Native)
-- [ ] **Intégrations bancaires** réelles
-- [ ] **OCR** pour factures
-- [ ] **IA** pour catégorisation automatique
+## Breaking changes
 
-## 🐛 Signaler un Bug
+We follow semantic versioning for changes that directly impact CLI commands, flags, and configurations.
 
-Utilisez les [GitHub Issues](https://github.com/NouctheCo/sb1-gafkau66/issues) avec :
-- **Description** détaillée du problème
-- **Étapes** pour reproduire
-- **Environnement** (OS, navigateur, version)
-- **Screenshots** si applicable
+However, due to dependencies on other service images, we cannot guarantee that schema migrations, seed.sql, and generated types will always work for the same CLI major version. If you need such guarantees, we encourage you to pin a specific version of CLI in package.json.
 
-## 📄 License
+## Developing
 
-Ce projet est sous licence **MIT**. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+To run from source:
 
-## 👨‍💻 Auteurs
-
-- **NouctheCo** - *Développement initial* - [GitHub](https://github.com/NouctheCo)
-
-## 🙏 Remerciements
-
-- [Supabase](https://supabase.com) pour la stack backend
-- [shadcn/ui](https://ui.shadcn.com) pour les composants UI
-- [Tailwind CSS](https://tailwindcss.com) pour le styling
-- [Lucide](https://lucide.dev) pour les icônes
-
----
-
-<div align="center">
-
-**⭐ N'oubliez pas de star le projet si il vous plaît ! ⭐**
-
-[🌐 Demo Live](https://casskai.app) • [📚 Documentation](https://casskai.app/docs) • [💬 Support](https://github.com/NouctheCo/sb1-gafkau66/discussions)
-
-</div># Casskai
+```sh
+# Go >= 1.22
+go run . help
+```

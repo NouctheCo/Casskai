@@ -51,13 +51,7 @@ export default function WelcomeStep() {
   const userName = user?.user_metadata?.first_name || user?.email?.split('@')[0] || 'utilisateur';
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.5 }}
-      className="max-w-4xl mx-auto"
-    >
+    <div className="max-w-4xl mx-auto">
       <Card className="glass-card overflow-hidden">
         <CardHeader className="text-center pb-8 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
           <motion.div
@@ -183,7 +177,10 @@ export default function WelcomeStep() {
             className="text-center"
           >
             <Button
-              onClick={nextStep}
+              onClick={() => {
+                console.warn('[WelcomeStep] Button clicked - calling nextStep()');
+                nextStep();
+              }}
               size="lg"
               className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
             >
@@ -203,6 +200,6 @@ export default function WelcomeStep() {
           </motion.div>
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 }
