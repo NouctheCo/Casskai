@@ -9,6 +9,11 @@ export interface ModuleDefinition {
   category: 'core' | 'business' | 'hr' | 'project' | 'integration' | 'marketplace';
   icon: string;
   
+  // Navigation properties
+  key: string; // Unique identifier for the module
+  path: string; // Route path for the module
+  label?: string; // Display label (defaults to name)
+  
   // Statut et availability
   status: 'available' | 'beta' | 'coming_soon' | 'deprecated';
   isCore: boolean; // Si true, module toujours activé

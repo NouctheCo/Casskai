@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useContext } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import ModularSidebarEnhanced from '@/components/layout/ModularSidebarEnhanced';
 import { Header } from '@/components/layout/Header';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { useModules } from '@/contexts/ModulesContext';
+import { useModulesSafe, useModules } from '@/contexts/ModulesContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,6 +12,9 @@ import { useLocale } from '@/contexts/LocaleContext';
 import AnalyticsProvider from '@/components/analytics/AnalyticsProvider';
 import { PageTransition } from '@/components/ui/PageTransition';
 import TrialExpirationNotice from '@/components/subscription/TrialExpirationNotice';
+import { NotificationProvider } from '@/components/notifications/NotificationSystem';
+import { IntelligentSidebar } from '@/components/layout/IntelligentSidebar';
+import { useContextualTheme } from '@/hooks/useContextualTheme';
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -27,6 +30,33 @@ function useIsMobile() {
 
 export function MainLayout() {
   const isE2EMinimal = (import.meta as unknown as { env: Record<string, string | undefined> }).env?.VITE_E2E_MINIMAL === 'true';
+  
+  // Hooks must be called before any conditional returns
+  const [isSidebarStoredCollapsed, _setIsSidebarStoredCollapsed] = useLocalStorage('sidebarCollapsed', false);
+  const isMobile = useIsMobile();
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const location = useLocation();
+  const { user, loading: authLoading, onboardingCompleted, currentCompany } = useAuth();
+  const { t } = useLocale();
+  const { currentModule } = useContextualTheme();
+
+  const { isLoading: modulesLoading } = useModulesSafe();
+
+  // Pages qui ne nécessitent pas la sidebar
+  const publicPages = ['/landing', '/auth', '/login', '/register'];
+  const onboardingPages = ['/onboarding'];
+  const isPublicPage = publicPages.includes(location.pathname);
+  const isOnboardingPage = onboardingPages.some(page => location.pathname.startsWith(page));
+  const showSidebar = user && !isPublicPage && !isOnboardingPage;
+
+  // Fermer la sidebar mobile quand on change de route ou quand on passe en mode desktop
+  useEffect(() => {
+    setIsMobileSidebarOpen(false);
+  }, [location.pathname, isMobile]);
+
+  // Gestion du collapse sur desktop
+  const [isDesktopCollapsed, _setIsDesktopCollapsed] = useState(isSidebarStoredCollapsed);
+
   if (isE2EMinimal) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
@@ -42,33 +72,6 @@ export function MainLayout() {
       </div>
     );
   }
-  const [isSidebarStoredCollapsed, setIsSidebarStoredCollapsed] = useLocalStorage('sidebarCollapsed', false);
-  const isMobile = useIsMobile();
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { activeModules, isLoading: modulesLoading } = useModules();
-  const { user, loading: authLoading } = useAuth();
-  const { t } = useLocale();
-
-  // Pages qui ne nécessitent pas la sidebar
-  const publicPages = ['/landing', '/auth', '/login', '/register'];
-  const isPublicPage = publicPages.includes(location.pathname);
-  const showSidebar = user && !isPublicPage;
-
-  // Fermer la sidebar mobile quand on change de route ou quand on passe en mode desktop
-  useEffect(() => {
-    setIsMobileSidebarOpen(false);
-  }, [location.pathname, isMobile]);
-
-  // Gestion du collapse sur desktop
-  const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(isSidebarStoredCollapsed);
-
-  const toggleDesktopSidebar = () => {
-    const newCollapsed = !isDesktopCollapsed;
-    setIsDesktopCollapsed(newCollapsed);
-    setIsSidebarStoredCollapsed(newCollapsed);
-  };
 
   // Loading state
   if (modulesLoading || authLoading) {
@@ -100,7 +103,8 @@ export function MainLayout() {
   // Layout principal avec sidebar pour les utilisateurs connectés
   return (
     <AnalyticsProvider domain="app.casskai.fr" showConsentBanner={true}>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
+      <NotificationProvider>
+        <div className="main-layout" data-module={currentModule}>
         {/* Sidebar Desktop */}
         {showSidebar && (
           <div className={cn(
@@ -111,7 +115,7 @@ export function MainLayout() {
               "fixed top-0 left-0 h-full z-20 transition-all duration-300",
               isDesktopCollapsed ? "w-16" : "w-64"
             )}>
-              <ModularSidebarEnhanced />
+              <IntelligentSidebar collapsed={isDesktopCollapsed} />
             </div>
           </div>
         )}
@@ -136,7 +140,7 @@ export function MainLayout() {
                   className="w-64 h-full"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <ModularSidebarEnhanced />
+                  <IntelligentSidebar />
                 </motion.div>
               </motion.div>
             )}
@@ -144,23 +148,24 @@ export function MainLayout() {
         )}
 
         {/* Contenu principal */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="main-content">
+          {/* Header - Sticky en haut de la page */}
           {showSidebar && (
-            <Header
-              onMenuClick={() => setIsMobileSidebarOpen(true)}
-              isMobile={isMobile}
-              isDesktopSidebarCollapsed={isDesktopCollapsed}
-            />
+            <div className="w-full">
+              <Header
+                onMenuClick={() => setIsMobileSidebarOpen(true)}
+                isMobile={isMobile}
+                isDesktopSidebarCollapsed={isDesktopCollapsed}
+              />
+            </div>
           )}
-          
+
           <main className={cn(
-            "main-content flex-1 overflow-y-auto",
-            showSidebar ? "bg-gray-50 dark:bg-gray-900" : "",
-            showSidebar && !isDesktopCollapsed ? "ml-64" : "",
-            showSidebar && isDesktopCollapsed ? "ml-16" : ""
+            "content-container overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent pt-16",
+            showSidebar ? "bg-gray-50 dark:bg-gray-900" : ""
           )}>
             <div className={cn(
-              showSidebar ? "page-content container mx-auto px-4 sm:px-6 lg:px-8 py-8" : ""
+              showSidebar ? "page-content" : ""
             )}>
               {/* Notification d'expiration d'essai pour les utilisateurs connectés */}
               {showSidebar && (
@@ -175,7 +180,8 @@ export function MainLayout() {
             </div>
           </main>
         </div>
-      </div>
+        </div>
+      </NotificationProvider>
     </AnalyticsProvider>
   );
 }

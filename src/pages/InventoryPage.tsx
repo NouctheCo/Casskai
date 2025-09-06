@@ -197,7 +197,7 @@ export default function InventoryPage() {
   // États pour le formulaire de mouvement
   const [showMovementForm, setShowMovementForm] = useState(false);
   const [movementItemId, setMovementItemId] = useState('');
-  const [movementType, setMovementType] = useState('entry');
+  const [movementType, setMovementType] = useState<'entry' | 'exit' | 'adjustment' | 'transfer'>('entry');
   const [movementQuantity, setMovementQuantity] = useState('');
   const [movementReason, setMovementReason] = useState('');
   
@@ -267,14 +267,15 @@ export default function InventoryPage() {
         description: description.trim(),
         category,
         unit,
-        purchase_price: parseFloat(purchasePrice),
-        selling_price: parseFloat(sellingPrice),
-        current_stock: parseInt(initialStock) || 0,
-        min_stock: parseInt(minStock) || 0,
-        max_stock: parseInt(minStock) * 5 || 50,
+        purchasePrice: parseFloat(purchasePrice),
+        sellingPrice: parseFloat(sellingPrice),
+        currentStock: parseInt(initialStock) || 0,
+        minStock: parseInt(minStock) || 0,
+        maxStock: parseInt(minStock) * 5 || 50,
         location: location.trim(),
         supplier: supplier.trim(),
-        barcode: `${Date.now()}${Math.floor(Math.random() * 1000)}`
+        barcode: `${Date.now()}${Math.floor(Math.random() * 1000)}`,
+        status: 'active' as const
       };
 
       // Créer l'article d'inventaire
@@ -340,7 +341,7 @@ export default function InventoryPage() {
         item_id: itemId,
         type,
         quantity: Math.abs(quantity),
-        unit_price: item.avg_cost || item.purchase_price,
+        unit_price: item.avgCost || item.purchasePrice,
         reason,
         reference: `MOV-${Date.now()}`,
         location: item.location
@@ -730,7 +731,7 @@ export default function InventoryPage() {
                     <DollarSign className="h-4 w-4 text-green-500" />
                     <span className="text-sm font-medium">Valeur totale</span>
                   </div>
-                  <div className="text-2xl font-bold">€{metrics.totalValue.toLocaleString()}</div>
+                  <div className="text-2xl font-bold">€{(metrics.totalValue || 0).toLocaleString()}</div>
                   <p className="text-xs text-muted-foreground">Inventaire valorisé</p>
                 </CardContent>
               </Card>
@@ -1072,7 +1073,7 @@ export default function InventoryPage() {
                           ))}
                           <span className="text-sm ml-1">{supplier.rating}/5</span>
                         </div>
-                        <p className="text-sm font-medium">€{supplier.totalAmount.toLocaleString()}</p>
+                        <p className="text-sm font-medium">€{(supplier.totalAmount || 0).toLocaleString()}</p>
                         <p className="text-xs text-muted-foreground">{supplier.totalOrders} commandes</p>
                         <p className="text-xs text-muted-foreground">Paiement: {supplier.paymentTerms}</p>
                       </div>
@@ -1194,7 +1195,7 @@ export default function InventoryPage() {
                       <CardContent className="p-4">
                         <div className="text-center">
                           <h3 className="font-semibold">Valeur totale</h3>
-                          <p className="text-2xl font-bold text-blue-600">€{metrics.totalValue.toLocaleString()}</p>
+                          <p className="text-2xl font-bold text-blue-600">€{(metrics.totalValue || 0).toLocaleString()}</p>
                           <p className="text-sm text-muted-foreground">Coût moyen pondéré</p>
                         </div>
                       </CardContent>
@@ -1290,7 +1291,7 @@ export default function InventoryPage() {
                           </div>
                           <div className="p-4 border rounded-lg">
                             <h4 className="font-semibold mb-2">Ventes du mois</h4>
-                            <p className="text-2xl font-bold text-green-600">€{metrics.monthlyTurnover.toLocaleString()}</p>
+                            <p className="text-2xl font-bold text-green-600">€{(metrics.monthlyTurnover || 0).toLocaleString()}</p>
                             <p className="text-sm text-muted-foreground">Chiffre d'affaires</p>
                           </div>
                         </div>
@@ -1310,7 +1311,7 @@ export default function InventoryPage() {
                                   </div>
                                   <div className="text-right">
                                     <p className="font-semibold">{salesVolume} vendus</p>
-                                    <p className="text-sm text-muted-foreground">€{(salesVolume * item.sellingPrice).toLocaleString()}</p>
+                                    <p className="text-sm text-muted-foreground">€{((salesVolume * (item.sellingPrice || 0))).toLocaleString()}</p>
                                   </div>
                                 </div>
                               );
@@ -1645,7 +1646,7 @@ export default function InventoryPage() {
                   <SelectContent>
                     {inventoryItems.map(item => (
                       <SelectItem key={item.id} value={item.id}>
-                        {item.name} (Stock: {item.current_stock})
+                        {item.name} (Stock: {item.currentStock})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1654,7 +1655,7 @@ export default function InventoryPage() {
 
               <div className="space-y-2">
                 <Label>Type de mouvement *</Label>
-                <Select value={movementType} onValueChange={setMovementType}>
+                <Select value={movementType} onValueChange={(value) => setMovementType(value as 'entry' | 'exit' | 'adjustment' | 'transfer')}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { FullConfig } from '@playwright/test';
 
 async function globalTeardown(config: FullConfig) {

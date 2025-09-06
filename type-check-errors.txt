@@ -1,0 +1,889 @@
+
+> casskai@1.0.0 type-check
+> npm run type-check:app && npm run type-check:vitest && npm run type-check:playwright
+
+
+> casskai@1.0.0 type-check:app
+> tsc --noEmit -p tsconfig.app.json
+
+src/components/accounting/AccountingPage.tsx(23,37): error TS2307: Cannot find module '@/services/journalEntryService' or its corresponding type declarations.
+src/components/accounting/AccountingPage.tsx(339,12): error TS2739: Type '{ currentEnterpriseId: string; onFinish: () => void; }' is missing the following properties from type '{ currentEnterpriseId: any; open: any; onOpenChange: any; onFinish: any; }': open, onOpenChange
+src/components/accounting/ChartOfAccounts.tsx(15,40): error TS2307: Cannot find module '@/utils/defaultAccountingData' or its corresponding type declarations.
+src/components/accounting/ChartOfAccounts.tsx(62,52): error TS2339: Property 'account_number' does not exist on type '{}'.
+src/components/accounting/ChartOfAccounts.tsx(64,17): error TS2339: Property 'account_number' does not exist on type '{}'.
+src/components/accounting/ChartOfAccounts.tsx(66,42): error TS2339: Property 'name' does not exist on type '{}'.
+src/components/accounting/ChartOfAccounts.tsx(67,35): error TS2339: Property 'type' does not exist on type '{}'.
+src/components/accounting/ChartOfAccounts.tsx(68,39): error TS2339: Property 'currency' does not exist on type '{}'.
+src/components/accounting/ChartOfAccounts.tsx(69,36): error TS2339: Property 'class' does not exist on type '{}'.
+src/components/accounting/ChartOfAccounts.tsx(93,19): error TS2339: Property 'account_number' does not exist on type '{}'.
+src/components/accounting/ChartOfAccounts.tsx(93,90): error TS2339: Property 'account_number' does not exist on type '{}'.
+src/components/accounting/ChartOfAccounts.tsx(98,19): error TS2339: Property 'name' does not exist on type '{}'.
+src/components/accounting/ChartOfAccounts.tsx(98,80): error TS2339: Property 'name' does not exist on type '{}'.
+src/components/accounting/ChartOfAccounts.tsx(112,19): error TS2339: Property 'class' does not exist on type '{}'.
+src/components/accounting/ChartOfAccounts.tsx(112,81): error TS2339: Property 'class' does not exist on type '{}'.
+src/components/accounting/ChartOfAccounts.tsx(126,19): error TS2339: Property 'type' does not exist on type '{}'.
+src/components/accounting/ChartOfAccounts.tsx(126,80): error TS2339: Property 'type' does not exist on type '{}'.
+src/components/accounting/ChartOfAccounts.tsx(131,19): error TS2339: Property 'currency' does not exist on type '{}'.
+src/components/accounting/ChartOfAccounts.tsx(131,84): error TS2339: Property 'currency' does not exist on type '{}'.
+src/components/accounting/ChartOfAccounts.tsx(186,21): error TS2554: Expected 0 arguments, but got 1.
+src/components/accounting/ChartOfAccounts.tsx(367,46): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+src/components/accounting/ChartOfAccountsTab.tsx(278,29): error TS2339: Property 'files' does not exist on type 'EventTarget'.
+src/components/accounting/FECImport.tsx(232,26): error TS2322: Type '"warning"' is not assignable to type '"default" | "destructive"'.
+src/components/accounting/FECImport.tsx(256,26): error TS2322: Type '"default" | "warning"' is not assignable to type '"default" | "destructive"'.
+  Type '"warning"' is not assignable to type '"default" | "destructive"'.
+src/components/accounting/FECImport.tsx(295,32): error TS2322: Type '"warning"' is not assignable to type '"default" | "destructive"'.
+src/components/accounting/FECImport.tsx(341,18): error TS2322: Type '"destructive" | "success"' is not assignable to type '"default" | "destructive"'.
+  Type '"success"' is not assignable to type '"default" | "destructive"'.
+src/components/accounting/JournalEntriesList.tsx(54,5): error TS2304: Cannot find name 'setLoading'.
+src/components/accounting/JournalEntriesList.tsx(55,5): error TS2304: Cannot find name 'setError'.
+src/components/accounting/JournalEntriesList.tsx(77,7): error TS2304: Cannot find name 'setError'.
+src/components/accounting/JournalEntriesList.tsx(80,7): error TS2304: Cannot find name 'setLoading'.
+src/components/accounting/JournalEntriesList.tsx(90,23): error TS2339: Property 'dateRange' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(92,85): error TS2339: Property 'journalId' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(93,85): error TS2339: Property 'accountId' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(94,49): error TS2339: Property 'reference' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(95,51): error TS2339: Property 'description' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(105,21): error TS2339: Property 'dateRange' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(107,83): error TS2339: Property 'journalId' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(108,83): error TS2339: Property 'accountId' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(109,47): error TS2339: Property 'reference' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(110,49): error TS2339: Property 'description' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(135,21): error TS2339: Property 'dateRange' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(137,83): error TS2339: Property 'journalId' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(138,83): error TS2339: Property 'accountId' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(139,47): error TS2339: Property 'reference' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(140,49): error TS2339: Property 'description' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(177,23): error TS2339: Property 'dateRange' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(179,85): error TS2339: Property 'journalId' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(180,85): error TS2339: Property 'accountId' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(181,49): error TS2339: Property 'reference' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(182,51): error TS2339: Property 'description' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(241,23): error TS2339: Property 'dateRange' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(243,85): error TS2339: Property 'journalId' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(244,85): error TS2339: Property 'accountId' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(245,49): error TS2339: Property 'reference' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(246,51): error TS2339: Property 'description' does not exist on type '{ sort_by: string; sort_order: string; }'.
+src/components/accounting/JournalEntriesList.tsx(256,63): error TS2339: Property 'message' does not exist on type 'string'.
+src/components/accounting/JournalEntriesList.tsx(363,10): error TS2559: Type '{ children: Element[]; }' has no properties in common with type 'IntrinsicAttributes & RefAttributes<unknown>'.
+src/components/accounting/JournalEntriesList.tsx(364,12): error TS2741: Property 'className' is missing in type '{ children: Element; }' but required in type '{ [x: string]: any; className: any; }'.
+src/components/accounting/JournalEntriesList.tsx(364,31): error TS2559: Type '{ children: string; }' has no properties in common with type 'IntrinsicAttributes & RefAttributes<unknown>'.
+src/components/accounting/JournalEntriesList.tsx(365,12): error TS2559: Type '{ children: string; }' has no properties in common with type 'IntrinsicAttributes & RefAttributes<unknown>'.
+src/components/accounting/JournalEntriesList.tsx(366,12): error TS2741: Property 'className' is missing in type '{ children: Element[]; }' but required in type '{ [x: string]: any; className: any; }'.
+src/components/accounting/JournalEntriesList.tsx(367,14): error TS2322: Type '{ children: string; onClick: () => void; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<unknown>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<unknown>'.
+src/components/accounting/JournalEntriesList.tsx(368,14): error TS2322: Type '{ children: string; onClick: () => Promise<void>; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<unknown>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<unknown>'.
+src/components/accounting/JournalEntriesListFilterSection.tsx(25,14): error TS2741: Property 'className' is missing in type '{ value: Date; onChange: (date: any) => any; placeholder: string; }' but required in type '{ value: any; onChange: any; placeholder: any; className: any; }'.
+src/components/accounting/JournalEntriesListFilterSection.tsx(33,14): error TS2741: Property 'className' is missing in type '{ value: Date; onChange: (date: any) => any; placeholder: string; }' but required in type '{ value: any; onChange: any; placeholder: any; className: any; }'.
+src/components/accounting/JournalEntryForm.tsx(25,37): error TS2307: Cannot find module '@/services/journalEntryService' or its corresponding type declarations.
+src/components/accounting/JournalEntryForm.tsx(30,3): error TS2339: Property 'item' does not exist on type '{}'.
+src/components/accounting/JournalEntryForm.tsx(31,3): error TS2339: Property 'index' does not exist on type '{}'.
+src/components/accounting/JournalEntryForm.tsx(32,3): error TS2339: Property 'updateItem' does not exist on type '{}'.
+src/components/accounting/JournalEntryForm.tsx(33,3): error TS2339: Property 'removeItem' does not exist on type '{}'.
+src/components/accounting/JournalEntryForm.tsx(34,3): error TS2339: Property 'canRemove' does not exist on type '{}'.
+src/components/accounting/JournalEntryForm.tsx(35,3): error TS2339: Property 'localAccounts' does not exist on type '{}'.
+src/components/accounting/JournalEntryForm.tsx(36,3): error TS2339: Property 'loading' does not exist on type '{}'.
+src/components/accounting/JournalEntryForm.tsx(37,3): error TS2339: Property 'fetchError' does not exist on type '{}'.
+src/components/accounting/JournalEntryForm.tsx(38,3): error TS2339: Property 't' does not exist on type '{}'.
+src/components/accounting/JournalEntryForm.tsx(348,36): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+src/components/accounting/JournalEntryForm.tsx(349,37): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+src/components/accounting/JournalEntryForm.tsx(414,14): error TS2322: Type '{ children: Element; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<unknown>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<unknown>'.
+src/components/accounting/JournalEntryForm.tsx(415,16): error TS2739: Type '{ mode: string; selected: Date; onSelect: (date: any) => void; initialFocus: true; }' is missing the following properties from type '{ [x: string]: any; className: any; classNames: any; showOutsideDays?: boolean; }': className, classNames
+src/components/accounting/JournalEntryForm.tsx(502,19): error TS2322: Type '{ key: number; item: { id: number; account_id: string; debit_amount: number; credit_amount: number; description: string; currency: string; }; updateItem: (id: any, field: any, value: any) => void; ... 5 more ...; t: (key: string, defaultValueOrParams?: any, paramsIfDefaultValue?: any) => string; }' is not assignable to type 'IntrinsicAttributes & object'.
+  Property 'item' does not exist on type 'IntrinsicAttributes & object'.
+src/components/accounting/JournalEntryForm.tsx(515,21): error TS2322: Type 'string' is not assignable to type 'number'.
+src/components/accounting/JournalEntryForm.tsx(521,21): error TS2322: Type 'string' is not assignable to type 'number'.
+src/components/accounting/JournalEntryForm.tsx(522,21): error TS2322: Type 'string' is not assignable to type 'number'.
+src/components/accounting/SetupWizard.tsx(15,57): error TS2307: Cannot find module '@/utils/defaultAccountingData' or its corresponding type declarations.
+src/components/accounting/SetupWizard.tsx(335,19): error TS2322: Type '{ id: string; value: Date; onChange: Dispatch<SetStateAction<Date>>; }' is not assignable to type 'IntrinsicAttributes & { value: any; onChange: any; placeholder: any; className: any; }'.
+  Property 'id' does not exist on type 'IntrinsicAttributes & { value: any; onChange: any; placeholder: any; className: any; }'.
+src/components/accounting/SetupWizard.tsx(343,19): error TS2322: Type '{ id: string; value: Date; onChange: Dispatch<SetStateAction<Date>>; }' is not assignable to type 'IntrinsicAttributes & { value: any; onChange: any; placeholder: any; className: any; }'.
+  Property 'id' does not exist on type 'IntrinsicAttributes & { value: any; onChange: any; placeholder: any; className: any; }'.
+src/components/ai/widgets/CashFlowPredictionWidget.tsx(58,25): error TS2339: Property 'predictedValue' does not exist on type 'CashFlowPrediction'.
+src/components/ai/widgets/CashFlowPredictionWidget.tsx(58,48): error TS2339: Property 'predictedValue' does not exist on type 'CashFlowPrediction'.
+src/components/ai/widgets/CashFlowPredictionWidget.tsx(224,49): error TS2339: Property 'predictedValue' does not exist on type 'CashFlowPrediction'.
+src/components/ai/widgets/CashFlowPredictionWidget.tsx(225,58): error TS2339: Property 'predictedValue' does not exist on type 'CashFlowPrediction'.
+src/components/ai/widgets/CashFlowPredictionWidget.tsx(254,56): error TS2339: Property 'predictedValue' does not exist on type 'CashFlowPrediction'.
+src/components/ai/widgets/CashFlowPredictionWidget.tsx(323,42): error TS2339: Property 'predictedValue' does not exist on type 'CashFlowPrediction'.
+src/components/ai/widgets/CashFlowPredictionWidget.tsx(326,58): error TS2339: Property 'predictedValue' does not exist on type 'CashFlowPrediction'.
+src/components/ai/widgets/CashFlowPredictionWidget.tsx(349,41): error TS2339: Property 'name' does not exist on type 'PredictionFactor'.
+src/components/ai/widgets/CashFlowPredictionWidget.tsx(390,50): error TS2339: Property 'predictedValue' does not exist on type 'CashFlowPrediction'.
+src/components/ai/widgets/CashFlowPredictionWidget.tsx(405,31): error TS2339: Property 'predictedValue' does not exist on type 'CashFlowPrediction'.
+src/components/ai/widgets/TaxOptimizationWidget.tsx(123,12): error TS2678: Type '"implemented"' is not comparable to type '"completed" | "in_progress" | "dismissed" | "suggested"'.
+src/components/ai/widgets/TaxOptimizationWidget.tsx(162,46): error TS2367: This comparison appears to be unintentional because the types '"completed" | "in_progress" | "dismissed" | "suggested"' and '"implemented"' have no overlap.
+src/components/ai/widgets/TaxOptimizationWidget.tsx(319,19): error TS2367: This comparison appears to be unintentional because the types '"completed" | "in_progress" | "dismissed" | "suggested"' and '"implemented"' have no overlap.
+src/components/ai/widgets/TaxOptimizationWidget.tsx(348,30): error TS2367: This comparison appears to be unintentional because the types '"completed" | "in_progress" | "dismissed" | "suggested"' and '"implemented"' have no overlap.
+src/components/ai/widgets/TaxOptimizationWidget.tsx(401,26): error TS2367: This comparison appears to be unintentional because the types '"completed" | "in_progress" | "dismissed"' and '"implemented"' have no overlap.
+src/components/ai/widgets/TaxOptimizationWidget.tsx(406,30): error TS2367: This comparison appears to be unintentional because the types '"completed" | "in_progress" | "dismissed"' and '"implemented"' have no overlap.
+src/components/analytics/AnalyticsProvider.tsx(71,29): error TS2345: Argument of type 'Record<string, unknown>' is not assignable to parameter of type 'PlausibleEventProps'.
+  'string' index signatures are incompatible.
+    Type 'unknown' is not assignable to type 'string | number | boolean'.
+src/components/auth/PermissionGuard.tsx(54,38): error TS2345: Argument of type 'string' is not assignable to parameter of type 'UserRole[]'.
+src/components/auth/PermissionGuard.tsx(106,46): error TS2345: Argument of type 'string' is not assignable to parameter of type 'UserRole[]'.
+src/components/auth/PermissionGuard.tsx(109,66): error TS2345: Argument of type 'string' is not assignable to parameter of type 'UserRole[]'.
+src/components/auth/PermissionGuard.tsx(118,75): error TS2345: Argument of type 'string' is not assignable to parameter of type 'UserRole[]'.
+src/components/auth/PermissionGuard.tsx(197,16): error TS2322: Type 'string' is not assignable to type 'UserRole'.
+src/components/auth/PermissionGuard.tsx(198,21): error TS2322: Type 'string' is not assignable to type 'UserRole'.
+src/components/auth/PermissionGuard.tsx(198,30): error TS2322: Type 'string' is not assignable to type 'UserRole'.
+src/components/auth/PermissionGuard.tsx(199,26): error TS2322: Type 'string' is not assignable to type 'UserRole'.
+src/components/auth/PermissionGuard.tsx(199,35): error TS2322: Type 'string' is not assignable to type 'UserRole'.
+src/components/auth/PermissionGuard.tsx(199,44): error TS2322: Type 'string' is not assignable to type 'UserRole'.
+src/components/auth/PermissionGuard.tsx(200,24): error TS2322: Type 'string' is not assignable to type 'UserRole'.
+src/components/auth/PermissionGuard.tsx(200,33): error TS2322: Type 'string' is not assignable to type 'UserRole'.
+src/components/auth/PermissionGuard.tsx(200,42): error TS2322: Type 'string' is not assignable to type 'UserRole'.
+src/components/auth/PermissionGuard.tsx(200,56): error TS2322: Type 'string' is not assignable to type 'UserRole'.
+src/components/auth/PermissionGuard.tsx(201,15): error TS2322: Type 'string' is not assignable to type 'UserRole'.
+src/components/auth/PermissionGuard.tsx(201,24): error TS2322: Type 'string' is not assignable to type 'UserRole'.
+src/components/auth/PermissionGuard.tsx(201,33): error TS2322: Type 'string' is not assignable to type 'UserRole'.
+src/components/auth/PermissionGuard.tsx(201,47): error TS2322: Type 'string' is not assignable to type 'UserRole'.
+src/components/auth/PermissionGuard.tsx(201,59): error TS2322: Type 'string' is not assignable to type 'UserRole'.
+src/components/banking/BankReconciliation.tsx(454,18): error TS2304: Cannot find name 'Label'.
+src/components/banking/BankReconciliation.tsx(456,19): error TS2304: Cannot find name 'Label'.
+src/components/banking/BankReconciliation.tsx(472,18): error TS2304: Cannot find name 'Label'.
+src/components/banking/BankReconciliation.tsx(474,19): error TS2304: Cannot find name 'Label'.
+src/components/crm/CommercialActions.tsx(210,9): error TS2353: Object literal may only specify known properties, and 'completed_date' does not exist in type 'Partial<CommercialActionFormData>'.
+src/components/crm/OpportunitiesKanban.tsx(150,7): error TS2322: Type '"lost" | "prospecting" | "qualification" | "proposal" | "negotiation" | "closing" | "won"' is not assignable to type '"prospecting" | "qualification" | "proposal" | "negotiation" | "closing"'.
+  Type '"lost"' is not assignable to type '"prospecting" | "qualification" | "proposal" | "negotiation" | "closing"'.
+src/components/crm/OpportunityPipeline.tsx(22,28): error TS2724: '"@/types/crm.types"' has no exported member named 'OpportunityStage'. Did you mean 'Opportunity'?
+src/components/currency/CurrencyComponents.tsx(7,50): error TS2307: Cannot find module '../hooks/useCurrency' or its corresponding type declarations.
+src/components/dashboard/ModularDashboard.tsx(435,11): error TS2322: Type 'GridBreakpoints' is not assignable to type '{ [P: string]: number; }'.
+  Index signature for type 'string' is missing in type 'GridBreakpoints'.
+src/components/dashboard/ModularDashboard.tsx(436,11): error TS2322: Type 'GridCols' is not assignable to type '{ [P: string]: number; }'.
+  Index signature for type 'string' is missing in type 'GridCols'.
+src/components/dashboard/ModularDashboard.tsx(448,11): error TS2322: Type '(currentLayout: Layout[], allLayouts: { [key: string]: Layout[]; }) => void' is not assignable to type 'ItemCallback'.
+  Types of parameters 'allLayouts' and 'oldItem' are incompatible.
+    Type 'Layout' is not assignable to type '{ [key: string]: Layout[]; }'.
+      Index signature for type 'string' is missing in type 'Layout'.
+src/components/debug/OnboardingDebugPanel.tsx(32,43): error TS2339: Property 'synchronizeAfterOnboarding' does not exist on type 'EnterpriseContextType'.
+src/components/einvoicing/EInvoiceSubmissionForm.tsx(283,19): error TS2322: Type 'Dispatch<SetStateAction<boolean>>' is not assignable to type '(checked: CheckedState) => void'.
+  Types of parameters 'value' and 'checked' are incompatible.
+    Type 'CheckedState' is not assignable to type 'SetStateAction<boolean>'.
+      Type '"indeterminate"' is not assignable to type 'SetStateAction<boolean>'.
+src/components/einvoicing/EInvoiceSubmissionForm.tsx(297,19): error TS2322: Type 'Dispatch<SetStateAction<boolean>>' is not assignable to type '(checked: CheckedState) => void'.
+  Types of parameters 'value' and 'checked' are incompatible.
+    Type 'CheckedState' is not assignable to type 'SetStateAction<boolean>'.
+      Type '"indeterminate"' is not assignable to type 'SetStateAction<boolean>'.
+src/components/einvoicing/EInvoiceSubmissionForm.tsx(311,19): error TS2322: Type 'Dispatch<SetStateAction<boolean>>' is not assignable to type '(checked: CheckedState) => void'.
+  Types of parameters 'value' and 'checked' are incompatible.
+    Type 'CheckedState' is not assignable to type 'SetStateAction<boolean>'.
+      Type '"indeterminate"' is not assignable to type 'SetStateAction<boolean>'.
+src/components/enterprise/EnterpriseSelector.tsx(167,74): error TS2339: Property 'legalName' does not exist on type 'Enterprise'.
+src/components/forecasts/ForecastReportView.tsx(62,61): error TS2554: Expected 1 arguments, but got 2.
+src/components/guards/AuthGuard.tsx(22,11): error TS2339: Property 'isAuthenticated' does not exist on type '{ data: (Company | UserRole | UserCompany | Account | JournalEntry | JournalEntryLine)[]; loading: boolean; ... 6 more ...; refresh: () => void; }'.
+src/components/guards/AuthGuard.tsx(22,28): error TS2339: Property 'isLoading' does not exist on type '{ data: (Company | UserRole | UserCompany | Account | JournalEntry | JournalEntryLine)[]; loading: boolean; ... 6 more ...; refresh: () => void; }'.
+src/components/guards/AuthGuard.tsx(22,39): error TS2339: Property 'signIn' does not exist on type '{ data: (Company | UserRole | UserCompany | Account | JournalEntry | JournalEntryLine)[]; loading: boolean; ... 6 more ...; refresh: () => void; }'.
+src/components/guards/AuthGuard.tsx(22,47): error TS2339: Property 'signUp' does not exist on type '{ data: (Company | UserRole | UserCompany | Account | JournalEntry | JournalEntryLine)[]; loading: boolean; ... 6 more ...; refresh: () => void; }'.
+src/components/guards/AuthGuard.tsx(22,55): error TS2339: Property 'resetPassword' does not exist on type '{ data: (Company | UserRole | UserCompany | Account | JournalEntry | JournalEntryLine)[]; loading: boolean; ... 6 more ...; refresh: () => void; }'.
+src/components/guards/AuthGuard.tsx(22,73): error TS2554: Expected 1-2 arguments, but got 0.
+src/components/guards/AuthIntegration.tsx(19,11): error TS2339: Property 'user' does not exist on type '{ data: (Company | UserRole | UserCompany | Account | JournalEntry | JournalEntryLine)[]; loading: boolean; ... 6 more ...; refresh: () => void; }'.
+src/components/guards/AuthIntegration.tsx(19,17): error TS2339: Property 'isAuthenticated' does not exist on type '{ data: (Company | UserRole | UserCompany | Account | JournalEntry | JournalEntryLine)[]; loading: boolean; ... 6 more ...; refresh: () => void; }'.
+src/components/guards/AuthIntegration.tsx(19,34): error TS2339: Property 'session' does not exist on type '{ data: (Company | UserRole | UserCompany | Account | JournalEntry | JournalEntryLine)[]; loading: boolean; ... 6 more ...; refresh: () => void; }'.
+src/components/guards/AuthIntegration.tsx(19,46): error TS2554: Expected 1-2 arguments, but got 0.
+src/components/guards/AuthIntegration.tsx(44,11): error TS2339: Property 'isAuthenticated' does not exist on type '{ data: (Company | UserRole | UserCompany | Account | JournalEntry | JournalEntryLine)[]; loading: boolean; ... 6 more ...; refresh: () => void; }'.
+src/components/guards/AuthIntegration.tsx(44,28): error TS2339: Property 'isLoading' does not exist on type '{ data: (Company | UserRole | UserCompany | Account | JournalEntry | JournalEntryLine)[]; loading: boolean; ... 6 more ...; refresh: () => void; }'.
+src/components/guards/AuthIntegration.tsx(44,42): error TS2554: Expected 1-2 arguments, but got 0.
+src/components/guards/ConfigGuard.tsx(15,29): error TS2339: Property 'isReady' does not exist on type '{ config: UseConfigReturn; supabase: { data: (Company | UserRole | UserCompany | Account | JournalEntry | JournalEntryLine)[]; ... 7 more ...; refresh: () => void; }; hasError: boolean; }'.
+src/components/guards/ConfigGuard.tsx(15,38): error TS2339: Property 'needsSetup' does not exist on type '{ config: UseConfigReturn; supabase: { data: (Company | UserRole | UserCompany | Account | JournalEntry | JournalEntryLine)[]; ... 7 more ...; refresh: () => void; }; hasError: boolean; }'.
+src/components/guards/ConfigGuard.tsx(46,36): error TS2551: Property 'isLoading' does not exist on type '{ data: (Company | UserRole | UserCompany | Account | JournalEntry | JournalEntryLine)[]; loading: boolean; ... 6 more ...; refresh: () => void; }'. Did you mean 'loading'?
+src/components/guards/ConfigGuard.tsx(144,40): error TS2339: Property 'isClientReady' does not exist on type '{ data: (Company | UserRole | UserCompany | Account | JournalEntry | JournalEntryLine)[]; loading: boolean; ... 6 more ...; refresh: () => void; }'.
+src/components/installation/InstallationGuide.tsx(3,41): error TS2304: Cannot find name 'useState'.
+src/components/installation/InstallationGuide.tsx(184,12): error TS2304: Cannot find name 'Button'.
+src/components/installation/InstallationGuide.tsx(190,13): error TS2304: Cannot find name 'Button'.
+src/components/installation/InstallationGuide.tsx(192,12): error TS2304: Cannot find name 'Button'.
+src/components/installation/InstallationGuide.tsx(197,13): error TS2304: Cannot find name 'Button'.
+src/components/invoicing/OptimizedInvoicesTabNew.tsx(18,35): error TS2614: Module '"@/services/invoicingService"' has no exported member 'ThirdParty'. Did you mean to use 'import ThirdParty from "@/services/invoicingService"' instead?
+src/components/invoicing/OptimizedInvoicesTabNew.tsx(128,13): error TS2353: Object literal may only specify known properties, and 'receipt' does not exist in type '{ invoice: DocumentTemplate; quote: DocumentTemplate; }'.
+src/components/invoicing/OptimizedInvoicesTabNew.tsx(133,13): error TS2353: Object literal may only specify known properties, and 'receiptPrefix' does not exist in type '{ invoicePrefix: string; quotePrefix: string; format: string; counters: { invoice: number; quote: number; }; }'.
+src/components/invoicing/OptimizedInvoicesTabNew.tsx(217,56): error TS2551: Property 'postal_code' does not exist on type '{ street?: string; postalCode?: string; city?: string; country?: string; }'. Did you mean 'postalCode'?
+src/components/invoicing/OptimizedInvoicesTabNew.tsx(222,50): error TS2551: Property 'vat_number' does not exist on type '{ name: string; commercialName?: string; legalForm?: LegalForm; siret?: string; apeCode?: string; vatNumber?: string; shareCapital?: number; }'. Did you mean 'vatNumber'?
+src/components/invoicing/OptimizedInvoicesTabNew.tsx(226,70): error TS2345: Argument of type 'import("C:/Users/noutc/Casskai/src/services/invoicingService").InvoiceWithDetails' is not assignable to parameter of type 'import("C:/Users/noutc/Casskai/src/types/database/invoices.types").InvoiceWithDetails'.
+  Type 'InvoiceWithDetails' is missing the following properties from type 'InvoiceWithDetails': total_ht, total_tva, total_ttc, remaining_amount, and 5 more.
+src/components/invoicing/OptimizedInvoicesTabNew.tsx(275,56): error TS2551: Property 'postal_code' does not exist on type '{ street?: string; postalCode?: string; city?: string; country?: string; }'. Did you mean 'postalCode'?
+src/components/invoicing/OptimizedInvoicesTabNew.tsx(280,50): error TS2551: Property 'vat_number' does not exist on type '{ name: string; commercialName?: string; legalForm?: LegalForm; siret?: string; apeCode?: string; vatNumber?: string; shareCapital?: number; }'. Did you mean 'vatNumber'?
+src/components/invoicing/OptimizedInvoicesTabNew.tsx(284,44): error TS2345: Argument of type 'import("C:/Users/noutc/Casskai/src/services/invoicingService").InvoiceWithDetails' is not assignable to parameter of type 'import("C:/Users/noutc/Casskai/src/types/database/invoices.types").InvoiceWithDetails'.
+  Type 'InvoiceWithDetails' is missing the following properties from type 'InvoiceWithDetails': total_ht, total_tva, total_ttc, remaining_amount, and 5 more.
+src/components/invoicing/OptimizedInvoicesTabNew.tsx(309,56): error TS2551: Property 'postal_code' does not exist on type '{ street?: string; postalCode?: string; city?: string; country?: string; }'. Did you mean 'postalCode'?
+src/components/invoicing/OptimizedInvoicesTabNew.tsx(314,50): error TS2551: Property 'vat_number' does not exist on type '{ name: string; commercialName?: string; legalForm?: LegalForm; siret?: string; apeCode?: string; vatNumber?: string; shareCapital?: number; }'. Did you mean 'vatNumber'?
+src/components/invoicing/OptimizedInvoicesTabNew.tsx(320,48): error TS2345: Argument of type 'import("C:/Users/noutc/Casskai/src/services/invoicingService").InvoiceWithDetails' is not assignable to parameter of type 'import("C:/Users/noutc/Casskai/src/types/database/invoices.types").InvoiceWithDetails'.
+  Type 'InvoiceWithDetails' is missing the following properties from type 'InvoiceWithDetails': total_ht, total_tva, total_ttc, remaining_amount, and 5 more.
+src/components/invoicing/OptimizedPaymentsTab.tsx(69,12): error TS2304: Cannot find name 'FileText'.
+src/components/LanguageToggle.tsx(69,30): error TS2339: Property 'flag' does not exist on type '{}'.
+src/components/LanguageToggle.tsx(69,61): error TS2339: Property 'flag' does not exist on type '{}'.
+src/components/layout/ModularSidebar.tsx(114,60): error TS2339: Property 'allModules' does not exist on type 'ModulesContextType'.
+src/components/layout/ModularSidebar.tsx(147,10): error TS2304: Cannot find name 'Collapsible'.
+src/components/layout/ModularSidebar.tsx(148,12): error TS2304: Cannot find name 'CollapsibleTrigger'.
+src/components/layout/ModularSidebar.tsx(165,18): error TS2304: Cannot find name 'ChevronDown'.
+src/components/layout/ModularSidebar.tsx(167,18): error TS2304: Cannot find name 'ChevronRight'.
+src/components/layout/ModularSidebar.tsx(170,13): error TS2304: Cannot find name 'CollapsibleTrigger'.
+src/components/layout/ModularSidebar.tsx(171,12): error TS2304: Cannot find name 'CollapsibleContent'.
+src/components/layout/ModularSidebar.tsx(173,13): error TS2304: Cannot find name 'CollapsibleContent'.
+src/components/layout/ModularSidebar.tsx(174,11): error TS2304: Cannot find name 'Collapsible'.
+src/components/layout/ModularSidebarNew.tsx(67,11): error TS2339: Property 'allModules' does not exist on type 'ModulesContextType'.
+src/components/layout/ModularSidebarNew.tsx(67,23): error TS2339: Property 'canAccessModule' does not exist on type 'ModulesContextType'.
+src/components/layout/ModularSidebarNew.tsx(67,40): error TS2339: Property 'currentPlan' does not exist on type 'ModulesContextType'.
+src/components/layout/ModularSidebarNew.tsx(67,53): error TS2339: Property 'isTrialUser' does not exist on type 'ModulesContextType'.
+src/components/layout/ModularSidebarNew.tsx(67,66): error TS2339: Property 'trialDaysRemaining' does not exist on type 'ModulesContextType'.
+src/components/layout/Sidebar.tsx(42,11): error TS2339: Property 'allModules' does not exist on type 'ModulesContextType'.
+src/components/modules/ModulesManagementPage.tsx(383,11): error TS2339: Property 'currentPlan' does not exist on type 'ModulesContextType'.
+src/components/modules/ModulesManagementPage.tsx(383,24): error TS2339: Property 'isTrialUser' does not exist on type 'ModulesContextType'.
+src/components/modules/ModulesManagementPage.tsx(383,37): error TS2339: Property 'trialDaysRemaining' does not exist on type 'ModulesContextType'.
+src/components/modules/ModulesManagementPage.tsx(383,57): error TS2339: Property 'canAccessModule' does not exist on type 'ModulesContextType'.
+src/components/reports/QuickAction.tsx(37,14): error TS2604: JSX element type 'Icon' does not have any construct or call signatures.
+src/components/reports/QuickAction.tsx(37,14): error TS2786: 'Icon' cannot be used as a JSX component.
+  Its type 'ElementType<any, keyof IntrinsicElements>' is not a valid JSX element type.
+    Type 'number' is not assignable to type 'ElementType'.
+src/components/reports/ReportsKPI.tsx(43,14): error TS2604: JSX element type 'Icon' does not have any construct or call signatures.
+src/components/reports/ReportsKPI.tsx(43,14): error TS2786: 'Icon' cannot be used as a JSX component.
+  Its type 'ElementType<any, keyof IntrinsicElements>' is not a valid JSX element type.
+    Type 'number' is not assignable to type 'ElementType'.
+src/components/security/SecuritySettingsPage.tsx(384,23): error TS2322: Type 'number | boolean' is not assignable to type 'boolean'.
+  Type 'number' is not assignable to type 'boolean'.
+src/components/settings/SubscriptionSettings.tsx(29,11): error TS2339: Property 'currentPlan' does not exist on type 'ModulesContextType'.
+src/components/settings/SubscriptionSettings.tsx(29,24): error TS2339: Property 'isTrialUser' does not exist on type 'ModulesContextType'.
+src/components/settings/SubscriptionSettings.tsx(29,37): error TS2339: Property 'trialDaysRemaining' does not exist on type 'ModulesContextType'.
+src/components/settings/SubscriptionSettings.tsx(29,57): error TS2339: Property 'getAvailableModulesForPlan' does not exist on type 'ModulesContextType'.
+src/components/settings/SubscriptionSettings.tsx(191,61): error TS2339: Property 'displayName' does not exist on type 'SubscriptionPlan'.
+src/components/setup/CurrencySelector.tsx(4,29): error TS2307: Cannot find module '../hooks/useCurrency' or its corresponding type declarations.
+src/components/setup/LicenseChecker.tsx(3,32): error TS2307: Cannot find module '../services/licenseService' or its corresponding type declarations.
+src/components/setup/LicenseChecker.tsx(9,27): error TS2304: Cannot find name 'LicenseFeatures'.
+src/components/setup/LicenseChecker.tsx(45,50): error TS2304: Cannot find name 'LicenseFeatures'.
+src/components/setup/LicenseChecker.tsx(46,43): error TS2304: Cannot find name 'LicenseFeatures'.
+src/components/setup/LicenseChecker.tsx(58,27): error TS2538: Type 'symbol' cannot be used as an index type.
+src/components/setup/MarketSelector.tsx(13,25): error TS2304: Cannot find name 'MarketService'.
+src/components/setup/SetupWizard.tsx(10,48): error TS2307: Cannot find module '../lib/i18n' or its corresponding type declarations.
+src/components/setup/TenantGuard.tsx(3,27): error TS2307: Cannot find module '../hooks/useTenant' or its corresponding type declarations.
+src/components/ui/alert-dialog.tsx(10,48): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/alert-dialog.tsx(17,5): error TS2322: Type 'ForwardedRef<unknown>' is not assignable to type 'LegacyRef<HTMLDivElement>'.
+  Type 'MutableRefObject<unknown>' is not assignable to type 'LegacyRef<HTMLDivElement>'.
+    Type 'MutableRefObject<unknown>' is not assignable to type 'RefObject<HTMLDivElement>'.
+      Types of property 'current' are incompatible.
+        Type '{}' is missing the following properties from type 'HTMLDivElement': align, addEventListener, removeEventListener, accessKey, and 315 more.
+src/components/ui/alert-dialog.tsx(21,48): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/alert-dialog.tsx(25,7): error TS2322: Type 'ForwardedRef<unknown>' is not assignable to type 'LegacyRef<HTMLDivElement>'.
+  Type 'MutableRefObject<unknown>' is not assignable to type 'LegacyRef<HTMLDivElement>'.
+    Type 'MutableRefObject<unknown>' is not assignable to type 'RefObject<HTMLDivElement>'.
+      Types of property 'current' are incompatible.
+        Type '{}' is missing the following properties from type 'HTMLDivElement': align, addEventListener, removeEventListener, accessKey, and 315 more.
+src/components/ui/alert-dialog.tsx(55,46): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/alert-dialog.tsx(56,31): error TS2322: Type 'ForwardedRef<unknown>' is not assignable to type 'LegacyRef<HTMLHeadingElement>'.
+  Type 'MutableRefObject<unknown>' is not assignable to type 'LegacyRef<HTMLHeadingElement>'.
+    Type 'MutableRefObject<unknown>' is not assignable to type 'RefObject<HTMLHeadingElement>'.
+      Types of property 'current' are incompatible.
+        Type '{}' is missing the following properties from type 'HTMLHeadingElement': align, addEventListener, removeEventListener, accessKey, and 315 more.
+src/components/ui/alert-dialog.tsx(60,52): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/alert-dialog.tsx(62,5): error TS2322: Type 'ForwardedRef<unknown>' is not assignable to type 'LegacyRef<HTMLParagraphElement>'.
+  Type 'MutableRefObject<unknown>' is not assignable to type 'LegacyRef<HTMLParagraphElement>'.
+    Type 'MutableRefObject<unknown>' is not assignable to type 'RefObject<HTMLParagraphElement>'.
+      Types of property 'current' are incompatible.
+        Type '{}' is missing the following properties from type 'HTMLParagraphElement': align, addEventListener, removeEventListener, accessKey, and 315 more.
+src/components/ui/alert-dialog.tsx(68,47): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/alert-dialog.tsx(69,32): error TS2322: Type 'ForwardedRef<unknown>' is not assignable to type 'LegacyRef<HTMLButtonElement>'.
+  Type 'MutableRefObject<unknown>' is not assignable to type 'LegacyRef<HTMLButtonElement>'.
+    Type 'MutableRefObject<unknown>' is not assignable to type 'RefObject<HTMLButtonElement>'.
+      Types of property 'current' are incompatible.
+        Type '{}' is missing the following properties from type 'HTMLButtonElement': disabled, form, formAction, formEnctype, and 333 more.
+src/components/ui/alert-dialog.tsx(73,47): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/alert-dialog.tsx(75,5): error TS2322: Type 'ForwardedRef<unknown>' is not assignable to type 'LegacyRef<HTMLButtonElement>'.
+  Type 'MutableRefObject<unknown>' is not assignable to type 'LegacyRef<HTMLButtonElement>'.
+    Type 'MutableRefObject<unknown>' is not assignable to type 'RefObject<HTMLButtonElement>'.
+      Types of property 'current' are incompatible.
+        Type '{}' is missing the following properties from type 'HTMLButtonElement': disabled, form, formAction, formEnctype, and 333 more.
+src/components/ui/AnimatedChart.tsx(437,11): error TS2322: Type '{ ref: MutableRefObject<any>; type: "line" | "bar" | "pie" | "doughnut"; data: { labels: any; datasets: any; }; options: { color: string; plugins: { legend: { labels: { color: string; }; }; }; scales: { ...; }; responsive: boolean; maintainAspectRatio: boolean; onClick: (event: any, elements: any[]) => void; } | { ....' is not assignable to type 'IntrinsicAttributes & AnimatedChartProps'.
+  Property 'ref' does not exist on type 'IntrinsicAttributes & AnimatedChartProps'.
+src/components/ui/ConfirmDialog.tsx(44,8): error TS2559: Type '{ children: Element[]; }' has no properties in common with type 'IntrinsicAttributes & RefAttributes<unknown>'.
+src/components/ui/ConfirmDialog.tsx(45,10): error TS2741: Property 'className' is missing in type '{ children: Element[]; }' but required in type '{ [x: string]: any; className: any; }'.
+src/components/ui/ConfirmDialog.tsx(46,12): error TS2559: Type '{ children: string; }' has no properties in common with type 'IntrinsicAttributes & RefAttributes<unknown>'.
+src/components/ui/ConfirmDialog.tsx(47,12): error TS2559: Type '{ children: string; }' has no properties in common with type 'IntrinsicAttributes & RefAttributes<unknown>'.
+src/components/ui/ConfirmDialog.tsx(51,10): error TS2741: Property 'className' is missing in type '{ children: Element[]; }' but required in type '{ [x: string]: any; className: any; }'.
+src/components/ui/ConfirmDialog.tsx(52,12): error TS2559: Type '{ children: string; }' has no properties in common with type 'IntrinsicAttributes & RefAttributes<unknown>'.
+src/components/ui/ConfirmDialog.tsx(53,12): error TS2322: Type '{ children: string; onClick: () => Promise<void>; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<unknown>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<unknown>'.
+src/components/ui/ConfirmDialog.tsx(98,10): error TS2559: Type '{ children: Element[]; }' has no properties in common with type 'IntrinsicAttributes & RefAttributes<unknown>'.
+src/components/ui/ConfirmDialog.tsx(99,12): error TS2741: Property 'className' is missing in type '{ children: Element[]; }' but required in type '{ [x: string]: any; className: any; }'.
+src/components/ui/ConfirmDialog.tsx(100,14): error TS2559: Type '{ children: string; }' has no properties in common with type 'IntrinsicAttributes & RefAttributes<unknown>'.
+src/components/ui/ConfirmDialog.tsx(101,14): error TS2559: Type '{ children: string; }' has no properties in common with type 'IntrinsicAttributes & RefAttributes<unknown>'.
+src/components/ui/ConfirmDialog.tsx(105,12): error TS2741: Property 'className' is missing in type '{ children: Element[]; }' but required in type '{ [x: string]: any; className: any; }'.
+src/components/ui/ConfirmDialog.tsx(106,14): error TS2322: Type '{ children: string; onClick: () => void; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<unknown>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<unknown>'.
+src/components/ui/ConfirmDialog.tsx(114,14): error TS2322: Type '{ children: string; onClick: () => void | Promise<void>; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<unknown>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<unknown>'.
+src/components/ui/date-picker.tsx(36,8): error TS2322: Type '{ children: Element; className: string; align: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<unknown>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<unknown>'.
+src/components/ui/date-picker.tsx(37,10): error TS2739: Type '{ mode: string; selected: any; onSelect: any; locale: any; initialFocus: true; }' is missing the following properties from type '{ [x: string]: any; className: any; classNames: any; showOutsideDays?: boolean; }': className, classNames
+src/components/ui/DragDropGrid.tsx(81,7): error TS2322: Type 'boolean' is not assignable to type 'true | "position"'.
+src/components/ui/form.tsx(18,8): error TS2307: Cannot find module './form.d' or its corresponding type declarations.
+src/components/ui/LazyChart.tsx(2,37): error TS2307: Cannot find module '@/utils/performance/lazyLoading' or its corresponding type declarations.
+src/components/ui/popover.tsx(9,48): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/popover.tsx(9,59): error TS2339: Property 'align' does not exist on type '{}'.
+src/components/ui/popover.tsx(9,77): error TS2339: Property 'sideOffset' does not exist on type '{}'.
+src/components/ui/popover.tsx(12,11): error TS2322: Type 'ForwardedRef<unknown>' is not assignable to type 'LegacyRef<HTMLDivElement>'.
+  Type 'MutableRefObject<unknown>' is not assignable to type 'LegacyRef<HTMLDivElement>'.
+    Type 'MutableRefObject<unknown>' is not assignable to type 'RefObject<HTMLDivElement>'.
+      Types of property 'current' are incompatible.
+        Type '{}' is missing the following properties from type 'HTMLDivElement': align, addEventListener, removeEventListener, accessKey, and 315 more.
+src/components/ui/SkeletonLoader.tsx(212,13): error TS2322: Type '{ key: number; className: string; style: { height: number; }; initial: { scaleY: number; }; animate: { scaleY: number; transition: { delay: number; duration: number; ease: "easeOut"; }; }; transformOrigin: string; }' is not assignable to type 'IntrinsicAttributes & Omit<HTMLMotionProps<"div">, "ref"> & RefAttributes<HTMLDivElement>'.
+  Property 'transformOrigin' does not exist on type 'IntrinsicAttributes & Omit<HTMLMotionProps<"div">, "ref"> & RefAttributes<HTMLDivElement>'.
+src/components/ui/SmartTooltip.tsx(440,15): error TS2322: Type '{ key: number; className: string; style: { backgroundColor: string; height: string; minHeight: string; }; initial: { scaleY: number; }; animate: { scaleY: number; }; transition: { delay: number; duration: number; ease: "easeOut"; }; transformOrigin: string; }' is not assignable to type 'IntrinsicAttributes & Omit<HTMLMotionProps<"div">, "ref"> & RefAttributes<HTMLDivElement>'.
+  Property 'transformOrigin' does not exist on type 'IntrinsicAttributes & Omit<HTMLMotionProps<"div">, "ref"> & RefAttributes<HTMLDivElement>'.
+src/components/ui/toast.tsx(9,43): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/toast.tsx(11,3): error TS2322: Type 'ForwardedRef<unknown>' is not assignable to type 'LegacyRef<HTMLOListElement>'.
+  Type 'MutableRefObject<unknown>' is not assignable to type 'LegacyRef<HTMLOListElement>'.
+    Type 'MutableRefObject<unknown>' is not assignable to type 'RefObject<HTMLOListElement>'.
+      Types of property 'current' are incompatible.
+        Type '{}' is missing the following properties from type 'HTMLOListElement': compact, reversed, start, type, and 318 more.
+src/components/ui/toast.tsx(37,35): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/toast.tsx(37,46): error TS2339: Property 'variant' does not exist on type '{}'.
+src/components/ui/toast.tsx(40,4): error TS2322: Type 'ForwardedRef<unknown>' is not assignable to type 'LegacyRef<HTMLLIElement>'.
+  Type 'MutableRefObject<unknown>' is not assignable to type 'LegacyRef<HTMLLIElement>'.
+    Type 'MutableRefObject<unknown>' is not assignable to type 'RefObject<HTMLLIElement>'.
+      Types of property 'current' are incompatible.
+        Type '{}' is missing the following properties from type 'HTMLLIElement': type, value, addEventListener, removeEventListener, and 316 more.
+src/components/ui/toast.tsx(48,41): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/toast.tsx(50,3): error TS2322: Type 'ForwardedRef<unknown>' is not assignable to type 'LegacyRef<HTMLButtonElement>'.
+  Type 'MutableRefObject<unknown>' is not assignable to type 'LegacyRef<HTMLButtonElement>'.
+    Type 'MutableRefObject<unknown>' is not assignable to type 'RefObject<HTMLButtonElement>'.
+      Types of property 'current' are incompatible.
+        Type '{}' is missing the following properties from type 'HTMLButtonElement': disabled, form, formAction, formEnctype, and 333 more.
+src/components/ui/toast.tsx(60,40): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/toast.tsx(62,3): error TS2322: Type 'ForwardedRef<unknown>' is not assignable to type 'LegacyRef<HTMLButtonElement>'.
+  Type 'MutableRefObject<unknown>' is not assignable to type 'LegacyRef<HTMLButtonElement>'.
+    Type 'MutableRefObject<unknown>' is not assignable to type 'RefObject<HTMLButtonElement>'.
+      Types of property 'current' are incompatible.
+        Type '{}' is missing the following properties from type 'HTMLButtonElement': disabled, form, formAction, formEnctype, and 333 more.
+src/components/ui/toast.tsx(75,40): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/toast.tsx(77,3): error TS2322: Type 'ForwardedRef<unknown>' is not assignable to type 'LegacyRef<HTMLDivElement>'.
+  Type 'MutableRefObject<unknown>' is not assignable to type 'LegacyRef<HTMLDivElement>'.
+    Type 'MutableRefObject<unknown>' is not assignable to type 'RefObject<HTMLDivElement>'.
+      Types of property 'current' are incompatible.
+        Type '{}' is missing the following properties from type 'HTMLDivElement': align, addEventListener, removeEventListener, accessKey, and 315 more.
+src/components/ui/toast.tsx(84,46): error TS2339: Property 'className' does not exist on type '{}'.
+src/components/ui/toast.tsx(86,3): error TS2322: Type 'ForwardedRef<unknown>' is not assignable to type 'LegacyRef<HTMLDivElement>'.
+  Type 'MutableRefObject<unknown>' is not assignable to type 'LegacyRef<HTMLDivElement>'.
+    Type 'MutableRefObject<unknown>' is not assignable to type 'RefObject<HTMLDivElement>'.
+      Types of property 'current' are incompatible.
+        Type '{}' is missing the following properties from type 'HTMLDivElement': align, addEventListener, removeEventListener, accessKey, and 315 more.
+src/components/widgets/WidgetRenderer.tsx(38,53): error TS2339: Property 'DataTable' does not exist on type 'typeof import("C:/Users/noutc/Casskai/src/components/ui/DataTable")'.
+src/components/widgets/WidgetRenderer.tsx(41,58): error TS2339: Property 'CalendarWidget' does not exist on type 'typeof import("C:/Users/noutc/Casskai/src/components/ui/CalendarWidget")'.
+src/components/widgets/WidgetRenderer.tsx(491,51): error TS2339: Property 'data' does not exist on type '{ chartType: "area" | "line" | "bar" | "pie" | "doughnut"; dataKey: string; xAxis?: string; yAxis?: string; colors?: string[]; showLegend?: boolean; showGrid?: boolean; animate?: boolean; }'.
+src/components/widgets/WidgetRenderer.tsx(491,93): error TS2339: Property 'data' does not exist on type '{ chartType: "area" | "line" | "bar" | "pie" | "doughnut"; dataKey: string; xAxis?: string; yAxis?: string; colors?: string[]; showLegend?: boolean; showGrid?: boolean; animate?: boolean; }'.
+src/components/widgets/WidgetRenderer.tsx(492,35): error TS2339: Property 'data' does not exist on type '{ chartType: "area" | "line" | "bar" | "pie" | "doughnut"; dataKey: string; xAxis?: string; yAxis?: string; colors?: string[]; showLegend?: boolean; showGrid?: boolean; animate?: boolean; }'.
+src/components/widgets/WidgetRenderer.tsx(505,51): error TS2339: Property 'data' does not exist on type '{ columns: TableColumn[]; pageSize?: number; showPagination?: boolean; sortable?: boolean; filterable?: boolean; }'.
+src/components/widgets/WidgetRenderer.tsx(505,93): error TS2339: Property 'data' does not exist on type '{ columns: TableColumn[]; pageSize?: number; showPagination?: boolean; sortable?: boolean; filterable?: boolean; }'.
+src/components/widgets/WidgetRenderer.tsx(506,35): error TS2339: Property 'data' does not exist on type '{ columns: TableColumn[]; pageSize?: number; showPagination?: boolean; sortable?: boolean; filterable?: boolean; }'.
+src/components/widgets/WidgetRenderer.tsx(521,49): error TS2339: Property 'calendar' does not exist on type 'WidgetSpecificConfig'.
+src/components/widgets/WidgetRenderer.tsx(521,97): error TS2339: Property 'calendar' does not exist on type 'WidgetSpecificConfig'.
+src/components/widgets/WidgetRenderer.tsx(522,29): error TS2339: Property 'calendar' does not exist on type 'WidgetSpecificConfig'.
+src/config/app-routes.tsx(59,20): error TS2741: Property 'children' is missing in type '{}' but required in type 'Props'.
+src/config/app-routes.tsx(268,14): error TS2741: Property 'moduleId' is missing in type '{}' but required in type 'ModuleRendererProps'.
+src/contexts/DashboardContext.tsx(407,13): error TS2353: Object literal may only specify known properties, and 'actions' does not exist in type 'WidgetSpecificConfig'.
+src/contexts/DashboardContext.tsx(760,18): error TS2345: Argument of type '{ type: "ADD_REALTIME_EVENT"; payload: string; }' is not assignable to parameter of type 'DashboardAction'.
+  Types of property 'payload' are incompatible.
+    Type 'string' is not assignable to type 'RealtimeEvent'.
+src/contexts/EnterpriseContext.tsx(50,3): error TS2322: Type 'string' is not assignable to type 'number | Date'.
+src/contexts/EnterpriseContext.tsx(51,3): error TS2322: Type 'string' is not assignable to type 'number | Date'.
+src/contexts/EnterpriseContext.tsx(120,7): error TS2322: Type 'string' is not assignable to type 'number | Date'.
+src/contexts/EnterpriseContext.tsx(121,7): error TS2322: Type 'string' is not assignable to type 'number | Date'.
+src/contexts/EnterpriseContext.tsx(145,20): error TS2345: Argument of type '(Enterprise | { updatedAt: string; id: string; name: string; registrationNumber: string; vatNumber?: string; countryCode: string; address: { street: string; postalCode: string; city: string; country: string; }; ... 7 more ...; settings: EnterpriseSettings; })[]' is not assignable to parameter of type 'SetStateAction<Enterprise[]>'.
+  Type '(Enterprise | { updatedAt: string; id: string; name: string; registrationNumber: string; vatNumber?: string; countryCode: string; address: { street: string; postalCode: string; city: string; country: string; }; ... 7 more ...; settings: EnterpriseSettings; })[]' is not assignable to type 'Enterprise[]'.
+    Type 'Enterprise | { updatedAt: string; id: string; name: string; registrationNumber: string; vatNumber?: string; countryCode: string; address: { street: string; postalCode: string; city: string; country: string; }; ... 7 more ...; settings: EnterpriseSettings; }' is not assignable to type 'Enterprise'.
+      Type '{ updatedAt: string; id: string; name: string; registrationNumber: string; vatNumber?: string; countryCode: string; address: { street: string; postalCode: string; city: string; country: string; }; ... 7 more ...; settings: EnterpriseSettings; }' is not assignable to type 'Enterprise'.
+        Types of property 'updatedAt' are incompatible.
+          Type 'string' is not assignable to type 'number | Date'.
+src/contexts/EnterpriseContext.tsx(197,7): error TS2353: Object literal may only specify known properties, and 'country' does not exist in type 'EnterpriseTaxConfiguration'.
+src/contexts/EnterpriseContext.tsx(197,27): error TS2339: Property 'country' does not exist on type 'Enterprise'.
+src/contexts/EnterpriseContext.tsx(198,27): error TS2339: Property 'country' does not exist on type 'Enterprise'.
+src/contexts/EnterpriseContext.tsx(199,36): error TS2339: Property 'country' does not exist on type 'Enterprise'.
+src/contexts/ModulesContext.tsx(340,27): error TS2339: Property 'getModule' does not exist on type 'ModulesContextType'.
+src/contexts/ModulesContext.tsx(363,39): error TS2349: This expression is not callable.
+  Not all constituents of type 'ComponentType<{}>' are callable.
+    Type 'ComponentClass<{}, any>' has no call signatures.
+src/contexts/ModulesContext.tsx(397,17): error TS2322: Type 'PropsWithoutRef<P> & { ref: ForwardedRef<any>; }' is not assignable to type 'IntrinsicAttributes & P'.
+  Type 'PropsWithoutRef<P> & { ref: ForwardedRef<any>; }' is not assignable to type 'P'.
+    'PropsWithoutRef<P> & { ref: ForwardedRef<any>; }' is assignable to the constraint of type 'P', but 'P' could be instantiated with a different subtype of constraint 'object'.
+src/contexts/ModulesContext.tsx(402,13): error TS2322: Type 'PropsWithoutRef<P> & { ref: ForwardedRef<any>; }' is not assignable to type 'IntrinsicAttributes & P'.
+  Type 'PropsWithoutRef<P> & { ref: ForwardedRef<any>; }' is not assignable to type 'P'.
+    'PropsWithoutRef<P> & { ref: ForwardedRef<any>; }' is assignable to the constraint of type 'P', but 'P' could be instantiated with a different subtype of constraint 'object'.
+src/contexts/ThemeContext.tsx(2,37): error TS5097: An import path can only end with a '.tsx' extension when 'allowImportingTsExtensions' is enabled.
+src/data/licensePlans.ts(2,29): error TS2304: Cannot find name 'LicenseType'.
+src/hooks/index.ts(16,15): error TS2305: Module '"@/contexts/ConfigContext"' has no exported member 'UseConfigReturn'.
+src/hooks/index.ts(25,20): error TS2554: Expected 1-2 arguments, but got 0.
+src/hooks/useAccountingImport.ts(92,21): error TS2345: Argument of type '"file"' is not assignable to parameter of type '"format" | "encoding" | "skipFirstRow" | "skipEmptyLines" | "validateBeforeImport" | "autoLetterage"'.
+src/hooks/useAccountingImport.ts(99,25): error TS2345: Argument of type '"delimiter"' is not assignable to parameter of type '"format" | "encoding" | "skipFirstRow" | "skipEmptyLines" | "validateBeforeImport" | "autoLetterage"'.
+src/hooks/useAccountingImport.ts(242,7): error TS2322: Type '{ id?: string; status?: "draft" | "validated" | "posted"; date?: string; description?: string; createdAt?: string; updatedAt?: string; items?: { description?: string; auxiliaryAccount?: string; letterage?: string; accountId?: string; debitAmount?: number; creditAmount?: number; }[]; reference?: string; companyId?: s...' is not assignable to type 'FECEntry[]'.
+  Type '{ id?: string; status?: "draft" | "validated" | "posted"; date?: string; description?: string; createdAt?: string; updatedAt?: string; items?: { description?: string; auxiliaryAccount?: string; letterage?: string; accountId?: string; debitAmount?: number; creditAmount?: number; }[]; reference?: string; companyId?: s...' is missing the following properties from type 'FECEntry': journalCode, journalName, accountNumber, accountName, and 3 more.
+src/hooks/useAccountingImport.ts(369,38): error TS2345: Argument of type '(config: ImportConfig) => Promise<{ totalRows: number; validRows: number; success: boolean; errors: ImportError[]; entries: FECEntry[]; duplicates: FECEntry[]; warnings: ImportWarning[]; }>' is not assignable to parameter of type 'SubmitHandler<{ format: string; encoding: string; skipFirstRow: boolean; skipEmptyLines: boolean; validateBeforeImport: boolean; autoLetterage: boolean; }>'.
+  Types of parameters 'config' and 'data' are incompatible.
+    Type '{ format: string; encoding: string; skipFirstRow: boolean; skipEmptyLines: boolean; validateBeforeImport: boolean; autoLetterage: boolean; }' is not assignable to type '{ format?: "Excel" | "CSV" | "FEC" | "auto"; file?: File; journalId?: string; encoding?: "UTF-8" | "ISO-8859-1" | "Windows-1252"; delimiter?: string; skipFirstRow?: boolean; skipEmptyLines?: boolean; validateBeforeImport?: boolean; autoLetterage?: boolean; }'.
+      Types of property 'format' are incompatible.
+        Type 'string' is not assignable to type '"Excel" | "CSV" | "FEC" | "auto"'.
+src/hooks/useAccountingImport.ts(380,43): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(names: readonly ("format" | "encoding" | "skipFirstRow" | "skipEmptyLines" | "validateBeforeImport" | "autoLetterage")[], defaultValue?: { format?: string; encoding?: string; skipFirstRow?: boolean; skipEmptyLines?: boolean; validateBeforeImport?: boolean; autoLetterage?: boolean; }): readonly (string | boolean)[]', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'readonly ("format" | "encoding" | "skipFirstRow" | "skipEmptyLines" | "validateBeforeImport" | "autoLetterage")[]'.
+  Overload 2 of 4, '(name: "format" | "encoding" | "skipFirstRow" | "skipEmptyLines" | "validateBeforeImport" | "autoLetterage", defaultValue?: string | boolean): string | boolean', gave the following error.
+    Argument of type '"file"' is not assignable to parameter of type '"format" | "encoding" | "skipFirstRow" | "skipEmptyLines" | "validateBeforeImport" | "autoLetterage"'.
+  Overload 3 of 4, '(callback: WatchObserver<{ format: string; encoding: string; skipFirstRow: boolean; skipEmptyLines: boolean; validateBeforeImport: boolean; autoLetterage: boolean; }>, defaultValues?: { ...; }): Subscription', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'WatchObserver<{ format: string; encoding: string; skipFirstRow: boolean; skipEmptyLines: boolean; validateBeforeImport: boolean; autoLetterage: boolean; }>'.
+src/hooks/useCompanies.ts(101,50): error TS2339: Property 'accountingStandard' does not exist on type '{ name: string; country?: string; currency?: string; }'.
+src/hooks/useCompanies.ts(118,15): error TS2352: Conversion of type 'string' to type 'UserRole' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+src/hooks/useEnterprise.ts(74,13): error TS2322: Type '{ id: any; name: any; country: any; currency: any; locale: any; timezone: any; isActive: any; address: any; city: any; postalCode: any; phone: any; email: any; website: any; taxNumber: any; registrationNumber: any; ... 4 more ...; isDefault: any; }[]' is not assignable to type 'Enterprise[]'.
+  Type '{ id: any; name: any; country: any; currency: any; locale: any; timezone: any; isActive: any; address: any; city: any; postalCode: any; phone: any; email: any; website: any; taxNumber: any; registrationNumber: any; ... 4 more ...; isDefault: any; }' is missing the following properties from type 'Enterprise': countryCode, taxRegime, fiscalYearStart, fiscalYearEnd, settings
+src/hooks/useEnterprise.ts(102,68): error TS2339: Property 'isDefault' does not exist on type 'Enterprise'.
+src/hooks/useEnterprise.ts(167,9): error TS2353: Object literal may only specify known properties, and 'country' does not exist in type 'Enterprise'.
+src/hooks/useEnterprise.ts(247,9): error TS2353: Object literal may only specify known properties, and 'country' does not exist in type 'Enterprise'.
+src/hooks/useEnterprise.ts(263,65): error TS2339: Property 'userRole' does not exist on type 'Enterprise'.
+src/hooks/useEnterprise.ts(264,66): error TS2339: Property 'isDefault' does not exist on type 'Enterprise'.
+src/hooks/useEnterprise.ts(315,47): error TS2353: Object literal may only specify known properties, and 'isDefault' does not exist in type 'SetStateAction<Enterprise>'.
+src/hooks/useEnterprise.ts(353,52): error TS2339: Property 'userRole' does not exist on type 'Enterprise'.
+src/hooks/useJournalEntries.ts(8,3): error TS2305: Module '"@/types/database.types"' has no exported member 'Journal'.
+src/hooks/useJournalEntries.ts(200,11): error TS2345: Argument of type 'PostgrestFilterBuilder<any, any, any, { journal_entry_id: any; }[], "journal_entry_items", unknown, "GET">' is not assignable to parameter of type 'readonly any[]'.
+  Type 'PostgrestFilterBuilder<any, any, any, { journal_entry_id: any; }[], "journal_entry_items", unknown, "GET">' is missing the following properties from type 'readonly any[]': length, concat, join, slice, and 25 more.
+src/hooks/useJournalEntries.ts(337,7): error TS2322: Type '{ id: any; account_number: any; name: any; type: any; class: any; balance: any; }[]' is not assignable to type 'Account[]'.
+  Type '{ id: any; account_number: any; name: any; type: any; class: any; balance: any; }' is missing the following properties from type 'Account': company_id, currency, is_active, created_at, updated_at
+src/hooks/useJournals.ts(4,15): error TS2305: Module '"@/types/database.types"' has no exported member 'Journal'.
+src/hooks/useLicense.ts(5,43): error TS2304: Cannot find name 'LicenseService'.
+src/hooks/useLicense.ts(8,37): error TS2304: Cannot find name 'LicenseFeatures'.
+src/hooks/useLicense.ts(12,39): error TS2304: Cannot find name 'LicenseLimits'.
+src/hooks/useLicense.ts(16,33): error TS2304: Cannot find name 'LicenseType'.
+src/hooks/usePlausibleAnalytics.ts(196,19): error TS2551: Property 'msDoNotTrack' does not exist on type 'Navigator'. Did you mean 'doNotTrack'?
+src/hooks/usePlausibleAnalytics.ts(409,5): error TS2687: All declarations of 'plausible' must have identical modifiers.
+src/hooks/useThirdParties.ts(4,15): error TS2305: Module '"@/types/database.types"' has no exported member 'ThirdParty'.
+src/hooks/useTransactions.ts(4,15): error TS2305: Module '"@/types/database.types"' has no exported member 'Transaction'.
+src/hooks/useTransactions.ts(4,28): error TS2305: Module '"@/types/database.types"' has no exported member 'TransactionType'.
+src/hooks/useTransactions.ts(4,45): error TS2305: Module '"@/types/database.types"' has no exported member 'TransactionStatus'.
+src/hooks/useUserManagement.ts(138,24): error TS2339: Property 'id' does not exist on type '{ id: any; email: any; first_name: any; last_name: any; avatar_url: any; phone_number: any; last_login_at: any; status: any; }[]'.
+src/hooks/useUserManagement.ts(139,27): error TS2339: Property 'email' does not exist on type '{ id: any; email: any; first_name: any; last_name: any; avatar_url: any; phone_number: any; last_login_at: any; status: any; }[]'.
+src/hooks/useUserManagement.ts(140,31): error TS2339: Property 'first_name' does not exist on type '{ id: any; email: any; first_name: any; last_name: any; avatar_url: any; phone_number: any; last_login_at: any; status: any; }[]'.
+src/hooks/useUserManagement.ts(141,30): error TS2339: Property 'last_name' does not exist on type '{ id: any; email: any; first_name: any; last_name: any; avatar_url: any; phone_number: any; last_login_at: any; status: any; }[]'.
+src/hooks/useUserManagement.ts(142,28): error TS2339: Property 'avatar_url' does not exist on type '{ id: any; email: any; first_name: any; last_name: any; avatar_url: any; phone_number: any; last_login_at: any; status: any; }[]'.
+src/hooks/useUserManagement.ts(155,33): error TS2339: Property 'last_login_at' does not exist on type '{ id: any; email: any; first_name: any; last_name: any; avatar_url: any; phone_number: any; last_login_at: any; status: any; }[]'.
+src/hooks/useUserManagement.ts(157,33): error TS2339: Property 'phone_number' does not exist on type '{ id: any; email: any; first_name: any; last_name: any; avatar_url: any; phone_number: any; last_login_at: any; status: any; }[]'.
+src/hooks/useUserManagement.ts(207,31): error TS2339: Property 'id' does not exist on type '{ id: any; email: any; first_name: any; last_name: any; avatar_url: any; phone_number: any; last_login_at: any; status: any; }[]'.
+src/hooks/useUserManagement.ts(208,34): error TS2339: Property 'email' does not exist on type '{ id: any; email: any; first_name: any; last_name: any; avatar_url: any; phone_number: any; last_login_at: any; status: any; }[]'.
+src/hooks/useUserManagement.ts(209,38): error TS2339: Property 'first_name' does not exist on type '{ id: any; email: any; first_name: any; last_name: any; avatar_url: any; phone_number: any; last_login_at: any; status: any; }[]'.
+src/hooks/useUserManagement.ts(210,37): error TS2339: Property 'last_name' does not exist on type '{ id: any; email: any; first_name: any; last_name: any; avatar_url: any; phone_number: any; last_login_at: any; status: any; }[]'.
+src/hooks/useUserManagement.ts(211,35): error TS2339: Property 'avatar_url' does not exist on type '{ id: any; email: any; first_name: any; last_name: any; avatar_url: any; phone_number: any; last_login_at: any; status: any; }[]'.
+src/hooks/useUserManagement.ts(224,40): error TS2339: Property 'last_login_at' does not exist on type '{ id: any; email: any; first_name: any; last_name: any; avatar_url: any; phone_number: any; last_login_at: any; status: any; }[]'.
+src/hooks/useUserManagement.ts(226,40): error TS2339: Property 'phone_number' does not exist on type '{ id: any; email: any; first_name: any; last_name: any; avatar_url: any; phone_number: any; last_login_at: any; status: any; }[]'.
+src/hooks/useWebVitals.ts(318,19): error TS2345: Argument of type '(prev: { metric: string; value: number; threshold: number; severity: "warning" | "critical"; timestamp: number; }[]) => ({ metric: string; value: number; threshold: number; severity: "warning" | "critical"; timestamp: number; } | { ...; })[]' is not assignable to parameter of type 'SetStateAction<{ metric: string; value: number; threshold: number; severity: "warning" | "critical"; timestamp: number; }[]>'.
+  Type '(prev: { metric: string; value: number; threshold: number; severity: "warning" | "critical"; timestamp: number; }[]) => ({ metric: string; value: number; threshold: number; severity: "warning" | "critical"; timestamp: number; } | { ...; })[]' is not assignable to type '(prevState: { metric: string; value: number; threshold: number; severity: "warning" | "critical"; timestamp: number; }[]) => { metric: string; value: number; threshold: number; severity: "warning" | "critical"; timestamp: number; }[]'.
+    Type '({ metric: string; value: number; threshold: number; severity: "warning" | "critical"; timestamp: number; } | { metric: "FCP" | "LCP" | "FID" | "CLS" | "TTFB" | "INP"; value: number; threshold: number; severity: string; timestamp: number; })[]' is not assignable to type '{ metric: string; value: number; threshold: number; severity: "warning" | "critical"; timestamp: number; }[]'.
+      Type '{ metric: string; value: number; threshold: number; severity: "warning" | "critical"; timestamp: number; } | { metric: "FCP" | "LCP" | "FID" | "CLS" | "TTFB" | "INP"; value: number; threshold: number; severity: string; timestamp: number; }' is not assignable to type '{ metric: string; value: number; threshold: number; severity: "warning" | "critical"; timestamp: number; }'.
+        Type '{ metric: "FCP" | "LCP" | "FID" | "CLS" | "TTFB" | "INP"; value: number; threshold: number; severity: string; timestamp: number; }' is not assignable to type '{ metric: string; value: number; threshold: number; severity: "warning" | "critical"; timestamp: number; }'.
+          Types of property 'severity' are incompatible.
+            Type 'string' is not assignable to type '"warning" | "critical"'.
+src/i18n/i18n.ts(289,13): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(callback?: Callback): Promise<TFunction<"translation", undefined>>', gave the following error.
+    Argument of type '{ resources: { fr: { translation: { translation: { light: string; dark: string; system: string; }; common: { success: string; error: string; save: string; cancel: string; delete: string; edit: string; create: string; ... 31 more ...; search: string; }; ... 203 more ...; international: { ...; }; }; }; en: { ...; }; e...' is not assignable to parameter of type 'Callback'.
+      Type '{ resources: { fr: { translation: { translation: { light: string; dark: string; system: string; }; common: { success: string; error: string; save: string; cancel: string; delete: string; edit: string; create: string; ... 31 more ...; search: string; }; ... 203 more ...; international: { ...; }; }; }; en: { ...; }; e...' provides no match for the signature '(error: any, t: TFunction<"translation", undefined>): void'.
+  Overload 2 of 2, '(options: InitOptions<unknown>, callback?: Callback): Promise<TFunction<"translation", undefined>>', gave the following error.
+    Argument of type '{ resources: { fr: { translation: { translation: { light: string; dark: string; system: string; }; common: { success: string; error: string; save: string; cancel: string; delete: string; edit: string; create: string; ... 31 more ...; search: string; }; ... 203 more ...; international: { ...; }; }; }; en: { ...; }; e...' is not assignable to parameter of type 'InitOptions<unknown>'.
+      Types of property 'joinArrays' are incompatible.
+        Type 'boolean' is not assignable to type 'string | false'.
+src/lib/auth.ts(6,35): error TS2499: An interface can only extend an identifier/qualified-name with optional type arguments.
+src/lib/auth.ts(208,37): error TS2345: Argument of type 'UserRole' is not assignable to parameter of type 'string'.
+src/lib/auth.ts(253,35): error TS2339: Property 'id' does not exist on type 'AuthUser'.
+src/lib/auth.ts(258,49): error TS2339: Property 'id' does not exist on type 'AuthUser'.
+src/lib/auth.ts(303,44): error TS2344: Type 'UserRole' does not satisfy the constraint 'string | number | symbol'.
+src/lib/auth.ts(368,27): error TS2686: 'React' refers to a UMD global, but the current file is a module. Consider adding an import instead.
+src/lib/auth.ts(370,3): error TS2686: 'React' refers to a UMD global, but the current file is a module. Consider adding an import instead.
+src/lib/formData.ts(435,9): error TS2862: Type 'T' is generic and can only be indexed for reading.
+src/lib/formData.ts(451,9): error TS2862: Type 'T' is generic and can only be indexed for reading.
+src/lib/formData.ts(468,9): error TS2862: Type 'T' is generic and can only be indexed for reading.
+src/lib/formData.ts(472,11): error TS2862: Type 'T' is generic and can only be indexed for reading.
+src/lib/formData.ts(474,11): error TS2862: Type 'T' is generic and can only be indexed for reading.
+src/lib/formData.ts(727,20): error TS2339: Property 'input' does not exist on type 'ZodIssue'.
+  Property 'input' does not exist on type 'ZodCustomIssue & { fatal?: boolean; message: string; }'.
+src/lib/formHelpers.ts(317,44): error TS2536: Type 'keyof T' cannot be used to index type 'DeepPartial<T>'.
+src/lib/formHelpers.ts(322,40): error TS2536: Type 'keyof T' cannot be used to index type 'DeepPartial<T>'.
+src/lib/formIntegration.tsx(33,3): error TS2305: Module '"@/components/ui/form"' has no exported member 'FormDescription'.
+src/lib/formIntegration.tsx(640,29): error TS2339: Property 'name' does not exist on type 'FieldError | Partial<{ type: string | number; message: string; }> | Ref | Merge<FieldError["ref" & keyof DeepRequired<T>[string]], FieldErrorsImpl<...>["ref" & keyof DeepRequired<...>[string]]> | ... 108 more ... | Merge<...>'.
+  Property 'name' does not exist on type 'FieldError'.
+src/lib/formIntegration.tsx(672,7): error TS2322: Type 'string | ("message" extends keyof FieldError & keyof DeepRequired<T>[string] ? [FieldError["message" & keyof DeepRequired<T>[string]], FieldErrorsImpl<...>["message" & keyof DeepRequired<...>[string]]] extends [...] ? Merge<...> : FieldErrorsImpl<...>["message" & keyof DeepRequired<...>[string]] : string)' is not assignable to type 'string'.
+  Type '"message" extends keyof FieldError & keyof DeepRequired<T>[string] ? [FieldError["message" & keyof DeepRequired<T>[string]], FieldErrorsImpl<...>["message" & keyof DeepRequired<...>[string]]] extends [...] ? Merge<...> : FieldErrorsImpl<...>["message" & keyof DeepRequired<...>[string]] : string' is not assignable to type 'string'.
+    Type 'string | ([FieldError["message" & keyof DeepRequired<T>[string]], FieldErrorsImpl<DeepRequired<T>[string]>["message" & keyof DeepRequired<...>[string]]] extends [...] ? Merge<...> : FieldErrorsImpl<...>["message" & keyof DeepRequired<...>[string]])' is not assignable to type 'string'.
+      Type '[FieldError["message" & keyof DeepRequired<T>[string]], FieldErrorsImpl<DeepRequired<T>[string]>["message" & keyof DeepRequired<...>[string]]] extends [...] ? Merge<...> : FieldErrorsImpl<...>["message" & keyof DeepRequired<...>[string]]' is not assignable to type 'string'.
+        Type 'FieldErrorsImpl<DeepRequired<T>[string]>["message" & keyof DeepRequired<T>[string]] | Merge<FieldError["message" & keyof DeepRequired<...>[string]], FieldErrorsImpl<...>["message" & keyof DeepRequired<...>[string]]>' is not assignable to type 'string'.
+          Type 'DeepRequired<T>[string]["message" & keyof DeepRequired<T>[string]] extends Blob | BrowserNativeObject ? FieldError : "message" & keyof DeepRequired<...>[string] extends "root" | `root.${string}` ? Partial<...> : DeepRequired<...>[string]["message" & keyof DeepRequired<...>[string]] extends object ? Merge<...> : Fiel...' is not assignable to type 'string'.
+            Type 'FieldError | ("message" & keyof DeepRequired<T>[string] extends "root" | `root.${string}` ? Partial<{ type: string | number; message: string; }> : DeepRequired<...>[string]["message" & keyof DeepRequired<...>[string]] extends object ? Merge<...> : FieldError)' is not assignable to type 'string'.
+              Type 'FieldError' is not assignable to type 'string'.
+src/lib/icons.tsx(35,3): error TS2305: Module '"lucide-react"' has no exported member 'Sort'.
+src/lib/index.ts(91,14): error TS2304: Cannot find name 'FormValidator'.
+src/lib/index.ts(92,12): error TS2304: Cannot find name 'ValidationSchemas'.
+src/lib/index.ts(93,3): error TS18004: No value exists in scope for the shorthand property 'CasskaiSchemas'. Either declare one or provide an initializer.
+src/lib/index.ts(96,3): error TS18004: No value exists in scope for the shorthand property 'Formatters'. Either declare one or provide an initializer.
+src/lib/index.ts(97,3): error TS18004: No value exists in scope for the shorthand property 'Parsers'. Either declare one or provide an initializer.
+src/lib/index.ts(98,3): error TS18004: No value exists in scope for the shorthand property 'Transformers'. Either declare one or provide an initializer.
+src/lib/index.ts(102,12): error TS2304: Cannot find name 'ValidationCodes'.
+src/lib/index.ts(103,16): error TS2304: Cannot find name 'ValidationMessageGenerator'.
+src/lib/index.ts(104,13): error TS2304: Cannot find name 'createValidationMessage'.
+src/lib/index.ts(105,16): error TS2304: Cannot find name 'MessageTemplates'.
+src/lib/index.ts(126,16): error TS2304: Cannot find name 'CasskaiSchemas'.
+src/lib/index.ts(129,12): error TS2304: Cannot find name 'CasskaiSchemas'.
+src/lib/index.ts(132,17): error TS2304: Cannot find name 'CasskaiSchemas'.
+src/lib/index.ts(135,20): error TS2304: Cannot find name 'CasskaiSchemas'.
+src/lib/index.ts(138,10): error TS2304: Cannot find name 'ValidationSchemas'.
+src/lib/index.ts(139,13): error TS2304: Cannot find name 'ValidationSchemas'.
+src/lib/index.ts(142,10): error TS2304: Cannot find name 'ValidationSchemas'.
+src/lib/index.ts(143,10): error TS2304: Cannot find name 'ValidationSchemas'.
+src/lib/index.ts(144,15): error TS2304: Cannot find name 'ValidationSchemas'.
+src/lib/index.ts(152,29): error TS2304: Cannot find name 'Formatters'.
+src/lib/index.ts(155,36): error TS2304: Cannot find name 'Formatters'.
+src/lib/index.ts(158,31): error TS2304: Cannot find name 'Formatters'.
+src/lib/index.ts(161,31): error TS2304: Cannot find name 'Formatters'.
+src/lib/index.ts(164,33): error TS2304: Cannot find name 'Formatters'.
+src/lib/index.ts(172,32): error TS2304: Cannot find name 'Parsers'.
+src/lib/index.ts(175,30): error TS2304: Cannot find name 'Parsers'.
+src/lib/index.ts(178,28): error TS2304: Cannot find name 'Parsers'.
+src/lib/index.ts(181,29): error TS2304: Cannot find name 'Parsers'.
+src/lib/index.ts(184,29): error TS2304: Cannot find name 'Parsers'.
+src/lib/index.ts(195,19): error TS2304: Cannot find name 'FormValidationConfig'.
+src/lib/index.ts(201,8): error TS2304: Cannot find name 'FormValidationConfig'.
+src/lib/index.ts(203,14): error TS2304: Cannot find name 'FormValidator'.
+src/lib/index.ts(210,14): error TS2304: Cannot find name 'ValidationMessageGenerator'.
+src/lib/index.ts(217,35): error TS2304: Cannot find name 'FieldValidationConfig'.
+src/lib/index.ts(218,12): error TS2304: Cannot find name 'FormValidationConfig'.
+src/lib/index.ts(231,30): error TS2304: Cannot find name 'FieldValidationConfig'.
+src/lib/index.ts(253,32): error TS2304: Cannot find name 'FieldValidationConfig'.
+src/modules/crm/crmModule.ts(439,3): error TS2416: Property 'getRoutes' in type 'CRMModule' is not assignable to the same property in base type 'Module'.
+  Type '() => { path: string; component: () => Promise<any>; permissions: string[]; }[]' is not assignable to type '() => { path: string; component: ComponentType<{}>; permissions?: string[]; }[]'.
+    Type '{ path: string; component: () => Promise<any>; permissions: string[]; }[]' is not assignable to type '{ path: string; component: ComponentType<{}>; permissions?: string[]; }[]'.
+      Type '{ path: string; component: () => Promise<any>; permissions: string[]; }' is not assignable to type '{ path: string; component: ComponentType<{}>; permissions?: string[]; }'.
+        Types of property 'component' are incompatible.
+          Type '() => Promise<any>' is not assignable to type 'ComponentType<{}>'.
+            Type '() => Promise<any>' is not assignable to type 'FunctionComponent<{}>'.
+              Type 'Promise<any>' is not assignable to type 'ReactNode'.
+src/modules/crm/crmModule.ts(489,3): error TS2416: Property 'getComponents' in type 'CRMModule' is not assignable to the same property in base type 'Module'.
+  Type '() => { CRMWidget: () => Promise<any>; SalesChart: () => Promise<any>; RecentDeals: () => Promise<any>; }' is not assignable to type '() => Record<string, ComponentType<{}>>'.
+    Type '{ CRMWidget: () => Promise<any>; SalesChart: () => Promise<any>; RecentDeals: () => Promise<any>; }' is not assignable to type 'Record<string, ComponentType<{}>>'.
+      Property 'CRMWidget' is incompatible with index signature.
+        Type '() => Promise<any>' is not assignable to type 'ComponentType<{}>'.
+          Type '() => Promise<any>' is not assignable to type 'FunctionComponent<{}>'.
+            Type 'Promise<any>' is not assignable to type 'ReactNode'.
+src/pages/AccountingImportPage.tsx(13,29): error TS2339: Property 'currentCompany' does not exist on type 'AppConfig'.
+src/pages/auth/ForgotPasswordPage.tsx(150,11): error TS2353: Object literal may only specify known properties, and 'duration' does not exist in type 'Toast'.
+src/pages/auth/ForgotPasswordPage.tsx(294,25): error TS2322: Type '{ children: Element; type: "submit"; className: string; disabled: boolean; whileHover: { scale: number; }; whileTap: { scale: number; }; }' is not assignable to type 'IntrinsicAttributes & Omit<ButtonProps, "ref"> & RefAttributes<HTMLButtonElement>'.
+  Property 'whileHover' does not exist on type 'IntrinsicAttributes & Omit<ButtonProps, "ref"> & RefAttributes<HTMLButtonElement>'.
+src/pages/AuthPage.tsx(90,9): error TS2353: Object literal may only specify known properties, and 'duration' does not exist in type 'Toast'.
+src/pages/AuthPage.tsx(98,9): error TS2353: Object literal may only specify known properties, and 'duration' does not exist in type 'Toast'.
+src/pages/AuthPage.tsx(154,14): error TS2339: Property 'email' does not exist on type '{}'.
+src/pages/AuthPage.tsx(156,14): error TS2339: Property 'email' does not exist on type '{}'.
+src/pages/AuthPage.tsx(161,14): error TS2339: Property 'password' does not exist on type '{}'.
+src/pages/AuthPage.tsx(163,14): error TS2339: Property 'password' does not exist on type '{}'.
+src/pages/AuthPage.tsx(169,16): error TS2339: Property 'firstName' does not exist on type '{}'.
+src/pages/AuthPage.tsx(171,16): error TS2339: Property 'firstName' does not exist on type '{}'.
+src/pages/AuthPage.tsx(175,16): error TS2339: Property 'lastName' does not exist on type '{}'.
+src/pages/AuthPage.tsx(177,16): error TS2339: Property 'lastName' does not exist on type '{}'.
+src/pages/AuthPage.tsx(181,16): error TS2339: Property 'confirmPassword' does not exist on type '{}'.
+src/pages/AuthPage.tsx(188,16): error TS2339: Property 'email' does not exist on type '{}'.
+src/pages/AuthPage.tsx(190,16): error TS2339: Property 'email' does not exist on type '{}'.
+src/pages/AuthPage.tsx(378,11): error TS2353: Object literal may only specify known properties, and 'duration' does not exist in type 'Toast'.
+src/pages/AuthPage.tsx(676,73): error TS2339: Property 'email' does not exist on type '{}'.
+src/pages/AuthPage.tsx(680,66): error TS2339: Property 'email' does not exist on type '{}'.
+src/pages/AuthPage.tsx(684,43): error TS2339: Property 'email' does not exist on type '{}'.
+src/pages/AuthPage.tsx(692,47): error TS2339: Property 'email' does not exist on type '{}'.
+src/pages/AuthPage.tsx(710,79): error TS2339: Property 'password' does not exist on type '{}'.
+src/pages/AuthPage.tsx(714,66): error TS2339: Property 'password' does not exist on type '{}'.
+src/pages/AuthPage.tsx(729,43): error TS2339: Property 'password' does not exist on type '{}'.
+src/pages/AuthPage.tsx(737,47): error TS2339: Property 'password' does not exist on type '{}'.
+src/pages/AuthPage.tsx(803,67): error TS2339: Property 'firstName' does not exist on type '{}'.
+src/pages/AuthPage.tsx(807,66): error TS2339: Property 'firstName' does not exist on type '{}'.
+src/pages/AuthPage.tsx(810,45): error TS2339: Property 'firstName' does not exist on type '{}'.
+src/pages/AuthPage.tsx(818,49): error TS2339: Property 'firstName' does not exist on type '{}'.
+src/pages/AuthPage.tsx(833,67): error TS2339: Property 'lastName' does not exist on type '{}'.
+src/pages/AuthPage.tsx(837,66): error TS2339: Property 'lastName' does not exist on type '{}'.
+src/pages/AuthPage.tsx(840,45): error TS2339: Property 'lastName' does not exist on type '{}'.
+src/pages/AuthPage.tsx(848,49): error TS2339: Property 'lastName' does not exist on type '{}'.
+src/pages/AuthPage.tsx(867,73): error TS2339: Property 'email' does not exist on type '{}'.
+src/pages/AuthPage.tsx(871,66): error TS2339: Property 'email' does not exist on type '{}'.
+src/pages/AuthPage.tsx(875,43): error TS2339: Property 'email' does not exist on type '{}'.
+src/pages/AuthPage.tsx(883,47): error TS2339: Property 'email' does not exist on type '{}'.
+src/pages/AuthPage.tsx(901,79): error TS2339: Property 'password' does not exist on type '{}'.
+src/pages/AuthPage.tsx(905,66): error TS2339: Property 'password' does not exist on type '{}'.
+src/pages/AuthPage.tsx(920,43): error TS2339: Property 'password' does not exist on type '{}'.
+src/pages/AuthPage.tsx(928,47): error TS2339: Property 'password' does not exist on type '{}'.
+src/pages/AuthPage.tsx(949,73): error TS2339: Property 'confirmPassword' does not exist on type '{}'.
+src/pages/AuthPage.tsx(953,66): error TS2339: Property 'confirmPassword' does not exist on type '{}'.
+src/pages/AuthPage.tsx(957,43): error TS2339: Property 'confirmPassword' does not exist on type '{}'.
+src/pages/AuthPage.tsx(965,47): error TS2339: Property 'confirmPassword' does not exist on type '{}'.
+src/pages/AuthPage.tsx(1020,77): error TS2339: Property 'email' does not exist on type '{}'.
+src/pages/AuthPage.tsx(1025,70): error TS2339: Property 'email' does not exist on type '{}'.
+src/pages/AuthPage.tsx(1029,47): error TS2339: Property 'email' does not exist on type '{}'.
+src/pages/AuthPage.tsx(1037,51): error TS2339: Property 'email' does not exist on type '{}'.
+src/pages/BanksPage.tsx(230,28): error TS2339: Property 'date' does not exist on type '{}'.
+src/pages/BanksPage.tsx(233,28): error TS2339: Property 'amount' does not exist on type '{}'.
+src/pages/BanksPage.tsx(237,28): error TS2339: Property 'description' does not exist on type '{}'.
+src/pages/BanksPage.tsx(240,28): error TS2339: Property 'reference' does not exist on type '{}'.
+src/pages/BanksPage.tsx(243,32): error TS2339: Property 'date' does not exist on type '{}'.
+src/pages/BanksPage.tsx(243,66): error TS2339: Property 'amount' does not exist on type '{}'.
+src/pages/BanksPage.tsx(245,49): error TS2339: Property 'date' does not exist on type '{}'.
+src/pages/BanksPage.tsx(246,45): error TS2339: Property 'description' does not exist on type '{}'.
+src/pages/BanksPage.tsx(247,40): error TS2339: Property 'amount' does not exist on type '{}'.
+src/pages/BanksPage.tsx(248,43): error TS2339: Property 'reference' does not exist on type '{}'.
+src/pages/BanksPage.tsx(250,64): error TS2339: Property 'description' does not exist on type '{}'.
+src/pages/BanksPage.tsx(466,28): error TS2339: Property 'style' does not exist on type 'EventTarget'.
+src/pages/BanksPage.tsx(467,28): error TS2339: Property 'nextSibling' does not exist on type 'EventTarget'.
+src/pages/BillingPage.tsx(71,9): error TS2353: Object literal may only specify known properties, and 'duration' does not exist in type 'Toast'.
+src/pages/BillingPage.tsx(82,9): error TS2353: Object literal may only specify known properties, and 'duration' does not exist in type 'Toast'.
+src/pages/BillingPage.tsx(106,11): error TS2353: Object literal may only specify known properties, and 'duration' does not exist in type 'Toast'.
+src/pages/BillingPage.tsx(141,11): error TS2353: Object literal may only specify known properties, and 'duration' does not exist in type 'Toast'.
+src/pages/BillingPage.tsx(218,11): error TS2353: Object literal may only specify known properties, and 'duration' does not exist in type 'Toast'.
+src/pages/BillingPage.tsx(239,9): error TS2353: Object literal may only specify known properties, and 'duration' does not exist in type 'Toast'.
+src/pages/BillingPage.tsx(270,9): error TS2353: Object literal may only specify known properties, and 'duration' does not exist in type 'Toast'.
+src/pages/BillingPage.tsx(281,11): error TS2353: Object literal may only specify known properties, and 'duration' does not exist in type 'Toast'.
+src/pages/BillingPage.tsx(310,9): error TS2353: Object literal may only specify known properties, and 'duration' does not exist in type 'Toast'.
+src/pages/BillingPage.tsx(321,11): error TS2353: Object literal may only specify known properties, and 'duration' does not exist in type 'Toast'.
+src/pages/ContractsPage.tsx(151,11): error TS2322: Type 'Element' is not assignable to type 'string | number'.
+src/pages/ContractsPage.tsx(523,28): error TS2304: Cannot find name 'handleExportContracts'.
+src/pages/CookiesPolicyPage.tsx(165,9): error TS2353: Object literal may only specify known properties, and 'duration' does not exist in type 'Toast'.
+src/pages/CookiesPolicyPage.tsx(195,9): error TS2353: Object literal may only specify known properties, and 'duration' does not exist in type 'Toast'.
+src/pages/CookiesPolicyPage.tsx(230,9): error TS2353: Object literal may only specify known properties, and 'duration' does not exist in type 'Toast'.
+src/pages/DashboardPage.tsx(752,16): error TS2322: Type '{ title: string; description: string; icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; onClick: () => void; color: string; badge: string; } | { ...; }' is not assignable to type 'IntrinsicAttributes & { title: any; description: any; icon: any; onClick: any; color?: string; badge: any; }'.
+  Type '{ title: string; description: string; icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; onClick: () => void; color: string; badge?: undefined; }' is not assignable to type '{ title: any; description: any; icon: any; onClick: any; color?: string; badge: any; }'.
+    Property 'badge' is optional in type '{ title: string; description: string; icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; onClick: () => void; color: string; badge?: undefined; }' but required in type '{ title: any; description: any; icon: any; onClick: any; color?: string; badge: any; }'.
+src/pages/DiagnosticPage.tsx(11,5): error TS2339: Property 'currentEnterpriseName' does not exist on type 'AuthContextType'.
+src/pages/DocumentationArticlePage.tsx(548,7): error TS2353: Object literal may only specify known properties, and 'duration' does not exist in type 'Toast'.
+src/pages/DocumentationArticlePage.tsx(591,7): error TS2353: Object literal may only specify known properties, and 'duration' does not exist in type 'Toast'.
+src/pages/GDPRPage.tsx(225,9): error TS2353: Object literal may only specify known properties, and 'duration' does not exist in type 'Toast'.
+src/pages/HumanResourcesPage.tsx(252,61): error TS2345: Argument of type '{ employee_number: any; first_name: string; last_name: string; email: string; phone: string; position: string; department: string; hire_date: any; salary: number; contract_type: string; status: string; address: string; }' is not assignable to parameter of type 'Partial<Employee>'.
+  Types of property 'contract_type' are incompatible.
+    Type 'string' is not assignable to type '"freelance" | "permanent" | "temporary" | "intern"'.
+src/pages/HumanResourcesPage.tsx(259,40): error TS2345: Argument of type '{ employee_number: any; first_name: string; last_name: string; email: string; phone: string; position: string; department: string; hire_date: any; salary: number; contract_type: string; status: string; address: string; }' is not assignable to parameter of type 'Omit<Employee, "id" | "company_id" | "created_at" | "updated_at">'.
+  Types of property 'status' are incompatible.
+    Type 'string' is not assignable to type '"active" | "inactive" | "on_leave"'.
+src/pages/HumanResourcesPage.tsx(595,18): error TS2741: Property 'className' is missing in type '{ value: any; onChange: Dispatch<any>; placeholder: string; }' but required in type '{ value: any; onChange: any; placeholder: any; className: any; }'.
+src/pages/InventoryPage.tsx(281,66): error TS2345: Argument of type '{ reference: string; name: string; description: string; category: string; unit: string; purchase_price: number; selling_price: number; current_stock: number; min_stock: number; max_stock: number; location: string; supplier: string; barcode: string; }' is not assignable to parameter of type 'Omit<InventoryItem, "id" | "company_id" | "created_at" | "updated_at">'.
+  Property 'status' is missing in type '{ reference: string; name: string; description: string; category: string; unit: string; purchase_price: number; selling_price: number; current_stock: number; min_stock: number; max_stock: number; location: string; supplier: string; barcode: string; }' but required in type 'Omit<InventoryItem, "id" | "company_id" | "created_at" | "updated_at">'.
+src/pages/InventoryPage.tsx(390,9): error TS2322: Type 'string' is not assignable to type '"transfer" | "exit" | "entry" | "adjustment"'.
+src/pages/InvoicingPage.tsx(263,31): error TS2339: Property 'clientsCount' does not exist on type 'InvoicingStats'.
+src/pages/InvoicingPage.tsx(264,30): error TS2339: Property 'quotesCount' does not exist on type 'InvoicingStats'.
+src/pages/InvoicingPage.tsx(472,12): error TS2741: Property 'onClick' is missing in type '{ title: string; value: string; icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; color: string; trend: number; description: string; }' but required in type '{ title: any; value: any; icon: any; trend: any; color?: string; description: any; onClick: any; }'.
+src/pages/InvoicingPage.tsx(481,12): error TS2741: Property 'onClick' is missing in type '{ title: string; value: string; icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; color: string; trend: number; description: string; }' but required in type '{ title: any; value: any; icon: any; trend: any; color?: string; description: any; onClick: any; }'.
+src/pages/InvoicingPage.tsx(490,12): error TS2741: Property 'onClick' is missing in type '{ title: string; value: string; icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; color: string; trend: number; description: string; }' but required in type '{ title: any; value: any; icon: any; trend: any; color?: string; description: any; onClick: any; }'.
+src/pages/InvoicingPage.tsx(499,12): error TS2741: Property 'onClick' is missing in type '{ title: string; value: string; icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; color: string; trend: number; description: string; }' but required in type '{ title: any; value: any; icon: any; trend: any; color?: string; description: any; onClick: any; }'.
+src/pages/LandingPage.tsx(55,47): error TS2353: Object literal may only specify known properties, and 'threshold' does not exist in type 'UseInViewOptions'.
+src/pages/onboarding/CompleteStep.tsx(98,15): error TS2353: Object literal may only specify known properties, and 'duration' does not exist in type 'Toast'.
+src/pages/onboarding/CompleteStep.tsx(104,15): error TS2353: Object literal may only specify known properties, and 'duration' does not exist in type 'Toast'.
+src/pages/PrivacyPolicyPage.tsx(79,98): error TS2339: Property 'map' does not exist on type '$SpecialObject'.
+  Property 'map' does not exist on type 'object'.
+src/pages/PrivacyPolicyPage.tsx(86,89): error TS2339: Property 'map' does not exist on type '$SpecialObject'.
+  Property 'map' does not exist on type 'object'.
+src/pages/PrivacyPolicyPage.tsx(93,92): error TS2339: Property 'map' does not exist on type '$SpecialObject'.
+  Property 'map' does not exist on type 'object'.
+src/pages/ProjectsPage.tsx(574,17): error TS2322: Type 'string' is not assignable to type 'number'.
+src/pages/ProjectsPage.tsx(582,18): error TS2741: Property 'className' is missing in type '{ value: any; onChange: Dispatch<any>; placeholder: string; }' but required in type '{ value: any; onChange: any; placeholder: any; className: any; }'.
+src/pages/ProjectsPage.tsx(590,18): error TS2741: Property 'className' is missing in type '{ value: any; onChange: Dispatch<any>; placeholder: string; }' but required in type '{ value: any; onChange: any; placeholder: any; className: any; }'.
+src/pages/PurchasesPage.tsx(430,8): error TS2739: Type '{}' is missing the following properties from type 'Omit<ConfirmDialogProps, "children">': title, description, onConfirm
+src/pages/ReportsPage.tsx(304,25): error TS2304: Cannot find name 'dateRange'.
+src/pages/ReportsPage.tsx(304,45): error TS2304: Cannot find name 'dateRange'.
+src/pages/ReportsPage.tsx(314,28): error TS2304: Cannot find name 'dateRange'.
+src/pages/ReportsPage.tsx(314,61): error TS2304: Cannot find name 'handleDateRangePreset'.
+src/pages/ReportsPage.tsx(330,24): error TS2304: Cannot find name 'dateRange'.
+src/pages/ReportsPage.tsx(331,34): error TS2304: Cannot find name 'setDateRange'.
+src/pages/ReportsPage.tsx(337,24): error TS2304: Cannot find name 'dateRange'.
+src/pages/ReportsPage.tsx(338,34): error TS2304: Cannot find name 'setDateRange'.
+src/pages/ReportsPage.tsx(820,42): error TS2304: Cannot find name 'handleViewReport'.
+src/pages/ReportsPage.tsx(827,42): error TS2304: Cannot find name 'handleEditReport'.
+src/pages/ReportsPage.tsx(835,44): error TS2304: Cannot find name 'handleDeleteReport'.
+src/pages/ReportsPage.tsx(867,40): error TS2304: Cannot find name 'handleGenerateReport'.
+src/pages/ReportsPage.tsx(919,42): error TS2304: Cannot find name 'handleScheduleReport'.
+src/pages/ReportsPage.tsx(926,42): error TS2304: Cannot find name 'handleEditReport'.
+src/pages/ReportsPage.tsx(933,42): error TS2304: Cannot find name 'handleDeleteReport'.
+src/pages/SalesCrmPage.tsx(713,8): error TS2739: Type '{}' is missing the following properties from type 'Omit<ConfirmDialogProps, "children">': title, description, onConfirm
+src/pages/SettingsPage.tsx(21,14): error TS2339: Property 'currentLocale' does not exist on type 'LocaleContextType'.
+src/pages/SettingsPage.tsx(22,11): error TS2339: Property 'ALL_MODULES' does not exist on type 'ModulesContextType'.
+src/pages/SettingsPage.tsx(22,39): error TS2339: Property 'enabledModules' does not exist on type 'ModulesContextType'.
+src/pages/SettingsPage.tsx(22,55): error TS2339: Property 'updateModuleState' does not exist on type 'ModulesContextType'.
+src/pages/SettingsPage.tsx(22,74): error TS2339: Property 'loadingModules' does not exist on type 'ModulesContextType'.
+src/pages/SettingsPage.tsx(186,9): error TS2322: Type '"success"' is not assignable to type '"default" | "destructive"'.
+src/pages/SettingsPage.tsx(463,67): error TS2304: Cannot find name 'handleExportData'.
+src/pages/SettingsPage.tsx(467,67): error TS2304: Cannot find name 'handleBackupNow'.
+src/pages/TaxPage.tsx(255,16): error TS2339: Property 'exportDeclarationsToCSV' does not exist on type '{ getTaxRates(companyId: string): Promise<{ data: TaxRate[]; error: Error; }>; createTaxRate(companyId: string, taxRate: Omit<TaxRate, "id" | "createdAt" | "updatedAt">): Promise<...>; ... 13 more ...; getObligations(enterpriseId: string): Promise<...>; }'.
+src/pages/TaxPage.tsx(264,41): error TS2339: Property 'acknowledgeAlert' does not exist on type '{ getTaxRates(companyId: string): Promise<{ data: TaxRate[]; error: Error; }>; createTaxRate(companyId: string, taxRate: Omit<TaxRate, "id" | "createdAt" | "updatedAt">): Promise<...>; ... 13 more ...; getObligations(enterpriseId: string): Promise<...>; }'.
+src/pages/TaxPage.tsx(332,45): error TS2339: Property 'name' does not exist on type 'TaxObligation'.
+src/pages/UserManagementPage.tsx(947,10): error TS2559: Type '{ children: Element[]; }' has no properties in common with type 'IntrinsicAttributes & RefAttributes<unknown>'.
+src/pages/UserManagementPage.tsx(948,12): error TS2741: Property 'className' is missing in type '{ children: Element[]; }' but required in type '{ [x: string]: any; className: any; }'.
+src/pages/UserManagementPage.tsx(949,14): error TS2559: Type '{ children: string; }' has no properties in common with type 'IntrinsicAttributes & RefAttributes<unknown>'.
+src/pages/UserManagementPage.tsx(950,14): error TS2559: Type '{ children: any[]; }' has no properties in common with type 'IntrinsicAttributes & RefAttributes<unknown>'.
+src/pages/UserManagementPage.tsx(955,12): error TS2741: Property 'className' is missing in type '{ children: Element[]; }' but required in type '{ [x: string]: any; className: any; }'.
+src/pages/UserManagementPage.tsx(956,14): error TS2559: Type '{ children: string; }' has no properties in common with type 'IntrinsicAttributes & RefAttributes<unknown>'.
+src/pages/UserManagementPage.tsx(957,14): error TS2322: Type '{ children: string; onClick: () => void; className: string; }' is not assignable to type 'IntrinsicAttributes & RefAttributes<unknown>'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & RefAttributes<unknown>'.
+src/services/aiAnalyticsService.ts(2,10): error TS2614: Module '"ml-matrix"' has no exported member 'regression'. Did you mean to use 'import regression from "ml-matrix"' instead?
+src/services/aiAssistantService.ts(23,11): error TS2300: Duplicate identifier 'conversationHistory'.
+src/services/aiAssistantService.ts(515,7): error TS2322: Type 'string' is not assignable to type '"monthly" | "quarterly" | "annual" | "custom"'.
+src/services/aiAssistantService.ts(663,7): error TS2300: Duplicate identifier 'conversationHistory'.
+src/services/aiVisualizationService.ts(39,5): error TS2322: Type 'ScaleOrdinal<string, unknown, never>' is not assignable to type 'ScaleOrdinal<string, string, never>'.
+  Type 'unknown' is not assignable to type 'string'.
+src/services/automaticLetterageService.ts(222,36): error TS2339: Property 'number' does not exist on type '{ id: any; number: any; name: any; }[]'.
+src/services/automaticLetterageService.ts(223,34): error TS2339: Property 'date' does not exist on type '{ id: any; date: any; reference: any; description: any; }[]'.
+src/services/automaticLetterageService.ts(224,39): error TS2339: Property 'reference' does not exist on type '{ id: any; date: any; reference: any; description: any; }[]'.
+src/services/automaticLetterageService.ts(225,61): error TS2339: Property 'description' does not exist on type '{ id: any; date: any; reference: any; description: any; }[]'.
+src/services/automaticLetterageService.ts(229,37): error TS2339: Property 'id' does not exist on type '{ id: any; date: any; reference: any; description: any; }[]'.
+src/services/automaticLetterageService.ts(699,36): error TS2339: Property 'number' does not exist on type '{ number: any; name: any; }[]'.
+src/services/automaticLetterageService.ts(699,60): error TS2339: Property 'name' does not exist on type '{ number: any; name: any; }[]'.
+src/services/automaticLetterageService.ts(702,40): error TS2339: Property 'number' does not exist on type '{ number: any; name: any; }[]'.
+src/services/automaticLetterageService.ts(703,38): error TS2339: Property 'name' does not exist on type '{ number: any; name: any; }[]'.
+src/services/automaticLetterageService.ts(743,40): error TS2339: Property 'date' does not exist on type '{ date: any; company_id: any; }[]'.
+src/services/configService.ts(102,29): error TS2663: Cannot find name 'getSupabaseClient'. Did you mean the instance member 'this.getSupabaseClient'?
+src/services/configService.ts(129,26): error TS2663: Cannot find name 'getSupabaseClient'. Did you mean the instance member 'this.getSupabaseClient'?
+src/services/currencyIntegration.ts(273,25): error TS2339: Property 'id' does not exist on type 'CompanyConfig'.
+src/services/currencyIntegration.ts(285,34): error TS2339: Property 'id' does not exist on type 'CompanyConfig'.
+src/services/currencyIntegration.ts(295,42): error TS2339: Property 'id' does not exist on type 'CompanyConfig'.
+src/services/currencyIntegration.ts(306,42): error TS2339: Property 'id' does not exist on type 'CompanyConfig'.
+src/services/dashboardService.tsx(293,27): error TS2339: Property 'total_movement' does not exist on type 'unknown'.
+src/services/dashboardService.tsx(293,46): error TS2339: Property 'total_movement' does not exist on type 'unknown'.
+src/services/einvoicing/adapters/ChannelProviders/PPFProvider.ts(46,13): error TS2612: Property 'config' will overwrite the base property in 'ChannelProvider'. If this is intentional, add an initializer. Otherwise, add a 'declare' modifier or remove the redundant declaration.
+src/services/einvoicing/api/routes.ts(128,21): error TS2345: Argument of type '(req: AuthenticatedRequest, res: Response) => Promise<APIResponse<SubmissionResult>>' is not assignable to parameter of type 'Promise<APIResponse<any>>'.
+src/services/einvoicing/api/routes.ts(149,21): error TS2345: Argument of type '(req: AuthenticatedRequest, res: Response) => Promise<APIResponse<EInvDocument>>' is not assignable to parameter of type 'Promise<APIResponse<any>>'.
+src/services/einvoicing/api/routes.ts(169,21): error TS2345: Argument of type '(req: AuthenticatedRequest, res: Response) => Promise<APIResponse<{ documents: EInvDocument[]; pagination: { page: number; limit: number; total: number; total_pages: number; }; }>>' is not assignable to parameter of type 'Promise<APIResponse<any>>'.
+src/services/einvoicing/api/routes.ts(204,21): error TS2345: Argument of type '(req: AuthenticatedRequest, res: Response) => Promise<APIResponse<{ enabled: boolean; formats: EInvoiceFormat[]; channels: EInvoiceChannel[]; features: string[]; }>>' is not assignable to parameter of type 'Promise<APIResponse<any>>'.
+src/services/einvoicing/api/routes.ts(222,21): error TS2345: Argument of type '(req: AuthenticatedRequest, res: Response) => Promise<APIResponse<{ total_documents: number; by_status: Record<EInvoiceLifecycleStatus, number>; by_format: Record<EInvoiceFormat, number>; by_channel: Record<EInvoiceChannel, number>; success_rate: number; recent_activity: Array<{ date: string; count: number; }>; }>>' is not assignable to parameter of type 'Promise<APIResponse<any>>'.
+src/services/einvoicing/api/routes.ts(243,21): error TS2345: Argument of type '(req: AuthenticatedRequest, res: Response) => Promise<APIResponse<{ enabled: boolean; }>>' is not assignable to parameter of type 'Promise<APIResponse<any>>'.
+src/services/einvoicing/api/routes.ts(261,21): error TS2345: Argument of type '(req: AuthenticatedRequest, res: Response) => Promise<APIResponse<{ enabled: boolean; }>>' is not assignable to parameter of type 'Promise<APIResponse<any>>'.
+src/services/einvoicing/api/routes.ts(278,21): error TS2345: Argument of type '(req: Request, res: Response) => Promise<APIResponse<{ updated: boolean; }>>' is not assignable to parameter of type 'Promise<APIResponse<any>>'.
+src/services/einvoicing/inbound/InboundService.ts(14,10): error TS2305: Module '"xml2js"' has no exported member 'xml2js'.
+src/services/einvoicing/inbound/InboundService.ts(401,13): error TS2322: Type '"UNKNOWN"' is not assignable to type '"FACTURX" | "UBL" | "CII"'.
+src/services/errorHandlingService.ts(135,39): error TS2693: 'ApiError' only refers to a type, but is being used as a value here.
+src/services/errorHandlingService.ts(138,19): error TS2345: Argument of type 'Error | ApiError' is not assignable to parameter of type 'ApiError'.
+  Type 'Error' is missing the following properties from type 'ApiError': code, severity, userMessage, technicalMessage, retryable
+src/services/errorHandlingService.ts(141,26): error TS2345: Argument of type 'Error | ApiError' is not assignable to parameter of type 'ApiError'.
+  Type 'Error' is missing the following properties from type 'ApiError': code, severity, userMessage, technicalMessage, retryable
+src/services/errorHandlingService.ts(144,22): error TS2345: Argument of type 'Error | ApiError' is not assignable to parameter of type 'ApiError'.
+  Type 'Error' is missing the following properties from type 'ApiError': code, severity, userMessage, technicalMessage, retryable
+src/services/fecImportService.ts(149,9): error TS2353: Object literal may only specify known properties, and 'journals' does not exist in type 'DatabaseImportResult'.
+src/services/fecParser.ts(125,5): error TS2322: Type 'Promise<unknown>' is not assignable to type 'string'.
+src/services/forecastsService.ts(418,7): error TS2322: Type '{ total_revenue: number; total_expenses: number; net_cash_flow: number; gross_margin: number; net_margin: number; break_even_point: number; updated_at: string; name: string; period_id: string; ... 12 more ...; created_at: string; }' is not assignable to type 'ForecastData'.
+  Types of property 'revenue_items' are incompatible.
+    Type 'Omit<RevenueLineItem, "id">[]' is not assignable to type 'RevenueLineItem[]'.
+      Property 'id' is missing in type 'Omit<RevenueLineItem, "id">' but required in type 'RevenueLineItem'.
+src/services/invoicePdfService.ts(141,26): error TS2339: Property 'address_street' does not exist on type '{ id: string; company_id: string; name: string; email: string; phone: string; address: string; city: string; postal_code: string; country: string; tax_number: string; type: string; is_active: boolean; ... 7 more ...; contact_name: string; }'.
+src/services/invoicePdfService.ts(142,33): error TS2339: Property 'address_street' does not exist on type '{ id: string; company_id: string; name: string; email: string; phone: string; address: string; city: string; postal_code: string; country: string; tax_number: string; type: string; is_active: boolean; ... 7 more ...; contact_name: string; }'.
+src/services/invoicePdfService.ts(145,26): error TS2339: Property 'address_city' does not exist on type '{ id: string; company_id: string; name: string; email: string; phone: string; address: string; city: string; postal_code: string; country: string; tax_number: string; type: string; is_active: boolean; ... 7 more ...; contact_name: string; }'.
+src/services/invoicePdfService.ts(146,43): error TS2339: Property 'address_postal_code' does not exist on type '{ id: string; company_id: string; name: string; email: string; phone: string; address: string; city: string; postal_code: string; country: string; tax_number: string; type: string; is_active: boolean; ... 7 more ...; contact_name: string; }'.
+src/services/invoicePdfService.ts(146,87): error TS2339: Property 'address_city' does not exist on type '{ id: string; company_id: string; name: string; email: string; phone: string; address: string; city: string; postal_code: string; country: string; tax_number: string; type: string; is_active: boolean; ... 7 more ...; contact_name: string; }'.
+src/services/invoicingService.ts(333,9): error TS2393: Duplicate function implementation.
+src/services/invoicingService.ts(482,9): error TS2393: Duplicate function implementation.
+src/services/invoicingServiceEnhanced.ts(94,15): error TS2339: Property 'data' does not exist on type 'Promise<UserResponse>'.
+src/services/invoicingServiceEnhanced.ts(339,38): error TS2345: Argument of type '() => Promise<InvoiceWithDetails>' is not assignable to parameter of type '() => Promise<{ data: InvoiceWithDetails; error: any; }>'.
+  Type 'Promise<InvoiceWithDetails>' is not assignable to type 'Promise<{ data: InvoiceWithDetails; error: any; }>'.
+    Type 'InvoiceWithDetails' is missing the following properties from type '{ data: InvoiceWithDetails; error: any; }': data, error
+src/services/invoicingServiceEnhanced.ts(417,38): error TS2345: Argument of type '() => Promise<string>' is not assignable to parameter of type '() => Promise<{ data: string; error: any; }>'.
+  Type 'Promise<string>' is not assignable to type 'Promise<{ data: string; error: any; }>'.
+    Type 'string' is not assignable to type '{ data: string; error: any; }'.
+src/services/licenseService.ts(4,27): error TS2304: Cannot find name 'LicenseType'.
+src/services/licenseService.ts(34,24): error TS2304: Cannot find name 'LicenseType'.
+src/services/licenseService.ts(38,35): error TS2304: Cannot find name 'LicenseFeatures'.
+src/services/licenseService.ts(43,30): error TS2304: Cannot find name 'LicenseLimits'.
+src/services/licenseService.ts(53,22): error TS2304: Cannot find name 'LicenseType'.
+src/services/licenseService.ts(54,12): error TS2304: Cannot find name 'LICENSE_PLANS'.
+src/services/licenseService.ts(58,18): error TS2304: Cannot find name 'LICENSE_PLANS'.
+src/services/marketService.ts(21,5): error TS2322: Type 'import("C:/Users/noutc/Casskai/src/types/markets").MarketConfig' is not assignable to type 'import("C:/Users/noutc/Casskai/src/types/market").MarketConfig'.
+  Types of property 'region' are incompatible.
+    Type 'string' is not assignable to type '"europe" | "africa" | "americas"'.
+src/services/marketService.ts(28,5): error TS2322: Type 'Promise<MarketConfig | MarketConfig>' is not assignable to type 'Promise<MarketConfig>'.
+  Type 'MarketConfig | MarketConfig' is not assignable to type 'MarketConfig'.
+    Type 'import("C:/Users/noutc/Casskai/src/types/markets").MarketConfig' is not assignable to type 'import("C:/Users/noutc/Casskai/src/types/market").MarketConfig'.
+      Types of property 'region' are incompatible.
+        Type 'string' is not assignable to type '"europe" | "africa" | "americas"'.
+src/services/marketService.ts(37,7): error TS2322: Type 'import("C:/Users/noutc/Casskai/src/types/markets").MarketConfig' is not assignable to type 'import("C:/Users/noutc/Casskai/src/types/market").MarketConfig'.
+  Types of property 'region' are incompatible.
+    Type 'string' is not assignable to type '"europe" | "africa" | "americas"'.
+src/services/marketService.ts(38,37): error TS2345: Argument of type 'import("C:/Users/noutc/Casskai/src/types/markets").MarketConfig' is not assignable to parameter of type 'import("C:/Users/noutc/Casskai/src/types/market").MarketConfig'.
+  Types of property 'region' are incompatible.
+    Type 'string' is not assignable to type '"europe" | "africa" | "americas"'.
+src/services/marketService.ts(49,5): error TS2322: Type 'import("C:/Users/noutc/Casskai/src/types/markets").MarketConfig[]' is not assignable to type 'import("C:/Users/noutc/Casskai/src/types/market").MarketConfig[]'.
+  Type 'import("C:/Users/noutc/Casskai/src/types/markets").MarketConfig' is not assignable to type 'import("C:/Users/noutc/Casskai/src/types/market").MarketConfig'.
+    Types of property 'region' are incompatible.
+      Type 'string' is not assignable to type '"europe" | "africa" | "americas"'.
+src/services/marketService.ts(53,5): error TS2322: Type 'import("C:/Users/noutc/Casskai/src/types/markets").MarketConfig[]' is not assignable to type 'import("C:/Users/noutc/Casskai/src/types/market").MarketConfig[]'.
+  Type 'import("C:/Users/noutc/Casskai/src/types/markets").MarketConfig' is not assignable to type 'import("C:/Users/noutc/Casskai/src/types/market").MarketConfig'.
+    Types of property 'region' are incompatible.
+      Type 'string' is not assignable to type '"europe" | "africa" | "americas"'.
+src/services/marketService.ts(69,40): error TS2345: Argument of type 'PCGAccount[]' is not assignable to parameter of type 'AccountPlan'.
+  Type 'PCGAccount[]' is missing the following properties from type 'AccountPlan': standard, country, classes
+src/services/migrationService.ts(36,62): error TS2304: Cannot find name 'supabase'.
+src/services/migrationService.ts(54,68): error TS2304: Cannot find name 'supabase'.
+src/services/migrationService.ts(62,70): error TS2304: Cannot find name 'supabase'.
+src/services/migrationService.ts(181,37): error TS2304: Cannot find name 'supabase'.
+src/services/migrationService.ts(197,48): error TS2304: Cannot find name 'supabase'.
+src/services/migrationService.ts(212,46): error TS2304: Cannot find name 'supabase'.
+src/services/migrationService.ts(222,49): error TS2304: Cannot find name 'supabase'.
+src/services/migrationService.ts(248,48): error TS2304: Cannot find name 'supabase'.
+src/services/migrationService.ts(258,43): error TS2304: Cannot find name 'supabase'.
+src/services/migrationService.ts(272,42): error TS2304: Cannot find name 'supabase'.
+src/services/migrationService.ts(289,13): error TS2304: Cannot find name 'supabase'.
+src/services/migrationService.ts(299,40): error TS2304: Cannot find name 'supabase'.
+src/services/migrationService.ts(324,37): error TS2304: Cannot find name 'supabase'.
+src/services/migrationService.ts(354,31): error TS2304: Cannot find name 'supabase'.
+src/services/migrationService.ts(377,37): error TS2304: Cannot find name 'supabase'.
+src/services/migrationService.ts(403,37): error TS2304: Cannot find name 'supabase'.
+src/services/onboarding/OnboardingProgressService.ts(35,5): error TS2322: Type '{ id: string; title: string; description: string; isRequired: true; order: number; estimatedTime: number; }' is not assignable to type 'ProgressStep'.
+  Type '{ id: string; title: string; description: string; isRequired: true; order: number; estimatedTime: number; }' is missing the following properties from type 'OnboardingStep': name, completed, current, locked
+src/services/onboarding/OnboardingProgressService.ts(43,5): error TS2322: Type '{ id: string; title: string; description: string; isRequired: true; order: number; estimatedTime: number; }' is not assignable to type 'ProgressStep'.
+  Type '{ id: string; title: string; description: string; isRequired: true; order: number; estimatedTime: number; }' is missing the following properties from type 'OnboardingStep': name, completed, current, locked
+src/services/onboarding/OnboardingProgressService.ts(51,5): error TS2322: Type '{ id: string; title: string; description: string; isRequired: true; order: number; estimatedTime: number; }' is not assignable to type 'ProgressStep'.
+  Type '{ id: string; title: string; description: string; isRequired: true; order: number; estimatedTime: number; }' is missing the following properties from type 'OnboardingStep': name, completed, current, locked
+src/services/onboarding/OnboardingProgressService.ts(59,5): error TS2322: Type '{ id: string; title: string; description: string; isRequired: true; order: number; estimatedTime: number; }' is not assignable to type 'ProgressStep'.
+  Type '{ id: string; title: string; description: string; isRequired: true; order: number; estimatedTime: number; }' is missing the following properties from type 'OnboardingStep': name, completed, current, locked
+src/services/onboarding/OnboardingServiceRefactored.ts(53,11): error TS2353: Object literal may only specify known properties, and 'industry' does not exist in type 'Partial<CompanyProfile>'.
+src/services/onboarding/OnboardingServiceRefactored.ts(62,11): error TS2353: Object literal may only specify known properties, and 'modules' does not exist in type 'Partial<OnboardingPreferences>'.
+src/services/onboarding/OnboardingServiceRefactored.ts(114,11): error TS2561: Object literal may only specify known properties, but 'errors' does not exist in type 'OnboardingResponse<OnboardingData>'. Did you mean to write 'error'?
+src/services/onboarding/OnboardingServiceRefactored.ts(132,57): error TS2339: Property 'countryCode' does not exist on type 'MarketConfig'.
+src/services/onboarding/OnboardingServiceRefactored.ts(181,11): error TS2561: Object literal may only specify known properties, but 'errors' does not exist in type 'OnboardingResponse<OnboardingData>'. Did you mean to write 'error'?
+src/services/onboarding/OnboardingServiceRefactored.ts(244,11): error TS2561: Object literal may only specify known properties, but 'errors' does not exist in type 'OnboardingResponse<OnboardingData>'. Did you mean to write 'error'?
+src/services/onboarding/OnboardingServiceRefactored.ts(259,9): error TS2561: Object literal may only specify known properties, but 'currentStep' does not exist in type 'OnboardingData'. Did you mean to write 'currentStepId'?
+src/services/onboarding/OnboardingServiceRefactored.ts(305,11): error TS2561: Object literal may only specify known properties, but 'errors' does not exist in type 'OnboardingResponse<{ companyId: string; onboardingData: OnboardingData; }>'. Did you mean to write 'error'?
+src/services/onboarding/OnboardingServiceRefactored.ts(315,9): error TS2353: Object literal may only specify known properties, and 'isComplete' does not exist in type 'OnboardingData'.
+src/services/onboardingService.ts(195,57): error TS2339: Property 'countryCode' does not exist on type 'MarketConfig'.
+src/services/onboardingService.ts(430,70): error TS2339: Property 'required' does not exist on type 'OnboardingStep'.
+src/services/onboardingService.ts(433,20): error TS2339: Property 'required' does not exist on type 'OnboardingStep'.
+src/services/openBanking/providers/BridgeProvider.ts(430,31): error TS2304: Cannot find name 'error'.
+src/services/openBanking/providers/BridgeProvider.ts(562,66): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type '{}'.
+src/services/openBanking/providers/BudgetInsightProvider.ts(159,56): error TS2304: Cannot find name 'userId'.
+src/services/pdfService.ts(65,32): error TS2339: Property 'street' does not exist on type 'Enterprise'.
+src/services/pdfService.ts(66,39): error TS2339: Property 'street' does not exist on type 'Enterprise'.
+src/services/pdfService.ts(69,32): error TS2339: Property 'postalCode' does not exist on type 'Enterprise'.
+src/services/pdfService.ts(69,69): error TS2339: Property 'city' does not exist on type 'Enterprise'.
+src/services/pdfService.ts(70,42): error TS2339: Property 'postalCode' does not exist on type 'Enterprise'.
+src/services/pdfService.ts(70,79): error TS2339: Property 'city' does not exist on type 'Enterprise'.
+src/services/pdfService.ts(77,32): error TS2339: Property 'email' does not exist on type 'Enterprise'.
+src/services/pdfService.ts(78,49): error TS2339: Property 'email' does not exist on type 'Enterprise'.
+src/services/performanceOptimizer.ts(62,37): error TS2339: Property 'processingStart' does not exist on type 'PerformanceEntry'.
+src/services/purchasesService.ts(197,11): error TS2322: Type '{ tva_amount: number; amount_ttc: number; supplier_name: string; updated_at: string; invoice_number: string; purchase_date: string; supplier_id: string; description: string; amount_ht: number; ... 7 more ...; company_id: string; }' is not assignable to type 'Purchase'.
+  Types of property 'attachments' are incompatible.
+    Type 'string[] | File[]' is not assignable to type 'string[]'.
+      Type 'File[]' is not assignable to type 'string[]'.
+        Type 'File' is not assignable to type 'string'.
+src/services/taxService.ts(481,11): error TS2353: Object literal may only specify known properties, and 'completed_declarations' does not exist in type 'TaxStats'.
+src/services/tenantService.ts(32,15): error TS2339: Property 'getSupabaseClient' does not exist on type 'typeof import("C:/Users/noutc/Casskai/src/lib/supabase")'.
+src/services/vatCalculationService.ts(423,44): error TS2339: Property 'number' does not exist on type '{ number: any; name: any; type: any; }[]'.
+src/services/vatCalculationService.ts(428,37): error TS2339: Property 'date' does not exist on type '{ date: any; reference: any; description: any; }[]'.
+src/services/vatCalculationService.ts(429,42): error TS2339: Property 'reference' does not exist on type '{ date: any; reference: any; description: any; }[]'.
+src/services/vatCalculationService.ts(431,37): error TS2339: Property 'name' does not exist on type '{ number: any; name: any; type: any; }[]'.
+src/types/database-base.ts(17,13): error TS2304: Cannot find name 'DatabaseTables'.
+src/types/database-base.ts(18,12): error TS2304: Cannot find name 'DatabaseViews'.
+src/types/database-base.ts(19,16): error TS2304: Cannot find name 'DatabaseFunctions'.
+src/types/database-base.ts(20,12): error TS2304: Cannot find name 'DatabaseEnums'.
+src/types/database-base.ts(21,21): error TS2304: Cannot find name 'DatabaseCompositeTypes'.
+src/types/database-base.ts(26,37): error TS2307: Cannot find module './database-tables' or its corresponding type declarations.
+src/types/database-base.ts(27,36): error TS2307: Cannot find module './database-views' or its corresponding type declarations.
+src/types/database-base.ts(28,79): error TS2307: Cannot find module './database-functions' or its corresponding type declarations.
+src/types/database/accounting.types.ts(20,61): error TS2339: Property 'journal_entry_lines' does not exist on type '{ companies: { Row: { id: string; name: string; created_at: string; updated_at: string; stripe_customer_id: string; stripe_subscription_id: string; country: string; default_currency: string; is_active: boolean; ... 55 more ...; onboarding_completed_at: string; }; Insert: { ...; }; Update: { ...; }; }; ... 34 more .....'.
+src/types/database/accounting.types.ts(21,67): error TS2339: Property 'journal_entry_lines' does not exist on type '{ companies: { Row: { id: string; name: string; created_at: string; updated_at: string; stripe_customer_id: string; stripe_subscription_id: string; country: string; default_currency: string; is_active: boolean; ... 55 more ...; onboarding_completed_at: string; }; Insert: { ...; }; Update: { ...; }; }; ... 34 more .....'.
+src/types/database/accounting.types.ts(22,67): error TS2339: Property 'journal_entry_lines' does not exist on type '{ companies: { Row: { id: string; name: string; created_at: string; updated_at: string; stripe_customer_id: string; stripe_subscription_id: string; country: string; default_currency: string; is_active: boolean; ... 55 more ...; onboarding_completed_at: string; }; Insert: { ...; }; Update: { ...; }; }; ... 34 more .....'.
+src/types/database/invoices.types.ts(10,50): error TS2339: Property 'quotes' does not exist on type '{ companies: { Row: { id: string; name: string; created_at: string; updated_at: string; stripe_customer_id: string; stripe_subscription_id: string; country: string; default_currency: string; is_active: boolean; ... 55 more ...; onboarding_completed_at: string; }; Insert: { ...; }; Update: { ...; }; }; ... 34 more .....'.
+src/types/database/invoices.types.ts(11,56): error TS2339: Property 'quotes' does not exist on type '{ companies: { Row: { id: string; name: string; created_at: string; updated_at: string; stripe_customer_id: string; stripe_subscription_id: string; country: string; default_currency: string; is_active: boolean; ... 55 more ...; onboarding_completed_at: string; }; Insert: { ...; }; Update: { ...; }; }; ... 34 more .....'.
+src/types/database/invoices.types.ts(12,56): error TS2339: Property 'quotes' does not exist on type '{ companies: { Row: { id: string; name: string; created_at: string; updated_at: string; stripe_customer_id: string; stripe_subscription_id: string; country: string; default_currency: string; is_active: boolean; ... 55 more ...; onboarding_completed_at: string; }; Insert: { ...; }; Update: { ...; }; }; ... 34 more .....'.
+src/types/database/transactions.types.ts(10,52): error TS2339: Property 'payments' does not exist on type '{ companies: { Row: { id: string; name: string; created_at: string; updated_at: string; stripe_customer_id: string; stripe_subscription_id: string; country: string; default_currency: string; is_active: boolean; ... 55 more ...; onboarding_completed_at: string; }; Insert: { ...; }; Update: { ...; }; }; ... 34 more .....'.
+src/types/database/transactions.types.ts(11,58): error TS2339: Property 'payments' does not exist on type '{ companies: { Row: { id: string; name: string; created_at: string; updated_at: string; stripe_customer_id: string; stripe_subscription_id: string; country: string; default_currency: string; is_active: boolean; ... 55 more ...; onboarding_completed_at: string; }; Insert: { ...; }; Update: { ...; }; }; ... 34 more .....'.
+src/types/database/transactions.types.ts(12,58): error TS2339: Property 'payments' does not exist on type '{ companies: { Row: { id: string; name: string; created_at: string; updated_at: string; stripe_customer_id: string; stripe_subscription_id: string; country: string; default_currency: string; is_active: boolean; ... 55 more ...; onboarding_completed_at: string; }; Insert: { ...; }; Update: { ...; }; }; ... 34 more .....'.
+src/types/index.ts(3,1): error TS2308: Module './config' has already exported a member named 'CompanyAddress'. Consider explicitly re-exporting to resolve the ambiguity.
+src/types/index.ts(4,1): error TS2308: Module './database' has already exported a member named 'Account'. Consider explicitly re-exporting to resolve the ambiguity.
+src/types/index.ts(4,1): error TS2308: Module './database' has already exported a member named 'Company'. Consider explicitly re-exporting to resolve the ambiguity.
+src/types/index.ts(4,1): error TS2308: Module './database' has already exported a member named 'JournalEntry'. Consider explicitly re-exporting to resolve the ambiguity.
+src/types/modules/index.ts(40,8): error TS2307: Cannot find module './module-marketplace.types' or its corresponding type declarations.
+src/types/modules/index.ts(52,3): error TS2305: Module '"./module-utils.types"' has no exported member 'ModuleCategory'.
+src/utils/abTestingFramework.ts(499,5): error TS2687: All declarations of 'plausible' must have identical modifiers.
+src/utils/abTestingFramework.ts(499,5): error TS2717: Subsequent property declarations must have the same type.  Property 'plausible' must be of type '(event: string, options?: { props?: Record<string, any>; u?: string; callback?: () => void; }) => void', but here has type '(event: string, options?: { props: Record<string, unknown>; }) => void'.

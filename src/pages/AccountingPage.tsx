@@ -1,54 +1,62 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { 
   Calculator,
   FileText, 
   BookOpen, 
-  Calendar, 
-  FileArchive, 
   TrendingUp,
-  AlertTriangle,
-  Settings,
   BarChart3,
   DollarSign,
-  Users,
-  CheckCircle,
-  Clock,
-  Filter,
-  Download,
-  RefreshCw,
-  Plus,
-  Eye,
-  Edit,
-  Trash2,
-  Search,
   ArrowUpRight,
   ArrowDownRight,
-  Target,
   PieChart,
   Activity,
-  Zap
+  Plus,
+  Eye,
+  RefreshCw,
+  Download,
+  CheckCircle,
+  type LucideIcon
 } from 'lucide-react';
-
-// Import optimized tab components
 import OptimizedJournalEntriesTab from '@/components/accounting/OptimizedJournalEntriesTab';
 import OptimizedChartOfAccountsTab from '@/components/accounting/OptimizedChartOfAccountsTab';
 import OptimizedJournalsTab from '@/components/accounting/OptimizedJournalsTab';
 import OptimizedReportsTab from '@/components/accounting/OptimizedReportsTab';
 
-// Accounting KPI Card Component
-const AccountingKPICard = ({ title, value, icon, trend, color = 'blue', description, onClick }) => {
-  const IconComponent = icon;
-  
+// Types
+interface AccountingKPICardProps {
+  title: string;
+  value: string | number;
+  icon: LucideIcon;
+  trend?: number;
+  color?: string;
+  description: string;
+  onClick?: () => void;
+}
+
+interface QuickActionsProps {
+  onNewEntry: () => void;
+  onViewReports: () => void;
+  onExportData: () => void;
+}
+
+interface AccountingData {
+  totalBalance: number;
+  totalDebit: number;
+  totalCredit: number;
+  entriesCount: number;
+  accountsCount: number;
+  journalsCount: number;
+}
+
+const AccountingKPICard: React.FC<AccountingKPICardProps> = ({ title, value, icon: Icon, trend, color = 'blue', description, onClick }) => {
   return (
     <motion.div
       className={`card-modern card-hover cursor-pointer overflow-hidden relative group ${onClick ? 'hover:shadow-lg' : ''}`}
@@ -60,7 +68,7 @@ const AccountingKPICard = ({ title, value, icon, trend, color = 'blue', descript
       <div className="relative z-10 p-6">
         <div className="flex items-center justify-between mb-4">
           <div className={`p-3 rounded-xl bg-gradient-to-r from-${color}-500 to-${color}-600 shadow-lg`}>
-            <IconComponent className="w-6 h-6 text-white" />
+            <Icon className="w-6 h-6 text-white" />
           </div>
           {trend && (
             <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
@@ -88,8 +96,7 @@ const AccountingKPICard = ({ title, value, icon, trend, color = 'blue', descript
   );
 };
 
-// Quick Actions Component
-const QuickActions = ({ onNewEntry, onViewReports, onExportData }) => {
+const QuickActions: React.FC<QuickActionsProps> = ({ onNewEntry, onViewReports, onExportData }) => {
   const quickActions = [
     {
       title: 'Nouvelle écriture',
@@ -122,6 +129,7 @@ const QuickActions = ({ onNewEntry, onViewReports, onExportData }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 }}
+		  onClick={action.onClick}
         >
           <Card className="cursor-pointer hover:shadow-md transition-all duration-200 border-2 border-transparent hover:border-gray-200 dark:hover:border-gray-700">
             <CardContent className="p-4">
@@ -150,7 +158,6 @@ const QuickActions = ({ onNewEntry, onViewReports, onExportData }) => {
   );
 };
 
-// Recent Activities Component
 const RecentAccountingActivities = () => {
   const activities = [
     { type: 'entry', description: 'Nouvelle écriture - Facture F-001', time: '2 min', icon: FileText, color: 'blue' },
@@ -208,15 +215,13 @@ const RecentAccountingActivities = () => {
 
 export default function AccountingPageOptimized() {
   const { toast } = useToast();
-  const { user } = useAuth();
   const { canAccessFeature } = useSubscription();
   
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedPeriod, setSelectedPeriod] = useState('current-month');
   const [isLoading, setIsLoading] = useState(true);
 
-  // Mock accounting data
-  const [accountingData, setAccountingData] = useState({
+  const [accountingData] = useState<AccountingData>({
     totalBalance: 45670.50,
     totalDebit: 125430.75,
     totalCredit: 79760.25,
@@ -226,7 +231,6 @@ export default function AccountingPageOptimized() {
   });
 
   useEffect(() => {
-    // Simulate data loading
     const loadAccountingData = async () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       setIsLoading(false);
@@ -245,7 +249,6 @@ export default function AccountingPageOptimized() {
       return;
     }
     setActiveTab('entries');
-    // Additional logic for creating new entry
   };
 
   const handleViewReports = () => {
@@ -265,7 +268,6 @@ export default function AccountingPageOptimized() {
       title: "Export en cours",
       description: "Génération du fichier FEC en cours...",
     });
-    // Export logic here
   };
 
   if (isLoading) {
@@ -290,7 +292,6 @@ export default function AccountingPageOptimized() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Enhanced Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center space-x-2">
@@ -303,32 +304,36 @@ export default function AccountingPageOptimized() {
         </div>
         
         <div className="flex items-center space-x-3">
-          <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-            <SelectTrigger className="w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="current-month">Mois en cours</SelectItem>
-              <SelectItem value="current-quarter">Trimestre en cours</SelectItem>
-              <SelectItem value="current-year">Année en cours</SelectItem>
-              <SelectItem value="last-month">Mois dernier</SelectItem>
-              <SelectItem value="custom">Période personnalisée</SelectItem>
-            </SelectContent>
-          </Select>
+          <div>
+            <label htmlFor="accounting-period-select" className="sr-only">
+              Sélectionner la période comptable
+            </label>
+            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+              <SelectTrigger id="accounting-period-select" name="accounting-period" className="w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="current-month">Mois en cours</SelectItem>
+                <SelectItem value="current-quarter">Trimestre en cours</SelectItem>
+                <SelectItem value="current-year">Année en cours</SelectItem>
+                <SelectItem value="last-month">Mois dernier</SelectItem>
+                <SelectItem value="custom">Période personnalisée</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           
           <Button variant="outline">
             <RefreshCw className="w-4 h-4 mr-2" />
             Actualiser
           </Button>
           
-          <Button>
+          <Button onClick={handleNewEntry}>
             <Plus className="w-4 h-4 mr-2" />
             Nouvelle écriture
           </Button>
         </div>
       </div>
 
-      {/* Accounting KPIs */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <AccountingKPICard
           title="Solde total"
@@ -391,7 +396,6 @@ export default function AccountingPageOptimized() {
           </TabsTrigger>
         </TabsList>
 
-        {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
           <QuickActions
             onNewEntry={handleNewEntry}
@@ -432,22 +436,18 @@ export default function AccountingPageOptimized() {
           </div>
         </TabsContent>
 
-        {/* Entries Tab */}
         <TabsContent value="entries">
           <OptimizedJournalEntriesTab />
         </TabsContent>
 
-        {/* Accounts Tab */}
         <TabsContent value="accounts">
           <OptimizedChartOfAccountsTab />
         </TabsContent>
 
-        {/* Journals Tab */}
         <TabsContent value="journals">
           <OptimizedJournalsTab />
         </TabsContent>
 
-        {/* Reports Tab */}
         <TabsContent value="reports">
           <OptimizedReportsTab />
         </TabsContent>

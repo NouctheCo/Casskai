@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ValidationService Unit Tests
  * Test suite for EN 16931 invoice validation

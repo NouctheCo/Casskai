@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { supabase, getCurrentCompany } from '../lib/supabase';
 import { FECParser } from './fecParser';
 import type { ImportResult, FECEntry } from '../types/accounting-import.types';

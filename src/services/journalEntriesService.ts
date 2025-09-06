@@ -54,6 +54,48 @@ type JournalEntryInsert = {
 };
 
 export class JournalEntriesService {
+  // Mettre à jour une écriture
+  async updateJournalEntry(entryId: string, entryData: Partial<JournalEntryInsert>): Promise<{
+    success: boolean;
+    data?: JournalEntry;
+    error?: string
+  }> {
+    try {
+      // This is a placeholder implementation
+      console.warn("updateJournalEntry is not fully implemented yet");
+      const { data, error } = await supabase
+        .from('journal_entries')
+        .update(entryData)
+        .eq('id', entryId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('Erreur mise à jour écriture:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Supprimer toutes les écritures d'une entreprise
+  async deleteAllJournalEntries(companyId: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const { error } = await supabase
+        .from('journal_entries')
+        .delete()
+        .eq('company_id', companyId);
+
+      if (error) throw error;
+
+      return { success: true };
+    } catch (error) {
+      console.error('Erreur suppression toutes écritures:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   private static instance: JournalEntriesService;
 
   static getInstance(): JournalEntriesService {
@@ -356,6 +398,52 @@ export class JournalEntriesService {
     type: string;
     is_active: boolean;
   }[]> {
+    try {
+      const { data, error } = await supabase
+        .from('accounts')
+        .select('id, account_number, name, type, is_active')
+        .eq('company_id', companyId)
+        .eq('is_active', true)
+        .order('account_number', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Erreur récupération comptes:', error);
+      return [];
+    }
+  }
+
+  async getJournalsList(companyId: string): Promise<Array<{
+    id: string;
+    name: string;
+    code: string;
+    type: string;
+    is_active: boolean;
+  }>> {
+    try {
+      const { data, error } = await supabase
+        .from('journals')
+        .select('id, name, code, type, is_active')
+        .eq('company_id', companyId)
+        .eq('is_active', true)
+        .order('code', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Erreur récupération journaux:', error);
+      return [];
+    }
+  }
+
+  async getAccountsList(companyId: string): Promise<Array<{
+    id: string;
+    account_number: string;
+    name: string;
+    type: string;
+    is_active: boolean;
+  }>> {
     try {
       const { data, error } = await supabase
         .from('accounts')

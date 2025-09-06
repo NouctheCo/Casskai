@@ -1,6 +1,6 @@
 import React, { useMemo, lazy, Suspense } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useModules } from '@/contexts/ModulesContext';
+import { useModulesSafe, useModules } from '@/contexts/ModulesContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 
@@ -38,7 +38,7 @@ const LoadingFallback: React.FC = () => (
 
 const ModuleRenderer: React.FC<ModuleRendererProps> = ({ moduleId }) => {
   const location = useLocation();
-  const { activeModules, isModuleActive } = useModules();
+  const { activeModules, isModuleActive } = useModulesSafe();
 
   const moduleComponent = useMemo(() => {
     if (!isModuleActive(moduleId)) {

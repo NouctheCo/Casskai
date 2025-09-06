@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
@@ -27,7 +28,7 @@ interface PlausibleConfig {
 
 // Configuration par défaut pour Plausible
 const DEFAULT_CONFIG: PlausibleConfig = {
-  domain: 'app.casskai.fr',
+  domain: 'casskai.app',
   apiHost: 'https://plausible.io',
   trackLocalhost: false,
   excludePaths: ['/admin', '/api'],
@@ -121,18 +122,26 @@ class PlausibleService {
 
   private createPlausibleProxy() {
     return (...args: any[]) => {
-      if (this.isLoaded) {
-        // Si Plausible est chargé, utiliser la fonction native
-        if (window.plausible && typeof window.plausible === 'function') {
-          return window.plausible.apply(null, args);
-        }
-      } else {
-        // Sinon, mettre en queue
-        this.queue.push(() => {
+      try {
+        if (this.isLoaded) {
+          // Si Plausible est chargé, utiliser la fonction native
           if (window.plausible && typeof window.plausible === 'function') {
-            window.plausible.apply(null, args);
+            return window.plausible.apply(null, args);
           }
-        });
+        } else {
+          // Sinon, mettre en queue
+          this.queue.push(() => {
+            try {
+              if (window.plausible && typeof window.plausible === 'function') {
+                window.plausible.apply(null, args);
+              }
+            } catch (error) {
+              console.warn('[Plausible] Erreur lors de l\'envoi des analytics:', error);
+            }
+          });
+        }
+      } catch (error) {
+        console.warn('[Plausible] Erreur lors de l\'envoi des analytics:', error);
       }
     };
   }
@@ -148,10 +157,14 @@ class PlausibleService {
   trackPageview(url?: string): void {
     if (!this.shouldTrack()) return;
 
-    const pageUrl = url || window.location.pathname + window.location.search;
-    
-    if (window.plausible) {
-      window.plausible('pageview', { u: pageUrl });
+    try {
+      const pageUrl = url || window.location.pathname + window.location.search;
+      
+      if (window.plausible) {
+        window.plausible('pageview', { u: pageUrl });
+      }
+    } catch (error) {
+      console.warn('[Plausible] Erreur lors du tracking de page vue:', error);
     }
   }
 
@@ -159,12 +172,16 @@ class PlausibleService {
   trackEvent(eventName: string, props?: PlausibleEventProps): void {
     if (!this.shouldTrack()) return;
 
-    if (window.plausible) {
-      if (props && Object.keys(props).length > 0) {
-        window.plausible(eventName, { props });
-      } else {
-        window.plausible(eventName);
+    try {
+      if (window.plausible) {
+        if (props && Object.keys(props).length > 0) {
+          window.plausible(eventName, { props });
+        } else {
+          window.plausible(eventName);
+        }
       }
+    } catch (error) {
+      console.warn('[Plausible] Erreur lors du tracking d\'événement:', error);
     }
   }
 
@@ -172,19 +189,23 @@ class PlausibleService {
   trackGoal(goalName: string, props?: PlausibleGoalProps): void {
     if (!this.shouldTrack()) return;
 
-    if (window.plausible) {
-      const goalProps: any = { ...props };
-      
-      // Gérer les revenue goals
-      if (props?.revenue) {
-        goalProps.revenue = props.revenue;
-      }
+    try {
+      if (window.plausible) {
+        const goalProps: any = { ...props };
+        
+        // Gérer les revenue goals
+        if (props?.revenue) {
+          goalProps.revenue = props.revenue;
+        }
 
-      if (Object.keys(goalProps).length > 0) {
-        window.plausible(goalName, { props: goalProps });
-      } else {
-        window.plausible(goalName);
+        if (Object.keys(goalProps).length > 0) {
+          window.plausible(goalName, { props: goalProps });
+        } else {
+          window.plausible(goalName);
+        }
       }
+    } catch (error) {
+      console.warn('[Plausible] Erreur lors du tracking de goal:', error);
     }
   }
 

@@ -181,9 +181,9 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({ chil
         setPaymentMethods(userPaymentMethods);
       }
 
-      // Load invoices from Supabase
+      // Load invoices from Supabase (Stripe invoices)
       const { data: supabaseInvoices, error: invoiceError } = await supabase
-        .from('invoices')
+        .from('stripe_invoices')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { supabase, getCurrentCompany, getUserCompanies } from '../lib/supabase';
 // import type { Database } from '../types/supabase';

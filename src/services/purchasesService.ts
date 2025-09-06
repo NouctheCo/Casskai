@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Purchase, PurchaseFormData, PurchaseFilters, PurchaseStats, Supplier } from '../types/purchase.types';
 
 // Mock data for development

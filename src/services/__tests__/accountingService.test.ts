@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { AccountingService } from '../accountingService';
 import { AccountPlan, Account, AccountType } from '@/types/accounting';

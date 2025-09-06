@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator 
 } from '@/components/ui/dropdown-menu';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -30,20 +30,26 @@ export function Header({
 }: HeaderProps) {
   const { currentEnterprise } = useEnterprise();
   const { t } = useLocale();
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
+  const { user, signOut, currentCompany } = useAuth();
+  // const navigate = useNavigate(); // Commenté car on utilise Link maintenant
   const [searchFocused, setSearchFocused] = useState(false);
 
   const notificationCount = 0; // TODO: Implement dynamic notifications
 
+  // Use currentCompany from AuthContext if available, fallback to currentEnterprise
+  const displayCompany = currentCompany || currentEnterprise;
+
   return (
     <motion.header 
-      className="main-header glass-nav shadow-soft border-b border-white/20 dark:border-gray-800/20 sticky top-0 z-50"
+      className={cn(
+        "main-header bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 fixed top-0 z-50 shadow-sm transition-[left] duration-300 ease-in-out",
+        isMobile ? "left-0 right-0 w-full" : (isDesktopSidebarCollapsed ? "left-16 right-0 w-auto" : "left-64 right-0 w-auto")
+      )}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
-      <div className="header-content flex items-center justify-between h-16 px-4">
+      <div className="header-content flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8 w-full">
         {/* Left side - Menu and branding */}
         <div className="flex items-center space-x-4">
           {isMobile && (
@@ -63,14 +69,19 @@ export function Header({
           )}
           
           <div className="flex items-center space-x-3">
-            <motion.h1 
-              className="text-xl font-bold text-gray-900 dark:text-white gradient-text"
+            <motion.div
               whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
-              CassKai
-            </motion.h1>
-            {currentEnterprise && (
+              <Link 
+                to="/dashboard"
+                className="text-xl font-bold text-gray-900 dark:text-white gradient-text hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
+              >
+                CassKai
+              </Link>
+            </motion.div>
+            {displayCompany && (
               <motion.div
                 className="flex items-center space-x-2"
                 initial={{ opacity: 0, x: -10 }}
@@ -79,7 +90,7 @@ export function Header({
               >
                 <span className="text-gray-300 dark:text-gray-600">|</span>
                 <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">
-                  {currentEnterprise.name}
+                  {displayCompany.name}
                 </span>
               </motion.div>
             )}
@@ -163,8 +174,15 @@ export function Header({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
           >
-            <Button variant="ghost" size="icon" className="hover:bg-white/20 dark:hover:bg-gray-800/20">
-              <Settings className="h-5 w-5" />
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="hover:bg-white/20 dark:hover:bg-gray-800/20"
+              asChild
+            >
+              <Link to="/settings">
+                <Settings className="h-5 w-5" />
+              </Link>
             </Button>
           </motion.div>
 
@@ -215,35 +233,44 @@ export function Header({
                 </div>
                 <DropdownMenuItem 
                   className="hover:bg-white/20 dark:hover:bg-gray-800/20"
-                  onClick={() => navigate('/settings')}
+                  asChild
                 >
-                  {t('header.profile', { defaultValue: 'Mon profil' })}
+                  <Link to="/settings">
+                    {t('header.profile', { defaultValue: 'Mon profil' })}
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="hover:bg-white/20 dark:hover:bg-gray-800/20 flex items-center gap-2"
-                  onClick={() => navigate('/security')}
+                  asChild
                 >
-                  <Shield className="h-4 w-4" />
-                  {t('sidebar.security', { defaultValue: 'Sécurité & Confidentialité' })}
+                  <Link to="/security">
+                    <Shield className="h-4 w-4" />
+                    {t('sidebar.security', { defaultValue: 'Sécurité & Confidentialité' })}
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="hover:bg-white/20 dark:hover:bg-gray-800/20"
-                  onClick={() => navigate('/settings')}
+                  asChild
                 >
-                  {t('header.settings', { defaultValue: 'Paramètres' })}
+                  <Link to="/settings">
+                    <Settings className="h-4 w-4 mr-2" />
+                    {t('header.settings', { defaultValue: 'Paramètres' })}
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="hover:bg-white/20 dark:hover:bg-gray-800/20"
-                  onClick={() => navigate('/help')}
+                  asChild
                 >
-                  {t('header.help', { defaultValue: 'Aide' })}
+                  <Link to="/help">
+                    {t('header.help', { defaultValue: 'Aide' })}
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-white/20 dark:bg-gray-800/20" />
                 <DropdownMenuItem 
                   className="hover:bg-white/20 dark:hover:bg-gray-800/20 text-red-600 dark:text-red-400"
                   onClick={async () => {
                     await signOut();
-                    navigate('/auth');
+                    window.location.href = '/auth'; // Redirection forcée après déconnexion
                   }}
                 >
                   {t('header.logout', { defaultValue: 'Se déconnecter' })}

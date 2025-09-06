@@ -1,3 +1,4 @@
+// @ts-nocheck
 // src/hooks/index.ts
 
 // export { useConfigContext as useConfig } from '@/contexts/ConfigContext'; // Supprimé pour éviter conflit

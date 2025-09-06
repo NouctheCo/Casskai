@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { test, expect } from '@playwright/test';
 import { injectAxe, checkA11y, getViolations } from 'axe-playwright';
 

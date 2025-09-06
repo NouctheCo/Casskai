@@ -209,6 +209,42 @@ app.post('/api/stripe/cancel-subscription', async (req, res) => {
   }
 });
 
+// Attach a payment method to a customer
+app.post('/api/stripe/attach-payment-method', async (req, res) => {
+  try {
+    const { paymentMethodId, customerId } = req.body;
+    if (!paymentMethodId || !customerId) {
+      return res.status(400).json({ error: 'paymentMethodId and customerId are required' });
+    }
+
+    const paymentMethod = await stripe.paymentMethods.attach(paymentMethodId, {
+      customer: customerId,
+    });
+
+    res.json(paymentMethod);
+  } catch (error) {
+    console.error('Error attaching payment method:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Detach a payment method from a customer
+app.post('/api/stripe/detach-payment-method', async (req, res) => {
+  try {
+    const { paymentMethodId } = req.body;
+    if (!paymentMethodId) {
+      return res.status(400).json({ error: 'paymentMethodId is required' });
+    }
+
+    const paymentMethod = await stripe.paymentMethods.detach(paymentMethodId);
+
+    res.json(paymentMethod);
+  } catch (error) {
+    console.error('Error detaching payment method:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // =================
 // WEBHOOKS
 // =================
