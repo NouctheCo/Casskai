@@ -341,7 +341,7 @@ export interface Database {
           category?: string;
           reconciled: boolean;
           imported_from?: 'csv' | 'ofx' | 'qif' | 'api';
-          raw_data?: any;
+          raw_data?: Record<string, unknown>;
           created_at: string;
           updated_at: string;
         };
@@ -358,7 +358,7 @@ export interface Database {
           category?: string;
           reconciled?: boolean;
           imported_from?: 'csv' | 'ofx' | 'qif' | 'api';
-          raw_data?: any;
+          raw_data?: Record<string, unknown>;
           created_at?: string;
           updated_at?: string;
         };
@@ -473,8 +473,8 @@ export interface Database {
           company_id: string;
           name: string;
           description?: string;
-          conditions: any;
-          actions: any;
+          conditions: Record<string, unknown>;
+          actions: Record<string, unknown>;
           priority: number;
           active: boolean;
           auto_apply: boolean;
@@ -487,8 +487,8 @@ export interface Database {
           company_id: string;
           name: string;
           description?: string;
-          conditions: any;
-          actions: any;
+          conditions: Record<string, unknown>;
+          actions: Record<string, unknown>;
           priority?: number;
           active?: boolean;
           auto_apply?: boolean;
@@ -499,8 +499,8 @@ export interface Database {
         Update: {
           name?: string;
           description?: string;
-          conditions?: any;
-          actions?: any;
+          conditions?: Record<string, unknown>;
+          actions?: Record<string, unknown>;
           priority?: number;
           active?: boolean;
           auto_apply?: boolean;
@@ -542,18 +542,22 @@ export interface Database {
 }
 
 // Utility function to handle Supabase errors
-export const handleSupabaseError = (error: any) => {
+export const handleSupabaseError = (error: unknown) => {
   console.error('Supabase error:', error);
   
-  if (error?.message?.includes('JWT')) {
-    return 'Session expired. Please log in again.';
+  if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
+    if (error.message.includes('JWT')) {
+      return 'Session expired. Please log in again.';
+    }
+    
+    if (error.message.includes('Row Level Security')) {
+      return 'Access denied. You don\'t have permission for this operation.';
+    }
+    
+    return error.message;
   }
   
-  if (error?.message?.includes('Row Level Security')) {
-    return 'Access denied. You don\'t have permission for this operation.';
-  }
-  
-  return error?.message || 'An unexpected error occurred.';
+  return 'An unexpected error occurred.';
 };
 
 // Helper function to get current user's companies

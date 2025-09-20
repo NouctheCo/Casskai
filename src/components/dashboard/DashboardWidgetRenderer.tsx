@@ -220,18 +220,20 @@ export function MetricWidget({ title, value, change, icon: Icon }: {
   icon?: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="space-y-2">
+    <div className="flex flex-col h-full">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">{title}</p>
+        <p className="text-sm text-muted-foreground truncate">{title}</p>
         {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
       </div>
-      <div className="flex items-center gap-2">
-        <p className="text-2xl font-bold">{value}</p>
-        {change && (
-          <span className="text-sm text-green-600 bg-green-100 px-2 py-1 rounded-full">
-            {change}
-          </span>
-        )}
+      <div className="flex-grow flex items-center">
+        <div className="flex items-baseline gap-2">
+          <p className="text-2xl md:text-3xl font-bold">{value}</p>
+          {change && (
+            <span className="text-sm text-green-600 bg-green-100 px-2 py-1 rounded-full">
+              {change}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -239,12 +241,13 @@ export function MetricWidget({ title, value, change, icon: Icon }: {
 
 export function QuickActionWidget({ actions }: { actions: Array<{ label: string; action: () => void; icon?: React.ComponentType<{ className?: string }> }> }) {
   return (
-    <div className="space-y-2">
+    <div className="flex flex-wrap gap-2">
       {actions.map((action, index) => (
         <motion.div
           key={index}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
+          className="flex-grow"
         >
           <Button 
             variant="outline" 
@@ -253,7 +256,7 @@ export function QuickActionWidget({ actions }: { actions: Array<{ label: string;
             className="w-full justify-start gap-2"
           >
             {action.icon && <action.icon className="h-4 w-4" />}
-            {action.label}
+            <span>{action.label}</span>
           </Button>
         </motion.div>
       ))}

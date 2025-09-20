@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   OnboardingData,
   OnboardingStepId,
@@ -29,40 +28,79 @@ export interface OnboardingMetrics {
   }>;
 }
 
-type ProgressStep = OnboardingStep & { isRequired: boolean; estimatedTime: number };
+type ProgressStep = {
+  id: string;
+  name: string;
+  title: string;
+  description: string;
+  completed: boolean;
+  current: boolean;
+  locked: boolean;
+  order: number;
+  isRequired: boolean;
+  estimatedTime: number;
+};
 
 export class OnboardingProgressService {
   private readonly steps: ProgressStep[] = [
     {
       id: 'welcome',
+      name: 'welcome',
       title: 'Bienvenue',
       description: 'Introduction à CassKai',
+      completed: false,
+      current: false,
+      locked: false,
       isRequired: true,
       order: 1,
       estimatedTime: 2
     },
     {
-      id: 'company',
-      title: 'Profil Entreprise',
-      description: 'Informations sur votre entreprise',
-      isRequired: true,
-      order: 2,
-      estimatedTime: 5
-    },
-    {
       id: 'preferences',
+      name: 'preferences',
       title: 'Préférences',
       description: 'Configuration de votre environnement',
+      completed: false,
+      current: false,
+      locked: false,
       isRequired: true,
-      order: 3,
+      order: 2,
       estimatedTime: 3
     },
     {
-      id: 'complete',
-      title: 'Finalisation',
-      description: 'Finaliser la configuration',
+      id: 'company',
+      name: 'company',
+      title: 'Profil Entreprise',
+      description: 'Informations sur votre entreprise',
+      completed: false,
+      current: false,
+      locked: false,
+      isRequired: true,
+      order: 3,
+      estimatedTime: 5
+    },
+    {
+      id: 'modules',
+      name: 'modules',
+      title: 'Sélection des Modules',
+      description: 'Choisissez les fonctionnalités à activer',
+      completed: false,
+      current: false,
+      locked: false,
       isRequired: true,
       order: 4,
+      estimatedTime: 4
+    },
+    {
+      id: 'complete',
+      name: 'complete',
+      title: 'Finalisation',
+      description: 'Finaliser la configuration',
+      completed: false,
+      current: false,
+      locked: false,
+      isRequired: true,
+      order: 5,
       estimatedTime: 2
     }
   ];

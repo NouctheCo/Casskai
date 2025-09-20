@@ -123,7 +123,7 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     price: 29,
     currency: 'EUR',
     interval: 'month',
-    stripePriceId: 'price_starter_monthly',
+    stripePriceId: import.meta.env.VITE_STRIPE_STARTER_MONTHLY_PRICE_ID || 'price_starter_monthly',
     stripeProductId: 'prod_starter',
     maxUsers: 2,
     maxClients: 100,
@@ -146,7 +146,7 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     price: 69,
     currency: 'EUR',
     interval: 'month',
-    stripePriceId: 'price_professional_monthly',
+    stripePriceId: import.meta.env.VITE_STRIPE_PRO_MONTHLY_PRICE_ID || 'price_professional_monthly',
     stripeProductId: 'prod_professional',
     maxUsers: 10,
     maxClients: 1000,
@@ -173,7 +173,7 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     price: 129,
     currency: 'EUR',
     interval: 'month',
-    stripePriceId: 'price_enterprise_monthly',
+    stripePriceId: import.meta.env.VITE_STRIPE_ENTERPRISE_MONTHLY_PRICE_ID || 'price_enterprise_monthly',
     stripeProductId: 'prod_enterprise',
     maxUsers: null, // unlimited
     maxClients: null, // unlimited
@@ -252,82 +252,62 @@ export interface PlanModules {
   modules: string[];
 }
 
+// Définition centralisée de tous les modules disponibles
+export const AVAILABLE_MODULES = [
+  // Core modules (toujours disponibles)
+  { key: 'dashboard', name: 'Tableau de bord', category: 'Core', required: true },
+  { key: 'settings', name: 'Paramètres', category: 'Core', required: true },
+  { key: 'users', name: 'Utilisateurs', category: 'Core', required: true },
+  { key: 'security', name: 'Sécurité', category: 'Core', required: true },
+
+  // Finance modules
+  { key: 'accounting', name: 'Comptabilité', category: 'Finance', required: false },
+  { key: 'invoicing', name: 'Facturation', category: 'Finance', required: false },
+  { key: 'banking', name: 'Banque', category: 'Finance', required: false },
+  { key: 'purchases', name: 'Achats', category: 'Finance', required: false },
+  { key: 'reports', name: 'Rapports', category: 'Finance', required: false },
+
+  // Operations modules
+  { key: 'salesCrm', name: 'CRM Ventes', category: 'Opérations', required: false },
+  { key: 'inventory', name: 'Stock & Inventaire', category: 'Opérations', required: false },
+  { key: 'projects', name: 'Projets', category: 'Opérations', required: false },
+  { key: 'thirdParties', name: 'Tiers', category: 'Opérations', required: false },
+
+  // Advanced modules
+  { key: 'humanResources', name: 'Ressources Humaines', category: 'Avancé', required: false },
+  { key: 'tax', name: 'Fiscalité', category: 'Avancé', required: false },
+  { key: 'forecasts', name: 'Prévisions', category: 'Avancé', required: false },
+  { key: 'contracts', name: 'Contrats', category: 'Avancé', required: false }
+];
+
 export const PLAN_MODULES: PlanModules[] = [
   {
     planId: 'starter',
     modules: [
-      'dashboard',
-      'accounting',
-      'invoicing',
-      'banking',
-      'reports',
-      'users',
-      'settings',
-      'security'
+      'dashboard', 'settings', 'users', 'security',
+      'accounting', 'invoicing', 'banking', 'reports'
     ]
   },
   {
     planId: 'professional',
     modules: [
-      'dashboard',
-      'accounting',
-      'invoicing',
-      'purchases',
-      'banking',
-      'salesCrm',
-      'inventory',
-      'reports',
-      'forecasts',
-      'thirdParties',
-      'contracts',
-      'users',
-      'settings',
-      'security'
+      'dashboard', 'settings', 'users', 'security',
+      'accounting', 'invoicing', 'banking', 'purchases', 'reports',
+      'salesCrm', 'inventory', 'projects', 'thirdParties'
     ]
   },
   {
     planId: 'enterprise',
     modules: [
-      'dashboard',
-      'accounting',
-      'invoicing',
-      'purchases',
-      'banking',
-      'salesCrm',
-      'humanResources',
-      'projects',
-      'inventory',
-      'reports',
-      'forecasts',
-      'thirdParties',
-      'tax',
-      'contracts',
-      'users',
-      'settings',
-      'security'
+      'dashboard', 'settings', 'users', 'security',
+      'accounting', 'invoicing', 'banking', 'purchases', 'reports',
+      'salesCrm', 'inventory', 'projects', 'thirdParties',
+      'humanResources', 'tax', 'forecasts', 'contracts'
     ]
   },
   {
     planId: 'trial', // Période d'essai - tous les modules
-    modules: [
-      'dashboard',
-      'accounting',
-      'invoicing',
-      'purchases',
-      'banking',
-      'salesCrm',
-      'humanResources',
-      'projects',
-      'inventory',
-      'reports',
-      'forecasts',
-      'thirdParties',
-      'tax',
-      'contracts',
-      'users',
-      'settings',
-      'security'
-    ]
+    modules: AVAILABLE_MODULES.map(m => m.key)
   }
 ];
 

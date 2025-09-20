@@ -32,10 +32,24 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { PageContainer } from '@/components/ui/PageContainer';
+import { PublicNavigation } from '@/components/navigation/PublicNavigation';
 
 const GDPRPage = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { toast } = useToast();
+
+  // Fonction de traduction robuste avec fallbacks multiples
+  const safeT = (key: string, fallbackFr: string, fallbackEn?: string, fallbackEs?: string) => {
+    try {
+      const currentLang = i18n?.language || 'fr';
+      if (currentLang.startsWith('en') && fallbackEn) return fallbackEn;
+      if (currentLang.startsWith('es') && fallbackEs) return fallbackEs;
+      return fallbackFr;
+    } catch (error) {
+      console.warn('Translation error:', error);
+      return fallbackFr;
+    }
+  };
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState<string[]>([]);
   const [requestForm, setRequestForm] = useState({
@@ -272,8 +286,10 @@ const GDPRPage = () => {
 
   return (
     <PageContainer variant="legal">
+      <PublicNavigation variant="legal" />
+
       {/* Header */}
-      <div className="bg-gradient-to-br from-blue-900 to-indigo-900 text-white py-16">
+      <div className="bg-gradient-to-br from-blue-900 to-indigo-900 text-white py-16 pt-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -282,14 +298,14 @@ const GDPRPage = () => {
           >
             <Shield className="w-16 h-16 mx-auto mb-6 text-blue-200" />
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Conformité RGPD
+              {safeT('gdpr.title', 'Conformité RGPD', 'GDPR Compliance', 'Cumplimiento RGPD')}
             </h1>
             <p className="text-xl text-blue-100 mb-4">
-              Vos droits en matière de protection des données personnelles
+              {safeT('gdpr.subtitle', 'Vos droits en matière de protection des données personnelles', 'Your rights regarding personal data protection', 'Sus derechos sobre la protección de datos personales')}
             </p>
             <Badge className="bg-blue-800/50 text-blue-200 border-blue-700">
               <Calendar className="w-4 h-4 mr-2" />
-              {t('gdpr.updated', { defaultValue: 'Mise à jour' })} : {lastUpdated}
+              {safeT('gdpr.updated', 'Mise à jour', 'Last updated', 'Última actualización')} : {lastUpdated}
             </Badge>
           </motion.div>
         </div>
@@ -301,34 +317,34 @@ const GDPRPage = () => {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Info className="w-6 h-6 mr-3 text-blue-600" />
-              {t('gdpr.whatIsGDPR', { defaultValue: 'Qu\'est-ce que le RGPD ?' })}
+              {safeT('gdpr.whatIsGDPR', 'Qu\'est-ce que le RGPD ?', 'What is GDPR?', '¿Qué es el RGPD?')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="mb-4">
-              {t('gdpr.description', { defaultValue: 'Le Règlement Général sur la Protection des Données (RGPD) est une réglementation européenne qui renforce et unifie la protection des données personnelles. Chez CassKai, nous nous engageons à respecter scrupuleusement vos droits.' })}
+              {safeT('gdpr.description', 'Le Règlement Général sur la Protection des Données (RGPD) est une réglementation européenne qui renforce et unifie la protection des données personnelles. Chez CassKai, nous nous engageons à respecter scrupuleusement vos droits.', 'The General Data Protection Regulation (GDPR) is European legislation that strengthens and unifies the protection of personal data. At CassKai, we are committed to scrupulously respecting your rights.', 'El Reglamento General de Protección de Datos (RGPD) es una regulación europea que refuerza y unifica la protección de datos personales. En CassKai, nos comprometemos a respetar escrupulosamente sus derechos.')}
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
               <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
                 <Shield className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                <h4 className="font-semibold text-sm mb-1">{t('gdpr.protectionTitle', { defaultValue: 'Protection renforcée' })}</h4>
+                <h4 className="font-semibold text-sm mb-1">{safeT('gdpr.protectionTitle', 'Protection renforcée', 'Enhanced protection', 'Protección reforzada')}</h4>
                 <p className="text-xs text-gray-600 dark:text-gray-300">
-                  {t('gdpr.protectionDesc', { defaultValue: 'Vos données sont protégées par des standards stricts' })}
+                  {safeT('gdpr.protectionDesc', 'Vos données sont protégées par des standards stricts', 'Your data is protected by strict standards', 'Sus datos están protegidos por estándares estrictos')}
                 </p>
               </div>
               <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
                 <UserCheck className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                <h4 className="font-semibold text-sm mb-1">{t('gdpr.rightsTitle', { defaultValue: 'Droits étendus' })}</h4>
+                <h4 className="font-semibold text-sm mb-1">{safeT('gdpr.rightsTitle', 'Droits étendus', 'Extended rights', 'Derechos extendidos')}</h4>
                 <p className="text-xs text-gray-600 dark:text-gray-300">
-                  {t('gdpr.rightsDesc', { defaultValue: '6 droits fondamentaux à votre disposition' })}
+                  {safeT('gdpr.rightsDesc', '6 droits fondamentaux à votre disposition', '6 fundamental rights at your disposal', '6 derechos fundamentales a su disposición')}
                 </p>
               </div>
               <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center">
                 <Globe className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-                <h4 className="font-semibold text-sm mb-1">{t('gdpr.europeTitle', { defaultValue: 'Norme européenne' })}</h4>
+                <h4 className="font-semibold text-sm mb-1">{safeT('gdpr.europeTitle', 'Norme européenne', 'European standard', 'Norma europea')}</h4>
                 <p className="text-xs text-gray-600 dark:text-gray-300">
-                  {t('gdpr.europeDesc', { defaultValue: 'Applicable dans toute l\'Union Européenne' })}
+                  {safeT('gdpr.europeDesc', 'Applicable dans toute l\'Union Européenne', 'Applicable throughout the European Union', 'Aplicable en toda la Unión Europea')}
                 </p>
               </div>
             </div>
@@ -340,12 +356,12 @@ const GDPRPage = () => {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Database className="w-6 h-6 mr-3 text-purple-600" />
-              {t('gdpr.dataWeProcess', { defaultValue: 'Données que nous traitons' })}
+              {safeT('gdpr.dataWeProcess', 'Données que nous traitons', 'Data we process', 'Datos que procesamos')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="mb-6">
-              {t('gdpr.dataDescription', { defaultValue: 'Voici un aperçu transparent des données personnelles que CassKai collecte et traite :' })}
+              {safeT('gdpr.dataDescription', 'Voici un aperçu transparent des données personnelles que CassKai collecte et traite :', 'Here is a transparent overview of the personal data that CassKai collects and processes:', 'Aquí tienes una visión transparente de los datos personales que CassKai recopila y procesa:')}
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -389,7 +405,7 @@ const GDPRPage = () => {
           <CardHeader>
             <CardTitle className="flex items-center">
               <UserCheck className="w-6 h-6 mr-3 text-green-600" />
-              Vos droits RGPD
+              {safeT('gdpr.yourRights', 'Vos droits RGPD', 'Your GDPR Rights', 'Sus derechos RGPD')}
             </CardTitle>
           </CardHeader>
           <CardContent>

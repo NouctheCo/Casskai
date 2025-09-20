@@ -18,6 +18,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PageContainer } from '@/components/ui/PageContainer';
+import { PublicNavigation } from '@/components/navigation/PublicNavigation';
 
 const TermsOfServicePage = () => {
   const { t } = useTranslation();
@@ -26,8 +27,10 @@ const TermsOfServicePage = () => {
 
   return (
     <PageContainer variant="legal">
+      <PublicNavigation variant="legal" />
+
       {/* Header */}
-      <div className="bg-gradient-to-br from-indigo-900 to-purple-900 text-white py-16">
+      <div className="bg-gradient-to-br from-indigo-900 to-purple-900 text-white py-16 pt-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

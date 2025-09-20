@@ -170,11 +170,11 @@ const ReportsPage: React.FC = () => {
     }
     
     if (filters.period_start) {
-      filtered = filtered.filter(r => r.period.start_date >= filters.period_start);
+      filtered = filtered.filter(r => r.period_start >= filters.period_start);
     }
     
     if (filters.period_end) {
-      filtered = filtered.filter(r => r.period.end_date <= filters.period_end);
+      filtered = filtered.filter(r => r.period_end <= filters.period_end);
     }
     
     setFilteredReports(filtered);
@@ -283,6 +283,22 @@ const ReportsPage: React.FC = () => {
     toast({
       title: 'Fonctionnalité à venir',
       description: 'L\'édition de rapport sera bientôt disponible'
+    });
+  };
+
+  const handleDeleteReport = (_reportId: string) => {
+    // TODO: Implement delete report functionality
+    toast({
+      title: 'Fonctionnalité à venir',
+      description: 'La suppression de rapport sera bientôt disponible'
+    });
+  };
+
+  const handleDownloadReport = (_reportId: string) => {
+    // TODO: Implement download report functionality
+    toast({
+      title: 'Fonctionnalité à venir',
+      description: 'Le téléchargement de rapport sera bientôt disponible'
     });
   };
 
@@ -470,6 +486,8 @@ const ReportsPage: React.FC = () => {
               onFiltersChange={setFilters}
               onViewReport={handleViewReport}
               onEditReport={handleEditReport}
+              onDeleteReport={handleDeleteReport}
+              onDownloadReport={handleDownloadReport}
             />
           </TabsContent>
 

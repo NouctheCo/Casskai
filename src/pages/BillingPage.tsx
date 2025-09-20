@@ -28,6 +28,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { SUBSCRIPTION_PLANS, formatPrice } from '@/types/subscription.types';
 import SubscriptionStatus from '@/components/subscription/SubscriptionStatus';
 import PricingCard from '@/components/subscription/PricingCard';
+import { TrialStatusCard, TrialActionsCard } from '@/components/TrialComponents';
+import { useTrial } from '@/hooks/trial.hooks';
 
 const BillingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -399,6 +401,12 @@ const BillingPage: React.FC = () => {
             Actualiser
           </Button>
         </div>
+      </div>
+
+      {/* Trial Status Section */}
+      <div className="space-y-6">
+        <TrialStatusCard />
+        <TrialActionsCard />
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

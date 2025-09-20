@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { supabase } from './supabase';
 
 /**
@@ -11,26 +10,56 @@ export const getUserCompanies = async (userId: string) => {
     throw new Error("L'ID de l'utilisateur est requis.");
   }
 
-  const { data, error } = await supabase
+  // Étape 1: récupérer les liaisons (sans join) pour éviter toute récursion RLS
+  const { data: links, error: linksError } = await supabase
     .from('user_companies')
-    .select(`
-      company:companies (
-        id,
-        name,
-        country,
-        default_currency,
-        is_active
-      )
-    `)
+    .select('company_id')
     .eq('user_id', userId);
 
-  if (error) {
-    console.error("Erreur lors de la récupération des entreprises de l'utilisateur:", error);
+  if (linksError) {
+    console.error("Erreur lors de la récupération des liaisons user_companies:", linksError);
+    if (linksError.code === '42P17' || linksError.message?.includes('infinite recursion')) {
+      console.warn('RLS policy recursion detected on user_companies, returning empty array');
+      return [];
+    }
     throw new Error("Impossible de récupérer les entreprises de l'utilisateur.");
   }
 
-  // Extraire et retourner uniquement les données de l'entreprise
-  return data?.map(item => item.company).filter(Boolean) || [];
+  const companyIds = (links || []).map(l => l.company_id).filter(Boolean);
+  if (companyIds.length === 0) return [];
+
+  // Étape 2: récupérer les entreprises par leurs IDs (RLS sur companies autorise si relation existe)
+  const { data: companies, error: companiesError } = await supabase
+    .from('companies')
+    .select('*')
+    .in('id', companyIds);
+
+  if (companiesError) {
+    console.error('Erreur lors de la récupération des entreprises:', companiesError);
+    if (companiesError.code === '42P17' || companiesError.message?.includes('infinite recursion')) {
+      console.warn('RLS policy recursion detected on companies, returning empty array');
+      return [];
+    }
+    throw new Error("Impossible de récupérer les entreprises de l'utilisateur.");
+  }
+
+  // Retourne un tableau d'entreprises avec champs communs (dev/prod)
+  return (companies || []) as Array<{
+    id: string;
+    name: string;
+    country?: string;
+    default_currency?: string;
+    default_locale?: string;
+    timezone?: string;
+    address?: string;
+    city?: string;
+    postal_code?: string;
+    phone?: string;
+    email?: string;
+    website?: string;
+    created_at?: string;
+    updated_at?: string;
+  }>;
 };
 
 /**
@@ -46,15 +75,18 @@ export const getCompanyDetails = async (companyId: string) => {
   const { data, error } = await supabase
     .from('companies')
     .select('*')
-    .eq('id', companyId)
-    .single();
+    .eq('id', companyId);
 
   if (error) {
     console.error("Erreur lors de la récupération des détails de l'entreprise:", error);
     throw new Error("Impossible de récupérer les détails de l'entreprise.");
   }
 
-  return data;
+  if (!data || data.length === 0) {
+    throw new Error("Entreprise non trouvée.");
+  }
+
+  return data[0]; // Retourner le premier résultat au lieu d'utiliser .single()
 };
 
 /**

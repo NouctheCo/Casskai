@@ -10,24 +10,60 @@ export interface OnboardingStep {
 }
 
 export interface CompanyProfile {
-  name: string;
-  legalName: string;
-  country: string;
-  currency: string;
-  timezone: string;
-  registrationNumber: string;
-  vatNumber: string;
-  street: string;
-  postalCode: string;
-  city: string;
-  phone: string;
-  email: string;
-  website: string;
-  shareCapital: string;
-  ceoName: string;
-  sector: string;
-  fiscalYearStart: number;
-  fiscalYearEnd: number;
+  // Propriétés directes pour compatibilité
+  name?: string;
+  legalName?: string;
+  country?: string;
+  currency?: string;
+  timezone?: string;
+  registrationNumber?: string;
+  vatNumber?: string;
+  street?: string;
+  postalCode?: string;
+  city?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  shareCapital?: string;
+  ceoName?: string;
+  sector?: string;
+  fiscalYearStart?: number;
+  fiscalYearEnd?: number;
+  accountingStandard?: string;
+  
+  // Structure imbriquée pour les données d'entreprise
+  generalInfo?: {
+    name?: string;
+    legalName?: string;
+    siret?: string;
+    vatNumber?: string;
+    shareCapital?: string;
+    ceoName?: string;
+  };
+  
+  contact?: {
+    address?: {
+      street?: string;
+      postalCode?: string;
+      city?: string;
+      country?: string;
+    };
+    phone?: string;
+    email?: string;
+    website?: string;
+  };
+  
+  business?: {
+    sector?: string;
+    currency?: string;
+    timezone?: string;
+  };
+  
+  accounting?: {
+    fiscalYearStart?: number;
+    fiscalYearEnd?: number;
+    accountingStandard?: string;
+  };
 }
 
 export interface OnboardingPreferences {
@@ -56,6 +92,7 @@ export interface FeatureExploration {
 export interface OnboardingData {
   userId: string;
   companyProfile: Partial<CompanyProfile>;
+  selectedModules: string[];
   preferences: Partial<OnboardingPreferences>;
   featuresExploration: FeatureExploration;
   currentStepId: string;
@@ -83,7 +120,7 @@ export interface OnboardingState {
   progress: number;
 }
 
-export type OnboardingStepId = 'welcome' | 'company' | 'preferences' | 'features' | 'complete';
+export type OnboardingStepId = 'welcome' | 'company' | 'modules' | 'preferences' | 'features' | 'complete';
 
 export interface StepValidationResult {
   isValid: boolean;
@@ -102,6 +139,7 @@ export interface OnboardingContextType {
   
   // Actions de données
   updateCompanyProfile: (profile: Partial<CompanyProfile>) => void;
+  updateSelectedModules: (modules: string[]) => void;
   updatePreferences: (preferences: Partial<OnboardingPreferences>) => void;
   updateFeatureExploration: (featureId: string, data: Partial<FeatureExploration[string]>) => void;
   

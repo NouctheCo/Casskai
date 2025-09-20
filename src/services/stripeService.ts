@@ -124,8 +124,8 @@ class RealStripeService {
   async createCheckoutSession(
     planId: string,
     userId: string,
-    successUrl: string,
-    cancelUrl: string
+    _successUrl: string,
+    _cancelUrl: string
   ): Promise<SubscriptionResponse> {
     try {
       // Récupérer le plan depuis Supabase
@@ -143,33 +143,25 @@ class RealStripeService {
         return { success: false, error: 'Prix Stripe non configuré pour ce plan' };
       }
 
-      // Créer la session de checkout
-      const response = await fetch(`${API_BASE_URL}/stripe/create-checkout-session`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          priceId: plan.stripe_price_id,
-          userId,
+      // Utiliser la fonction Edge Supabase au lieu du backend Express
+      const { data: sessionData, error: sessionError } = await supabase.functions.invoke('create-checkout-session', {
+        body: {
           planId,
-          successUrl,
-          cancelUrl,
-          metadata: {
-            user_id: userId,
-            plan_id: planId
-          }
-        })
+          userId
+        }
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (sessionError) {
+        console.error('Error creating checkout session:', sessionError);
+        return {
+          success: false,
+          error: 'Impossible de créer la session de paiement'
+        };
       }
 
-      const session = await response.json();
       return {
         success: true,
-        checkoutUrl: session.url
+        checkoutUrl: sessionData.sessionId ? `https://checkout.stripe.com/pay/${sessionData.sessionId}` : undefined
       };
     } catch (error) {
       console.error('Error creating checkout session:', error);
@@ -194,28 +186,32 @@ class RealStripeService {
         .eq('user_id', userId)
         .in('status', ['active', 'trialing'])
         .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+        .limit(1);
 
-      if (error || !subscription) {
+      if (error) {
+        console.error('Error fetching subscription:', error);
+        return { success: false, error: 'Erreur lors de la récupération de l\'abonnement' };
+      }
+
+      if (!subscription || subscription.length === 0) {
         return { success: true, subscription: undefined };
       }
 
       // Convertir en format UserSubscription
       const userSubscription: UserSubscription = {
-        id: subscription.id,
-        userId: subscription.user_id,
-        planId: subscription.plan_id,
-        stripeSubscriptionId: subscription.stripe_subscription_id || '',
-        stripeCustomerId: subscription.stripe_customer_id || '',
-        status: subscription.status as UserSubscription['status'],
-        currentPeriodStart: new Date(subscription.current_period_start),
-        currentPeriodEnd: new Date(subscription.current_period_end),
-        cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
-        trialEnd: subscription.trial_end ? new Date(subscription.trial_end) : undefined,
-        metadata: subscription.metadata || {},
-        createdAt: new Date(subscription.created_at),
-        updatedAt: new Date(subscription.updated_at)
+        id: subscription[0].id,
+        userId: subscription[0].user_id,
+        planId: subscription[0].plan_id,
+        stripeSubscriptionId: subscription[0].stripe_subscription_id || '',
+        stripeCustomerId: subscription[0].stripe_customer_id || '',
+        status: subscription[0].status as UserSubscription['status'],
+        currentPeriodStart: new Date(subscription[0].current_period_start),
+        currentPeriodEnd: new Date(subscription[0].current_period_end),
+        cancelAtPeriodEnd: subscription[0].cancel_at_period_end || false,
+        trialEnd: subscription[0].trial_end ? new Date(subscription[0].trial_end) : undefined,
+        metadata: subscription[0].metadata || {},
+        createdAt: new Date(subscription[0].created_at),
+        updatedAt: new Date(subscription[0].updated_at)
       };
 
       return { success: true, subscription: userSubscription };
@@ -233,39 +229,25 @@ class RealStripeService {
    */
   async cancelSubscription(stripeSubscriptionId: string): Promise<SubscriptionResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/stripe/cancel-subscription`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // Utiliser la fonction Edge Supabase
+      const { data: _data, error } = await supabase.functions.invoke('cancel-subscription', {
+        body: {
           subscriptionId: stripeSubscriptionId,
           cancelAtPeriodEnd: true
-        })
+        }
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      
-      // Mettre à jour dans Supabase
-      const { error: updateError } = await supabase
-        .from('user_subscriptions')
-        .update({
-          cancel_at_period_end: true,
-          updated_at: new Date().toISOString()
-        })
-        .eq('stripe_subscription_id', stripeSubscriptionId);
-
-      if (updateError) {
-        console.error('Error updating subscription in Supabase:', updateError);
+      if (error) {
+        console.error('Error canceling subscription:', error);
+        return {
+          success: false,
+          error: 'Impossible d\'annuler l\'abonnement'
+        };
       }
 
       return { success: true };
     } catch (error) {
-      console.error('Error canceling subscription:', error);
+      console.error('Error in cancelSubscription:', error);
       return {
         success: false,
         error: 'Impossible d\'annuler l\'abonnement'
@@ -562,7 +544,7 @@ class RealStripeService {
   /**
    * Redirige vers la checkout Stripe
    */
-  async redirectToCheckout(sessionId: string): Promise<{ error?: any }> {
+  async redirectToCheckout(sessionId: string): Promise<{ error?: unknown }> {
     try {
       const stripe = await this.getStripe();
       if (!stripe) {

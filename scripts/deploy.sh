@@ -11,7 +11,7 @@ echo ""
 # Configuration
 VPS_IP="89.116.111.88"
 VPS_USER="root"
-FRONTEND_PATH="/var/www/casskai.app/public"
+FRONTEND_PATH="/var/www/casskai.app"
 BACKEND_PATH="/var/www/casskai.app/api"
 
 # Vérifications pré-déploiement

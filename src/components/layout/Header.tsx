@@ -42,8 +42,12 @@ export function Header({
   return (
     <motion.header 
       className={cn(
-        "main-header bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 fixed top-0 z-50 shadow-sm transition-[left] duration-300 ease-in-out",
-        isMobile ? "left-0 right-0 w-full" : (isDesktopSidebarCollapsed ? "left-16 right-0 w-auto" : "left-64 right-0 w-auto")
+        "main-header bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 fixed top-0 z-40 shadow-sm transition-all duration-300 ease-in-out",
+        isMobile 
+          ? "left-0 right-0 w-full" 
+          : isDesktopSidebarCollapsed 
+            ? "left-16 right-0" 
+            : "left-64 right-0"
       )}
       initial={{ y: -100 }}
       animate={{ y: 0 }}

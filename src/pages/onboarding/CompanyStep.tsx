@@ -17,8 +17,32 @@ import {
   ArrowLeft,
   AlertCircle
 } from 'lucide-react';
-import { useOnboarding } from '@/contexts/OnboardingContext';
+import { useOnboarding } from '@/hooks/useOnboarding';
 import { useTranslation } from 'react-i18next';
+
+type CompanyFormData = {
+  name?: string;
+  legalName?: string;
+  country?: string;
+  currency?: string;
+  timezone?: string;
+  registrationNumber?: string;
+  vatNumber?: string;
+  street?: string;
+  postalCode?: string;
+  city?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  shareCapital?: string;
+  ceoName?: string;
+  sector?: string;
+  fiscalYearStart?: number;
+  fiscalYearEnd?: number;
+  siret?: string;
+  address?: string;
+  ceoTitle?: string;
+};
 
 const sectors = [
   { code: 'services', name: 'Services aux entreprises', icon: '💼' },
@@ -38,7 +62,7 @@ const sectors = [
 
 // Composant pour les informations générales
 const GeneralInfoSection: React.FC<{
-  companyData: Record<string, string | undefined>;
+  companyData: CompanyFormData;
   updateField: (field: string, value: string) => void;
   errors: Record<string, string>;
 }> = ({ companyData, updateField, errors }) => (
@@ -63,7 +87,7 @@ const GeneralInfoSection: React.FC<{
         <Input
           id="company-name"
           name="company-name"
-          value={companyData.name}
+          value={companyData.name ?? ''}
           onChange={(e) => updateField('name', e.target.value)}
           placeholder="Ex: Mon Entreprise SAS"
           autoComplete="organization"
@@ -81,7 +105,7 @@ const GeneralInfoSection: React.FC<{
         <Label htmlFor="sector">
           Secteur d'activité <span className="text-red-500">*</span>
         </Label>
-        <Select value={companyData.sector} onValueChange={(value) => updateField('sector', value)}>
+  <Select value={companyData.sector ?? ''} onValueChange={(value) => updateField('sector', value)}>
           <SelectTrigger id="sector" name="sector" className={errors.sector ? 'border-red-500' : ''}>
             <SelectValue placeholder="Sélectionnez votre secteur" />
           </SelectTrigger>
@@ -111,7 +135,7 @@ const GeneralInfoSection: React.FC<{
         <Input
           id="siret"
           name="siret"
-          value={companyData.siret}
+          value={companyData.siret ?? ''}
           onChange={(e) => updateField('siret', e.target.value)}
           placeholder="Ex: 12345678901234"
           autoComplete="off"
@@ -123,7 +147,7 @@ const GeneralInfoSection: React.FC<{
         <Input
           id="vat-number"
           name="vat-number"
-          value={companyData.vatNumber}
+          value={companyData.vatNumber ?? ''}
           onChange={(e) => updateField('vatNumber', e.target.value)}
           placeholder="Ex: FR12345678901"
           autoComplete="off"
@@ -135,7 +159,7 @@ const GeneralInfoSection: React.FC<{
 
 // Composant pour les coordonnées
 const AddressSection: React.FC<{
-  companyData: any;
+  companyData: CompanyFormData;
   updateField: (field: string, value: string) => void;
   errors: Record<string, string>;
 }> = ({ companyData, updateField, errors }) => (
@@ -158,7 +182,7 @@ const AddressSection: React.FC<{
         <Textarea
           id="address"
           name="address"
-          value={companyData.address}
+          value={companyData.address ?? ''}
           onChange={(e) => updateField('address', e.target.value)}
           placeholder="Ex: 123 Rue de la Paix"
           autoComplete="address-line1"
@@ -172,7 +196,7 @@ const AddressSection: React.FC<{
           <Input
             id="city"
             name="city"
-            value={companyData.city}
+            value={companyData.city ?? ''}
             onChange={(e) => updateField('city', e.target.value)}
             placeholder="Ex: Paris"
             autoComplete="address-level2"
@@ -184,7 +208,7 @@ const AddressSection: React.FC<{
           <Input
             id="postal-code"
             name="postal-code"
-            value={companyData.postalCode}
+            value={companyData.postalCode ?? ''}
             onChange={(e) => updateField('postalCode', e.target.value)}
             placeholder="Ex: 75001"
             autoComplete="postal-code"
@@ -195,7 +219,7 @@ const AddressSection: React.FC<{
           <Label htmlFor="country">
             Pays <span className="text-red-500">*</span>
           </Label>
-          <Select value={companyData.country} onValueChange={(value) => updateField('country', value)}>
+          <Select value={companyData.country ?? ''} onValueChange={(value) => updateField('country', value)}>
             <SelectTrigger id="country" name="country" className={errors.country ? 'border-red-500' : ''}>
               <SelectValue placeholder="Sélectionnez un pays" />
             </SelectTrigger>
@@ -224,7 +248,7 @@ const AddressSection: React.FC<{
 
 // Composant pour les informations de contact
 const ContactSection: React.FC<{
-  companyData: any;
+  companyData: CompanyFormData;
   updateField: (field: string, value: string) => void;
   errors: Record<string, string>;
 }> = ({ companyData, updateField, errors }) => (
@@ -252,7 +276,7 @@ const ContactSection: React.FC<{
             id="email"
             name="email"
             type="email"
-            value={companyData.email}
+            value={companyData.email ?? ''}
             onChange={(e) => updateField('email', e.target.value)}
             placeholder="contact@monentreprise.com"
             autoComplete="email"
@@ -275,7 +299,7 @@ const ContactSection: React.FC<{
             id="phone"
             name="phone"
             type="tel"
-            value={companyData.phone}
+            value={companyData.phone ?? ''}
             onChange={(e) => updateField('phone', e.target.value)}
             placeholder="+33 1 23 45 67 89"
             autoComplete="tel"
@@ -293,7 +317,7 @@ const ContactSection: React.FC<{
           id="website"
           name="website"
           type="url"
-          value={companyData.website}
+          value={companyData.website ?? ''}
           onChange={(e) => updateField('website', e.target.value)}
           placeholder="https://www.monentreprise.com"
           autoComplete="url"
@@ -306,7 +330,7 @@ const ContactSection: React.FC<{
 
 // Composant pour les informations du dirigeant
 const CeoSection: React.FC<{
-  companyData: any;
+  companyData: CompanyFormData;
   updateField: (field: string, value: string) => void;
 }> = ({ companyData, updateField }) => (
   <motion.div
@@ -328,7 +352,7 @@ const CeoSection: React.FC<{
         <Input
           id="ceo-name"
           name="ceo-name"
-          value={companyData.ceoName}
+          value={companyData.ceoName ?? ''}
           onChange={(e) => updateField('ceoName', e.target.value)}
           placeholder="Ex: Jean Dupont"
           autoComplete="name"
@@ -337,7 +361,7 @@ const CeoSection: React.FC<{
       
       <div className="space-y-2">
         <Label htmlFor="ceo-title">Fonction</Label>
-        <Select value={companyData.ceoTitle} onValueChange={(value) => updateField('ceoTitle', value)}>
+  <Select value={companyData.ceoTitle ?? ''} onValueChange={(value) => updateField('ceoTitle', value)}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
@@ -355,7 +379,7 @@ const CeoSection: React.FC<{
 );
 
 // Fonctions utilitaires pour la validation et gestion des erreurs
-const validateCompanyForm = (companyData: Record<string, any>): Record<string, string> => {
+const validateCompanyForm = (companyData: CompanyFormData): Record<string, string> => {
   const errors: Record<string, string> = {};
 
   // Sanitiser le nom de l'entreprise (remplacer & par et)
@@ -432,39 +456,36 @@ const renderNavigation = (prevStep: () => void, handleNext: () => void) => (
       onClick={handleNext}
       className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white flex items-center space-x-2"
     >
-      <span>Finaliser</span>
+      <span>Continuer</span>
       <ArrowRight className="w-4 h-4" />
     </Button>
   </div>
 );
 
 export default function CompanyStep() {
-  const { nextStep, prevStep, companyData, setCompanyData } = useOnboarding();
+  const { goToNextStep, goToPreviousStep, state, updateCompanyProfile } = useOnboarding();
   const { t } = useTranslation();
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const updateField = (field: string, value: string) => {
-    setCompanyData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-    
+    updateCompanyProfile({ [field]: value });
     clearFieldError(field, errors, setErrors);
   };
 
   const handleNext = () => {
     // Sanitiser le nom de l'entreprise avant validation
+    const currentCompanyData = state.data?.companyProfile || {};
     const sanitizedCompanyData = {
-      ...companyData,
-      name: companyData.name?.trim().replace(/&/g, 'et') || ''
+      ...currentCompanyData,
+      name: currentCompanyData.name?.trim().replace(/&/g, 'et') || ''
     };
 
     const newErrors = validateCompanyForm(sanitizedCompanyData);
     setErrors(newErrors);
     if (Object.keys(newErrors).length === 0) {
       // Mettre à jour les données avec le nom sanitizé
-      setCompanyData(sanitizedCompanyData);
-      nextStep();
+      updateCompanyProfile(sanitizedCompanyData);
+      goToNextStep();
     }
   };
 
@@ -481,29 +502,29 @@ export default function CompanyStep() {
 
         <CardContent className="p-6 space-y-6">
           <GeneralInfoSection 
-            companyData={companyData as unknown as Record<string, string | undefined>} 
+            companyData={state.data?.companyProfile || {}} 
             updateField={updateField} 
             errors={errors} 
           />
           
           <AddressSection 
-            companyData={companyData as unknown as Record<string, string | undefined>} 
+            companyData={state.data?.companyProfile || {}} 
             updateField={updateField} 
             errors={errors} 
           />
           
           <ContactSection 
-            companyData={companyData as unknown as Record<string, string | undefined>} 
+            companyData={state.data?.companyProfile || {}} 
             updateField={updateField} 
             errors={errors} 
           />
           
           <CeoSection 
-            companyData={companyData as unknown as Record<string, string | undefined>} 
+            companyData={state.data?.companyProfile || {}} 
             updateField={updateField} 
           />
 
-          {renderNavigation(prevStep, handleNext)}
+          {renderNavigation(goToPreviousStep, handleNext)}
         </CardContent>
       </Card>
     </motion.div>

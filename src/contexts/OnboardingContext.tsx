@@ -1,250 +1,445 @@
-import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
-import { ALL_MODULES } from '@/contexts/ModulesContext';
+import React, { createContext, useState, useCallback, useMemo, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  OnboardingContextType,
+  OnboardingState,
+  OnboardingStepId,
+  CompanyProfile,
+  OnboardingPreferences,
+  OnboardingData,
+  StepValidationResult
+} from '../types/onboarding.types';
+import { OnboardingProgressService } from '../services/onboarding/OnboardingProgressService';
+import { OnboardingStorageService } from '../services/onboarding/OnboardingStorageService';
 
-// LocalStorage keys
-const ONBOARDING_STEP_KEY = 'onboarding_current_step';
-const ONBOARDING_COMPANY_DATA_KEY = 'onboarding_company_data';
-const ONBOARDING_MODULES_KEY = 'onboarding_modules';
+export const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
 
-// Types
-interface CompanyData {
-  name: string;
-  country: string;
-  currency: string;
-  sector: string;
-  accountingStandard: string;
-  siret: string;
-  vatNumber: string;
-  address: string;
-  city: string;
-  postalCode: string;
-  phone: string;
-  email: string;
-  website: string;
-  fiscalYearStartMonth: number;
-  fiscalYearEndMonth: number;
-  shareCapital: string;
-  ceoName: string;
-  ceoTitle: string;
-}
-
-interface ModulesState {
-  [key: string]: boolean;
-}
-
-interface OnboardingContextType {
-  currentStep: number;
-  companyData: CompanyData;
-  setCompanyData: React.Dispatch<React.SetStateAction<CompanyData>>;
-  nextStep: () => void;
-  prevStep: () => void;
-  goToStep: (step: number) => void;
-  modules: ModulesState;
-  setModules: React.Dispatch<React.SetStateAction<ModulesState>>;
-  clearOnboardingData: () => void;
-  completeOnboarding: (companyData: CompanyData, modules: ModulesState) => Promise<{ success: boolean; trialCreated?: boolean; error?: string }>;
-}
-
-const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
-
-const defaultCompanyData: CompanyData = {
-  name: '',
-  country: 'FR',
-  currency: 'EUR',
-  sector: '',
-  accountingStandard: 'PCG',
-  siret: '',
-  vatNumber: '',
-  address: '',
-  city: '',
-  postalCode: '',
-  phone: '',
-  email: '',
-  website: '',
-  fiscalYearStartMonth: 1,
-  fiscalYearEndMonth: 12,
-  shareCapital: '',
-  ceoName: '',
-  ceoTitle: 'Gérant',
+const initialState: OnboardingState = {
+  isLoading: false,
+  isInitialized: false,
+  isCompleted: false,
+  currentStep: null,
+  steps: [],
+  data: null,
+  errors: [],
+  progress: 0
 };
 
-const getInitialModules = (): ModulesState => {
-  try {
-    return ALL_MODULES.reduce((acc, mod) => {
-      if (!mod.isGlobal) {
-        acc[mod.key] = false;
-      }
-      return acc;
-    }, {} as ModulesState);
-  } catch (error) {
-    console.error('Error initializing modules in onboarding context:', error);
-    // Fallback avec modules de base
-    return {
-      accounting: false,
-      invoicing: false,
-      banking: false,
-      reports: false,
-    };
-  }
+const initialData: OnboardingData = {
+  userId: '',
+  companyProfile: {},
+  selectedModules: [],
+  preferences: {},
+  featuresExploration: {},
+  currentStepId: 'welcome',
+  completedSteps: [],
+  startedAt: new Date().toISOString(),
+  lastSavedAt: new Date().toISOString(),
+  progress: 0
 };
 
 export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
-  
-  // Load initial state from localStorage or use defaults
-  const [currentStep, setCurrentStep] = useState<number>(() => {
-    const savedStep = localStorage.getItem(ONBOARDING_STEP_KEY);
-    return savedStep ? JSON.parse(savedStep) : 1;
-  });
+  const [state, setState] = useState<OnboardingState>(initialState);
+  const progressService = useMemo(() => new OnboardingProgressService(), []);
+  const storageService = useMemo(() => new OnboardingStorageService(), []);
 
-  const [companyData, setCompanyData] = useState<CompanyData>(() => {
-    const savedData = localStorage.getItem(ONBOARDING_COMPANY_DATA_KEY);
-    return savedData ? JSON.parse(savedData) : defaultCompanyData;
-  });
-
-  const [modules, setModules] = useState<ModulesState>(() => {
-    try {
-      const savedModules = localStorage.getItem(ONBOARDING_MODULES_KEY);
-      return savedModules ? JSON.parse(savedModules) : getInitialModules();
-    } catch (error) {
-      console.error('Error loading modules from localStorage:', error);
-      return getInitialModules();
-    }
-  });
-
-  // Persist state to localStorage on change with error handling
+  // Initialize onboarding
   useEffect(() => {
-    try {
-      localStorage.setItem(ONBOARDING_STEP_KEY, JSON.stringify(currentStep));
-    } catch (error) {
-      console.error('Error saving onboarding step to localStorage:', error);
+    if (user?.id && !state.isInitialized) {
+      initializeOnboarding();
     }
-  }, [currentStep]);
+  }, [user?.id, state.isInitialized]);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(ONBOARDING_COMPANY_DATA_KEY, JSON.stringify(companyData));
-    } catch (error) {
-      console.error('Error saving company data to localStorage:', error);
-    }
-  }, [companyData]);
+  const initializeOnboarding = useCallback(async () => {
+    if (!user?.id) return;
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(ONBOARDING_MODULES_KEY, JSON.stringify(modules));
-    } catch (error) {
-      console.error('Error saving modules to localStorage:', error);
-    }
-  }, [modules]);
-
-  // Navigation functions
-  const nextStep = useCallback(() => {
-    setCurrentStep(prev => {
-      const newStep = Math.min(prev + 1, 5);
-      return newStep;
-    });
-  }, []);
-
-  const prevStep = useCallback(() => {
-    setCurrentStep(prev => {
-      const newStep = Math.max(prev - 1, 1);
-      return newStep;
-    });
-  }, []);
-
-  const goToStep = useCallback((step: number) => {
-    const newStep = Math.max(1, Math.min(step, 5));
-    setCurrentStep(newStep);
-  }, []);
-
-  // Cleanup function
-  const clearOnboardingData = useCallback(() => {
-    try {
-      localStorage.removeItem(ONBOARDING_STEP_KEY);
-      localStorage.removeItem(ONBOARDING_COMPANY_DATA_KEY);
-      localStorage.removeItem(ONBOARDING_MODULES_KEY);
-      // Reset state to defaults
-      setCurrentStep(1);
-      setCompanyData(defaultCompanyData);
-      setModules(getInitialModules());
-      console.warn('🧹 Onboarding data cleared successfully');
-    } catch (error) {
-      console.error('Error clearing onboarding data:', error);
-    }
-  }, []);
-
-  // Complete onboarding function
-  const completeOnboarding = useCallback(async (companyData: CompanyData, modules: ModulesState) => {
-    if (!user?.id) {
-      throw new Error('User not authenticated');
-    }
+    setState(prev => ({ ...prev, isLoading: true }));
 
     try {
-      // Prepare the modules payload with both key and name
-      const enabledModules = Object.keys(modules)
-        .filter(key => modules[key])
-        .map(key => {
-          const moduleInfo = ALL_MODULES.find(m => m.key === key);
-          return { key: key, name: moduleInfo?.name || key };
-        });
+      // Load existing data
+      const response = await storageService.getOnboardingData(user.id);
+      const savedData = response.success ? response.data : null;
+      const data = savedData || { ...initialData, userId: user.id };
 
-      const { data: newCompany, error } = await supabase.rpc('complete_onboarding', {
-        p_user_id: user.id,
-        p_company_name: companyData.name,
-        p_company_data: companyData,
-        p_modules: enabledModules
+      // Initialize steps
+      const steps = progressService.getStepsWithStatus(data);
+
+      setState({
+        isLoading: false,
+        isInitialized: true,
+        isCompleted: data.completedAt !== undefined,
+        currentStep: steps.find(s => s.id === data.currentStepId) || null,
+        steps,
+        data,
+        errors: [],
+        progress: data.progress
       });
+    } catch (error) {
+      console.error('Failed to initialize onboarding:', error);
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        errors: [{ field: 'initialization', message: 'Failed to load onboarding data', code: 'INIT_ERROR' }]
+      }));
+    }
+  }, [user?.id, progressService, storageService]);
 
-      if (error) {
-        console.error('Error calling complete_onboarding function:', error);
-        throw new Error(`Failed to complete onboarding: ${error.message}`);
+  // Navigation methods
+  const goToStep = useCallback((stepId: OnboardingStepId) => {
+    setState(prev => {
+      const step = prev.steps.find(s => s.id === stepId);
+      if (!step || !prev.data) return prev;
+
+      const updatedData = {
+        ...prev.data,
+        currentStepId: stepId,
+        lastSavedAt: new Date().toISOString()
+      };
+
+      // Save asynchronously without blocking
+      if (user?.id) {
+        storageService.saveOnboardingData(user.id, updatedData);
       }
 
-      // 4. Store company ID in localStorage for immediate use
-      localStorage.setItem('casskai_current_company_id', newCompany.id);
-
-      // Set a flag for AuthContext to read on reload, preventing flicker
-      localStorage.setItem('onboarding_just_completed', 'true');
-
-      console.log('✅ Onboarding completed successfully for company:', newCompany.name);
-      
-      return { 
-        success: true, 
-        trialCreated: true // Assuming trial is created by default
+      return {
+        ...prev,
+        currentStep: step,
+        data: updatedData
       };
+    });
+  }, [storageService, user?.id]);
 
-    } catch (error) {
-      console.error('Error completing onboarding:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error occurred' 
-      };
+  const goToNextStep = useCallback(() => {
+    if (!state.currentStep || !state.data) return;
+
+    const nextStepId = progressService.getNextStep(state.currentStep.id as OnboardingStepId);
+    if (nextStepId) {
+      goToStep(nextStepId);
     }
-  }, [user]);
+  }, [state.currentStep, state.data, progressService, goToStep]);
 
-  const contextValue = useMemo(() => ({
-    currentStep,
-    companyData,
-    setCompanyData,
-    nextStep,
-    prevStep,
+  const goToPreviousStep = useCallback(() => {
+    if (!state.currentStep || !state.data) return;
+
+    const prevStepId = progressService.getPreviousStep(state.currentStep.id as OnboardingStepId);
+    if (prevStepId) {
+      goToStep(prevStepId);
+    }
+  }, [state.currentStep, state.data, progressService, goToStep]);
+
+  // Data update methods
+  const updateCompanyProfile = useCallback((profile: Partial<CompanyProfile>) => {
+    setState(prev => {
+      if (!prev.data) return prev;
+
+      const updatedData = {
+        ...prev.data,
+        companyProfile: { ...prev.data.companyProfile, ...profile },
+        lastSavedAt: new Date().toISOString()
+      };
+
+      // Save asynchronously without blocking
+      if (user?.id) {
+        storageService.saveOnboardingData(user.id, updatedData);
+      }
+
+      return {
+        ...prev,
+        data: updatedData
+      };
+    });
+  }, [storageService, user?.id]);
+
+  const updateSelectedModules = useCallback((modules: string[]) => {
+    setState(prev => {
+      if (!prev.data) return prev;
+
+      const updatedData = {
+        ...prev.data,
+        selectedModules: modules,
+        lastSavedAt: new Date().toISOString()
+      };
+
+      // Save asynchronously without blocking
+      if (user?.id) {
+        storageService.saveOnboardingData(user.id, updatedData);
+      }
+
+      return {
+        ...prev,
+        data: updatedData
+      };
+    });
+  }, [storageService, user?.id]);
+
+  const updatePreferences = useCallback((preferences: Partial<OnboardingPreferences>) => {
+    setState(prev => {
+      if (!prev.data) return prev;
+
+      const updatedData = {
+        ...prev.data,
+        preferences: { ...prev.data.preferences, ...preferences },
+        lastSavedAt: new Date().toISOString()
+      };
+
+      // Save asynchronously without blocking
+      if (user?.id) {
+        storageService.saveOnboardingData(user.id, updatedData);
+      }
+
+      return {
+        ...prev,
+        data: updatedData
+      };
+    });
+  }, [storageService, user?.id]);
+
+  const updateFeatureExploration = useCallback((featureId: string, data: Record<string, unknown>) => {
+    setState(prev => {
+      if (!prev.data) return prev;
+
+      const updatedData = {
+        ...prev.data,
+        featuresExploration: {
+          ...prev.data.featuresExploration,
+          [featureId]: { ...prev.data.featuresExploration[featureId], ...data }
+        },
+        lastSavedAt: new Date().toISOString()
+      };
+
+      // Save asynchronously without blocking
+      if (user?.id) {
+        storageService.saveOnboardingData(user.id, updatedData);
+      }
+
+      return {
+        ...prev,
+        data: updatedData
+      };
+    });
+  }, [storageService, user?.id]);
+
+  // Validation methods
+  const validateCurrentStep = useCallback(async (): Promise<StepValidationResult> => {
+    if (!state.currentStep) {
+      return { isValid: false, errors: [{ field: 'step', message: 'No current step', code: 'NO_STEP' }] };
+    }
+
+    // Basic validation - can be extended based on step requirements
+    const stepId = state.currentStep.id as OnboardingStepId;
+    const data = state.data;
+
+    if (!data) {
+      return { isValid: false, errors: [{ field: 'data', message: 'No onboarding data', code: 'NO_DATA' }] };
+    }
+
+    // Validate based on step
+    switch (stepId) {
+      case 'company':
+        if (!data.companyProfile.name || !data.companyProfile.country) {
+          return {
+            isValid: false,
+            errors: [{ field: 'company', message: 'Company name and country are required', code: 'COMPANY_REQUIRED' }]
+          };
+        }
+        break;
+      case 'modules':
+        if (!data.selectedModules || data.selectedModules.length === 0) {
+          return {
+            isValid: false,
+            errors: [{ field: 'modules', message: 'At least one module must be selected', code: 'MODULES_REQUIRED' }]
+          };
+        }
+        break;
+    }
+
+    return { isValid: true, errors: [] };
+  }, [state.currentStep, state.data]);
+
+  // Completion methods
+  const completeCurrentStep = useCallback(async () => {
+    if (!state.currentStep || !state.data) return;
+
+    const stepId = state.currentStep.id as OnboardingStepId;
+    const updatedData = {
+      ...state.data,
+      completedSteps: [...state.data.completedSteps.filter(s => s !== stepId), stepId],
+      progress: progressService.calculateProgress([...state.data.completedSteps.filter(s => s !== stepId), stepId]),
+      lastSavedAt: new Date().toISOString()
+    };
+
+    // Save asynchronously
+    if (user?.id) {
+      await storageService.saveOnboardingData(user.id, updatedData);
+    }
+
+    setState(prev => ({
+      ...prev,
+      data: updatedData,
+      steps: prev.steps.map(s => s.id === stepId ? { ...s, completed: true } : s)
+    }));
+  }, [state.currentStep, state.data, progressService, storageService, user?.id]);
+
+  // Finalization
+  const finalizeOnboarding = useCallback(async (): Promise<{ success: boolean; error?: string }> => {
+    if (!state.data || !user?.id) return { success: false, error: 'No onboarding data or user' };
+
+    try {
+      // Create company in database
+      const { data: company, error } = await supabase
+        .from('companies')
+        .insert({
+          name: state.data.companyProfile.name,
+          country: state.data.companyProfile.country,
+          default_currency: state.data.companyProfile.currency,
+          siret: state.data.companyProfile.registrationNumber,
+          vat_number: state.data.companyProfile.vatNumber,
+          address: state.data.companyProfile.street,
+          city: state.data.companyProfile.city,
+          postal_code: state.data.companyProfile.postalCode,
+          phone: state.data.companyProfile.phone,
+          email: state.data.companyProfile.email,
+          website: state.data.companyProfile.website,
+          fiscal_year_start: state.data.companyProfile.fiscalYearStart,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Create user-company relationship
+      await supabase
+        .from('user_companies')
+        .insert({
+          user_id: user.id,
+          company_id: company.id,
+          role: 'admin',
+          is_active: true
+        });
+
+      // Create company modules
+      if (state.data.selectedModules.length > 0) {
+        const modulesToInsert = state.data.selectedModules.map(moduleId => ({
+          company_id: company.id,
+          module_key: moduleId,
+          is_enabled: true
+        }));
+
+        await supabase
+          .from('company_modules')
+          .insert(modulesToInsert);
+      }
+
+      // Mark onboarding as completed
+      const completedData = {
+        ...state.data,
+        completedAt: new Date().toISOString(),
+        progress: 100
+      };
+
+      await storageService.saveOnboardingData(user.id, completedData);
+
+      setState(prev => ({
+        ...prev,
+        isCompleted: true,
+        data: completedData
+      }));
+
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to finalize onboarding:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }, [state.data, user?.id, storageService]);
+
+  const contextValue: OnboardingContextType = {
+    state,
     goToStep,
-    modules,
-    setModules,
-    clearOnboardingData,
-    completeOnboarding,
-  }), [
-    currentStep,
-    companyData,
-    modules,
-    nextStep,
-    prevStep,
-    goToStep,
-    clearOnboardingData,
-    completeOnboarding,
-  ]);
+    goToNextStep,
+    goToPreviousStep,
+    canGoToStep: (stepId) => {
+      // Simple logic: can go to any step for now
+      return state.steps.some(s => s.id === stepId);
+    },
+    updateCompanyProfile,
+    updateSelectedModules,
+    updatePreferences,
+    updateFeatureExploration,
+    validateCurrentStep,
+    validateStep: (stepId) => {
+      // Basic validation logic
+      const data = state.data;
+      if (!data) return Promise.resolve({ isValid: false, errors: [] });
+
+      switch (stepId) {
+        case 'company':
+          return Promise.resolve({
+            isValid: !!(data.companyProfile.name && data.companyProfile.country),
+            errors: []
+          });
+        case 'modules':
+          return Promise.resolve({
+            isValid: !!(data.selectedModules && data.selectedModules.length > 0),
+            errors: []
+          });
+        default:
+          return Promise.resolve({ isValid: true, errors: [] });
+      }
+    },
+    completeCurrentStep,
+    completeStep: async (stepId) => {
+      const updatedData = state.data ? {
+        ...state.data,
+        completedSteps: [...state.data.completedSteps.filter(s => s !== stepId), stepId]
+      } : null;
+
+      if (updatedData && user?.id) {
+        await storageService.saveOnboardingData(user.id, updatedData);
+        setState(prev => ({ ...prev, data: updatedData }));
+      }
+    },
+    resetStep: (stepId) => {
+      setState(prev => ({
+        ...prev,
+        data: prev.data ? {
+          ...prev.data,
+          completedSteps: prev.data.completedSteps.filter(s => s !== stepId)
+        } : null
+      }));
+    },
+    saveProgress: async () => {
+      if (state.data && user?.id) {
+        await storageService.saveOnboardingData(user.id, state.data);
+      }
+    },
+    loadProgress: initializeOnboarding,
+    clearProgress: () => {
+      if (user?.id) {
+        storageService.clearOnboardingData(user.id);
+      }
+      setState(initialState);
+    },
+    finalizeOnboarding,
+    skipOnboarding: async () => {
+      // Implementation for skipping onboarding
+      return Promise.resolve();
+    },
+    getStepByIndex: (index) => state.steps[index] || null,
+    getStepById: (stepId) => state.steps.find(s => s.id === stepId) || null,
+    getCurrentStepIndex: () => state.steps.findIndex(s => s.id === state.currentStep?.id),
+    getTotalSteps: () => state.steps.length,
+    getCompletedStepsCount: () => state.data?.completedSteps.length || 0,
+    clearErrors: () => setState(prev => ({ ...prev, errors: [] })),
+    addError: (error) => setState(prev => ({ ...prev, errors: [...prev.errors, error] })),
+    removeError: (field) => setState(prev => ({
+      ...prev,
+      errors: prev.errors.filter(e => e.field !== field)
+    }))
+  };
 
   return (
     <OnboardingContext.Provider value={contextValue}>
@@ -252,13 +447,3 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     </OnboardingContext.Provider>
   );
 };
-
-export const useOnboarding = () => {
-  const context = useContext(OnboardingContext);
-  if (!context) {
-    throw new Error('useOnboarding must be used within an OnboardingProvider');
-  }
-  return context;
-};
-
-export { OnboardingContext };

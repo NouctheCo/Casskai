@@ -16,8 +16,9 @@ import {
   ArrowLeft,
   Info
 } from 'lucide-react';
-import { useOnboarding } from '@/contexts/OnboardingContext';
+import { useOnboarding } from '@/hooks/useOnboarding';
 import { useTranslation } from 'react-i18next';
+import { CompanyProfile } from '@/types/onboarding.types';
 
 const currencies = [
   { code: 'EUR', name: 'Euro (€)', flag: '🇪🇺' },
@@ -307,7 +308,7 @@ const NavigationSection: React.FC<NavigationProps> = ({ onPrevStep, onNextStep }
 );
 
 // Hook personnalisé pour gérer les préférences
-const usePreferences = (companyData: Record<string, unknown>, setCompanyData: (updater: (prev: Record<string, unknown>) => Record<string, unknown>) => void) => {
+const usePreferences = (companyData: Record<string, unknown>, updateCompanyProfile: (profile: Partial<CompanyProfile>) => void) => {
   const [preferences, setPreferences] = useState<Preferences>({
     language: 'fr',
     currency: (companyData.default_currency as string) || 'EUR',
@@ -333,10 +334,7 @@ const usePreferences = (companyData: Record<string, unknown>, setCompanyData: (u
     }));
 
     if (key === 'currency' || key === 'accountingStandard' || key === 'fiscalYearStart') {
-      setCompanyData((prev: Record<string, unknown>) => ({
-        ...prev,
-        [key]: value
-      }));
+      updateCompanyProfile({ [key]: value });
     }
   };
 
@@ -351,12 +349,11 @@ const usePreferences = (companyData: Record<string, unknown>, setCompanyData: (u
   };
 
   const handleNext = () => {
-    setCompanyData((prev: Record<string, unknown>) => ({
-      ...prev,
+    updateCompanyProfile({
       currency: preferences.currency,
       accountingStandard: preferences.accountingStandard,
       fiscalYearStart: preferences.fiscalYearStart
-    }));
+    });
   };
 
   return {
@@ -368,14 +365,14 @@ const usePreferences = (companyData: Record<string, unknown>, setCompanyData: (u
 };
 
 export default function PreferencesStep() {
-  const { nextStep, prevStep, companyData, setCompanyData } = useOnboarding();
+  const { goToNextStep, goToPreviousStep, state, updateCompanyProfile } = useOnboarding();
   const { t } = useTranslation();
 
-  const { preferences, updatePreference, updateNotification, handleNext: savePreferences } = usePreferences(companyData as unknown as Record<string, unknown>, setCompanyData as unknown as (updater: (prev: Record<string, unknown>) => Record<string, unknown>) => void);
+  const { preferences, updatePreference, updateNotification, handleNext: savePreferences } = usePreferences(state.data?.companyProfile || {}, updateCompanyProfile);
 
   const handleNext = () => {
     savePreferences();
-    nextStep();
+    goToNextStep();
   };
 
   return (
@@ -428,7 +425,7 @@ export default function PreferencesStep() {
           <InformationSection />
 
           <NavigationSection
-            onPrevStep={prevStep}
+            onPrevStep={goToPreviousStep}
             onNextStep={handleNext}
           />
         </CardContent>

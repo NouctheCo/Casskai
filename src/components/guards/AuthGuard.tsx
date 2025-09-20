@@ -10,11 +10,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Loader2, Lock, User, AlertCircle, CheckCircle } from 'lucide-react';
 
 export const AuthForm: React.FC = () => {
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, isAuthenticated, onboardingCompleted } = useAuth();
   const [activeTab, setActiveTab] = useState('signin');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Redirect authenticated users appropriately
+  if (isAuthenticated && onboardingCompleted) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  if (isAuthenticated && !onboardingCompleted) {
+    return <Navigate to="/onboarding" replace />;
+  }
 
   const [signInForm, setSignInForm] = useState({ email: '', password: '' });
   const [signUpForm, setSignUpForm] = useState({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });

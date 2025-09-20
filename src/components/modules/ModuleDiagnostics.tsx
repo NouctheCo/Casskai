@@ -26,7 +26,7 @@ import {
   Cpu
 } from 'lucide-react';
 
-import { useModulesSafe, useModules } from '@/contexts/ModulesContext';
+import { useModulesSafe, useModules } from '@/hooks/modules.hooks';
 import { ModuleTestService } from '@/services/moduleTestService';
 import { ModuleDefinition } from '@/types/modules.types';
 

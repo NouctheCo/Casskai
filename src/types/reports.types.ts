@@ -14,6 +14,10 @@ export interface FinancialReport {
   generated_at?: string;
   generated_by?: string;
   currency?: string;
+  include_notes?: boolean;
+  include_charts?: boolean;
+  show_variance?: boolean;
+  access_level?: string;
   created_at: string;
   updated_at: string;
 }
@@ -203,6 +207,8 @@ export interface ReportSchedule {
   file_format: 'pdf' | 'excel' | 'both';
   
   // Status
+  status?: string;
+  report_type?: string;
   is_active: boolean;
   last_run?: string;
   next_run?: string;

@@ -23,6 +23,9 @@ const supabase = createClient(
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Trust proxy for reverse proxy setups (Traefik, Nginx, etc.)
+app.set('trust proxy', true);
+
 // Security middleware
 app.use(helmet());
 

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { DashboardLayout, DashboardWidget, DashboardContextType } from '@/types/dashboard-widget.types';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
@@ -11,7 +12,7 @@ const DEFAULT_WIDGETS: Omit<DashboardWidget, 'id'>[] = [
     priority: 'high',
     size: 'medium',
     category: 'financial',
-    position: { x: 0, y: 0, width: 6, height: 4 },
+    position: { x: 0, y: 0, w: 6, h: 4 },
     isVisible: true,
     isCollapsed: false,
   },
@@ -21,7 +22,7 @@ const DEFAULT_WIDGETS: Omit<DashboardWidget, 'id'>[] = [
     priority: 'high',
     size: 'large',
     category: 'financial',
-    position: { x: 6, y: 0, width: 6, height: 6 },
+    position: { x: 6, y: 0, w: 6, h: 6 },
     isVisible: true,
     isCollapsed: false,
   },
@@ -31,7 +32,7 @@ const DEFAULT_WIDGETS: Omit<DashboardWidget, 'id'>[] = [
     priority: 'medium',
     size: 'large',
     category: 'analytics',
-    position: { x: 0, y: 4, width: 12, height: 6 },
+    position: { x: 0, y: 4, w: 12, h: 6 },
     isVisible: true,
     isCollapsed: false,
   },
@@ -41,7 +42,7 @@ const DEFAULT_WIDGETS: Omit<DashboardWidget, 'id'>[] = [
     priority: 'medium',
     size: 'small',
     category: 'operational',
-    position: { x: 0, y: 10, width: 4, height: 3 },
+    position: { x: 0, y: 10, w: 4, h: 3 },
     isVisible: true,
     isCollapsed: false,
   },
@@ -51,7 +52,7 @@ const DEFAULT_WIDGETS: Omit<DashboardWidget, 'id'>[] = [
     priority: 'low',
     size: 'small',
     category: 'alerts',
-    position: { x: 4, y: 10, width: 4, height: 3 },
+    position: { x: 4, y: 10, w: 4, h: 3 },
     isVisible: true,
     isCollapsed: false,
   },
@@ -65,34 +66,36 @@ export function DashboardWidgetProvider({ children }: { children: React.ReactNod
 
   // Initialize default layout
   useEffect(() => {
-    if (!user || currentLayout) return;
-    
-    const defaultLayout: DashboardLayout = {
-      id: `default-${user.id}`,
-      name: 'Layout par défaut',
-      userId: user.id,
-      widgets: DEFAULT_WIDGETS.map((widget, index) => ({
-        ...widget,
-        id: `widget-${index}`,
-      })),
-      focusMode: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    if (!user) return;
 
-    // Try to load from localStorage first
-    const savedLayout = localStorage.getItem(`dashboard-layout-${user.id}`);
-    if (savedLayout) {
-      try {
-        setCurrentLayout(JSON.parse(savedLayout));
-      } catch (error) {
-        console.error('Error parsing saved layout:', error);
+    const loadLayout = async () => {
+      const { data, error } = await supabase
+        .from('dashboard_layouts')
+        .select('layout')
+        .eq('user_id', user.id)
+        .single();
+
+      if (data && data.layout) {
+        setCurrentLayout(data.layout);
+      } else {
+        const defaultLayout: DashboardLayout = {
+          id: `default-${user.id}`,
+          name: 'Layout par défaut',
+          userId: user.id,
+          widgets: DEFAULT_WIDGETS.map((widget, index) => ({
+            ...widget,
+            id: `widget-${index}`,
+          })),
+          focusMode: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
         setCurrentLayout(defaultLayout);
       }
-    } else {
-      setCurrentLayout(defaultLayout);
-    }
-  }, [user, currentLayout]);
+    };
+
+    loadLayout();
+  }, [user]);
 
   const toggleFocusMode = useCallback(() => {
     setFocusMode(prev => !prev);
@@ -103,8 +106,11 @@ export function DashboardWidgetProvider({ children }: { children: React.ReactNod
   }, [focusMode, currentLayout]);
 
   const toggleEditMode = useCallback(() => {
+    if (editMode) {
+      saveLayout();
+    }
     setEditMode(prev => !prev);
-  }, []);
+  }, [editMode]);
 
   const updateWidget = useCallback((widgetId: string, updates: Partial<DashboardWidget>) => {
     if (!currentLayout) return;
@@ -152,12 +158,17 @@ export function DashboardWidgetProvider({ children }: { children: React.ReactNod
     setCurrentLayout(updatedLayout);
   }, [currentLayout]);
 
-  const saveLayout = useCallback(() => {
+  const saveLayout = useCallback(async () => {
     if (!currentLayout || !user) return;
 
     try {
-      localStorage.setItem(`dashboard-layout-${user.id}`, JSON.stringify(currentLayout));
-      console.log('Layout saved successfully');
+      const { error } = await supabase
+        .from('dashboard_layouts')
+        .upsert({ user_id: user.id, layout: currentLayout });
+
+      if (error) {
+        console.error('Error saving layout:', error);
+      }
     } catch (error) {
       console.error('Error saving layout:', error);
     }
@@ -180,21 +191,41 @@ export function DashboardWidgetProvider({ children }: { children: React.ReactNod
     };
 
     setCurrentLayout(defaultLayout);
-    localStorage.removeItem(`dashboard-layout-${user.id}`);
+    saveLayout(); // Save the reset layout to supabase
     setFocusMode(false);
     setEditMode(false);
-  }, [user]);
+  }, [user, saveLayout]);
+
+  const updateLayout = useCallback((layout: any) => {
+    if (!currentLayout) return;
+
+    const updatedWidgets = currentLayout.widgets.map(widget => {
+      const layoutItem = layout.find(l => l.i === widget.id);
+      if (layoutItem) {
+        return { ...widget, position: { x: layoutItem.x, y: layoutItem.y, w: layoutItem.w, h: layoutItem.h } };
+      }
+      return widget;
+    });
+
+    const updatedLayout = {
+      ...currentLayout,
+      widgets: updatedWidgets,
+      updatedAt: new Date(),
+    };
+
+    setCurrentLayout(updatedLayout);
+  }, [currentLayout]);
 
   // Auto-save layout changes
   useEffect(() => {
-    if (currentLayout && user) {
+    if (currentLayout && user && editMode) {
       const timeoutId = setTimeout(() => {
         saveLayout();
       }, 1000);
 
       return () => clearTimeout(timeoutId);
     }
-  }, [currentLayout, user, saveLayout]);
+  }, [currentLayout, user, saveLayout, editMode]);
 
   const value: DashboardContextType = {
     currentLayout,
@@ -207,6 +238,7 @@ export function DashboardWidgetProvider({ children }: { children: React.ReactNod
     removeWidget,
     saveLayout,
     resetLayout,
+    updateLayout,
   };
 
   return (

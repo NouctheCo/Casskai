@@ -1,11 +1,11 @@
 // Service de gestion des modules - Architecture modulaire CassKai
 
-import { supabase } from '../lib/supabase';
-import { 
-  ModuleDefinition, 
-  Module, 
-  ModuleActivation, 
-  ModuleContext, 
+import { supabase} from '../lib/supabase';
+import {
+  ModuleDefinition,
+  Module,
+  ModuleActivation,
+  ModuleContext,
   ModuleError,
   ModuleDependencyError,
   ModuleConflictError
@@ -34,13 +34,13 @@ export class ModuleManager {
     try {
       // Stocker le tenantId pour les sauvegardes
       this.tenantId = context.tenantId || null;
-      
+
       // Charger les activations depuis la base de données
       await this.loadActivations(context.tenantId!);
-      
+
       // Initialiser les modules core automatiquement
       await this.initializeCoreModules(context);
-      
+
       this.isInitialized = true;
       console.warn('[ModuleManager] Initialisé avec succès');
     } catch (error) {
@@ -52,7 +52,7 @@ export class ModuleManager {
   // Enregistrer un module
   registerModule(module: Module): void {
     const { id } = module.definition;
-    
+
     if (this.modules.has(id)) {
       // Make registration idempotent: warn and ignore duplicate registrations
       console.warn(`[ModuleManager] Module ${id} already registered - skipping duplicate registration`);
@@ -61,10 +61,10 @@ export class ModuleManager {
 
     // Valider la définition du module
     this.validateModuleDefinition(module.definition);
-    
+
     this.modules.set(id, module);
     this.dependencies.set(id, module.definition.dependencies);
-    
+
     console.log(`[ModuleManager] Module ${id} enregistré`);
   }
 
@@ -141,7 +141,7 @@ export class ModuleManager {
     // Vérifier si d'autres modules dépendent de celui-ci
     const dependentModules = this.getDependentModules(moduleId);
     const activeDependents = dependentModules.filter(id => this.isModuleActive(id));
-    
+
     if (activeDependents.length > 0) {
       throw new ModuleError(
         `Cannot deactivate ${moduleId}: modules ${activeDependents.join(', ')} depend on it`,
@@ -484,11 +484,11 @@ export class ModuleManager {
       // Sauvegarder en format simple pour compatibilité avec AuthContext
       const allActivations = Array.from(this.activations.values());
       const simpleModules: Record<string, boolean> = {};
-      
+
       allActivations.forEach(act => {
         simpleModules[act.moduleId] = act.isActive;
       });
-      
+
       localStorage.setItem('casskai_modules', JSON.stringify(simpleModules));
       console.warn('[ModuleManager] Modules saved to localStorage in simple format');
 
@@ -496,29 +496,39 @@ export class ModuleManager {
       if (this.tenantId && supabase) {
         try {
           console.warn('[ModuleManager] Saving modules to Supabase for tenant:', this.tenantId);
-          
-          // Supprimer les anciens enregistrements pour cette entreprise
-          await supabase
-            .from('company_modules')
-            .delete()
-            .eq('company_id', this.tenantId);
 
-          // Insérer les nouveaux enregistrements
-          const modulesToInsert = allActivations.map(act => ({
+          // Utiliser upsert pour insérer ou mettre à jour les modules de l'entreprise
+          const moduleNames = {
+            'dashboard': 'Tableau de Bord',
+            'settings': 'Paramètres',
+            'accounting': 'Comptabilité',
+            'invoicing': 'Facturation',
+            'banking': 'Banque',
+            'inventory': 'Stock & Inventaire',
+            'crm': 'CRM',
+            'reports': 'Rapports',
+            'users': 'Utilisateurs',
+            'security': 'Sécurité',
+            'projects': 'Projets',
+            'humanResources': 'Ressources Humaines'
+          };
+
+          const modulesToUpsert = allActivations.map(act => ({
             company_id: this.tenantId,
             module_key: act.moduleId,
+            module_name: moduleNames[act.moduleId as keyof typeof moduleNames] || act.moduleId,
             is_enabled: act.isActive,
           }));
 
-          if (modulesToInsert.length > 0) {
+          if (modulesToUpsert.length > 0) {
             const { error } = await supabase
               .from('company_modules')
-              .insert(modulesToInsert);
+              .upsert(modulesToUpsert, { onConflict: 'company_id,module_key' });
 
             if (error) {
-              console.error('[ModuleManager] Error saving to Supabase:', error);
+              console.error('[ModuleManager] Error upserting to Supabase:', error);
             } else {
-              console.warn('[ModuleManager] Modules saved to Supabase successfully');
+              console.warn('[ModuleManager] Modules upserted to Supabase successfully');
             }
           }
         } catch (supabaseError) {
@@ -558,25 +568,25 @@ export class ModulePermissionService {
     MODULE_DEACTIVATE: 'module:deactivate',
     MODULE_CONFIGURE: 'module:configure',
     MODULE_VIEW: 'module:view',
-    
+
     // Permissions CRM
     CRM_VIEW: 'crm:view',
     CRM_MANAGE_CONTACTS: 'crm:manage_contacts',
     CRM_MANAGE_DEALS: 'crm:manage_deals',
     CRM_EXPORT_DATA: 'crm:export_data',
-    
+
     // Permissions RH
     HR_VIEW: 'hr:view',
     HR_MANAGE_EMPLOYEES: 'hr:manage_employees',
     HR_APPROVE_LEAVES: 'hr:approve_leaves',
     HR_VIEW_PAYROLL: 'hr:view_payroll',
-    
+
     // Permissions Projets
     PROJECT_VIEW: 'project:view',
     PROJECT_MANAGE: 'project:manage',
     PROJECT_TRACK_TIME: 'project:track_time',
     PROJECT_BILLING: 'project:billing',
-    
+
     // Permissions Marketplace
     MARKETPLACE_BROWSE: 'marketplace:browse',
     MARKETPLACE_INSTALL: 'marketplace:install',

@@ -16,7 +16,7 @@ import {
   Loader2,
   AlertTriangle
 } from 'lucide-react';
-import { useOnboarding } from '@/contexts/OnboardingContext';
+import { useOnboarding } from '@/hooks/useOnboarding';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 
@@ -182,7 +182,7 @@ const CompletedContent: React.FC<{
 export default function CompleteStep() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { companyData, modules, clearOnboardingData, completeOnboarding } = useOnboarding();
+  const { state, clearProgress, finalizeOnboarding } = useOnboarding();
   const { signOut } = useAuth();
   const { t } = useTranslation();
 
@@ -216,7 +216,7 @@ export default function CompleteStep() {
     setError(null);
 
     // Vérifier que les données essentielles sont présentes
-    if (!companyData?.name?.trim()) {
+    if (!state.data?.companyProfile?.name?.trim()) {
       setError("Le nom de l'entreprise est requis. Veuillez revenir à l'étape précédente pour le saisir.");
       setStatus('error');
       setIsSubmitting(false);
@@ -233,7 +233,7 @@ export default function CompleteStep() {
       processStepsSequentially();
 
       // Appel API réel pour sauvegarder les données
-      const result = await completeOnboarding(companyData, modules);
+      const result = await finalizeOnboarding();
 
       if (!result.success) {
         throw new Error('Une erreur inattendue est survenue lors de la finalisation.');
@@ -242,12 +242,10 @@ export default function CompleteStep() {
       setStatus('completed');
       toast({
         title: "Configuration terminée !",
-        description: result?.trialCreated 
-          ? "Votre entreprise a été configurée avec succès. Votre essai gratuit de 30 jours a commencé !"
-          : "Votre entreprise a été configurée avec succès dans CassKai.",
+        description: "Votre entreprise a été configurée avec succès dans CassKai.",
       });
 
-      clearOnboardingData();
+      clearProgress();
 
       // Force a clean reload to the dashboard to ensure all contexts are updated
       window.location.href = '/dashboard';
@@ -283,7 +281,7 @@ export default function CompleteStep() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [companyData, modules, completeOnboarding, clearOnboardingData, navigate, toast, signOut, isSubmitting]);
+  }, [state.data?.companyProfile?.name, finalizeOnboarding, clearProgress, navigate, toast, signOut, isSubmitting]);
 
   useEffect(() => {
     // This check with useRef prevents the effect from running twice in development due to React's StrictMode.
@@ -302,13 +300,12 @@ export default function CompleteStep() {
     }
   };
 
-  const calculateEnabledModulesCount = (modules: Record<string, boolean>) => 
-    Object.values(modules).filter(Boolean).length;
+
 
   const calculateProgressPercentage = (status: string, currentStep: number, totalSteps: number) =>
     status === 'completed' ? 100 : Math.round(((currentStep + 1) / totalSteps) * 100);
 
-  const enabledModulesCount = calculateEnabledModulesCount(modules);
+  const enabledModulesCount = (state.data?.selectedModules || []).length;
   const progressPercentage = calculateProgressPercentage(status, currentStep, completionSteps.length);
 
   const isProcessing = status === 'completing';
@@ -342,7 +339,7 @@ export default function CompleteStep() {
 
           {isCompleted && (
             <CompletedContent 
-              companyData={companyData as unknown as Record<string, unknown>} 
+              companyData={state.data?.companyProfile as Record<string, unknown> || {}} 
               enabledModulesCount={enabledModulesCount} 
               nextSteps={nextSteps} 
               handleNavigate={handleNavigate} 

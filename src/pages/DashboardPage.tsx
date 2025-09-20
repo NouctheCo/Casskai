@@ -16,6 +16,8 @@ import { DashboardSkeleton } from '@/components/ui/SkeletonLoader';
 import { DashboardWidgetProvider, useDashboardWidget } from '@/contexts/DashboardWidgetContext';
 import { DashboardWidgetRenderer, MetricWidget, QuickActionWidget } from '@/components/dashboard/DashboardWidgetRenderer';
 import { EnhancedDashboard } from '@/components/dashboard/EnhancedDashboard';
+import { TrialStatusCard } from '@/components/TrialComponents';
+import { useTrial } from '@/hooks/trial.hooks';
 import { 
   DollarSign, 
   Users, 
@@ -725,6 +727,14 @@ const DashboardPage = () => {
             />
           </>
         )}
+      </motion.div>
+
+      {/* Trial Status Card - Affiché seulement si l'utilisateur a un essai actif */}
+      <motion.div 
+        className="w-full"
+        variants={itemVariants}
+      >
+        <TrialStatusCard />
       </motion.div>
 
       {/* Enhanced Quick Actions */}

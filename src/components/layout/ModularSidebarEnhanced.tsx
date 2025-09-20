@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { useModules } from '@/contexts/ModulesContext';
+import { useModules } from '@/hooks/modules.hooks';
 
 // Import direct des icônes spécifiques utilisées
 import { 

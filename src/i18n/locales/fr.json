@@ -28,7 +28,7 @@
       "subtitle": "en toute simplicité",
       "description": "CassKai révolutionne la gestion d'entreprise avec une suite complète : comptabilité, facturation, CRM, projets, RH et bien plus. Tout en un, simple et puissant.",
       "cta": {
-        "start": "Essai gratuit 14 jours",
+        "start": "Essai gratuit 30 jours",
         "demo": "Voir la démo"
       },
       "stats": {
@@ -84,7 +84,7 @@
       "badge": "Tarifs transparents",
       "title": "Choisissez votre plan",
       "subtitle": "et démarrez aujourd'hui",
-      "description": "Tous nos plans incluent un essai gratuit de 14 jours, sans engagement et sans carte bancaire.",
+      "description": "Tous nos plans incluent un essai gratuit de 30 jours, sans engagement et sans carte bancaire.",
       "period": "/mois",
       "period.annual": "/an",
       "monthly": "Mensuel",
@@ -128,7 +128,7 @@
           "everything": "Tout du plan Professionnel",
           "users": "Utilisateurs illimités",
           "hr_advanced": "RH avancées",
-          "banking": "Connexions bancaires",
+          "banking": "Import des fichiers bancaires",
           "forecasting": "Prévisions financières",
           "audit": "Piste d'audit complète",
           "integrations": "Intégrations personnalisées",
@@ -143,7 +143,7 @@
           "description": "Vos données sont chiffrées et sauvegardées quotidiennement"
         },
         "trial": {
-          "title": "14 jours gratuits",
+          "title": "30 jours gratuits",
           "description": "Testez toutes les fonctionnalités sans engagement"
         },
         "support": {
@@ -153,10 +153,10 @@
       }
     },
     "testimonials": {
-      "badge": "Témoignages clients",
-      "title": "Ils nous font confiance",
-      "subtitle": "et réussissent avec CassKai",
-      "description": "Découvrez comment CassKai transforme la gestion d'entreprise pour des milliers de professionnels.",
+      "badge": "Premiers utilisateurs",
+      "title": "Premiers utilisateurs",
+      "subtitle": "et beta-testeurs",
+      "description": "Retours honnêtes de nos premiers utilisateurs et des professionnels qui testent CassKai.",
       "marie": {
         "content": "CassKai a révolutionné notre gestion financière. L'interface est intuitive et nous fait gagner un temps précieux chaque jour."
       },
@@ -165,6 +165,33 @@
       },
       "sophie": {
         "content": "La gestion multi-entités et les tableaux de bord nous donnent une vision claire de nos performances."
+      },
+      "alex": {
+        "content": "En phase de test depuis 3 mois. L'import des relevés bancaires me fait gagner 2h par semaine. Interface claire, j'attends les prochaines fonctionnalités !"
+      },
+      "fatou": {
+        "content": "Parfait pour mes clients PME au Sénégal. Le support du SYSCOHADA était indispensable. Facile à expliquer aux entrepreneurs."
+      },
+      "thomas": {
+        "content": "J'ai testé la v1.0 pendant 2 mois. Quelques bugs mais l'équipe est réactive. Le module projets sera top quand il sera fini."
+      }
+    },
+    "roi": {
+      "badge": "Retour sur investissement",
+      "title": "Pourquoi choisir CassKai ?",
+      "subtitle": "Le ROI est immédiat",
+      "description": "Calculé sur la base de nos utilisateurs actuels, découvrez les économies réelles que vous pouvez réaliser.",
+      "accounting": {
+        "title": "Économies comptabilité",
+        "description": "vs expert-comptable traditionnel"
+      },
+      "time": {
+        "title": "Temps gagné",
+        "description": "sur les tâches administratives"
+      },
+      "productivity": {
+        "title": "Productivité",
+        "description": "amélioration globale"
       }
     },
     "contact": {
@@ -1590,7 +1617,6 @@
     "termsAgreement": "En créant un compte, vous acceptez nos",
     "and": "et notre",
     "termsOfService": "Conditions d'utilisation",
-    "privacyPolicy": "Politique de confidentialité",
     
     "firstName": "Prénom",
     "lastName": "Nom de famille",

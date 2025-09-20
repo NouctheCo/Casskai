@@ -6,12 +6,12 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { useModules } from '@/contexts/ModulesContext';
+import { useModules } from '@/hooks/modules.hooks';
 import { Settings, Zap, Star, CheckCircle, AlertCircle, Loader2, Save, Info } from 'lucide-react';
 
 export function ModuleManagementSettings() {
   const { user } = useAuth();
-  const { allModules: systemModules, activeModules, isModuleActive, updateModuleConfig, isLoading: contextLoading } = useModules();
+  const { allModules: systemModules, activeModules: _activeModules, isModuleActive, updateModuleConfig, isLoading: contextLoading } = useModules();
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
   const [moduleStates, setModuleStates] = useState<Record<string, boolean>>({});
@@ -55,7 +55,11 @@ export function ModuleManagementSettings() {
         const newState = moduleStates[mod.key];
 
         if (currentState !== newState) {
-          promises.push(updateModuleConfig(mod.key, { enabled: newState }));
+          if (newState) {
+            promises.push(updateModuleConfig(mod.key, { enabled: true }));
+          } else {
+            promises.push(updateModuleConfig(mod.key, { enabled: false }));
+          }
         }
       }
 

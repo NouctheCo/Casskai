@@ -4,9 +4,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import des styles de react-grid-layout */
+@import '../node_modules/react-grid-layout/css/styles.css';
+@import '../node_modules/react-resizable/css/styles.css';
+
 /* Import des animations optimisées */
 @import './styles/animations.css';
 @import './styles/grid-layout.css';
+
+/* Layout fixes */
+.main-layout {
+  @apply relative min-h-screen overflow-hidden;
+}
+
+.main-header {
+  @apply h-16;
+  height: 4rem !important;
+}
+
+.main-content {
+  @apply relative;
+}
+
+.content-container {
+  @apply relative w-full;
+}
 
 @layer base {
   :root {

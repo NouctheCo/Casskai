@@ -7,7 +7,7 @@ import { PublicLayout } from '@/components/layout/PublicLayout';
 import { AuthForm } from '@/components/guards/AuthGuard';
 import HomePage from '@/components/HomePage';
 import OnboardingPage from '@/pages/OnboardingPage';
-import { OnboardingProvider } from '@/contexts/OnboardingContext';
+import { OnboardingProvider } from '@/contexts';
 import ProtectedRoute from '@/components/guards/ProtectedRoute';
 
 // Lazy load pages for better performance
@@ -32,19 +32,29 @@ const LazyCookiesPolicyPage = React.lazy(() => import('@/pages/CookiesPolicyPage
 const LazyGDPRPage = React.lazy(() => import('@/pages/GDPRPage'));
 const LazyDiagnosticPage = React.lazy(() => import('@/pages/DiagnosticPage'));
 const LazyDocumentationArticlePage = React.lazy(() => import('@/pages/DocumentationArticlePage'));
+const LazyDocumentationCategoryPage = React.lazy(() => import('@/pages/DocumentationCategoryPage'));
 const LazyAccountingImportPage = React.lazy(() => import('@/pages/AccountingImportPage'));
+const LazyPricingPage = React.lazy(() => import('@/pages/PricingPage'));
 const LazyForgotPasswordPage = React.lazy(() => import('@/pages/auth/ForgotPasswordPage'));
+const LazySystemStatusPage = React.lazy(() => import('@/pages/SystemStatusPage'));
 
 const AppRouter: React.FC = () => {
   const { isAuthenticated, loading, onboardingCompleted, currentCompany, isCheckingOnboarding } = useAuth();
 
   // Memoize the routing logic to prevent infinite re-renders
   const routingState = useMemo(() => {
+    // Show loading during authentication checks
     if (loading || isCheckingOnboarding) return 'loading';
+    
+    // If not authenticated, show public routes
     if (!isAuthenticated) return 'unauthenticated';
-    if (!onboardingCompleted || !currentCompany) return 'needs-onboarding';
+    
+    // If authenticated but no companies (needs onboarding)
+    if (isAuthenticated && !onboardingCompleted) return 'needs-onboarding';
+    
+    // Fully authenticated with company
     return 'authenticated';
-  }, [loading, isAuthenticated, onboardingCompleted, currentCompany, isCheckingOnboarding]);
+  }, [loading, isAuthenticated, onboardingCompleted, isCheckingOnboarding]);
 
   if (routingState === 'loading') {
     const loadingMessage = isCheckingOnboarding 
@@ -92,6 +102,21 @@ const AppRouter: React.FC = () => {
                 <LazyGDPRPage />
               </Suspense>
             } />
+            <Route path="system-status" element={
+              <Suspense fallback={<LoadingFallback />}>
+                <LazySystemStatusPage />
+              </Suspense>
+            } />
+            <Route path="docs/:category" element={
+              <Suspense fallback={<LoadingFallback />}>
+                <LazyDocumentationCategoryPage />
+              </Suspense>
+            } />
+            <Route path="docs/:category/:article" element={
+              <Suspense fallback={<LoadingFallback />}>
+                <LazyDocumentationArticlePage />
+              </Suspense>
+            } />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </>
@@ -101,11 +126,12 @@ const AppRouter: React.FC = () => {
       {routingState === 'needs-onboarding' && (
         <>
           <Route path="/" element={<MainLayout />}>
-            <Route path="*" element={
+            <Route path="onboarding" element={
               <OnboardingProvider>
                 <OnboardingPage />
               </OnboardingProvider>
             } />
+            <Route path="*" element={<Navigate to="/onboarding" replace />} />
           </Route>
         </>
       )}

@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import AnalyticsProvider from '@/components/analytics/AnalyticsProvider';
 import { PageTransition } from '@/components/ui/PageTransition';
+import { WhatsAppFloatingButton } from '@/components/chat/WhatsAppChat';
 
 export const PublicLayout: React.FC = () => {
   return (
@@ -10,6 +11,8 @@ export const PublicLayout: React.FC = () => {
         <PageTransition>
           <Outlet />
         </PageTransition>
+        {/* Bouton WhatsApp flottant - rendu au niveau du layout pour rester visible sur toutes les pages publiques */}
+        <WhatsAppFloatingButton />
       </div>
     </AnalyticsProvider>
   );

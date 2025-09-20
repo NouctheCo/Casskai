@@ -6,8 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
-import { useModulesSafe, useModules } from '@/contexts/ModulesContext';
+import { useModules } from '@/contexts/ModulesContext';
 import { subscriptionService } from '@/services/subscriptionService';
+import { trialService } from '@/services/trialService';
+import { TrialStatusCard, TrialActionsCard } from '@/components/TrialComponents';
+import { useTrial } from '@/hooks/trial.hooks';
 import { SUBSCRIPTION_PLANS, formatPrice } from '@/types/subscription.types';
 import {
   Crown,
@@ -150,6 +153,12 @@ const SubscriptionSettings: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Enhanced Trial Management Section */}
+      <div className="space-y-6">
+        <TrialStatusCard />
+        <TrialActionsCard />
+      </div>
 
       {/* Available Plans */}
       <Card>

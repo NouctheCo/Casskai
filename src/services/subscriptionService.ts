@@ -180,43 +180,49 @@ class SubscriptionService {
   async createTrialSubscription(
     userId: string,
     companyId?: string
-  ): Promise<string | null> {
+  ): Promise<{ success: boolean; subscriptionId?: string; error?: string }> {
     try {
-      const { data, error } = await supabase
-        .rpc('create_trial_subscription', {
-          p_user_id: userId,
-          p_company_id: companyId || null
-        });
+      const { data, error } = await supabase.rpc('create_trial_subscription', {
+        p_user_id: userId,
+        p_company_id: companyId || null
+      });
 
       if (error) {
         console.error('Error creating trial subscription:', error);
-        return null;
+        return { success: false, error: error.message };
       }
 
-      return data;
+      if (data === 'ALREADY_EXISTS') {
+        return { success: false, error: 'Un essai existe déjà pour cet utilisateur' };
+      }
+
+      if (!data) {
+        return { success: false, error: 'Erreur lors de la création de l\'essai' };
+      }
+
+      return { success: true, subscriptionId: data };
     } catch (error) {
       console.error('Error in createTrialSubscription:', error);
-      return null;
+      return { success: false, error: 'Erreur inattendue' };
     }
   }
 
   /**
    * Expire les essais qui ont dépassé leur date de fin
    */
-  async expireTrials(): Promise<number> {
+  async expireTrials(): Promise<{ expiredCount: number; error?: string }> {
     try {
-      const { data, error } = await supabase
-        .rpc('expire_trials');
+      const { data, error } = await supabase.rpc('expire_trials');
 
       if (error) {
         console.error('Error expiring trials:', error);
-        return 0;
+        return { expiredCount: 0, error: error.message };
       }
 
-      return data || 0;
+      return { expiredCount: data || 0 };
     } catch (error) {
       console.error('Error in expireTrials:', error);
-      return 0;
+      return { expiredCount: 0, error: 'Erreur inattendue' };
     }
   }
 

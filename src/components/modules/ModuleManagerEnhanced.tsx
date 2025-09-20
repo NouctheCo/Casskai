@@ -38,7 +38,7 @@ import {
 } from 'lucide-react';
 
 // Hooks pour l'intégration avec l'architecture modulaire
-import { useModulesSafe, useModules } from '@/contexts/ModulesContext';
+import { useModulesSafe, useModules } from '@/hooks/modules.hooks';
 import { ModuleDefinition } from '@/types/modules.types';
 
 interface ActivationStatus {

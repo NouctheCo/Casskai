@@ -4,7 +4,9 @@ import { UserProfileSettings } from './UserProfileSettings';
 import { CompanySettings } from './CompanySettings';
 import { NotificationSettings } from './NotificationSettings';
 import { ModuleManagementSettings } from './ModuleManagementSettings';
-import { UserCog, Building, Bell, Settings } from 'lucide-react';
+import SubscriptionSettings from './SubscriptionSettings';
+import { StripeIntegrationTest } from '../StripeIntegrationTest';
+import { UserCog, Building, Bell, Settings, CreditCard, TestTube } from 'lucide-react';
 
 export function EnhancedSettings() {
   const [activeTab, setActiveTab] = useState('profile');
@@ -19,7 +21,7 @@ export function EnhancedSettings() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <UserCog className="h-4 w-4" />
             Profil
@@ -28,6 +30,10 @@ export function EnhancedSettings() {
             <Building className="h-4 w-4" />
             Entreprise
           </TabsTrigger>
+          <TabsTrigger value="subscription" className="flex items-center gap-2">
+            <CreditCard className="h-4 w-4" />
+            Abonnement
+          </TabsTrigger>
           <TabsTrigger value="notifications" className="flex items-center gap-2">
             <Bell className="h-4 w-4" />
             Notifications
@@ -35,6 +41,10 @@ export function EnhancedSettings() {
           <TabsTrigger value="modules" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             Modules
+          </TabsTrigger>
+          <TabsTrigger value="dev" className="flex items-center gap-2">
+            <TestTube className="h-4 w-4" />
+            Dev
           </TabsTrigger>
         </TabsList>
 
@@ -46,12 +56,28 @@ export function EnhancedSettings() {
           <CompanySettings />
         </TabsContent>
 
+        <TabsContent value="subscription" className="space-y-6">
+          <SubscriptionSettings />
+        </TabsContent>
+
         <TabsContent value="notifications" className="space-y-6">
           <NotificationSettings />
         </TabsContent>
 
         <TabsContent value="modules" className="space-y-6">
           <ModuleManagementSettings />
+        </TabsContent>
+
+        <TabsContent value="dev" className="space-y-6">
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-semibold">Outils de développement</h2>
+              <p className="text-muted-foreground">
+                Testez les intégrations et fonctionnalités en développement
+              </p>
+            </div>
+            <StripeIntegrationTest />
+          </div>
         </TabsContent>
       </Tabs>
     </div>

@@ -3,7 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import ModularSidebarEnhanced from '@/components/layout/ModularSidebarEnhanced';
 import { Header } from '@/components/layout/Header';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { useModulesSafe, useModules } from '@/contexts/ModulesContext';
+import { useModulesSafe, useModules } from '@/hooks/modules.hooks';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -147,25 +147,32 @@ export function MainLayout() {
           </AnimatePresence>
         )}
 
-        {/* Contenu principal */}
-        <div className="main-content">
-          {/* Header - Sticky en haut de la page */}
-          {showSidebar && (
-            <div className="w-full">
-              <Header
-                onMenuClick={() => setIsMobileSidebarOpen(true)}
-                isMobile={isMobile}
-                isDesktopSidebarCollapsed={isDesktopCollapsed}
-              />
-            </div>
-          )}
+        {/* Header fixe */}
+        {showSidebar && (
+          <Header
+            onMenuClick={() => setIsMobileSidebarOpen(true)}
+            isMobile={isMobile}
+            isDesktopSidebarCollapsed={isDesktopCollapsed}
+          />
+        )}
 
+        {/* Contenu principal avec marge pour la sidebar et padding-top pour le header */}
+        <div className={cn(
+          "main-content transition-all duration-300 ease-in-out",
+          showSidebar ? (
+            isMobile 
+              ? "ml-0" 
+              : isDesktopCollapsed 
+                ? "ml-16" 
+                : "ml-64"
+          ) : "ml-0"
+        )}>
           <main className={cn(
-            "content-container overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent pt-16",
-            showSidebar ? "bg-gray-50 dark:bg-gray-900" : ""
+            "content-container min-h-screen overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent",
+            showSidebar ? "pt-16 bg-gray-50 dark:bg-gray-900" : "pt-0"
           )}>
             <div className={cn(
-              showSidebar ? "page-content" : ""
+              showSidebar ? "page-content px-4 sm:px-6 lg:px-8 py-6" : ""
             )}>
               {/* Notification d'expiration d'essai pour les utilisateurs connectés */}
               {showSidebar && (

@@ -124,7 +124,7 @@ const ReportCard: React.FC<{
             </Badge>
           </div>
           <div className="flex items-center gap-4 text-sm text-gray-600">
-            <span>Période: {new Date(report.period.start_date).toLocaleDateString('fr-FR')} - {new Date(report.period.end_date).toLocaleDateString('fr-FR')}</span>
+            <span>Période: {new Date(report.period_start).toLocaleDateString('fr-FR')} - {new Date(report.period_end).toLocaleDateString('fr-FR')}</span>
             <span>Format: {report.format}</span>
             <span>Généré: {report.generated_at ? new Date(report.generated_at).toLocaleDateString('fr-FR') : 'Jamais'}</span>
           </div>

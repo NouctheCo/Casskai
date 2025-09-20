@@ -1,6 +1,6 @@
 import React, { useMemo, lazy, Suspense } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useModulesSafe, useModules } from '@/contexts/ModulesContext';
+import { useModulesSafe, useModules } from '@/hooks/modules.hooks';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 

@@ -5,7 +5,7 @@ export interface DashboardWidget {
   priority: 'high' | 'medium' | 'low';
   size: 'small' | 'medium' | 'large';
   category: 'financial' | 'operational' | 'alerts' | 'analytics';
-  position: { x: number; y: number; width: number; height: number };
+  position: { x: number; y: number; w: number; h: number };
   isVisible: boolean;
   isCollapsed: boolean;
   permissions?: string[];
@@ -45,4 +45,5 @@ export interface DashboardContextType {
   removeWidget: (widgetId: string) => void;
   saveLayout: () => void;
   resetLayout: () => void;
+  updateLayout: (layout: any) => void;
 }

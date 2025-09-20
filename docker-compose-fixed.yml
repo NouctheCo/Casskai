@@ -1,0 +1,84 @@
+services:
+  traefik:
+    image: "traefik:v2.10"
+    restart: always
+    command:
+      - "--api=true"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.mytlschallenge.acme.tlschallenge=true"
+      - "--certificatesresolvers.mytlschallenge.acme.email=${SSL_EMAIL}"
+      - "--certificatesresolvers.mytlschallenge.acme.storage=/letsencrypt/acme.json"
+      - "--log.level=DEBUG"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - traefik_data:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  n8n:
+    image: "docker.n8n.io/n8nio/n8n"
+    restart: always
+    ports:
+      - "127.0.0.1:5678:5678"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.n8n.rule=Host(`${SUBDOMAIN}.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.n8n.tls=true"
+      - "traefik.http.routers.n8n.entrypoints=web,websecure"
+      - "traefik.http.routers.n8n.tls.certresolver=mytlschallenge"
+      - "traefik.http.middlewares.n8n.headers.SSLRedirect=true"
+      - "traefik.http.middlewares.n8n.headers.STSSeconds=315360000"
+      - "traefik.http.middlewares.n8n.headers.browserXSSFilter=true"
+      - "traefik.http.middlewares.n8n.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.n8n.headers.forceSTSHeader=true"
+      - "traefik.http.middlewares.n8n.headers.SSLHost=${DOMAIN_NAME}"
+      - "traefik.http.middlewares.n8n.headers.STSIncludeSubdomains=true"
+      - "traefik.http.middlewares.n8n.headers.STSPreload=true"
+      - "traefik.http.routers.n8n.middlewares=n8n@docker"
+    environment:
+      N8N_HOST: "${SUBDOMAIN}.${DOMAIN_NAME}"
+      N8N_PORT: "5678"
+      N8N_PROTOCOL: "https"
+      NODE_ENV: "production"
+      WEBHOOK_URL: "https://${SUBDOMAIN}.${DOMAIN_NAME}/"
+      GENERIC_TIMEZONE: "${GENERIC_TIMEZONE}"
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - /local-files:/files
+
+  casskai-proxy:
+    image: "nginx:alpine"
+    container_name: casskai-proxy
+    restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - /root/casskai-proxy.conf:/etc/nginx/conf.d/default.conf:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.casskai-https.rule=Host(`casskai.app`) || Host(`www.casskai.app`)"
+      - "traefik.http.routers.casskai-https.entrypoints=websecure"
+      - "traefik.http.routers.casskai-https.tls=true"
+      - "traefik.http.routers.casskai-https.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.casskai-https.middlewares=hsts@docker"
+      - "traefik.http.services.casskai.loadbalancer.server.port=80"
+      - "traefik.http.routers.casskai-http.rule=Host(`casskai.app`) || Host(`www.casskai.app`)"
+      - "traefik.http.routers.casskai-http.entrypoints=web"
+      - "traefik.http.routers.casskai-http.middlewares=https-redirect@docker"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.hsts.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.hsts.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.hsts.headers.stsPreload=true"
+
+volumes:
+  traefik_data:
+    external: true
+  n8n_data:
+    external: true

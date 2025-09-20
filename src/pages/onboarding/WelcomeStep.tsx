@@ -12,7 +12,7 @@ import {
   ArrowRight,
   Sparkles
 } from 'lucide-react';
-import { useOnboarding } from '@/contexts/OnboardingContext';
+import { useOnboarding } from '@/hooks/useOnboarding';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 
@@ -44,7 +44,7 @@ const features = [
 ];
 
 export default function WelcomeStep() {
-  const { nextStep } = useOnboarding();
+  const { goToNextStep } = useOnboarding();
   const { user } = useAuth();
   const { t } = useTranslation();
 
@@ -179,7 +179,7 @@ export default function WelcomeStep() {
             <Button
               onClick={() => {
                 console.warn('[WelcomeStep] Button clicked - calling nextStep()');
-                nextStep();
+                goToNextStep();
               }}
               size="lg"
               className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"

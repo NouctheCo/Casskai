@@ -4,8 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useModulesSafe, useModules } from '@/contexts/ModulesContext';
+import { useModulesSafe, useModules } from '@/hooks/modules.hooks';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { 
   Home,
   Calculator,
@@ -36,24 +37,24 @@ const MODULE_CATEGORIES = {
     priority: 1
   },
   commercial: {
-    label: 'Commercial', 
+    label: 'Commercial',
     icon: Users,
     color: 'green',
-    modules: ['crm', 'quotes', 'contracts'],
+    modules: ['salesCrm', 'contracts'],
     priority: 2
   },
   gestion: {
     label: 'Gestion',
     icon: Package,
-    color: 'purple', 
-    modules: ['inventory', 'purchases', 'projects'],
+    color: 'purple',
+    modules: ['inventory', 'purchases', 'projects', 'thirdParties', 'humanResources'],
     priority: 3
   },
   analyse: {
     label: 'Analyse',
     icon: BarChart3,
     color: 'orange',
-    modules: ['reports', 'forecasts', 'analytics'],
+    modules: ['reports', 'forecasts'],
     priority: 4
   }
 };
@@ -65,14 +66,15 @@ const MODULE_ICONS = {
   invoicing: FileText,
   tax: Calculator,
   reports: BarChart3,
-  crm: Users,
-  quotes: FileText,
+  salesCrm: Users,
   contracts: Briefcase,
   inventory: Package,
   purchases: ShoppingCart,
   projects: Briefcase,
   forecasts: BarChart3,
-  analytics: Sparkles
+  analytics: Sparkles,
+  humanResources: Users,
+  thirdParties: Users
 };
 
 interface IntelligentSidebarProps {
@@ -82,8 +84,9 @@ interface IntelligentSidebarProps {
 
 export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProps) {
   const location = useLocation();
-  const { allModules, isModuleActive } = useModulesSafe();
+  const { allModules, isModuleActive, activeModules } = useModulesSafe();
   const { user } = useAuth();
+  const { subscription } = useSubscription();
   
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['finances']));
   const [searchQuery, setSearchQuery] = useState('');
@@ -105,7 +108,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
         console.error('Error loading sidebar preferences:', error);
       }
     }
-  }, [user]);
+  }, [user, activeModules]);
 
   // Sauvegarder les préférences
   const savePreferences = (updates: Record<string, unknown>) => {
@@ -311,7 +314,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
                         )}
                       >
                         <IconComponent className="h-4 w-4 flex-shrink-0" />
-                        <span className="flex-1 truncate">{module.label}</span>
+                        <span className="flex-1 truncate">{module.name}</span>
                       </Link>
                     </motion.div>
                   );
@@ -443,7 +446,12 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
       {/* Footer avec raccourcis */}
       {!collapsed && (
         <div className="p-3 border-t border-gray-200 dark:border-gray-700">
-          <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+          <Button asChild className="w-full">
+            <Link to={subscription ? "/settings?tab=subscription" : "/pricing"}>
+              Gérer l'abonnement
+            </Link>
+          </Button>
+          <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1 mt-4">
             <div className="flex items-center gap-2">
               <Zap className="h-3 w-3" />
               <span>Raccourcis clavier</span>

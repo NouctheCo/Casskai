@@ -22,9 +22,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PageContainer } from '@/components/ui/PageContainer';
+import { PublicNavigation } from '@/components/navigation/PublicNavigation';
 import { useState } from 'react';
 
-const categoriesData = {
+export const categoriesData = {
   'premiers-pas': {
     id: 'premiers-pas',
     title: 'Premiers pas',
@@ -296,15 +297,6 @@ const categoriesData = {
         views: 756
       },
       {
-        id: 'api-et-webhooks',
-        title: 'API et webhooks',
-        description: 'Intégrer CassKai avec vos applications tierces',
-        readTime: '20 min',
-        difficulty: 'Avancé',
-        popular: false,
-        views: 145
-      },
-      {
         id: 'import-export',
         title: 'Import/Export',
         description: 'Échanger des données avec d\'autres logiciels comptables',
@@ -323,11 +315,75 @@ const categoriesData = {
         views: 320
       }
     ]
+  },
+  'api-et-webhooks': {
+    id: 'api-et-webhooks',
+    title: 'API et webhooks',
+    description: 'Intégration et développement avec l\'API CassKai',
+    icon: CreditCard,
+    color: 'bg-purple-500',
+    bgColor: 'bg-purple-50 dark:bg-purple-900/20',
+    articles: [
+      {
+        id: 'introduction-api',
+        title: 'Introduction à l\'API CassKai',
+        description: 'Découvrez les bases de l\'API REST de CassKai et comment l\'utiliser',
+        readTime: '8 min',
+        difficulty: 'Intermédiaire',
+        popular: true,
+        views: 856
+      },
+      {
+        id: 'authentification-api',
+        title: 'Authentification API',
+        description: 'Comment s\'authentifier et gérer les tokens d\'accès',
+        readTime: '10 min',
+        difficulty: 'Intermédiaire',
+        popular: true,
+        views: 743
+      },
+      {
+        id: 'endpoints-comptabilite',
+        title: 'Endpoints de comptabilité',
+        description: 'API pour gérer les écritures comptables, journaux et comptes',
+        readTime: '15 min',
+        difficulty: 'Avancé',
+        popular: false,
+        views: 412
+      },
+      {
+        id: 'endpoints-facturation',
+        title: 'Endpoints de facturation',
+        description: 'Créer, modifier et gérer les factures via l\'API',
+        readTime: '12 min',
+        difficulty: 'Avancé',
+        popular: true,
+        views: 567
+      },
+      {
+        id: 'webhooks-configuration',
+        title: 'Configuration des webhooks',
+        description: 'Recevoir des notifications en temps réel des événements CassKai',
+        readTime: '20 min',
+        difficulty: 'Avancé',
+        popular: false,
+        views: 234
+      },
+      {
+        id: 'exemples-integration',
+        title: 'Exemples d\'intégration',
+        description: 'Cas pratiques d\'intégration avec des outils populaires',
+        readTime: '25 min',
+        difficulty: 'Avancé',
+        popular: false,
+        views: 189
+      }
+    ]
   }
 };
 
 const DocumentationCategoryPage = () => {
-  const { categoryId } = useParams();
+  const { category: categoryId } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
@@ -338,18 +394,23 @@ const DocumentationCategoryPage = () => {
 
   if (!category) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Catégorie non trouvée
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300 mb-8">
-            La catégorie demandée n'existe pas ou a été déplacée.
-          </p>
-          <Button onClick={() => navigate('/help')}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Retour au centre d'aide
-          </Button>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+        <PublicNavigation variant="legal" />
+        <div className="pt-24 pb-16">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                Catégorie non trouvée
+              </h1>
+              <p className="text-gray-600 dark:text-gray-300 mb-8">
+                La catégorie demandée n'existe pas ou a été déplacée.
+              </p>
+              <Button onClick={() => navigate('/help')}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Retour au centre d'aide
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -392,9 +453,11 @@ const DocumentationCategoryPage = () => {
   const CategoryIcon = category.icon;
 
   return (
-    <PageContainer variant="default">
-      {/* Header */}
-      <div className={`${category.bgColor} py-16`}>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+      <PublicNavigation variant="legal" />
+      <div className="pt-24 pb-16">
+        {/* Header */}
+        <div className={`${category.bgColor} py-16`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center mb-6">
             <Button
@@ -530,7 +593,7 @@ const DocumentationCategoryPage = () => {
                   <Button
                     className="w-full mt-4"
                     variant="outline"
-                    onClick={() => navigate(`/docs/${article.id}`)}
+                    onClick={() => navigate(`/docs/${categoryId}/${article.id}`)}
                   >
                     Lire l'article
                     <ArrowRight className="w-4 h-4 ml-2" />
@@ -555,8 +618,9 @@ const DocumentationCategoryPage = () => {
             </Button>
           </div>
         )}
+        </div>
       </div>
-    </PageContainer>
+    </div>
   );
 };
 

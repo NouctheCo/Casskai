@@ -87,10 +87,24 @@ const SubscriptionWidget: React.FC = () => {
   const statusColor = getSubscriptionStatusColor(subscription.status);
   const statusLabel = getSubscriptionStatusLabel(subscription.status);
   
-  const usersLimit = getUsageLimit('users');
-  const currentUsers = 3; // Mock data - in real app, this would come from your backend
+  const [usageData, setUsageData] = React.useState({
+    users: { current: 3, limit: null as number | null }
+  });
 
-  const usagePercentage = usersLimit ? Math.min((currentUsers / usersLimit) * 100, 100) : 0;
+  React.useEffect(() => {
+    const fetchUsageData = async () => {
+      try {
+        const usersData = await getUsageLimit('users');
+        setUsageData({ users: usersData });
+      } catch (error) {
+        console.error('Failed to fetch usage data:', error);
+      }
+    };
+
+    fetchUsageData();
+  }, [getUsageLimit]);
+
+  const usagePercentage = usageData.users.limit ? Math.min((usageData.users.current / usageData.users.limit) * 100, 100) : 0;
 
   return (
     <motion.div
@@ -149,7 +163,7 @@ const SubscriptionWidget: React.FC = () => {
           </div>
 
           {/* Usage progress */}
-          {usersLimit && (
+          {usageData.users.limit && (
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center space-x-2">
@@ -157,7 +171,7 @@ const SubscriptionWidget: React.FC = () => {
                   <span className="text-gray-600 dark:text-gray-400">Utilisateurs</span>
                 </div>
                 <span className="font-medium text-gray-900 dark:text-white">
-                  {currentUsers}/{usersLimit}
+                  {usageData.users.current}/{usageData.users.limit}
                 </span>
               </div>
               <Progress value={usagePercentage} className="h-2" />

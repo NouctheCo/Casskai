@@ -6,6 +6,20 @@ interface ImportMetaEnv {
   readonly VITE_STRIPE_PUBLISHABLE_KEY: string;
   readonly VITE_APP_URL: string;
   readonly VITE_APP_ENV: string;
+  readonly VITE_WHATSAPP_PHONE: string;
+  readonly VITE_N8N_WEBHOOK_URL: string;
+  readonly VITE_STRIPE_STARTER_MONTHLY_PRICE_ID: string;
+  readonly VITE_STRIPE_PRO_MONTHLY_PRICE_ID: string;
+  readonly VITE_STRIPE_ENTERPRISE_MONTHLY_PRICE_ID: string;
+  readonly VITE_STRIPE_STARTER_YEARLY_PRICE_ID: string;
+  readonly VITE_STRIPE_PRO_YEARLY_PRICE_ID: string;
+  readonly VITE_STRIPE_ENTERPRISE_YEARLY_PRICE_ID: string;
+  readonly VITE_PLAUSIBLE_DOMAIN: string;
+  readonly VITE_PLAUSIBLE_API_HOST: string;
+  readonly VITE_API_BASE_URL: string;
+  readonly VITE_APP_NAME: string;
+  readonly VITE_APP_VERSION: string;
+  readonly VITE_USE_MOCK_SERVICES: string;
 }
 
 interface ImportMeta {

@@ -1,0 +1,58 @@
+import { DashboardWidget } from '@/types/dashboard-widget.types';
+
+export const availableWidgets: Omit<DashboardWidget, 'id' | 'position'>[] = [
+  {
+    title: 'Revenus du mois',
+    type: 'metric',
+    priority: 'high',
+    size: 'medium',
+    category: 'financial',
+    isVisible: true,
+    isCollapsed: false,
+  },
+  {
+    title: 'Factures en attente',
+    type: 'table',
+    priority: 'high',
+    size: 'large',
+    category: 'financial',
+    isVisible: true,
+    isCollapsed: false,
+  },
+  {
+    title: 'Graphique de trésorerie',
+    type: 'chart',
+    priority: 'medium',
+    size: 'large',
+    category: 'analytics',
+    isVisible: true,
+    isCollapsed: false,
+  },
+  {
+    title: 'Actions rapides',
+    type: 'quick-action',
+    priority: 'medium',
+    size: 'small',
+    category: 'operational',
+    isVisible: true,
+    isCollapsed: false,
+  },
+  {
+    title: 'Alertes système',
+    type: 'alert',
+    priority: 'low',
+    size: 'small',
+    category: 'alerts',
+    isVisible: true,
+    isCollapsed: false,
+  },
+  {
+    title: 'Nouveaux clients',
+    type: 'metric',
+    priority: 'medium',
+    size: 'small',
+    category: 'financial',
+    isVisible: true,
+    isCollapsed: false,
+  },
+];

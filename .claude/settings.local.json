@@ -85,7 +85,15 @@
       "Bash(rg:*)",
       "WebFetch(domain:localhost)",
       "Bash(rsync:*)",
-      "Bash(tar:*)"
+      "Bash(tar:*)",
+      "Bash(npx cspell:*)",
+      "Bash(./deploy-fix.sh:*)",
+      "Bash(jq:*)",
+      "Bash(deploy-simple.cmd)",
+      "Bash(./deploy-simple.cmd)",
+      "Bash(./deploy-vps.sh:*)",
+      "Bash(ping:*)",
+      "Bash(dir scripts)"
     ],
     "deny": []
   }

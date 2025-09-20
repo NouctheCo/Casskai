@@ -18,7 +18,7 @@ import {
   Star,
   Zap
 } from 'lucide-react';
-import { useOnboarding } from '@/contexts/OnboardingContext';
+import { useOnboarding } from '@/hooks/useOnboarding';
 import { useTranslation } from 'react-i18next';
 
 const modules = [
@@ -97,28 +97,26 @@ const modules = [
 ];
 
 export default function FeaturesStep() {
-  const { nextStep, prevStep, modules: selectedModules, setModules } = useOnboarding();
+  const { goToNextStep, goToPreviousStep, state, updateSelectedModules } = useOnboarding();
   const { t } = useTranslation();
 
   const toggleModule = (moduleKey: string) => {
-    setModules(prev => ({
-      ...prev,
-      [moduleKey]: !prev[moduleKey]
-    }));
+    const currentModules = state.data?.selectedModules || [];
+    const isSelected = currentModules.includes(moduleKey);
+    const newModules = isSelected
+      ? currentModules.filter(m => m !== moduleKey)
+      : [...currentModules, moduleKey];
+    updateSelectedModules(newModules);
   };
 
   const enableRecommended = () => {
     const recommendedModules = modules.filter(m => m.recommended).map(m => m.key);
-    setModules(prev => {
-      const updated = { ...prev };
-      recommendedModules.forEach(key => {
-        updated[key] = true;
-      });
-      return updated;
-    });
+    const currentModules = state.data?.selectedModules || [];
+    const newModules = [...new Set([...currentModules, ...recommendedModules])];
+    updateSelectedModules(newModules);
   };
 
-  const selectedCount = Object.values(selectedModules).filter(Boolean).length;
+  const selectedCount = (state.data?.selectedModules || []).length;
 
   return (
     <motion.div
@@ -175,7 +173,7 @@ export default function FeaturesStep() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * index, duration: 0.5 }}
                 className={`relative p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer hover:shadow-lg ${
-                  selectedModules[module.key]
+                  (state.data?.selectedModules || []).includes(module.key)
                     ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-md'
                     : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
                 }`}
@@ -193,7 +191,7 @@ export default function FeaturesStep() {
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center space-x-3">
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                      selectedModules[module.key]
+                      (state.data?.selectedModules || []).includes(module.key)
                         ? 'bg-blue-500 text-white'
                         : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                     }`}>
@@ -210,7 +208,7 @@ export default function FeaturesStep() {
                   </div>
                   
                   <Switch
-                    checked={selectedModules[module.key] || false}
+                    checked={(state.data?.selectedModules || []).includes(module.key)}
                     onCheckedChange={() => toggleModule(module.key)}
                     className="data-[state=checked]:bg-blue-500"
                   />
@@ -264,7 +262,7 @@ export default function FeaturesStep() {
           <div className="flex justify-between">
             <Button
               variant="outline"
-              onClick={prevStep}
+              onClick={goToPreviousStep}
               className="flex items-center space-x-2"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -272,7 +270,7 @@ export default function FeaturesStep() {
             </Button>
             
             <Button
-              onClick={nextStep}
+              onClick={goToNextStep}
               className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white flex items-center space-x-2"
             >
               <span>Continuer</span>

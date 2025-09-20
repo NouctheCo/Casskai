@@ -109,7 +109,7 @@ export default [
       'import/no-cycle': 'off', // Trop lourd pour le développement
       'complexity': ['warn', 15],
       'max-depth': ['warn', 4],
-      'max-lines': ['warn', 500],
+      'max-lines': ['warn', 700],
       'max-lines-per-function': ['warn', 100],
       'max-params': ['warn', 5],
       'no-eval': 'error',

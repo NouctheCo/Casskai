@@ -23,6 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { PageContainer } from '@/components/ui/PageContainer';
+import { PublicNavigation } from '@/components/navigation/PublicNavigation';
 
 const CookiesPolicyPage = () => {
   const { t } = useTranslation();
@@ -244,8 +245,10 @@ const CookiesPolicyPage = () => {
 
   return (
     <PageContainer variant="legal">
+      <PublicNavigation variant="legal" />
+
       {/* Header */}
-      <div className="bg-gradient-to-br from-orange-900 to-red-900 text-white py-16">
+      <div className="bg-gradient-to-br from-orange-900 to-red-900 text-white py-16 pt-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

@@ -83,16 +83,33 @@ const SubscriptionStatus: React.FC = () => {
   const statusColor = getSubscriptionStatusColor(subscription.status);
   const statusLabel = getSubscriptionStatusLabel(subscription.status);
   
-  const usersLimit = getUsageLimit('users');
-  const clientsLimit = getUsageLimit('clients');
-  const storageLimit = getUsageLimit('storage');
+  const [usageLimits, setUsageLimits] = React.useState({
+    users: { current: 0, limit: null as number | null },
+    clients: { current: 0, limit: null as number | null },
+    storage: { current: 0, limit: null as number | null }
+  });
 
-  // Mock usage data (in real app, this would come from your backend)
-  const currentUsage = {
-    users: 3,
-    clients: 87,
-    storage: 1.2 // GB
-  };
+  React.useEffect(() => {
+    const fetchUsageLimits = async () => {
+      try {
+        const [usersData, clientsData, storageData] = await Promise.all([
+          getUsageLimit('users'),
+          getUsageLimit('clients'),
+          getUsageLimit('storage')
+        ]);
+
+        setUsageLimits({
+          users: usersData,
+          clients: clientsData,
+          storage: storageData
+        });
+      } catch (error) {
+        console.error('Failed to fetch usage limits:', error);
+      }
+    };
+
+    fetchUsageLimits();
+  }, [getUsageLimit]);
 
   const getUsagePercentage = (used: number, limit: number | null) => {
     if (!limit) return 0;
@@ -232,7 +249,7 @@ const SubscriptionStatus: React.FC = () => {
             </h4>
             
             <div className="grid md:grid-cols-3 gap-4">
-              {usersLimit && (
+              {usageLimits.users.limit && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
@@ -242,17 +259,17 @@ const SubscriptionStatus: React.FC = () => {
                       </span>
                     </div>
                     <span className="text-sm text-gray-500">
-                      {currentUsage.users}/{usersLimit}
+                      {usageLimits.users.current}/{usageLimits.users.limit}
                     </span>
                   </div>
                   <Progress 
-                    value={getUsagePercentage(currentUsage.users, usersLimit)} 
+                    value={getUsagePercentage(usageLimits.users.current, usageLimits.users.limit)} 
                     className="h-2"
                   />
                 </div>
               )}
               
-              {clientsLimit && (
+              {usageLimits.clients.limit && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
@@ -262,17 +279,17 @@ const SubscriptionStatus: React.FC = () => {
                       </span>
                     </div>
                     <span className="text-sm text-gray-500">
-                      {currentUsage.clients}/{clientsLimit}
+                      {usageLimits.clients.current}/{usageLimits.clients.limit}
                     </span>
                   </div>
                   <Progress 
-                    value={getUsagePercentage(currentUsage.clients, clientsLimit)} 
+                    value={getUsagePercentage(usageLimits.clients.current, usageLimits.clients.limit)} 
                     className="h-2"
                   />
                 </div>
               )}
               
-              {storageLimit && (
+              {usageLimits.storage.limit && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
@@ -282,11 +299,11 @@ const SubscriptionStatus: React.FC = () => {
                       </span>
                     </div>
                     <span className="text-sm text-gray-500">
-                      {currentUsage.storage} GB/{storageLimit/1024} GB
+                      {usageLimits.storage.current} GB/{usageLimits.storage.limit ? usageLimits.storage.limit / 1024 : 0} GB
                     </span>
                   </div>
                   <Progress 
-                    value={getUsagePercentage(currentUsage.storage * 1024, storageLimit)} 
+                    value={getUsagePercentage(usageLimits.storage.current * 1024, usageLimits.storage.limit)} 
                     className="h-2"
                   />
                 </div>

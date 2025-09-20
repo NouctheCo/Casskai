@@ -11,6 +11,7 @@ import { CountrySelector } from '@/components/ui/CountrySelector';
 import { getMarketPricing, formatMarketPrice, getDefaultCountryCode } from '@/services/marketPricingService';
 import { changeLanguageAndDetectCountry } from '@/i18n/i18n';
 import { PageContainer } from '@/components/ui/PageContainer';
+import { PublicNavigation } from '@/components/navigation/PublicNavigation';
 import { 
   Calculator, 
   FileText, 
@@ -77,150 +78,6 @@ const AnimatedSection = ({ children, className = "" }) => {
   );
 };
 
-// Composant de navigation moderne
-const Navigation = ({ isScrolled }) => {
-  const { t } = useTranslation();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const navigate = useNavigate();
-
-  const navItems = [
-    { key: 'features', label: t('landing.nav.features', 'Fonctionnalités') },
-    { key: 'pricing', label: t('landing.nav.pricing', 'Tarifs') },
-    { key: 'testimonials', label: t('landing.nav.testimonials', 'Témoignages') },
-    { key: 'contact', label: t('landing.nav.contact', 'Contact') }
-  ];
-
-  const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-    setIsMenuOpen(false);
-  };
-
-  return (
-    <motion.nav
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-lg border-b border-gray-200/20 dark:border-gray-700/20' 
-          : 'bg-transparent'
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo avec effet premium */}
-          <motion.div 
-            className="flex items-center space-x-3"
-            whileHover={{ scale: 1.02 }}
-            transition={{ type: "spring", stiffness: 400, damping: 17 }}
-          >
-            <div className="relative">
-              <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 p-2.5 rounded-xl shadow-lg">
-                <Calculator className="w-6 h-6 text-white" />
-              </div>
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white dark:border-gray-900 animate-pulse"></div>
-            </div>
-            <div>
-              <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                CassKai
-              </span>
-              <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                Business Suite
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Navigation Desktop */}
-          <div className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
-              <motion.button
-                key={item.key}
-                onClick={() => scrollToSection(item.key)}
-                className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium relative group"
-                whileHover={{ y: -1 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              >
-                {item.label}
-                <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 group-hover:w-full transition-all duration-300"></div>
-              </motion.button>
-            ))}
-          </div>
-
-          {/* Actions Desktop */}
-          <div className="hidden md:flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/login')}
-              className="hover:bg-gray-100 dark:hover:bg-gray-800"
-            >
-              {t('landing.nav.login', 'Connexion')}
-            </Button>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                onClick={() => navigate('/register')}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <Zap className="w-4 h-4 mr-2" />
-                {t('landing.nav.signup', 'Commencer')}
-              </Button>
-            </motion.div>
-          </div>
-
-          {/* Menu mobile */}
-          <div className="md:hidden">
-            <motion.button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              whileTap={{ scale: 0.95 }}
-            >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </motion.button>
-          </div>
-        </div>
-
-        {/* Menu mobile */}
-        {isMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-t border-gray-200/20 dark:border-gray-700/20 rounded-b-lg shadow-lg"
-          >
-            <div className="py-4 space-y-2">
-              {navItems.map((item) => (
-                <button
-                  key={item.key}
-                  onClick={() => scrollToSection(item.key)}
-                  className="block w-full text-left px-4 py-3 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg mx-2 transition-colors font-medium"
-                >
-                  {item.label}
-                </button>
-              ))}
-              <div className="px-4 py-2 space-y-3 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => navigate('/login')}
-                  className="w-full"
-                >
-                  {t('landing.nav.login', 'Connexion')}
-                </Button>
-                <Button
-                  onClick={() => navigate('/register')}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-                >
-                  <Zap className="w-4 h-4 mr-2" />
-                  {t('landing.nav.signup', 'Commencer')}
-                </Button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </div>
-    </motion.nav>
-  );
-};
 
 // Hero Section améliorée
 const HeroSection = () => {
@@ -285,7 +142,7 @@ const HeroSection = () => {
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-10 py-6 text-lg font-semibold shadow-2xl hover:shadow-3xl transition-all duration-300 rounded-xl"
               >
                 <Zap className="mr-3 w-6 h-6" />
-                {t('landing.hero.cta.start', 'Essai gratuit 14 jours')}
+                {t('landing.hero.cta.start', 'Essai gratuit 30 jours')}
                 <ArrowRight className="ml-3 w-6 h-6" />
               </Button>
             </motion.div>
@@ -311,7 +168,7 @@ const HeroSection = () => {
             className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-5xl mx-auto"
           >
             {[
-              { number: '10,000+', label: t('landing.hero.stats.companies', 'Entreprises'), icon: Building, color: 'text-blue-600' },
+              { number: '100+', label: t('landing.hero.stats.companies', 'Entreprises'), icon: Building, color: 'text-blue-600' },
               { number: '99.9%', label: t('landing.hero.stats.uptime', 'Disponibilité'), icon: Shield, color: 'text-green-600' },
               { number: '24/7', label: t('landing.hero.stats.support', 'Support'), icon: MessageCircle, color: 'text-purple-600' },
               { number: '5★', label: t('landing.hero.stats.rating', 'Satisfaction'), icon: Star, color: 'text-yellow-600' }
@@ -335,6 +192,148 @@ const HeroSection = () => {
             ))}
           </motion.div>
         </div>
+      </div>
+    </section>
+  );
+};
+
+// Section ROI avec chiffres concrets
+const ROISection = () => {
+  const { t } = useTranslation();
+
+  const roiStats = [
+    {
+      icon: Calculator,
+      title: t('landing.roi.accounting.title', 'Économies comptabilité'),
+      value: "2,500€",
+      period: "/ an",
+      description: t('landing.roi.accounting.description', 'vs expert-comptable traditionnel'),
+      details: [
+        "Expert-comptable: 300-400€/mois",
+        "CassKai Pro: 49€/mois",
+        "Économies: ~250€/mois"
+      ],
+      color: 'from-green-500 to-emerald-600',
+      bgColor: 'bg-green-50 dark:bg-green-900/20'
+    },
+    {
+      icon: Clock,
+      title: t('landing.roi.time.title', 'Temps gagné'),
+      value: "15h",
+      period: "/ semaine",
+      description: t('landing.roi.time.description', 'sur les tâches administratives'),
+      details: [
+        "Saisie manuelle: 8h → 2h",
+        "Rapports: 4h → 30min",
+        "Relances clients: 3h → automatique"
+      ],
+      color: 'from-blue-500 to-indigo-600',
+      bgColor: 'bg-blue-50 dark:bg-blue-900/20'
+    },
+    {
+      icon: PieChart,
+      title: t('landing.roi.productivity.title', 'Productivité'),
+      value: "+40%",
+      period: "",
+      description: t('landing.roi.productivity.description', 'amélioration globale'),
+      details: [
+        "Moins d'erreurs de saisie",
+        "Tableaux de bord temps réel",
+        "Décisions plus rapides"
+      ],
+      color: 'from-purple-500 to-violet-600',
+      bgColor: 'bg-purple-50 dark:bg-purple-900/20'
+    }
+  ];
+
+  return (
+    <section className="py-24 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <AnimatedSection className="text-center mb-20">
+          <Badge className="mb-6 px-4 py-2 bg-gradient-to-r from-green-100 to-blue-100 dark:from-green-900/30 dark:to-blue-900/30 text-green-800 dark:text-blue-200 border-green-200/50 dark:border-blue-700/50">
+            <Calculator className="w-4 h-4 mr-2" />
+            {t('landing.roi.badge', 'Retour sur investissement')}
+          </Badge>
+
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+            {t('landing.roi.title', 'Pourquoi choisir CassKai ?')}
+            <br />
+            <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+              {t('landing.roi.subtitle', 'Le ROI est immédiat')}
+            </span>
+          </h2>
+
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            {t('landing.roi.description', 'Calculé sur la base de nos utilisateurs actuels, découvrez les économies réelles que vous pouvez réaliser.')}
+          </p>
+        </AnimatedSection>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+          {roiStats.map((stat, index) => (
+            <AnimatedSection key={index}>
+              <motion.div
+                className="group"
+                whileHover={{ y: -8, scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              >
+                <Card className={`h-full border-0 shadow-lg hover:shadow-2xl transition-all duration-300 ${stat.bgColor} border-l-4 border-l-green-500`}>
+                  <CardContent className="p-8 text-center">
+                    <div className={`w-16 h-16 bg-gradient-to-r ${stat.color} rounded-xl mx-auto mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                      <stat.icon className="w-8 h-8 text-white" />
+                    </div>
+
+                    <div className="mb-4">
+                      <span className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">
+                        {stat.value}
+                      </span>
+                      <span className="text-xl text-gray-600 dark:text-gray-400 ml-1">
+                        {stat.period}
+                      </span>
+                    </div>
+
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                      {stat.title}
+                    </h3>
+
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                      {stat.description}
+                    </p>
+
+                    <div className="space-y-2">
+                      {stat.details.map((detail, i) => (
+                        <div key={i} className="text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center">
+                          <CheckCircle className="w-3 h-3 text-green-500 mr-2 flex-shrink-0" />
+                          {detail}
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </AnimatedSection>
+          ))}
+        </div>
+
+        {/* Call-to-action ROI */}
+        <AnimatedSection>
+          <div className="text-center bg-gradient-to-r from-green-600 to-blue-600 rounded-2xl p-8 text-white">
+            <h3 className="text-2xl md:text-3xl font-bold mb-4">
+              Votre ROI se calcule en semaines, pas en mois
+            </h3>
+            <p className="text-lg opacity-90 mb-6 max-w-2xl mx-auto">
+              La plupart de nos utilisateurs rentabilisent CassKai dès le 2ème mois d'utilisation
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button
+                size="lg"
+                className="bg-white text-green-600 hover:bg-gray-100 px-8 py-3 font-semibold"
+              >
+                Démarrer l'essai gratuit 30 jours
+              </Button>
+              <span className="text-sm opacity-75">Sans engagement • Annulation en 1 clic</span>
+            </div>
+          </div>
+        </AnimatedSection>
       </div>
     </section>
   );
@@ -391,7 +390,7 @@ const FeaturesSection = () => {
       description: t('landing.features.banking.description', 'Connectez vos comptes bancaires, automatisez les rapprochements et suivez votre trésorerie en temps réel.'),
       color: 'from-indigo-500 to-blue-600',
       bgColor: 'bg-indigo-50 dark:bg-indigo-900/20',
-      details: ['Connexion bancaire', 'Rapprochement auto', 'Suivi trésorerie', 'Prévisions cash-flow']
+      details: ['Import des fichiers bancaires', 'Rapprochement auto', 'Suivi trésorerie', 'Prévisions cash-flow']
     }
   ];
 
@@ -415,6 +414,11 @@ const FeaturesSection = () => {
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             {t('landing.features.description', 'CassKai réunit tous les outils essentiels à la gestion de votre entreprise dans une interface moderne et intuitive.')}
           </p>
+
+          <div className="mt-6 inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-100 to-blue-100 dark:from-green-900/30 dark:to-blue-900/30 text-green-800 dark:text-green-200 text-sm font-medium rounded-full border border-green-200/50 dark:border-green-700/50 shadow-sm">
+            <Zap className="w-4 h-4 mr-2" />
+            📈 Nouvelles fonctionnalités en continu • Prochaine maj: janvier 2026
+          </div>
         </AnimatedSection>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -575,7 +579,7 @@ const PricingSection = () => {
         t('landing.pricing.enterprise.features.everything', 'Tout du plan Professionnel'),
         t('landing.pricing.enterprise.features.users', 'Utilisateurs illimités'),
         t('landing.pricing.enterprise.features.hr_advanced', 'RH avancées'),
-        t('landing.pricing.enterprise.features.banking', 'Connexions bancaires'),
+        t('landing.pricing.enterprise.features.banking', 'Import des fichiers bancaires'),
         t('landing.pricing.enterprise.features.forecasting', 'Prévisions financières'),
         t('landing.pricing.enterprise.features.audit', 'Piste d\'audit complète'),
         t('landing.pricing.enterprise.features.integrations', 'Intégrations personnalisées'),
@@ -633,7 +637,7 @@ const PricingSection = () => {
           </h2>
           
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
-            {t('landing.pricing.description', 'Tous nos plans incluent un essai gratuit de 14 jours, sans engagement et sans carte bancaire.')}
+            {t('landing.pricing.description', 'Tous nos plans incluent un essai gratuit de 30 jours, sans engagement et sans carte bancaire.')}
           </p>
 
           {/* Sélecteur de pays avec drapeaux */}
@@ -799,7 +803,7 @@ const PricingSection = () => {
               },
               {
                 icon: Clock,
-                title: t('landing.pricing.guarantee.trial.title', '14 jours gratuits'),
+                title: t('landing.pricing.guarantee.trial.title', '30 jours gratuits'),
                 description: t('landing.pricing.guarantee.trial.description', 'Testez toutes les fonctionnalités sans engagement')
               },
               {
@@ -838,28 +842,28 @@ const TestimonialsSection = () => {
 
   const testimonials = [
     {
-      name: "Marie Dubois",
-      position: "CEO, TechStart",
-      company: "Startup Tech",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b1-5c",
-      content: t('landing.testimonials.marie.content', "CassKai a révolutionné notre gestion financière. L'interface est intuitive et nous fait gagner un temps précieux chaque jour."),
-      rating: 5
+      name: "Alexandre K.",
+      position: "Fondateur",
+      company: "Startup E-commerce",
+      content: t('landing.testimonials.alex.content', "En phase de test depuis 3 mois. L'import des relevés bancaires me fait gagner 2h par semaine. Interface claire, j'attends les prochaines fonctionnalités !"),
+      rating: 4,
+      isBeta: true
     },
     {
-      name: "Pierre Martin",
-      position: "Comptable",
-      company: "Cabinet Martin & Associés",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
-      content: t('landing.testimonials.pierre.content', "Excellent outil pour mes clients PME. Les rapports automatisés et la conformité fiscale sont parfaits."),
-      rating: 5
+      name: "Fatou D.",
+      position: "Comptable indépendante",
+      company: "Dakar, Sénégal",
+      content: t('landing.testimonials.fatou.content', "Parfait pour mes clients PME au Sénégal. Le support du SYSCOHADA était indispensable. Facile à expliquer aux entrepreneurs."),
+      rating: 5,
+      isBeta: false
     },
     {
-      name: "Sophie Laurent",
-      position: "Directrice Financière",
-      company: "Retail Plus",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80",
-      content: t('landing.testimonials.sophie.content', "La gestion multi-entités et les tableaux de bord nous donnent une vision claire de nos performances."),  
-      rating: 5
+      name: "Thomas M.",
+      position: "Beta-testeur",
+      company: "Consultant freelance",
+      content: t('landing.testimonials.thomas.content', "J'ai testé la v1.0 pendant 2 mois. Quelques bugs mais l'équipe est réactive. Le module projets sera top quand il sera fini."),
+      rating: 4,
+      isBeta: true
     }
   ];
 
@@ -873,15 +877,15 @@ const TestimonialsSection = () => {
           </Badge>
           
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-            {t('landing.testimonials.title', 'Ils nous font confiance')}
+            {t('landing.testimonials.title', 'Premiers utilisateurs')}
             <br />
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              {t('landing.testimonials.subtitle', 'et réussissent avec CassKai')}
+              {t('landing.testimonials.subtitle', 'et beta-testeurs')}
             </span>
           </h2>
-          
+
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            {t('landing.testimonials.description', 'Découvrez comment CassKai transforme la gestion d\'entreprise pour des milliers de professionnels.')}
+            {t('landing.testimonials.description', 'Retours honnêtes de nos premiers utilisateurs et des professionnels qui testent CassKai.')}
           </p>
         </AnimatedSection>
 
@@ -895,11 +899,18 @@ const TestimonialsSection = () => {
               >
                 <Card className="h-full border-0 shadow-lg hover:shadow-2xl transition-all duration-300 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm group-hover:bg-white dark:group-hover:bg-gray-800">
                   <CardContent className="p-8">
-                    {/* Étoiles */}
-                    <div className="flex items-center mb-6">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                      ))}
+                    {/* Badge Beta */}
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center">
+                        {[...Array(testimonial.rating)].map((_, i) => (
+                          <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                        ))}
+                      </div>
+                      {testimonial.isBeta && (
+                        <Badge className="bg-gradient-to-r from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30 text-orange-800 dark:text-orange-200 border-orange-200/50 dark:border-orange-700/50 text-xs">
+                          Beta-testeur
+                        </Badge>
+                      )}
                     </div>
                     
                     {/* Témoignage */}
@@ -1047,7 +1058,7 @@ const Footer = () => {
               {[
                 { key: 'features', label: t('landing.footer.product.features', 'Fonctionnalités'), type: 'scroll' },
                 { key: 'pricing', label: t('landing.footer.product.pricing', 'Tarifs'), type: 'scroll' },
-                { key: 'security-info', label: t('landing.footer.product.security', 'Sécurité'), type: 'navigate' }
+                { key: 'gdpr', label: t('landing.footer.product.security', 'Sécurité'), type: 'navigate' }
               ].map((item) => (
                 <li key={item.key}>
                   <button
@@ -1072,14 +1083,22 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-6">{t('landing.footer.support.title', 'Support')}</h3>
             <ul className="space-y-3">
               {[
-                { label: t('landing.footer.support.help', 'Centre d\'aide'), href: '/help' },
-                { label: t('landing.footer.support.documentation', 'Documentation'), href: '/docs' },
-                { label: t('landing.footer.support.api', 'API'), href: '/api' },
-                { label: t('landing.footer.support.status', 'Statut'), href: '/status' }
+                { label: t('landing.footer.support.help', 'Centre d\'aide'), href: '#contact' },
+                { label: t('landing.footer.support.documentation', 'Documentation'), href: '/docs/premiers-pas' },
+                { label: t('landing.footer.support.api', 'API'), href: '/docs/api-et-webhooks' },
+                { label: t('landing.footer.support.status', 'Statut'), href: '/system-status' }
               ].map((item, index) => (
                 <li key={index}>
                   <button
-                    onClick={() => navigate(item.href)}
+                    onClick={() => {
+                      if (item.href.startsWith('http')) {
+                        window.open(item.href, '_blank');
+                      } else if (item.href.startsWith('#')) {
+                        document.getElementById(item.href.substring(1))?.scrollIntoView({ behavior: 'smooth' });
+                      } else {
+                        navigate(item.href);
+                      }
+                    }}
                     className="text-gray-400 hover:text-white transition-colors"
                   >
                     {item.label}
@@ -1094,9 +1113,9 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-6">{t('landing.footer.legal.title', 'Légal')}</h3>
             <ul className="space-y-3">
               {[
-                { label: t('landing.footer.legal.privacy', 'Confidentialité'), href: '/privacy' },
-                { label: t('landing.footer.legal.terms', 'Conditions'), href: '/terms' },
-                { label: t('landing.footer.legal.cookies', 'Cookies'), href: '/cookies' },
+                { label: t('landing.footer.legal.privacy', 'Confidentialité'), href: '/privacy-policy' },
+                { label: t('landing.footer.legal.terms', 'Conditions'), href: '/privacy-policy' },
+                { label: t('landing.footer.legal.cookies', 'Cookies'), href: '/cookies-policy' },
                 { label: t('landing.footer.legal.gdpr', 'RGPD'), href: '/gdpr' }
               ].map((item, index) => (
                 <li key={index}>
@@ -1181,27 +1200,20 @@ const Footer = () => {
 // Composant principal de la Landing Page
 const LandingPage = () => {
   const { t } = useTranslation();
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   return (
-    <PageContainer variant="landing" className="overflow-x-hidden">
-      <Navigation isScrolled={isScrolled} />
-      <HeroSection />
-      <FeaturesSection />
-      <PricingSection />
-      <TestimonialsSection />
-      <ContactSection />
-      <Footer />
-    </PageContainer>
+    <>
+      <PageContainer variant="landing" className="overflow-x-hidden">
+        <PublicNavigation variant="landing" />
+        <HeroSection />
+        <FeaturesSection />
+        <ROISection />
+        <PricingSection />
+        <TestimonialsSection />
+        <ContactSection />
+        <Footer />
+      </PageContainer>
+    </>
   );
 };
 

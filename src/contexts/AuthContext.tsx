@@ -4,10 +4,24 @@ import React, { createContext, useContext, useEffect, useState, useCallback, Rea
 import { supabase } from '../lib/supabase';
 import type { User, Session, AuthResponse, AuthError } from '@supabase/supabase-js';
 import { getCompanyDetails, getUserCompanies, getCompanyModules } from '../lib/company';
+import { trialService } from '../services/trialService';
 
 interface Company {
   id: string;
   name: string;
+  country?: string;
+  default_currency?: string;
+  siret?: string;
+  vat_number?: string;
+  address?: string;
+  city?: string;
+  postal_code?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  fiscal_year_start?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface AuthContextType {
@@ -48,6 +62,31 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return { error };
   }, []);
 
+  // Fonction pour s'assurer qu'un utilisateur a un abonnement d'essai
+  const ensureTrialSubscription = useCallback(async (userId: string, companyId: string) => {
+    try {
+      // Vérifier si l'utilisateur peut créer un essai
+      const canCreate = await trialService.canCreateTrial(userId);
+
+      if (canCreate) {
+        console.warn('🔄 Création automatique d\'un essai pour le nouvel utilisateur...');
+
+        // Créer un abonnement d'essai automatiquement
+        const result = await trialService.createTrialSubscription(userId, companyId);
+
+        if (result.success) {
+          console.warn('✅ Essai créé automatiquement pour l\'utilisateur');
+        } else {
+          console.error('❌ Échec de la création de l\'essai:', result.error);
+        }
+      } else {
+        console.warn('ℹ️ Utilisateur déjà éligible ou a déjà un abonnement');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la vérification/création de l\'abonnement:', error);
+    }
+  }, []);
+
   const switchCompany = useCallback(async (companyId: string) => {
     // Not setting loading here to avoid flicker when switching companies
     try {
@@ -66,6 +105,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     } catch (error) {
       console.error("AuthContext | Erreur lors du changement d'entreprise:", error);
+      // Ne pas lancer une erreur fatale, juste logger
+      setCurrentCompany(null);
     }
   }, []);
 
@@ -102,11 +143,29 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setOnboardingCompleted(true);
         localStorage.removeItem('onboarding_just_completed'); // Clean up the flag
         
+        // Vérifier et créer automatiquement un abonnement d'essai si nécessaire
+        await ensureTrialSubscription(currentUser.id, companies[0].id);
+        
         const lastCompanyId = localStorage.getItem('casskai_current_company_id');
         const companyToLoad = companies.find(c => c.id === lastCompanyId) || companies[0];
 
         if (companyToLoad) {
-          await switchCompany(companyToLoad.id);
+          try {
+            await switchCompany(companyToLoad.id);
+          } catch (switchError) {
+            console.error("AuthContext | Erreur lors du chargement de l'entreprise, tentative avec la première entreprise:", switchError);
+            // Essayer avec la première entreprise si celle sélectionnée échoue
+            if (companies[0] && companies[0].id !== companyToLoad.id) {
+              try {
+                await switchCompany(companies[0].id);
+              } catch (fallbackError) {
+                console.error("AuthContext | Échec du fallback vers la première entreprise:", fallbackError);
+                setCurrentCompany(null);
+              }
+            } else {
+              setCurrentCompany(null);
+            }
+          }
         } else {
           setCurrentCompany(null);
         }
@@ -115,26 +174,74 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setCurrentCompany(null);
       }
     } catch (error) {
-      console.error("AuthContext | Erreur critique lors de la récupération des données utilisateur:", error);
-      await signOut(); // Log out on critical error to ensure a clean state
+      console.error("AuthContext | Erreur lors de la récupération des données utilisateur:", error);
+      // Ne pas déconnecter automatiquement, juste logger l'erreur
+      setUserCompanies([]);
+      setCurrentCompany(null);
+      setOnboardingCompleted(false);
     } finally {
       setIsCheckingOnboarding(false); // Fin de la vérification
       setLoading(false);
     }
-  }, [switchCompany, signOut]);
+  }, [switchCompany, ensureTrialSubscription]);
 
   useEffect(() => {
     setLoading(true);
 
+    // Handle URL hash authentication tokens (email confirmation, etc.)
+    const handleAuthFromUrl = () => {
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const type = hashParams.get('type');
+      
+      if (accessToken && type === 'email_confirmation') {
+        console.warn('📧 Email confirmation detected, cleaning URL...');
+        // Clean URL by removing hash parameters
+        window.history.replaceState(null, '', window.location.pathname);
+        return true;
+      }
+      return false;
+    };
+
+    const isEmailConfirmation = handleAuthFromUrl();
+
     // Check for existing session on initial load
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.warn('Session recovery failed, clearing auth data:', error);
+        // Clear corrupted session data
+        localStorage.removeItem('sb-smtdtgrymuzwvctattmx-auth-token');
+        supabase.auth.signOut();
+        setSession(null);
+        fetchUserSession(null);
+        return;
+      }
+      
       setSession(session);
+      
+      // If this is an email confirmation, mark for onboarding redirect
+      if (isEmailConfirmation && session?.user) {
+        console.warn('📧 Email confirmed, user will be redirected to onboarding');
+      }
+      
       fetchUserSession(session?.user ?? null);
     });
 
     // Listen for auth state changes
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      console.warn('🔐 Auth state change:', event);
+      
       setSession(session);
+      
+      // Special handling for email confirmation
+      if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        if (hashParams.get('type') === 'email_confirmation') {
+          console.warn('📧 Email confirmation event detected');
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+      }
+      
       fetchUserSession(session?.user ?? null);
     });
 
