@@ -22,8 +22,14 @@ export interface DatabaseTable<T = any> {
 export interface DatabaseTables {
   companies: DatabaseTable<Company>;
   accounts: DatabaseTable<Account>;
+  journals: DatabaseTable;
   journal_entries: DatabaseTable;
   journal_entry_lines: DatabaseTable;
+  invoices: DatabaseTable;
+  quotes: DatabaseTable;
+  third_parties: DatabaseTable;
+  transactions: DatabaseTable;
+  payments: DatabaseTable;
   user_companies: DatabaseTable;
   user_roles: DatabaseTable;
 }

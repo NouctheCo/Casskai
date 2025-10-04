@@ -135,6 +135,11 @@ export interface Database {
         Insert: Partial<Account>
         Update: Partial<Account>
       }
+      journals: {
+        Row: any
+        Insert: any
+        Update: any
+      }
       journal_entries: {
         Row: JournalEntry
         Insert: Partial<JournalEntry>
@@ -144,6 +149,31 @@ export interface Database {
         Row: JournalEntryLine
         Insert: Partial<JournalEntryLine>
         Update: Partial<JournalEntryLine>
+      }
+      invoices: {
+        Row: any
+        Insert: any
+        Update: any
+      }
+      quotes: {
+        Row: any
+        Insert: any
+        Update: any
+      }
+      third_parties: {
+        Row: any
+        Insert: any
+        Update: any
+      }
+      transactions: {
+        Row: any
+        Insert: any
+        Update: any
+      }
+      payments: {
+        Row: any
+        Insert: any
+        Update: any
       }
       user_companies: {
         Row: UserCompany
