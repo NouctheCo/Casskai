@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useEffect, useCallback, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { useLocation } from 'react-router-dom';

@@ -1,4 +1,3 @@
-// @ts-nocheck
 // hooks/useLicense.ts
 import { useState, useEffect } from 'react';
 
