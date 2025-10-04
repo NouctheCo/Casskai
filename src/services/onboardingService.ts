@@ -1,4 +1,3 @@
-// @ts-nocheck
 // import { supabase } from '../lib/supabase'; // Commenté pour la compatibilité de build
 import { MARKET_CONFIGS } from '../data/markets';
 import {

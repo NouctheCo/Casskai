@@ -1,4 +1,3 @@
-// @ts-nocheck
 // src/services/migrationService.ts
 // import { supabase } from '../lib/supabase'; // Commented out for build compatibility
 

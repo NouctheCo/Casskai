@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { supabase } from '@/lib/supabase';
 import { errorHandler, type ErrorContext, withErrorHandling } from './errorHandlingService';
 import { toast } from 'sonner';
