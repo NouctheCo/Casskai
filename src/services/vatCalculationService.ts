@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { VATRule } from '../types/accounting-import.types';
 import { supabase } from '../lib/supabase';
 

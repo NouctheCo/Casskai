@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Service de génération de rapports financiers avec calculs avancés
 import { supabase } from '@/lib/supabase';
 import { reportExportService, TableData, ExportOptions } from './ReportExportService';

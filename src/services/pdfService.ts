@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Service de génération PDF pour les factures
  * Utilise jsPDF pour créer des factures personnalisées côté client

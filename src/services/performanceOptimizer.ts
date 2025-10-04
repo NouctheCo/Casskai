@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Service d'optimisation des performances pour CassKai
 import { ModuleDefinition } from '@/types/modules.types';
 

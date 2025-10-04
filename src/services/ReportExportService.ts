@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Service d'export de rapports avec génération PDF et Excel
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';

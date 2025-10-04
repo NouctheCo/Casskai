@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Service Projets moderne intégré avec Supabase
 import { supabase } from '@/lib/supabase';
 
