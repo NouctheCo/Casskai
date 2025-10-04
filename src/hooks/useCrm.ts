@@ -57,6 +57,13 @@ interface UseCrmReturn {
   refreshAll: () => Promise<void>;
 }
 
+// Helper to extract error message
+const getErrorMessage = (error: string | { message: string; code?: string } | undefined): string => {
+  if (!error) return 'Unknown error';
+  if (typeof error === 'string') return error;
+  return error.message;
+};
+
 export function useCrm(): UseCrmReturn {
   const { currentCompany } = useAuth();
 
@@ -116,7 +123,7 @@ export function useCrm(): UseCrmReturn {
       if (response.success && response.data) {
         setContacts(response.data);
       } else {
-        setError(response.error || 'Failed to fetch contacts');
+        setError(getErrorMessage(response.error) || 'Failed to fetch contacts');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -132,12 +139,13 @@ export function useCrm(): UseCrmReturn {
     setError(null);
 
     try {
-      const response = await crmService.getOpportunities(currentCompany.id, clientId);
+      const filters: CrmFilters = clientId ? { search: clientId } : {};
+      const response = await crmService.getOpportunities(currentCompany.id, filters);
 
       if (response.success && response.data) {
         setOpportunities(response.data);
       } else {
-        setError(response.error || 'Failed to fetch opportunities');
+        setError(getErrorMessage(response.error) || 'Failed to fetch opportunities');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -153,12 +161,14 @@ export function useCrm(): UseCrmReturn {
     setError(null);
 
     try {
-      const response = await crmService.getCommercialActions(currentCompany.id, filters);
+      // Convert filters to CrmFilters format
+      const crmFilters: CrmFilters = filters?.clientId ? { search: filters.clientId } : {};
+      const response = await crmService.getCommercialActions(currentCompany.id, crmFilters);
 
       if (response.success && response.data) {
         setCommercialActions(response.data);
       } else {
-        setError(response.error || 'Failed to fetch commercial actions');
+        setError(getErrorMessage(response.error) || 'Failed to fetch commercial actions');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -188,7 +198,8 @@ export function useCrm(): UseCrmReturn {
       }
 
       if (!statsResponse.success || !pipelineResponse.success) {
-        setError(statsResponse.error || pipelineResponse.error || 'Failed to fetch stats');
+        const errorMsg = getErrorMessage(statsResponse.error) || getErrorMessage(pipelineResponse.error) || 'Failed to fetch stats';
+        setError(errorMsg);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -209,7 +220,7 @@ export function useCrm(): UseCrmReturn {
       if (response.success && response.data) {
         setDashboardData(response.data);
       } else {
-        setError(response.error || 'Failed to fetch dashboard data');
+        setError(getErrorMessage(response.error) || 'Failed to fetch dashboard data');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -230,7 +241,7 @@ export function useCrm(): UseCrmReturn {
         await fetchClients();
         return true;
       } else {
-        setError(response.error || 'Failed to create client');
+        setError(getErrorMessage(response.error) || 'Failed to create client');
         return false;
       }
     } catch (err) {
@@ -241,14 +252,14 @@ export function useCrm(): UseCrmReturn {
 
   const updateClient = useCallback(async (clientId: string, clientData: Partial<ClientFormData>): Promise<boolean> => {
     try {
-      const response = await crmService.updateClient(clientId, clientData);
+      const response = await crmService.updateClient(clientId, clientData as ClientFormData);
 
       if (response.success) {
         // Refresh clients list
         await fetchClients();
         return true;
       } else {
-        setError(response.error || 'Failed to update client');
+        setError(getErrorMessage(response.error) || 'Failed to update client');
         return false;
       }
     } catch (err) {
@@ -266,7 +277,7 @@ export function useCrm(): UseCrmReturn {
         await fetchClients();
         return true;
       } else {
-        setError(response.error || 'Failed to delete client');
+        setError(getErrorMessage(response.error) || 'Failed to delete client');
         return false;
       }
     } catch (err) {
@@ -286,7 +297,7 @@ export function useCrm(): UseCrmReturn {
         await fetchContacts();
         return true;
       } else {
-        setError(response.error || 'Failed to create contact');
+        setError(getErrorMessage(response.error) || 'Failed to create contact');
         return false;
       }
     } catch (err) {
@@ -306,7 +317,7 @@ export function useCrm(): UseCrmReturn {
         await fetchOpportunities();
         return true;
       } else {
-        setError(response.error || 'Failed to create opportunity');
+        setError(getErrorMessage(response.error) || 'Failed to create opportunity');
         return false;
       }
     } catch (err) {
@@ -326,7 +337,7 @@ export function useCrm(): UseCrmReturn {
         await fetchCommercialActions();
         return true;
       } else {
-        setError(response.error || 'Failed to create commercial action');
+        setError(getErrorMessage(response.error) || 'Failed to create commercial action');
         return false;
       }
     } catch (err) {
