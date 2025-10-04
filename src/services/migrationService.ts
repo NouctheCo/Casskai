@@ -1,5 +1,5 @@
 // src/services/migrationService.ts
-// import { supabase } from '../lib/supabase'; // Commented out for build compatibility
+import { supabase } from '../lib/supabase';
 
 export interface MigrationResult {
   success: boolean;
@@ -51,10 +51,14 @@ class MigrationService {
       const companiesTableExists = tablesData && tablesData.length > 0;
 
       // Vérifier si la fonction get_dashboard_stats existe
-      const { data: functionsData, error: functionsError } = await supabase
-        .rpc('get_dashboard_stats', { p_company_id: '00000000-0000-0000-0000-000000000000' })
-        .then(() => ({ data: true, error: null }))
-        .catch((error: any) => ({ data: false, error }));
+      let functionsData = false;
+      let functionsError = null;
+      try {
+        await supabase.rpc('get_dashboard_stats', { p_company_id: '00000000-0000-0000-0000-000000000000' });
+        functionsData = true;
+      } catch (error: any) {
+        functionsError = error;
+      }
 
       const functionsExist = !functionsError;
 
