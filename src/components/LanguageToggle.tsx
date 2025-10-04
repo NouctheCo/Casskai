@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { Languages, Globe, Check } from 'lucide-react';
 import { useLocale } from '@/contexts/LocaleContext';

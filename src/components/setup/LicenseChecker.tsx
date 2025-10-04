@@ -1,4 +1,3 @@
-// @ts-nocheck
 // components/LicenseChecker.tsx
 import React, { useEffect, useState } from 'react';
 import { LicenseService } from '../services/licenseService';
