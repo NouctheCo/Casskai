@@ -132,14 +132,19 @@ export function useUserManagement(companyId: string) {
       if (usersError) throw usersError;
 
       // Transform data to match User interface
-      const transformedUsers: User[] = users
+      const transformedUsers = (users || [])
         .filter(uc => uc.users)
-        .map(uc => ({
-          id: uc.users.id,
-          email: uc.users.email,
-          firstName: uc.users.first_name || '',
-          lastName: uc.users.last_name || '',
-          avatar: uc.users.avatar_url,
+        .map(uc => {
+          // Supabase returns nested objects in array format, take first element
+          const user = Array.isArray(uc.users) ? uc.users[0] : uc.users;
+          if (!user) return null;
+
+          return {
+          id: user.id,
+          email: user.email,
+          firstName: user.first_name || '',
+          lastName: user.last_name || '',
+          avatar: user.avatar_url,
           role: {
             id: uc.role,
             name: getRoleName(uc.role),
@@ -152,13 +157,15 @@ export function useUserManagement(companyId: string) {
           permissions: getRolePermissions(uc.role),
           createdAt: uc.created_at,
           updatedAt: uc.updated_at,
-          lastLoginAt: uc.users.last_login_at,
+          lastLoginAt: user.last_login_at,
           companyId,
-          phoneNumber: uc.users.phone_number,
+          phoneNumber: user.phone_number,
           invitedBy: null
-        }));
+        } as User;
+        })
+        .filter((u: User | null): u is User => u !== null);
 
-      return transformedUsers;
+      return transformedUsers as User[];
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch users';
       setError(errorMessage);
@@ -201,14 +208,18 @@ export function useUserManagement(companyId: string) {
         .single();
 
       if (userError) throw userError;
-      if (!userCompany.users) return null;
+      if (!userCompany?.users) return null;
+
+      // Supabase returns nested objects in array format, take first element
+      const userRecord = Array.isArray(userCompany.users) ? userCompany.users[0] : userCompany.users;
+      if (!userRecord) return null;
 
       const user: User = {
-        id: userCompany.users.id,
-        email: userCompany.users.email,
-        firstName: userCompany.users.first_name || '',
-        lastName: userCompany.users.last_name || '',
-        avatar: userCompany.users.avatar_url,
+        id: userRecord.id,
+        email: userRecord.email,
+        firstName: userRecord.first_name || '',
+        lastName: userRecord.last_name || '',
+        avatar: userRecord.avatar_url,
         role: {
           id: userCompany.role,
           name: getRoleName(userCompany.role),
@@ -221,9 +232,9 @@ export function useUserManagement(companyId: string) {
         permissions: getRolePermissions(userCompany.role),
         createdAt: userCompany.created_at,
         updatedAt: userCompany.updated_at,
-        lastLoginAt: userCompany.users.last_login_at,
+        lastLoginAt: userRecord.last_login_at,
         companyId,
-        phoneNumber: userCompany.users.phone_number,
+        phoneNumber: userRecord.phone_number,
         invitedBy: null
       };
 
