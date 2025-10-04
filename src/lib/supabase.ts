@@ -34,43 +34,79 @@ export interface Database {
   public: {
     Tables: {
       companies: {
-        Row: {
-          id: string;
-          name: string;
-          country: string;
-          default_currency: string;
-          default_locale: string;
-          timezone: string;
-          is_active: boolean;
-          active_modules?: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          name: string;
-          country?: string;
-          default_currency?: string;
-          default_locale?: string;
-          timezone?: string;
-          is_active?: boolean;
-          active_modules?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          name?: string;
-          country?: string;
-          default_currency?: string;
-          default_locale?: string;
-          timezone?: string;
-          is_active?: boolean;
-          active_modules?: string | null;
-          updated_at?: string;
-        };
+      Row: {
+        id: string;
+        name: string;
+        country: string;
+        default_currency: string;
+        default_locale: string;
+        timezone: string;
+        owner_id: string | null;
+        created_by: string | null;
+        legal_form: string | null;
+        registration_number: string | null;
+        tax_number: string | null;
+        address: string | null;
+        city: string | null;
+        postal_code: string | null;
+        phone: string | null;
+        email: string | null;
+        website: string | null;
+        sector: string | null;
+        is_active: boolean;
+        active_modules?: string | null;
+        created_at: string;
+        updated_at: string;
       };
-      user_companies: {
+      Insert: {
+        id?: string;
+        name: string;
+        country?: string;
+        default_currency?: string;
+        default_locale?: string;
+        timezone?: string;
+        owner_id?: string | null;
+        created_by?: string | null;
+        legal_form?: string | null;
+        registration_number?: string | null;
+        tax_number?: string | null;
+        address?: string | null;
+        city?: string | null;
+        postal_code?: string | null;
+        phone?: string | null;
+        email?: string | null;
+        website?: string | null;
+        sector?: string | null;
+        is_active?: boolean;
+        active_modules?: string | null;
+        created_at?: string;
+        updated_at?: string;
+      };
+      Update: {
+        id?: string;
+        name?: string;
+        country?: string;
+        default_currency?: string;
+        default_locale?: string;
+        timezone?: string;
+        owner_id?: string | null;
+        created_by?: string | null;
+        legal_form?: string | null;
+        registration_number?: string | null;
+        tax_number?: string | null;
+        address?: string | null;
+        city?: string | null;
+        postal_code?: string | null;
+        phone?: string | null;
+        email?: string | null;
+        website?: string | null;
+        sector?: string | null;
+        is_active?: boolean;
+        active_modules?: string | null;
+        updated_at?: string;
+      };
+    };
+    user_companies: {
         Row: {
           id: string;
           user_id: string;
@@ -588,6 +624,14 @@ export const getUserCompanies = async (userId?: string) => {
   .eq('user_id', resolvedUserId);
 
   if (error) {
+    // Gestion gracieuse des erreurs RLS/500 - permet l'onboarding
+    if (error.message?.includes('500') ||
+        error.message?.includes('policy') ||
+        error.message?.includes('RLS') ||
+        error.code === '42P17') {
+      console.warn('🔄 RLS/Policy error in getUserCompanies - returning empty array for onboarding');
+      return [];
+    }
     throw new Error(handleSupabaseError(error));
   }
 

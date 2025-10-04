@@ -156,32 +156,40 @@ class TrialService {
   }
 
   /**
-   * Annule un essai
+   * Annule un abonnement d'essai
    */
-  async cancelTrial(userId: string, reason?: string): Promise<{ success: boolean; error?: string }> {
+  async cancelTrial(
+    userId: string,
+    reason?: string
+  ): Promise<{ success: boolean; error?: string }> {
     try {
-      const { data, error } = await supabase.rpc('cancel_trial', {
-        p_user_id: userId,
-        p_reason: reason || null
-      });
+      // Utiliser une approche directe au lieu de la fonction RPC
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .update({
+          status: 'canceled',
+          canceled_at: new Date().toISOString(),
+          cancel_reason: reason || null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId)
+        .eq('status', 'trialing')
+        .eq('plan_id', 'trial')
+        .select();
 
       if (error) {
         console.error('Error canceling trial:', error);
         return { success: false, error: error.message };
       }
 
-      if (data === 'NO_ACTIVE_TRIAL') {
-        return { success: false, error: 'Aucun essai actif trouvé' };
+      if (!data || data.length === 0) {
+        return { success: false, error: 'Aucun essai actif trouvé pour cet utilisateur' };
       }
 
-      if (data === 'SUCCESS') {
-        return { success: true };
-      }
-
-      return { success: false, error: 'Erreur lors de l\'annulation' };
+      return { success: true };
     } catch (error) {
       console.error('Error in cancelTrial:', error);
-      return { success: false, error: 'Erreur inattendue' };
+      return { success: false, error: 'Erreur lors de l\'annulation de l\'essai' };
     }
   }
 
@@ -210,7 +218,7 @@ class TrialService {
   async getExpiringTrials(daysAhead: number = 7): Promise<ExpiringTrial[]> {
     try {
       const { data, error } = await supabase
-        .from('user_subscriptions')
+        .from('subscriptions')
         .select(`
           id,
           user_id,

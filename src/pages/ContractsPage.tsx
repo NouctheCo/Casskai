@@ -150,7 +150,7 @@ const ContractsPage: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {dashboardData.alerts.map((alert) => (
+              {(dashboardData.alerts || []).map((alert) => (
                 <div
                   key={alert.id}
                   className={`p-3 rounded-lg border-l-4 ${

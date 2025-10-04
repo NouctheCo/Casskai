@@ -26,7 +26,11 @@ export interface CompanyProfile {
   website?: string;
   shareCapital?: string;
   ceoName?: string;
+  ceoTitle?: string;
   sector?: string;
+  industryType?: string;
+  companySize?: string;
+  registrationDate?: string;
   fiscalYearStart?: number;
   fiscalYearEnd?: number;
   accountingStandard?: string;
@@ -73,11 +77,29 @@ export interface OnboardingPreferences {
   dateFormat: string;
   numberFormat: string;
   theme: 'light' | 'dark' | 'system';
+
+  // Notifications détaillées (PHASE 1 - user_preferences)
+  emailNotifications?: boolean;
+  pushNotifications?: boolean;
+  smsNotifications?: boolean;
+  notificationFrequency?: 'immediate' | 'daily' | 'weekly' | 'monthly';
+
+  // Structure existante pour compatibilité
   notifications: {
     email: boolean;
     push: boolean;
     marketing: boolean;
   };
+
+  // Paramètres métier (PHASE 1 - user_preferences)
+  fiscalYearStart?: string;
+  defaultPaymentTerms?: string;
+  autoBackup?: boolean;
+
+  // Préférences UI (PHASE 1 - user_preferences)
+  compactView?: boolean;
+  showTooltips?: boolean;
+  autoSave?: boolean;
 }
 
 export interface FeatureExploration {

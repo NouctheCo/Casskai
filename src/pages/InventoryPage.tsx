@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import InventoryService from '@/services/inventoryService';
+import { useInventory } from '@/hooks/useInventory';
 import { 
   Archive, 
   PlusCircle, 
@@ -147,6 +147,26 @@ export default function InventoryPage() {
   const { t } = useLocale();
   const { toast } = useToast();
 
+  // Hook pour la gestion de l'inventaire
+  const {
+    items: inventoryItems,
+    movements: stockMovements,
+    metrics,
+    categories,
+    loading: isLoading,
+    itemsLoading,
+    movementsLoading,
+    error,
+    createItem,
+    updateItem,
+    deleteItem,
+    createMovement,
+    refreshAll,
+    lowStockItems,
+    outOfStockItems,
+    totalValue
+  } = useInventory();
+
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -174,12 +194,6 @@ export default function InventoryPage() {
   const [activeView, setActiveView] = useState('dashboard');
   const [showArticleForm, setShowArticleForm] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [inventoryItems, setInventoryItems] = useState([]);
-  const [stockMovements, setStockMovements] = useState([]);
-  const [productionOrders, setProductionOrders] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
   
   // États pour le formulaire article
   const [reference, setReference] = useState('');
@@ -193,53 +207,20 @@ export default function InventoryPage() {
   const [minStock, setMinStock] = useState('');
   const [location, setLocation] = useState('');
   const [supplier, setSupplier] = useState('');
-  
+
   // États pour le formulaire de mouvement
   const [showMovementForm, setShowMovementForm] = useState(false);
   const [movementItemId, setMovementItemId] = useState('');
   const [movementType, setMovementType] = useState<'entry' | 'exit' | 'adjustment' | 'transfer'>('entry');
   const [movementQuantity, setMovementQuantity] = useState('');
   const [movementReason, setMovementReason] = useState('');
-  
+
   // États pour le formulaire fournisseur
   const [showSupplierForm, setShowSupplierForm] = useState(false);
   const [supplierName, setSupplierName] = useState('');
   const [supplierEmail, setSupplierEmail] = useState('');
   const [supplierPhone, setSupplierPhone] = useState('');
   const [supplierContact, setSupplierContact] = useState('');
-
-  // Chargement initial des données
-  useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const [items, movements, suppliersList, metrics] = await Promise.all([
-          InventoryService.getInventoryItems(),
-          InventoryService.getStockMovements(),
-          InventoryService.getSuppliers(),
-          InventoryService.getInventoryMetrics()
-        ]);
-        
-        setInventoryItems(items);
-        setStockMovements(movements);
-        setSuppliers(suppliersList);
-        // Les métriques seront utilisées dans computedMetrics plus bas
-      } catch (error) {
-        console.error('Error loading inventory data:', error);
-        setError(error.message);
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Impossible de charger les données d'inventaire"
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
-  }, [toast]);
 
   // Gestionnaires d'événements
   const handleNewArticle = () => {
@@ -278,49 +259,29 @@ export default function InventoryPage() {
         status: 'active' as const
       };
 
-      // Créer l'article d'inventaire
-      const newItem = await InventoryService.createInventoryItem(itemData);
-      
-      // Créer un mouvement d'entrée initial si du stock est défini
-      if (parseInt(initialStock) > 0) {
-        await InventoryService.createStockMovement({
-          item_id: newItem.id,
-          type: 'entry',
-          quantity: parseInt(initialStock),
-          unit_price: parseFloat(purchasePrice),
-          reason: 'Stock initial',
-          reference: 'INIT-' + newItem.id,
-          location: newItem.location
+      // Utiliser le hook pour créer l'article
+      const success = await createItem(itemData);
+
+      if (success) {
+        // Réinitialiser le formulaire
+        setReference('');
+        setName('');
+        setDescription('');
+        setCategory('Matériel informatique');
+        setUnit('Pièce');
+        setPurchasePrice('');
+        setSellingPrice('');
+        setInitialStock('');
+        setMinStock('');
+        setLocation('');
+        setSupplier('');
+
+        toast({
+          title: "Succès",
+          description: "Article ajouté avec succès"
         });
+        setShowArticleForm(false);
       }
-      
-      // Recharger les données
-      const [items, movements] = await Promise.all([
-        InventoryService.getInventoryItems(),
-        InventoryService.getStockMovements()
-      ]);
-      
-      setInventoryItems(items);
-      setStockMovements(movements);
-      
-      // Réinitialiser le formulaire
-      setReference('');
-      setName('');
-      setDescription('');
-      setCategory('Matériel informatique');
-      setUnit('Pièce');
-      setPurchasePrice('');
-      setSellingPrice('');
-      setInitialStock('');
-      setMinStock('');
-      setLocation('');
-      setSupplier('');
-      
-      toast({
-        title: "Succès",
-        description: "Article ajouté avec succès"
-      });
-      setShowArticleForm(false);
     } catch (error) {
       console.error('Error creating inventory item:', error);
       toast({
@@ -329,15 +290,15 @@ export default function InventoryPage() {
         description: "Impossible de créer l'article"
       });
     }
-  }, [reference, name, description, category, unit, purchasePrice, sellingPrice, initialStock, minStock, location, supplier, toast]);
+  }, [reference, name, description, category, unit, purchasePrice, sellingPrice, initialStock, minStock, location, supplier, toast, createItem]);
 
   const handleStockMovement = useCallback(async (itemId, type, quantity, reason) => {
     const item = inventoryItems.find(i => i.id === itemId);
     if (!item) return;
 
     try {
-      // Créer le mouvement de stock
-      await InventoryService.createStockMovement({
+      // Utiliser le hook pour créer le mouvement de stock
+      const success = await createMovement({
         item_id: itemId,
         type,
         quantity: Math.abs(quantity),
@@ -346,20 +307,13 @@ export default function InventoryPage() {
         reference: `MOV-${Date.now()}`,
         location: item.location
       });
-      
-      // Recharger les données
-      const [items, movements] = await Promise.all([
-        InventoryService.getInventoryItems(),
-        InventoryService.getStockMovements()
-      ]);
-      
-      setInventoryItems(items);
-      setStockMovements(movements);
 
-      toast({
-        title: "Mouvement enregistré",
-        description: `${type === 'exit' ? 'Sortie' : 'Entrée'} de ${Math.abs(quantity)} ${item.unit.toLowerCase()}(s) pour ${item.name}`
-      });
+      if (success) {
+        toast({
+          title: "Mouvement enregistré",
+          description: `${type === 'exit' ? 'Sortie' : 'Entrée'} de ${Math.abs(quantity)} ${item.unit.toLowerCase()}(s) pour ${item.name}`
+        });
+      }
     } catch (error) {
       console.error('Error creating stock movement:', error);
       toast({
@@ -368,7 +322,7 @@ export default function InventoryPage() {
         description: "Impossible d'enregistrer le mouvement"
       });
     }
-  }, [inventoryItems, toast]);
+  }, [inventoryItems, toast, createMovement]);
 
   // Gestionnaire pour nouveau mouvement
   const handleNewMovement = () => {
@@ -386,7 +340,7 @@ export default function InventoryPage() {
     }
 
     try {
-      await InventoryService.createStockMovement({
+      const success = await createMovement({
         item_id: movementItemId,
         type: movementType,
         quantity: parseInt(movementQuantity),
@@ -394,26 +348,19 @@ export default function InventoryPage() {
         reference: `MOV-${Date.now()}`
       });
 
-      // Recharger les données
-      const [items, movements] = await Promise.all([
-        InventoryService.getInventoryItems(),
-        InventoryService.getStockMovements()
-      ]);
-      
-      setInventoryItems(items);
-      setStockMovements(movements);
+      if (success) {
+        // Réinitialiser le formulaire
+        setMovementItemId('');
+        setMovementType('entry');
+        setMovementQuantity('');
+        setMovementReason('');
+        setShowMovementForm(false);
 
-      // Réinitialiser le formulaire
-      setMovementItemId('');
-      setMovementType('entry');
-      setMovementQuantity('');
-      setMovementReason('');
-      setShowMovementForm(false);
-
-      toast({
-        title: "Succès",
-        description: "Mouvement enregistré avec succès"
-      });
+        toast({
+          title: "Succès",
+          description: "Mouvement enregistré avec succès"
+        });
+      }
     } catch (error) {
       console.error('Error creating movement:', error);
       toast({
@@ -422,7 +369,7 @@ export default function InventoryPage() {
         description: "Impossible d'enregistrer le mouvement"
       });
     }
-  }, [movementItemId, movementType, movementQuantity, movementReason, toast]);
+  }, [movementItemId, movementType, movementQuantity, movementReason, toast, createMovement]);
 
   // Gestionnaire pour nouveau fournisseur
   const handleNewSupplier = () => {
@@ -440,29 +387,18 @@ export default function InventoryPage() {
     }
 
     try {
-      await InventoryService.createSupplier({
-        name: supplierName.trim(),
-        email: supplierEmail.trim(),
-        phone: supplierPhone.trim(),
-        contact_person: supplierContact.trim(),
-        status: 'active'
+      // Cette fonction sera ajoutée au hook plus tard
+      toast({
+        title: "Information",
+        description: "Fonction de création de fournisseur à implémenter"
       });
 
-      // Recharger les fournisseurs
-      const suppliersData = await InventoryService.getSuppliers();
-      setSuppliers(suppliersData);
-
-      // Réinitialiser le formulaire
+      // Réinitialiser le formulaire en attendant
       setSupplierName('');
       setSupplierEmail('');
       setSupplierPhone('');
       setSupplierContact('');
       setShowSupplierForm(false);
-
-      toast({
-        title: "Succès",
-        description: "Fournisseur créé avec succès"
-      });
     } catch (error) {
       console.error('Error creating supplier:', error);
       toast({
@@ -473,25 +409,18 @@ export default function InventoryPage() {
     }
   }, [supplierName, supplierEmail, supplierPhone, supplierContact, toast]);
 
-  // Calculs pour les métriques
-  const metrics = useMemo(() => {
-    const totalValue = inventoryItems.reduce((sum, item) => sum + item.totalValue, 0);
-    const lowStockItems = inventoryItems.filter(item => item.status === 'low_stock').length;
-    const outOfStockItems = inventoryItems.filter(item => item.status === 'out_of_stock').length;
-    const activeItems = inventoryItems.filter(item => item.status === 'active').length;
-    
-    return {
-      totalItems: inventoryItems.length,
-      totalValue,
-      lowStockItems,
-      outOfStockItems,
-      activeItems,
-      averageRotation: 2.3, // À calculer plus tard
-      totalMovements: stockMovements.length,
-      monthlyTurnover: 0, // À calculer plus tard
-      profitMargin: 32.5 // À calculer plus tard
-    };
-  }, [inventoryItems]);
+  // Métriques calculées provenant du hook
+  const computedMetrics = useMemo(() => ({
+    totalItems: inventoryItems.length,
+    totalValue: totalValue,
+    lowStockItems: lowStockItems.length,
+    outOfStockItems: outOfStockItems.length,
+    activeItems: inventoryItems.filter(item => item.status === 'active').length,
+    averageRotation: metrics?.totalMovementsValue || 2.3,
+    totalMovements: stockMovements.length,
+    monthlyTurnover: 0,
+    profitMargin: 32.5
+  }), [inventoryItems, totalValue, lowStockItems, outOfStockItems, stockMovements, metrics]);
 
   return (
     <motion.div 
@@ -720,8 +649,8 @@ export default function InventoryPage() {
                     <Box className="h-4 w-4 text-blue-500" />
                     <span className="text-sm font-medium">Articles total</span>
                   </div>
-                  <div className="text-2xl font-bold">{metrics.totalItems}</div>
-                  <p className="text-xs text-muted-foreground">{metrics.activeItems} actifs</p>
+                  <div className="text-2xl font-bold">{computedMetrics.totalItems}</div>
+                  <p className="text-xs text-muted-foreground">{computedMetrics.activeItems} actifs</p>
                 </CardContent>
               </Card>
               
@@ -731,7 +660,7 @@ export default function InventoryPage() {
                     <DollarSign className="h-4 w-4 text-green-500" />
                     <span className="text-sm font-medium">Valeur totale</span>
                   </div>
-                  <div className="text-2xl font-bold">€{(metrics.totalValue || 0).toLocaleString()}</div>
+                  <div className="text-2xl font-bold">€{(computedMetrics.totalValue || 0).toLocaleString()}</div>
                   <p className="text-xs text-muted-foreground">Inventaire valorisé</p>
                 </CardContent>
               </Card>
@@ -742,7 +671,7 @@ export default function InventoryPage() {
                     <AlertTriangle className="h-4 w-4 text-orange-500" />
                     <span className="text-sm font-medium">Stock faible</span>
                   </div>
-                  <div className="text-2xl font-bold">{metrics.lowStockItems}</div>
+                  <div className="text-2xl font-bold">{computedMetrics.lowStockItems}</div>
                   <p className="text-xs text-muted-foreground">Articles à réapprovisionner</p>
                 </CardContent>
               </Card>
@@ -753,7 +682,7 @@ export default function InventoryPage() {
                     <XCircle className="h-4 w-4 text-red-500" />
                     <span className="text-sm font-medium">Rupture</span>
                   </div>
-                  <div className="text-2xl font-bold">{metrics.outOfStockItems}</div>
+                  <div className="text-2xl font-bold">{computedMetrics.outOfStockItems}</div>
                   <p className="text-xs text-muted-foreground">Articles en rupture</p>
                 </CardContent>
               </Card>
@@ -794,13 +723,13 @@ export default function InventoryPage() {
                       <div key={movement.id} className="flex items-center gap-3">
                         <div className={`w-2 h-2 rounded-full ${movement.type === 'entry' ? 'bg-green-500' : movement.type === 'exit' ? 'bg-red-500' : 'bg-blue-500'}`} />
                         <div className="flex-1">
-                          <p className="text-sm font-medium">{movement.itemName}</p>
+                          <p className="text-sm font-medium">{movement.item_name}</p>
                           <p className="text-xs text-muted-foreground">
                             {movement.type === 'entry' ? 'Entrée' : movement.type === 'exit' ? 'Sortie' : 'Ajustement'} 
                             de {Math.abs(movement.quantity)} - {movement.reason}
                           </p>
                         </div>
-                        <span className="text-xs text-muted-foreground">{movement.date}</span>
+                        <span className="text-xs text-muted-foreground">{new Date(movement.created_at).toLocaleDateString()}</span>
                       </div>
                     ))}
                   </div>
@@ -920,13 +849,13 @@ export default function InventoryPage() {
                            movement.type === 'exit' ? <ArrowDown className="h-5 w-5" /> : <Activity className="h-5 w-5" />}
                         </div>
                         <div>
-                          <h3 className="font-semibold">{movement.itemName}</h3>
+                          <h3 className="font-semibold">{movement.item_name}</h3>
                           <p className="text-sm text-muted-foreground">
                             {movement.type === 'entry' ? 'Entrée' : movement.type === 'exit' ? 'Sortie' : 'Ajustement'} 
                             de {Math.abs(movement.quantity)} - {movement.reason}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {movement.date} à {movement.time} par {movement.user}
+                            {new Date(movement.created_at).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
@@ -934,8 +863,8 @@ export default function InventoryPage() {
                         <p className={`text-lg font-bold ${movement.type === 'entry' ? 'text-green-600' : movement.type === 'exit' ? 'text-red-600' : 'text-blue-600'}`}>
                           {movement.type === 'entry' ? '+' : movement.type === 'exit' ? '-' : '±'}{Math.abs(movement.quantity)}
                         </p>
-                        <p className="text-sm text-muted-foreground">€{Math.abs(movement.totalValue).toFixed(2)}</p>
-                        <p className="text-xs text-muted-foreground">{movement.document}</p>
+                        <p className="text-sm text-muted-foreground">€{Math.abs(movement.total_value || 0).toFixed(2)}</p>
+                        <p className="text-xs text-muted-foreground">{movement.reference}</p>
                       </div>
                     </motion.div>
                   ))}
@@ -963,7 +892,7 @@ export default function InventoryPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  {productionOrders.map((order) => (
+                  {mockProductionOrders.map((order) => (
                     <motion.div
                       key={order.id}
                       initial={{ opacity: 0, y: 20 }}
@@ -1048,7 +977,7 @@ export default function InventoryPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {suppliers.map((supplier) => (
+                  {mockSuppliers.map((supplier) => (
                     <motion.div
                       key={supplier.id}
                       initial={{ opacity: 0, y: 20 }}
@@ -1195,7 +1124,7 @@ export default function InventoryPage() {
                       <CardContent className="p-4">
                         <div className="text-center">
                           <h3 className="font-semibold">Valeur totale</h3>
-                          <p className="text-2xl font-bold text-blue-600">€{(metrics.totalValue || 0).toLocaleString()}</p>
+                          <p className="text-2xl font-bold text-blue-600">€{(computedMetrics.totalValue || 0).toLocaleString()}</p>
                           <p className="text-sm text-muted-foreground">Coût moyen pondéré</p>
                         </div>
                       </CardContent>
@@ -1204,7 +1133,7 @@ export default function InventoryPage() {
                       <CardContent className="p-4">
                         <div className="text-center">
                           <h3 className="font-semibold">Rotation moyenne</h3>
-                          <p className="text-2xl font-bold text-green-600">{metrics.averageRotation}</p>
+                          <p className="text-2xl font-bold text-green-600">{computedMetrics.averageRotation}</p>
                           <p className="text-sm text-muted-foreground">Fois par an</p>
                         </div>
                       </CardContent>
@@ -1213,7 +1142,7 @@ export default function InventoryPage() {
                       <CardContent className="p-4">
                         <div className="text-center">
                           <h3 className="font-semibold">Marge moyenne</h3>
-                          <p className="text-2xl font-bold text-purple-600">{metrics.profitMargin}%</p>
+                          <p className="text-2xl font-bold text-purple-600">{computedMetrics.profitMargin}%</p>
                           <p className="text-sm text-muted-foreground">Sur prix de vente</p>
                         </div>
                       </CardContent>
@@ -1231,7 +1160,7 @@ export default function InventoryPage() {
                           .sort((a, b) => b.totalValue - a.totalValue)
                           .slice(0, 5)
                           .map((item, index) => {
-                            const percentage = (item.totalValue / metrics.totalValue) * 100;
+                            const percentage = (item.totalValue / computedMetrics.totalValue) * 100;
                             return (
                               <div key={item.id} className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
@@ -1291,7 +1220,7 @@ export default function InventoryPage() {
                           </div>
                           <div className="p-4 border rounded-lg">
                             <h4 className="font-semibold mb-2">Ventes du mois</h4>
-                            <p className="text-2xl font-bold text-green-600">€{(metrics.monthlyTurnover || 0).toLocaleString()}</p>
+                            <p className="text-2xl font-bold text-green-600">€{(computedMetrics.monthlyTurnover || 0).toLocaleString()}</p>
                             <p className="text-sm text-muted-foreground">Chiffre d'affaires</p>
                           </div>
                         </div>
@@ -1445,12 +1374,12 @@ export default function InventoryPage() {
                                 <p className="text-xs text-muted-foreground mb-2">Historique des mouvements:</p>
                                 <div className="space-y-1">
                                   {stockMovements
-                                    .filter(m => m.itemId === item.id)
+                                    .filter(m => m.item_id === item.id)
                                     .slice(0, 3)
                                     .map((movement) => (
                                       <div key={movement.id} className="flex items-center gap-2 text-xs">
                                         <div className={`w-2 h-2 rounded-full ${movement.type === 'entry' ? 'bg-green-500' : movement.type === 'exit' ? 'bg-red-500' : 'bg-blue-500'}`} />
-                                        <span>{movement.date} - {movement.reason} ({movement.quantity})</span>
+                                        <span>{new Date(movement.created_at).toLocaleDateString()} - {movement.reason} ({movement.quantity})</span>
                                       </div>
                                     ))}
                                 </div>
@@ -1567,7 +1496,7 @@ export default function InventoryPage() {
                   <CardContent>
                     <div className="space-y-2">
                       {stockMovements
-                        .filter(movement => movement.itemId === selectedItem.id)
+                        .filter(movement => movement.item_id === selectedItem.id)
                         .slice(0, 5)
                         .map((movement) => (
                           <div key={movement.id} className="flex items-center gap-2 text-sm">
@@ -1576,7 +1505,7 @@ export default function InventoryPage() {
                               {movement.type === 'entry' ? 'Entrée' : movement.type === 'exit' ? 'Sortie' : 'Ajust.'} 
                               de {Math.abs(movement.quantity)}
                             </span>
-                            <span className="text-muted-foreground">{movement.date}</span>
+                            <span className="text-muted-foreground">{new Date(movement.created_at).toLocaleDateString()}</span>
                           </div>
                         ))}
                     </div>

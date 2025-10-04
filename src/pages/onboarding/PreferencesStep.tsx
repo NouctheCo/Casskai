@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { 
+import {
   Settings,
   Globe,
   DollarSign,
@@ -14,20 +14,16 @@ import {
   Smartphone,
   ArrowRight,
   ArrowLeft,
-  Info
+  Info,
+  Loader2
 } from 'lucide-react';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { useTranslation } from 'react-i18next';
 import { CompanyProfile } from '@/types/onboarding.types';
+import { useCurrencies, useTimezones } from '@/hooks/useReferentials';
 
-const currencies = [
-  { code: 'EUR', name: 'Euro (€)', flag: '🇪🇺' },
-  { code: 'XOF', name: 'Franc CFA BCEAO (F)', flag: '🇸🇳' },
-  { code: 'XAF', name: 'Franc CFA BEAC (F)', flag: '🇨🇲' },
-  { code: 'MAD', name: 'Dirham marocain (DH)', flag: '🇲🇦' },
-  { code: 'TND', name: 'Dinar tunisien (د.ت)', flag: '🇹🇳' },
-  { code: 'USD', name: 'Dollar américain ($)', flag: '🇺🇸' }
-];
+// ✨ LISTES HARDCODÉES SUPPRIMÉES - PHASE 3 RÉFÉRENTIELS DYNAMIQUES
+// Remplacées par useCurrencies() et useTimezones() hooks
 
 const languages = [
   { code: 'fr', name: 'Français', flag: '🇫🇷' },
@@ -66,9 +62,17 @@ interface Preferences {
 interface RegionalConfigurationProps {
   preferences: Preferences;
   updatePreference: (key: string, value: string | number) => void;
+  // ✨ RÉFÉRENTIELS DYNAMIQUES - PHASE 3
+  currencies?: any[];
+  timezones?: any[];
 }
 
-const RegionalConfigurationSection: React.FC<RegionalConfigurationProps> = ({ preferences, updatePreference }) => (
+const RegionalConfigurationSection: React.FC<RegionalConfigurationProps> = ({
+  preferences,
+  updatePreference,
+  currencies = [],
+  timezones = []
+}) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -109,10 +113,10 @@ const RegionalConfigurationSection: React.FC<RegionalConfigurationProps> = ({ pr
           </SelectTrigger>
           <SelectContent>
             {currencies.map(currency => (
-              <SelectItem key={currency.code} value={currency.code}>
+              <SelectItem key={currency.currency_code} value={currency.currency_code}>
                 <div className="flex items-center space-x-2">
-                  <span>{currency.flag}</span>
-                  <span>{currency.name}</span>
+                  <span>{currency.currency_symbol}</span>
+                  <span>{currency.currency_name}</span>
                 </div>
               </SelectItem>
             ))}
@@ -368,6 +372,12 @@ export default function PreferencesStep() {
   const { goToNextStep, goToPreviousStep, state, updateCompanyProfile } = useOnboarding();
   const { t } = useTranslation();
 
+  // ✨ RÉFÉRENTIELS DYNAMIQUES - PHASE 3
+  const { currencies, loading: currenciesLoading } = useCurrencies();
+  const { timezones, loading: timezonesLoading } = useTimezones(true); // Seulement les populaires
+
+  const referentialsLoading = currenciesLoading || timezonesLoading;
+
   const { preferences, updatePreference, updateNotification, handleNext: savePreferences } = usePreferences(state.data?.companyProfile || {}, updateCompanyProfile);
 
   const handleNext = () => {
@@ -407,27 +417,39 @@ export default function PreferencesStep() {
         </CardHeader>
 
         <CardContent className="p-6 space-y-8">
-          <RegionalConfigurationSection
-            preferences={preferences}
-            updatePreference={updatePreference}
-          />
+          {referentialsLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-6 h-6 animate-spin text-green-600 mr-2" />
+              <span className="text-gray-600 dark:text-gray-400">Chargement des préférences...</span>
+            </div>
+          ) : (
+            <>
+              <RegionalConfigurationSection
+                preferences={preferences}
+                updatePreference={updatePreference}
+                // ✨ RÉFÉRENTIELS DYNAMIQUES - PHASE 3
+                currencies={currencies}
+                timezones={timezones}
+              />
 
-          <AccountingConfigurationSection
-            preferences={preferences}
-            updatePreference={updatePreference}
-          />
+              <AccountingConfigurationSection
+                preferences={preferences}
+                updatePreference={updatePreference}
+              />
 
-          <NotificationsSection
-            preferences={preferences}
-            updateNotification={updateNotification}
-          />
+              <NotificationsSection
+                preferences={preferences}
+                updateNotification={updateNotification}
+              />
 
-          <InformationSection />
+              <InformationSection />
 
-          <NavigationSection
-            onPrevStep={goToPreviousStep}
-            onNextStep={handleNext}
-          />
+              <NavigationSection
+                onPrevStep={goToPreviousStep}
+                onNextStep={handleNext}
+              />
+            </>
+          )}
         </CardContent>
       </Card>
     </motion.div>

@@ -9,27 +9,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
-import { 
+import {
   Plus,
   Search,
-  Filter,
-  Download,
   Edit,
   Trash2,
   Eye,
-  Calendar,
   FileText,
   ChevronDown,
   ChevronRight,
   CheckCircle,
   AlertCircle,
-  Clock,
-  Zap
+  Zap,
+  RefreshCw
 } from 'lucide-react';
 
-// Entry Form Component
-const EntryFormDialog = ({ open, onClose, entry = null, onSave }) => {
-  const { toast } = useToast();
+function useEntryFormState(entry) {
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     reference: '',
@@ -51,13 +46,116 @@ const EntryFormDialog = ({ open, onClose, entry = null, onSave }) => {
     }
   }, [entry]);
 
+  return { formData, setFormData };
+}
+
+function EntryLineForm({ line, index, updateLine, removeLine, canRemove }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="grid md:grid-cols-5 gap-4 p-4 border rounded-lg"
+    >
+      <div className="space-y-2">
+        <Label>Compte</Label>
+        <Select
+          value={line.account}
+          onValueChange={(value) => updateLine(index, 'account', value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Sélectionner" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="411000">411000 - Clients</SelectItem>
+            <SelectItem value="701000">701000 - Ventes</SelectItem>
+            <SelectItem value="445710">445710 - TVA collectée</SelectItem>
+            <SelectItem value="512000">512000 - Banque</SelectItem>
+            <SelectItem value="607000">607000 - Achats</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label>Libellé</Label>
+        <Input
+          placeholder="Libellé de la ligne"
+          value={line.description}
+          onChange={(e) => updateLine(index, 'description', e.target.value)}
+        />
+      </div>
+      <div className="space-y-2">
+        <Label>Débit</Label>
+        <Input
+          type="number"
+          step="0.01"
+          placeholder="0.00"
+          value={line.debit}
+          onChange={(e) => updateLine(index, 'debit', e.target.value)}
+        />
+      </div>
+      <div className="space-y-2">
+        <Label>Crédit</Label>
+        <Input
+          type="number"
+          step="0.01"
+          placeholder="0.00"
+          value={line.credit}
+          onChange={(e) => updateLine(index, 'credit', e.target.value)}
+        />
+      </div>
+      <div className="flex items-end">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => removeLine(index)}
+          disabled={!canRemove}
+        >
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      </div>
+    </motion.div>
+  );
+}
+
+function EntryTotals({ totals }) {
+  return (
+    <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+      <div className="grid md:grid-cols-3 gap-4 text-sm">
+        <div className="flex justify-between">
+          <span className="font-medium">Total Débit:</span>
+          <span className="font-mono">{totals.totalDebit.toFixed(2)} €</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="font-medium">Total Crédit:</span>
+          <span className="font-mono">{totals.totalCredit.toFixed(2)} €</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="font-medium">Équilibre:</span>
+          <div className="flex items-center space-x-2">
+            {totals.isBalanced ? (
+              <CheckCircle className="w-4 h-4 text-green-500" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-red-500" />
+            )}
+            <span className={totals.isBalanced ? 'text-green-600' : 'text-red-600'}>
+              {totals.isBalanced ? 'Équilibrée' : 'Non équilibrée'}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const EntryFormDialog = ({ open, onClose, entry = null, onSave }) => {
+  const { toast } = useToast();
+  const { formData, setFormData } = useEntryFormState(entry);
+
   const addLine = () => {
     setFormData(prev => ({
       ...prev,
       lines: [...prev.lines, { account: '', description: '', debit: '', credit: '' }]
     }));
   };
-
   const removeLine = (index) => {
     if (formData.lines.length > 2) {
       setFormData(prev => ({
@@ -66,7 +164,6 @@ const EntryFormDialog = ({ open, onClose, entry = null, onSave }) => {
       }));
     }
   };
-
   const updateLine = (index, field, value) => {
     setFormData(prev => ({
       ...prev,
@@ -75,15 +172,12 @@ const EntryFormDialog = ({ open, onClose, entry = null, onSave }) => {
       )
     }));
   };
-
   const calculateTotals = () => {
     const totalDebit = formData.lines.reduce((sum, line) => sum + (parseFloat(line.debit) || 0), 0);
     const totalCredit = formData.lines.reduce((sum, line) => sum + (parseFloat(line.credit) || 0), 0);
     return { totalDebit, totalCredit, isBalanced: totalDebit === totalCredit };
   };
-
   const totals = calculateTotals();
-
   const handleSave = () => {
     if (!totals.isBalanced) {
       toast({
@@ -93,7 +187,6 @@ const EntryFormDialog = ({ open, onClose, entry = null, onSave }) => {
       });
       return;
     }
-
     onSave({
       ...formData,
       id: entry?.id || Date.now(),
@@ -101,15 +194,12 @@ const EntryFormDialog = ({ open, onClose, entry = null, onSave }) => {
       totalDebit: totals.totalDebit,
       totalCredit: totals.totalCredit
     });
-
     toast({
       title: entry ? "Écriture modifiée" : "Écriture créée",
       description: "L'écriture a été enregistrée avec succès."
     });
-
     onClose();
   };
-
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
@@ -119,7 +209,6 @@ const EntryFormDialog = ({ open, onClose, entry = null, onSave }) => {
             <span>{entry ? 'Modifier l\'écriture' : 'Nouvelle écriture'}</span>
           </DialogTitle>
         </DialogHeader>
-
         <div className="space-y-6">
           {/* Entry Header */}
           <div className="grid md:grid-cols-3 gap-4">
@@ -151,7 +240,6 @@ const EntryFormDialog = ({ open, onClose, entry = null, onSave }) => {
               />
             </div>
           </div>
-
           {/* Entry Lines */}
           <Card>
             <CardHeader>
@@ -166,106 +254,21 @@ const EntryFormDialog = ({ open, onClose, entry = null, onSave }) => {
             <CardContent>
               <div className="space-y-4">
                 {formData.lines.map((line, index) => (
-                  <motion.div
+                  <EntryLineForm
                     key={index}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="grid md:grid-cols-5 gap-4 p-4 border rounded-lg"
-                  >
-                    <div className="space-y-2">
-                      <Label>Compte</Label>
-                      <Select
-                        value={line.account}
-                        onValueChange={(value) => updateLine(index, 'account', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="411000">411000 - Clients</SelectItem>
-                          <SelectItem value="701000">701000 - Ventes</SelectItem>
-                          <SelectItem value="445710">445710 - TVA collectée</SelectItem>
-                          <SelectItem value="512000">512000 - Banque</SelectItem>
-                          <SelectItem value="607000">607000 - Achats</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>Libellé</Label>
-                      <Input
-                        placeholder="Libellé de la ligne"
-                        value={line.description}
-                        onChange={(e) => updateLine(index, 'description', e.target.value)}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>Débit</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
-                        value={line.debit}
-                        onChange={(e) => updateLine(index, 'debit', e.target.value)}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>Crédit</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
-                        value={line.credit}
-                        onChange={(e) => updateLine(index, 'credit', e.target.value)}
-                      />
-                    </div>
-                    
-                    <div className="flex items-end">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeLine(index)}
-                        disabled={formData.lines.length <= 2}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </motion.div>
+                    line={line}
+                    index={index}
+                    updateLine={updateLine}
+                    removeLine={removeLine}
+                    canRemove={formData.lines.length > 2}
+                  />
                 ))}
               </div>
-
               {/* Totals */}
-              <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                <div className="grid md:grid-cols-3 gap-4 text-sm">
-                  <div className="flex justify-between">
-                    <span className="font-medium">Total Débit:</span>
-                    <span className="font-mono">{totals.totalDebit.toFixed(2)} €</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="font-medium">Total Crédit:</span>
-                    <span className="font-mono">{totals.totalCredit.toFixed(2)} €</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">Équilibre:</span>
-                    <div className="flex items-center space-x-2">
-                      {totals.isBalanced ? (
-                        <CheckCircle className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <AlertCircle className="w-4 h-4 text-red-500" />
-                      )}
-                      <span className={totals.isBalanced ? 'text-green-600' : 'text-red-600'}>
-                        {totals.isBalanced ? 'Équilibrée' : 'Non équilibrée'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <EntryTotals totals={totals} />
             </CardContent>
           </Card>
         </div>
-
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
             Annuler
@@ -280,9 +283,140 @@ const EntryFormDialog = ({ open, onClose, entry = null, onSave }) => {
   );
 };
 
+// Entry Preview Dialog Component
+const EntryPreviewDialog = ({ open, onClose, entry }) => {
+  if (!entry) return null;
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'validated':
+        return <Badge className="bg-green-100 text-green-800 border-green-200">Validée</Badge>;
+      case 'draft':
+        return <Badge variant="secondary">Brouillon</Badge>;
+      case 'pending':
+        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">En attente</Badge>;
+      default:
+        return <Badge variant="outline">Inconnue</Badge>;
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center space-x-3">
+            <FileText className="w-5 h-5 text-blue-500" />
+            <span>Détails de l'écriture - {entry.reference}</span>
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          {/* Entry Header */}
+          <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div>
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Référence</Label>
+              <p className="text-lg font-semibold">{entry.reference}</p>
+            </div>
+            <div>
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Statut</Label>
+              <div className="mt-1">{getStatusBadge(entry.status)}</div>
+            </div>
+          </div>
+
+          {/* Entry Details */}
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Date</Label>
+                <p className="text-base">{new Date(entry.date).toLocaleDateString('fr-FR')}</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Description</Label>
+                <p className="text-base">{entry.description}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Entry Lines */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Lignes d'écriture</h3>
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Compte</TableHead>
+                    <TableHead>Libellé</TableHead>
+                    <TableHead className="text-right">Débit</TableHead>
+                    <TableHead className="text-right">Crédit</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {entry.lines?.map((line, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-mono">{line.account}</TableCell>
+                      <TableCell>{line.description}</TableCell>
+                      <TableCell className="text-right font-mono">
+                        {line.debit ? `${parseFloat(line.debit).toFixed(2)} €` : ''}
+                      </TableCell>
+                      <TableCell className="text-right font-mono">
+                        {line.credit ? `${parseFloat(line.credit).toFixed(2)} €` : ''}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+
+          {/* Totals */}
+          <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div className="text-center">
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Débit</Label>
+              <p className="text-xl font-bold text-red-600">{entry.totalDebit?.toFixed(2)} €</p>
+            </div>
+            <div className="text-center">
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Crédit</Label>
+              <p className="text-xl font-bold text-green-600">{entry.totalCredit?.toFixed(2)} €</p>
+            </div>
+          </div>
+
+          {/* Balance Status */}
+          <div className="text-center">
+            {entry.totalDebit === entry.totalCredit ? (
+              <div className="flex items-center justify-center space-x-2 text-green-600">
+                <CheckCircle className="w-5 h-5" />
+                <span className="font-medium">Écriture équilibrée</span>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center space-x-2 text-red-600">
+                <AlertCircle className="w-5 h-5" />
+                <span className="font-medium">Écriture non équilibrée</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Fermer
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 // Entry Row Component
 const EntryRow = ({ entry, onEdit, onDelete, onView }) => {
   const [expanded, setExpanded] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  // Simuler un contrôle RBAC (à remplacer par vrai hook/context)
+  const userCanEdit = true; // TODO: remplacer par vrai contrôle
+  const userCanDelete = true;
+  const userCanView = true;
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -321,14 +455,20 @@ const EntryRow = ({ entry, onEdit, onDelete, onView }) => {
         <TableCell>{getStatusBadge(entry.status)}</TableCell>
         <TableCell>
           <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="sm" onClick={() => onView(entry)}>
+            <Button variant="ghost" size="sm" onClick={() => userCanView && onView(entry)} disabled={!userCanView}>
               <Eye className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => onEdit(entry)}>
+            <Button variant="ghost" size="sm" onClick={() => userCanEdit && onEdit(entry)} disabled={!userCanEdit}>
               <Edit className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => onDelete(entry)}>
-              <Trash2 className="w-4 h-4" />
+            <Button variant="ghost" size="sm" onClick={async () => {
+              if (!userCanDelete) return;
+              setIsDeleting(true);
+              await new Promise(r => setTimeout(r, 600)); // Simule async
+              onDelete(entry);
+              setIsDeleting(false);
+            }} disabled={!userCanDelete || isDeleting}>
+              {isDeleting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
             </Button>
           </div>
         </TableCell>
@@ -392,6 +532,7 @@ export default function OptimizedJournalEntriesTab() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [showEntryForm, setShowEntryForm] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null);
+  const [previewEntry, setPreviewEntry] = useState(null);
 
   const filteredEntries = entries.filter(entry => {
     const matchesSearch = entry.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -425,11 +566,7 @@ export default function OptimizedJournalEntriesTab() {
   };
 
   const handleViewEntry = (entry) => {
-    // View entry details logic
-    toast({
-      title: "Détails de l'écriture",
-      description: `Consultation de l'écriture ${entry.reference}`
-    });
+    setPreviewEntry(entry);
   };
 
   const summary = {
@@ -572,6 +709,12 @@ export default function OptimizedJournalEntriesTab() {
         }}
         entry={editingEntry}
         onSave={handleSaveEntry}
+      />
+
+      <EntryPreviewDialog
+        open={!!previewEntry}
+        onClose={() => setPreviewEntry(null)}
+        entry={previewEntry}
       />
     </div>
   );

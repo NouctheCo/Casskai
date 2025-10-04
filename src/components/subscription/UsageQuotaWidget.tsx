@@ -221,7 +221,7 @@ export const UsageQuotaWidget: React.FC<UsageQuotaWidgetProps> = ({
           {showUpgradeButton && (criticalCount || nearLimitCount > 1) && (
             <div className={`${compact ? 'pt-2' : 'pt-4'} border-t border-gray-200 dark:border-gray-700`}>
               <Button 
-                onClick={() => navigate('/settings/billing?tab=plans')}
+                onClick={() => navigate('/pricing')}
                 className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
                 size={compact ? 'sm' : 'default'}
               >

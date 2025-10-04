@@ -38,17 +38,22 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // FIX: Logique cohérente de vérification d'onboarding
   if (requireOnboarding && user) {
-    console.warn('📋 ProtectedRoute: Checking onboarding requirement', {
-      requireOnboarding,
-      onboardingCompleted,
-      hasCurrentCompany: !!currentCompany,
-      currentCompanyId: currentCompany?.id,
-      currentPath: location.pathname
-    });
+    // Debug logs seulement en mode développement avec debug activé
+    if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_MODE === 'true') {
+      console.warn('📋 ProtectedRoute: Checking onboarding requirement', {
+        requireOnboarding,
+        onboardingCompleted,
+        hasCurrentCompany: !!currentCompany,
+        currentCompanyId: currentCompany?.id,
+        currentPath: location.pathname
+      });
+    }
 
     // Si l'utilisateur est déjà sur la page d'onboarding, ne pas rediriger
     if (location.pathname === '/onboarding' || location.pathname.startsWith('/onboarding/')) {
-      console.warn('ℹ️ ProtectedRoute: Already on onboarding page - allowing render');
+      if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_MODE === 'true') {
+        console.warn('ℹ️ ProtectedRoute: Already on onboarding page - allowing render');
+      }
       return <>{children}</>;
     }
 
@@ -110,7 +115,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Si l'utilisateur est connecté et que les requirements sont satisfaits,
   // afficher le contenu protégé
-  console.warn('🎉 ProtectedRoute: Access granted, rendering protected content');
+  if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_MODE === 'true') {
+    console.warn('🎉 ProtectedRoute: Access granted, rendering protected content');
+  }
   return <>{children}</>;
 };
 

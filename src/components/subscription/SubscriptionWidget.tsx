@@ -71,9 +71,9 @@ const SubscriptionWidget: React.FC = () => {
                 </p>
               </div>
             </div>
-            <Button 
-              size="sm" 
-              onClick={() => navigate('/settings/billing')}
+            <Button
+              size="sm"
+              onClick={() => navigate('/pricing')}
               className="bg-yellow-600 hover:bg-yellow-700 text-white"
             >
               Choisir un plan
@@ -206,7 +206,7 @@ const SubscriptionWidget: React.FC = () => {
               <Button 
                 size="sm" 
                 className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                onClick={() => navigate('/settings/billing?tab=plans')}
+                onClick={() => navigate('/pricing')}
               >
                 <ArrowUpCircle className="w-4 h-4 mr-2" />
                 Upgrade

@@ -337,6 +337,139 @@ const InvoiceFormDialog = ({ open, onClose, invoice = null, onSave }) => {
   );
 };
 
+// Invoice Preview Dialog Component
+const InvoicePreviewDialog = ({ open, onClose, invoice }) => {
+  if (!invoice) return null;
+
+  const calculateTotals = (invoice) => {
+    const subtotal = invoice.items?.reduce((sum, item) => sum + item.total, 0) || 0;
+    const discountAmount = subtotal * (invoice.discount || 0) / 100;
+    const taxableAmount = subtotal - discountAmount;
+    const taxAmount = taxableAmount * (invoice.tax || 20) / 100;
+    const total = taxableAmount + taxAmount;
+
+    return { subtotal, discountAmount, taxAmount, total };
+  };
+
+  const totals = calculateTotals(invoice);
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center space-x-2">
+            <Eye className="w-5 h-5 text-blue-500" />
+            <span>Aperçu de la facture {invoice.invoiceNumber}</span>
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          {/* En-tête de la facture */}
+          <div className="border-b pb-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h3 className="font-semibold text-lg mb-2">Informations client</h3>
+                <p className="text-gray-600 dark:text-gray-400">{invoice.clientName || 'Client inconnu'}</p>
+              </div>
+              <div className="text-right">
+                <h3 className="font-semibold text-lg mb-2">Informations facture</h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  <strong>Numéro:</strong> {invoice.invoiceNumber}
+                </p>
+                <p className="text-gray-600 dark:text-gray-400">
+                  <strong>Date:</strong> {new Date(invoice.date).toLocaleDateString('fr-FR')}
+                </p>
+                <p className="text-gray-600 dark:text-gray-400">
+                  <strong>Échéance:</strong> {new Date(invoice.dueDate).toLocaleDateString('fr-FR')}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Articles de la facture */}
+          <div>
+            <h3 className="font-semibold text-lg mb-4">Articles</h3>
+            <div className="border rounded-lg overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-800">
+                  <tr>
+                    <th className="px-4 py-2 text-left">Description</th>
+                    <th className="px-4 py-2 text-center">Quantité</th>
+                    <th className="px-4 py-2 text-right">Prix unitaire</th>
+                    <th className="px-4 py-2 text-right">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoice.items?.map((item, index) => (
+                    <tr key={index} className="border-t">
+                      <td className="px-4 py-2">{item.description}</td>
+                      <td className="px-4 py-2 text-center">{item.quantity}</td>
+                      <td className="px-4 py-2 text-right">{item.price.toFixed(2)} €</td>
+                      <td className="px-4 py-2 text-right font-medium">{item.total.toFixed(2)} €</td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot className="bg-gray-50 dark:bg-gray-800 border-t-2">
+                  <tr>
+                    <td colSpan={3} className="px-4 py-2 text-right font-semibold">Sous-total</td>
+                    <td className="px-4 py-2 text-right font-bold">{totals.subtotal.toFixed(2)} €</td>
+                  </tr>
+                  {invoice.discount > 0 && (
+                    <tr>
+                      <td colSpan={3} className="px-4 py-2 text-right font-semibold text-red-600">
+                        Remise ({invoice.discount}%)
+                      </td>
+                      <td className="px-4 py-2 text-right text-red-600">-{totals.discountAmount.toFixed(2)} €</td>
+                    </tr>
+                  )}
+                  <tr>
+                    <td colSpan={3} className="px-4 py-2 text-right font-semibold">
+                      TVA ({invoice.tax || 20}%)
+                    </td>
+                    <td className="px-4 py-2 text-right">{totals.taxAmount.toFixed(2)} €</td>
+                  </tr>
+                  <tr>
+                    <td colSpan={3} className="px-4 py-2 text-right font-bold">Total TTC</td>
+                    <td className="px-4 py-2 text-right font-bold text-lg">{totals.total.toFixed(2)} €</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+          {/* Notes */}
+          {invoice.notes && (
+            <div>
+              <h3 className="font-semibold text-lg mb-2">Notes</h3>
+              <p className="text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                {invoice.notes}
+              </p>
+            </div>
+          )}
+
+          {/* Statut */}
+          <div className="flex items-center justify-between pt-4 border-t">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-600 dark:text-gray-400">Statut:</span>
+              {invoice.status === 'paid' && <Badge className="bg-green-100 text-green-800 border-green-200">Payée</Badge>}
+              {invoice.status === 'sent' && <Badge className="bg-blue-100 text-blue-800 border-blue-200">Envoyée</Badge>}
+              {invoice.status === 'overdue' && <Badge className="bg-red-100 text-red-800 border-red-200">En retard</Badge>}
+              {invoice.status === 'draft' && <Badge variant="secondary">Brouillon</Badge>}
+              {invoice.status === 'cancelled' && <Badge variant="destructive">Annulée</Badge>}
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Fermer
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 // Invoice Row Component
 const InvoiceRow = ({ invoice, onEdit, onDelete, onView, onSend }) => {
   const getStatusBadge = (status) => {
@@ -390,53 +523,63 @@ const InvoiceRow = ({ invoice, onEdit, onDelete, onView, onSend }) => {
 
 export default function OptimizedInvoicesTab({ shouldCreateNew = false, onCreateNewCompleted }) {
   const { toast } = useToast();
-  const [invoices, setInvoices] = useState([
-    {
-      id: 1,
-      invoiceNumber: 'F-2024-001',
-      clientId: 'client1',
-      clientName: 'ABC Corporation',
-      date: '2024-01-15',
-      dueDate: '2024-02-15',
-      total: 1440.00,
-      status: 'paid',
-      items: [
-        { description: 'Consultation', quantity: 8, price: 150, total: 1200 },
-        { description: 'Analyse technique', quantity: 1, price: 200, total: 200 }
-      ]
-    },
-    {
-      id: 2,
-      invoiceNumber: 'F-2024-002',
-      clientId: 'client2',
-      clientName: 'XYZ Entreprise',
-      date: '2024-01-20',
-      dueDate: '2024-02-20',
-      total: 2880.00,
-      status: 'sent',
-      items: [
-        { description: 'Développement application', quantity: 16, price: 180, total: 2880 }
-      ]
-    },
-    {
-      id: 3,
-      invoiceNumber: 'F-2024-003',
-      clientId: 'client3',
-      clientName: 'Tech Solutions',
-      date: '2024-01-10',
-      dueDate: '2024-01-25',
-      total: 960.00,
-      status: 'overdue',
-      items: [
-        { description: 'Formation équipe', quantity: 1, price: 800, total: 800 }
-      ]
+  const [invoices, setInvoices] = useState(() => {
+    // Charger les factures depuis localStorage
+    const savedInvoices = localStorage.getItem('casskai_invoices');
+    if (savedInvoices) {
+      return JSON.parse(savedInvoices);
     }
-  ]);
+
+    // Données par défaut si rien dans localStorage
+    return [
+      {
+        id: 1,
+        invoiceNumber: 'F-2024-001',
+        clientId: 'client1',
+        clientName: 'ABC Corporation',
+        date: '2024-01-15',
+        dueDate: '2024-02-15',
+        total: 1440.00,
+        status: 'paid',
+        items: [
+          { description: 'Consultation', quantity: 8, price: 150, total: 1200 },
+          { description: 'Analyse technique', quantity: 1, price: 200, total: 200 }
+        ]
+      },
+      {
+        id: 2,
+        invoiceNumber: 'F-2024-002',
+        clientId: 'client2',
+        clientName: 'XYZ Entreprise',
+        date: '2024-01-20',
+        dueDate: '2024-02-20',
+        total: 2880.00,
+        status: 'sent',
+        items: [
+          { description: 'Développement application', quantity: 16, price: 180, total: 2880 }
+        ]
+      },
+      {
+        id: 3,
+        invoiceNumber: 'F-2024-003',
+        clientId: 'client3',
+        clientName: 'Tech Solutions',
+        date: '2024-01-10',
+        dueDate: '2024-01-25',
+        total: 960.00,
+        status: 'overdue',
+        items: [
+          { description: 'Formation équipe', quantity: 1, price: 800, total: 800 }
+        ]
+      }
+    ];
+  });
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showInvoiceForm, setShowInvoiceForm] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState(null);
+  const [previewInvoice, setPreviewInvoice] = useState(null);
 
   // Ouvrir automatiquement le formulaire si shouldCreateNew est true
   useEffect(() => {
@@ -447,6 +590,11 @@ export default function OptimizedInvoicesTab({ shouldCreateNew = false, onCreate
       }
     }
   }, [shouldCreateNew, onCreateNewCompleted]);
+
+  // Synchroniser les factures avec localStorage
+  useEffect(() => {
+    localStorage.setItem('casskai_invoices', JSON.stringify(invoices));
+  }, [invoices]);
 
   const filteredInvoices = invoices.filter(invoice => {
     const matchesSearch = invoice.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -480,10 +628,7 @@ export default function OptimizedInvoicesTab({ shouldCreateNew = false, onCreate
   };
 
   const handleViewInvoice = (invoice) => {
-    toast({
-      title: "Aperçu de la facture",
-      description: `Consultation de la facture ${invoice.invoiceNumber}`
-    });
+    setPreviewInvoice(invoice);
   };
 
   const handleSendInvoice = (invoice) => {
@@ -637,6 +782,13 @@ export default function OptimizedInvoicesTab({ shouldCreateNew = false, onCreate
         }}
         invoice={editingInvoice}
         onSave={handleSaveInvoice}
+      />
+
+      {/* Invoice Preview Dialog */}
+      <InvoicePreviewDialog
+        open={!!previewInvoice}
+        onClose={() => setPreviewInvoice(null)}
+        invoice={previewInvoice}
       />
     </div>
   );

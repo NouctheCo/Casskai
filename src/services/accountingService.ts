@@ -238,15 +238,13 @@ export class AccountingService {
       const accountsToCreate = PCG_ACCOUNTS.map(account => ({
         company_id: companyId,
         account_number: account.code,
-        name: account.name,
-        type: this.mapPCGTypeToDBType(account.type),
-        class: parseInt(account.code.charAt(0)),
-        parent_account_id: null, // À implémenter si nécessaire
+        account_name: account.name,
+        account_type: this.mapPCGTypeToDBType(account.type),
+        account_class: parseInt(account.code.charAt(0)),
+        parent_account_id: null,
         description: account.description || null,
-        is_active: account.isActive,
-        balance: 0,
-        currency: 'EUR',
-        tax_rate: 0
+        is_active: account.isActive || true,
+        normal_balance: this.getAccountNormalBalance(account.type)
       }));
 
       const { data, error } = await supabase
@@ -328,12 +326,28 @@ export class AccountingService {
   private mapPCGTypeToDBType(pcgType: string): string {
     const typeMapping: { [key: string]: string } = {
       'asset': 'asset',
-      'liability': 'liability', 
+      'liability': 'liability',
       'equity': 'equity',
       'revenue': 'revenue',
-      'expense': 'expense'
+      'expense': 'expense',
+      'capitaux': 'equity',
+      'immobilisations': 'asset',
+      'stocks': 'asset',
+      'dettes': 'liability',
+      'creances': 'asset',
+      'tresorerie': 'asset',
+      'charges': 'expense',
+      'produits': 'revenue'
     };
     return typeMapping[pcgType] || 'asset';
+  }
+
+  /**
+   * Détermine le sens normal du solde d'un compte
+   */
+  private getAccountNormalBalance(accountType: string): 'debit' | 'credit' {
+    const debitAccounts = ['asset', 'expense', 'immobilisations', 'stocks', 'creances', 'tresorerie', 'charges'];
+    return debitAccounts.includes(accountType) ? 'debit' : 'credit';
   }
 
   /**

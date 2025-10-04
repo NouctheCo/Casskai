@@ -1,8 +1,10 @@
-
+/* eslint-disable max-lines, max-lines-per-function */
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { EnhancedReportsPage } from '../components/reports/EnhancedReportsPage';
 import { DashboardSection } from '../components/reports/DashboardSection';
 import { ReportsSection } from '../components/reports/ReportsSection';
+import { ReportViewer } from '../components/reports/ReportViewer';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -11,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { useToast } from '../components/ui/use-toast';
 import { useEnterprise } from '../contexts/EnterpriseContext';
+import { useAuth } from '../contexts/AuthContext';
 import { reportsService } from '../services/reportsService';
 import {
   FinancialReport,
@@ -35,8 +38,19 @@ import {
 } from 'lucide-react';
 
 const ReportsPage: React.FC = () => {
+  const { currentEnterprise } = useEnterprise();
+
+  if (!currentEnterprise?.id) {
+    return <EnhancedReportsPage />;
+  }
+
+  return <EnhancedReportsPage />;
+};
+
+const LegacyReportsPage: React.FC = () => {
   const { toast } = useToast();
   const { currentEnterprise } = useEnterprise();
+  const { user } = useAuth();
   
   // State management
   const [dashboardData, setDashboardData] = useState<ReportsDashboardData | null>(null);
@@ -81,8 +95,8 @@ const ReportsPage: React.FC = () => {
   // Filter states
   const [filters, setFilters] = useState<ReportFilters>({
     search: '',
-    type: '',
-    status: '',
+    type: 'all_types',
+    status: 'all_statuses',
     period_start: '',
     period_end: '',
     file_format: ''
@@ -157,11 +171,11 @@ const ReportsPage: React.FC = () => {
       );
     }
     
-    if (filters.type) {
+    if (filters.type && filters.type !== 'all_types') {
       filtered = filtered.filter(r => r.type === filters.type);
     }
-    
-    if (filters.status) {
+
+    if (filters.status && filters.status !== 'all_statuses') {
       filtered = filtered.filter(r => r.status === filters.status);
     }
     
@@ -204,7 +218,7 @@ const ReportsPage: React.FC = () => {
     });
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status?: string) => {
     switch (status) {
       case 'ready': return 'bg-green-100 text-green-800';
       case 'published': return 'bg-blue-100 text-blue-800';
@@ -215,7 +229,7 @@ const ReportsPage: React.FC = () => {
     }
   };
 
-  const getTypeColor = (type: string) => {
+  const getTypeColor = (type?: string) => {
     switch (type) {
       case 'balance_sheet': return 'bg-blue-100 text-blue-800';
       case 'income_statement': return 'bg-green-100 text-green-800';
@@ -270,36 +284,52 @@ const ReportsPage: React.FC = () => {
     });
   };
 
-  const handleViewReport = (_reportId: string) => {
-    // TODO: Implement view report functionality
-    toast({
-      title: 'Fonctionnalité à venir',
-      description: 'La visualisation de rapport sera bientôt disponible'
-    });
+  const handleViewReport = async (reportId: string) => {
+    const res = await reportsService.getReportById(reportId);
+    if (res.error || !res.data) {
+      toast({ title: 'Erreur', description: res.error?.message || 'Rapport introuvable' });
+      return;
+    }
+    // For now, if a file_url exists, open it; otherwise inform user
+    const url = res.data.file_url;
+    if (url) {
+      window.open(url, '_blank');
+    } else {
+      toast({ title: 'Rapport sans fichier', description: 'Exportez ou générez le fichier pour l\'afficher.' });
+    }
   };
 
-  const handleEditReport = (_reportId: string) => {
-    // TODO: Implement edit report functionality
-    toast({
-      title: 'Fonctionnalité à venir',
-      description: 'L\'édition de rapport sera bientôt disponible'
-    });
+  const handleEditReport = async (reportId: string) => {
+    const current = reports.find(r => r.id === reportId);
+    if (!current) return;
+    const newName = `${current.name} (modifié)`;
+    const res = await reportsService.updateReport(reportId, { name: newName });
+    if (res.error || !res.data) {
+      toast({ title: 'Erreur', description: res.error?.message || 'Échec de la mise à jour' });
+      return;
+    }
+    setReports(prev => prev.map(r => r.id === reportId ? { ...r, name: newName, updated_at: new Date().toISOString() } : r));
+    toast({ title: 'Modifié', description: 'Le rapport a été renommé.' });
   };
 
-  const handleDeleteReport = (_reportId: string) => {
-    // TODO: Implement delete report functionality
-    toast({
-      title: 'Fonctionnalité à venir',
-      description: 'La suppression de rapport sera bientôt disponible'
-    });
+  const handleDeleteReport = async (reportId: string) => {
+    const res = await reportsService.deleteReport(reportId);
+    if (res.error) {
+      toast({ title: 'Erreur', description: res.error.message });
+      return;
+    }
+    setReports(prev => prev.filter(r => r.id !== reportId));
+    toast({ title: 'Supprimé', description: 'Le rapport a été supprimé.' });
   };
 
-  const handleDownloadReport = (_reportId: string) => {
-    // TODO: Implement download report functionality
-    toast({
-      title: 'Fonctionnalité à venir',
-      description: 'Le téléchargement de rapport sera bientôt disponible'
-    });
+  const handleDownloadReport = async (reportId: string) => {
+    const res = await reportsService.getDownloadUrl(reportId);
+    if (res.error || !res.data) {
+      toast({ title: 'Erreur', description: res.error?.message || 'Téléchargement indisponible' });
+      return;
+    }
+    // Trigger download/open
+    window.open(res.data, '_blank');
   };
 
   const handleViewTemplate = (_templateId: string) => {
@@ -350,12 +380,105 @@ const ReportsPage: React.FC = () => {
     });
   };
 
-  const handleCreateReport = (_reportType: string) => {
-    // TODO: Implement create report functionality
-    toast({
-      title: 'Fonctionnalité à venir',
-      description: `La création de rapport sera bientôt disponible`
-    });
+  const handleCreateReport = async (reportType: string) => {
+    if (!currentEnterprise?.id || !user?.id) {
+      toast({
+        title: 'Erreur',
+        description: 'Entreprise ou utilisateur non trouvé'
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      let _reportData;
+      const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      const yearStart = `${new Date().getFullYear()}-01-01`;
+      
+      switch (reportType) {
+        case 'balance_sheet': {
+          const balanceSheetRes = await reportsService.generateBalanceSheet(currentEnterprise.id, currentDate);
+          if (balanceSheetRes.error || !balanceSheetRes.data) {
+            throw new Error(balanceSheetRes.error?.message || 'Erreur lors de la génération du bilan');
+          }
+          _reportData = balanceSheetRes.data;
+          break;
+        }
+          
+        case 'income_statement': {
+          const incomeRes = await reportsService.generateIncomeStatement(currentEnterprise.id, yearStart, currentDate);
+          if (incomeRes.error || !incomeRes.data) {
+            throw new Error(incomeRes.error?.message || 'Erreur lors de la génération du compte de résultat');
+          }
+          _reportData = incomeRes.data;
+          break;
+        }
+          
+        case 'cash_flow': {
+          const cashFlowRes = await reportsService.generateCashFlowStatement(currentEnterprise.id, yearStart, currentDate);
+          if (cashFlowRes.error || !cashFlowRes.data) {
+            throw new Error(cashFlowRes.error?.message || 'Erreur lors de la génération du flux de trésorerie');
+          }
+          _reportData = cashFlowRes.data;
+          break;
+        }
+          
+        case 'trial_balance': {
+          const trialBalanceRes = await reportsService.generateTrialBalance(currentEnterprise.id, currentDate);
+          if (trialBalanceRes.error || !trialBalanceRes.data) {
+            throw new Error(trialBalanceRes.error?.message || 'Erreur lors de la génération de la balance générale');
+          }
+          _reportData = trialBalanceRes.data;
+          break;
+        }
+          
+        default:
+          throw new Error('Type de rapport non supporté');
+      }
+
+      // Créer le rapport dans la base de données
+      const createRes = await reportsService.createReport(currentEnterprise.id, user.id, {
+        name: `${getReportTypeName(reportType)} - ${new Date().toLocaleDateString('fr-FR')}`,
+        type: reportType as 'balance_sheet' | 'income_statement' | 'cash_flow' | 'trial_balance',
+        format: 'detailed',
+        period_start: yearStart,
+        period_end: currentDate,
+        file_format: 'pdf',
+        currency: 'EUR'
+      });
+
+      if (createRes.error || !createRes.data) {
+        throw new Error(createRes.error?.message || 'Erreur lors de la sauvegarde du rapport');
+      }
+
+      // Actualiser la liste des rapports
+      await loadReports();
+      
+      toast({
+        title: 'Rapport créé',
+        description: `${getReportTypeName(reportType)} généré avec succès`
+      });
+      
+    } catch (error) {
+      console.error('Erreur lors de la création du rapport:', error);
+      toast({
+        title: 'Erreur',
+        description: error instanceof Error ? error.message : 'Erreur lors de la création du rapport'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getReportTypeName = (type: string): string => {
+    switch (type) {
+      case 'balance_sheet': return 'Bilan';
+      case 'income_statement': return 'Compte de Résultat';
+      case 'cash_flow': return 'Flux de Trésorerie';
+      case 'trial_balance': return 'Balance Générale';
+      default: return 'Rapport';
+    }
   };
 
   if (loading) {
@@ -463,9 +586,10 @@ const ReportsPage: React.FC = () => {
       {/* Tabs Navigation */}
       <motion.div variants={itemVariants}>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="dashboard">Tableau de Bord</TabsTrigger>
             <TabsTrigger value="reports">Rapports</TabsTrigger>
+            <TabsTrigger value="generator">Générateur</TabsTrigger>
             <TabsTrigger value="templates">Modèles</TabsTrigger>
             <TabsTrigger value="schedules">Planification</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -491,6 +615,11 @@ const ReportsPage: React.FC = () => {
             />
           </TabsContent>
 
+          {/* Generator Tab - New Advanced Report Viewer */}
+          <TabsContent value="generator" className="space-y-6">
+            <ReportViewer />
+          </TabsContent>
+
           {/* Templates Tab */}
           <TabsContent value="templates" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -503,7 +632,7 @@ const ReportsPage: React.FC = () => {
                         <p className="text-sm text-gray-600 mt-1">{template.description}</p>
                       </div>
                       <Badge className={getTypeColor(template.type)}>
-                        {template.type.replace('_', ' ')}
+                        {template.type?.replace('_', ' ') || 'Type non défini'}
                       </Badge>
                     </div>
                   </CardHeader>
@@ -511,7 +640,7 @@ const ReportsPage: React.FC = () => {
                     <div className="space-y-4">
                       <div className="flex items-center justify-between text-sm">
                         <span>Sections:</span>
-                        <Badge variant="outline">{template.sections.length}</Badge>
+                        <Badge variant="outline">{template.sections?.length ?? 0}</Badge>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span>Dernière modification:</span>
@@ -568,7 +697,7 @@ const ReportsPage: React.FC = () => {
                           </Badge>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-gray-600">
-                          <span>Type: {schedule.report_type.replace('_', ' ')}</span>
+                          <span>Type: {schedule.report_type?.replace('_', ' ') || 'Type non défini'}</span>
                           <span>Fréquence: {schedule.frequency}</span>
                           <span>Prochaine exécution: {schedule.next_run ? new Date(schedule.next_run).toLocaleDateString('fr-FR') : 'Non défini'} à {schedule.time}</span>
                         </div>
@@ -728,7 +857,7 @@ const ReportsPage: React.FC = () => {
                     💡 <strong>Conseil:</strong> Utilisez les modèles prédéfinis pour gagner du temps
                     ou créez un rapport personnalisé selon vos besoins spécifiques.
                   </p>
-                  <Button disabled className="mt-3">
+                  <Button onClick={() => handleCreateReport('custom')} className="mt-3">
                     Créer un Rapport
                   </Button>
                 </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { unifiedThirdPartiesService } from '@/services/unifiedThirdPartiesService';
 import { 
   Plus,
   Search,
@@ -190,6 +192,140 @@ const ClientFormDialog = ({ open, onClose, client = null, onSave }) => {
   );
 };
 
+// Client Preview Dialog Component
+const ClientPreviewDialog = ({ open, onClose, client }) => {
+  if (!client) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center space-x-3">
+            <Users className="w-5 h-5 text-blue-500" />
+            <span>Profil client - {client.name}</span>
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          {/* Client Header */}
+          <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div>
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Nom complet</Label>
+              <p className="text-lg font-semibold">{client.name}</p>
+            </div>
+            <div>
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Entreprise</Label>
+              <p className="text-base">{client.company || 'N/A'}</p>
+            </div>
+          </div>
+
+          {/* Contact Information */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Informations de contact</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                <Mail className="w-5 h-5 text-blue-500" />
+                <div>
+                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Email</Label>
+                  <p className="text-base">{client.email}</p>
+                </div>
+              </div>
+
+              {client.phone && (
+                <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                  <Phone className="w-5 h-5 text-green-500" />
+                  <div>
+                    <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Téléphone</Label>
+                    <p className="text-base">{client.phone}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Address Information */}
+          {(client.address || client.city || client.postalCode || client.country) && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Adresse</h3>
+              <div className="flex items-start space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                <MapPin className="w-5 h-5 text-red-500 mt-0.5" />
+                <div>
+                  {client.address && <p className="text-base">{client.address}</p>}
+                  {(client.city || client.postalCode || client.country) && (
+                    <p className="text-base text-gray-600 dark:text-gray-400">
+                      {[client.postalCode, client.city].filter(Boolean).join(' ')}
+                      {client.country && `, ${client.country}`}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Business Information */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Informations commerciales</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md text-center">
+                <FileText className="w-6 h-6 text-blue-500 mx-auto mb-2" />
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Factures</Label>
+                <p className="text-xl font-bold">{client.invoicesCount}</p>
+              </div>
+
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md text-center">
+                <Euro className="w-6 h-6 text-green-500 mx-auto mb-2" />
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">CA total</Label>
+                <p className="text-xl font-bold">{client.totalAmount.toFixed(2)} €</p>
+              </div>
+
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md text-center">
+                <Building className="w-6 h-6 text-purple-500 mx-auto mb-2" />
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">CA moyen</Label>
+                <p className="text-xl font-bold">
+                  {client.invoicesCount > 0 ? (client.totalAmount / client.invoicesCount).toFixed(2) : '0.00'} €
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Notes */}
+          {client.notes && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Notes</h3>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                <p className="text-base whitespace-pre-wrap">{client.notes}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Client Timeline */}
+          <div className="border-t pt-4">
+            <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Historique</Label>
+            <div className="mt-2 space-y-2">
+              <div className="flex items-center space-x-3 text-sm">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>Client créé le {new Date(client.createdAt).toLocaleDateString('fr-FR')}</span>
+              </div>
+              {client.invoicesCount > 0 && (
+                <div className="flex items-center space-x-3 text-sm">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span>{client.invoicesCount} facture{client.invoicesCount > 1 ? 's' : ''} émise{client.invoicesCount > 1 ? 's' : ''}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Fermer
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 // Client Row Component
 const ClientRow = ({ client, onEdit, onDelete, onView }) => {
   return (
@@ -249,54 +385,54 @@ const ClientRow = ({ client, onEdit, onDelete, onView }) => {
 
 export default function OptimizedClientsTab() {
   const { toast } = useToast();
-  const [clients, setClients] = useState([
-    {
-      id: 1,
-      name: 'Jean Dupont',
-      email: 'jean.dupont@abc-corp.com',
-      phone: '01 23 45 67 89',
-      company: 'ABC Corporation',
-      address: '123 Avenue des Champs',
-      city: 'Paris',
-      postalCode: '75008',
-      country: 'France',
-      invoicesCount: 5,
-      totalAmount: 7200.00,
-      createdAt: '2024-01-10'
-    },
-    {
-      id: 2,
-      name: 'Marie Martin',
-      email: 'marie.martin@xyz-ent.fr',
-      phone: '01 98 76 54 32',
-      company: 'XYZ Entreprise',
-      address: '456 Rue de la République',
-      city: 'Lyon',
-      postalCode: '69002',
-      country: 'France',
-      invoicesCount: 3,
-      totalAmount: 4320.00,
-      createdAt: '2024-01-15'
-    },
-    {
-      id: 3,
-      name: 'Pierre Moreau',
-      email: 'p.moreau@tech-solutions.com',
-      phone: '01 55 44 33 22',
-      company: 'Tech Solutions',
-      address: '789 Boulevard Haussmann',
-      city: 'Paris',
-      postalCode: '75009',
-      country: 'France',
-      invoicesCount: 2,
-      totalAmount: 1920.00,
-      createdAt: '2024-01-20'
-    }
-  ]);
-
+  const { currentCompany } = useAuth();
+  const [clients, setClients] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showClientForm, setShowClientForm] = useState(false);
   const [editingClient, setEditingClient] = useState(null);
+  const [previewClient, setPreviewClient] = useState(null);
+
+  // Charger les clients depuis Supabase
+  useEffect(() => {
+    if (currentCompany?.id) {
+      loadClients();
+    }
+  }, [currentCompany]);
+
+  const loadClients = async () => {
+    try {
+      setLoading(true);
+      const customers = await unifiedThirdPartiesService.getCustomers(currentCompany.id);
+
+      // Transformer pour correspondre au format attendu par l'UI
+      const transformed = customers.map(customer => ({
+        id: customer.id,
+        name: customer.name,
+        email: customer.email || '',
+        phone: customer.phone || '',
+        company: customer.company_name || '',
+        address: customer.billing_address_line1 || '',
+        city: customer.billing_city || '',
+        postalCode: customer.billing_postal_code || '',
+        country: customer.billing_country || 'France',
+        invoicesCount: 0, // TODO: Récupérer depuis invoices
+        totalAmount: 0, // TODO: Récupérer depuis invoices
+        createdAt: customer.created_at || new Date().toISOString()
+      }));
+
+      setClients(transformed);
+    } catch (error) {
+      console.error('Error loading clients:', error);
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de charger les clients',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredClients = clients.filter(client =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -304,15 +440,57 @@ export default function OptimizedClientsTab() {
     client.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleSaveClient = (clientData) => {
-    if (editingClient) {
-      setClients(prev => prev.map(client => 
-        client.id === editingClient.id ? { ...clientData, id: editingClient.id } : client
-      ));
-    } else {
-      setClients(prev => [...prev, { ...clientData, id: Date.now() }]);
+  const handleSaveClient = async (clientData) => {
+    try {
+      if (editingClient) {
+        // Mise à jour d'un client existant
+        await unifiedThirdPartiesService.updateCustomer(editingClient.id, {
+          name: clientData.name,
+          email: clientData.email || undefined,
+          phone: clientData.phone || undefined,
+          company_name: clientData.company || undefined,
+          billing_address_line1: clientData.address || undefined,
+          billing_city: clientData.city || undefined,
+          billing_postal_code: clientData.postalCode || undefined,
+          billing_country: clientData.country || 'FR'
+        });
+        toast({
+          title: "Client modifié",
+          description: "Le client a été modifié avec succès. Visible partout dans l'application!"
+        });
+      } else {
+        // Création d'un nouveau client
+        const result = await unifiedThirdPartiesService.createCustomer({
+          company_id: currentCompany.id,
+          name: clientData.name,
+          email: clientData.email || undefined,
+          phone: clientData.phone || undefined,
+          company_name: clientData.company || undefined,
+          billing_address_line1: clientData.address || undefined,
+          billing_city: clientData.city || undefined,
+          billing_postal_code: clientData.postalCode || undefined,
+          billing_country: clientData.country || 'FR'
+        });
+
+        if (result.error) throw result.error;
+
+        toast({
+          title: "Client créé",
+          description: "Le client a été créé avec succès. Visible partout dans l'application!"
+        });
+      }
+
+      // Recharger la liste des clients
+      await loadClients();
+      setEditingClient(null);
+    } catch (error) {
+      console.error('Error saving client:', error);
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de sauvegarder le client',
+        variant: 'destructive'
+      });
     }
-    setEditingClient(null);
   };
 
   const handleEditClient = (client) => {
@@ -320,19 +498,30 @@ export default function OptimizedClientsTab() {
     setShowClientForm(true);
   };
 
-  const handleDeleteClient = (client) => {
-    setClients(prev => prev.filter(c => c.id !== client.id));
-    toast({
-      title: "Client supprimé",
-      description: "Le client a été supprimé avec succès."
-    });
+  const handleDeleteClient = async (client) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce client ?')) {
+      return;
+    }
+
+    try {
+      await unifiedThirdPartiesService.deleteCustomer(client.id);
+      await loadClients();
+      toast({
+        title: "Client supprimé",
+        description: "Le client a été supprimé avec succès."
+      });
+    } catch (error) {
+      console.error('Error deleting client:', error);
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de supprimer le client',
+        variant: 'destructive'
+      });
+    }
   };
 
   const handleViewClient = (client) => {
-    toast({
-      title: "Détails du client",
-      description: `Consultation du profil de ${client.name}`
-    });
+    setPreviewClient(client);
   };
 
   const summary = {
@@ -437,15 +626,35 @@ export default function OptimizedClientsTab() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredClients.map((client) => (
-                  <ClientRow
-                    key={client.id}
-                    client={client}
-                    onEdit={handleEditClient}
-                    onDelete={handleDeleteClient}
-                    onView={handleViewClient}
-                  />
-                ))}
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                        <span>Chargement des clients...</span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : filteredClients.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      <Users className="w-12 h-12 mx-auto text-gray-400 mb-2" />
+                      <p className="text-gray-600 dark:text-gray-400">
+                        {searchTerm ? 'Aucun client trouvé' : 'Aucun client. Commencez par en créer un !'}
+                      </p>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredClients.map((client) => (
+                    <ClientRow
+                      key={client.id}
+                      client={client}
+                      onEdit={handleEditClient}
+                      onDelete={handleDeleteClient}
+                      onView={handleViewClient}
+                    />
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
@@ -461,6 +670,12 @@ export default function OptimizedClientsTab() {
         }}
         client={editingClient}
         onSave={handleSaveClient}
+      />
+
+      <ClientPreviewDialog
+        open={!!previewClient}
+        onClose={() => setPreviewClient(null)}
+        client={previewClient}
       />
     </div>
   );

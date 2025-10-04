@@ -22,7 +22,6 @@ const LazyProjectsPage = React.lazy(() => import('@/pages/ProjectsPage'));
 const LazyContractsPage = React.lazy(() => import('@/pages/ContractsPage'));
 const LazyPurchasesPage = React.lazy(() => import('@/pages/PurchasesPage'));
 const LazyInventoryPage = React.lazy(() => import('@/pages/InventoryPage'));
-const LazyForecastsPage = React.lazy(() => import('@/pages/ForecastsPage'));
 const LazyTaxPage = React.lazy(() => import('@/pages/TaxPage'));
 const LazyHumanResourcesPage = React.lazy(() => import('@/pages/HumanResourcesPage'));
 const LazySalesCrmPage = React.lazy(() => import('@/pages/SalesCrmPage'));
@@ -37,6 +36,11 @@ const LazyAccountingImportPage = React.lazy(() => import('@/pages/AccountingImpo
 const LazyPricingPage = React.lazy(() => import('@/pages/PricingPage'));
 const LazyForgotPasswordPage = React.lazy(() => import('@/pages/auth/ForgotPasswordPage'));
 const LazySystemStatusPage = React.lazy(() => import('@/pages/SystemStatusPage'));
+const LazyStripeSuccessPage = React.lazy(() => import('@/pages/StripeSuccessPage'));
+const LazyStripeCancelPage = React.lazy(() => import('@/pages/StripeCancelPage'));
+const LazyBudgetPage = React.lazy(() => import('@/pages/BudgetPage'));
+const LazyAutomationPage = React.lazy(() => import('@/pages/AutomationPage'));
+const LazyThirdPartiesPage = React.lazy(() => import('@/pages/ThirdPartiesPage'));
 
 const AppRouter: React.FC = () => {
   const { isAuthenticated, loading, onboardingCompleted, currentCompany, isCheckingOnboarding } = useAuth();
@@ -77,6 +81,21 @@ const AppRouter: React.FC = () => {
             <Route path="landing" element={
               <Suspense fallback={<LoadingFallback />}>
                 <LazyLandingPage />
+              </Suspense>
+            } />
+            <Route path="pricing" element={
+              <Suspense fallback={<LoadingFallback />}>
+                <LazyPricingPage />
+              </Suspense>
+            } />
+            <Route path="stripe/success" element={
+              <Suspense fallback={<LoadingFallback />}>
+                <LazyStripeSuccessPage />
+              </Suspense>
+            } />
+            <Route path="stripe/cancel" element={
+              <Suspense fallback={<LoadingFallback />}>
+                <LazyStripeCancelPage />
               </Suspense>
             } />
             <Route path="auth" element={<AuthForm />} />
@@ -211,10 +230,10 @@ const AppRouter: React.FC = () => {
                 </Suspense>
               </ProtectedRoute>
             } />
-            <Route path="forecasts" element={
+            <Route path="budget" element={
               <ProtectedRoute>
                 <Suspense fallback={<LoadingFallback />}>
-                  <LazyForecastsPage />
+                  <LazyBudgetPage />
                 </Suspense>
               </ProtectedRoute>
             } />
@@ -239,6 +258,20 @@ const AppRouter: React.FC = () => {
                 </Suspense>
               </ProtectedRoute>
             } />
+            <Route path="third-parties" element={
+              <ProtectedRoute>
+                <Suspense fallback={<LoadingFallback />}>
+                  <LazyThirdPartiesPage />
+                </Suspense>
+              </ProtectedRoute>
+            } />
+            <Route path="tiers" element={
+              <ProtectedRoute>
+                <Suspense fallback={<LoadingFallback />}>
+                  <LazyThirdPartiesPage />
+                </Suspense>
+              </ProtectedRoute>
+            } />
             <Route path="billing" element={
               <ProtectedRoute>
                 <Suspense fallback={<LoadingFallback />}>
@@ -246,10 +279,24 @@ const AppRouter: React.FC = () => {
                 </Suspense>
               </ProtectedRoute>
             } />
+            <Route path="automation" element={
+              <ProtectedRoute>
+                <Suspense fallback={<LoadingFallback />}>
+                  <LazyAutomationPage />
+                </Suspense>
+              </ProtectedRoute>
+            } />
             <Route path="settings" element={
               <ProtectedRoute>
                 <Suspense fallback={<LoadingFallback />}>
                   <LazySettingsPage />
+                </Suspense>
+              </ProtectedRoute>
+            } />
+            <Route path="pricing" element={
+              <ProtectedRoute requireOnboarding={false}>
+                <Suspense fallback={<LoadingFallback />}>
+                  <LazyPricingPage />
                 </Suspense>
               </ProtectedRoute>
             } />
@@ -274,6 +321,11 @@ const AppRouter: React.FC = () => {
                 </OnboardingProvider>
               </ProtectedRoute>
             } />
+            {/* Redirections pour anciennes URLs (compatibilité) */}
+            <Route path="crm" element={<Navigate to="/sales-crm" replace />} />
+            <Route path="human-resources" element={<Navigate to="/hr" replace />} />
+            <Route path="tax" element={<Navigate to="/taxes" replace />} />
+            <Route path="forecasts" element={<Navigate to="/budget" replace />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Route>
         </>

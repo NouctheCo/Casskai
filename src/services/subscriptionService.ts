@@ -102,11 +102,30 @@ class SubscriptionService {
    */
   async getCurrentSubscription(userId: string): Promise<UserSubscription | null> {
     try {
-      const { data, error } = await supabase
-        .from('user_subscriptions')
+      console.warn('[SubscriptionService] getCurrentSubscription called for user:', userId);
+
+      // First get the subscription
+      const { data: subscription, error: subError } = await supabase
+        .from('subscriptions')
         .select(`
-          *,
-          subscription_plans (*)
+          id,
+          user_id,
+          plan_id,
+          stripe_subscription_id,
+          stripe_customer_id,
+          status,
+          current_period_start,
+          current_period_end,
+          cancel_at_period_end,
+          canceled_at,
+          trial_start,
+          trial_end,
+          created_at,
+          updated_at,
+          company_id,
+          cancel_at,
+          cancel_reason,
+          metadata
         `)
         .eq('user_id', userId)
         .in('status', ['active', 'trialing'])
@@ -114,30 +133,64 @@ class SubscriptionService {
         .limit(1)
         .maybeSingle();
 
-      if (error) {
-        console.warn('[SubscriptionService] Erreur requête subscription:', error);
+      if (subError) {
+        console.warn('[SubscriptionService] Erreur requête subscription:', subError);
         return null;
       }
 
-      if (!data) {
+      if (!subscription) {
+        console.warn('[SubscriptionService] No subscription found for user');
         return null;
       }
 
-      return {
-        id: data.id,
-        userId: data.user_id,
-        planId: data.plan_id,
-        stripeSubscriptionId: data.stripe_subscription_id || '',
-        stripeCustomerId: data.stripe_customer_id || '',
-        status: data.status as UserSubscription['status'],
-        currentPeriodStart: new Date(data.current_period_start),
-        currentPeriodEnd: new Date(data.current_period_end),
-        cancelAtPeriodEnd: data.cancel_at_period_end || false,
-        trialEnd: data.trial_end ? new Date(data.trial_end) : undefined,
-        metadata: data.metadata || {},
-        createdAt: new Date(data.created_at),
-        updatedAt: new Date(data.updated_at)
+      console.warn('[SubscriptionService] Found subscription:', subscription);
+
+      // Then get the plan details separately
+      const { data: plan, error: planError } = await supabase
+        .from('subscription_plans')
+        .select('id, name, price, currency, billing_period, is_trial, trial_days, stripe_price_id, is_active')
+        .eq('id', subscription.plan_id)
+        .single();
+
+      if (planError) {
+        console.error('[SubscriptionService] Error fetching plan:', planError);
+        return null;
+      }
+
+      console.warn('[SubscriptionService] Plan fetched:', plan);
+
+      // Convert to UserSubscription format
+      const userSubscription: UserSubscription = {
+        id: subscription.id,
+        userId: subscription.user_id,
+        planId: subscription.plan_id,
+        stripeSubscriptionId: subscription.stripe_subscription_id || '',
+        stripeCustomerId: subscription.stripe_customer_id || '',
+        status: subscription.status as UserSubscription['status'],
+        currentPeriodStart: new Date(subscription.current_period_start || subscription.created_at),
+        currentPeriodEnd: new Date(subscription.current_period_end || subscription.trial_end || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)),
+        cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
+        trialEnd: subscription.trial_end ? new Date(subscription.trial_end) : undefined,
+        metadata: subscription.metadata || {},
+        createdAt: new Date(subscription.created_at),
+        updatedAt: new Date(subscription.updated_at || subscription.created_at),
+        plan: plan ? {
+          id: plan.id,
+          name: plan.name,
+          description: '',
+          price: plan.price,
+          currency: plan.currency,
+          interval: plan.billing_period === 'yearly' ? 'year' : 'month',
+          features: [],
+          stripePriceId: plan.stripe_price_id || '',
+          stripeProductId: '',
+          supportLevel: 'basic'
+        } : undefined
       };
+
+      console.warn('[SubscriptionService] Converted subscription:', userSubscription);
+      return userSubscription;
+
     } catch (error) {
       console.error('Error getting current subscription:', error);
       return null;
@@ -154,7 +207,7 @@ class SubscriptionService {
   ): Promise<boolean> {
     try {
       const { error } = await supabase
-        .from('user_subscriptions')
+        .from('subscriptions')
         .update({
           status,
           metadata: { ...metadata },
@@ -444,7 +497,7 @@ class SubscriptionService {
       
       if (subscription) {
         const { error } = await supabase
-          .from('user_subscriptions')
+          .from('subscriptions')
           .update({ plan_id: newPlanId, updated_at: new Date().toISOString() })
           .eq('user_id', userId);
 
@@ -529,6 +582,50 @@ class SubscriptionService {
   async getCurrentPlanInfo(userId: string): Promise<SubscriptionPlan | null> {
     const planId = await this.getCurrentUserPlan(userId);
     return PREDEFINED_PLANS.find(p => p.id === planId) || null;
+  }
+
+  /**
+   * Obtenir le statut complet de l'abonnement d'un utilisateur
+   */
+  async getUserSubscriptionStatus(userId: string) {
+    try {
+      const { data, error } = await supabase
+        .rpc('get_user_subscription_status', {
+          p_user_id: userId
+        });
+
+      if (error) {
+        console.error('Error getting user subscription status:', error);
+        return null;
+      }
+
+      return data && data.length > 0 ? data[0] : null;
+    } catch (error) {
+      console.error('Error in getUserSubscriptionStatus:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Obtenir les modules autorisés pour un plan depuis Supabase
+   */
+  async getAllowedModulesForPlan(planId: string): Promise<string[]> {
+    try {
+      const { data, error } = await supabase
+        .rpc('get_allowed_modules_for_plan', {
+          p_plan_id: planId
+        });
+
+      if (error) {
+        console.error('Error getting allowed modules:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error in getAllowedModulesForPlan:', error);
+      return [];
+    }
   }
 }
 

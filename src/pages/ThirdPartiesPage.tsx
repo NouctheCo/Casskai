@@ -10,7 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { useToast } from '../components/ui/use-toast';
 import { useEnterprise } from '../contexts/EnterpriseContext';
-import { thirdPartiesService } from '../services/thirdPartiesService';
+import { unifiedThirdPartiesService } from '@/services/unifiedThirdPartiesService';
+import { ThirdPartyFormDialog } from '@/components/third-parties/ThirdPartyFormDialog';
 import {
   ThirdParty,
   ThirdPartyFilters,
@@ -55,6 +56,7 @@ const ThirdPartiesPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedThirdParty, setSelectedThirdParty] = useState<ThirdParty | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   // Animation variants
   const containerVariants = {
@@ -106,10 +108,16 @@ const ThirdPartiesPage: React.FC = () => {
 
   const loadDashboardData = async () => {
     try {
-      const response = await thirdPartiesService.getDashboardData(currentEnterprise!.id);
-      if (response.data) {
-        setDashboardData(response.data);
-      }
+      const stats = await unifiedThirdPartiesService.getDashboardStats(currentEnterprise!.id);
+      setDashboardData({
+        total_third_parties: stats.total_customers + stats.total_suppliers,
+        total_customers: stats.total_customers,
+        total_suppliers: stats.total_suppliers,
+        active_third_parties: stats.active_customers + stats.active_suppliers,
+        total_balance: stats.net_balance,
+        overdue_count: 0, // TODO: Implémenter si nécessaire
+        top_customers: [] // TODO: Implémenter si nécessaire
+      } as ThirdPartyDashboardData);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     }
@@ -117,8 +125,36 @@ const ThirdPartiesPage: React.FC = () => {
 
   const loadThirdParties = async () => {
     try {
-      const response = await thirdPartiesService.getThirdParties(currentEnterprise!.id);
-      setThirdParties(response || []);
+      const unified = await unifiedThirdPartiesService.getUnifiedThirdParties(currentEnterprise!.id);
+      // Transform to match ThirdParty type expected by the page
+      const transformed = unified.map(tp => ({
+        id: tp.id,
+        type: tp.party_type,
+        name: tp.name,
+        email: tp.email || '',
+        phone: tp.phone || '',
+        primary_email: tp.email || '',
+        primary_phone: tp.phone || '',
+        company_name: tp.company_name,
+        tax_number: tp.tax_number,
+        billing_address: {
+          street: tp.primary_address_line1 || '',
+          city: tp.primary_city || '',
+          postal_code: tp.primary_postal_code || '',
+          country: tp.primary_country || 'FR'
+        },
+        payment_terms: tp.payment_terms || 30,
+        currency: tp.currency || 'EUR',
+        is_active: tp.is_active,
+        notes: tp.notes,
+        current_balance: tp.balance,
+        total_receivables: tp.party_type === 'customer' ? tp.balance : 0,
+        total_payables: tp.party_type === 'supplier' ? tp.balance : 0,
+        tags: [],
+        created_at: tp.created_at,
+        updated_at: tp.updated_at
+      })) as ThirdParty[];
+      setThirdParties(transformed);
     } catch (error) {
       console.error('Error loading third parties:', error);
       toast({
@@ -131,10 +167,8 @@ const ThirdPartiesPage: React.FC = () => {
 
   const loadAgingReport = async () => {
     try {
-      const response = await thirdPartiesService.getAgingReport(currentEnterprise!.id);
-      if (response.data) {
-        setAgingReport(response.data);
-      }
+      // TODO: Implémenter via RPC function si nécessaire
+      setAgingReport([]);
       setLoading(false);
     } catch (error) {
       console.error('Error loading aging report:', error);
@@ -222,13 +256,17 @@ const ThirdPartiesPage: React.FC = () => {
     // TODO: Open edit modal or navigate to edit form
   };
 
-  const handleDeleteThirdParty = async (thirdPartyId: string) => {
+  const handleDeleteThirdParty = async (thirdParty: ThirdParty) => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce tiers ?')) {
       return;
     }
-    
+
     try {
-      await thirdPartiesService.deleteThirdParty(thirdPartyId);
+      if (thirdParty.type === 'customer') {
+        await unifiedThirdPartiesService.deleteCustomer(thirdParty.id);
+      } else {
+        await unifiedThirdPartiesService.deleteSupplier(thirdParty.id);
+      }
       await loadThirdParties();
       toast({
         title: 'Suppression réussie',
@@ -242,6 +280,11 @@ const ThirdPartiesPage: React.FC = () => {
         variant: 'destructive'
       });
     }
+  };
+
+  const handleCreateSuccess = () => {
+    loadThirdParties();
+    loadDashboardData();
   };
 
   const getTypeColor = (type: string) => {
@@ -314,9 +357,9 @@ const ThirdPartiesPage: React.FC = () => {
             <FileDown className="h-4 w-4" />
             Exporter
           </Button>
-          <Button 
+          <Button
             className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 flex items-center gap-2"
-            onClick={() => setActiveTab('new-third-party')}
+            onClick={() => setShowCreateDialog(true)}
           >
             <Plus className="h-4 w-4" />
             Nouveau Tiers
@@ -907,6 +950,16 @@ const ThirdPartiesPage: React.FC = () => {
           </TabsContent>
         </Tabs>
       </motion.div>
+      {/* Dialog de création */}
+      {currentEnterprise && (
+        <ThirdPartyFormDialog
+          open={showCreateDialog}
+          onClose={() => setShowCreateDialog(false)}
+          onSuccess={handleCreateSuccess}
+          companyId={currentEnterprise.id}
+          defaultType="customer"
+        />
+      )}
     </motion.div>
   );
 };

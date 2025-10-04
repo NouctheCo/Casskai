@@ -27,31 +27,8 @@ export const useEnterprise = () => {
   return context;
 };
 
-// Entreprise par défaut
-const DEFAULT_ENTERPRISE: Enterprise = {
-  id: 'default-enterprise',
-  name: 'Mon Entreprise',
-  legalName: 'Mon Entreprise SAS',
-  country: 'FR',
-  currency: 'EUR',
-  accountingStandard: 'PCG',
-  registrationNumber: '',
-  vatNumber: '',
-  street: '',
-  postalCode: '',
-  city: '',
-  phone: '',
-  email: '',
-  website: '',
-  shareCapital: '10000',
-  ceoName: '',
-  sector: 'tech',
-  fiscalYearStart: 1,
-  fiscalYearEnd: 12,
-  isSetupCompleted: true,
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString()
-};
+// Entreprise par défaut supprimée - causait des erreurs UUID
+// L'utilisateur doit maintenant terminer l'onboarding pour créer sa première entreprise
 
 export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [enterprises, setEnterprises] = useState<Enterprise[]>([]);
@@ -171,7 +148,10 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     
     // If no enterprises, wait for onboarding to create one
     if (enterpriseList.length === 0) {
-      console.log('🏢 No enterprises found. Waiting for onboarding.');
+      console.log('🏢 No enterprises found. User needs to complete onboarding.');
+
+      // Ne pas utiliser l'entreprise par défaut avec un ID invalide
+      // L'utilisateur doit terminer l'onboarding pour créer sa première entreprise
     }
     
     setEnterprises(enterpriseList);

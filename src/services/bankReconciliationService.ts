@@ -262,7 +262,7 @@ class BankReconciliationService {
       case 'equals':
         if (condition.field === 'amount') {
           const tolerance = condition.tolerance || 0.01;
-          return Math.abs(bankValue - entryValue) <= tolerance;
+          return Math.abs(bankValue - entryValue) <= tolerance + Number.EPSILON;
         }
         return bankValue === entryValue;
       
@@ -623,3 +623,5 @@ class BankReconciliationService {
 
 export const bankReconciliationService = new BankReconciliationService();
 export default bankReconciliationService;
+
+

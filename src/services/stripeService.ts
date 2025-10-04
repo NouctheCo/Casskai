@@ -143,11 +143,24 @@ class RealStripeService {
         return { success: false, error: 'Prix Stripe non configuré pour ce plan' };
       }
 
-      // Utiliser la fonction Edge Supabase au lieu du backend Express
+      // Obtenir le token JWT de la session courante
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        return {
+          success: false,
+          error: 'Vous devez être connecté pour créer un abonnement'
+        };
+      }
+
+      // Utiliser la fonction Edge Supabase avec authentification
       const { data: sessionData, error: sessionError } = await supabase.functions.invoke('create-checkout-session', {
         body: {
           planId,
           userId
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
         }
       });
 
@@ -176,50 +189,105 @@ class RealStripeService {
    * Récupère l'abonnement actuel depuis Supabase
    */
   async getCurrentSubscription(userId: string): Promise<SubscriptionResponse> {
+    console.warn('[StripeService] getCurrentSubscription called for user:', userId);
+
     try {
+      console.warn('[StripeService] Executing subscription query...');
       const { data: subscription, error } = await supabase
-        .from('user_subscriptions')
+        .from('subscriptions')
         .select(`
-          *,
-          subscription_plans (*)
+          id,
+          user_id,
+          plan_id,
+          stripe_subscription_id,
+          stripe_customer_id,
+          status,
+          current_period_start,
+          current_period_end,
+          cancel_at_period_end,
+          canceled_at,
+          trial_start,
+          trial_end,
+          created_at,
+          updated_at,
+          company_id,
+          cancel_at,
+          cancel_reason,
+          metadata
         `)
         .eq('user_id', userId)
         .in('status', ['active', 'trialing'])
         .order('created_at', { ascending: false })
         .limit(1);
 
+      console.warn('[StripeService] Query result:', { data: subscription, error });
+
       if (error) {
-        console.error('Error fetching subscription:', error);
-        return { success: false, error: 'Erreur lors de la récupération de l\'abonnement' };
+        console.error('[StripeService] Database error:', error);
+        return { success: false, error: `Erreur base de données: ${error.message}` };
       }
 
       if (!subscription || subscription.length === 0) {
+        console.warn('[StripeService] No subscription found for user');
         return { success: true, subscription: undefined };
+      }
+
+      console.warn('[StripeService] Found subscription:', subscription[0]);
+
+      const sub = subscription[0];
+
+      // Fetch the plan details separately
+      console.warn('[StripeService] Fetching plan details for plan_id:', sub.plan_id);
+      const { data: plan, error: planError } = await supabase
+        .from('subscription_plans')
+        .select('id, name, price, currency, billing_period, is_trial, trial_days, stripe_price_id, is_active')
+        .eq('id', sub.plan_id)
+        .single();
+
+      console.warn('[StripeService] Plan fetch result:', { data: plan, error: planError });
+
+      if (planError) {
+        console.error('[StripeService] Error fetching plan:', planError);
+        return { success: false, error: `Erreur récupération plan: ${planError.message}` };
       }
 
       // Convertir en format UserSubscription
       const userSubscription: UserSubscription = {
-        id: subscription[0].id,
-        userId: subscription[0].user_id,
-        planId: subscription[0].plan_id,
-        stripeSubscriptionId: subscription[0].stripe_subscription_id || '',
-        stripeCustomerId: subscription[0].stripe_customer_id || '',
-        status: subscription[0].status as UserSubscription['status'],
-        currentPeriodStart: new Date(subscription[0].current_period_start),
-        currentPeriodEnd: new Date(subscription[0].current_period_end),
-        cancelAtPeriodEnd: subscription[0].cancel_at_period_end || false,
-        trialEnd: subscription[0].trial_end ? new Date(subscription[0].trial_end) : undefined,
-        metadata: subscription[0].metadata || {},
-        createdAt: new Date(subscription[0].created_at),
-        updatedAt: new Date(subscription[0].updated_at)
+        id: sub.id,
+        userId: sub.user_id,
+        planId: sub.plan_id,
+        stripeSubscriptionId: sub.stripe_subscription_id || '',
+        stripeCustomerId: sub.stripe_customer_id || '',
+        status: sub.status as UserSubscription['status'],
+        currentPeriodStart: new Date(sub.current_period_start || sub.created_at),
+        currentPeriodEnd: new Date(sub.current_period_end || sub.trial_end || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)),
+        cancelAtPeriodEnd: sub.cancel_at_period_end || false,
+        trialEnd: sub.trial_end ? new Date(sub.trial_end) : undefined,
+        metadata: sub.metadata || {},
+        createdAt: new Date(sub.created_at),
+        updatedAt: new Date(sub.updated_at || sub.created_at),
+        plan: plan ? {
+          id: plan.id,
+          name: plan.name,
+          description: '',
+          price: plan.price,
+          currency: plan.currency,
+          interval: plan.billing_period === 'yearly' ? 'year' : 'month',
+          features: [],
+          stripePriceId: plan.stripe_price_id || '',
+          stripeProductId: '',
+          supportLevel: 'basic'
+        } : undefined
       };
 
+      console.warn('[StripeService] Converted subscription:', userSubscription);
       return { success: true, subscription: userSubscription };
+
     } catch (error) {
-      console.error('Error fetching subscription:', error);
+      console.error('[StripeService] Unexpected error:', error);
       return {
         success: false,
-        error: 'Impossible de récupérer l\'abonnement'
+        error: `Erreur inattendue: ${error instanceof Error ? error.message : 'Unknown error'}`
       };
     }
   }

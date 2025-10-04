@@ -5,13 +5,15 @@ import App from './App.tsx';
 import './index.css';
 import { ConfigProvider } from '@/contexts/ConfigContext';
 
-// Debug des variables d'environnement au démarrage
-console.warn('🔧 Variables d\'environnement au démarrage:');
-console.warn('VITE_SUPABASE_URL:', import.meta.env.VITE_SUPABASE_URL ? '✅ Configuré' : '❌ Non configuré');
-console.warn('VITE_SUPABASE_ANON_KEY:', import.meta.env.VITE_SUPABASE_ANON_KEY ? '✅ Configuré' : '❌ Non configuré');
-console.warn('VITE_NODE_ENV:', import.meta.env.VITE_NODE_ENV);
-console.warn('MODE:', import.meta.env.MODE);
-console.warn('Toutes les variables VITE_:', Object.keys(import.meta.env).filter(key => key.startsWith('VITE_')));
+// Debug des variables d'environnement au démarrage (uniquement en mode développement)
+if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_MODE === 'true') {
+  console.warn('🔧 Variables d\'environnement au démarrage:');
+  console.warn('VITE_SUPABASE_URL:', import.meta.env.VITE_SUPABASE_URL ? '✅ Configuré' : '❌ Non configuré');
+  console.warn('VITE_SUPABASE_ANON_KEY:', import.meta.env.VITE_SUPABASE_ANON_KEY ? '✅ Configuré' : '❌ Non configuré');
+  console.warn('VITE_NODE_ENV:', import.meta.env.VITE_NODE_ENV);
+  console.warn('MODE:', import.meta.env.MODE);
+  console.warn('Toutes les variables VITE_:', Object.keys(import.meta.env).filter(key => key.startsWith('VITE_')));
+}
 
 // Configuration globale de l'application
 const _config = {

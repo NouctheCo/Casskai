@@ -13,10 +13,16 @@ import { useToast } from "@/components/ui/use-toast";
 import { PlusCircle, ChevronDown, ChevronUp, ChevronsUpDown, Filter, AlertTriangle, Search, X } from 'lucide-react';
 import JournalEntriesListFilterSection from './JournalEntriesListFilterSection';
 import JournalEntriesListEntryRow from './JournalEntriesListEntryRow';
+import type { JournalEntryFormInitialValues } from '@/types/journalEntries.types';
 
 const ITEMS_PER_PAGE = 20;
+const DEFAULT_CURRENCY = 'EUR';
+const coerceNumber = (value: unknown) => {
+  const parsed = typeof value === 'string' ? parseFloat(value) : Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
 
-// ✅ MODIFICATION: Ajouter refreshTrigger dans les props
+// MODIFICATION: Ajouter refreshTrigger dans les props
 const JournalEntriesList = ({ currentEnterpriseId: propCurrentEnterpriseId, onEdit, onNew, refreshTrigger }) => {
   const { user } = useAuth();
   const { currentCompany } = useCompanies();
@@ -191,41 +197,51 @@ const JournalEntriesList = ({ currentEnterpriseId: propCurrentEnterpriseId, onEd
   
   const handleEdit = (entry) => {
     const mappedEntry = {
-        ...entry,
-        items: (entry.journal_entry_items || []).map(item => ({
-            id: item.id,
-            accountId: item.account_id,
-            account_id: item.account_id,
-            accountNumber: item.accounts?.account_number || '', 
-            description: item.description,
-            debit_amount: parseFloat(item.debit_amount) || 0,
-            credit_amount: parseFloat(item.credit_amount) || 0,
-            currency: "EUR"
-        }))
+      id: entry.id,
+      entryDate: entry.entry_date ? new Date(entry.entry_date) : new Date(),
+      description: entry.description ?? '',
+      referenceNumber: entry.reference_number ?? undefined,
+      journalId: entry.journal_id ?? '',
+      items: (entry.journal_entry_items || []).map((item) => ({
+        accountId: item.account_id,
+        debitAmount: coerceNumber(item.debit_amount),
+        creditAmount: coerceNumber(item.credit_amount),
+        description: item.description ?? '',
+        currency: item.currency ?? DEFAULT_CURRENCY,
+      })),
+      status: entry.status ?? 'draft',
+      entryNumber: entry.entry_number ?? null,
     };
-    if (onEdit) onEdit(mappedEntry);
+
+    if (onEdit) {
+      onEdit(mappedEntry);
+    }
   };
 
   const handleDuplicate = (entry) => {
     const duplicatedEntry = {
-        ...entry,
-        entry_date: new Date().toISOString().split('T')[0], 
-        reference_number: `${entry.reference_number || ''} ${t('copySuffix')}`.trim(),
-        description: `${entry.description} ${t('copySuffix')}`.trim(),
-        items: (entry.journal_entry_items || []).map(item => ({
-            account_id: item.account_id,
-            accountNumber: item.accounts?.account_number || '',
-            description: item.description,
-            debit_amount: parseFloat(item.debit_amount) || 0,
-            credit_amount: parseFloat(item.credit_amount) || 0,
-            currency: "EUR"
-        }))
+      entryDate: new Date(),
+      description: entry.description
+        ? `${entry.description} ${t('copySuffix')}`.trim()
+        : t('copySuffix'),
+      referenceNumber: entry.reference_number
+        ? `${entry.reference_number} ${t('copySuffix')}`.trim()
+        : undefined,
+      journalId: entry.journal_id ?? '',
+      items: (entry.journal_entry_items || []).map((item) => ({
+        accountId: item.account_id,
+        debitAmount: coerceNumber(item.debit_amount),
+        creditAmount: coerceNumber(item.credit_amount),
+        description: item.description ?? '',
+        currency: item.currency ?? DEFAULT_CURRENCY,
+      })),
+      status: entry.status ?? 'draft',
+      entryNumber: null,
     };
-    delete duplicatedEntry.id; 
-    delete duplicatedEntry.created_at;
-    delete duplicatedEntry.updated_at;
-    delete duplicatedEntry.status; 
-    if (onEdit) onEdit(duplicatedEntry);
+
+    if (onEdit) {
+      onEdit(duplicatedEntry);
+    }
   };
 
   // ✅ CORRECTION: Calcul correct des pages totales

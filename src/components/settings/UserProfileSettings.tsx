@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,8 +9,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-// import { supabase } from '@/integrations/supabase/client';
-import { User, Mail, Phone, MapPin, Calendar, Building, Camera, Save, Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { User, Mail, Phone, MapPin, Calendar, Building, Camera, Save, Loader2, Trash2, AlertTriangle } from 'lucide-react';
+import { AccountDeletionWizard } from '@/components/account/AccountDeletionWizard';
 
 interface UserProfile {
   firstName: string;
@@ -33,6 +34,7 @@ export function UserProfileSettings() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showDeletionWizard, setShowDeletionWizard] = useState(false);
 
   const [profile, setProfile] = useState<UserProfile>({
     firstName: '',
@@ -51,62 +53,130 @@ export function UserProfileSettings() {
   });
 
   // Charger le profil utilisateur
-  useEffect(() => {
-    const loadUserProfile = async () => {
-      if (!user?.id) return;
+  const loadUserProfile = useCallback(async () => {
+    if (!user?.id) return;
 
-      setIsLoading(true);
-      try {
-        // TODO: Intégrer Supabase pour charger le profil
-        // const { data, error } = await supabase
-        //   .from('user_profiles')
-        //   .select('*')
-        //   .eq('user_id', user.id)
-        //   .single();
+    setIsLoading(true);
+    try {
+      // Charger le profil depuis Supabase
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-        // Simulation des données depuis les métadonnées utilisateur
+      if (error) {
+        console.error('Erreur Supabase:', error);
+        throw error;
+      }
+
+      // Si le profil existe, l'utiliser, sinon utiliser les métadonnées
+      if (data) {
+        setProfile({
+          firstName: data.first_name || '',
+          lastName: data.last_name || '',
+          email: user.email || '',
+          phone: data.phone || '',
+          avatar: data.avatar_url || '',
+          timezone: data.timezone || 'Europe/Paris',
+          language: data.language || 'fr',
+          jobTitle: data.job_title || '',
+          department: data.department || '',
+          bio: data.bio || '',
+          website: data.website || '',
+          linkedin: data.linkedin || '',
+          twitter: data.twitter || ''
+        });
+      } else {
+        // Créer un profil initial depuis les métadonnées utilisateur
         setProfile({
           firstName: user.user_metadata?.first_name || '',
           lastName: user.user_metadata?.last_name || '',
           email: user.email || '',
           phone: user.user_metadata?.phone || '',
           avatar: user.user_metadata?.avatar_url || '',
-          timezone: user.user_metadata?.timezone || 'Europe/Paris',
-          language: user.user_metadata?.language || 'fr',
-          jobTitle: user.user_metadata?.job_title || '',
-          department: user.user_metadata?.department || '',
-          bio: user.user_metadata?.bio || '',
-          website: user.user_metadata?.website || '',
-          linkedin: user.user_metadata?.linkedin || '',
-          twitter: user.user_metadata?.twitter || ''
+          timezone: 'Europe/Paris',
+          language: 'fr',
+          jobTitle: '',
+          department: '',
+          bio: '',
+          website: '',
+          linkedin: '',
+          twitter: ''
         });
-      } catch (error) {
-        console.error('Erreur chargement profil:', error);
-        toast({
-          title: 'Erreur',
-          description: 'Impossible de charger votre profil',
-          variant: 'destructive'
-        });
-      } finally {
-        setIsLoading(false);
       }
-    };
-
-    loadUserProfile();
+    } catch (error) {
+      console.error('Erreur chargement profil:', error);
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de charger votre profil',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }, [user, toast]);
+
+  // Charger le profil utilisateur au montage du composant
+  useEffect(() => {
+    loadUserProfile();
+  }, [loadUserProfile]);
 
   const handleSave = async () => {
     if (!user?.id) return;
 
     setIsSaving(true);
     try {
-      // TODO: Intégrer Supabase pour sauvegarder le profil
-      // const { error } = await supabase
-      //   .from('user_profiles')
-      //   .upsert(profileData, { onConflict: 'user_id' });
+      // Préparer les données pour Supabase
+      const profileData = {
+        user_id: user.id,
+        email: user.email,
+        first_name: profile.firstName.trim(),
+        last_name: profile.lastName.trim(),
+        phone: profile.phone.trim(),
+        avatar_url: profile.avatar,
+        timezone: profile.timezone,
+        language: profile.language,
+        job_title: profile.jobTitle.trim(),
+        department: profile.department.trim(),
+        bio: profile.bio.trim(),
+        website: profile.website.trim(),
+        linkedin: profile.linkedin.trim(),
+        twitter: profile.twitter.trim()
+      };
 
-      // Simulation de sauvegarde
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.warn('💾 Données à sauvegarder:', profileData);
+
+      // Sauvegarder dans Supabase - approche explicite insert/update
+      const { data: existingProfile } = await supabase
+        .from('user_profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      let error;
+      if (existingProfile) {
+        // Update existing profile
+        const result = await supabase
+          .from('user_profiles')
+          .update(profileData)
+          .eq('user_id', user.id);
+        error = result.error;
+      } else {
+        // Insert new profile
+        const result = await supabase
+          .from('user_profiles')
+          .insert(profileData);
+        error = result.error;
+      }
+
+      if (error) {
+        console.error('Erreur Supabase sauvegarde:', error);
+        throw error;
+      }
+
+      // Recharger le profil après la sauvegarde pour mettre à jour l'interface
+      await loadUserProfile();
 
       toast({
         title: 'Profil mis à jour',
@@ -129,24 +199,49 @@ export function UserProfileSettings() {
     if (!file || !user?.id) return;
 
     try {
-      // TODO: Intégrer Supabase Storage pour l'upload d'avatar
-      // const fileExt = file.name.split('.').pop();
-      // const fileName = `${user.id}/avatar.${fileExt}`;
-      // const { error: uploadError } = await supabase.storage
-      //   .from('avatars')
-      //   .upload(fileName, file, { upsert: true });
-      // if (uploadError) throw uploadError;
-      // const { data: { publicUrl } } = supabase.storage
-      //   .from('avatars')
-      //   .getPublicUrl(fileName);
+      // Vérifier la taille du fichier (5MB max)
+      if (file.size > 5242880) {
+        toast({
+          title: 'Fichier trop volumineux',
+          description: 'La taille maximale est de 5MB',
+          variant: 'destructive'
+        });
+        return;
+      }
 
-      // Simulation d'upload
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setProfile(prev => ({ ...prev, avatar: result }));
-      };
-      reader.readAsDataURL(file);
+      // Upload vers Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/avatar.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) {
+        console.error('Erreur upload Storage:', uploadError);
+        throw uploadError;
+      }
+
+      // Obtenir l'URL publique
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      // Mettre à jour le profil avec la nouvelle URL
+      setProfile(prev => ({ ...prev, avatar: publicUrl }));
+
+      // Sauvegarder dans user_profiles
+      const { error: updateError } = await supabase
+        .from('user_profiles')
+        .upsert({
+          user_id: user.id,
+          avatar_url: publicUrl
+        });
+
+      if (updateError) {
+        console.error('Erreur mise à jour profil:', updateError);
+        throw updateError;
+      }
 
       toast({
         title: 'Avatar mis à jour',
@@ -226,6 +321,7 @@ export function UserProfileSettings() {
             <div className="space-y-2">
               <Label htmlFor="firstName">Prénom</Label>
               <Input
+                key={`firstName-${profile.firstName}`}
                 id="firstName"
                 value={profile.firstName}
                 onChange={(e) => setProfile(prev => ({ ...prev, firstName: e.target.value }))}
@@ -235,6 +331,7 @@ export function UserProfileSettings() {
             <div className="space-y-2">
               <Label htmlFor="lastName">Nom</Label>
               <Input
+                key={`lastName-${profile.lastName}`}
                 id="lastName"
                 value={profile.lastName}
                 onChange={(e) => setProfile(prev => ({ ...prev, lastName: e.target.value }))}
@@ -248,6 +345,7 @@ export function UserProfileSettings() {
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
+                key={`email-${profile.email}`}
                 id="email"
                 type="email"
                 value={profile.email}
@@ -263,6 +361,7 @@ export function UserProfileSettings() {
             <div className="relative">
               <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
+                key={`phone-${profile.phone}`}
                 id="phone"
                 value={profile.phone}
                 onChange={(e) => setProfile(prev => ({ ...prev, phone: e.target.value }))}
@@ -284,6 +383,7 @@ export function UserProfileSettings() {
             <div className="space-y-2">
               <Label htmlFor="jobTitle">Poste</Label>
               <Input
+                key={`jobTitle-${profile.jobTitle}`}
                 id="jobTitle"
                 value={profile.jobTitle}
                 onChange={(e) => setProfile(prev => ({ ...prev, jobTitle: e.target.value }))}
@@ -293,6 +393,7 @@ export function UserProfileSettings() {
             <div className="space-y-2">
               <Label htmlFor="department">Département</Label>
               <Input
+                key={`department-${profile.department}`}
                 id="department"
                 value={profile.department}
                 onChange={(e) => setProfile(prev => ({ ...prev, department: e.target.value }))}
@@ -389,6 +490,43 @@ export function UserProfileSettings() {
         </CardContent>
       </Card>
 
+      {/* Actions dangereuses */}
+      <Card className="border-red-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-red-600">
+            <AlertTriangle className="h-5 w-5" />
+            Zone de danger
+          </CardTitle>
+          <CardDescription>
+            Ces actions sont irréversibles et peuvent supprimer définitivement vos données.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <h3 className="font-medium text-red-900">
+                  Supprimer mon compte
+                </h3>
+                <p className="text-sm text-red-700">
+                  Suppression définitive de votre compte avec export de vos données comptables.
+                  Cette action inclut une période de grâce de 30 jours.
+                </p>
+              </div>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setShowDeletionWizard(true)}
+                className="ml-4 shrink-0"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Supprimer
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Bouton de sauvegarde */}
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={isSaving}>
@@ -405,6 +543,19 @@ export function UserProfileSettings() {
           )}
         </Button>
       </div>
+
+      {/* Wizard de suppression de compte */}
+      <AccountDeletionWizard
+        isOpen={showDeletionWizard}
+        onClose={() => setShowDeletionWizard(false)}
+        onComplete={() => {
+          toast({
+            title: "Demande enregistrée",
+            description: "Votre demande de suppression de compte a été enregistrée. Vous recevrez un email de confirmation.",
+          });
+          setShowDeletionWizard(false);
+        }}
+      />
     </div>
   );
 }

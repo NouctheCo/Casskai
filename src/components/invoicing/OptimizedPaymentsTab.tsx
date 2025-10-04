@@ -28,7 +28,8 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   DollarSign,
-  Banknote
+  Banknote,
+  FileText
 } from 'lucide-react';
 
 // Payment Row Component
@@ -288,6 +289,158 @@ const PaymentFormDialog = ({ open, onClose, onSave }) => {
   );
 };
 
+const PaymentPreviewDialog = ({ open, onClose, payment }) => {
+  if (!payment) return null;
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'completed':
+        return <Badge className="bg-green-100 text-green-800 border-green-200">Reçu</Badge>;
+      case 'pending':
+        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">En attente</Badge>;
+      case 'failed':
+        return <Badge className="bg-red-100 text-red-800 border-red-200">Échoué</Badge>;
+      case 'refunded':
+        return <Badge className="bg-purple-100 text-purple-800 border-purple-200">Remboursé</Badge>;
+      default:
+        return <Badge variant="outline">Inconnu</Badge>;
+    }
+  };
+
+  const getMethodBadge = (method) => {
+    switch (method) {
+      case 'card':
+        return <Badge variant="outline" className="flex items-center space-x-1">
+          <CreditCard className="w-3 h-3" />
+          <span>Carte bancaire</span>
+        </Badge>;
+      case 'bank_transfer':
+        return <Badge variant="outline" className="flex items-center space-x-1">
+          <Building className="w-3 h-3" />
+          <span>Virement bancaire</span>
+        </Badge>;
+      case 'cash':
+        return <Badge variant="outline" className="flex items-center space-x-1">
+          <Banknote className="w-3 h-3" />
+          <span>Espèces</span>
+        </Badge>;
+      case 'check':
+        return <Badge variant="outline" className="flex items-center space-x-1">
+          <FileText className="w-3 h-3" />
+          <span>Chèque</span>
+        </Badge>;
+      default:
+        return <Badge variant="outline">Autre</Badge>;
+    }
+  };
+
+  const getTypeIcon = (type) => {
+    return type === 'income'
+      ? <ArrowDownLeft className="w-5 h-5 text-green-500" />
+      : <ArrowUpRight className="w-5 h-5 text-red-500" />;
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center space-x-3">
+            {getTypeIcon(payment.type)}
+            <span>Détails du paiement - {payment.reference}</span>
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          {/* Payment Header */}
+          <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div>
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Référence</Label>
+              <p className="text-lg font-semibold">{payment.reference}</p>
+            </div>
+            <div>
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Statut</Label>
+              <div className="mt-1">{getStatusBadge(payment.status)}</div>
+            </div>
+          </div>
+
+          {/* Payment Details */}
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Client</Label>
+                <p className="text-base font-medium">{payment.clientName}</p>
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Numéro de facture</Label>
+                <p className="text-base">{payment.invoiceNumber || 'N/A'}</p>
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Date</Label>
+                <p className="text-base">{new Date(payment.date).toLocaleDateString('fr-FR')}</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Montant</Label>
+                <p className={`text-2xl font-bold ${payment.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                  {payment.type === 'income' ? '+' : '-'}{payment.amount.toFixed(2)} €
+                </p>
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Méthode de paiement</Label>
+                <div className="mt-1">{getMethodBadge(payment.method)}</div>
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Type</Label>
+                <p className="text-base flex items-center space-x-2">
+                  {getTypeIcon(payment.type)}
+                  <span>{payment.type === 'income' ? 'Recette' : 'Dépense'}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Description */}
+          {payment.description && (
+            <div>
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Description</Label>
+              <p className="text-base mt-1 p-3 bg-gray-50 dark:bg-gray-800 rounded-md">{payment.description}</p>
+            </div>
+          )}
+
+          {/* Payment Timeline */}
+          <div className="border-t pt-4">
+            <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Historique</Label>
+            <div className="mt-2 space-y-2">
+              <div className="flex items-center space-x-3 text-sm">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>Paiement créé le {new Date(payment.date).toLocaleDateString('fr-FR')}</span>
+              </div>
+              {payment.status === 'completed' && (
+                <div className="flex items-center space-x-3 text-sm">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span>Paiement confirmé et traité</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Fermer
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreateNewCompleted }) {
   const { toast } = useToast();
   const [payments, setPayments] = useState([
@@ -349,6 +502,7 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [previewPayment, setPreviewPayment] = useState(null);
 
   // Ouvrir automatiquement le formulaire si shouldCreateNew est true
   React.useEffect(() => {
@@ -385,10 +539,7 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
   };
 
   const handleViewPayment = (payment) => {
-    toast({
-      title: "Détails du paiement",
-      description: `Consultation du paiement ${payment.reference}`
-    });
+    setPreviewPayment(payment);
   };
 
   const handleNewPayment = () => {
@@ -605,6 +756,12 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
         open={showPaymentForm}
         onClose={() => setShowPaymentForm(false)}
         onSave={handleSavePayment}
+      />
+
+      <PaymentPreviewDialog
+        open={!!previewPayment}
+        onClose={() => setPreviewPayment(null)}
+        payment={previewPayment}
       />
     </div>
   );

@@ -3,9 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { BarChart3, FileText, CheckCircle, Clock, AlertCircle, Eye } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import { BarChart3, FileText, CheckCircle, Clock, AlertCircle, Eye, RefreshCw } from 'lucide-react';
 
 export default function OptimizedJournalsTab() {
+  const { toast } = useToast();
   const [journals] = useState([
     {
       id: 1,
@@ -53,6 +55,11 @@ export default function OptimizedJournalsTab() {
     }
   ]);
 
+  // RBAC simulation (à remplacer par vrai hook/context)
+  const userCanView = true; // TODO: remplacer par vrai contrôle
+
+  const [viewingJournal, setViewingJournal] = useState(null);
+
   const getStatusBadge = (status) => {
     switch (status) {
       case 'active':
@@ -80,6 +87,21 @@ export default function OptimizedJournalsTab() {
     totalEntries: journals.reduce((sum, j) => sum + j.entries, 0),
     totalDebit: journals.reduce((sum, j) => sum + j.totalDebit, 0),
     activeJournals: journals.filter(j => j.status === 'active').length
+  };
+
+  const handleViewJournal = async (journal) => {
+    if (!userCanView) return;
+    
+    setViewingJournal(journal.id);
+    // Simuler un délai de chargement
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    toast({
+      title: "Journal consulté",
+      description: `Le journal "${journal.name}" (${journal.code}) a été ouvert avec succès.`
+    });
+    
+    setViewingJournal(null);
   };
 
   return (
@@ -182,8 +204,17 @@ export default function OptimizedJournalsTab() {
                     <TableCell>{getStatusBadge(journal.status)}</TableCell>
                     <TableCell>{new Date(journal.lastEntry).toLocaleDateString('fr-FR')}</TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="sm">
-                        <Eye className="w-4 h-4" />
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleViewJournal(journal)}
+                        disabled={!userCanView || viewingJournal === journal.id}
+                      >
+                        {viewingJournal === journal.id ? (
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
                       </Button>
                     </TableCell>
                   </TableRow>

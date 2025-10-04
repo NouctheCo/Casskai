@@ -224,25 +224,11 @@ const initConfig = {
     excludeCacheFor: ['cimode']
   },
   
-  // Options d'interpolation avec formatage personnalisé
+  // Options d'interpolation avec formatage personnalisé (nouvelle approche)
   interpolation: {
     escapeValue: false,
-    formatSeparator: ',',
-    format(value, format, lng) {
-      // Formatage personnalisé pour les devises
-      if (format === 'currency') {
-        return formatCurrency(value, lng || 'fr');
-      }
-      // Formatage des nombres
-      if (format === 'number') {
-        return formatNumber(value, lng || 'fr');
-      }
-      // Formatage des dates
-      if (format === 'date') {
-        return formatDate(value, lng || 'fr');
-      }
-      return value;
-    }
+    // Nouvelle approche recommandée : utiliser des fonctions de formatage globales
+    // au lieu de la propriété 'format' obsolète
   },
   
   // Options de développement
@@ -288,8 +274,40 @@ const initializeI18n = async () => {
       .use(LanguageDetector)
       .use(initReactI18next)
       .init(initConfig);
-    
-    console.warn('i18n initialisé avec succès');
+
+    // Ajouter les formateurs avec la nouvelle approche
+    if (i18n.services.formatter) {
+      i18n.services.formatter.add('currency', (value, lng, options) => {
+        // Utilisation directe des fonctions pour éviter les problèmes d'ordre
+        const detectedCurrency = options?.currency || getCurrencyForLocale(lng || 'fr');
+        const currencyConfig = WEST_AFRICAN_CURRENCIES[detectedCurrency as keyof typeof WEST_AFRICAN_CURRENCIES];
+
+        if (currencyConfig) {
+          const formatted = new Intl.NumberFormat(lng?.startsWith('fr') ? 'fr-FR' : 'en-US', {
+            style: 'decimal',
+            minimumFractionDigits: currencyConfig.format.decimal,
+            maximumFractionDigits: currencyConfig.format.decimal,
+            useGrouping: true
+          }).format(value);
+          return `${formatted} ${currencyConfig.symbol}`;
+        }
+
+        return new Intl.NumberFormat(lng || 'fr').format(value);
+      });
+
+      i18n.services.formatter.add('number', (value, lng) => {
+        return new Intl.NumberFormat(lng || 'fr').format(value);
+      });
+
+      i18n.services.formatter.add('date', (value, lng) => {
+        const date = typeof value === 'string' ? new Date(value) : value;
+        return date.toLocaleDateString(lng || 'fr');
+      });
+    }
+
+    if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_MODE === 'true') {
+      console.warn('i18n initialisé avec succès');
+    }
     return true;
   } catch (err) {
     console.error('Erreur d\'initialisation i18n:', err);

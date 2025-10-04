@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import type { User, Session, AuthResponse, AuthError } from '@supabase/supabase-js';
 import { getCompanyDetails, getUserCompanies, getCompanyModules } from '../lib/company';
 import { trialService } from '../services/trialService';
+import { trialExpirationService } from '../services/trialExpirationService';
 
 interface Company {
   id: string;
@@ -57,6 +58,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(false);
 
   const signOut = useCallback(async (): Promise<{ error: AuthError | null }> => {
+    // Arrêter le service de vérification des essais
+    trialExpirationService.stopPeriodicCheck();
+
     const { error } = await supabase.auth.signOut();
     // State cleanup is handled by onAuthStateChange which triggers fetchUserSession(null)
     return { error };
@@ -97,7 +101,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         const modules = await getCompanyModules(companyId);
         localStorage.setItem('casskai_modules', JSON.stringify(modules));
-        window.dispatchEvent(new CustomEvent('modulesUpdated', { detail: modules }));
+        window.dispatchEvent(new CustomEvent('module-states-reset'));
         
         console.warn(`Entreprise changée: ${companyDetails.name}`);
       } else {
@@ -145,6 +149,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         
         // Vérifier et créer automatiquement un abonnement d'essai si nécessaire
         await ensureTrialSubscription(currentUser.id, companies[0].id);
+
+        // Démarrer la vérification de l'expiration des essais
+        trialExpirationService.startPeriodicCheck(60); // Vérifier toutes les heures
+
+        // Vérifier l'état de l'utilisateur au démarrage
+        await trialExpirationService.checkUserOnStartup(currentUser.id);
         
         const lastCompanyId = localStorage.getItem('casskai_current_company_id');
         const companyToLoad = companies.find(c => c.id === lastCompanyId) || companies[0];
@@ -175,6 +185,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     } catch (error) {
       console.error("AuthContext | Erreur lors de la récupération des données utilisateur:", error);
+
+      // Gestion spéciale des erreurs RLS/500 - assumer que l'utilisateur doit faire l'onboarding
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('500') || errorMessage.includes('RLS') || errorMessage.includes('policy')) {
+        console.warn('🔄 Erreur RLS détectée - redirection vers onboarding');
+        setOnboardingCompleted(false);
+      }
+
       // Ne pas déconnecter automatiquement, juste logger l'erreur
       setUserCompanies([]);
       setCurrentCompany(null);
@@ -193,11 +211,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const accessToken = hashParams.get('access_token');
       const type = hashParams.get('type');
-      
+
       if (accessToken && type === 'email_confirmation') {
         console.warn('📧 Email confirmation detected, cleaning URL...');
         // Clean URL by removing hash parameters
-        window.history.replaceState(null, '', window.location.pathname);
+        window.history.replaceState(null, '', '/onboarding');
         return true;
       }
       return false;
@@ -230,18 +248,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Listen for auth state changes
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       console.warn('🔐 Auth state change:', event);
-      
+
       setSession(session);
-      
+
       // Special handling for email confirmation
       if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         if (hashParams.get('type') === 'email_confirmation') {
-          console.warn('📧 Email confirmation event detected');
-          window.history.replaceState(null, '', window.location.pathname);
+          console.warn('📧 Email confirmation event detected - redirecting to onboarding');
+          window.history.replaceState(null, '', '/onboarding');
         }
       }
-      
+
       fetchUserSession(session?.user ?? null);
     });
 

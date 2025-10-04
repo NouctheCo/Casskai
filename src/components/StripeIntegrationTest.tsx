@@ -52,7 +52,7 @@ export function StripeIntegrationTest() {
 
       // Test 3: Tester la création d'une session de checkout (simulation)
       const checkoutResult = await stripeService.createCheckoutSession(
-        'professional',
+        'pro_monthly',
         user.id,
         'http://localhost:5173/success',
         'http://localhost:5173/pricing'

@@ -628,7 +628,7 @@ const TransactionsList = ({ transactions, onMatch, onEdit }) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {transactions.map((transaction) => (
+          {(transactions || []).map((transaction) => (
             <motion.div
               key={transaction.id}
               initial={{ opacity: 0, y: 20 }}
@@ -825,7 +825,7 @@ const CategorizationRules = ({ rules, onEdit, onToggle, onAdd }) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {rules.map((rule) => (
+          {(rules || []).map((rule) => (
             <motion.div
               key={rule.id}
               initial={{ opacity: 0, y: 10 }}

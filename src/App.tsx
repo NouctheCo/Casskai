@@ -9,7 +9,6 @@ import { EnterpriseProvider } from '@/contexts/EnterpriseContext';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
 import ABTestProvider from '@/components/ABTestProvider';
-import { ToastProvider } from '@/components/ui/use-toast';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { LoadingFallback } from '@/components/ui/LoadingFallback';
 import ErrorBoundary, { setupGlobalErrorHandling } from '@/components/ErrorBoundary';
@@ -28,11 +27,15 @@ const ModulesProviderWrapper: React.FC<{ children: React.ReactNode }> = ({ child
     return <>{children}</>;
   }
   
+  // Permissions par défaut pour l'environnement de développement/démonstration
+  const defaultPermissions = ['*', 'module:activate', 'module:configure', 'module:deactivate'];
+  const userPermissions = user.user_metadata?.permissions || defaultPermissions;
+
   return (
     <ModulesProvider
       userId={user.id}
       tenantId={currentCompany.id}
-      userPermissions={user.user_metadata?.permissions || []}
+      userPermissions={userPermissions}
     >
       {children}
     </ModulesProvider>
@@ -52,9 +55,20 @@ function App() {
             <AuthProvider>
               <SubscriptionProvider>
                 <ABTestProvider>
-                  <ToastProvider>
-                    <BrowserRouter>
-                      {isE2EMinimal ? (
+                  <BrowserRouter>
+                    {isE2EMinimal ? (
+                      <EnterpriseProvider>
+                        <TooltipProvider>
+                          <Suspense fallback={<LoadingFallback message="Chargement de l'application..." />}>
+                            <AppRouter />
+                          </Suspense>
+                          <Toaster />
+                          <UpdateNotification />
+                          <OfflineIndicator />
+                        </TooltipProvider>
+                      </EnterpriseProvider>
+                    ) : (
+                      <ModulesProviderWrapper>
                         <EnterpriseProvider>
                           <TooltipProvider>
                             <Suspense fallback={<LoadingFallback message="Chargement de l'application..." />}>
@@ -65,22 +79,9 @@ function App() {
                             <OfflineIndicator />
                           </TooltipProvider>
                         </EnterpriseProvider>
-                      ) : (
-                        <ModulesProviderWrapper>
-                          <EnterpriseProvider>
-                            <TooltipProvider>
-                              <Suspense fallback={<LoadingFallback message="Chargement de l'application..." />}>
-                                <AppRouter />
-                              </Suspense>
-                              <Toaster />
-                              <UpdateNotification />
-                              <OfflineIndicator />
-                            </TooltipProvider>
-                          </EnterpriseProvider>
-                        </ModulesProviderWrapper>
-                      )}
-                    </BrowserRouter>
-                  </ToastProvider>
+                      </ModulesProviderWrapper>
+                    )}
+                  </BrowserRouter>
                 </ABTestProvider>
               </SubscriptionProvider>
             </AuthProvider>

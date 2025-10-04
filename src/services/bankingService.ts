@@ -395,12 +395,8 @@ export class BankingService {
   }
 
   private formatCurrency(amount: number, currency: string = 'EUR'): string {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(amount);
+    const formatted = new Intl.NumberFormat('fr-FR', {}).format(amount);
+    return formatted.replace(/\u00a0/g, ' ');
   }
 
   private formatLastSync(date: Date): string {
@@ -439,3 +435,6 @@ export class BankingService {
 
 // Instance singleton
 export const bankingService = BankingService.getInstance();
+
+
+

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Menu, Settings, Bell, User, Search, Command, ChevronDown, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { LanguageToggle } from '@/components/LanguageToggle';
 import { useEnterprise } from '@/contexts/EnterpriseContext';
@@ -8,14 +9,15 @@ import { useLocale } from '@/contexts/LocaleContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator 
+  DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu';
 import { Link } from 'react-router-dom';
+import { NotificationCenter, useNotificationCenter } from '@/components/notifications/NotificationCenter';
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -34,7 +36,8 @@ export function Header({
   // const navigate = useNavigate(); // Commenté car on utilise Link maintenant
   const [searchFocused, setSearchFocused] = useState(false);
 
-  const notificationCount = 0; // TODO: Implement dynamic notifications
+  // Utiliser le hook pour les notifications
+  const { isOpen: isNotificationOpen, setIsOpen: setNotificationOpen, unreadCount } = useNotificationCenter();
 
   // Use currentCompany from AuthContext if available, fallback to currentEnterprise
   const displayCompany = currentCompany || currentEnterprise;
@@ -158,16 +161,21 @@ export function Header({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
           >
-            <Button variant="ghost" size="icon" className="relative hover:bg-white/20 dark:hover:bg-gray-800/20 min-h-[44px] min-w-[44px] touch-manipulation">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative hover:bg-white/20 dark:hover:bg-gray-800/20 min-h-[44px] min-w-[44px] touch-manipulation"
+              onClick={() => setNotificationOpen(!isNotificationOpen)}
+            >
               <Bell className="h-5 w-5" />
-              {notificationCount > 0 && (
+              {unreadCount > 0 && (
                 <motion.span
                   className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full text-xs text-white flex items-center justify-center font-medium"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 500, damping: 30 }}
                 >
-                  {notificationCount > 9 ? '9+' : notificationCount}
+                  {unreadCount > 9 ? '9+' : unreadCount}
                 </motion.span>
               )}
             </Button>
@@ -287,6 +295,12 @@ export function Header({
 
       {/* Animated border bottom */}
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
+
+      {/* Notification Center */}
+      <NotificationCenter
+        isOpen={isNotificationOpen}
+        onClose={() => setNotificationOpen(false)}
+      />
     </motion.header>
   );
 }

@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { invoicingService } from '@/services/invoicingService';
 import { thirdPartiesService } from '@/services/thirdPartiesService';
 import CompanySettingsService from '@/services/companySettingsService';
@@ -69,6 +70,7 @@ interface OptimizedInvoicesTabNewProps {
 // Composant principal
 const OptimizedInvoicesTabNew: React.FC<OptimizedInvoicesTabNewProps> = ({ shouldCreateNew, onCreateNewCompleted }) => {
   const { toast } = useToast();
+  const { currentCompany } = useAuth();
   
   // États
   const [invoices, setInvoices] = useState<InvoiceWithDetails[]>([]);
@@ -95,9 +97,12 @@ const OptimizedInvoicesTabNew: React.FC<OptimizedInvoicesTabNewProps> = ({ shoul
   
   const loadCompanySettings = async (): Promise<CompanySettings | null> => {
     try {
-      // For now, we'll use a mock company ID. In a real app, this would come from context
-      const companyId = 'current-company';
-      const settings = await CompanySettingsService.getCompanySettings(companyId);
+      if (!currentCompany?.id) {
+        console.warn('No current company available');
+        return null;
+      }
+
+      const settings = await CompanySettingsService.getCompanySettings(currentCompany.id);
       return settings;
     } catch (error) {
       console.warn('Could not load company settings:', error);
@@ -105,7 +110,7 @@ const OptimizedInvoicesTabNew: React.FC<OptimizedInvoicesTabNewProps> = ({ shoul
       return {
         generalInfo: { name: '' },
         contact: { address: {}, email: '' },
-        accounting: { 
+        accounting: {
           fiscalYear: { startMonth: 1, endMonth: 12 },
           taxRegime: 'real_simplified' as const,
           vatRegime: 'subject' as const,

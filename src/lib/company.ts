@@ -18,10 +18,17 @@ export const getUserCompanies = async (userId: string) => {
 
   if (linksError) {
     console.error("Erreur lors de la récupération des liaisons user_companies:", linksError);
-    if (linksError.code === '42P17' || linksError.message?.includes('infinite recursion')) {
-      console.warn('RLS policy recursion detected on user_companies, returning empty array');
+
+    // Gestion des erreurs RLS communes
+    if (linksError.code === '42P17' ||
+        linksError.message?.includes('infinite recursion') ||
+        linksError.message?.includes('500') ||
+        linksError.message?.includes('Internal Server Error') ||
+        linksError.message?.includes('policy')) {
+      console.warn('🔄 RLS/Policy error detected on user_companies, returning empty array for onboarding');
       return [];
     }
+
     throw new Error("Impossible de récupérer les entreprises de l'utilisateur.");
   }
 
@@ -36,10 +43,17 @@ export const getUserCompanies = async (userId: string) => {
 
   if (companiesError) {
     console.error('Erreur lors de la récupération des entreprises:', companiesError);
-    if (companiesError.code === '42P17' || companiesError.message?.includes('infinite recursion')) {
-      console.warn('RLS policy recursion detected on companies, returning empty array');
+
+    // Gestion des erreurs RLS communes
+    if (companiesError.code === '42P17' ||
+        companiesError.message?.includes('infinite recursion') ||
+        companiesError.message?.includes('500') ||
+        companiesError.message?.includes('Internal Server Error') ||
+        companiesError.message?.includes('policy')) {
+      console.warn('🔄 RLS/Policy error detected on companies, returning empty array for onboarding');
       return [];
     }
+
     throw new Error("Impossible de récupérer les entreprises de l'utilisateur.");
   }
 

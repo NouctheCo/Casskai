@@ -64,12 +64,50 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
     setError(null);
 
     try {
-      // Add company_id and created_by if applicable
-      const recordWithMeta = {
-        ...record,
-        ...(companyId && tableName !== 'companies' && tableName !== 'user_companies' ? { company_id: companyId } : {}),
-        ...(record && 'created_by' in record ? { created_by: user.id } : {}),
-      };
+      // Add company_id and created_by if applicable (excluding system tables)
+      const tableNameString = tableName as string;
+      const excludedCompanyTables = new Set([
+        'companies',
+        'subscriptions',
+        'subscription_plans'
+      ]);
+
+      // Tables that don't have created_by column
+      const excludedCreatedByTables = new Set([
+        'companies',
+        'user_companies',
+        'subscriptions',
+        'subscription_plans'
+      ]);
+
+      // Type-safe record manipulation
+      let recordWithMeta = { ...record } as any;
+
+      console.log(`🔧 [useSupabase] Creating record for table: ${tableNameString}`, {
+        companyId,
+        isExcluded: excludedCompanyTables.has(tableNameString),
+        originalRecord: record
+      });
+
+      // FORCE REMOVE company_id from excluded tables
+      if (excludedCompanyTables.has(tableNameString)) {
+        delete recordWithMeta.company_id;
+        console.log(`🚫 [useSupabase] REMOVED company_id from excluded table: ${tableNameString}`);
+      }
+
+      // Only add company_id if not excluded AND companyId exists
+      if (companyId && !excludedCompanyTables.has(tableNameString)) {
+        recordWithMeta.company_id = companyId;
+        console.log(`✅ [useSupabase] Added company_id: ${companyId}`);
+      }
+
+      // Only add created_by if not in excluded list
+      if (!excludedCreatedByTables.has(tableNameString)) {
+        recordWithMeta.created_by = user.id;
+        console.log(`✅ [useSupabase] Added created_by: ${user.id}`);
+      }
+
+      console.log(`📤 [useSupabase] Final record to insert:`, recordWithMeta);
 
       const { data: result, error: insertError } = await supabase
         .from(tableName)

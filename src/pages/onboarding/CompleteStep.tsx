@@ -19,6 +19,7 @@ import {
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
+import { clearUserSession } from '@/utils/sessionCleanup';
 
 const completionSteps = [
   { id: 'company', label: 'Création de votre entreprise', duration: 1500 },
@@ -30,17 +31,17 @@ const completionSteps = [
 const nextSteps = [
   {
     icon: BarChart3,
-    title: 'Explorez votre Dashboard',
-    description: 'Découvrez vos KPIs et métriques personnalisées',
-    action: 'Voir le dashboard',
-    path: '/dashboard'
+    title: 'Démarrez le guide interactif',
+    description: 'Découvrez CassKai avec une visite guidée de 2 minutes',
+    action: 'Commencer le tour',
+    path: '/dashboard?tour=start'
   },
   {
     icon: Settings,
-    title: 'Configurez vos paramètres',
-    description: 'Personnalisez davantage votre expérience',
-    action: 'Paramètres',
-    path: '/settings'
+    title: 'Ajoutez des données d\'exemple',
+    description: 'Initialisez votre application avec des données de démonstration',
+    action: 'Données d\'exemple',
+    path: '/settings/sample-data'
   },
   {
     icon: Users,
@@ -112,10 +113,20 @@ const ErrorSection: React.FC<{
       <AlertTriangle className="w-10 h-10 text-red-500 mx-auto mb-4" />
       <h3 className="text-lg font-semibold text-red-700 dark:text-red-400">Une erreur est survenue</h3>
       <p className="text-sm text-red-600 dark:text-red-300 mt-2 mb-4 max-w-md mx-auto">{error || "Impossible de finaliser la configuration de votre compte."}</p>
-      <Button onClick={processOnboarding}>
-        <Loader2 className="w-4 h-4 mr-2" />
-        Réessayer
-      </Button>
+      <div className="flex flex-col gap-3 items-center">
+        <Button onClick={processOnboarding}>
+          <Loader2 className="w-4 h-4 mr-2" />
+          Réessayer
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={clearUserSession}
+          className="text-xs"
+        >
+          Nettoyer la session et recommencer
+        </Button>
+      </div>
     </motion.div>
   );
 };
@@ -236,7 +247,7 @@ export default function CompleteStep() {
       const result = await finalizeOnboarding();
 
       if (!result.success) {
-        throw new Error('Une erreur inattendue est survenue lors de la finalisation.');
+        throw new Error(result.error || 'Une erreur inattendue est survenue lors de la finalisation.');
       }
       
       setStatus('completed');
@@ -244,6 +255,40 @@ export default function CompleteStep() {
         title: "Configuration terminée !",
         description: "Votre entreprise a été configurée avec succès dans CassKai.",
       });
+
+      // ============================================
+      // CONFIGURATION FINALE DES MODULES
+      // ============================================
+      const baseModules = ['dashboard', 'settings', 'users', 'security'];
+      const selectedModules = state.data?.selectedModules || [];
+      const enabledModules = Array.from(new Set([...baseModules, ...selectedModules]));
+
+      console.log('🔧 Configuration finale des modules:', {
+        baseModules,
+        selectedModules,
+        enabledModules,
+        total: enabledModules.length
+      });
+
+      if (typeof window !== 'undefined') {
+        const modulesRecord = enabledModules.reduce((acc, key) => {
+          acc[key] = true;
+          return acc;
+        }, {} as Record<string, boolean>);
+
+        // Sauvegarder dans localStorage avec les deux clés pour compatibilité
+        localStorage.setItem('casskai_modules', JSON.stringify(modulesRecord));
+        localStorage.setItem('casskai-module-states', JSON.stringify(modulesRecord));
+
+        // Déclencher l'événement pour synchroniser avec le contexte des modules
+        window.dispatchEvent(new CustomEvent('module-state-changed', {
+          detail: {
+            allStates: modulesRecord
+          }
+        }));
+
+        console.log('✅ Modules sauvegardés dans localStorage:', modulesRecord);
+      }
 
       clearProgress();
 

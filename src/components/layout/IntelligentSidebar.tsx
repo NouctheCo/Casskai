@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useModulesSafe, useModules } from '@/hooks/modules.hooks';
+import { useModulesSafe } from '@/hooks/modules.hooks';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { 
@@ -33,7 +33,7 @@ const MODULE_CATEGORIES = {
     label: 'Finances',
     icon: Calculator,
     color: 'blue',
-    modules: ['dashboard', 'accounting', 'banking', 'invoicing', 'tax'],
+    modules: ['dashboard', 'accounting', 'banking', 'invoicing', 'tax', 'budget'],
     priority: 1
   },
   commercial: {
@@ -54,8 +54,15 @@ const MODULE_CATEGORIES = {
     label: 'Analyse',
     icon: BarChart3,
     color: 'orange',
-    modules: ['reports', 'forecasts'],
+    modules: ['reports'],
     priority: 4
+  },
+  automation: {
+    label: 'Automatisation',
+    icon: Zap,
+    color: 'yellow',
+    modules: ['automation'],
+    priority: 5
   }
 };
 
@@ -65,16 +72,17 @@ const MODULE_ICONS = {
   banking: Landmark,
   invoicing: FileText,
   tax: Calculator,
+  budget: Calculator,
   reports: BarChart3,
   salesCrm: Users,
   contracts: Briefcase,
   inventory: Package,
   purchases: ShoppingCart,
   projects: Briefcase,
-  forecasts: BarChart3,
   analytics: Sparkles,
   humanResources: Users,
-  thirdParties: Users
+  thirdParties: Users,
+  automation: Zap
 };
 
 interface IntelligentSidebarProps {
@@ -84,8 +92,8 @@ interface IntelligentSidebarProps {
 
 export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProps) {
   const location = useLocation();
-  const { allModules, isModuleActive, activeModules } = useModulesSafe();
-  const { user } = useAuth();
+  const { allModules, isModuleActive, activeModules, canAccessModule } = useModulesSafe();
+  const { user, currentCompany: _currentCompany } = useAuth();
   const { subscription } = useSubscription();
   
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['finances']));
@@ -186,6 +194,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
     ).filter(Boolean);
   };
 
+
   // Raccourcis clavier
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -253,7 +262,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
                 {getFavoriteModulesData().map((module) => {
                   if (!module) return null;
                   const IconComponent = MODULE_ICONS[module.key] || FileText;
-                  const canAccess = isModuleActive(module.id);
+                  const canAccess = canAccessModule(module.id);
                   
                   return (
                     <motion.div
@@ -294,7 +303,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
                 {getRecentModulesData().map((module) => {
                   if (!module) return null;
                   const IconComponent = MODULE_ICONS[module.key] || FileText;
-                  const canAccess = isModuleActive(module.id);
+                  const canAccess = canAccessModule(module.id);
                   
                   return (
                     <motion.div
@@ -376,7 +385,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
                     >
                       {categoryModules.map((module) => {
                         const IconComponent = MODULE_ICONS[module.key] || FileText;
-                        const canAccess = isModuleActive(module.id);
+                        const canAccess = canAccessModule(module.id);
                         const isFavorite = favoriteModules.has(module.key);
                         
                         return (
@@ -446,12 +455,14 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
       {/* Footer avec raccourcis */}
       {!collapsed && (
         <div className="p-3 border-t border-gray-200 dark:border-gray-700">
-          <Button asChild className="w-full">
+          <Button asChild className="w-full mb-2">
             <Link to={subscription ? "/settings?tab=subscription" : "/pricing"}>
               Gérer l'abonnement
             </Link>
           </Button>
-          <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1 mt-4">
+          
+          
+          <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
             <div className="flex items-center gap-2">
               <Zap className="h-3 w-3" />
               <span>Raccourcis clavier</span>

@@ -1,5 +1,4 @@
 import { Module } from '@/types/modules.types';
-import ForecastsPage from '@/pages/ForecastsPage';
 
 export const forecastsModule: Module = {
   definition: {
@@ -20,13 +19,7 @@ export const forecastsModule: Module = {
     dependencies: [],
     conflicts: [],
   },
-  getRoutes: () => [
-    {
-      path: '/forecasts',
-      component: ForecastsPage,
-      exact: true,
-    },
-  ],
+  getRoutes: () => [],
 };
 
 export default forecastsModule;

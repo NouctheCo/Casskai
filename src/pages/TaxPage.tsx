@@ -16,6 +16,7 @@ import { fr } from 'date-fns/locale';
 import { useToast } from '../components/ui/use-toast';
 import { useEnterprise } from '../contexts/EnterpriseContext';
 import { taxService } from '../services/taxService';
+import { TaxCompliancePanel } from '../components/fiscal/TaxCompliancePanel';
 import {
   TaxDeclaration,
   TaxCalendarEvent,
@@ -464,8 +465,9 @@ const TaxPage: React.FC = () => {
       {/* Tabs Navigation */}
       <motion.div variants={itemVariants}>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="dashboard">Tableau de Bord</TabsTrigger>
+            <TabsTrigger value="compliance">Conformité Fiscale</TabsTrigger>
             <TabsTrigger value="declarations">Déclarations</TabsTrigger>
             <TabsTrigger value="calendar">Calendrier</TabsTrigger>
             <TabsTrigger value="alerts">Alertes</TabsTrigger>
@@ -574,6 +576,7 @@ const TaxPage: React.FC = () => {
                     </CardContent>
                   </Card>
 
+{dashboardData.compliance_score && (
                   <Card>
                     <CardHeader>
                       <CardTitle>Score de Conformité</CardTitle>
@@ -581,15 +584,17 @@ const TaxPage: React.FC = () => {
                     <CardContent>
                       <div className="text-center mb-4">
                         <div className="text-3xl font-bold text-blue-600 mb-2">
-                          {dashboardData.compliance_score.current_score}/{dashboardData.compliance_score.max_score}
+                          {dashboardData.compliance_score.current_score || 0}/{dashboardData.compliance_score.max_score || 100}
                         </div>
-                        <Progress 
-                          value={(dashboardData.compliance_score.current_score / dashboardData.compliance_score.max_score) * 100} 
+                        <Progress
+                          value={dashboardData.compliance_score.current_score && dashboardData.compliance_score.max_score
+                            ? (dashboardData.compliance_score.current_score / dashboardData.compliance_score.max_score) * 100
+                            : 0}
                           className="w-full"
                         />
                       </div>
                       <div className="space-y-2">
-                        {dashboardData.compliance_score.factors.map((factor, index) => (
+                        {(dashboardData.compliance_score.factors || []).map((factor, index) => (
                           <div key={index} className="flex justify-between items-center text-sm">
                             <span className={`flex items-center gap-2 ${
                               factor.status === 'good' ? 'text-green-600' :
@@ -602,13 +607,14 @@ const TaxPage: React.FC = () => {
                               {factor.name}
                             </span>
                             <span className="font-medium">
-                              {factor.score}/{factor.max_score}
+                              {factor.score || 0}/{factor.max_score || 0}
                             </span>
                           </div>
                         ))}
                       </div>
                     </CardContent>
                   </Card>
+                )}
                 </div>
 
                 {/* Breakdown by Type */}
@@ -618,7 +624,7 @@ const TaxPage: React.FC = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {dashboardData.stats.by_type.map((typeData) => (
+                      {(dashboardData.stats?.by_type || []).map((typeData) => (
                         <div key={typeData.type} className="p-4 border rounded-lg">
                           <div className="flex justify-between items-center mb-3">
                             <div className="flex items-center gap-2">
@@ -656,7 +662,7 @@ const TaxPage: React.FC = () => {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        {dashboardData.recent_declarations.map((declaration) => (
+                        {(dashboardData.recent_declarations || []).map((declaration) => (
                           <div key={declaration.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                             <div>
                               <div className="flex items-center gap-2 mb-1">
@@ -691,7 +697,7 @@ const TaxPage: React.FC = () => {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        {dashboardData.upcoming_obligations.map((obligation) => (
+                        {(dashboardData.upcoming_obligations || []).map((obligation) => (
                           <div key={obligation.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                             <div>
                               <div className="flex items-center gap-2 mb-1">
@@ -718,6 +724,16 @@ const TaxPage: React.FC = () => {
                   </Card>
                 </div>
               </>
+            )}
+          </TabsContent>
+
+          {/* Conformité Fiscale Multi-pays Tab */}
+          <TabsContent value="compliance" className="space-y-6">
+            {currentEnterprise?.id && (
+              <TaxCompliancePanel
+                companyId={currentEnterprise.id}
+                countryCode={currentEnterprise.country || 'FR'}
+              />
             )}
           </TabsContent>
 
@@ -917,7 +933,7 @@ const TaxPage: React.FC = () => {
           {/* Alerts Tab */}
           <TabsContent value="alerts" className="space-y-6">
             <div className="grid gap-4">
-              {alerts.map((alert) => (
+              {(alerts || []).map((alert) => (
                 <Card key={alert.id}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
@@ -988,7 +1004,7 @@ const TaxPage: React.FC = () => {
           {/* Obligations Tab */}
           <TabsContent value="obligations" className="space-y-6">
             <div className="grid gap-6">
-              {obligations.map((obligation) => (
+              {(obligations || []).map((obligation) => (
                 <Card key={obligation.id}>
                   <CardContent className="p-6">
                     <div className="flex justify-between items-start mb-4">
@@ -1071,7 +1087,7 @@ const TaxPage: React.FC = () => {
                       <div className="mt-4">
                         <p className="text-sm font-medium text-gray-700 mb-2">Emails de notification:</p>
                         <div className="flex flex-wrap gap-2">
-                          {obligation.notification_emails.map((email, index) => (
+                          {(obligation.notification_emails || []).map((email, index) => (
                             <Badge key={index} variant="outline" className="text-xs">
                               📧 {email}
                             </Badge>

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { DashboardLayout, DashboardWidget, DashboardContextType } from '@/types/dashboard-widget.types';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { inferSizeFromWidth } from '@/utils/dashboardLayout';
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
@@ -200,9 +201,14 @@ export function DashboardWidgetProvider({ children }: { children: React.ReactNod
     if (!currentLayout) return;
 
     const updatedWidgets = currentLayout.widgets.map(widget => {
-      const layoutItem = layout.find(l => l.i === widget.id);
+      const layoutItem = layout.find((l: any) => l.i === widget.id);
       if (layoutItem) {
-        return { ...widget, position: { x: layoutItem.x, y: layoutItem.y, w: layoutItem.w, h: layoutItem.h } };
+        const inferredSize = inferSizeFromWidth(layoutItem.w);
+        return {
+          ...widget,
+          size: inferredSize,
+          position: { x: layoutItem.x, y: layoutItem.y, w: layoutItem.w, h: layoutItem.h },
+        };
       }
       return widget;
     });
@@ -255,3 +261,4 @@ export function useDashboardWidget() {
   }
   return context;
 }
+

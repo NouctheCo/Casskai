@@ -7,6 +7,8 @@ import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { useSubscription } from '@/contexts/SubscriptionContext';
+import { AccountingService } from '@/services/accountingService';
+import { supabase } from '@/lib/supabase';
 import { 
   Calculator,
   FileText, 
@@ -26,7 +28,7 @@ import {
   type LucideIcon
 } from 'lucide-react';
 import OptimizedJournalEntriesTab from '@/components/accounting/OptimizedJournalEntriesTab';
-import OptimizedChartOfAccountsTab from '@/components/accounting/OptimizedChartOfAccountsTab';
+import ChartOfAccountsEnhanced from '@/components/accounting/ChartOfAccountsEnhanced';
 import OptimizedJournalsTab from '@/components/accounting/OptimizedJournalsTab';
 import OptimizedReportsTab from '@/components/accounting/OptimizedReportsTab';
 
@@ -220,22 +222,63 @@ export default function AccountingPageOptimized() {
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedPeriod, setSelectedPeriod] = useState('current-month');
   const [isLoading, setIsLoading] = useState(true);
-
-  const [accountingData] = useState<AccountingData>({
-    totalBalance: 45670.50,
-    totalDebit: 125430.75,
-    totalCredit: 79760.25,
-    entriesCount: 156,
-    accountsCount: 87,
-    journalsCount: 5
+  const [accountingData, setAccountingData] = useState<AccountingData>({
+    totalBalance: 0,
+    totalDebit: 0,
+    totalCredit: 0,
+    entriesCount: 0,
+    accountsCount: 0,
+    journalsCount: 0
   });
+
+  const accountingService = AccountingService.getInstance();
 
   useEffect(() => {
     const loadAccountingData = async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setIsLoading(false);
+      try {
+        setIsLoading(true);
+
+        // Récupérer les données comptables réelles
+        const { data: user } = await supabase.auth.getUser();
+        if (!user?.user?.id) return;
+
+        // Récupérer la première entreprise de l'utilisateur
+        const { data: companies } = await supabase
+          .from('companies')
+          .select('id')
+          .eq('owner_id', user.user.id)
+          .limit(1);
+
+        if (!companies || companies.length === 0) {
+          setIsLoading(false);
+          return;
+        }
+
+        const companyId = companies[0].id;
+
+        // Compter les comptes, journaux et écritures
+        const [accountsResult, journalsResult, entriesResult] = await Promise.all([
+          supabase.from('accounts').select('*', { count: 'exact', head: true }).eq('company_id', companyId),
+          supabase.from('journals').select('*', { count: 'exact', head: true }).eq('company_id', companyId),
+          supabase.from('journal_entries').select('*', { count: 'exact', head: true }).eq('company_id', companyId)
+        ]);
+
+        setAccountingData({
+          totalBalance: 0, // À calculer depuis les écritures
+          totalDebit: 0,   // À calculer
+          totalCredit: 0,  // À calculer
+          entriesCount: entriesResult.count || 0,
+          accountsCount: accountsResult.count || 0,
+          journalsCount: journalsResult.count || 0
+        });
+
+      } catch (error) {
+        console.error('Erreur chargement données comptables:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
-    
+
     loadAccountingData();
   }, [selectedPeriod]);
 
@@ -441,7 +484,7 @@ export default function AccountingPageOptimized() {
         </TabsContent>
 
         <TabsContent value="accounts">
-          <OptimizedChartOfAccountsTab />
+          <ChartOfAccountsEnhanced />
         </TabsContent>
 
         <TabsContent value="journals">

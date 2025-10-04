@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import { useProjects } from '@/hooks/useProjects';
 import { 
   KanbanSquare, 
   PlusCircle, 
@@ -348,6 +349,27 @@ export default function ProjectsPage() {
   const { t } = useLocale();
   const { toast } = useToast();
 
+  // Hook pour la gestion des projets
+  const {
+    projects,
+    tasks,
+    timeEntries,
+    metrics,
+    categories,
+    managers,
+    loading: projectsLoading,
+    error,
+    createProject,
+    updateProject,
+    deleteProject,
+    refreshAll,
+    activeProjects,
+    completedProjects,
+    totalBudget,
+    totalRevenue,
+    averageProgress
+  } = useProjects();
+
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -371,13 +393,81 @@ export default function ProjectsPage() {
       }
     }
   };
+
+  // Mock des resources temporaire pour éviter l'erreur
+  const resources = [
+    {
+      id: '1',
+      name: 'Marie Dubois',
+      role: 'Chef de Projet',
+      email: 'marie.dubois@casskai.app',
+      skills: ['Project Management', 'Agile', 'Scrum'],
+      availability: 85,
+      hourlyRate: 75,
+      currentProjects: ['1', '2'] // Projets actifs
+    },
+    {
+      id: '2',
+      name: 'Pierre Martin',
+      role: 'Développeur Full Stack',
+      email: 'pierre.martin@casskai.app',
+      skills: ['React', 'Node.js', 'TypeScript'],
+      availability: 92,
+      hourlyRate: 65,
+      currentProjects: ['1'] // Projets actifs
+    },
+    {
+      id: '3',
+      name: 'Sophie Bernard',
+      role: 'Designer UX/UI',
+      email: 'sophie.bernard@casskai.app',
+      skills: ['Figma', 'Adobe XD', 'User Research'],
+      availability: 78,
+      hourlyRate: 60,
+      currentProjects: ['1', '3'] // Projets actifs
+    }
+  ];
+
+  // Mock des timesheets temporaire pour éviter l'erreur
+  const timesheets = [
+    {
+      id: '1',
+      projectId: '1',
+      userId: '1',
+      date: '2024-03-15',
+      hours: 8,
+      billableHours: 8,
+      hourlyRate: 75,
+      description: 'Développement front-end',
+      task: 'UI Implementation'
+    },
+    {
+      id: '2',
+      projectId: '1',
+      userId: '2',
+      date: '2024-03-15',
+      hours: 7.5,
+      billableHours: 7.5,
+      hourlyRate: 65,
+      description: 'API Development',
+      task: 'Backend Integration'
+    },
+    {
+      id: '3',
+      projectId: '2',
+      userId: '3',
+      date: '2024-03-14',
+      hours: 6,
+      billableHours: 6,
+      hourlyRate: 60,
+      description: 'Design System',
+      task: 'UX Research'
+    }
+  ];
+
   const [activeView, setActiveView] = useState('dashboard');
   const [showProjectForm, setShowProjectForm] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
-  const [projects, setProjects] = useState(mockProjects);
-  const [tasks, setTasks] = useState(mockTasks);
-  const [timesheets, setTimesheets] = useState(mockTimesheets);
-  const [resources, setResources] = useState(mockResources);
   
   // États pour le formulaire projet
   const [startDate, setStartDate] = useState(null);
@@ -398,7 +488,7 @@ export default function ProjectsPage() {
     setShowProjectForm(false);
   };
 
-  const handleSubmitProject = useCallback(() => {
+  const handleSubmitProject = useCallback(async () => {
     if (!projectName.trim() || !projectClient.trim() || !projectBudget) {
       toast({
         variant: "destructive",
@@ -408,92 +498,104 @@ export default function ProjectsPage() {
       return;
     }
 
-    const newProject = {
-      id: Date.now().toString(),
-      name: projectName.trim(),
-      description: projectDescription.trim(),
-      client: projectClient.trim(),
-      status: projectStatus,
-      priority: 'medium',
-      startDate: startDate ? startDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-      endDate: endDate ? endDate.toISOString().split('T')[0] : new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      budget: parseFloat(projectBudget),
-      spent: 0,
-      progress: 0,
-      manager: projectManager.trim() || 'Non assigné',
-      team: [],
-      category: 'Général',
-      lastActivity: new Date().toISOString(),
-      totalHours: 0,
-      billableHours: 0,
-      hourlyRate: 75,
-      revenue: 0,
-      profit: 0
-    };
+    try {
+      const projectData = {
+        name: projectName.trim(),
+        description: projectDescription.trim(),
+        client: projectClient.trim(),
+        status: projectStatus as 'planning' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled',
+        priority: 'medium' as 'low' | 'medium' | 'high' | 'critical',
+        startDate: startDate ? startDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        endDate: endDate ? endDate.toISOString().split('T')[0] : new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        budget: parseFloat(projectBudget),
+        spent: 0,
+        progress: 0,
+        manager: projectManager.trim() || 'Non assigné',
+        team: [],
+        category: 'Général',
+        lastActivity: new Date().toISOString(),
+        totalHours: 0,
+        billableHours: 0,
+        hourlyRate: 75,
+        revenue: 0
+      };
 
-    setProjects(prev => [...prev, newProject]);
-    
-    // Réinitialiser le formulaire
-    setProjectName('');
-    setProjectClient('');
-    setProjectDescription('');
-    setProjectBudget('');
-    setProjectManager('');
-    setProjectStatus('planning');
-    setStartDate(null);
-    setEndDate(null);
-    
-    toast({
-      title: "Succès",
-      description: "Projet créé avec succès"
-    });
-    setShowProjectForm(false);
-  }, [projectName, projectClient, projectDescription, projectBudget, projectManager, projectStatus, startDate, endDate, toast]);
+      const success = await createProject(projectData);
 
-  const handleTaskStatusChange = useCallback((taskId, newStatus) => {
-    setTasks(prev => prev.map(task => 
-      task.id === taskId ? { ...task, status: newStatus } : task
-    ));
-    toast({
-      title: "Tâche mise à jour",
-      description: "Le statut de la tâche a été modifié"
-    });
+      if (success) {
+        // Réinitialiser le formulaire
+        setProjectName('');
+        setProjectClient('');
+        setProjectDescription('');
+        setProjectBudget('');
+        setProjectManager('');
+        setProjectStatus('planning');
+        setStartDate(null);
+        setEndDate(null);
+
+        toast({
+          title: "Succès",
+          description: "Projet créé avec succès"
+        });
+        setShowProjectForm(false);
+      }
+    } catch (error) {
+      console.error('Error creating project:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de créer le projet"
+      });
+    }
+  }, [projectName, projectClient, projectDescription, projectBudget, projectManager, projectStatus, startDate, endDate, toast, createProject]);
+
+  const handleTaskStatusChange = useCallback(async (taskId, newStatus) => {
+    try {
+      // Cette fonction sera implémentée dans le hook plus tard
+      toast({
+        title: "Information",
+        description: "Fonction de mise à jour des tâches à implémenter"
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de mettre à jour la tâche"
+      });
+    }
   }, [toast]);
 
-  const handleProjectStatusChange = useCallback((projectId, newStatus) => {
-    setProjects(prev => prev.map(project => 
-      project.id === projectId ? { ...project, status: newStatus } : project
-    ));
-    toast({
-      title: "Projet mis à jour",
-      description: "Le statut du projet a été modifié"
-    });
-  }, [toast]);
+  const handleProjectStatusChange = useCallback(async (projectId, newStatus) => {
+    try {
+      const success = await updateProject(projectId, { status: newStatus });
 
-  // Calculs pour les métriques
-  const metrics = useMemo(() => {
-    const totalRevenue = projects.reduce((sum, project) => sum + project.revenue, 0);
-    const totalBudget = projects.reduce((sum, project) => sum + project.budget, 0);
-    const totalSpent = projects.reduce((sum, project) => sum + project.spent, 0);
-    const averageProgress = projects.length > 0 ? projects.reduce((sum, project) => sum + project.progress, 0) / projects.length : 0;
-    const activeProjects = projects.filter(p => p.status === 'in_progress').length;
-    const completedProjects = projects.filter(p => p.status === 'completed').length;
-    const onHoldProjects = projects.filter(p => p.status === 'on_hold').length;
-    const profitMargin = totalRevenue > 0 ? ((totalRevenue - totalSpent) / totalRevenue) * 100 : 0;
-    
-    return {
-      ...mockProjectMetrics,
-      totalProjects: projects.length,
-      activeProjects,
-      completedProjects,
-      onHoldProjects,
-      totalRevenue,
-      totalBudget,
-      totalSpent,
-      averageProgress,
-      profitMargin
-    };
-  }, [projects]);
+      if (success) {
+        toast({
+          title: "Projet mis à jour",
+          description: "Le statut du projet a été modifié"
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de mettre à jour le projet"
+      });
+    }
+  }, [toast, updateProject]);
+
+  // Métriques calculées provenant du hook
+  const computedMetrics = useMemo(() => ({
+    totalProjects: projects.length,
+    activeProjects: activeProjects.length,
+    completedProjects: completedProjects.length,
+    onHoldProjects: projects.filter(p => p.status === 'on_hold').length,
+    totalRevenue: totalRevenue,
+    totalBudget: totalBudget,
+    totalSpent: projects.reduce((sum, project) => sum + (project.spent || 0), 0),
+    averageProgress: averageProgress,
+    profitMargin: totalRevenue > 0 ? ((totalRevenue - projects.reduce((sum, p) => sum + (p.spent || 0), 0)) / totalRevenue) * 100 : 0
+  }), [projects, activeProjects, completedProjects, totalRevenue, totalBudget, averageProgress]);
 
   return (
     <motion.div 
@@ -661,8 +763,8 @@ export default function ProjectsPage() {
                     <Briefcase className="h-4 w-4 text-blue-500" />
                     <span className="text-sm font-medium">Projets total</span>
                   </div>
-                  <div className="text-2xl font-bold">{metrics.totalProjects}</div>
-                  <p className="text-xs text-muted-foreground">{metrics.activeProjects} actifs</p>
+                  <div className="text-2xl font-bold">{computedMetrics.totalProjects}</div>
+                  <p className="text-xs text-muted-foreground">{computedMetrics.activeProjects} actifs</p>
                 </CardContent>
               </Card>
               
@@ -672,8 +774,8 @@ export default function ProjectsPage() {
                     <DollarSign className="h-4 w-4 text-green-500" />
                     <span className="text-sm font-medium">Revenus</span>
                   </div>
-                  <div className="text-2xl font-bold">€{metrics.totalRevenue.toLocaleString()}</div>
-                  <p className="text-xs text-muted-foreground">Marge: {metrics.profitMargin.toFixed(1)}%</p>
+                  <div className="text-2xl font-bold">€{computedMetrics.totalRevenue.toLocaleString()}</div>
+                  <p className="text-xs text-muted-foreground">Marge: {computedMetrics.profitMargin.toFixed(1)}%</p>
                 </CardContent>
               </Card>
               
@@ -683,7 +785,7 @@ export default function ProjectsPage() {
                     <Target className="h-4 w-4 text-orange-500" />
                     <span className="text-sm font-medium">Progression</span>
                   </div>
-                  <div className="text-2xl font-bold">{metrics.averageProgress.toFixed(0)}%</div>
+                  <div className="text-2xl font-bold">{computedMetrics.averageProgress.toFixed(0)}%</div>
                   <p className="text-xs text-muted-foreground">Moyenne projets</p>
                 </CardContent>
               </Card>
@@ -694,8 +796,8 @@ export default function ProjectsPage() {
                     <Calculator className="h-4 w-4 text-purple-500" />
                     <span className="text-sm font-medium">Budget utilisé</span>
                   </div>
-                  <div className="text-2xl font-bold">{((metrics.totalSpent / metrics.totalBudget) * 100).toFixed(0)}%</div>
-                  <p className="text-xs text-muted-foreground">€{metrics.totalSpent.toLocaleString()} / €{metrics.totalBudget.toLocaleString()}</p>
+                  <div className="text-2xl font-bold">{((computedMetrics.totalSpent / computedMetrics.totalBudget) * 100).toFixed(0)}%</div>
+                  <p className="text-xs text-muted-foreground">€{computedMetrics.totalSpent.toLocaleString()} / €{computedMetrics.totalBudget.toLocaleString()}</p>
                 </CardContent>
               </Card>
             </div>
@@ -709,12 +811,12 @@ export default function ProjectsPage() {
                 <CardContent>
                   <div className="space-y-3">
                     {[
-                      { status: 'En cours', count: metrics.activeProjects, color: 'bg-blue-500' },
-                      { status: 'Terminés', count: metrics.completedProjects, color: 'bg-green-500' },
-                      { status: 'En pause', count: metrics.onHoldProjects, color: 'bg-orange-500' },
+                      { status: 'En cours', count: computedMetrics.activeProjects, color: 'bg-blue-500' },
+                      { status: 'Terminés', count: computedMetrics.completedProjects, color: 'bg-green-500' },
+                      { status: 'En pause', count: computedMetrics.onHoldProjects, color: 'bg-orange-500' },
                       { status: 'Planifiés', count: projects.filter(p => p.status === 'planning').length, color: 'bg-gray-500' }
                     ].map((item) => {
-                      const percentage = metrics.totalProjects > 0 ? (item.count / metrics.totalProjects) * 100 : 0;
+                      const percentage = computedMetrics.totalProjects > 0 ? (item.count / computedMetrics.totalProjects) * 100 : 0;
                       return (
                         <div key={item.status} className="flex items-center justify-between">
                           <span className="text-sm font-medium">{item.status}</span>
@@ -736,7 +838,7 @@ export default function ProjectsPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {projects.slice(0, 4).map((project) => (
+                    {(projects || []).slice(0, 4).map((project) => (
                       <div key={project.id} className="flex items-center gap-3">
                         <div className={`w-2 h-2 rounded-full ${
                           project.status === 'in_progress' ? 'bg-blue-500' :
@@ -1093,7 +1195,7 @@ export default function ProjectsPage() {
                       <CardContent className="p-4">
                         <div className="text-center">
                           <h3 className="font-semibold">Revenus totaux</h3>
-                          <p className="text-2xl font-bold text-green-600">€{metrics.totalRevenue.toLocaleString()}</p>
+                          <p className="text-2xl font-bold text-green-600">€{computedMetrics.totalRevenue.toLocaleString()}</p>
                           <p className="text-sm text-muted-foreground">Facturable</p>
                         </div>
                       </CardContent>
@@ -1280,7 +1382,7 @@ export default function ProjectsPage() {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-sm text-muted-foreground">Rentabilité moyenne</p>
-                            <p className="text-2xl font-bold">{metrics.profitMargin.toFixed(1)}%</p>
+                            <p className="text-2xl font-bold">{computedMetrics.profitMargin.toFixed(1)}%</p>
                           </div>
                           <TrendingUp className="h-8 w-8 text-green-500" />
                         </div>
@@ -1364,7 +1466,7 @@ export default function ProjectsPage() {
                             }, [])
                             .sort((a, b) => b.revenue - a.revenue)
                             .map((client) => {
-                              const percentage = (client.revenue / metrics.totalRevenue) * 100;
+                              const percentage = (client.revenue / computedMetrics.totalRevenue) * 100;
                               return (
                                 <div key={client.client} className="space-y-2">
                                   <div className="flex justify-between">

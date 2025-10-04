@@ -23,7 +23,7 @@ if (!(Test-Path "package.json")) {
 # 2. Build local (optionnel)
 if (!$SkipBuild) {
     Write-Host "[BUILD] Construction du projet..." -ForegroundColor Blue
-    npm run build
+    npm run build:production
     if ($LASTEXITCODE -ne 0) {
         Write-Host "[ERROR] Erreur lors de la construction du projet" -ForegroundColor Red
         exit 1
@@ -45,7 +45,9 @@ if (!$SkipBuild) {
 
 # 3. Backup et preparation sur le VPS
 Write-Host "[BACKUP] Sauvegarde et preparation sur le VPS..." -ForegroundColor Blue
-$backupCommand = @"
+
+# Créer un script temporaire pour éviter les problèmes d'échappement
+$tempScript = @"
 if [ -d '$VPS_PATH' ]; then
     cp -r $VPS_PATH ${VPS_PATH}.backup.`$(date +%Y%m%d_%H%M%S)
     echo 'Sauvegarde creee'
@@ -53,9 +55,22 @@ fi
 mkdir -p ${VPS_PATH}.tmp
 rm -rf ${VPS_PATH}.tmp/*
 echo 'Repertoire temporaire prepare'
-"@
+"@ -replace '\$VPS_PATH', $VPS_PATH
 
-ssh -o ConnectTimeout=10 "$VPS_USER@$VPS_HOST" $backupCommand
+# Écrire le script dans un fichier temporaire
+$tempFile = [System.IO.Path]::GetTempFileName() + ".sh"
+$tempScript | Out-File -FilePath $tempFile -Encoding UTF8
+
+Write-Host "[DEBUG] Script temporaire: $tempFile" -ForegroundColor Yellow
+Write-Host "[DEBUG] Contenu:" -ForegroundColor Yellow
+Get-Content $tempFile | Write-Host -ForegroundColor Gray
+
+# Copier et exécuter le script sur le VPS
+scp -o ConnectTimeout=10 "$tempFile" "$VPS_USER@${VPS_HOST}:/tmp/deploy_backup.sh"
+ssh -o ConnectTimeout=10 "$VPS_USER@$VPS_HOST" "chmod +x /tmp/deploy_backup.sh && /tmp/deploy_backup.sh"
+
+# Nettoyer
+Remove-Item $tempFile -ErrorAction SilentlyContinue
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "[ERROR] Erreur lors de la preparation sur le VPS" -ForegroundColor Red
@@ -94,7 +109,7 @@ chmod -R 644 '$VPS_PATH'/*
 find '$VPS_PATH' -type d -exec chmod 755 {} \;
 
 echo 'Fichiers deployes et permissions corrigees'
-"@
+"@ -replace '\$VPS_PATH', $VPS_PATH
 
 ssh -o ConnectTimeout=10 "$VPS_USER@$VPS_HOST" $deployCommand
 
