@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Framework A/B Testing moderne et performant
 // Optimisé pour les Core Web Vitals et la performance
 

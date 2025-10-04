@@ -214,7 +214,6 @@ declare module '@/types/supabase' {
 }
 
 // Suppression d'erreurs TypeScript globales pour les composants complexes
-// @ts-nocheck directives seront ajoutées aux fichiers problématiques
 declare global {
   var __SUPPRESS_TYPESCRIPT_ERRORS__: boolean;
 }

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Intégration avec les formulaires existants
  * 

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Index principal de la librairie FormData
  * 

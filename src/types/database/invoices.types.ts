@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Types liés aux factures, devis et clients
 import type { Database } from '../database-types-fix'
 

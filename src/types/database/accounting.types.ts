@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Types liés à la comptabilité
 import type { Database } from '../database-types-fix'
 

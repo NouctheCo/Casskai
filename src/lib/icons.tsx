@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Système d'icônes centralisé pour CassKai
 import {
   // Navigation et layout

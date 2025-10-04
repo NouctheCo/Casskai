@@ -1,4 +1,3 @@
-// @ts-nocheck
 // data/licensePlans.ts
 export const LICENSE_PLANS: LicenseType[] = [
   {

@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Types liés aux transactions et paiements
 import type { Database } from '../database-types-fix'
 

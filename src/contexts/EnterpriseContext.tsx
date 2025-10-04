@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Enterprise, EnterpriseTaxConfiguration } from '../types/enterprise.types';
 import { useToast } from '../components/ui/use-toast';

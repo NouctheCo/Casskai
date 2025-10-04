@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Configuration des routes de l'application
 import React, { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';

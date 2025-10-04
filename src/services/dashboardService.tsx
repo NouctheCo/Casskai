@@ -1,4 +1,3 @@
-// @ts-nocheck
 // src/services/dashboardService.js
 import { supabase } from '../lib/supabase';
 

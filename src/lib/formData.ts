@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * FormData Library - Validation et gestion des formulaires pour Casskai
  * 

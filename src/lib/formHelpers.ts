@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Form Helpers - Helpers et hooks pour faciliter l'utilisation des formulaires
  * 
