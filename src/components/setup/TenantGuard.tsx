@@ -1,4 +1,3 @@
-// @ts-nocheck
 // components/TenantGuard.tsx
 import React from 'react';
 import { useTenant } from '../hooks/useTenant';

@@ -1,5 +1,4 @@
 // Composant amélioré du Plan Comptable avec gestion des mappings budgétaires
-// @ts-nocheck
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';

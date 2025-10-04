@@ -1,4 +1,3 @@
-// @ts-nocheck
 // components/MarketSelector.tsx
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

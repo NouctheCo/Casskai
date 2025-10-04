@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { Suspense } from 'react';
 import { componentStrategies } from '@/utils/performance/lazyLoading';
 import { Skeleton } from './skeleton';
