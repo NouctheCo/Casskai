@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { MarketLocalization, MarketPricing } from '../types/market';
 // services/marketService.ts
 import { MarketConfig } from '../types/market';

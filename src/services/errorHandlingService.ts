@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 
