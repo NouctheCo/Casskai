@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * PPF (Chorus Pro) Provider
  * Handles submission to French government's Chorus Pro platform

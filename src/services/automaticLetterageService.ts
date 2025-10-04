@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { LetterageRule, LetterageCriteria, LetterageMatch } from '../types/accounting-import.types';
 import { supabase } from '../lib/supabase';
 

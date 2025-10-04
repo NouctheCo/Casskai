@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as tf from '@tensorflow/tfjs';
 import { regression } from 'ml-matrix';
 import { 
