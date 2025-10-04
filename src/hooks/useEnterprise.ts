@@ -1,7 +1,39 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import type { Enterprise, TaxRegime, EnterpriseSettings } from '@/types/enterprise.types';
+import type { Enterprise as BaseEnterprise, TaxRegime, EnterpriseSettings } from '@/types/enterprise.types';
+
+// Simplified Enterprise type for this hook (database representation)
+export interface Enterprise {
+  id: string;
+  name: string;
+  country?: string;
+  countryCode?: string;
+  currency?: string;
+  locale?: string;
+  timezone?: string;
+  isActive: boolean;
+  address?: any;
+  city?: string;
+  postalCode?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  taxNumber?: string;
+  registrationNumber?: string;
+  legalForm?: string;
+  createdAt?: string | Date | number;
+  updatedAt?: string | Date | number;
+  userRole?: string;
+  isDefault?: boolean;
+  // Optional fields from BaseEnterprise
+  vatNumber?: string;
+  taxRegime?: TaxRegime;
+  fiscalYearStart?: number;
+  fiscalYearEnd?: number;
+  logo?: string;
+  settings?: EnterpriseSettings;
+}
 
 export interface CreateEnterpriseData {
   name: string;
