@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState } from 'react';
 import { Opportunity, OpportunityFormData, Client, Contact } from '../../types/crm.types';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';

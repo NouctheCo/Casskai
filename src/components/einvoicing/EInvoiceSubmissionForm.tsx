@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * E-invoice Submission Form Component
  * Form to submit invoices for e-invoicing processing

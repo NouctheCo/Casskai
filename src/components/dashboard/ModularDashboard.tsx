@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useCallback, useRef } from 'react';
 import { Responsive, WidthProvider, Layout } from 'react-grid-layout';
 import { motion, AnimatePresence } from 'framer-motion';
