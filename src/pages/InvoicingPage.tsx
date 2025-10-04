@@ -43,7 +43,7 @@ import {
 } from 'lucide-react';
 
 // Import optimized tab components
-import OptimizedInvoicesTabNew from '@/components/invoicing/OptimizedInvoicesTabNew';
+import OptimizedInvoicesTab from '@/components/invoicing/OptimizedInvoicesTab';
 import OptimizedClientsTab from '@/components/invoicing/OptimizedClientsTab';
 import OptimizedQuotesTab from '@/components/invoicing/OptimizedQuotesTab';
 import OptimizedPaymentsTab from '@/components/invoicing/OptimizedPaymentsTab';
@@ -681,7 +681,7 @@ export default function InvoicingPageOptimized() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <OptimizedInvoicesTabNew 
+              <OptimizedInvoicesTab 
                 shouldCreateNew={shouldCreateNew === 'invoice'}
                 onCreateNewCompleted={() => setShouldCreateNew(null)}
               />
