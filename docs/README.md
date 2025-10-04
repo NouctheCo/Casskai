@@ -1,43 +1,55 @@
 # 📚 Documentation CassKai
 
-## 📁 Structure de la Documentation
+Index complet de la documentation.
 
-### 📋 Guides Principaux
-- **[Performance Optimization Guide](./performance-optimization-guide.md)** - Guide d'optimisation des performances
-- **[Testing Strategy](./testing-strategy.md)** - Stratégie de tests automatisés
-- **[Technical Improvements Summary](./technical-improvements-summary.md)** - Résumé des améliorations techniques
-- **[Dependency Management](./dependency-management.md)** - Gestion des dépendances
+## 🚀 Quick Start
 
-### 🏗️ Architecture & Services
-- **[Services Documentation](./services/)** - Documentation des services backend
-  - BankingService, ConfigService, DispatchService, ModuleManager, etc.
+1. **[Déploiement](deployment/DEPLOYMENT.md)** - Déployer en 1 minute
+2. **[Supabase](guides/SUPABASE_SETUP.md)** - Configurer la base
+3. **[Stripe](deployment/STRIPE_INTEGRATION.md)** - Activer les paiements
+4. **[Sécurité](security/SECURITY_CONFIGURATION_GUIDE.md)** - Secrets et RLS
 
-### 🔒 Sécurité & Conformité
-- **[Banking Security Requirements](./BANKING_SECURITY_REQUIREMENTS.md)** - Exigences de sécurité bancaire
+## 📂 Documentation par Catégorie
 
-### 📂 Archive
-- **[archive/](./archive/)** - Documentation historique et guides de déploiement archivés
-  - Guide de déploiement complet avec architecture VPS
+### 🚀 deployment/
+- **DEPLOYMENT.md** - Guide complet VPS + Scripts
+- **STRIPE_INTEGRATION.md** - Paiements et webhooks
+- **DEPLOYMENT_EDGE_FUNCTIONS.md** - Supabase Edge Functions
 
-### 📜 Legacy
-- **[legacy/](./legacy/)** - Ancienne documentation conservée pour référence
-  - Guides de déploiement historiques et notes techniques
+### 📖 guides/
+- **SUPABASE_SETUP.md** - Config + Troubleshooting DB
+- **SUBSCRIPTION_*.md** - Système d'abonnements
+- **TRIAL_SYSTEM_README.md** - Essais gratuits
+- **PLANS_COMPTABLES_*.md** - Plans comptables internationaux
 
-## 🚀 Démarrage Rapide
+### 🔒 security/
+- **SECURITY_CONFIGURATION_GUIDE.md** - Configuration complète
+- **ACTIONS_IMMEDIATES_SECURITE.md** - Checklist 20min
 
-1. **Développement** : Consultez le guide de performance pour les optimisations
-2. **Tests** : Référez-vous à la stratégie de tests pour les procédures
-3. **Déploiement** : Utilisez le guide archivé dans `archive/DEPLOYMENT_GUIDE.md`
-4. **Services** : Documentation technique dans le dossier `services/`
+### 📋 planning/ & 🗄️ archive/
+- Documents de planification et historique
 
-## 📝 Contribution
+## 🛠️ Commandes Essentielles
 
-Pour modifier la documentation :
-1. Utilisez le format Markdown
-2. Suivez la structure existante
-3. Mettez à jour ce README si nécessaire
-4. Archivez les anciens documents dans le dossier `archive/`
+```bash
+# Déploiement
+npm run deploy
 
-## 🔄 Maintenance
+# Supabase
+supabase db push
+supabase functions deploy [name]
 
-Cette documentation est maintenue parallèlement au code source. Les documents obsolètes sont archivés plutôt que supprimés pour préserver l'historique du projet.
+# Tests
+npm run type-check
+npm test
+```
+
+## 🆘 Troubleshooting
+
+- Déploiement → [DEPLOYMENT.md#troubleshooting](deployment/DEPLOYMENT.md)
+- Supabase → [SUPABASE_SETUP.md](guides/SUPABASE_SETUP.md)
+- Stripe → [STRIPE_INTEGRATION.md](deployment/STRIPE_INTEGRATION.md)
+
+---
+
+**Production**: https://casskai.app | **VPS**: 89.116.111.88
