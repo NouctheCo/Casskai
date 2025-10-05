@@ -89,14 +89,14 @@ export function useAccountingImport({
       setCsvMapping(analysis.suggestedMapping || []);
 
       // Mise à jour automatique du formulaire
-      form.setValue('file', file);
-      
+      (form.setValue as any)('file', file);
+
       if (analysis.format === 'Excel') {
         form.setValue('format', 'Excel');
       } else if (analysis.format === 'CSV') {
         form.setValue('format', 'CSV');
         if (analysis.delimiter) {
-          form.setValue('delimiter', analysis.delimiter);
+          (form.setValue as any)('delimiter', analysis.delimiter);
         }
       }
       
@@ -239,7 +239,7 @@ export function useAccountingImport({
 
     return {
       ...result,
-      entries: validation.valid,
+      entries: validation.valid as any,
       errors: [...result.errors, ...validation.invalid.flatMap(inv => inv.errors)],
       warnings: [...result.warnings, ...validation.warnings],
       validRows: validation.valid.length
@@ -366,7 +366,7 @@ export function useAccountingImport({
 
     // Actions principales
     analyzeFile,
-    performImport: form.handleSubmit(performImport),
+    performImport: form.handleSubmit(performImport as any),
     resetImport,
 
     // Utilitaires
@@ -377,7 +377,7 @@ export function useAccountingImport({
     checkDuplicates,
 
     // États dérivés
-    canImport: !isImporting && form.watch('file') !== undefined,
+    canImport: !isImporting && (form.watch as any)('file') !== undefined,
     hasPreview: previewData.length > 0,
     hasMapping: csvMapping.length > 0,
     isCompleted: importSession?.status === 'completed',

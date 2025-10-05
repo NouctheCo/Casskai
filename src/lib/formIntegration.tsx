@@ -26,13 +26,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { 
+import {
   FormItem,
   FormLabel,
   FormControl,
-  FormDescription,
   FormMessage,
 } from '@/components/ui/form';
+
+const FormDescription: any = (props: any) => <div className="text-sm text-muted-foreground" {...props} />;
 import { Badge } from '@/components/ui/badge';
 import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { 
@@ -636,7 +637,7 @@ export function ValidatedForm<T extends FieldValues = FieldValues>({
       const isValid = await form.trigger();
       
       if (!isValid) {
-        const errors = Object.values(form.formState.errors).map(error => ({
+        const errors = Object.values(form.formState.errors).map((error: any) => ({
           field: error.ref?.name || 'unknown',
           message: error.message || 'Erreur de validation',
           code: 'VALIDATION_ERROR'
@@ -666,10 +667,10 @@ export function ValidatedForm<T extends FieldValues = FieldValues>({
   }, [form, onValidSubmit, showValidationErrors, autoScrollToErrors, scrollToFirstError]);
   
   const errors = Object.keys(form.formState.errors).reduce((acc, field) => {
-    const error = form.formState.errors[field];
+    const error: any = form.formState.errors[field];
     acc[field] = [{
       field,
-      message: error?.message || 'Erreur de validation',
+      message: (error?.message as string) || 'Erreur de validation',
       code: 'FORM_ERROR'
     }];
     return acc;

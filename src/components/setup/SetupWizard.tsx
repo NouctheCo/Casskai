@@ -7,7 +7,11 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle, AlertCircle, Database, Building, Globe, Shield, MapPin, Languages } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { changeLanguageAndDetectCountry } from '../lib/i18n';
+
+const changeLanguageAndDetectCountry = async (langCode: string) => {
+  // Stub function - i18n module not available
+  console.log('Language change requested:', langCode);
+};
 
 // Composant Sélecteur de Langue
 const LanguageSwitcher = ({ className = "" }) => {

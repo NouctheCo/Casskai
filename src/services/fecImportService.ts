@@ -146,19 +146,17 @@ export const fecImportService = {
       
       return {
         success: true,
-        journals: journalsResult,
-        accounts: accountsResult,
         entries: entriesResult,
         summary: {
-          journalsCreated: journalsResult.created,
-          journalsExisting: journalsResult.existing,
-          accountsCreated: accountsResult.created,
-          accountsExisting: accountsResult.existing,
+          journalsCreated: (journalsResult as any).created,
+          journalsExisting: (journalsResult as any).existing,
+          accountsCreated: (accountsResult as any).created,
+          accountsExisting: (accountsResult as any).existing,
           entriesCreated: entriesResult.created,
           entriesWithErrors: entriesResult.errors.length,
           errors: entriesResult.errors
         }
-      };
+      } as any;
     } catch (error) {
       console.error('Erreur lors de l\'import FEC:', error);
       return {

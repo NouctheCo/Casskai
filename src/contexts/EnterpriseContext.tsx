@@ -70,29 +70,40 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
         if (!error && userCompanies && userCompanies.length > 0) {
           // Convert Supabase format to Enterprise format
-          const enterprises: Enterprise[] = userCompanies.map((uc: any) => ({
+          const enterprises = userCompanies.map((uc: any): Enterprise => ({
             id: uc.companies.id,
             name: uc.companies.name,
-            legalName: uc.companies.name,
-            country: uc.companies.country || 'FR',
-            currency: uc.companies.default_currency || 'EUR',
-            accountingStandard: 'PCG',
             registrationNumber: uc.companies.registration_number || '',
             vatNumber: uc.companies.tax_number || '',
-            street: uc.companies.address || '',
-            postalCode: uc.companies.postal_code || '',
-            city: uc.companies.city || '',
-            phone: uc.companies.phone || '',
-            email: uc.companies.email || '',
-            website: uc.companies.website || '',
-            shareCapital: '10000',
-            ceoName: '',
-            sector: uc.companies.sector || 'tech',
+            countryCode: uc.companies.country || 'FR',
+            address: {
+              street: uc.companies.address || '',
+              postalCode: uc.companies.postal_code || '',
+              city: uc.companies.city || '',
+              country: uc.companies.country || 'FR'
+            },
+            taxRegime: {
+              id: 'default',
+              code: 'NORMAL',
+              name: 'Régime réel normal',
+              type: 'realNormal' as const,
+              vatPeriod: 'monthly' as const
+            },
             fiscalYearStart: uc.companies.fiscal_year_start || 1,
             fiscalYearEnd: 12,
-            isSetupCompleted: true,
-            createdAt: uc.companies.created_at,
-            updatedAt: uc.companies.updated_at
+            currency: uc.companies.default_currency || 'EUR',
+            createdAt: new Date(uc.companies.created_at).getTime(),
+            updatedAt: new Date(uc.companies.updated_at).getTime(),
+            isActive: true,
+            settings: {
+              defaultPaymentTerms: 30,
+              taxReminderDays: 15,
+              autoCalculateTax: true,
+              roundingRule: 'nearest' as const,
+              emailNotifications: true,
+              language: 'fr',
+              timezone: 'Europe/Paris'
+            }
           }));
 
           setEnterprises(enterprises);
@@ -194,8 +205,8 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const newEnterprise: Enterprise = {
       ...enterpriseData,
       id: `enterprise-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      createdAt: Date.now(),
+      updatedAt: Date.now()
     };
     
     const updatedEnterprises = [...enterprises, newEnterprise];
@@ -212,13 +223,13 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const updateEnterprise = async (id: string, data: Partial<Enterprise>) => {
     console.log('🔄 Mise à jour de l\'entreprise:', id, data);
-    
+
     const updatedEnterprises = enterprises.map(enterprise =>
       enterprise.id === id
-        ? { ...enterprise, ...data, updatedAt: new Date().toISOString() }
+        ? { ...enterprise, ...data, updatedAt: Date.now() }
         : enterprise
     );
-    
+
     setEnterprises(updatedEnterprises);
     localStorage.setItem('casskai_enterprises', JSON.stringify(updatedEnterprises));
     
@@ -273,15 +284,14 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const getEnterpriseTaxConfig = (enterpriseId: string): EnterpriseTaxConfiguration | null => {
     const enterprise = enterprises.find(e => e.id === enterpriseId);
     if (!enterprise) return null;
-    
+
     // Configuration fiscale par défaut basée sur le pays
     return {
-      country: enterprise.country,
-      vatRate: enterprise.country === 'FR' ? 20 : 0,
-      corporateTaxRate: enterprise.country === 'FR' ? 25 : 0,
-      fiscalYearStart: enterprise.fiscalYearStart,
-      fiscalYearEnd: enterprise.fiscalYearEnd,
-      taxRegime: 'normal'
+      enterpriseId: enterprise.id,
+      taxRates: [],
+      declarations: [],
+      payments: [],
+      documents: []
     };
   };
 

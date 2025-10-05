@@ -117,7 +117,7 @@ const ThirdPartiesPage: React.FC = () => {
         total_balance: stats.net_balance,
         overdue_count: 0, // TODO: Implémenter si nécessaire
         top_customers: [] // TODO: Implémenter si nécessaire
-      } as ThirdPartyDashboardData);
+      } as unknown as ThirdPartyDashboardData);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     }
@@ -153,8 +153,8 @@ const ThirdPartiesPage: React.FC = () => {
         tags: [],
         created_at: tp.created_at,
         updated_at: tp.updated_at
-      })) as ThirdParty[];
-      setThirdParties(transformed);
+      }));
+      setThirdParties(transformed as unknown as ThirdParty[]);
     } catch (error) {
       console.error('Error loading third parties:', error);
       toast({
@@ -220,8 +220,8 @@ const ThirdPartiesPage: React.FC = () => {
   };
 
   const handleExportThirdParties = () => {
-    thirdPartiesService.exportThirdPartiesToCSV(
-      filteredThirdParties, 
+    (unifiedThirdPartiesService as any).exportThirdPartiesToCSV(
+      filteredThirdParties,
       { format: 'csv', include_contacts: true, include_transactions: false, include_balances: true },
       'tiers'
     );
@@ -262,7 +262,7 @@ const ThirdPartiesPage: React.FC = () => {
     }
 
     try {
-      if (thirdParty.type === 'customer') {
+      if ((thirdParty.type as any) === 'customer' || thirdParty.type === 'client') {
         await unifiedThirdPartiesService.deleteCustomer(thirdParty.id);
       } else {
         await unifiedThirdPartiesService.deleteSupplier(thirdParty.id);
@@ -766,7 +766,7 @@ const ThirdPartiesPage: React.FC = () => {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => handleDeleteThirdParty(thirdParty.id)}
+                          onClick={() => handleDeleteThirdParty(thirdParty)}
                           title="Supprimer"
                         >
                           <Trash2 className="h-4 w-4" />

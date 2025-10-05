@@ -74,6 +74,7 @@ class OnboardingService {
 
       const initialData: OnboardingData = {
         userId,
+        selectedModules: [],
         companyProfile: {},
         preferences: {
           language: 'fr',
@@ -192,7 +193,7 @@ class OnboardingService {
       // Mise à jour des préférences basées sur le marché sélectionné
       let updatedPreferences = { ...currentData.preferences };
       if (companyProfile.country) {
-        const marketConfig = MARKET_CONFIGS.find(m => m.countryCode === companyProfile.country);
+        const marketConfig = MARKET_CONFIGS.find(m => (m as any).countryCode === companyProfile.country);
         if (marketConfig) {
           updatedPreferences = {
             ...updatedPreferences,
@@ -427,10 +428,10 @@ class OnboardingService {
    * Calcule le pourcentage de progression
    */
   private calculateProgress(completedSteps: string[]): number {
-    const totalSteps = this.getOnboardingSteps().filter(step => step.required).length;
+    const totalSteps = this.getOnboardingSteps().filter(step => (step as any).required).length;
     const requiredCompletedSteps = completedSteps.filter(stepId => {
       const step = this.getOnboardingSteps().find(s => s.id === stepId);
-      return step?.required || false;
+      return (step as any)?.required || false;
     });
     return Math.round((requiredCompletedSteps.length / totalSteps) * 100);
   }

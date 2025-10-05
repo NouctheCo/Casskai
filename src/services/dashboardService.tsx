@@ -290,7 +290,7 @@ export const dashboardService = {
 
       // Trier par activité et prendre le top
       const topAccounts = Object.values(accountActivity)
-        .sort((a, b) => b.total_movement - a.total_movement)
+        .sort((a: any, b: any) => b.total_movement - a.total_movement)
         .slice(0, limit);
 
       return { data: topAccounts, error: null };

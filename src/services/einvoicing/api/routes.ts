@@ -96,10 +96,10 @@ const validateSubmissionRequest = (req: Request, res: Response, next: NextFuncti
 };
 
 // Error handler middleware
-const handleAPIResponse = (apiCall: Promise<APIResponse>) => {
+const handleAPIResponse = (apiCall: (req: any, res: Response) => Promise<APIResponse<any>>) => {
   return async (req: Request, res: Response) => {
     try {
-      const result = await apiCall;
+      const result = await apiCall(req, res);
       const statusCode = result.success ? 200 : 400;
       res.status(statusCode).json(result);
     } catch (error) {

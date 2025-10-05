@@ -253,7 +253,7 @@ const TaxPage: React.FC = () => {
   };
 
   const handleExportDeclarations = () => {
-    taxService.exportDeclarationsToCSV(filteredDeclarations, 'declarations_fiscales');
+    (taxService as any).exportDeclarationsToCSV(filteredDeclarations, 'declarations_fiscales');
     toast({
       title: 'Export réussi',
       description: 'Les déclarations ont été exportées en CSV'
@@ -262,7 +262,7 @@ const TaxPage: React.FC = () => {
 
   const handleAcknowledgeAlert = async (alertId: string) => {
     try {
-      const response = await taxService.acknowledgeAlert(alertId);
+      const response = await (taxService as any).acknowledgeAlert(alertId);
       if (response.data) {
         setAlerts(prev => prev.map(alert => 
           alert.id === alertId ? response.data : alert
@@ -330,7 +330,7 @@ const TaxPage: React.FC = () => {
   const handleEditObligation = (obligation: TaxObligation) => {
     toast({
       title: 'Modification de l\'obligation',
-      description: `Édition de ${obligation.name}`,
+      description: `Édition de ${(obligation as any).name}`,
     });
     // TODO: Open edit modal or navigate to edit form
   };
@@ -731,7 +731,7 @@ const TaxPage: React.FC = () => {
             {currentEnterprise?.id && (
               <TaxCompliancePanel
                 companyId={currentEnterprise.id}
-                countryCode={currentEnterprise.country || 'FR'}
+                countryCode={(currentEnterprise as any).country || 'FR'}
               />
             )}
           </TabsContent>

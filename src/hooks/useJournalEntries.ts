@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import type { 
-  JournalEntry, 
-  JournalEntryLine, 
-  Account,
-  Journal
+import type {
+  JournalEntry,
+  JournalEntryLine,
+  Account
 } from '@/types/database.types';
+
+type Journal = any;
 
 export interface CreateJournalEntryData {
   date: string;
@@ -196,11 +197,11 @@ export function useJournalEntries(companyId: string) {
 
       // Filter by account (requires subquery)
       if (accountId) {
-        query = query.in('id', 
-          supabase.from('journal_entry_items')
-            .select('journal_entry_id')
-            .eq('account_id', accountId)
-        );
+        const itemsQuery = await supabase.from('journal_entry_items')
+          .select('journal_entry_id')
+          .eq('account_id', accountId);
+        const ids = (itemsQuery.data || []).map((item: any) => item.journal_entry_id);
+        query = query.in('id', ids);
       }
 
       // Apply sorting
@@ -334,7 +335,7 @@ export function useJournalEntries(companyId: string) {
         .order('account_number');
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as Account[];
     } catch (err) {
       console.error('Error fetching accounts list:', err);
       return [];

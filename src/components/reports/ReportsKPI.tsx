@@ -6,7 +6,7 @@ interface ReportsKPIProps {
   title: string;
   value: number;
   change?: number;
-  icon: React.ElementType;
+  icon: any;
   color?: string;
   trend?: string;
   format?: 'number' | 'currency' | 'percentage';

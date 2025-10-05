@@ -32,7 +32,7 @@ import {
   Minus,
   Search,
   Filter,
-  Sort,
+  // Sort, // Not exported from lucide-react
   
   // États
   CheckCircle,
@@ -166,7 +166,7 @@ export const icons = {
   'remove': Minus,
   'search': Search,
   'filter': Filter,
-  'sort': Sort,
+  // 'sort': Sort, // Not exported from lucide-react
   
   // === ÉTATS ET STATUTS ===
   'success': CheckCircle,

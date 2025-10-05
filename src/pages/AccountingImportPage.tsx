@@ -10,7 +10,7 @@ const AccountingImportPage: React.FC = () => {
   const { config } = useConfig();
   const { toast } = useToast();
   
-  const companyId = config?.currentCompany?.id;
+  const companyId = (config as any)?.currentCompany?.id;
 
   if (!companyId) {
     return (

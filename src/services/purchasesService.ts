@@ -199,11 +199,11 @@ export const purchasesService = {
       ...purchaseData,
       tva_amount: purchaseData.amount_ht ? purchaseData.amount_ht * ((purchaseData.tva_rate || existingPurchase.tva_rate) / 100) : existingPurchase.tva_amount,
       amount_ttc: purchaseData.amount_ht ? purchaseData.amount_ht * (1 + (purchaseData.tva_rate || existingPurchase.tva_rate) / 100) : existingPurchase.amount_ttc,
-      supplier_name: purchaseData.supplier_id ? 
+      supplier_name: purchaseData.supplier_id ?
         mockSuppliers.find(s => s.id === purchaseData.supplier_id)?.name || existingPurchase.supplier_name :
         existingPurchase.supplier_name,
       updated_at: new Date().toISOString()
-    };
+    } as any;
     
     mockPurchases[purchaseIndex] = updatedPurchase;
     return { data: updatedPurchase };

@@ -347,8 +347,6 @@ export const EnhancedChart: React.FC<{
   className,
   onChartClick
 }) => {
-  const chartRef = useRef<any>(null);
-  
   // FIX: Protection des données pour EnhancedChart
   const safeData = {
     labels: data?.labels || [],
@@ -434,7 +432,6 @@ export const EnhancedChart: React.FC<{
       
       <div className="relative h-64 md:h-80">
         <AnimatedChart
-          ref={chartRef}
           type={type}
           data={safeData}
           options={options}

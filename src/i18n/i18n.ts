@@ -248,7 +248,7 @@ const initConfig = {
   returnNull: false,
   returnEmptyString: false,
   returnObjects: false,
-  joinArrays: false,
+  joinArrays: '' as any,
   
   // Configuration pour éviter les conflits
   keySeparator: '.',

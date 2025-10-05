@@ -78,7 +78,7 @@ const DragDropCard: React.FC<DragDropCardProps> = ({
         zIndex: 1000,
         boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
       }}
-      layout={animateLayoutChanges}
+      layout={animateLayoutChanges as any}
       layoutId={item.id}
       onDragStart={() => setIsDragging(true)}
       onDragEnd={() => setIsDragging(false)}

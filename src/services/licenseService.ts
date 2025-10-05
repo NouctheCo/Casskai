@@ -1,4 +1,7 @@
 // services/licenseService.ts
+import { LicenseType, LicenseFeatures, LicenseLimits } from '../types/licensing';
+import { LICENSE_PLANS } from '../data/licensePlans';
+
 export class LicenseService {
   private static instance: LicenseService;
   private currentLicense: LicenseType | null = null;

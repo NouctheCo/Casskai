@@ -29,7 +29,8 @@ const OnboardingDebugPanel: React.FC = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [summary, setSummary] = useState<string>('');
   
-  const { currentEnterprise, enterprises, synchronizeAfterOnboarding } = useEnterprise();
+  const { currentEnterprise, enterprises } = useEnterprise();
+  const synchronizeAfterOnboarding = (useEnterprise() as any).synchronizeAfterOnboarding;
   const { user } = useAuth();
 
   const runTests = useCallback(async () => {

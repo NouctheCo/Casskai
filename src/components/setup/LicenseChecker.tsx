@@ -1,6 +1,7 @@
 // components/LicenseChecker.tsx
 import React, { useEffect, useState } from 'react';
-import { LicenseService } from '../services/licenseService';
+import { LicenseService } from '../../services/licenseService';
+import { LicenseFeatures } from '../../types/licensing';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 
@@ -43,7 +44,7 @@ export function LicenseChecker({ children, requiredFeature }: LicenseCheckerProp
 }
 
 function getLicenseNameForFeature(feature: keyof LicenseFeatures): string {
-  const featureToLicense: { [key in keyof LicenseFeatures]: string } = {
+  const featureToLicense: Record<string, string> = {
     multiCompany: 'Professionnel',
     multiCurrency: 'Professionnel',
     advancedReports: 'Professionnel',

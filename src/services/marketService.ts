@@ -1,6 +1,5 @@
-import { MarketLocalization, MarketPricing } from '../types/market';
 // services/marketService.ts
-import { MarketConfig } from '../types/market';
+import { MarketConfig } from '../types/markets';
 import { MARKET_CONFIGS } from '../data/markets';
 import { SYSCOHADA_PLAN } from '../data/syscohada';
 import { PCG_ACCOUNTS as PCG_PLAN } from '../data/pcg';
@@ -66,7 +65,7 @@ export class MarketService {
     if (market.accountingStandard === 'SYSCOHADA') {
       accountingService.setAccountPlan(SYSCOHADA_PLAN);
     } else if (market.accountingStandard === 'PCG') {
-      accountingService.setAccountPlan(PCG_PLAN);
+      accountingService.setAccountPlan(PCG_PLAN as any);
     }
 
     // 3. Configurer la localisation
@@ -76,7 +75,7 @@ export class MarketService {
     localStorage.setItem('casskai_market', market.id);
   }
 
-  private applyLocalization(localization: MarketLocalization): void {
+  private applyLocalization(localization: any): void {
     // Configuration des formats de date et nombre
     document.documentElement.lang = localization.language;
     
@@ -85,7 +84,7 @@ export class MarketService {
     (window as any).CASSKAI_TIMEZONE = localization.timezone;
   }
 
-  getMarketPricing(marketId: string): MarketPricing | null {
+  getMarketPricing(marketId: string): MarketConfig['pricing'] | null {
     const market = MARKET_CONFIGS.find(m => m.id === marketId);
     return market?.pricing || null;
   }

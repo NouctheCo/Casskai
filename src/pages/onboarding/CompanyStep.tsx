@@ -16,7 +16,8 @@ import {
   ArrowRight,
   ArrowLeft,
   AlertCircle,
-  Loader2
+  Loader2,
+  Calendar
 } from 'lucide-react';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { useTranslation } from 'react-i18next';

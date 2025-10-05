@@ -270,7 +270,7 @@ export class CurrencyIntegration {
     }
 
     // ✅ CORRECTION: Vérification que config.company.id existe
-    if (!config.company.id) {
+    if (!(config.company as any).id) {
       console.log('ID entreprise manquant, migration ignorée');
       return;
     }
@@ -282,7 +282,7 @@ export class CurrencyIntegration {
       const { error: companyError } = await supabase
         .from('companies')
         .update({ currency: companyCurrency })
-        .eq('id', config.company.id);
+        .eq('id', (config.company as any).id);
 
       if (companyError) {
         console.warn('Erreur mise à jour devise entreprise:', companyError);
@@ -292,7 +292,7 @@ export class CurrencyIntegration {
       const { error: accountsError } = await supabase
         .from('accounts')
         .update({ currency: companyCurrency })
-        .eq('company_id', config.company.id)
+        .eq('company_id', (config.company as any).id)
         .is('currency', null);
 
       if (accountsError) {
@@ -303,7 +303,7 @@ export class CurrencyIntegration {
       const { error: transactionsError } = await supabase
         .from('transactions')
         .update({ currency: companyCurrency })
-        .eq('company_id', config.company.id)
+        .eq('company_id', (config.company as any).id)
         .is('currency', null);
 
       if (transactionsError) {

@@ -418,7 +418,7 @@ export default function OptimizedClientsTab() {
         country: customer.billing_country || 'France',
         invoicesCount: 0, // TODO: Récupérer depuis invoices
         totalAmount: 0, // TODO: Récupérer depuis invoices
-        createdAt: customer.created_at || new Date().toISOString()
+        createdAt: (customer as any).created_at || new Date().toISOString()
       }));
 
       setClients(transformed);

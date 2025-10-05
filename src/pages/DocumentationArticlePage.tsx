@@ -1893,10 +1893,10 @@ const DocumentationArticlePage = () => {
     setHasRated(true);
     setUserRating(rating);
     
-    toast({
+    (toast as any)({
       title: "Merci pour votre retour !",
-      description: rating === 'positive' 
-        ? "Nous sommes ravis que cet article vous ait été utile." 
+      description: rating === 'positive'
+        ? "Nous sommes ravis que cet article vous ait été utile."
         : "Nous prendrons en compte votre retour pour améliorer cet article.",
       duration: 3000
     });

@@ -315,7 +315,7 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
   }, [fetchDropdownData]);
 
   return (
-    <Form {...form}>
+    <Form form={form}>
       <form className="space-y-6" onSubmit={handleSubmit(onSubmitHandler)}>
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-semibold">

@@ -47,24 +47,22 @@ class OnboardingService {
       // Créer de nouvelles données d'onboarding
       const initialData: OnboardingData = {
         userId,
-        currentStep: 'welcome',
+        currentStepId: 'welcome',
         companyProfile: {
           name: '',
-          industry: '',
-          country: '',
-          employeeCount: null,
-          annualRevenue: null
+          country: ''
         },
         preferences: {
           language: 'fr',
           currency: 'EUR',
-          timezone: 'Europe/Paris',
-          modules: ['accounting']
+          timezone: 'Europe/Paris'
         },
+        selectedModules: [],
+        featuresExploration: {} as any,
+        progress: 0,
         completedSteps: [],
         startedAt: new Date().toISOString(),
-        lastSavedAt: new Date().toISOString(),
-        isComplete: false
+        lastSavedAt: new Date().toISOString()
       };
 
       // Sauvegarder les données initiales
@@ -110,8 +108,7 @@ class OnboardingService {
       if (!validation.isValid) {
         return {
           success: false,
-          error: 'Données invalides',
-          errors: validation.errors
+          error: validation.errors.map(e => e.message).join(', ')
         };
       }
 
@@ -129,7 +126,7 @@ class OnboardingService {
       // Mise à jour des préférences basées sur le marché sélectionné
       let updatedPreferences = { ...currentData.preferences };
       if (companyProfile.country) {
-        const marketConfig = MARKET_CONFIGS.find(m => m.countryCode === companyProfile.country);
+        const marketConfig = MARKET_CONFIGS.find((m: any) => m.country === companyProfile.country || m.code === companyProfile.country);
         if (marketConfig) {
           updatedPreferences = {
             ...updatedPreferences,
@@ -177,8 +174,7 @@ class OnboardingService {
       if (!validation.isValid) {
         return {
           success: false,
-          error: 'Données invalides',
-          errors: validation.errors
+          error: validation.errors.map(e => e.message).join(', ')
         };
       }
 
@@ -240,8 +236,7 @@ class OnboardingService {
       if (!validation.isValid) {
         return {
           success: false,
-          error: 'Étape invalide',
-          errors: validation.errors
+          error: validation.errors.map(e => e.message).join(', ')
         };
       }
 
@@ -256,10 +251,9 @@ class OnboardingService {
 
       const updatedData: OnboardingData = {
         ...currentData,
-        currentStep: nextStep,
+        currentStepId: nextStep,
         completedSteps,
-        lastSavedAt: new Date().toISOString(),
-        isComplete: this.progressService.isOnboardingComplete({ ...currentData, completedSteps })
+        lastSavedAt: new Date().toISOString()
       };
 
       // Sauvegarder
@@ -301,8 +295,7 @@ class OnboardingService {
       if (!validation.isValid) {
         return {
           success: false,
-          error: 'Données d\'onboarding incomplètes',
-          errors: validation.errors
+          error: validation.errors.map(e => e.message).join(', ')
         };
       }
 
@@ -312,7 +305,6 @@ class OnboardingService {
       // Marquer comme complété
       const completedData: OnboardingData = {
         ...currentData,
-        isComplete: true,
         completedAt: new Date().toISOString(),
         lastSavedAt: new Date().toISOString()
       };

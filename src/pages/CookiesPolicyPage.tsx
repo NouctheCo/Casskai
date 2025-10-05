@@ -162,9 +162,8 @@ const CookiesPolicyPage = () => {
       
       toast({
         title: "Préférences sauvegardées",
-        description: "Vos préférences de cookies ont été mises à jour avec succès",
-        duration: 4000
-      });
+        description: "Vos préférences de cookies ont été mises à jour avec succès"
+      } as any);
     } catch (error) {
       console.error('Error saving cookie preferences:', error);
       toast({
@@ -192,9 +191,8 @@ const CookiesPolicyPage = () => {
       
       toast({
         title: "Tous les cookies acceptés",
-        description: "Toutes les catégories de cookies ont été activées",
-        duration: 4000
-      });
+        description: "Toutes les catégories de cookies ont été activées"
+      } as any);
     } catch (error) {
       console.error('Error accepting all cookies:', error);
       toast({
@@ -227,9 +225,8 @@ const CookiesPolicyPage = () => {
       
       toast({
         title: "Cookies optionnels refusés",
-        description: "Seuls les cookies essentiels sont activés",
-        duration: 4000
-      });
+        description: "Seuls les cookies essentiels sont activés"
+      } as any);
     } catch (error) {
       console.error('Error rejecting optional cookies:', error);
       toast({

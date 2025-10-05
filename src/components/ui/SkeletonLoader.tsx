@@ -199,9 +199,9 @@ export const ChartSkeleton: React.FC<{ className?: string }> = ({ className }) =
           <motion.div
             key={i}
             className="w-8 bg-blue-200 dark:bg-blue-800 rounded-t"
-            style={{ height: Math.random() * 200 + 50 }}
+            style={{ height: Math.random() * 200 + 50, transformOrigin: "bottom" }}
             initial={{ scaleY: 0 }}
-            animate={{ 
+            animate={{
               scaleY: 1,
               transition: {
                 delay: i * 0.1,
@@ -209,7 +209,6 @@ export const ChartSkeleton: React.FC<{ className?: string }> = ({ className }) =
                 ease: "easeOut"
               }
             }}
-            transformOrigin="bottom"
           />
         ))}
       </div>

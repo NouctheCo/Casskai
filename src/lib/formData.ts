@@ -427,46 +427,46 @@ export const Transformers = {
    * Transforme les données pour l'API
    */
   toApi: <T extends Record<string, any>>(data: T): T => {
-    const transformed = { ...data };
-    
+    const transformed: any = { ...data };
+
     // Convertit les dates en ISO strings
     Object.keys(transformed).forEach(key => {
       if (transformed[key] instanceof Date) {
         transformed[key] = transformed[key].toISOString();
       }
     });
-    
-    return transformed;
+
+    return transformed as T;
   },
 
   /**
    * Transforme les données depuis l'API
    */
   fromApi: <T extends Record<string, any>>(data: T): T => {
-    const transformed = { ...data };
-    
+    const transformed: any = { ...data };
+
     // Convertit les ISO strings en dates
     Object.keys(transformed).forEach(key => {
       if (typeof transformed[key] === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(transformed[key])) {
         transformed[key] = new Date(transformed[key]);
       }
     });
-    
-    return transformed;
+
+    return transformed as T;
   },
 
   /**
    * Normalise les données utilisateur
    */
   sanitize: <T extends Record<string, any>>(data: T): T => {
-    const sanitized = { ...data };
-    
+    const sanitized: any = { ...data };
+
     Object.keys(sanitized).forEach(key => {
       const value = sanitized[key];
       if (typeof value === 'string') {
         // Trim whitespace
         sanitized[key] = value.trim();
-        
+
         // Nettoie les caractères spéciaux pour certains champs
         if (key.includes('phone')) {
           sanitized[key] = Parsers.phone(value);
@@ -475,8 +475,8 @@ export const Transformers = {
         }
       }
     });
-    
-    return sanitized;
+
+    return sanitized as T;
   },
 
   /**
@@ -724,7 +724,7 @@ export class FormValidator<T extends FieldValues = FieldValues> {
       field: fieldOverride || error.path.join('.'),
       message: error.message,
       code: error.code.toUpperCase(),
-      value: error.input,
+      value: (error as any).input,
       context: { 
         path: error.path,
         expected: 'expected' in error ? error.expected : undefined,

@@ -12,7 +12,11 @@ interface ConfigGuardProps {
 }
 
 const ConfigGuard: React.FC<ConfigGuardProps> = ({ children, fallback }) => {
-  const { config, supabase, isReady, needsSetup, hasError } = useAppState();
+  const appState = useAppState();
+  const { config, supabase } = appState;
+  const isReady = (appState as any).isReady;
+  const needsSetup = (appState as any).needsSetup;
+  const hasError = (appState as any).hasError;
   const [isRetrying, setIsRetrying] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
 
@@ -43,7 +47,7 @@ const ConfigGuard: React.FC<ConfigGuardProps> = ({ children, fallback }) => {
   }
 
   // Affichage pendant le chargement initial (uniquement si la config existe déjà)
-  if (config.isLoading || supabase.isLoading) {
+  if ((config as any).isLoading || supabase.loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -141,7 +145,7 @@ const ConfigGuard: React.FC<ConfigGuardProps> = ({ children, fallback }) => {
   }
 
   // Configuration OK mais client Supabase pas prêt
-  if (config.isConfigured && !supabase.isClientReady) {
+  if ((config as any).isConfigured && !(supabase as any).isClientReady) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-100 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">

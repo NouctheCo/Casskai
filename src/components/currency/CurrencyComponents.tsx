@@ -34,8 +34,8 @@ export const CurrencySelector = ({
         className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
       >
         {currencyOptions.map(option => (
-          <option key={option.value} value={option.value}>
-            {option.label}
+          <option key={option.code} value={option.code}>
+            {option.name} ({option.symbol})
           </option>
         ))}
       </select>
@@ -62,9 +62,10 @@ export const AmountDisplay = ({
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (showConverted && currency.code !== baseCurrency.code) {
+    if (showConverted && currency !== baseCurrency.code) {
       setIsLoading(true);
-      const converted = formatAmountWithConversion(amount, currency);
+      const currencyObj: any = { code: currency, name: '', symbol: '' };
+      const converted = formatAmountWithConversion(amount, currencyObj);
       setConvertedAmount(converted);
       setIsLoading(false);
     }
@@ -72,7 +73,7 @@ export const AmountDisplay = ({
 
   const originalAmount = formatAmount(amount);
 
-  if (showConverted && currency.code !== baseCurrency.code) {
+  if (showConverted && currency !== baseCurrency.code) {
     return (
       <div className={className}>
         <span className="font-medium">{originalAmount}</span>
@@ -336,7 +337,7 @@ export const ExchangeRateWidget = ({
                   <div>
                     <span className="font-mono text-sm">{rate.toFixed(4)}</span>
                     <div className="text-xs text-gray-500">
-                      1 {pair.from} = {formatAmount(rate, pair.to)}
+                      1 {pair.from} = {rate.toFixed(4)} {pair.to}
                     </div>
                   </div>
                 ) : (
@@ -407,12 +408,4 @@ export const CurrencyInput = ({
       </div>
     </div>
   );
-};
-
-export default {
-  CurrencySelector,
-  AmountDisplay,
-  CurrencyConverter,
-  ExchangeRateWidget,
-  CurrencyInput
 };

@@ -62,20 +62,20 @@ export class PDFService {
     y += 10;
     doc.text(invoiceData.enterprise.name, margin, y);
     y += 6;
-    if (invoiceData.enterprise.street) {
-      doc.text(invoiceData.enterprise.street, margin, y);
+    if (invoiceData.enterprise.address?.street) {
+      doc.text(invoiceData.enterprise.address.street, margin, y);
       y += 6;
     }
-    if (invoiceData.enterprise.postalCode && invoiceData.enterprise.city) {
-      doc.text(`${invoiceData.enterprise.postalCode} ${invoiceData.enterprise.city}`, margin, y);
+    if (invoiceData.enterprise.address?.postalCode && invoiceData.enterprise.address?.city) {
+      doc.text(`${invoiceData.enterprise.address.postalCode} ${invoiceData.enterprise.address.city}`, margin, y);
       y += 6;
     }
     if (invoiceData.enterprise.vatNumber) {
       doc.text(`TVA: ${invoiceData.enterprise.vatNumber}`, margin, y);
       y += 6;
     }
-    if (invoiceData.enterprise.email) {
-      doc.text(`Email: ${invoiceData.enterprise.email}`, margin, y);
+    if ((invoiceData.enterprise as any).email) {
+      doc.text(`Email: ${(invoiceData.enterprise as any).email}`, margin, y);
       y += 10;
     }
 

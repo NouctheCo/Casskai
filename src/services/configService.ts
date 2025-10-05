@@ -99,7 +99,7 @@ class ConfigService {
 
     try {
       // CORRECTION CRITIQUE: Utiliser l'instance unique
-      this.supabaseClient = getSupabaseClient();
+      this.supabaseClient = this.getSupabaseClient();
 
       // Test de connexion
       const { error } = await this.supabaseClient.from('_test').select('*').limit(1);
@@ -126,7 +126,7 @@ class ConfigService {
   async validateSupabaseConfig(): Promise<boolean> {
     try {
       // CORRECTION CRITIQUE: Utiliser l'instance unique au lieu de créer une nouvelle
-      const tempClient = getSupabaseClient();
+      const tempClient = this.getSupabaseClient();
       const { error } = await tempClient.from('_test').select('*').limit(1);
       
       // Succès si pas d'erreur ou si l'erreur est "table not found"

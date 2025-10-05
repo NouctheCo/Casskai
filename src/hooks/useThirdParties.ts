@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import type { ThirdParty } from '@/types/database.types';
+
+type ThirdParty = any;
 
 export interface ThirdPartyFilters {
   type?: 'customer' | 'supplier' | 'partner' | 'employee' | 'ALL';

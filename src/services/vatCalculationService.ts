@@ -419,7 +419,7 @@ export class VATCalculationService {
     const deductible = { goods: 0, services: 0, immobilizations: 0, total: 0 };
     const entries: any[] = [];
 
-    vatEntries.data.forEach(entry => {
+    vatEntries.data.forEach((entry: any) => {
       const accountNumber = entry.accounts.number;
       const debit = entry.debit_amount || 0;
       const credit = entry.credit_amount || 0;

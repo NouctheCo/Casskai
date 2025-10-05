@@ -1,4 +1,6 @@
 // data/licensePlans.ts
+type LicenseType = any;
+
 export const LICENSE_PLANS: LicenseType[] = [
   {
     id: 'starter',

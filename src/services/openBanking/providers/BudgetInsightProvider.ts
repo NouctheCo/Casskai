@@ -156,7 +156,7 @@ export class BudgetInsightProvider extends BankingProvider {
   const _initUserId = ''; // À récupérer depuis la DB
   const biConnectionId = ''; // À récupérer depuis la DB
 
-  await this.makeRequest<unknown>('PUT', `/2.0/users/${userId}/connections/${biConnectionId}`, {
+  await this.makeRequest<unknown>('PUT', `/2.0/users/${_initUserId}/connections/${biConnectionId}`, {
         // Budget Insight specific updates
       });
 

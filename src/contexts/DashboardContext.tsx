@@ -593,7 +593,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         dispatch({ type: 'SET_COLLABORATORS', payload: collaborators });
       })
       .on('broadcast', { event: 'dashboard-update' }, (payload) => {
-        dispatch({ type: 'ADD_REALTIME_EVENT', payload: payload.event });
+        dispatch({ type: 'ADD_REALTIME_EVENT', payload: payload.event as any });
       })
       .subscribe((status) => {
         dispatch({ type: 'SET_CONNECTION_STATUS', payload: status === 'SUBSCRIBED' });

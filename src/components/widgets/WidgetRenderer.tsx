@@ -35,10 +35,10 @@ const LazyChart = lazy(() =>
   import('../ui/AnimatedChart').then(m => ({ default: m.AnimatedChart }))
 );
 const LazyTable = lazy(() =>
-  import('../ui/DataTable').then(m => ({ default: m.DataTable }))
+  import('../ui/DataTable')
 );
 const LazyCalendar = lazy(() =>
-  import('../ui/CalendarWidget').then(m => ({ default: m.CalendarWidget }))
+  import('../ui/CalendarWidget')
 );
 
 interface WidgetRendererProps {
@@ -488,38 +488,41 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
         case 'bar-chart':
         case 'pie-chart':
         case 'area-chart':
-          const chartData = widget.config?.chart?.data && Array.isArray(widget.config.chart.data) 
-            ? widget.config.chart.data 
+          const chartConfig = widget.config?.chart as any;
+          const chartData = chartConfig?.data && Array.isArray(chartConfig.data)
+            ? chartConfig.data
             : [];
           return (
             <Suspense fallback={<WidgetSkeleton type="chart" />}>
-              <LazyChart 
+              <LazyChart
                 type={widget.type.replace('-chart', '') as any}
                 data={chartData}
                 options={widget.config?.chart || {}}
               />
             </Suspense>
           );
-        
+
         case 'table':
-          const tableData = widget.config?.table?.data && Array.isArray(widget.config.table.data) 
-            ? widget.config.table.data 
+          const tableConfig = widget.config?.table as any;
+          const tableData = tableConfig?.data && Array.isArray(tableConfig.data)
+            ? tableConfig.data
             : [];
-          const tableColumns = widget.config?.table?.columns && Array.isArray(widget.config.table.columns) 
-            ? widget.config.table.columns 
+          const tableColumns = tableConfig?.columns && Array.isArray(tableConfig.columns)
+            ? tableConfig.columns
             : [];
           return (
             <Suspense fallback={<WidgetSkeleton type="table" />}>
-              <LazyTable 
+              <LazyTable
                 data={tableData}
                 columns={tableColumns}
               />
             </Suspense>
           );
-        
+
         case 'calendar':
-          const calendarEvents = widget.config?.calendar?.events && Array.isArray(widget.config.calendar.events) 
-            ? widget.config.calendar.events 
+          const calendarConfig = widget.config as any;
+          const calendarEvents = calendarConfig?.calendar?.events && Array.isArray(calendarConfig.calendar.events)
+            ? calendarConfig.calendar.events
             : [];
           return (
             <Suspense fallback={<WidgetSkeleton type="calendar" />}>

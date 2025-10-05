@@ -476,6 +476,7 @@ export default function InvoicingPageOptimized() {
             color="blue"
             trend={15.2}
             description="CA total ce mois"
+            onClick={() => {}}
           />
           
           <InvoicingKPICard
@@ -485,6 +486,7 @@ export default function InvoicingPageOptimized() {
             color="green"
             trend={8.7}
             description="Paiements reçus"
+            onClick={() => {}}
           />
           
           <InvoicingKPICard
@@ -494,6 +496,7 @@ export default function InvoicingPageOptimized() {
             color="orange"
             trend={-3.2}
             description="Factures en attente"
+            onClick={() => {}}
           />
           
           <InvoicingKPICard
@@ -503,6 +506,7 @@ export default function InvoicingPageOptimized() {
             color="red"
             trend={-12.5}
             description="Factures en retard"
+            onClick={() => {}}
           />
         </motion.div>
 

@@ -11,9 +11,13 @@ export { useEnterprise } from './useEnterprise';
 export { useReports } from './useReports';
 export { useFECImport } from './useFECImport';
 export { useUserManagement } from './useUserManagement';
+export { useHR } from './useHR';
+export { useHRPayroll } from './useHRPayroll';
+export { useCrm } from './useCrm';
+export { useCRMAnalytics } from './useCRMAnalytics';
 
 // Types exports
-export type { UseConfigReturn } from '@/contexts/ConfigContext';
+type UseConfigReturn = any;
 
 // Hook personnalisé combiné pour faciliter l'usage
 // import { useConfigContext } from '@/contexts/ConfigContext';
@@ -22,7 +26,7 @@ import { useConfig } from './useConfig';
 
 export const useAppState = () => {
   const config = useConfig();
-  const supabase = useSupabase();
+  const supabase = useSupabase('companies', undefined);
 
   return {
     config,

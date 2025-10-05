@@ -132,16 +132,16 @@ export class ErrorHandlingService {
    * Gestion centralisée des erreurs
    */
   private handleError<T>(error: Error, context: ErrorContext): never {
-    const apiError = error instanceof ApiError ? error : this.createApiError(error, context);
-    
+    const apiError = (error as any).statusCode ? (error as any) : this.createApiError(error, context);
+
     // Log error for monitoring
-    this.logError(apiError, context);
-    
+    this.logError(apiError as any, context);
+
     // Show user notification
-    this.showErrorToUser(apiError);
-    
+    this.showErrorToUser(apiError as any);
+
     // Report to error tracking service
-    this.reportError(apiError, context);
+    this.reportError(apiError as any, context);
     
     throw apiError;
   }

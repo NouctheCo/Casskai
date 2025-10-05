@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 interface QuickActionProps {
   title: string;
   description: string;
-  icon: React.ElementType;
+  icon: any;
   onClick: () => void;
   color?: string;
   badge?: string;

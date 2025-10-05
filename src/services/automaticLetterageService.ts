@@ -216,7 +216,7 @@ export class AutomaticLetterageService {
 
     if (!result.data) return [];
 
-    return result.data.map(item => ({
+    return result.data.map((item: any) => ({
       id: item.id,
       accountId: item.account_id,
       accountNumber: item.accounts.number,
@@ -695,7 +695,7 @@ export class AutomaticLetterageService {
     // Statistiques par compte
     const accountStats = new Map<string, any>();
     
-    result.data.forEach(item => {
+    result.data.forEach((item: any) => {
       const key = `${item.accounts.number}|${item.accounts.name}`;
       if (!accountStats.has(key)) {
         accountStats.set(key, {
@@ -705,7 +705,7 @@ export class AutomaticLetterageService {
           lettered: 0
         });
       }
-      
+
       const stats = accountStats.get(key)!;
       stats.totalEntries++;
       if (item.letterage) stats.lettered++;
@@ -735,7 +735,7 @@ export class AutomaticLetterageService {
     if (recentQuery.data) {
       const letterGroups = new Map<string, any>();
       
-      recentQuery.data.forEach(item => {
+      recentQuery.data.forEach((item: any) => {
         const key = item.letterage!;
         if (!letterGroups.has(key)) {
           letterGroups.set(key, {
@@ -745,7 +745,7 @@ export class AutomaticLetterageService {
             totalAmount: 0
           });
         }
-        
+
         const group = letterGroups.get(key)!;
         group.entriesCount++;
         group.totalAmount += (item.debit_amount || 0) + (item.credit_amount || 0);

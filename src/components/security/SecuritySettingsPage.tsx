@@ -381,7 +381,7 @@ const SecuritySettingsPage: React.FC = () => {
                   <div key={key} className="flex items-center justify-between">
                     <Label>{label}</Label>
                     <Switch
-                      checked={securitySettings?.passwordPolicy[key as keyof typeof securitySettings.passwordPolicy] || false}
+                      checked={!!(securitySettings?.passwordPolicy[key as keyof typeof securitySettings.passwordPolicy])}
                       onCheckedChange={(checked) => {
                         const policy = { ...securitySettings?.passwordPolicy, [key]: checked };
                         handleSecuritySettingsUpdate({ passwordPolicy: policy });

@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { fecValidationService, ValidationResult } from '@/services/fecValidationService';
+import { FECEntry } from '@/types/accounting-import.types';
 
 export interface FECImportData {
   journals: string[];
@@ -45,6 +47,14 @@ export function useFECImport(companyId: string) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
+
+  // Validate FEC entries before import
+  const validateFECEntries = useCallback((entries: FECEntry[]): ValidationResult => {
+    const result = fecValidationService.validateFEC(entries);
+    setValidationResult(result);
+    return result;
+  }, []);
 
   // Import FEC data
   const importFECData = useCallback(async (data: FECImportData): Promise<FECImportResult> => {
@@ -383,6 +393,8 @@ export function useFECImport(companyId: string) {
   return {
     loading,
     error,
+    validationResult,
+    validateFECEntries,
     importFECData,
     createMissingJournals,
     createMissingAccounts,

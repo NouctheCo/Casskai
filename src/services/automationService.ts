@@ -415,13 +415,12 @@ export class AutomationService {
     const { notificationService } = await import('@/services/notificationService');
 
     const result = await notificationService.createNotification({
-      company_id: companyId,
       title: config.title,
       message: config.message,
       type: 'info',
       priority: config.priority,
-      category: 'automation'
-    });
+      category: 'system' as any
+    } as any);
 
     if (!result.success) {
       throw new Error(result.error || 'Erreur création notification');

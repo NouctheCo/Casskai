@@ -485,9 +485,8 @@ export const taxService = {
           overdue_tax_amount: 0
         },
         recent_declarations: [],
-        upcoming_deadlines: [],
         alerts_count: 0
-      };
+      } as any;
       
       return { data: mockData };
     } catch (error) {

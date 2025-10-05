@@ -331,58 +331,6 @@ class InvoicingService {
     }
   }
 
-  async getInvoicingStats(options?: {
-    periodStart?: string;
-    periodEnd?: string;
-  }): Promise<InvoicingStats> {
-    try {
-      const companyId = await this.getCurrentCompanyId();
-      const now = new Date();
-      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-      const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
-      
-      const periodStart = options?.periodStart || firstDayOfMonth;
-      const periodEnd = options?.periodEnd || lastDayOfMonth;
-
-      const { data: invoicesData, error } = await supabase
-        .from('invoices')
-        .select('id, status, total_amount, paid_amount, issue_date, due_date')
-        .eq('company_id', companyId)
-        .gte('issue_date', periodStart)
-        .lte('issue_date', periodEnd);
-
-      if (error) {
-        throw new Error(`Failed to fetch invoicing stats: ${error.message}`);
-      }
-
-      const invoices = invoicesData || [];
-      const now_date = new Date();
-      
-      const totalRevenue = invoices.reduce((sum, inv) => sum + parseFloat(inv.total_amount), 0);
-      const paidInvoices = invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + parseFloat(inv.total_amount), 0);
-      const pendingInvoices = invoices.filter(inv => ['draft', 'sent'].includes(inv.status)).reduce((sum, inv) => sum + parseFloat(inv.total_amount), 0);
-      const overdueInvoices = invoices.filter(inv => {
-        const dueDate = new Date(inv.due_date);
-        return inv.status !== 'paid' && dueDate < now_date;
-      }).reduce((sum, inv) => sum + parseFloat(inv.total_amount), 0);
-      
-      const invoicesCount = invoices.length;
-      const averageInvoiceValue = invoicesCount > 0 ? totalRevenue / invoicesCount : 0;
-
-      return {
-        totalRevenue,
-        paidInvoices,
-        pendingInvoices,
-        overdueInvoices,
-        invoicesCount,
-        averageInvoiceValue
-      };
-    } catch (error) {
-      console.error('Error in getInvoicingStats:', error);
-      throw error;
-    }
-  }
-
   async generateInvoiceNumber(): Promise<string> {
     try {
       const companyId = await this.getCurrentCompanyId();

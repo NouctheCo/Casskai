@@ -83,15 +83,15 @@ export class InvoicingService {
     return {
       service: 'invoicingService',
       method,
-      userId: this.getCurrentUserId(),
+      userId: this.getCurrentUserId() as any,
       companyId: this.getCurrentCompanyId(),
       additional: additionalData,
     };
   }
 
-  private getCurrentUserId(): string | undefined {
+  private async getCurrentUserId(): Promise<string | undefined> {
     try {
-      const { data } = supabase.auth.getUser();
+      const { data } = await supabase.auth.getUser();
       return data.user?.id;
     } catch {
       return undefined;
@@ -336,7 +336,7 @@ export class InvoicingService {
   async updateInvoiceStatus(invoiceId: string, status: Invoice['status']): Promise<InvoiceWithDetails> {
     const context = this.getContext('updateInvoiceStatus', { invoiceId, status });
 
-    return errorHandler.supabaseCall(async () => {
+    const result = await errorHandler.supabaseCall(async () => {
       const updates: Partial<Invoice> = { status };
       
       // Ajouter des champs spécifiques selon le statut
@@ -363,10 +363,12 @@ export class InvoicingService {
         cancelled: 'annulée',
       };
       
-      toast.success(`Facture ${invoice.invoice_number} marquée comme ${statusLabels[status]}`);
-      
-      return invoice;
+      toast.success(`Facture ${(invoice as any).invoice_number} marquée comme ${statusLabels[status]}`);
+
+      return { data: invoice, error: null };
     }, context);
+
+    return (result as any).data;
   }
 
   /**
@@ -414,7 +416,7 @@ export class InvoicingService {
   async generateInvoiceNumber(companyId: string, type: Invoice['type'] = 'sale'): Promise<string> {
     const context = this.getContext('generateInvoiceNumber', { companyId, type });
 
-    return errorHandler.supabaseCall(async () => {
+    const result = await errorHandler.supabaseCall(async (): Promise<{ data: string; error: any }> => {
       const { data: lastInvoice } = await supabase
         .from('invoices')
         .select('invoice_number')
@@ -425,21 +427,24 @@ export class InvoicingService {
 
       const prefix = type === 'sale' ? 'FAC' : 'ACH';
       const currentYear = new Date().getFullYear();
-      
+
       if (!lastInvoice || lastInvoice.length === 0) {
-        return `${prefix}-${currentYear}-001`;
+        return { data: `${prefix}-${currentYear}-001`, error: null };
       }
 
       const lastNumber = lastInvoice[0].invoice_number;
       const numberMatch = lastNumber.match(/(\d+)$/);
-      
+
       if (!numberMatch) {
-        return `${prefix}-${currentYear}-001`;
+        return { data: `${prefix}-${currentYear}-001`, error: null };
       }
 
       const nextNumber = parseInt(numberMatch[1], 10) + 1;
-      return `${prefix}-${currentYear}-${nextNumber.toString().padStart(3, '0')}`;
+      const invoiceNumber = `${prefix}-${currentYear}-${nextNumber.toString().padStart(3, '0')}`;
+      return { data: invoiceNumber, error: null };
     }, context);
+
+    return (result as any).data;
   }
 
   /**

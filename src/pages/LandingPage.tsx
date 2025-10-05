@@ -53,7 +53,7 @@ import {
 const AnimatedSection = ({ children, className = "" }) => {
   const controls = useAnimation();
   const ref = React.useRef(null);
-  const inView = useInView(ref, { once: true, threshold: 0.1 });
+  const inView = useInView(ref, { once: true } as any);
 
   useEffect(() => {
     if (inView) {

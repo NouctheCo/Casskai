@@ -201,10 +201,10 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
 
   // Gérer l'action d'une notification
   const handleAction = (notification: Notification) => {
-    if (notification.action_url) {
+    if ((notification as any).action_url) {
       // Marquer comme lu puis naviguer
       markAsRead(notification);
-      window.location.href = notification.action_url;
+      window.location.href = (notification as any).action_url;
     }
   };
 
@@ -372,7 +372,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
                             </span>
                           </div>
 
-                          {notification.action_url && (
+                          {(notification as any).action_url && (
                             <Button
                               variant="ghost"
                               size="sm"
@@ -382,7 +382,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
                               }}
                               className="text-xs flex items-center gap-1 text-blue-600 hover:text-blue-700"
                             >
-                              {notification.action_label || 'Voir'}
+                              {(notification as any).action_label || 'Voir'}
                               <ExternalLink className="h-3 w-3" />
                             </Button>
                           )}

@@ -416,7 +416,7 @@ export default function InventoryPage() {
     lowStockItems: lowStockItems.length,
     outOfStockItems: outOfStockItems.length,
     activeItems: inventoryItems.filter(item => item.status === 'active').length,
-    averageRotation: metrics?.totalMovementsValue || 2.3,
+    averageRotation: (metrics as any)?.totalMovementsValue || metrics?.totalMovements || 2.3,
     totalMovements: stockMovements.length,
     monthlyTurnover: 0,
     profitMargin: 32.5

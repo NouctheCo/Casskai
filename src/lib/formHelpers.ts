@@ -314,12 +314,12 @@ export function useRealtimeValidation<T extends FieldValues = FieldValues>(
         // Debounce
         setTimeout(() => {
           if (Date.now() - lastValidation[name] >= debounceMs) {
-            validateField(name as Path<T>, data[name as keyof T]);
+            validateField(name as Path<T>, (data as any)[name as keyof T]);
             setLastValidation(prev => ({ ...prev, [name]: Date.now() }));
           }
         }, debounceMs);
       } else {
-        validateField(name as Path<T>, data[name as keyof T]);
+        validateField(name as Path<T>, (data as any)[name as keyof T]);
         setLastValidation(prev => ({ ...prev, [name]: now }));
       }
     });

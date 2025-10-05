@@ -98,7 +98,7 @@ export function useCompanies() {
           user_uuid: user.id,
           country_code: companyData.country || 'FR',
           currency_code: companyData.currency || 'EUR',
-          accounting_standard_param: companyData.accountingStandard || null,
+          accounting_standard_param: (companyData as any).accountingStandard || null,
         }
       );
 
@@ -115,7 +115,7 @@ export function useCompanies() {
 
       const newCompany: CompanyWithRole = {
         ...company,
-        role: 'owner' as UserRole,
+        role: 'owner' as unknown as UserRole,
         is_default: companies.length === 0, // First company becomes default
       };
 

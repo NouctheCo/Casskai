@@ -425,7 +425,7 @@ class ForecastsService {
         net_margin: netMargin,
         break_even_point: totalExpenses,
         updated_at: new Date().toISOString()
-      };
+      } as any;
       
       return { data: mockForecasts[forecastIndex] };
     } catch (error) {

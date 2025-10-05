@@ -11,7 +11,7 @@ import {
   EInvoicingError
 } from '../../../types/einvoicing.types';
 import { ValidationService } from '../core/ValidationService';
-import { xml2js } from 'xml2js';
+import xml2js from 'xml2js';
 
 interface ParsedInvoiceResult {
   success: boolean;
@@ -398,7 +398,7 @@ export class InboundService {
           return {
             success: false,
             errors: [`Unsupported or unrecognized invoice format`],
-            detected_format: detectedFormat
+            detected_format: detectedFormat as 'FACTURX' | 'UBL' | 'CII'
           };
       }
 

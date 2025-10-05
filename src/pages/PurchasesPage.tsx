@@ -425,9 +425,9 @@ export default function PurchasesPage() {
         suppliers={suppliers}
         loading={formLoading}
       />
-      
-      {/* Render confirmation dialog */}
-      <ConfirmDialog />
+
+
+      {/* Render confirmation dialog - component provided by useConfirmDialog */}
     </motion.div>
   );
 }

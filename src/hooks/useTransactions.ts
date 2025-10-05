@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import type { Transaction, TransactionType, TransactionStatus } from '@/types/database.types';
+
+type Transaction = any;
+type TransactionType = any;
+type TransactionStatus = any;
 
 export interface TransactionFilters {
   type?: TransactionType;

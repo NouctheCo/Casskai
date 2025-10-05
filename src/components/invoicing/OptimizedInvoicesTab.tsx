@@ -16,7 +16,8 @@ import { invoicingService } from '@/services/invoicingService';
 import { thirdPartiesService } from '@/services/thirdPartiesService';
 import CompanySettingsService from '@/services/companySettingsService';
 import { InvoicePdfService } from '@/services/invoicePdfService';
-import type { InvoiceWithDetails, ThirdParty } from '@/services/invoicingService';
+import type { InvoiceWithDetails } from '@/types/database/invoices.types';
+import type { ThirdParty } from '@/types/third-parties.types';
 import type { CompanySettings } from '@/types/company-settings.types';
 import { 
   Plus,
@@ -129,15 +130,17 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         documents: {
           templates: {
             invoice: 'default' as const,
-            quote: 'default' as const,
-            receipt: 'default' as const
+            quote: 'default' as const
           },
           numbering: {
             invoicePrefix: 'FAC',
             quotePrefix: 'DEV',
-            receiptPrefix: 'REC'
-          },
-          legalMentions: ''
+            format: 'YYYY-{number}',
+            counters: {
+              invoice: 1,
+              quote: 1
+            }
+          }
         },
         metadata: {}
       };
@@ -152,8 +155,8 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         thirdPartiesService.getThirdParties('customer'),
         loadCompanySettings()
       ]);
-      
-      setInvoices(invoicesData);
+
+      setInvoices(invoicesData as unknown as InvoiceWithDetails[]);
       setClients(clientsData);
       setCompanySettings(settingsData);
     } catch (error) {
@@ -219,12 +222,12 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         name: companySettings?.generalInfo?.name || 'Votre Entreprise',
         address: companySettings?.contact?.address?.street || '',
         city: companySettings?.contact?.address?.city || '',
-        postalCode: companySettings?.contact?.address?.postal_code || '',
+        postalCode: companySettings?.contact?.address?.postalCode || '',
         phone: companySettings?.contact?.phone || '',
         email: companySettings?.contact?.email || '',
         website: companySettings?.contact?.website || '',
         siret: companySettings?.generalInfo?.siret || '',
-        vatNumber: companySettings?.generalInfo?.vat_number || ''
+        vatNumber: companySettings?.generalInfo?.vatNumber || ''
       };
 
       // Générer une URL de données PDF pour prévisualisation
@@ -277,12 +280,12 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         name: companySettings?.generalInfo?.name || 'Votre Entreprise',
         address: companySettings?.contact?.address?.street || '',
         city: companySettings?.contact?.address?.city || '',
-        postalCode: companySettings?.contact?.address?.postal_code || '',
+        postalCode: companySettings?.contact?.address?.postalCode || '',
         phone: companySettings?.contact?.phone || '',
         email: companySettings?.contact?.email || '',
         website: companySettings?.contact?.website || '',
         siret: companySettings?.generalInfo?.siret || '',
-        vatNumber: companySettings?.generalInfo?.vat_number || ''
+        vatNumber: companySettings?.generalInfo?.vatNumber || ''
       };
 
       // Générer et télécharger le PDF
@@ -311,12 +314,12 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         name: companySettings?.generalInfo?.name || 'Votre Entreprise',
         address: companySettings?.contact?.address?.street || '',
         city: companySettings?.contact?.address?.city || '',
-        postalCode: companySettings?.contact?.address?.postal_code || '',
+        postalCode: companySettings?.contact?.address?.postalCode || '',
         phone: companySettings?.contact?.phone || '',
         email: companySettings?.contact?.email || '',
         website: companySettings?.contact?.website || '',
         siret: companySettings?.generalInfo?.siret || '',
-        vatNumber: companySettings?.generalInfo?.vat_number || ''
+        vatNumber: companySettings?.generalInfo?.vatNumber || ''
       };
 
       // Générer un PDF pour chaque facture filtrée
@@ -722,7 +725,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
           quantity: line.quantity,
           unitPrice: line.unit_price,
           taxRate: line.tax_rate || 20,
-          total: line.line_total
+          total: line.line_total_ht || 0
         })) || [{ description: '', quantity: 1, unitPrice: 0, taxRate: 20, total: 0 }],
         notes: invoice.notes || '',
         terms: ''
@@ -957,7 +960,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
                       <SelectItem key={client.id} value={client.id}>
                         <div className="flex flex-col">
                           <span className="font-medium">{client.name}</span>
-                          {client.email && <span className="text-xs text-gray-500">{client.email}</span>}
+                          {client.primary_email && <span className="text-xs text-gray-500">{client.primary_email}</span>}
                         </div>
                       </SelectItem>
                     ))}

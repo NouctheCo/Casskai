@@ -79,7 +79,8 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
       setLoading(true);
       const response = await crmService.getOpportunities(enterpriseId);
       if (response.error) {
-        throw new Error(response.error.message);
+        const errorMessage = typeof response.error === 'string' ? response.error : response.error.message;
+        throw new Error(errorMessage);
       }
       setOpportunities(response.data);
     } catch (error) {
@@ -140,7 +141,8 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
       // Update in service
       const response = await crmService.updateOpportunity(opportunityId, { stage: newStage as any });
       if (response.error) {
-        throw new Error(response.error.message);
+        const errorMessage = typeof response.error === 'string' ? response.error : response.error.message;
+        throw new Error(errorMessage);
       }
 
       toast({

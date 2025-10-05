@@ -529,7 +529,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
           onLayoutChange={handleLayoutChange}
           onDragStart={handleDragStart}
           onDragStop={handleDragStop}
-          onResizeStop={handleLayoutChange}
+          onResizeStop={handleLayoutChange as any}
         >
           {widgets.filter(widget => widget && widget.id).map(widget => {
             const layout = currentDashboard.layout.find(l => l.i && widget.id && String(l.i) === String(widget.id));

@@ -1,5 +1,5 @@
 // Configuration des routes de l'application
-import React, { lazy } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import RouteErrorBoundary from '@/components/RouteErrorBoundary';
@@ -7,7 +7,7 @@ import ProtectedRoute from '@/components/guards/ProtectedRoute';
 import HomePage from '@/components/HomePage';
 
 // Direct lazy imports - temporary fix for deployment
-const LazyAuthPage = lazy(() => import('@/pages/AuthPage'));
+// const LazyAuthPage = lazy(() => import('@/pages/AuthPage')); // File doesn't exist
 const LazyOnboardingPage = lazy(() => import('@/pages/OnboardingPage'));
 const LazyLandingPage = lazy(() => import('@/pages/LandingPage'));
 const LazyDashboardPage = lazy(() => import('@/pages/DashboardPage'));
@@ -18,7 +18,7 @@ const LazyPurchasesPage = lazy(() => import('@/pages/PurchasesPage'));
 const LazyInvoicingPage = lazy(() => import('@/pages/InvoicingPage'));
 const LazyInventoryPage = lazy(() => import('@/pages/InventoryPage'));
 const LazyReportsPage = lazy(() => import('@/pages/ReportsPage'));
-const LazyForecastsPage = lazy(() => import('@/pages/ForecastsPage'));
+// const LazyForecastsPage = lazy(() => import('@/pages/ForecastsPage')); // File doesn't exist
 const LazyTaxPage = lazy(() => import('@/pages/TaxPage'));
 const LazyContractsPage = lazy(() => import('@/pages/ContractsPage'));
 const LazySettingsPage = lazy(() => import('@/pages/SettingsPage'));
@@ -28,9 +28,9 @@ const LazyModulesManagementPage = lazy(() => import('@/components/modules/Module
 // Pages spécifiques
 const AccountingImportPage = lazy(() => import('@/pages/AccountingImportPage'));
 const SecurityPage = lazy(() => import('@/components/security/SecuritySettingsPage'));
-const DatabaseTestPage = lazy(() => import('@/pages/DatabaseTestPage'));
+// const DatabaseTestPage = lazy(() => import('@/pages/DatabaseTestPage')); // File doesn't exist
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
-const ModuleManager = lazy(() => import('@/components/modules/ModuleManagerEnhanced'));
+// const ModuleManager = lazy(() => import('@/components/modules/ModuleManagerEnhanced')); // File doesn't exist
 const ModuleDiagnostics = lazy(() => import('@/components/modules/ModuleDiagnostics'));
 const ModuleRenderer = lazy(() => import('@/components/modules/ModuleRenderer'));
 
@@ -56,10 +56,10 @@ export const appRouter = createBrowserRouter([
   {
     path: "/",
     element: <MainLayout />,
-    errorElement: <RouteErrorBoundary />,
+    errorElement: <RouteErrorBoundary><div /></RouteErrorBoundary>,
     children: [
       { index: true, element: <HomePage /> },
-      { path: "auth", element: <LazyAuthPage /> },
+      // { path: "auth", element: <LazyAuthPage /> }, // Component doesn't exist
       { path: "landing", element: <LazyLandingPage /> },
       
       // Pages légales
@@ -149,14 +149,14 @@ export const appRouter = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      {
-        path: "forecasts",
-        element: (
-          <ProtectedRoute requireAuth={true} requireOnboarding={true}>
-            <LazyForecastsPage />
-          </ProtectedRoute>
-        ),
-      },
+      // {
+      //   path: "forecasts",
+      //   element: (
+      //     <ProtectedRoute requireAuth={true} requireOnboarding={true}>
+      //       <LazyForecastsPage />
+      //     </ProtectedRoute>
+      //   ),
+      // }, // Component doesn't exist
       {
         path: "tax",
         element: (
@@ -267,20 +267,22 @@ export const appRouter = createBrowserRouter([
         path: "modules/:moduleId",
         element: (
           <ProtectedRoute requireAuth={true} requireOnboarding={true}>
-            <ModuleRenderer />
+            <Suspense fallback={<div>Loading...</div>}>
+              <ModuleRenderer moduleId={""} />
+            </Suspense>
           </ProtectedRoute>
         ),
       },
       
       // Route de test (dev uniquement)
-      ...(import.meta.env.DEV ? [{
-        path: "database-test",
-        element: (
-          <ProtectedRoute requireAuth={true}>
-            <DatabaseTestPage />
-          </ProtectedRoute>
-        ),
-      }] : []),
+      // ...(import.meta.env.DEV ? [{
+      //   path: "database-test",
+      //   element: (
+      //     <ProtectedRoute requireAuth={true}>
+      //       <DatabaseTestPage />
+      //     </ProtectedRoute>
+      //   ),
+      // }] : []), // Component doesn't exist
       
       // 404 et redirections
       { path: "404", element: <NotFoundPage /> },

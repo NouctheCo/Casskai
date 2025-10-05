@@ -6,6 +6,8 @@ import { ModulePermissionService } from '@/services/moduleManager';
 // Définition du module CRM
 export const CRM_MODULE_DEFINITION: ModuleDefinition = {
   id: 'crm-sales',
+  key: 'crm-sales',
+  path: '/crm',
   name: 'CRM & Ventes',
   description: 'Pipeline commercial intégré avec devis, factures et signature électronique',
   version: '1.0.0',
@@ -436,7 +438,7 @@ Cordialement,
   }
 
   // Routes et composants React
-  getRoutes() {
+  getRoutes(): any {
     return [
       {
         path: '/crm',
@@ -486,7 +488,7 @@ Cordialement,
     ];
   }
 
-  getComponents() {
+  getComponents(): any {
     return {
       CRMWidget: () => {
         const p = './components/CRMWidget';

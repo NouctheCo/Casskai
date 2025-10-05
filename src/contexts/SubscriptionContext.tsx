@@ -34,6 +34,11 @@ interface SubscriptionContextType {
   canAccessFeature: (featureName: string) => Promise<boolean>;
   getUsageLimit: (featureName: string) => Promise<{ current: number; limit: number | null }>;
   openBillingPortal: () => Promise<{ success: boolean; error?: string }>;
+  invoices: any[];
+  paymentMethods: any[];
+  defaultPaymentMethod: any | null;
+  subscribe: (planId: string) => Promise<{ success: boolean; error?: string; checkoutUrl?: string }>;
+  updateSubscription: (planId: string) => Promise<{ success: boolean; error?: string }>;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
@@ -295,6 +300,17 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     ? Math.max(0, Math.ceil((subscription.currentPeriodEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
     : null;
 
+  // Stub implementations for billing features
+  const subscribe = async (planId: string) => {
+    // TODO: Implement actual subscription logic
+    return { success: false, error: 'Not implemented' };
+  };
+
+  const updateSubscription = async (planId: string) => {
+    // TODO: Implement subscription update logic
+    return { success: false, error: 'Not implemented' };
+  };
+
   const value: SubscriptionContextType = {
     subscription,
     plan,
@@ -308,6 +324,11 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     canAccessFeature,
     getUsageLimit,
     openBillingPortal,
+    invoices: [], // TODO: Implement invoice fetching
+    paymentMethods: [], // TODO: Implement payment methods fetching
+    defaultPaymentMethod: null, // TODO: Implement default payment method
+    subscribe,
+    updateSubscription,
   };
 
   return (

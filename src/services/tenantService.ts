@@ -29,8 +29,8 @@ export class TenantService {
       }
 
       // 3. Utiliser l'instance Supabase unique (CORRECTION CRITIQUE)
-      const { getSupabaseClient } = await import('@/lib/supabase');
-      this.supabaseClient = getSupabaseClient();
+      const supabaseModule = await import('@/lib/supabase');
+      this.supabaseClient = (supabaseModule as any).getSupabaseClient();
 
       // 4. Vérifier la connexion à la base de données
       const { error } = await this.supabaseClient.from('companies').select('count').single();

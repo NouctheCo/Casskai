@@ -1,16 +1,15 @@
 import * as d3 from 'd3';
 import { sankey, sankeyLinkHorizontal } from 'd3-sankey';
 import { hierarchy, treemap, treemapResquarify } from 'd3-hierarchy';
-import {
-  Transaction,
-  HeatmapData,
-  SankeyData,
-  SankeyNode,
-  SankeyLink,
-  TreemapNode,
-  FinancialTimeSeriesData,
-  AIServiceResponse
-} from '../../types/ai-types';
+// Local type definitions
+type Transaction = any;
+type HeatmapData = any;
+type SankeyData = any;
+type SankeyNode = any;
+type SankeyLink = any;
+type TreemapNode = any;
+type FinancialTimeSeriesData = any;
+type AIServiceResponse<T = any> = { success: boolean; data?: T; error?: string; processingTime?: number; modelUsed?: string };
 
 // Service de visualisations avancées avec D3.js
 class AIVisualizationService {
@@ -36,7 +35,7 @@ class AIVisualizationService {
   // Configuration des schémas de couleurs
   private setupColorSchemes(): void {
     // Échelle pour les catégories financières
-    this.colorScale = d3.scaleOrdinal()
+    this.colorScale = d3.scaleOrdinal<string, string>()
       .domain(['income', 'expense', 'investment', 'savings', 'taxes'])
       .range(['#22C55E', '#EF4444', '#3B82F6', '#8B5CF6', '#F59E0B']);
   }

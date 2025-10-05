@@ -1,9 +1,10 @@
-import React, { Suspense } from 'react';
-import { componentStrategies } from '@/utils/performance/lazyLoading';
+import React, { Suspense, lazy } from 'react';
 import { Skeleton } from './skeleton';
 
 // Lazy-loaded chart component to avoid loading heavy chart.js upfront
-const LazyAnimatedChart = componentStrategies.visualization(() => import('./AnimatedChart'));
+const LazyAnimatedChart = lazy(() =>
+  import('./AnimatedChart').then(m => ({ default: m.AnimatedChart }))
+);
 
 interface LazyChartProps {
   type: 'bar' | 'line' | 'doughnut' | 'pie';

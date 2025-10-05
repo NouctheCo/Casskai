@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { useCrm } from '../hooks/useCrm';
+import { useCRMAnalytics } from '../hooks/useCRMAnalytics';
 import { useToast } from '../components/ui/use-toast.js';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
@@ -17,7 +18,11 @@ import {
   Activity,
   RefreshCw,
   AlertTriangle,
-  Sparkles
+  Sparkles,
+  Download,
+  FileText,
+  TrendingUp,
+  Calendar
 } from 'lucide-react';
 import {
   ClientFormData,
@@ -33,6 +38,9 @@ export default function SalesCrmPage() {
 
   // Use the new CRM hook
   const {
+    clients,
+    opportunities,
+    commercialActions,
     dashboardData,
     loading,
     error,
@@ -42,6 +50,25 @@ export default function SalesCrmPage() {
     createOpportunity,
     createCommercialAction
   } = useCrm();
+
+  // Use CRM analytics hook
+  const {
+    conversionMetrics,
+    salesCycleMetrics,
+    forecastData,
+    exportClientsCSV,
+    exportClientsExcel,
+    exportOpportunitiesCSV,
+    exportOpportunitiesExcel,
+    exportActionsCSV,
+    exportPipelineReport,
+    exportForecastReport,
+    exportDashboardReport
+  } = useCRMAnalytics({
+    clients,
+    opportunities,
+    actions: commercialActions
+  });
 
   // State management
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -190,6 +217,15 @@ export default function SalesCrmPage() {
           <Button
             variant="outline"
             size="sm"
+            onClick={exportDashboardReport}
+            disabled={loading || clients.length === 0}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Rapport Complet
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={fetchDashboardData}
             disabled={loading}
           >
@@ -243,6 +279,63 @@ export default function SalesCrmPage() {
           </TabsList>
 
           <TabsContent value="dashboard" className="space-y-6">
+            {/* Analytics Cards */}
+            {conversionMetrics && (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Taux de Conversion</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{conversionMetrics.conversion_rate.toFixed(1)}%</div>
+                    <p className="text-xs text-muted-foreground">
+                      {conversionMetrics.won_opportunities} gagnées / {conversionMetrics.total_opportunities} total
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Cycle de Vente</CardTitle>
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{salesCycleMetrics.average_days_to_close} jours</div>
+                    <p className="text-xs text-muted-foreground">
+                      Médiane: {salesCycleMetrics.median_days_to_close} jours
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Pipeline Pondéré</CardTitle>
+                    <Target className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">€{conversionMetrics.weighted_pipeline_value.toLocaleString()}</div>
+                    <p className="text-xs text-muted-foreground">
+                      Total: €{conversionMetrics.total_pipeline_value.toLocaleString()}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Taille Moyenne</CardTitle>
+                    <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">€{conversionMetrics.average_deal_size.toLocaleString()}</div>
+                    <p className="text-xs text-muted-foreground">
+                      Par opportunité gagnée
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
             <motion.div variants={itemVariants}>
               {dashboardData ? (
                 <CrmDashboard
@@ -271,16 +364,80 @@ export default function SalesCrmPage() {
                 </Card>
               )}
             </motion.div>
+
+            {/* Forecast Section */}
+            {forecastData && forecastData.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Prévisions des Ventes</CardTitle>
+                      <CardDescription>Prochains 3 mois</CardDescription>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={exportForecastReport}
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Exporter
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {forecastData.map((forecast) => (
+                      <div key={forecast.month} className="flex items-center justify-between p-3 border rounded">
+                        <div>
+                          <p className="font-medium">{forecast.month}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Confiance: {forecast.confidence_level}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-muted-foreground">Prévu</p>
+                          <p className="font-bold">€{forecast.pipeline_revenue.toLocaleString()}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="clients" className="space-y-6">
             <motion.div variants={itemVariants}>
               <Card>
                 <CardHeader>
-                  <CardTitle>Gestion des Clients</CardTitle>
-                  <CardDescription>
-                    Module clients en cours de migration vers Supabase
-                  </CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Gestion des Clients</CardTitle>
+                      <CardDescription>
+                        {clients.length} clients
+                      </CardDescription>
+                    </div>
+                    {clients.length > 0 && (
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={exportClientsCSV}
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          CSV
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={exportClientsExcel}
+                        >
+                          <FileText className="w-4 h-4 mr-2" />
+                          Excel
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-center py-12">
@@ -306,10 +463,34 @@ export default function SalesCrmPage() {
             <motion.div variants={itemVariants}>
               <Card>
                 <CardHeader>
-                  <CardTitle>Gestion des Opportunités</CardTitle>
-                  <CardDescription>
-                    Pipeline de ventes et suivi des opportunités
-                  </CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Gestion des Opportunités</CardTitle>
+                      <CardDescription>
+                        {opportunities.length} opportunités - Pipeline: €{conversionMetrics.total_pipeline_value.toLocaleString()}
+                      </CardDescription>
+                    </div>
+                    {opportunities.length > 0 && (
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={exportPipelineReport}
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Rapport Pipeline
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={exportOpportunitiesExcel}
+                        >
+                          <FileText className="w-4 h-4 mr-2" />
+                          Excel
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-center py-12">
@@ -335,10 +516,24 @@ export default function SalesCrmPage() {
             <motion.div variants={itemVariants}>
               <Card>
                 <CardHeader>
-                  <CardTitle>Actions Commerciales</CardTitle>
-                  <CardDescription>
-                    Suivi des actions et interactions clients
-                  </CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Actions Commerciales</CardTitle>
+                      <CardDescription>
+                        {commercialActions.length} actions
+                      </CardDescription>
+                    </div>
+                    {commercialActions.length > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={exportActionsCSV}
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Exporter CSV
+                      </Button>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-center py-12">

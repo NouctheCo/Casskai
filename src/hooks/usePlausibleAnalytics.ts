@@ -211,9 +211,9 @@ class PlausibleService {
   // Vérifier si on doit tracker
   private shouldTrack(): boolean {
     // Respecter Do Not Track
-    if (navigator.doNotTrack === '1' || 
-        (window as any).doNotTrack === '1' || 
-        navigator.msDoNotTrack === '1') {
+    if (navigator.doNotTrack === '1' ||
+        (window as any).doNotTrack === '1' ||
+        (navigator as any).msDoNotTrack === '1') {
       return false;
     }
 

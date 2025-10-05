@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { useHR } from '@/hooks/useHR';
+import { useHRPayroll } from '@/hooks/useHRPayroll';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -23,7 +24,9 @@ import {
   Award,
   Target,
   CheckCircle,
-  XCircle
+  XCircle,
+  Download,
+  FileText
 } from 'lucide-react';
 
 export default function HumanResourcesPage() {
@@ -50,6 +53,20 @@ export default function HumanResourcesPage() {
     fetchMetrics,
     refreshAll
   } = useHR();
+
+  // Use payroll and export hook
+  const {
+    exportEmployeesToCSV,
+    exportEmployeesToExcel,
+    exportLeavesToCSV,
+    exportExpensesToCSV,
+    exportTimeEntriesToCSV
+  } = useHRPayroll({
+    employees,
+    leaves,
+    expenses,
+    timeEntries
+  });
 
   // State management
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -313,10 +330,34 @@ export default function HumanResourcesPage() {
             <motion.div variants={itemVariants}>
               <Card>
                 <CardHeader>
-                  <CardTitle>Gestion des Employés</CardTitle>
-                  <CardDescription>
-                    {employeesLoading ? 'Chargement...' : `${employees.length} employés`}
-                  </CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Gestion des Employés</CardTitle>
+                      <CardDescription>
+                        {employeesLoading ? 'Chargement...' : `${employees.length} employés`}
+                      </CardDescription>
+                    </div>
+                    {employees.length > 0 && (
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={exportEmployeesToCSV}
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          CSV
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={exportEmployeesToExcel}
+                        >
+                          <FileText className="w-4 h-4 mr-2" />
+                          Excel
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent>
                   {employeesLoading ? (
@@ -374,10 +415,24 @@ export default function HumanResourcesPage() {
             <motion.div variants={itemVariants}>
               <Card>
                 <CardHeader>
-                  <CardTitle>Gestion des Congés</CardTitle>
-                  <CardDescription>
-                    {leavesLoading ? 'Chargement...' : `${leaves.length} demandes de congés`}
-                  </CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Gestion des Congés</CardTitle>
+                      <CardDescription>
+                        {leavesLoading ? 'Chargement...' : `${leaves.length} demandes de congés`}
+                      </CardDescription>
+                    </div>
+                    {leaves.length > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={exportLeavesToCSV}
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Exporter CSV
+                      </Button>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent>
                   {leavesLoading ? (
@@ -442,10 +497,24 @@ export default function HumanResourcesPage() {
             <motion.div variants={itemVariants}>
               <Card>
                 <CardHeader>
-                  <CardTitle>Gestion des Frais</CardTitle>
-                  <CardDescription>
-                    {expensesLoading ? 'Chargement...' : `${expenses.length} notes de frais`}
-                  </CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Gestion des Frais</CardTitle>
+                      <CardDescription>
+                        {expensesLoading ? 'Chargement...' : `${expenses.length} notes de frais`}
+                      </CardDescription>
+                    </div>
+                    {expenses.length > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={exportExpensesToCSV}
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Exporter CSV
+                      </Button>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent>
                   {expensesLoading ? (

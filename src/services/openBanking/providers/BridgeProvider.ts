@@ -427,7 +427,7 @@ export class BridgeProvider extends BankingProvider {
 
       return this.createResponse(undefined);
     } catch (_error) {
-      return this.handleError(error);
+      return this.handleError(_error);
     }
   }
 
@@ -559,13 +559,17 @@ export class BridgeProvider extends BankingProvider {
 
   protected handleError(error: any): OpenBankingResponse<never> {
     if (error instanceof BankingProviderError) {
-      return this.createErrorResponse(error.code, error.message, error.details);
+      return this.createErrorResponse(error.code, error.message, error.details as Record<string, unknown>);
     }
+
+    const errorDetails: Record<string, unknown> = typeof error === 'object' && error !== null && error
+      ? { ...error }
+      : { message: String(error) };
 
     return this.createErrorResponse(
       'UNKNOWN_ERROR',
-  (error as any)?.message || 'An unknown error occurred',
-      error
+      (error as any)?.message || 'An unknown error occurred',
+      errorDetails
     );
   }
 

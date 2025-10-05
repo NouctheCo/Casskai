@@ -123,7 +123,9 @@
       "Bash(git mv:*)",
       "Bash(git checkout:*)",
       "Bash(do echo \"=== Testing $file ===\")",
-      "Bash(do sed -i '1{/^\\/\\/ @ts-nocheck$/d;}' \"$file\")"
+      "Bash(do sed -i '1{/^\\/\\/ @ts-nocheck$/d;}' \"$file\")",
+      "Bash(tee:*)",
+      "Bash(cut:*)"
     ],
     "deny": []
   }

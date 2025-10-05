@@ -151,7 +151,7 @@ const mockProjects = [
 const mockTasks = [
   {
     id: '1',
-    projectId: '1',
+    project_id: '1',
     title: 'Maquettage interface utilisateur',
     description: 'Création des maquettes haute fidélité pour toutes les pages',
     status: 'completed',
@@ -169,7 +169,7 @@ const mockTasks = [
   },
   {
     id: '2',
-    projectId: '1',
+    project_id: '1',
     title: 'Développement API REST',
     description: 'Implémentation des endpoints API pour le backend',
     status: 'in_progress',
@@ -187,7 +187,7 @@ const mockTasks = [
   },
   {
     id: '3',
-    projectId: '1',
+    project_id: '1',
     title: 'Intégration paiement sécurisé',
     description: 'Mise en place du système de paiement avec Stripe',
     status: 'todo',
@@ -205,7 +205,7 @@ const mockTasks = [
   },
   {
     id: '4',
-    projectId: '2',
+    project_id: '2',
     title: 'Analyse des besoins',
     description: 'Recueil et analyse des exigences fonctionnelles',
     status: 'completed',
@@ -223,7 +223,7 @@ const mockTasks = [
   },
   {
     id: '5',
-    projectId: '2',
+    project_id: '2',
     title: 'Architecture technique',
     description: 'Définition de l\'architecture technique de l\'application',
     status: 'in_progress',
@@ -245,48 +245,48 @@ const mockTasks = [
 const mockTimesheets = [
   {
     id: '1',
-    projectId: '1',
-    taskId: '2',
-    userId: 'Pierre Martin',
+    project_id: '1',
+    task_id: '2',
+    user_id: 'user-pierre',
+    user_name: 'Pierre Martin',
     date: '2024-03-15',
-    startTime: '09:00',
-    endTime: '17:30',
-    breakTime: 60,
-    totalHours: 7.5,
+    hours: 7.5,
+    billable: true,
     billableHours: 7.5,
     description: 'Développement endpoints API utilisateurs et produits',
-    status: 'approved',
-    hourlyRate: 85
+    task: 'Développement API REST',
+    hourlyRate: 85,
+    approved: true
   },
   {
     id: '2',
-    projectId: '1',
-    taskId: '1',
-    userId: 'Sophie Bernard',
+    project_id: '1',
+    task_id: '1',
+    user_id: 'user-sophie',
+    user_name: 'Sophie Bernard',
     date: '2024-03-14',
-    startTime: '08:30',
-    endTime: '16:00',
-    breakTime: 30,
-    totalHours: 7,
+    hours: 7,
+    billable: true,
     billableHours: 7,
     description: 'Finalisation maquettes et préparation livrables',
-    status: 'approved',
-    hourlyRate: 75
+    task: 'Maquettage interface utilisateur',
+    hourlyRate: 75,
+    approved: true
   },
   {
     id: '3',
-    projectId: '2',
-    taskId: '5',
-    userId: 'Lucas Moreau',
+    project_id: '2',
+    task_id: '5',
+    user_id: 'user-lucas',
+    user_name: 'Lucas Moreau',
     date: '2024-03-15',
-    startTime: '10:00',
-    endTime: '18:00',
-    breakTime: 60,
-    totalHours: 7,
+    hours: 7,
+    billable: true,
     billableHours: 6.5,
     description: 'Conception architecture microservices',
-    status: 'pending',
-    hourlyRate: 90
+    task: 'Architecture technique',
+    hourlyRate: 90,
+    approved: false
   }
 ];
 
@@ -403,7 +403,9 @@ export default function ProjectsPage() {
       skills: ['Project Management', 'Agile', 'Scrum'],
       availability: 85,
       hourlyRate: 75,
-      currentProjects: ['1', '2'] // Projets actifs
+      currentProjects: ['1', '2'], // Projets actifs
+      totalHours: 160,
+      billableHours: 152
     },
     {
       id: '2',
@@ -413,7 +415,9 @@ export default function ProjectsPage() {
       skills: ['React', 'Node.js', 'TypeScript'],
       availability: 92,
       hourlyRate: 65,
-      currentProjects: ['1'] // Projets actifs
+      currentProjects: ['1'], // Projets actifs
+      totalHours: 168,
+      billableHours: 165
     },
     {
       id: '3',
@@ -423,7 +427,9 @@ export default function ProjectsPage() {
       skills: ['Figma', 'Adobe XD', 'User Research'],
       availability: 78,
       hourlyRate: 60,
-      currentProjects: ['1', '3'] // Projets actifs
+      currentProjects: ['1', '3'], // Projets actifs
+      totalHours: 140,
+      billableHours: 138
     }
   ];
 
@@ -431,36 +437,48 @@ export default function ProjectsPage() {
   const timesheets = [
     {
       id: '1',
-      projectId: '1',
-      userId: '1',
+      project_id: '1',
+      task_id: '1',
+      user_id: 'user-1',
+      user_name: 'Marie Dubois',
       date: '2024-03-15',
       hours: 8,
+      billable: true,
       billableHours: 8,
       hourlyRate: 75,
       description: 'Développement front-end',
-      task: 'UI Implementation'
+      task: 'UI Implementation',
+      approved: true
     },
     {
       id: '2',
-      projectId: '1',
-      userId: '2',
+      project_id: '1',
+      task_id: '2',
+      user_id: 'user-2',
+      user_name: 'Pierre Martin',
       date: '2024-03-15',
       hours: 7.5,
+      billable: true,
       billableHours: 7.5,
       hourlyRate: 65,
       description: 'API Development',
-      task: 'Backend Integration'
+      task: 'Backend Integration',
+      approved: true
     },
     {
       id: '3',
-      projectId: '2',
-      userId: '3',
+      project_id: '2',
+      task_id: '3',
+      user_id: 'user-3',
+      user_name: 'Sophie Bernard',
       date: '2024-03-14',
       hours: 6,
+      billable: true,
       billableHours: 6,
       hourlyRate: 60,
       description: 'Design System',
-      task: 'UX Research'
+      task: 'UX Research',
+      approved: false
     }
   ];
 
@@ -668,12 +686,12 @@ export default function ProjectsPage() {
             
             <div>
               <label htmlFor="projectDescription" className="text-sm font-medium">{t('projectspage.description', { defaultValue: 'Description' })}</label>
-              <textarea 
-                id="projectDescription" 
+              <textarea
+                id="projectDescription"
                 value={projectDescription}
                 onChange={(e) => setProjectDescription(e.target.value)}
-                className="w-full border rounded-md px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" 
-                rows="3" 
+                className="w-full border rounded-md px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                rows={3}
                 placeholder={t('projectspage.description', { defaultValue: 'Description' }) + ' détaillée du projet'}
               ></textarea>
             </div>
@@ -685,6 +703,7 @@ export default function ProjectsPage() {
                   value={startDate}
                   onChange={setStartDate}
                   placeholder={t('projectspage.slectionnez_une_date', { defaultValue: 'Sélectionnez une date' })}
+                  className=""
                 />
               </div>
               <div>
@@ -693,6 +712,7 @@ export default function ProjectsPage() {
                   value={endDate}
                   onChange={setEndDate}
                   placeholder={t('projectspage.slectionnez_une_date', { defaultValue: 'Sélectionnez une date' })}
+                  className=""
                 />
               </div>
               <div>
@@ -868,7 +888,7 @@ export default function ProjectsPage() {
               <CardContent>
                 <div className="space-y-3">
                   {tasks.filter(task => task.priority === 'high' && task.status !== 'completed').slice(0, 5).map((task) => {
-                    const project = projects.find(p => p.id === task.projectId);
+                    const project = projects.find(p => p.id === task.project_id);
                     return (
                       <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg">
                         <div className="flex items-center gap-3">
@@ -1001,7 +1021,7 @@ export default function ProjectsPage() {
 
                   {/* Liste des tâches */}
                   {tasks.map((task) => {
-                    const project = projects.find(p => p.id === task.projectId);
+                    const project = projects.find(p => p.id === task.project_id);
                     return (
                       <motion.div
                         key={task.id}
@@ -1127,8 +1147,8 @@ export default function ProjectsPage() {
               <CardContent>
                 <div className="space-y-4">
                   {timesheets.map((timesheet) => {
-                    const project = projects.find(p => p.id === timesheet.projectId);
-                    const task = tasks.find(t => t.id === timesheet.taskId);
+                    const project = projects.find(p => p.id === timesheet.project_id);
+                    const task = tasks.find(t => t.id === timesheet.task_id);
                     return (
                       <motion.div
                         key={timesheet.id}
@@ -1138,13 +1158,12 @@ export default function ProjectsPage() {
                       >
                         <div className="flex items-center gap-4">
                           <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${
-                            timesheet.status === 'approved' ? 'bg-green-500' :
-                            timesheet.status === 'pending' ? 'bg-orange-500' : 'bg-red-500'
+                            timesheet.approved ? 'bg-green-500' : 'bg-orange-500'
                           }`}>
                             <Timer className="h-5 w-5" />
                           </div>
                           <div>
-                            <h3 className="font-semibold">{timesheet.userId}</h3>
+                            <h3 className="font-semibold">{timesheet.user_name}</h3>
                             <p className="text-sm text-muted-foreground">{timesheet.description}</p>
                             <div className="flex items-center gap-2 mt-1">
                               <Badge variant="outline" className="text-xs">{project?.name}</Badge>
@@ -1153,13 +1172,12 @@ export default function ProjectsPage() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold">{timesheet.totalHours}h</p>
+                          <p className="font-semibold">{timesheet.hours}h</p>
                           <p className="text-sm text-muted-foreground">{timesheet.date}</p>
-                          <p className="text-sm text-muted-foreground">{timesheet.startTime} - {timesheet.endTime}</p>
-                          <p className="text-xs font-medium text-green-600">€{(timesheet.billableHours * timesheet.hourlyRate).toFixed(2)}</p>
+                          <p className="text-xs font-medium text-green-600">€{((timesheet.hourlyRate || 0) * timesheet.hours).toFixed(2)}</p>
                         </div>
-                        <Badge variant={timesheet.status === 'approved' ? 'default' : timesheet.status === 'pending' ? 'secondary' : 'destructive'}>
-                          {timesheet.status === 'approved' ? 'Approuvé' : timesheet.status === 'pending' ? 'En attente' : 'Refusé'}
+                        <Badge variant={timesheet.approved ? 'default' : 'secondary'}>
+                          {timesheet.approved ? 'Approuvé' : 'En attente'}
                         </Badge>
                       </motion.div>
                     );
@@ -1227,7 +1245,7 @@ export default function ProjectsPage() {
                   <div className="space-y-4">
                     <h3 className="font-semibold">Facturation par projet</h3>
                     {projects.map((project) => {
-                      const projectTimesheets = timesheets.filter(ts => ts.projectId === project.id);
+                      const projectTimesheets = timesheets.filter(ts => ts.project_id === project.id);
                       const totalBillable = projectTimesheets.reduce((sum, ts) => sum + ts.billableHours * ts.hourlyRate, 0);
                       return (
                         <div key={project.id} className="p-4 border rounded-lg">

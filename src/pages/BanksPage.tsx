@@ -216,7 +216,7 @@ const parseOFXBankFile = (content, file) => {
 const parseQIFBankFile = (content, file) => {
   const transactions = [];
   const lines = content.split('\n');
-  let currentTransaction = {};
+  let currentTransaction: { date?: string; amount?: number; description?: string; reference?: string } = {};
   
   lines.forEach(line => {
     const trimmedLine = line.trim();
@@ -458,13 +458,16 @@ const BankAccountCard = ({
         <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2 bg-secondary/30">
           <div className="flex items-center gap-3">
             {logoUrl ? (
-              <img 
-                src={logoUrl} 
-                alt={`${name} logo`} 
-                className="h-8 w-8 rounded-full" 
+              <img
+                src={logoUrl}
+                alt={`${name} logo`}
+                className="h-8 w-8 rounded-full"
                 onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.nextSibling.style.display = 'block';
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  if (target.nextSibling) {
+                    (target.nextSibling as HTMLElement).style.display = 'block';
+                  }
                 }}
               />
             ) : null}

@@ -319,7 +319,7 @@ export const usePerformanceMonitoring = (alertThresholds?: Partial<typeof THRESH
           metric: metric.name,
           value: metric.value,
           threshold: severity === 'critical' ? threshold.poor : threshold.good,
-          severity,
+          severity: severity as 'critical' | 'warning',
           timestamp: Date.now(),
         }].slice(-10)); // Garder seulement les 10 dernières alertes
       }

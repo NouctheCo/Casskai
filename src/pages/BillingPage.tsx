@@ -70,7 +70,6 @@ const BillingPage: React.FC = () => {
       toast({
         title: "Abonnement activé !",
         description: "Votre abonnement a été activé avec succès.",
-        duration: 5000,
       });
       // Refresh subscription data
       refreshSubscription();
@@ -81,7 +80,6 @@ const BillingPage: React.FC = () => {
         title: "Paiement annulé",
         description: "Vous avez annulé le processus de paiement.",
         variant: "destructive",
-        duration: 5000,
       });
       // Clean URL
       navigate('/settings/billing', { replace: true });
@@ -105,7 +103,6 @@ const BillingPage: React.FC = () => {
         toast({
           title: "Abonnement créé !",
           description: `Vous êtes maintenant abonné au plan ${SUBSCRIPTION_PLANS.find(p => p.id === planId)?.name}.`,
-          duration: 5000,
         });
       } else {
         toast({
@@ -135,12 +132,11 @@ const BillingPage: React.FC = () => {
 
     try {
       const result = await updateSubscription(newPlanId);
-      
+
       if (result.success) {
         toast({
           title: "Plan modifié !",
           description: `Votre plan a été changé avec succès.`,
-          duration: 5000,
         });
       } else {
         toast({
@@ -217,7 +213,6 @@ const BillingPage: React.FC = () => {
         toast({
           title: "Redirection...",
           description: "Ouverture du portail de gestion des paiements",
-          duration: 2000
         });
       }
       // Si succès, le portail s'ouvrira dans un nouvel onglet
@@ -238,9 +233,8 @@ const BillingPage: React.FC = () => {
       toast({
         title: "Méthode mise à jour",
         description: "Cette carte est maintenant votre méthode de paiement par défaut",
-        duration: 3000
       });
-      
+
       // Recharger les données d'abonnement pour réfléter les changements
       await refreshSubscription();
     } catch (error) {
@@ -269,18 +263,16 @@ const BillingPage: React.FC = () => {
       toast({
         title: "Téléchargement...",
         description: `Téléchargement de la facture #${invoice.stripeInvoiceId.slice(-8)}`,
-        duration: 2000
       });
 
       // Simuler l'ouverture du PDF dans un nouvel onglet
       // window.open(invoice.pdfUrl, '_blank');
-      
+
       // Pour la démo, on affiche un message de succès après un délai
       setTimeout(() => {
         toast({
           title: "PDF téléchargé",
           description: "La facture a été téléchargée avec succès.",
-          duration: 3000
         });
       }, 2000);
     } catch (error) {
@@ -309,18 +301,16 @@ const BillingPage: React.FC = () => {
       toast({
         title: "Ouverture de la facture",
         description: `Accès à la facture #${invoice.stripeInvoiceId.slice(-8)}`,
-        duration: 2000
       });
 
       // Simuler l'ouverture dans un nouvel onglet
       // window.open(invoice.invoiceUrl, '_blank');
-      
+
       // Pour la démo, on affiche un message informatif
       setTimeout(() => {
         toast({
           title: "Facture ouverte",
           description: "La facture s'ouvre dans un nouvel onglet.",
-          duration: 3000
         });
       }, 2000);
     } catch (error) {

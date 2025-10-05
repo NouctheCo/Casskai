@@ -233,7 +233,7 @@ const GDPRPage = () => {
       await GDPRService.sendConfirmationEmail(gdprRequest);
       
       // Afficher la confirmation avec toast
-      toast({
+      (toast as any)({
         title: "Demande RGPD envoyée",
         description: `Votre demande de ${getRequestTypeLabel(requestForm.type)} a été enregistrée. Vous recevrez une réponse sous ${GDPRService.getLegalTimeframe(requestForm.type)}.`,
         duration: 6000
