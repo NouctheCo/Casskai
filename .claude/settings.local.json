@@ -126,7 +126,8 @@
       "Bash(do sed -i '1{/^\\/\\/ @ts-nocheck$/d;}' \"$file\")",
       "Bash(tee:*)",
       "Bash(cut:*)",
-      "Bash(supabase:*)"
+      "Bash(supabase:*)",
+      "Bash(npm show:*)"
     ],
     "deny": []
   }
