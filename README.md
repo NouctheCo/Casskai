@@ -1,369 +1,183 @@
-# CassKai 🚀
+# Supabase CLI
 
-**La plateforme de gestion financière tout-en-un pour PME et indépendants**
+[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=main)](https://coveralls.io/github/supabase/cli?branch=main) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
+](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/votre-username/casskai)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org)
-[![TypeScript](https://img.shields.io/badge/typescript-5.x-blue.svg)](https://www.typescriptlang.org)
+[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
 
-> Plateforme ERP moderne avec tableau de bord unique pour la facturation, la comptabilité, l'analyse de flux de trésorerie et l'automatisation de processus.
+This repository contains all the functionality for Supabase CLI.
 
-🌐 **Production**: [https://casskai.app](https://casskai.app)
+- [x] Running Supabase locally
+- [x] Managing database migrations
+- [x] Creating and deploying Supabase Functions
+- [x] Generating types directly from your database schema
+- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
 
----
+## Getting started
 
-## ✨ Fonctionnalités Principales
+### Install the CLI
 
-### 📊 Tableau de Bord Intelligent
-- Vue consolidée du chiffre d'affaires, dépenses et indicateurs prévisionnels
-- Widgets personnalisables par module
-- Analytics en temps réel avec graphiques interactifs
-- KPIs financiers et opérationnels
-
-### 💰 Gestion Financière Complète
-- **Comptabilité**: Plan comptable international (FR, BE, LU, CH, CA, US, UK)
-- **Facturation**: Devis, factures, avoirs avec templates personnalisables
-- **Paiements**: Intégration Stripe pour abonnements et paiements récurrents
-- **Réconciliation bancaire**: Automatique avec ML/règles intelligentes
-- **Rapports**: Bilan, compte de résultat, flux de trésorerie (export PDF/Excel)
-
-### 🔄 Automatisation
-- Workflows configurables (onboarding, relances, notifications)
-- Intégration N8N pour automatisations avancées
-- Edge Functions Supabase pour logique métier serverless
-- Webhooks Stripe synchronisés
-
-### 🌍 International & Multi-entreprise
-- Support multilingue (FR, EN) avec i18next
-- Multi-devises avec conversion automatique
-- Plans comptables adaptés par pays
-- Gestion multi-entreprises par utilisateur
-
-### 👥 Modules Métier
-- **CRM**: Gestion clients, opportunités, pipeline commercial
-- **RH**: Employés, congés, notes de frais, pointage
-- **Inventaire**: Stock, mouvements, alertes de réapprovisionnement
-- **Projets**: Gestion de projets, tâches, time tracking, facturation
-- **Third Parties**: Clients, fournisseurs, partenaires unifiés
-
-### 🔒 Sécurité & Conformité
-- Authentification Supabase (email, OAuth, MFA)
-- Row Level Security (RLS) sur toutes les données
-- Secrets management avec rotation automatique
-- Audit logs et traçabilité
-- RGPD compliant
-
----
-
-## 🏗️ Architecture Technique
-
-### Stack Frontend
-- **Framework**: React 18 + TypeScript 5.x
-- **Build**: Vite (ultra-rapide HMR)
-- **Styling**: TailwindCSS + Radix UI
-- **State**: React Context + Custom Hooks
-- **Forms**: React Hook Form + Zod validation
-- **Charts**: Recharts + D3.js
-- **i18n**: i18next
-
-### Stack Backend
-- **Database**: Supabase (PostgreSQL)
-- **Auth**: Supabase Auth (JWT)
-- **Serverless**: Supabase Edge Functions (Deno)
-- **API**: REST + RPC Functions
-- **Storage**: Supabase Storage (documents, exports)
-- **Real-time**: Supabase Realtime (websockets)
-
-### Services Tiers
-- **Paiements**: Stripe (checkout, abonnements, webhooks)
-- **Automatisation**: N8N (workflows)
-- **AI** (optionnel): OpenAI GPT-4 pour analyses prédictives
-- **Email** (optionnel): SendGrid/Resend
-
-### Infrastructure
-- **Hosting**: VPS Hostinger (89.116.111.88)
-- **Web Server**: Nginx + PM2
-- **Proxy**: Traefik (Docker) pour HTTPS/SSL
-- **CI/CD**: Scripts automatisés (PowerShell + Bash)
-- **Monitoring**: Logs PM2 + Supabase Dashboard
-
----
-
-## 🚀 Démarrage Rapide
-
-### Prérequis
-
-- **Node.js** ≥ 18.0.0 et **npm** ≥ 8.0.0
-- **Supabase CLI**: `npm install -g supabase`
-- Compte [Supabase](https://supabase.com) (projet configuré)
-- Compte [Stripe](https://stripe.com) (clés API)
-
-### Installation
+Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
 
 ```bash
-# 1. Cloner le repository
-git clone https://github.com/votre-username/casskai.git
-cd casskai
-
-# 2. Installer les dépendances
-npm install
-
-# 3. Configurer les variables d'environnement
-cp .env.example .env
-# Éditer .env avec vos clés Supabase et Stripe
-
-# 4. Lancer en développement
-npm run dev
+npm i supabase --save-dev
 ```
 
-L'application sera accessible sur [http://localhost:5173](http://localhost:5173)
-
-### Configuration Minimale
-
-Dans `.env` :
+To install the beta release channel:
 
 ```bash
-# Supabase
-VITE_SUPABASE_URL=https://[votre-projet].supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGc...
-
-# Stripe
-VITE_STRIPE_PUBLIC_KEY=pk_test_...
-
-# Application
-VITE_APP_URL=http://localhost:5173
+npm i supabase@beta --save-dev
 ```
 
-⚠️ **IMPORTANT**: Ne JAMAIS committer les secrets dans Git. Voir [docs/security/SECURITY_CONFIGURATION_GUIDE.md](docs/security/SECURITY_CONFIGURATION_GUIDE.md)
+When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
 
----
+```
+NODE_OPTIONS=--no-experimental-fetch yarn add supabase
+```
 
-## 📚 Documentation
+> **Note**
+For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
 
-### Guides de Démarrage
-- 📖 **[Guide de Déploiement](docs/deployment/DEPLOYMENT.md)** - Déployer en production (1 minute)
-- 🔧 **[Configuration Supabase](docs/guides/SUPABASE_SETUP.md)** - Setup base de données
-- 💳 **[Intégration Stripe](docs/deployment/STRIPE_INTEGRATION.md)** - Paiements et abonnements
-- 🔒 **[Sécurité](docs/security/SECURITY_CONFIGURATION_GUIDE.md)** - Secrets et bonnes pratiques
+<details>
+  <summary><b>macOS</b></summary>
 
-### Documentation Complète
-- 📚 **[Index Documentation](docs/README.md)** - Table des matières complète
+  Available via [Homebrew](https://brew.sh). To install:
 
----
+  ```sh
+  brew install supabase/tap/supabase
+  ```
 
-## 🛠️ Développement
+  To install the beta release channel:
+  
+  ```sh
+  brew install supabase/tap/supabase-beta
+  brew link --overwrite supabase-beta
+  ```
+  
+  To upgrade:
 
-### Commandes Disponibles
+  ```sh
+  brew upgrade supabase
+  ```
+</details>
+
+<details>
+  <summary><b>Windows</b></summary>
+
+  Available via [Scoop](https://scoop.sh). To install:
+
+  ```powershell
+  scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
+  scoop install supabase
+  ```
+
+  To upgrade:
+
+  ```powershell
+  scoop update supabase
+  ```
+</details>
+
+<details>
+  <summary><b>Linux</b></summary>
+
+  Available via [Homebrew](https://brew.sh) and Linux packages.
+
+  #### via Homebrew
+
+  To install:
+
+  ```sh
+  brew install supabase/tap/supabase
+  ```
+
+  To upgrade:
+
+  ```sh
+  brew upgrade supabase
+  ```
+
+  #### via Linux packages
+
+  Linux packages are provided in [Releases](https://github.com/supabase/cli/releases). To install, download the `.apk`/`.deb`/`.rpm`/`.pkg.tar.zst` file depending on your package manager and run the respective commands.
+
+  ```sh
+  sudo apk add --allow-untrusted <...>.apk
+  ```
+
+  ```sh
+  sudo dpkg -i <...>.deb
+  ```
+
+  ```sh
+  sudo rpm -i <...>.rpm
+  ```
+
+  ```sh
+  sudo pacman -U <...>.pkg.tar.zst
+  ```
+</details>
+
+<details>
+  <summary><b>Other Platforms</b></summary>
+
+  You can also install the CLI via [go modules](https://go.dev/ref/mod#go-install) without the help of package managers.
+
+  ```sh
+  go install github.com/supabase/cli@latest
+  ```
+
+  Add a symlink to the binary in `$PATH` for easier access:
+
+  ```sh
+  ln -s "$(go env GOPATH)/bin/cli" /usr/bin/supabase
+  ```
+
+  This works on other non-standard Linux distros.
+</details>
+
+<details>
+  <summary><b>Community Maintained Packages</b></summary>
+
+  Available via [pkgx](https://pkgx.sh/). Package script [here](https://github.com/pkgxdev/pantry/blob/main/projects/supabase.com/cli/package.yml).
+  To install in your working directory:
+
+  ```bash
+  pkgx install supabase
+  ```
+
+  Available via [Nixpkgs](https://nixos.org/). Package script [here](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/tools/supabase-cli/default.nix).
+</details>
+
+### Run the CLI
 
 ```bash
-# Développement
-npm run dev              # Démarrer le serveur de dev (port 5173)
-npm run build            # Build de production
-npm run preview          # Prévisualiser le build
-
-# Tests
-npm run type-check       # Vérification TypeScript
-npm test                 # Tests unitaires (Vitest)
-npm run test:e2e         # Tests E2E (Playwright)
-npm run lint             # Linting ESLint
-
-# Déploiement
-npm run deploy           # Déploiement complet VPS (build + deploy)
-./deploy-vps.ps1         # Windows PowerShell
-./deploy-vps.sh          # Linux/Mac/Git Bash
-
-# Supabase
-supabase login           # Connexion Supabase CLI
-supabase db push         # Appliquer migrations
-supabase functions deploy [name]  # Déployer Edge Function
+supabase bootstrap
 ```
 
-### Structure du Projet
-
-```
-casskai/
-├── src/
-│   ├── components/      # Composants React
-│   │   ├── accounting/  # Module comptabilité
-│   │   ├── invoicing/   # Module facturation
-│   │   ├── dashboard/   # Dashboard
-│   │   └── ui/          # Composants UI réutilisables
-│   ├── pages/           # Pages (routes)
-│   ├── services/        # Services métier (API calls)
-│   ├── hooks/           # Custom React Hooks
-│   ├── contexts/        # React Contexts (Auth, Subscription, etc.)
-│   ├── types/           # Types TypeScript
-│   └── utils/           # Utilitaires
-├── supabase/
-│   ├── migrations/      # Migrations SQL
-│   └── functions/       # Edge Functions (Deno)
-├── scripts/             # Scripts utilitaires
-│   ├── dev/             # Scripts de développement
-│   └── deploy.sh        # Script de déploiement
-├── docs/                # Documentation
-│   ├── deployment/      # Guides de déploiement
-│   ├── guides/          # Guides utilisateur
-│   ├── security/        # Sécurité
-│   └── README.md        # Index documentation
-└── public/              # Assets statiques
-```
-
-### Bonnes Pratiques
-
-✅ **Toujours** exécuter `npm run type-check` avant de commit
-✅ **Utiliser** les composants UI réutilisables (`src/components/ui/`)
-✅ **Écrire** des tests pour les features critiques
-✅ **Documenter** les nouveaux services et API
-✅ **Respecter** les conventions de nommage TypeScript
-✅ **Ne jamais** committer de secrets ou clés API
-
-❌ **Éviter** les `@ts-nocheck` (dette technique)
-❌ **Ne pas** créer de fichiers temporaires/test dans src/
-❌ **Ne pas** dupliquer le code (DRY principle)
-
----
-
-## 🚢 Déploiement
-
-### Production (VPS)
-
-Le déploiement en production est **entièrement automatisé** :
+Or using npx:
 
 ```bash
-# Une seule commande pour tout déployer
-npm run deploy
+npx supabase bootstrap
 ```
 
-Cette commande :
-1. ✅ Vérifie la connexion VPS
-2. 🔨 Build de production (Vite)
-3. 📦 Upload via SCP
-4. 🔧 Configure les permissions
-5. 🔄 Redémarre Nginx + PM2
-6. 🧪 Teste l'application
-7. 🎉 Confirme le succès
+The bootstrap command will guide you through the process of setting up a Supabase project using one of the [starter](https://github.com/supabase-community/supabase-samples/blob/main/samples.json) templates.
 
-**Temps total** : ~1 minute
+## Docs
 
-Voir [docs/deployment/DEPLOYMENT.md](docs/deployment/DEPLOYMENT.md) pour plus de détails.
+Command & config reference can be found [here](https://supabase.com/docs/reference/cli/about).
 
-### Edge Functions Supabase
+## Breaking changes
 
-```bash
-# Déployer une fonction
-supabase functions deploy create-checkout-session
+We follow semantic versioning for changes that directly impact CLI commands, flags, and configurations.
 
-# Configurer les secrets
-supabase secrets set STRIPE_SECRET_KEY=sk_live_...
-supabase secrets set SUPABASE_SERVICE_ROLE_KEY=eyJ...
+However, due to dependencies on other service images, we cannot guarantee that schema migrations, seed.sql, and generated types will always work for the same CLI major version. If you need such guarantees, we encourage you to pin a specific version of CLI in package.json.
 
-# Voir les logs
-supabase functions logs create-checkout-session --tail
+## Developing
+
+To run from source:
+
+```sh
+# Go >= 1.22
+go run . help
 ```
-
----
-
-## 🧪 Tests
-
-### Tests Unitaires (Vitest)
-
-```bash
-# Lancer tous les tests
-npm test
-
-# Mode watch
-npm test -- --watch
-
-# Coverage
-npm test -- --coverage
-```
-
-### Tests E2E (Playwright)
-
-```bash
-# Installer les browsers (première fois)
-npx playwright install
-
-# Lancer les tests E2E
-npm run test:e2e
-
-# Mode UI (interactif)
-npm run test:e2e -- --ui
-```
-
-### Type Checking
-
-```bash
-# Vérifier les types TypeScript
-npm run type-check
-
-# En mode watch
-npm run type-check -- --watch
-```
-
----
-
-## 🤝 Contribution
-
-Les contributions sont les bienvenues ! Voici comment participer :
-
-1. **Fork** le projet
-2. **Créer** une branche (`git checkout -b feature/AmazingFeature`)
-3. **Commit** les changements (`git commit -m 'Add AmazingFeature'`)
-4. **Push** vers la branche (`git push origin feature/AmazingFeature`)
-5. **Ouvrir** une Pull Request
-
-### Guidelines
-
-- Suivre les conventions de code existantes
-- Ajouter des tests pour les nouvelles fonctionnalités
-- Mettre à jour la documentation si nécessaire
-- S'assurer que `npm run type-check` passe
-
----
-
-## 📝 Changelog
-
-Voir [CHANGELOG.md](CHANGELOG.md) pour l'historique des versions.
-
----
-
-## 📄 License
-
-Ce projet est sous licence MIT. Voir [LICENSE](LICENSE) pour plus de détails.
-
----
-
-## 🆘 Support
-
-### Documentation
-- 📚 [Documentation Complète](docs/README.md)
-- 🚀 [Guide de Déploiement](docs/deployment/DEPLOYMENT.md)
-- 🔧 [Configuration Supabase](docs/guides/SUPABASE_SETUP.md)
-- 💳 [Intégration Stripe](docs/deployment/STRIPE_INTEGRATION.md)
-
-### Problèmes Courants
-- **Erreur de déploiement** → [docs/deployment/DEPLOYMENT.md#troubleshooting](docs/deployment/DEPLOYMENT.md)
-- **Erreur Supabase** → [docs/guides/SUPABASE_SETUP.md](docs/guides/SUPABASE_SETUP.md)
-- **Erreur Stripe** → [docs/deployment/STRIPE_INTEGRATION.md#troubleshooting](docs/deployment/STRIPE_INTEGRATION.md)
-
-### Contact
-- **Production**: [https://casskai.app](https://casskai.app)
-- **Issues**: [GitHub Issues](https://github.com/votre-username/casskai/issues)
-
----
-
-## 🙏 Remerciements
-
-Construit avec :
-- [React](https://react.dev)
-- [Vite](https://vitejs.dev)
-- [Supabase](https://supabase.com)
-- [Stripe](https://stripe.com)
-- [TailwindCSS](https://tailwindcss.com)
-- [TypeScript](https://www.typescriptlang.org)
-
----
-
-**Fait avec ❤️ par l'équipe CassKai**

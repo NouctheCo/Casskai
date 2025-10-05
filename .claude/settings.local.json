@@ -125,7 +125,8 @@
       "Bash(do echo \"=== Testing $file ===\")",
       "Bash(do sed -i '1{/^\\/\\/ @ts-nocheck$/d;}' \"$file\")",
       "Bash(tee:*)",
-      "Bash(cut:*)"
+      "Bash(cut:*)",
+      "Bash(supabase:*)"
     ],
     "deny": []
   }
