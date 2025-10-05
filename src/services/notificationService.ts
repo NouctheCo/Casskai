@@ -3,27 +3,40 @@ import { supabase } from '@/lib/supabase';
 export interface Notification {
   id: string;
   user_id: string;
+  company_id?: string;
   title: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
-  category?: 'system' | 'billing' | 'feature' | 'security' | 'general';
+  type: 'info' | 'success' | 'warning' | 'error' | 'alert';
+  category?: 'system' | 'invoice' | 'payment' | 'expense' | 'approval' | 'reminder' | 'security' | 'billing' | 'feature' | 'general';
+  priority?: 'low' | 'normal' | 'high' | 'urgent';
   is_read: boolean;
   read_at?: string;
+  archived?: boolean;
+  archived_at?: string;
   link?: string;
-  metadata?: Record<string, any>;
+  action_url?: string;
+  action_label?: string;
+  metadata?: Record<string, unknown>;
   expires_at?: string;
+  scheduled_for?: string;
   created_at: string;
+  updated_at?: string;
 }
 
 export interface CreateNotificationData {
   user_id: string;
+  company_id?: string;
   title: string;
   message: string;
   type?: Notification['type'];
   category?: Notification['category'];
+  priority?: Notification['priority'];
   link?: string;
-  metadata?: Record<string, any>;
+  action_url?: string;
+  action_label?: string;
+  metadata?: Record<string, unknown>;
   expires_at?: string;
+  scheduled_for?: string;
 }
 
 export interface NotificationServiceResponse<T = any> {
@@ -51,14 +64,20 @@ export class NotificationService {
         .from('notifications')
         .insert({
           user_id: notificationData.user_id,
+          company_id: notificationData.company_id,
           title: notificationData.title,
           message: notificationData.message,
           type: notificationData.type || 'info',
           category: notificationData.category || 'general',
+          priority: notificationData.priority || 'normal',
           link: notificationData.link,
+          action_url: notificationData.action_url,
+          action_label: notificationData.action_label,
           metadata: notificationData.metadata || {},
           expires_at: notificationData.expires_at,
-          is_read: false
+          scheduled_for: notificationData.scheduled_for,
+          read: false,
+          archived: false
         })
         .select()
         .single();
@@ -75,6 +94,103 @@ export class NotificationService {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur lors de la création de la notification'
+      };
+    }
+  }
+
+  /**
+   * Archive une notification
+   */
+  async archiveNotification(notificationId: string): Promise<NotificationServiceResponse<Notification>> {
+    try {
+      const { data, error } = await supabase
+        .from('notifications')
+        .update({
+          archived: true,
+          archived_at: new Date().toISOString()
+        })
+        .eq('id', notificationId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      this.emitNotificationEvent('archive', data);
+
+      return {
+        success: true,
+        data
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erreur lors de l\'archivage de la notification'
+      };
+    }
+  }
+
+  /**
+   * Envoie une notification à tous les utilisateurs d'une entreprise
+   */
+  async notifyCompany(
+    companyId: string,
+    title: string,
+    message: string,
+    options?: {
+      type?: Notification['type'];
+      category?: Notification['category'];
+      priority?: Notification['priority'];
+      action_url?: string;
+      action_label?: string;
+    }
+  ): Promise<NotificationServiceResponse<number>> {
+    try {
+      // Récupérer tous les utilisateurs de l'entreprise
+      const { data: userCompanies, error: fetchError } = await supabase
+        .from('user_companies')
+        .select('user_id')
+        .eq('company_id', companyId);
+
+      if (fetchError) throw fetchError;
+
+      if (!userCompanies || userCompanies.length === 0) {
+        return {
+          success: true,
+          data: 0
+        };
+      }
+
+      // Créer les notifications
+      const notifications = userCompanies.map(uc => ({
+        user_id: uc.user_id,
+        company_id: companyId,
+        title,
+        message,
+        type: options?.type || 'info',
+        category: options?.category || 'system',
+        priority: options?.priority || 'normal',
+        action_url: options?.action_url,
+        action_label: options?.action_label,
+        read: false,
+        archived: false,
+        metadata: {}
+      }));
+
+      const { error: insertError, count } = await supabase
+        .from('notifications')
+        .insert(notifications)
+        .select();
+
+      if (insertError) throw insertError;
+
+      return {
+        success: true,
+        data: count || 0
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erreur lors de l\'envoi des notifications'
       };
     }
   }
