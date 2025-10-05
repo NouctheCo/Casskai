@@ -14,9 +14,13 @@ export function initializeSentry() {
     return;
   }
 
+  // Enhanced config for beta testing (staging environment)
+  const isBeta = import.meta.env.VITE_APP_ENV === 'staging' ||
+                 import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true';
+
   Sentry.init({
     dsn: SENTRY_DSN,
-    environment: ENV,
+    environment: import.meta.env.VITE_SENTRY_ENVIRONMENT || ENV,
 
     // Performance monitoring
     integrations: [
@@ -28,10 +32,16 @@ export function initializeSentry() {
     ],
 
     // Performance Monitoring
-    tracesSampleRate: ENV === 'production' ? 0.1 : 1.0, // 10% in production, 100% in staging
+    // Beta testing: 100% sampling for better debugging
+    tracesSampleRate: isBeta
+      ? parseFloat(import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE || '1.0')
+      : (ENV === 'production' ? 0.1 : 1.0),
 
     // Session Replay
-    replaysSessionSampleRate: 0.1, // 10% of sessions
+    // Beta testing: Higher replay rate to catch UX issues
+    replaysSessionSampleRate: isBeta
+      ? parseFloat(import.meta.env.VITE_SENTRY_REPLAYS_SESSION_SAMPLE_RATE || '1.0')
+      : 0.1,
     replaysOnErrorSampleRate: 1.0, // 100% when error occurs
 
     // Filter out non-critical errors
@@ -76,7 +86,13 @@ export function initializeSentry() {
     },
   });
 
-  console.log('📊 Sentry: Initialized (' + ENV + ')');
+  // Tag beta testers for filtering
+  if (isBeta) {
+    Sentry.setTag('beta_testing', true);
+    Sentry.setTag('environment_type', 'staging');
+  }
+
+  console.log('📊 Sentry: Initialized (' + ENV + (isBeta ? ' - BETA MODE' : '') + ')');
 }
 
 /**

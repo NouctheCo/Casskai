@@ -145,7 +145,19 @@ const HeroSection = () => {
                 <ArrowRight className="ml-3 w-6 h-6" />
               </Button>
             </motion.div>
-            
+
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                size="lg"
+                onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSeP1H29iZLZ7CgEnJz-Mey9wZDWij0NVZ42EK-mqmbjb5vqzg/viewform', '_blank')}
+                className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-10 py-6 text-lg font-semibold shadow-2xl hover:shadow-3xl transition-all duration-300 rounded-xl"
+              >
+                <Users className="mr-3 w-6 h-6" />
+                {t('landing.hero.cta.beta', 'Devenir beta tester')}
+                <ArrowRight className="ml-3 w-6 h-6" />
+              </Button>
+            </motion.div>
+
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 variant="outline"
@@ -983,7 +995,7 @@ const ContactSection = () => {
             {
               icon: Phone,
               title: t('landing.contact.phone.title', 'Téléphone'),
-              content: '+336 88 89 33 72 (Europe) / +229 01 69 18 76 03 (Afrique)',
+              content: '+33 7 52 02 71 98 (Europe) / +225 74 58 83 83 ou +229 01 69 18 76 03 (Afrique)',
               description: t('landing.contact.phone.description', 'Lun-Ven 9h-18h'),
               color: 'from-green-500 to-green-600'
             },
