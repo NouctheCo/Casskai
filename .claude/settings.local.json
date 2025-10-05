@@ -127,7 +127,10 @@
       "Bash(tee:*)",
       "Bash(cut:*)",
       "Bash(supabase:*)",
-      "Bash(npm show:*)"
+      "Bash(npm show:*)",
+      "Bash(./deploy-staging.sh:*)",
+      "Bash(nslookup:*)",
+      "Bash(host:*)"
     ],
     "deny": []
   }
