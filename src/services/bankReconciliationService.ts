@@ -561,7 +561,7 @@ class BankReconciliationService {
         .insert({
           bank_transaction_id: bankTransactionId,
           accounting_entry_id: accountingEntryId,
-          action: action,
+          action,
           timestamp: new Date().toISOString(),
           user_id: (await supabase.auth.getUser()).data.user?.id
         });

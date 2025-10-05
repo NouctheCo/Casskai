@@ -224,7 +224,7 @@ class CRMExportService {
       'expected_close_date',
       'assigned_to'
     ];
-    content += oppHeaders.join(',') + '\n';
+    content += `${oppHeaders.join(',')  }\n`;
 
     opportunities
       .filter(o => !['won', 'lost'].includes(o.stage))
@@ -234,7 +234,7 @@ class CRMExportService {
           const stringValue = String(value).replace(/"/g, '""');
           return stringValue.includes(',') ? `"${stringValue}"` : stringValue;
         });
-        content += row.join(',') + '\n';
+        content += `${row.join(',')  }\n`;
       });
 
     const filename = `pipeline_report_${this.getDateString()}.csv`;
@@ -327,7 +327,7 @@ class CRMExportService {
   ): void {
     let content = 'CRM DASHBOARD REPORT\n';
     content += `Generated: ${new Date().toLocaleString()}\n`;
-    content += '='.repeat(80) + '\n\n';
+    content += `${'='.repeat(80)  }\n\n`;
 
     // Key metrics
     content += '=== KEY METRICS ===\n';

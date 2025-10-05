@@ -280,7 +280,7 @@ export class ReportExportService {
         )
       ].join('\n');
 
-      const csvBlob = new Blob(['\ufeff' + csvContent], {
+      const csvBlob = new Blob([`\ufeff${  csvContent}`], {
         type: 'text/csv;charset=utf-8'
       });
 

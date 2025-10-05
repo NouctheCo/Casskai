@@ -279,7 +279,7 @@ export class SupabaseReportRepository implements IReportRepository {
       .upsert({
         cache_key: cacheKey,
         report_id: reportId,
-        result: result,
+        result,
         expires_at: expiresAt.toISOString(),
         created_at: new Date().toISOString()
       });

@@ -9,9 +9,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useLocale } from "@/contexts/LocaleContext";
 
 const localeMap = {
-  fr: fr,
+  fr,
   en: enUS,
-  es: es,
+  es,
 };
 
 export function DatePicker({ value, onChange, placeholder, className }) {

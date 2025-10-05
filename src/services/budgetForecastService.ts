@@ -325,7 +325,7 @@ class BudgetForecastService {
       cat.budget_annual.toFixed(2),
       cat.forecast_eoy.toFixed(2),
       cat.variance.toFixed(2),
-      cat.variance_percentage.toFixed(2) + '%'
+      `${cat.variance_percentage.toFixed(2)  }%`
     ]);
 
     const csvContent = [

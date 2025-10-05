@@ -442,7 +442,7 @@ export class EInvoicingService {
         
         await this.updateDocument(documentId, {
           lifecycle_status: 'DRAFT',
-          lifecycle_reason: 'Async submission failed: ' + (error as Error).message
+          lifecycle_reason: `Async submission failed: ${  (error as Error).message}`
         });
       }
     }, 100); // Small delay to return response quickly

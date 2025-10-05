@@ -52,7 +52,7 @@ async function fixModuleAccess() {
     const currentEnterpriseId = localStorage.getItem('casskai_current_enterprise');
     if (!currentEnterpriseId) {
       // Créer un ID d'entreprise fictif pour les tests
-      const testEnterpriseId = 'test-enterprise-' + Date.now();
+      const testEnterpriseId = `test-enterprise-${  Date.now()}`;
       localStorage.setItem('casskai_current_enterprise', testEnterpriseId);
 
       // Créer des données d'entreprise de test

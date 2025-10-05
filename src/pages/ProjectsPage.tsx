@@ -607,10 +607,10 @@ export default function ProjectsPage() {
     activeProjects: activeProjects.length,
     completedProjects: completedProjects.length,
     onHoldProjects: projects.filter(p => p.status === 'on_hold').length,
-    totalRevenue: totalRevenue,
-    totalBudget: totalBudget,
+    totalRevenue,
+    totalBudget,
     totalSpent: projects.reduce((sum, project) => sum + (project.spent || 0), 0),
-    averageProgress: averageProgress,
+    averageProgress,
     profitMargin: totalRevenue > 0 ? ((totalRevenue - projects.reduce((sum, p) => sum + (p.spent || 0), 0)) / totalRevenue) * 100 : 0
   }), [projects, activeProjects, completedProjects, totalRevenue, totalBudget, averageProgress]);
 
@@ -692,7 +692,7 @@ export default function ProjectsPage() {
                 onChange={(e) => setProjectDescription(e.target.value)}
                 className="w-full border rounded-md px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 rows={3}
-                placeholder={t('projectspage.description', { defaultValue: 'Description' }) + ' détaillée du projet'}
+                placeholder={`${t('projectspage.description', { defaultValue: 'Description' })  } détaillée du projet`}
               ></textarea>
             </div>
 

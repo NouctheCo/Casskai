@@ -59,7 +59,7 @@ async function checkFunctions() {
       const { data: companyResult, error: companyError } = await supabase.rpc(
         'create_company_with_setup',
         {
-          company_name_param: 'Test Company ' + Date.now(),
+          company_name_param: `Test Company ${  Date.now()}`,
           user_uuid_param: user.id,
           country_code_param: 'FR',
           currency_code_param: 'EUR',

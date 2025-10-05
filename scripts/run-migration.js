@@ -119,7 +119,7 @@ async function runMigrationAlternative() {
     const migrationPath = path.join(process.cwd(), 'src/database/migrations/add_company_extended_fields.sql');
     const migrationSQL = fs.readFileSync(migrationPath, 'utf8');
     
-    console.log('\n' + '='.repeat(80));
+    console.log(`\n${  '='.repeat(80)}`);
     console.log('CONTENU SQL À COPIER:');
     console.log('='.repeat(80));
     console.log(migrationSQL);

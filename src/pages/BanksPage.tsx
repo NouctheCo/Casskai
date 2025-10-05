@@ -123,8 +123,8 @@ const parseXMLBankFile = (content, file) => {
       transactions.push(createTransactionObject({
         date: formatDate(date),
         description: description.trim(),
-        amount: amount,
-        reference: reference,
+        amount,
+        reference,
         source: `${file.name} (XML)`,
         category: categorizeTransaction(description)
       }));
@@ -166,7 +166,7 @@ const parseCSVBankFile = (content, file) => {
       transactions.push(createTransactionObject({
         date: formatDate(date),
         description: description.trim(),
-        amount: amount,
+        amount,
         reference: reference || `CSV${i.toString().padStart(3, '0')}`,
         source: `${file.name} (CSV)`,
         category: categorizeTransaction(description)
@@ -197,8 +197,8 @@ const parseOFXBankFile = (content, file) => {
         transactions.push(createTransactionObject({
           date: formatDate(date),
           description: description.trim(),
-          amount: amount,
-          reference: reference,
+          amount,
+          reference,
           source: `${file.name} (OFX)`,
           category: categorizeTransaction(description)
         }));
@@ -285,7 +285,7 @@ const analyzeFileHeuristically = (content, file, extension) => {
         
         transactions.push(createTransactionObject({
           date: formatDate(dateMatch[0]),
-          description: description,
+          description,
           amount: potentialAmount,
           reference: `${extension.replace('.', '').toUpperCase()}${index.toString().padStart(3, '0')}`,
           source: `${file.name} (${extension})`,
@@ -335,7 +335,7 @@ const formatDate = (dateString) => {
     } else if (dateString.match(/^\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}/)) {
       // Format DD/MM/YYYY ou MM/DD/YYYY
       const parts = dateString.split(/[\/\-\.]/);
-      if (parts[2].length === 2) parts[2] = '20' + parts[2]; // Convert YY to YYYY
+      if (parts[2].length === 2) parts[2] = `20${  parts[2]}`; // Convert YY to YYYY
       date = new Date(parts[2], parseInt(parts[1]) - 1, parts[0]); // Assume DD/MM/YYYY
     } else {
       date = new Date(dateString);
@@ -696,7 +696,7 @@ const FileImportInterface = ({ onImport }) => {
     if (!file) return;
 
     const allowedTypes = ['.xml', '.csv', '.ofx', '.qif'];
-    const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+    const fileExtension = `.${  file.name.split('.').pop().toLowerCase()}`;
     
     if (!allowedTypes.includes(fileExtension)) {
       toast({

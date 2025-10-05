@@ -100,7 +100,7 @@ export class FECExportService {
           status: 'completed',
           file_url: fileUrl,
           file_size: new Blob([fecContent]).size,
-          checksum: checksum,
+          checksum,
           generated_at: new Date().toISOString()
         })
         .eq('id', exportRecord.id);
@@ -223,7 +223,7 @@ export class FECExportService {
       line.Idevise || ''
     ].join(separator)).join('\n');
 
-    return header + '\n' + content;
+    return `${header  }\n${  content}`;
   }
 
   /**

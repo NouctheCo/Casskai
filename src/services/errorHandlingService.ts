@@ -339,7 +339,7 @@ export class ErrorHandlingService {
           duration: 10000,
           action: {
             label: 'Contacter le support',
-            onClick: () => window.open('mailto:support@casskai.app?subject=Erreur critique&body=' + encodeURIComponent(`ID d'erreur: ${error.code}\nMessage: ${error.technicalMessage}`)),
+            onClick: () => window.open(`mailto:support@casskai.app?subject=Erreur critique&body=${  encodeURIComponent(`ID d'erreur: ${error.code}\nMessage: ${error.technicalMessage}`)}`),
           },
         });
         break;

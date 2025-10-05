@@ -81,7 +81,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
       ]);
 
       // Type-safe record manipulation
-      let recordWithMeta = { ...record } as any;
+      const recordWithMeta = { ...record } as any;
 
       console.log(`🔧 [useSupabase] Creating record for table: ${tableNameString}`, {
         companyId,

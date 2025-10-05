@@ -1940,7 +1940,7 @@ const DocumentationArticlePage = () => {
   // handleLiveChat supprimé - remplacé par WhatsAppChat
 
   const handleContactSupport = () => {
-    window.open('mailto:support@casskai.app?subject=' + encodeURIComponent('Question sur: ' + (article?.title || 'Documentation')));
+    window.open(`mailto:support@casskai.app?subject=${  encodeURIComponent(`Question sur: ${  article?.title || 'Documentation'}`)}`);
     toast({
       title: "Contact support",
       description: "Votre client email va s'ouvrir"

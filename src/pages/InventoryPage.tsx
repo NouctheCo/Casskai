@@ -412,7 +412,7 @@ export default function InventoryPage() {
   // Métriques calculées provenant du hook
   const computedMetrics = useMemo(() => ({
     totalItems: inventoryItems.length,
-    totalValue: totalValue,
+    totalValue,
     lowStockItems: lowStockItems.length,
     outOfStockItems: outOfStockItems.length,
     activeItems: inventoryItems.filter(item => item.status === 'active').length,
@@ -502,7 +502,7 @@ export default function InventoryPage() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={2}
-                placeholder={t('inventorypage.description', { defaultValue: 'Description' }) + ' détaillée de l\'article'}
+                placeholder={`${t('inventorypage.description', { defaultValue: 'Description' })  } détaillée de l'article`}
               />
             </div>
 

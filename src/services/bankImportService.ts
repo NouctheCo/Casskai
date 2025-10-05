@@ -106,7 +106,7 @@ class BankImportService {
         imported_count: saveResult.imported_count,
         skipped_count: saveResult.skipped_count,
         error_count: errors.length,
-        transactions: transactions,
+        transactions,
         errors: errors.length > 0 ? errors : undefined
       };
 
@@ -153,7 +153,7 @@ class BankImportService {
         imported_count: saveResult.imported_count,
         skipped_count: saveResult.skipped_count,
         error_count: 0,
-        transactions: transactions
+        transactions
       };
 
     } catch (error) {
@@ -196,7 +196,7 @@ class BankImportService {
         imported_count: saveResult.imported_count,
         skipped_count: saveResult.skipped_count,
         error_count: 0,
-        transactions: transactions
+        transactions
       };
 
     } catch (error) {
@@ -282,7 +282,7 @@ class BankImportService {
           break;
         case 'P': // Payee/Description
         case 'M': // Memo
-          currentTransaction.description = (currentTransaction.description || '') + ' ' + value;
+          currentTransaction.description = `${currentTransaction.description || ''  } ${  value}`;
           break;
         case 'N': // Number/Reference
           currentTransaction.reference = value;
@@ -428,10 +428,10 @@ class BankImportService {
         bank_account_id: accountId,
         company_id: companyId,
         transaction_date: date,
-        amount: amount,
+        amount,
         currency: 'EUR',
-        description: description,
-        reference: reference,
+        description,
+        reference,
         reconciled: false,
         imported_from: 'csv'
       };

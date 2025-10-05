@@ -594,7 +594,7 @@ export class BudgetService {
     if (budgetData.year < currentYear - 1 || budgetData.year > currentYear + 5) {
       errors.push({
         field: 'year',
-        message: 'L\'année doit être comprise entre ' + (currentYear - 1) + ' et ' + (currentYear + 5),
+        message: `L'année doit être comprise entre ${  currentYear - 1  } et ${  currentYear + 5}`,
         severity: 'error'
       });
     }

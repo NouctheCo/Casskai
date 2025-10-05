@@ -150,7 +150,7 @@ const PaymentFormDialog = ({ open, onClose, onSave }) => {
       type: formData.type,
       status: 'completed',
       description: formData.description,
-      clientId: 'client' + Date.now()
+      clientId: `client${  Date.now()}`
     };
 
     onSave(newPayment);

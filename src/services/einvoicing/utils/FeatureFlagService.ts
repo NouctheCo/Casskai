@@ -391,7 +391,7 @@ export class FeatureFlagService {
         p_actor_type: 'system',
         p_meta_json: {
           feature_name: feature,
-          action: action,
+          action,
           timestamp: new Date().toISOString()
         }
       });

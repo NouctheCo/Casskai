@@ -152,7 +152,7 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: currency
+      currency
     }).format(amount);
   };
 

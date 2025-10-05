@@ -295,13 +295,13 @@ const UserManagementPage = () => {
   const handleInviteSubmit = (e) => {
     e.preventDefault();
     const newInvitation = {
-      id: 'inv-' + Date.now(),
+      id: `inv-${  Date.now()}`,
       ...inviteForm,
       role: roles.find(r => r.id === inviteForm.roleId),
       invitedBy: currentUser?.id,
       companyId: 'comp-1',
       status: 'pending',
-      token: 'token-' + Date.now(),
+      token: `token-${  Date.now()}`,
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       createdAt: new Date().toISOString()
     };

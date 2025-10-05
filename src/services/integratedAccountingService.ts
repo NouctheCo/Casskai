@@ -1,4 +1,4 @@
-/* eslint-disable max-lines */
+ 
 import { FECParser } from './fecParser';
 import { CSVImportService } from './csvImportService';
 import { AccountingValidationService } from './accountingValidationService';

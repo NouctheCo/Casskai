@@ -60,8 +60,8 @@ export class IncomeStatementGenerator extends BaseReportGenerator {
     const netMarginPercent = totalRevenue > 0 ? (data.margins.net_margin / totalRevenue) * 100 : 0;
 
     return {
-      totalRevenue: totalRevenue,
-      totalExpenses: totalExpenses,
+      totalRevenue,
+      totalExpenses,
       netIncome: data.net_income,
       grossMargin: grossMarginPercent,
       keyMetrics: {
