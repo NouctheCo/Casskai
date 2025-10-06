@@ -68,7 +68,7 @@ export function FeedbackWidget({ className }: FeedbackWidgetProps) {
       <Button
         onClick={() => setIsOpen(true)}
         className={cn(
-          'fixed bottom-6 right-6 z-50 rounded-full shadow-lg',
+          'fixed bottom-6 left-1/2 -translate-x-1/2 z-40 rounded-full shadow-lg',
           'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700',
           'text-white font-semibold px-6 py-6',
           'animate-pulse hover:animate-none',
@@ -86,7 +86,7 @@ export function FeedbackWidget({ className }: FeedbackWidgetProps) {
   return (
     <div
       className={cn(
-        'fixed bottom-6 right-6 z-50',
+        'fixed bottom-6 left-1/2 -translate-x-1/2 z-40',
         'bg-white dark:bg-gray-800 rounded-xl shadow-2xl',
         'w-96 max-w-[calc(100vw-3rem)]',
         'border border-gray-200 dark:border-gray-700',

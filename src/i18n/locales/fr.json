@@ -29,7 +29,8 @@
       "description": "CassKai révolutionne la gestion d'entreprise avec une suite complète : comptabilité, facturation, CRM, projets, RH et bien plus. Tout en un, simple et puissant.",
       "cta": {
         "start": "Essai gratuit 30 jours",
-        "demo": "Voir la démo"
+        "demo": "Voir la démo",
+        "beta": "Devenir beta testeur"
       },
       "stats": {
         "companies": "Entreprises",

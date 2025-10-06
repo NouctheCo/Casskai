@@ -14,7 +14,6 @@ import { LoadingFallback } from '@/components/ui/LoadingFallback';
 import ErrorBoundary, { setupGlobalErrorHandling } from '@/components/ErrorBoundary';
 import { UpdateNotification, OfflineIndicator } from '@/hooks/useServiceWorker';
 import { FeedbackWidget } from '@/components/beta/FeedbackWidget';
-import { BetaBanner } from '@/components/beta/BetaBanner';
 import AppRouter from './AppRouter'; // Import the new router
 
 // Initialiser la gestion d'erreurs globale
@@ -58,7 +57,6 @@ function App() {
               <SubscriptionProvider>
                 <ABTestProvider>
                   <BrowserRouter>
-                    <BetaBanner />
                     {isE2EMinimal ? (
                       <EnterpriseProvider>
                         <TooltipProvider>
