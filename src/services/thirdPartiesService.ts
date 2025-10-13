@@ -12,6 +12,7 @@ export type ThirdPartyType = 'customer' | 'supplier' | 'partner' | 'employee';
 export interface CreateThirdPartyData {
   type: ThirdPartyType;
   name: string;
+  company_name?: string;
   legal_name?: string;
   contact_person?: string;
   email?: string;

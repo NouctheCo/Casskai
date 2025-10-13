@@ -18,6 +18,7 @@ export interface ThirdPartyFilters {
 export interface CreateThirdPartyData {
   type: 'customer' | 'supplier' | 'partner' | 'employee';
   name: string;
+  company_name?: string;
   legal_name?: string;
   contact_person?: string;
   email?: string;

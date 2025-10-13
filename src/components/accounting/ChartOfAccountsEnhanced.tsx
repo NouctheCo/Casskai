@@ -81,6 +81,9 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
     refresh
   } = useAccounting(companyId);
 
+  // Type assertion pour les comptes du plan comptable
+  const chartAccounts = accounts as any[];
+
   const [budgetCategories, setBudgetCategories] = useState<BudgetCategory[]>([]);
   const [accountMappings, setAccountMappings] = useState<Map<string, string>>(new Map());
   const [searchTerm, setSearchTerm] = useState('');
@@ -188,7 +191,7 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
 
   // Charger les mappings existants
   useEffect(() => {
-    if (!companyId || !accounts || accounts.length === 0) return;
+    if (!companyId || !chartAccounts || chartAccounts.length === 0) return;
 
     const loadExistingMappings = async () => {
       try {
@@ -210,7 +213,7 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
     };
 
     loadExistingMappings();
-  }, [companyId, accounts]);
+  }, [companyId, chartAccounts]);
 
   // Initialiser le plan comptable standard
   const handleInitializeChart = async () => {
@@ -329,7 +332,7 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
   };
 
   // Filtrer les comptes
-  const filteredAccounts = accounts?.filter(account => {
+  const filteredAccounts = chartAccounts?.filter(account => {
     const matchesSearch = !searchTerm ||
       account.account_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
       account.account_name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -516,7 +519,7 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
         ) : (
           <div className="overflow-x-auto">
             <div className="mb-4 text-sm text-muted-foreground">
-              {filteredAccounts?.length || 0} comptes • {accountMappings.size} mappés sur {accounts.length}
+              {filteredAccounts?.length || 0} comptes • {accountMappings.size} mappés sur {chartAccounts.length}
             </div>
             <Table>
               <TableHeader>

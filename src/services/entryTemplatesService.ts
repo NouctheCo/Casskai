@@ -14,7 +14,7 @@ export class EntryTemplatesService {
       id: 'template_sale_invoice',
       name: 'Facture de vente avec TVA',
       description: 'Template pour facturation client avec TVA 20%',
-      category: 'sales',
+      category: 'sale',
       isRecurring: false,
       isActive: true,
       accounts: [
@@ -46,15 +46,16 @@ export class EntryTemplatesService {
       conditions: [{
         id: 'vat_condition',
         field: 'taxRate',
-        operator: 'equals',
-        value: 20
+        operator: 'eq',
+        value: 20,
+        action: 'include'
       }]
     },
     {
       id: 'template_purchase_invoice',
       name: 'Facture d\'achat avec TVA',
       description: 'Template pour facture fournisseur avec TVA déductible',
-      category: 'purchases',
+      category: 'purchase',
       isRecurring: false,
       isActive: true,
       accounts: [
@@ -86,15 +87,16 @@ export class EntryTemplatesService {
       conditions: [{
         id: 'vat_condition',
         field: 'taxRate',
-        operator: 'equals',
-        value: 20
+        operator: 'eq',
+        value: 20,
+        action: 'include'
       }]
     },
     {
       id: 'template_bank_payment_client',
       name: 'Paiement client par virement',
       description: 'Template pour règlement client par virement bancaire',
-      category: 'payments',
+      category: 'payment',
       isRecurring: false,
       isActive: true,
       accounts: [
@@ -120,7 +122,7 @@ export class EntryTemplatesService {
       id: 'template_bank_payment_supplier',
       name: 'Paiement fournisseur par virement',
       description: 'Template pour règlement fournisseur par virement bancaire',
-      category: 'payments',
+      category: 'payment',
       isRecurring: false,
       isActive: true,
       accounts: [
@@ -146,7 +148,7 @@ export class EntryTemplatesService {
       id: 'template_cash_receipt',
       name: 'Encaissement espèces',
       description: 'Template pour encaissement en espèces',
-      category: 'payments',
+      category: 'payment',
       isRecurring: false,
       isActive: true,
       accounts: [
@@ -172,7 +174,7 @@ export class EntryTemplatesService {
       id: 'template_cash_payment',
       name: 'Décaissement espèces',
       description: 'Template pour décaissement en espèces',
-      category: 'payments',
+      category: 'payment',
       isRecurring: false,
       isActive: true,
       accounts: [
@@ -198,7 +200,7 @@ export class EntryTemplatesService {
       id: 'template_salary_expense',
       name: 'Charges de personnel',
       description: 'Template pour les charges de personnel',
-      category: 'payroll',
+      category: 'other',
       isRecurring: true,
       isActive: true,
       accounts: [
@@ -240,7 +242,7 @@ export class EntryTemplatesService {
       id: 'template_inventory_in',
       name: 'Entrée en stock',
       description: 'Template pour les entrées en stock',
-      category: 'inventory',
+      category: 'other',
       isRecurring: false,
       isActive: true,
       accounts: [
@@ -274,7 +276,7 @@ export class EntryTemplatesService {
       id: 'template_inventory_out',
       name: 'Sortie de stock',
       description: 'Template pour les sorties de stock',
-      category: 'inventory',
+      category: 'other',
       isRecurring: false,
       isActive: true,
       accounts: [
@@ -300,7 +302,7 @@ export class EntryTemplatesService {
       id: 'template_depreciation',
       name: 'Dotation aux amortissements',
       description: 'Template pour les dotations aux amortissements',
-      category: 'adjustments',
+      category: 'other',
       isRecurring: true,
       isActive: true,
       accounts: [
@@ -326,7 +328,7 @@ export class EntryTemplatesService {
       id: 'template_tax_payment',
       name: 'Paiement TVA',
       description: 'Template pour le paiement de la TVA',
-      category: 'tax',
+      category: 'other',
       isRecurring: true,
       isActive: true,
       accounts: [
@@ -405,9 +407,9 @@ export class EntryTemplatesService {
       companyId,
       journalId,
       entryNumber: await this.generateEntryNumber(companyId, journalId),
-      date: variables.date || new Date().toISOString(),
+      date: (variables.date as string) || new Date().toISOString(),
       description: this.interpolateString(template.description, variables),
-      reference: variables.reference || '',
+      reference: (variables.reference as string) || '',
       status: 'draft',
       items,
     };

@@ -144,6 +144,8 @@ export interface TrialBalanceLine {
   account_type: string;
   debit: number;
   credit: number;
+  debit_total?: number;
+  credit_total?: number;
   balance: number;
 }
 

@@ -1,9 +1,21 @@
 // Dashboard Page pour CassKai - Version Enterprise
-import React from 'react';
+import React, { Suspense } from 'react';
 import { useEnterprise } from '@/contexts/EnterpriseContext';
-import { EnterpriseDashboard } from '@/components/dashboard/EnterpriseDashboard';
 import { DashboardErrorBoundary } from '@/components/dashboard/DashboardErrorBoundary';
-import { Building } from 'lucide-react';
+import { Building, Loader2 } from 'lucide-react';
+
+// Lazy load the heavy dashboard component
+const EnterpriseDashboard = React.lazy(() => import('@/components/dashboard/EnterpriseDashboard').then(module => ({ default: module.EnterpriseDashboard })));
+
+// Loading component for dashboard
+const DashboardLoader: React.FC = () => (
+  <div className="flex items-center justify-center min-h-96">
+    <div className="flex flex-col items-center space-y-4">
+      <Loader2 className="w-12 h-12 animate-spin text-blue-500" />
+      <p className="text-lg text-gray-600 dark:text-gray-400">Chargement du tableau de bord...</p>
+    </div>
+  </div>
+);
 
 const DashboardPage = () => {
   const { currentEnterprise } = useEnterprise();
@@ -40,7 +52,9 @@ const DashboardPage = () => {
   return (
     <>
       <DashboardErrorBoundary>
-        <EnterpriseDashboard />
+        <Suspense fallback={<DashboardLoader />}>
+          <EnterpriseDashboard />
+        </Suspense>
       </DashboardErrorBoundary>
     </>
   );

@@ -38,6 +38,29 @@ export interface Account {
   description?: string;
 }
 
+// Interface pour les plans comptables
+export interface AccountPlan {
+  standard: AccountingStandard;
+  country: string;
+  classes: AccountPlanClass[];
+}
+
+export interface AccountPlanClass {
+  number: string;
+  name: string;
+  type: string;
+  accounts: AccountPlanAccount[];
+}
+
+export interface AccountPlanAccount {
+  number: string;
+  name: string;
+  type: string;
+  isDebitNormal: boolean;
+  isActive?: boolean;
+  subAccounts?: AccountPlanAccount[];
+}
+
 // Interface pour les écritures comptables
 export interface JournalEntry {
   id: string;

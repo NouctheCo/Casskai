@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,6 @@ import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { journalEntriesService } from '@/services/journalEntriesService';
-import JournalEntryForm from './JournalEntryForm';
 import type { JournalEntryFormInitialValues } from '@/types/journalEntries.types';
 import {
   Plus,
@@ -28,6 +27,19 @@ import {
   RefreshCw,
   Loader2
 } from 'lucide-react';
+
+// Lazy load the heavy form component
+const JournalEntryForm = React.lazy(() => import('./JournalEntryForm'));
+
+// Loading component for form
+const FormLoader: React.FC = () => (
+  <div className="flex items-center justify-center h-64">
+    <div className="flex flex-col items-center space-y-4">
+      <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+      <p className="text-sm text-gray-600 dark:text-gray-400">Chargement du formulaire...</p>
+    </div>
+  </div>
+);
 
 // Entry Preview Dialog Component
 const EntryPreviewDialog = ({ open, onClose, entry }) => {
@@ -410,14 +422,16 @@ export default function OptimizedJournalEntriesTab({ shouldCreateNew = false, on
           }
         }}>
           <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-            <JournalEntryForm
-              initialData={editingEntry || undefined}
-              onSubmit={handleSaveEntry}
-              onCancel={() => {
-                setShowEntryForm(false);
-                setEditingEntry(null);
-              }}
-            />
+            <Suspense fallback={<FormLoader />}>
+              <JournalEntryForm
+                initialData={editingEntry || undefined}
+                onSubmit={handleSaveEntry}
+                onCancel={() => {
+                  setShowEntryForm(false);
+                  setEditingEntry(null);
+                }}
+              />
+            </Suspense>
           </DialogContent>
         </Dialog>
       </>
@@ -566,22 +580,24 @@ export default function OptimizedJournalEntriesTab({ shouldCreateNew = false, on
         }
       }}>
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-          <JournalEntryForm
-            initialData={editingEntry || undefined}
-            onSubmit={async (values) => {
-              await handleSaveEntry(values);
-              if (shouldCreateNew && onCreateNewCompleted) {
-                onCreateNewCompleted();
-              }
-            }}
-            onCancel={() => {
-              setShowEntryForm(false);
-              setEditingEntry(null);
-              if (shouldCreateNew && onCreateNewCompleted) {
-                onCreateNewCompleted();
-              }
-            }}
-          />
+          <Suspense fallback={<FormLoader />}>
+            <JournalEntryForm
+              initialData={editingEntry || undefined}
+              onSubmit={async (values) => {
+                await handleSaveEntry(values);
+                if (shouldCreateNew && onCreateNewCompleted) {
+                  onCreateNewCompleted();
+                }
+              }}
+              onCancel={() => {
+                setShowEntryForm(false);
+                setEditingEntry(null);
+                if (shouldCreateNew && onCreateNewCompleted) {
+                  onCreateNewCompleted();
+                }
+              }}
+            />
+          </Suspense>
         </DialogContent>
       </Dialog>
 

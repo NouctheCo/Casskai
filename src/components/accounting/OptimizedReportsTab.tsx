@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -46,14 +46,18 @@ import {
   Users,
   Archive,
   Target,
-  Zap
+  Zap,
+  Loader2
 } from 'lucide-react';
 import { reportsService } from '@/services/reportsService';
 import { reportStorageService } from '@/services/reportStorageService';
-import { PDFGenerator, ExcelGenerator } from '@/utils/reportGeneration';
 import type { FinancialReport } from '@/types/reports.types';
 import { useAuth } from '@/contexts/AuthContext';
 import EmptyReportState from './EmptyReportState';
+
+// State for lazy loaded modules
+const [reportConfig, setReportConfig] = useState<any>(null);
+const [reportGenerators, setReportGenerators] = useState<any>(null);
 
 export default function OptimizedReportsTab() {
   const { showToast } = useToast();
@@ -74,6 +78,29 @@ export default function OptimizedReportsTab() {
   const userCanGenerate = true; // TODO: remplacer par vrai contrôle
   const userCanView = true;
   const userCanDownload = true;
+
+  // State for lazy loaded modules
+  const [reportConfig, setReportConfig] = useState<any>(null);
+  const [reportGenerators, setReportGenerators] = useState<any>(null);
+
+  // Load report configuration and generators lazily
+  useEffect(() => {
+    const loadModules = async () => {
+      try {
+        const [configModule, generatorsModule] = await Promise.all([
+          import('../../utils/professionalReports'),
+          import('../../utils/reportGenerators')
+        ]);
+        setReportConfig(configModule.professionalReports);
+        setReportGenerators(generatorsModule);
+      } catch (error) {
+        console.error('Failed to load report modules:', error);
+        showToast('Erreur de chargement: Impossible de charger les modules de rapports', 'error');
+      }
+    };
+
+    loadModules();
+  }, [showToast]);
 
   // Définition des rapports financiers professionnels avec leurs icônes et couleurs
   const professionalReports = [
@@ -429,7 +456,7 @@ export default function OptimizedReportsTab() {
 
           if (exportFormat === 'excel') {
             const excelConfig: ExcelReportConfig = reportConfig;
-            const blob = await ExcelGenerator.generateBalanceSheet(result.data as BalanceSheetData, excelConfig);
+            const blob = await reportGenerators.ExcelGenerator.generateBalanceSheet(result.data as BalanceSheetData, excelConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.xlsx`;
 
             // Upload to storage
@@ -448,10 +475,10 @@ export default function OptimizedReportsTab() {
             }
 
             // Download locally
-            ExcelGenerator.downloadBlob(blob, filename);
+            reportGenerators.ExcelGenerator.downloadBlob(blob, filename);
           } else {
             const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
-            const pdf = PDFGenerator.generateBalanceSheet(result.data as BalanceSheetData, pdfConfig);
+            const pdf = reportGenerators.PDFGenerator.generateBalanceSheet(result.data as BalanceSheetData, pdfConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.pdf`;
 
             // Upload to storage
@@ -487,7 +514,7 @@ export default function OptimizedReportsTab() {
 
           if (exportFormat === 'excel') {
             const excelConfig: ExcelReportConfig = reportConfig;
-            const blob = await ExcelGenerator.generateIncomeStatement(result.data as IncomeStatementData, excelConfig);
+            const blob = await reportGenerators.ExcelGenerator.generateIncomeStatement(result.data as IncomeStatementData, excelConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.xlsx`;
 
             // Upload to storage
@@ -501,10 +528,10 @@ export default function OptimizedReportsTab() {
               periodEnd: periodDates.end
             });
 
-            ExcelGenerator.downloadBlob(blob, filename);
+            reportGenerators.ExcelGenerator.downloadBlob(blob, filename);
           } else {
             const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
-            const pdf = PDFGenerator.generateIncomeStatement(result.data as IncomeStatementData, pdfConfig);
+            const pdf = reportGenerators.PDFGenerator.generateIncomeStatement(result.data as IncomeStatementData, pdfConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.pdf`;
 
             // Upload to storage
@@ -535,7 +562,7 @@ export default function OptimizedReportsTab() {
 
           if (exportFormat === 'excel') {
             const excelConfig: ExcelReportConfig = reportConfig;
-            const blob = await ExcelGenerator.generateTrialBalance(result.data as TrialBalanceData, excelConfig);
+            const blob = await reportGenerators.ExcelGenerator.generateTrialBalance(result.data as TrialBalanceData, excelConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.xlsx`;
 
             // Upload to storage
@@ -549,10 +576,10 @@ export default function OptimizedReportsTab() {
               periodEnd: periodDates.end
             });
 
-            ExcelGenerator.downloadBlob(blob, filename);
+            reportGenerators.ExcelGenerator.downloadBlob(blob, filename);
           } else {
             const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
-            const pdf = PDFGenerator.generateTrialBalance(result.data as TrialBalanceData, pdfConfig);
+            const pdf = reportGenerators.PDFGenerator.generateTrialBalance(result.data as TrialBalanceData, pdfConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.pdf`;
 
             // Upload to storage
@@ -583,7 +610,7 @@ export default function OptimizedReportsTab() {
 
           if (exportFormat === 'excel') {
             const excelConfig: ExcelReportConfig = reportConfig;
-            const blob = await ExcelGenerator.generateGeneralLedger(result.data as GeneralLedgerData, excelConfig);
+            const blob = await reportGenerators.ExcelGenerator.generateGeneralLedger(result.data as GeneralLedgerData, excelConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.xlsx`;
 
             // Upload to storage
@@ -597,10 +624,10 @@ export default function OptimizedReportsTab() {
               periodEnd: periodDates.end
             });
 
-            ExcelGenerator.downloadBlob(blob, filename);
+            reportGenerators.ExcelGenerator.downloadBlob(blob, filename);
           } else {
             const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
-            const pdf = PDFGenerator.generateGeneralLedger(result.data as GeneralLedgerData, pdfConfig);
+            const pdf = reportGenerators.PDFGenerator.generateGeneralLedger(result.data as GeneralLedgerData, pdfConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.pdf`;
 
             // Upload to storage
@@ -632,7 +659,7 @@ export default function OptimizedReportsTab() {
 
           if (exportFormat === 'excel') {
             const excelConfig: ExcelReportConfig = reportConfig;
-            const blob = await ExcelGenerator.generateCashFlowStatement(result.data as CashFlowData, excelConfig);
+            const blob = await reportGenerators.ExcelGenerator.generateCashFlowStatement(result.data as CashFlowData, excelConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.xlsx`;
 
             await reportStorageService.uploadReport({
@@ -645,10 +672,10 @@ export default function OptimizedReportsTab() {
               periodEnd: periodDates.end
             });
 
-            ExcelGenerator.downloadBlob(blob, filename);
+            reportGenerators.ExcelGenerator.downloadBlob(blob, filename);
           } else {
             const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
-            const pdf = PDFGenerator.generateCashFlowStatement(result.data as CashFlowData, pdfConfig);
+            const pdf = reportGenerators.PDFGenerator.generateCashFlowStatement(result.data as CashFlowData, pdfConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.pdf`;
 
             await reportStorageService.uploadReport({
@@ -678,7 +705,7 @@ export default function OptimizedReportsTab() {
 
           if (exportFormat === 'excel') {
             const excelConfig: ExcelReportConfig = reportConfig;
-            const blob = await ExcelGenerator.generateAgedReceivables(result.data as AgedReceivablesData, excelConfig);
+            const blob = await reportGenerators.ExcelGenerator.generateAgedReceivables(result.data as AgedReceivablesData, excelConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.xlsx`;
 
             await reportStorageService.uploadReport({
@@ -691,10 +718,10 @@ export default function OptimizedReportsTab() {
               periodEnd: periodDates.end
             });
 
-            ExcelGenerator.downloadBlob(blob, filename);
+            reportGenerators.ExcelGenerator.downloadBlob(blob, filename);
           } else {
             const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
-            const pdf = PDFGenerator.generateAgedReceivables(result.data as AgedReceivablesData, pdfConfig);
+            const pdf = reportGenerators.PDFGenerator.generateAgedReceivables(result.data as AgedReceivablesData, pdfConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.pdf`;
 
             await reportStorageService.uploadReport({
@@ -724,7 +751,7 @@ export default function OptimizedReportsTab() {
 
           if (exportFormat === 'excel') {
             const excelConfig: ExcelReportConfig = reportConfig;
-            const blob = await ExcelGenerator.generateAgedPayables(result.data as AgedPayablesData, excelConfig);
+            const blob = await reportGenerators.ExcelGenerator.generateAgedPayables(result.data as AgedPayablesData, excelConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.xlsx`;
 
             await reportStorageService.uploadReport({
@@ -737,10 +764,10 @@ export default function OptimizedReportsTab() {
               periodEnd: periodDates.end
             });
 
-            ExcelGenerator.downloadBlob(blob, filename);
+            reportGenerators.ExcelGenerator.downloadBlob(blob, filename);
           } else {
             const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
-            const pdf = PDFGenerator.generateAgedPayables(result.data as AgedPayablesData, pdfConfig);
+            const pdf = reportGenerators.PDFGenerator.generateAgedPayables(result.data as AgedPayablesData, pdfConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.pdf`;
 
             await reportStorageService.uploadReport({
@@ -764,7 +791,7 @@ export default function OptimizedReportsTab() {
 
           if (exportFormat === 'excel') {
             const excelConfig: ExcelReportConfig = reportConfig;
-            const blob = await ExcelGenerator.generateFinancialRatios(result.data as FinancialRatiosData, excelConfig);
+            const blob = await reportGenerators.ExcelGenerator.generateFinancialRatios(result.data as FinancialRatiosData, excelConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.xlsx`;
 
             await reportStorageService.uploadReport({
@@ -777,10 +804,10 @@ export default function OptimizedReportsTab() {
               periodEnd: periodDates.end
             });
 
-            ExcelGenerator.downloadBlob(blob, filename);
+            reportGenerators.ExcelGenerator.downloadBlob(blob, filename);
           } else {
             const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
-            const pdf = PDFGenerator.generateFinancialRatios(result.data as FinancialRatiosData, pdfConfig);
+            const pdf = reportGenerators.PDFGenerator.generateFinancialRatios(result.data as FinancialRatiosData, pdfConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.pdf`;
 
             await reportStorageService.uploadReport({
@@ -804,7 +831,7 @@ export default function OptimizedReportsTab() {
 
           if (exportFormat === 'excel') {
             const excelConfig: ExcelReportConfig = reportConfig;
-            const blob = await ExcelGenerator.generateVATReport(result.data as TaxDeclarationVAT, excelConfig);
+            const blob = await reportGenerators.ExcelGenerator.generateVATReport(result.data as TaxDeclarationVAT, excelConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.xlsx`;
 
             await reportStorageService.uploadReport({
@@ -817,10 +844,10 @@ export default function OptimizedReportsTab() {
               periodEnd: periodDates.end
             });
 
-            ExcelGenerator.downloadBlob(blob, filename);
+            reportGenerators.ExcelGenerator.downloadBlob(blob, filename);
           } else {
             const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
-            const pdf = PDFGenerator.generateVATReport(result.data as TaxDeclarationVAT, pdfConfig);
+            const pdf = reportGenerators.PDFGenerator.generateVATReport(result.data as TaxDeclarationVAT, pdfConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.pdf`;
 
             await reportStorageService.uploadReport({
@@ -844,7 +871,7 @@ export default function OptimizedReportsTab() {
 
           if (exportFormat === 'excel') {
             const excelConfig: ExcelReportConfig = reportConfig;
-            const blob = await ExcelGenerator.generateBudgetVariance(result.data as BudgetVarianceData, excelConfig);
+            const blob = await reportGenerators.ExcelGenerator.generateBudgetVariance(result.data as BudgetVarianceData, excelConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.xlsx`;
 
             await reportStorageService.uploadReport({
@@ -857,10 +884,10 @@ export default function OptimizedReportsTab() {
               periodEnd: periodDates.end
             });
 
-            ExcelGenerator.downloadBlob(blob, filename);
+            reportGenerators.ExcelGenerator.downloadBlob(blob, filename);
           } else {
             const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
-            const pdf = PDFGenerator.generateBudgetVariance(result.data as BudgetVarianceData, pdfConfig);
+            const pdf = reportGenerators.PDFGenerator.generateBudgetVariance(result.data as BudgetVarianceData, pdfConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.pdf`;
 
             await reportStorageService.uploadReport({
@@ -884,7 +911,7 @@ export default function OptimizedReportsTab() {
 
           if (exportFormat === 'excel') {
             const excelConfig: ExcelReportConfig = reportConfig;
-            const blob = await ExcelGenerator.generateKPIDashboard(result.data as KPIDashboardData, excelConfig);
+            const blob = await reportGenerators.ExcelGenerator.generateKPIDashboard(result.data as KPIDashboardData, excelConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.xlsx`;
 
             await reportStorageService.uploadReport({
@@ -897,10 +924,10 @@ export default function OptimizedReportsTab() {
               periodEnd: periodDates.end
             });
 
-            ExcelGenerator.downloadBlob(blob, filename);
+            reportGenerators.ExcelGenerator.downloadBlob(blob, filename);
           } else {
             const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
-            const pdf = PDFGenerator.generateKPIDashboard(result.data as KPIDashboardData, pdfConfig);
+            const pdf = reportGenerators.PDFGenerator.generateKPIDashboard(result.data as KPIDashboardData, pdfConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.pdf`;
 
             await reportStorageService.uploadReport({
@@ -925,7 +952,7 @@ export default function OptimizedReportsTab() {
 
           if (exportFormat === 'excel') {
             const excelConfig: ExcelReportConfig = reportConfig;
-            const blob = await ExcelGenerator.generateTaxSummary(result.data as TaxSummaryData, excelConfig);
+            const blob = await reportGenerators.ExcelGenerator.generateTaxSummary(result.data as TaxSummaryData, excelConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${fiscalYear}.xlsx`;
 
             await reportStorageService.uploadReport({
@@ -938,10 +965,10 @@ export default function OptimizedReportsTab() {
               periodEnd: `${fiscalYear}-12-31`
             });
 
-            ExcelGenerator.downloadBlob(blob, filename);
+            reportGenerators.ExcelGenerator.downloadBlob(blob, filename);
           } else {
             const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
-            const pdf = PDFGenerator.generateTaxSummary(result.data as TaxSummaryData, pdfConfig);
+            const pdf = reportGenerators.PDFGenerator.generateTaxSummary(result.data as TaxSummaryData, pdfConfig);
             const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${fiscalYear}.pdf`;
 
             await reportStorageService.uploadReport({

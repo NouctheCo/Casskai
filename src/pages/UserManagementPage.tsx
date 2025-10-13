@@ -269,6 +269,7 @@ const UserManagementPage = () => {
     setActivities(mockActivities);
     setLoading(false);
   };
+  */
 
   // Filter functions
   const filteredUsers = users.filter(user => {

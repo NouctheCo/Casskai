@@ -45,12 +45,12 @@ const DEFAULT_LINE: JournalEntryLineForm = {
   currency: DEFAULT_CURRENCY,
 };
 
-const ensureMinimumLines = (items: JournalEntryLineForm[]): JournalEntryLineForm[] => {
-  if (items.length >= 2) {
-    return items;
+const ensureMinimumLines = (lines: JournalEntryLineForm[]): JournalEntryLineForm[] => {
+  if (lines.length >= 2) {
+    return lines;
   }
-  const missing = 2 - items.length;
-  return [...items, ...Array.from({ length: missing }, () => ({ ...DEFAULT_LINE }))];
+  const missing = 2 - lines.length;
+  return [...lines, ...Array.from({ length: missing }, () => ({ ...DEFAULT_LINE }))];
 };
 
 const coerceNumber = (value: unknown): number => {
@@ -73,7 +73,7 @@ const mapInitialData = (initialData?: JournalEntryFormInitialValues): JournalEnt
     ? initialData.entryDate
     : new Date(initialData.entryDate ?? new Date());
 
-  const items = ensureMinimumLines(
+  const lines = ensureMinimumLines(
     initialData.items?.map((item) => ({
       accountId: item.accountId,
       debitAmount: coerceNumber(item.debitAmount),
@@ -88,7 +88,7 @@ const mapInitialData = (initialData?: JournalEntryFormInitialValues): JournalEnt
     description: initialData.description ?? '',
     referenceNumber: initialData.referenceNumber ?? '',
     journalId: initialData.journalId ?? '',
-    items,
+    items: lines,
   };
 };
 
@@ -108,8 +108,8 @@ const createSchema = (t: ReturnType<typeof useLocale>['t']) => {
     journalId: z.string({ required_error: t('fieldRequired') }).uuid(t('fieldRequired')),
     items: z
       .array(lineSchema)
-      .min(2, t('journal_entries.items_min_required', {
-        defaultValue: 'At least two items are required for a valid journal entry',
+      .min(2, t('journal_entries.lines_min_required', {
+        defaultValue: 'At least two lines are required for a valid journal entry',
       })),
   });
 };
@@ -156,10 +156,10 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
   const { control, handleSubmit, reset, watch, setValue } = form;
   const { fields, append, remove, replace } = useFieldArray({ control, name: 'items' });
 
-  const watchedItems = watch('items') ?? [];
+  const watchedLines = watch('items') ?? [];
 
   const totals = useMemo(() => {
-    return watchedItems.reduce(
+    return watchedLines.reduce(
       (acc, line) => {
         acc.debit += coerceNumber(line.debitAmount);
         acc.credit += coerceNumber(line.creditAmount);
@@ -167,7 +167,7 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
       },
       { debit: 0, credit: 0 },
     );
-  }, [watchedItems]);
+  }, [watchedLines]);
 
   const isBalanced = Math.abs(totals.debit - totals.credit) < BALANCE_TOLERANCE;
 
@@ -535,7 +535,7 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
               </thead>
               <tbody>
                 {fields.map((fieldItem, index) => {
-                  const item = watchedItems[index] ?? DEFAULT_LINE;
+                  const item = watchedLines[index] ?? DEFAULT_LINE;
                   return (
                     <tr className="border-b" key={fieldItem.id}>
                       <td className="py-2 pr-2 align-top">
@@ -634,7 +634,7 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
           </Button>
           <Button
             type="submit"
-            disabled={submitting || !isBalanced || watchedItems.some((item) => !(item?.accountId))}
+            disabled={submitting || !isBalanced || watchedLines.some((item) => !(item?.accountId))}
           >
             {submitting ? (
               <>

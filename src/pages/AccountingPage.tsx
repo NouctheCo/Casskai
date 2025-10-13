@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,14 +24,26 @@ import {
   RefreshCw,
   Download,
   AlertCircle,
+  Loader2,
   type LucideIcon
 } from 'lucide-react';
-import OptimizedJournalEntriesTab from '@/components/accounting/OptimizedJournalEntriesTab';
-import ChartOfAccountsEnhanced from '@/components/accounting/ChartOfAccountsEnhanced';
-import OptimizedJournalsTab from '@/components/accounting/OptimizedJournalsTab';
-import OptimizedReportsTab from '@/components/accounting/OptimizedReportsTab';
-import JournalDistribution from '@/components/accounting/JournalDistribution';
-import { calculateTrend, getPreviousPeriodDates } from '@/utils/trendCalculations';
+
+// Lazy load heavy accounting components
+const OptimizedJournalEntriesTab = React.lazy(() => import('@/components/accounting/OptimizedJournalEntriesTab'));
+const ChartOfAccountsEnhanced = React.lazy(() => import('@/components/accounting/ChartOfAccountsEnhanced'));
+const OptimizedJournalsTab = React.lazy(() => import('@/components/accounting/OptimizedJournalsTab'));
+const OptimizedReportsTab = React.lazy(() => import('@/components/accounting/OptimizedReportsTab'));
+const JournalDistribution = React.lazy(() => import('@/components/accounting/JournalDistribution'));
+
+// Loading component for lazy-loaded components
+const AccountingTabLoader: React.FC = () => (
+  <div className="flex items-center justify-center h-64">
+    <div className="flex flex-col items-center space-y-4">
+      <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+      <p className="text-sm text-gray-600 dark:text-gray-400">Chargement du module comptable...</p>
+    </div>
+  </div>
+);
 
 // Types
 interface AccountingKPICardProps {
@@ -264,6 +276,9 @@ export default function AccountingPageOptimized() {
       try {
         setIsLoading(true);
         setError(null);
+
+        // Dynamic import of trend calculations
+        const { calculateTrend, getPreviousPeriodDates } = await import('@/utils/trendCalculations');
 
         // Récupérer les données comptables réelles
         const { data: user } = await supabase.auth.getUser();
@@ -645,26 +660,36 @@ export default function AccountingPageOptimized() {
             onExportData={handleExportData}
           />
           
-          <JournalDistribution />
+          <Suspense fallback={<AccountingTabLoader />}>
+            <JournalDistribution />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="entries">
-          <OptimizedJournalEntriesTab 
-            shouldCreateNew={shouldCreateNew === 'entry'}
-            onCreateNewCompleted={() => setShouldCreateNew(null)}
-          />
+          <Suspense fallback={<AccountingTabLoader />}>
+            <OptimizedJournalEntriesTab 
+              shouldCreateNew={shouldCreateNew === 'entry'}
+              onCreateNewCompleted={() => setShouldCreateNew(null)}
+            />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="accounts">
-          <ChartOfAccountsEnhanced />
+          <Suspense fallback={<AccountingTabLoader />}>
+            <ChartOfAccountsEnhanced />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="journals">
-          <OptimizedJournalsTab />
+          <Suspense fallback={<AccountingTabLoader />}>
+            <OptimizedJournalsTab />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="reports">
-          <OptimizedReportsTab />
+          <Suspense fallback={<AccountingTabLoader />}>
+            <OptimizedReportsTab />
+          </Suspense>
         </TabsContent>
       </Tabs>
     </motion.div>

@@ -122,6 +122,7 @@ export interface EntryTemplate {
   description: string;
   category: 'sale' | 'purchase' | 'payment' | 'bank' | 'other';
   isRecurring: boolean;
+  isActive?: boolean;
   frequency?: 'monthly' | 'quarterly' | 'yearly';
   accounts: TemplateAccount[];
   vatRules?: VATRule[];
@@ -151,6 +152,7 @@ export interface VATRule {
 }
 
 export interface TemplateCondition {
+  id?: string;
   field: string;
   operator: 'eq' | 'ne' | 'gt' | 'lt' | 'gte' | 'lte' | 'contains';
   value: unknown;

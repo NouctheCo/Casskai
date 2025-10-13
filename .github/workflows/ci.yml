@@ -34,6 +34,20 @@ jobs:
       - name: Run TypeScript type check
         run: npm run type-check
 
+      - name: Verify report generators integration
+        run: node test_generators_simple.cjs
+
+      - name: Check TypeScript error regression
+        run: |
+          ERROR_COUNT=$(npm run type-check 2>&1 | grep -c "error TS" || true)
+          echo "TypeScript errors found: $ERROR_COUNT"
+          if [ $ERROR_COUNT -gt 80 ]; then
+            echo "❌ Too many TypeScript errors ($ERROR_COUNT > 80)"
+            exit 1
+          else
+            echo "✅ TypeScript errors within limit ($ERROR_COUNT)"
+          fi
+
   # Job 2: Unit Tests
   test:
     name: Unit Tests
@@ -54,6 +68,17 @@ jobs:
 
       - name: Run tests with coverage
         run: npm run test:coverage
+
+      - name: Check test coverage threshold
+        run: |
+          COVERAGE=$(node -p "JSON.parse(require('fs').readFileSync('./coverage/coverage-summary.json', 'utf8')).total.lines.pct")
+          echo "Test coverage: ${COVERAGE}%"
+          if (( $(echo "$COVERAGE < 40" | bc -l) )); then
+            echo "❌ Test coverage too low (${COVERAGE}% < 40%)"
+            exit 1
+          else
+            echo "✅ Test coverage OK (${COVERAGE}%)"
+          fi
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
@@ -90,8 +115,8 @@ jobs:
         run: |
           BUNDLE_SIZE=$(du -sm dist | cut -f1)
           echo "Bundle size: ${BUNDLE_SIZE}MB"
-          if [ $BUNDLE_SIZE -gt 15 ]; then
-            echo "❌ Bundle size too large (${BUNDLE_SIZE}MB > 15MB)"
+          if [ $BUNDLE_SIZE -gt 1 ]; then
+            echo "❌ Bundle size too large (${BUNDLE_SIZE}MB > 800KB target)"
             exit 1
           else
             echo "✅ Bundle size OK (${BUNDLE_SIZE}MB)"

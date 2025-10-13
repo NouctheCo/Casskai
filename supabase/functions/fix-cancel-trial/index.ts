@@ -7,7 +7,12 @@ const corsHeaders = {
 }
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || 'https://smtdtgrymuzwvctattmx.supabase.co'
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtdGR0Z3J5bXV6d3ZjdGF0dG14Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDU3NjAyMywiZXhwIjoyMDcwMTUyMDIzfQ.7SefKj_zSbmaYNbrai9sKeGqcPZtcaXENdA4bNrXa5I'
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+
+if (!supabaseServiceKey) {
+  throw new Error('SUPABASE_SERVICE_ROLE_KEY environment variable is required')
+}
+
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 serve(async (req) => {

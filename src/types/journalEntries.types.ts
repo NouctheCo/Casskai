@@ -23,14 +23,14 @@ export interface JournalEntryLineForm {
 
 // Interface pour le formulaire d'écriture complète
 export interface JournalEntryFormValues {
-  entryDate: string;
+  entryDate: Date;
   description: string;
   referenceNumber?: string;
   journalId: string;
   journalCode?: string;
   journalName?: string;
   status?: JournalEntryStatus;
-  lines: JournalEntryLineForm[];
+  items: JournalEntryLineForm[];
 }
 
 // Valeurs initiales pour le formulaire
@@ -51,7 +51,7 @@ export interface JournalEntryPayload {
   journalId?: string | null;
   status?: JournalEntryStatus;
   entryNumber?: string | null;
-  lines: JournalEntryLineForm[];
+  items: JournalEntryLineForm[];
 }
 
 // Types simplifiés pour les listes

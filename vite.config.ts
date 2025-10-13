@@ -108,8 +108,130 @@ export default defineConfig(({ mode }) => ({
 		rollupOptions: {
 			// Enhanced output configuration
 			output: {
-				// DISABLED manual chunking - let Vite handle it automatically to avoid React splitting issues
-				// manualChunks: undefined,
+				// ENABLE manual chunking for better bundle splitting
+				manualChunks: (id) => {
+					// React and core libraries
+					if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+						return 'react-vendor';
+					}
+					
+					// UI libraries
+					if (id.includes('node_modules/@radix-ui') || 
+						id.includes('node_modules/lucide-react') ||
+						id.includes('node_modules/framer-motion')) {
+						return 'ui-vendor';
+					}
+					
+					// Charts and data visualization
+					if (id.includes('node_modules/recharts') || 
+						id.includes('node_modules/d3')) {
+						return 'charts-vendor';
+					}
+					
+					// Supabase
+					if (id.includes('node_modules/@supabase')) {
+						return 'supabase-vendor';
+					}
+					
+					// PDF and Excel generation (heavy libraries)
+					if (id.includes('node_modules/jspdf') ||
+						id.includes('node_modules/xlsx') ||
+						id.includes('node_modules/html2canvas')) {
+						return 'reports-vendor';
+					}
+					
+					// Large application chunks
+					if (id.includes('src/pages/AccountingPage') || 
+						id.includes('src/components/accounting')) {
+						return 'accounting-chunk';
+					}
+					
+					if (id.includes('src/pages/BanksPage') || 
+						id.includes('src/components/banking')) {
+						return 'banking-chunk';
+					}
+					
+					// Large application chunks - separate pages into individual chunks
+					if (id.includes('src/pages/AccountingPage')) {
+						return 'accounting-page-chunk';
+					}
+					
+					if (id.includes('src/pages/BanksPage')) {
+						return 'banks-page-chunk';
+					}
+					
+					if (id.includes('src/pages/InventoryPage')) {
+						return 'inventory-page-chunk';
+					}
+					
+					if (id.includes('src/pages/InvoicingPage')) {
+						return 'invoicing-page-chunk';
+					}
+					
+					if (id.includes('src/pages/SalesCrmPage')) {
+						return 'sales-crm-page-chunk';
+					}
+					
+					if (id.includes('src/pages/SettingsPage')) {
+						return 'settings-page-chunk';
+					}
+					if (id.includes('node_modules/@tensorflow') || 
+						id.includes('node_modules/openai') ||
+						id.includes('node_modules/ml-matrix') ||
+						id.includes('node_modules/simple-statistics')) {
+						return 'ai-ml-vendor';
+					}
+					
+					// Calendar and scheduling
+					if (id.includes('node_modules/react-big-calendar') ||
+						id.includes('node_modules/react-day-picker')) {
+						return 'calendar-vendor';
+					}
+					
+					// Grid and layout libraries
+					if (id.includes('node_modules/react-grid-layout') ||
+						id.includes('node_modules/react-resizable')) {
+						return 'layout-vendor';
+					}
+					
+					// Form and validation libraries
+					if (id.includes('node_modules/react-hook-form') ||
+						id.includes('node_modules/@hookform')) {
+						return 'forms-vendor';
+					}
+					
+					// Internationalization
+					if (id.includes('node_modules/i18next') ||
+						id.includes('node_modules/react-i18next')) {
+						return 'i18n-vendor';
+					}
+					
+					// Utility libraries
+					if (id.includes('node_modules/date-fns') ||
+						id.includes('node_modules/clsx') ||
+						id.includes('node_modules/class-variance-authority') ||
+						id.includes('node_modules/tailwind-merge')) {
+						return 'utils-vendor';
+					}
+					
+					// Payment processing
+					if (id.includes('node_modules/@stripe') ||
+						id.includes('node_modules/stripe')) {
+						return 'payment-vendor';
+					}
+					
+					// Email and notifications
+					if (id.includes('node_modules/@sendgrid') ||
+						id.includes('node_modules/sonner') ||
+						id.includes('node_modules/react-toastify')) {
+						return 'notifications-vendor';
+					}
+					
+					// Error monitoring
+					if (id.includes('node_modules/@sentry')) {
+						return 'monitoring-vendor';
+					}
+				},
 				
 				// Optimize chunk naming for caching
 				chunkFileNames: (chunkInfo) => {

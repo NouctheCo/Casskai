@@ -583,12 +583,20 @@ class InvoicingService {
         journalId: journal.id,
         status: 'posted' as const,
         items: journalEntry.items
+          .filter(item => item.accountId)
+          .map(item => ({
+            accountId: item.accountId!,
+            debitAmount: item.debitAmount || 0,
+            creditAmount: item.creditAmount || 0,
+            description: item.description || '',
+            currency: (item as any).currency || 'EUR'
+          }))
       };
 
       const result = await journalEntriesService.createJournalEntry(payload);
 
       if (!result.success) {
-        console.error('Erreur création écriture comptable:', result.error);
+        console.error('Erreur création écriture comptable:', (result as any).error);
       } else {
         console.warn(`Écriture comptable créée pour la facture ${invoice.invoice_number}`);
       }
@@ -641,12 +649,20 @@ class InvoicingService {
         journalId: journal.id,
         status: 'posted' as const,
         items: journalEntry.items
+          .filter(item => item.accountId)
+          .map(item => ({
+            accountId: item.accountId!,
+            debitAmount: item.debitAmount || 0,
+            creditAmount: item.creditAmount || 0,
+            description: item.description || '',
+            currency: (item as any).currency || 'EUR'
+          }))
       };
 
       const result = await journalEntriesService.createJournalEntry(payload);
 
       if (!result.success) {
-        console.error('Erreur création écriture de paiement:', result.error);
+        console.error('Erreur création écriture de paiement:', (result as any).error);
       } else {
         console.warn(`Écriture de paiement créée pour la facture ${invoice.invoice_number}`);
       }

@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { formatCurrency, formatDate, cn, truncate } from './utils';
+import { describe, it, expect, vi } from 'vitest';
+import { formatCurrency, formatDate, cn, truncate, formatNumber, formatPercentage, formatFileSize, debounce, capitalize, generateId } from './utils';
 
 describe('Utils', () => {
   describe('formatCurrency', () => {
@@ -47,14 +47,14 @@ describe('Utils', () => {
   describe('formatDate', () => {
     it('should format date in FR locale', () => {
       const date = new Date('2025-01-15');
-      const formatted = formatDate(date, 'fr');
+      const formatted = formatDate(date, 'medium', 'fr-FR');
       expect(formatted).toContain('15');
       expect(formatted).toContain('2025');
     });
 
     it('should format date in EN locale', () => {
       const date = new Date('2025-01-15');
-      const formatted = formatDate(date, 'en');
+      const formatted = formatDate(date, 'medium', 'en-US');
       expect(formatted).toContain('15');
       expect(formatted).toContain('2025');
     });
@@ -129,6 +129,153 @@ describe('Utils', () => {
       const result = truncate(text, 8, '…');
       expect(result).toContain('…');
       expect(result).not.toContain('...');
+    });
+  });
+
+  describe('formatNumber', () => {
+    it('should format numbers with thousands separators', () => {
+      expect(formatNumber(1000)).toBe('1\u202f000');
+      expect(formatNumber(1000000)).toBe('1\u202f000\u202f000');
+      expect(formatNumber(1234567)).toBe('1\u202f234\u202f567');
+    });
+
+    it('should handle decimals', () => {
+      expect(formatNumber(1234.56)).toBe('1\u202f234,56');
+      expect(formatNumber(0.5)).toBe('0,5');
+    });
+
+    it('should handle zero and negative numbers', () => {
+      expect(formatNumber(0)).toBe('0');
+      expect(formatNumber(-1000)).toBe('-1\u202f000');
+    });
+
+    it('should use different locale', () => {
+      expect(formatNumber(1000, 'en-US')).toBe('1,000');
+      expect(formatNumber(1234.56, 'en-US')).toBe('1,234.56');
+    });
+  });
+
+  describe('formatPercentage', () => {
+    it('should format decimal as percentage', () => {
+      expect(formatPercentage(0.15)).toBe('15,0%');
+      expect(formatPercentage(0.5)).toBe('50,0%');
+      expect(formatPercentage(1)).toBe('100,0%');
+    });
+
+    it('should handle different decimal places', () => {
+      expect(formatPercentage(0.1234, 2)).toBe('12,34%');
+      expect(formatPercentage(0.1234, 0)).toBe('12%');
+    });
+
+    it('should handle zero and negative values', () => {
+      expect(formatPercentage(0)).toBe('0,0%');
+      expect(formatPercentage(-0.15)).toBe('-15,0%');
+    });
+
+    it('should use different locale', () => {
+      expect(formatPercentage(0.15, 1, 'en-US')).toBe('15.0%');
+    });
+  });
+
+  describe('formatFileSize', () => {
+    it('should format bytes', () => {
+      expect(formatFileSize(0)).toBe('0 Bytes');
+      expect(formatFileSize(512)).toBe('512 Bytes');
+    });
+
+    it('should format kilobytes', () => {
+      expect(formatFileSize(1024)).toBe('1 KB');
+      expect(formatFileSize(1536)).toBe('1.5 KB');
+    });
+
+    it('should format megabytes', () => {
+      expect(formatFileSize(1024 * 1024)).toBe('1 MB');
+      expect(formatFileSize(1024 * 1024 * 2.5)).toBe('2.5 MB');
+    });
+
+    it('should format gigabytes', () => {
+      expect(formatFileSize(1024 * 1024 * 1024)).toBe('1 GB');
+    });
+
+    it('should handle different decimal places', () => {
+      expect(formatFileSize(1536, 0)).toBe('2 KB');
+      expect(formatFileSize(1536, 3)).toBe('1.5 KB');
+    });
+  });
+
+  describe('debounce', () => {
+    it('should delay function execution', async () => {
+      const mockFn = vi.fn();
+      const debouncedFn = debounce(mockFn, 100);
+
+      debouncedFn();
+      expect(mockFn).not.toHaveBeenCalled();
+
+      await new Promise(resolve => setTimeout(resolve, 150));
+      expect(mockFn).toHaveBeenCalledTimes(1);
+    });
+
+    it('should cancel previous call when called again', async () => {
+      const mockFn = vi.fn();
+      const debouncedFn = debounce(mockFn, 100);
+
+      debouncedFn();
+      await new Promise(resolve => setTimeout(resolve, 50));
+      debouncedFn(); // Should cancel first call
+
+      await new Promise(resolve => setTimeout(resolve, 150));
+      expect(mockFn).toHaveBeenCalledTimes(1);
+    });
+
+    it('should pass arguments correctly', async () => {
+      const mockFn = vi.fn();
+      const debouncedFn = debounce(mockFn, 50);
+
+      debouncedFn('arg1', 'arg2');
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      expect(mockFn).toHaveBeenCalledWith('arg1', 'arg2');
+    });
+  });
+
+  describe('capitalize', () => {
+    it('should capitalize first letter', () => {
+      expect(capitalize('hello')).toBe('Hello');
+      expect(capitalize('HELLO')).toBe('HELLO');
+      expect(capitalize('hELLO')).toBe('HELLO');
+    });
+
+    it('should handle empty strings', () => {
+      expect(capitalize('')).toBe('');
+    });
+
+    it('should handle single character', () => {
+      expect(capitalize('a')).toBe('A');
+      expect(capitalize('A')).toBe('A');
+    });
+
+    it('should handle strings with spaces', () => {
+      expect(capitalize('hello world')).toBe('Hello world');
+    });
+  });
+
+  describe('generateId', () => {
+    it('should generate string of specified length', () => {
+      expect(generateId(10)).toHaveLength(10);
+      expect(generateId(20)).toHaveLength(20);
+      expect(generateId()).toHaveLength(16); // default
+    });
+
+    it('should generate different IDs', () => {
+      const id1 = generateId(10);
+      const id2 = generateId(10);
+      expect(id1).not.toBe(id2);
+    });
+
+    it('should only contain valid characters', () => {
+      const id = generateId(100);
+      const validChars = /^[A-Za-z0-9]+$/;
+      expect(validChars.test(id)).toBe(true);
     });
   });
 });
