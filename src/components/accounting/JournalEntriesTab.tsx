@@ -23,9 +23,11 @@ import {
   Save,
   X,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Lightbulb
 } from 'lucide-react';
 import { format } from 'date-fns';
+import JournalEntryHelper from './JournalEntryHelper';
 
 export default function JournalEntriesTab() {
   const { t } = useLocale();
@@ -42,6 +44,7 @@ export default function JournalEntriesTab() {
 
   // États pour le formulaire d'écriture
   const [showEntryForm, setShowEntryForm] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -329,10 +332,16 @@ export default function JournalEntriesTab() {
           </div>
           
           <div className="flex justify-between items-center">
-            <Button onClick={handleNewEntry} className="bg-primary hover:bg-primary/90">
-              <Plus className="mr-2 h-4 w-4" />
-              {t('newEntry', 'Nouvelle écriture')}
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={handleNewEntry} className="bg-primary hover:bg-primary/90">
+                <Plus className="mr-2 h-4 w-4" />
+                {t('newEntry', 'Nouvelle écriture')}
+              </Button>
+              <Button onClick={() => setShowTemplates(true)} variant="outline">
+                <Lightbulb className="mr-2 h-4 w-4" />
+                {t('useTemplate', 'Utiliser un modèle')}
+              </Button>
+            </div>
             
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => {
@@ -649,6 +658,49 @@ export default function JournalEntriesTab() {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Templates Dialog */}
+      <Dialog open={showTemplates} onOpenChange={setShowTemplates}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lightbulb className="h-5 w-5" />
+              Modèles d'écritures comptables
+            </DialogTitle>
+          </DialogHeader>
+          <JournalEntryHelper 
+            onSelectTemplate={(template) => {
+              // Pre-fill the form with the template
+              const newLines = template.accounts.map((acc, idx) => ({
+                account: acc.debit.code || acc.credit.code,
+                description: template.example.description,
+                debit: idx === 0 && acc.debit ? (template.example.amount / 1.2).toFixed(2) : '',
+                credit: idx === 0 && acc.credit ? (template.example.amount / 1.2).toFixed(2) : ''
+              }));
+
+              setEntryForm({
+                number: 'AUTO',
+                date: format(new Date(), 'yyyy-MM-dd'),
+                reference: '',
+                description: template.example.description,
+                journal: template.category === 'sale' ? 'VTE' : 
+                         template.category === 'purchase' ? 'ACH' :
+                         template.category === 'bank' ? 'BQ1' :
+                         template.category === 'cash' ? 'CAI' : 'OD',
+                lines: newLines
+              });
+              
+              setShowTemplates(false);
+              setShowEntryForm(true);
+              
+              toast({
+                title: "Modèle chargé",
+                description: `Le modèle "${template.title}" a été appliqué. Vous pouvez maintenant ajuster les montants.`
+              });
+            }}
+          />
         </DialogContent>
       </Dialog>
     </div>
