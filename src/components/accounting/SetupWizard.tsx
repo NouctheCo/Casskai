@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,7 @@ import { useJournals } from '@/hooks/useJournals';
 import { useCompanies } from '@/hooks/useCompanies';
 import { useAuth } from '@/contexts/AuthContext';
 import { defaultChartOfAccounts, defaultJournals } from '@/utils/defaultAccountingData';
+import { accountsAutoCreationService } from '@/services/accountsAutoCreationService';
 import { Loader2, CheckCircle, BookOpen, Calendar, FileText, ArrowRight } from 'lucide-react';
 
 const SetupWizard = ({ currentEnterpriseId: propCurrentEnterpriseId, onFinish }) => {
@@ -104,13 +104,32 @@ const SetupWizard = ({ currentEnterpriseId: propCurrentEnterpriseId, onFinish })
     setLoading(true);
     try {
       if (chartOfAccountsOption === 'default') {
-        // TODO: Implement importStandardChartOfAccounts in useAccounting hook
-        // await importStandardChartOfAccounts(defaultChartOfAccounts);
-        throw new Error('Import functionality not yet implemented');
+        // Use the new auto-creation service
+        const result = await accountsAutoCreationService.createEssentialAccounts(companyId);
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to create essential accounts');
+        }
         
         toast({
           title: t('success'),
-          description: t('defaultChartImportedSuccess')
+          description: t('defaultChartImportedSuccess', { 
+            defaultValue: `Successfully created ${result.accountsCreated} essential accounts` 
+          })
+        });
+      } else if (chartOfAccountsOption === 'full') {
+        // Create full PCG plan
+        const result = await accountsAutoCreationService.createFullPCGAccounts(companyId);
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to create full PCG accounts');
+        }
+        
+        toast({
+          title: t('success'),
+          description: t('fullChartImportedSuccess', { 
+            defaultValue: `Successfully created ${result.accountsCreated} accounts from PCG standard` 
+          })
         });
       }
       
@@ -298,7 +317,18 @@ const SetupWizard = ({ currentEnterpriseId: propCurrentEnterpriseId, onFinish })
                   <SelectValue placeholder={t('accounting.setup.selectChartOption', { defaultValue: 'Select an option' })} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="default">{t('accounting.setup.useDefaultChart', { defaultValue: 'Use default French chart of accounts' })}</SelectItem>
+                  <SelectItem value="default">
+                    <div>
+                      <div className="font-medium">{t('accounting.setup.useDefaultChart', { defaultValue: 'Essential accounts (Recommended)' })}</div>
+                      <div className="text-xs text-muted-foreground">{t('accounting.setup.essentialAccountsDesc', { defaultValue: '~80 most commonly used accounts' })}</div>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="full">
+                    <div>
+                      <div className="font-medium">{t('accounting.setup.useFullPCG', { defaultValue: 'Full PCG Standard' })}</div>
+                      <div className="text-xs text-muted-foreground">{t('accounting.setup.fullPCGDesc', { defaultValue: 'Complete French chart of accounts' })}</div>
+                    </div>
+                  </SelectItem>
                   <SelectItem value="custom" disabled>{t('accounting.setup.createCustomChart', { defaultValue: 'Create custom chart (coming soon)' })}</SelectItem>
                   <SelectItem value="import" disabled>{t('accounting.setup.importFromFile', { defaultValue: 'Import from file (coming soon)' })}</SelectItem>
                 </SelectContent>

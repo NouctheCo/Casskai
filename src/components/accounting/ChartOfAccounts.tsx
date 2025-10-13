@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -12,8 +11,9 @@ import { useAccounting } from '@/hooks/useAccounting';
 import { useCompanies } from '@/hooks/useCompanies';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocale } from '@/contexts/LocaleContext';
-import { PlusCircle, Edit3, Search, Filter, AlertTriangle, ListTree, Banknote, Landmark, Briefcase, Users, Coins, Package, Receipt } from 'lucide-react';
+import { PlusCircle, Edit3, Search, Filter, AlertTriangle, ListTree, Banknote, Landmark, Briefcase, Users, Coins, Package, Receipt, Download } from 'lucide-react';
 import { defaultChartOfAccounts } from '@/utils/defaultAccountingData';
+import { accountsAutoCreationService } from '@/services/accountsAutoCreationService';
 import type { Account } from '@/types/database.types';
 
 interface AccountFormProps {
@@ -253,10 +253,26 @@ const ChartOfAccounts = ({ currentEnterpriseId: propCurrentEnterpriseId }) => {
   const handleImportDefaults = async () => {
     if (!companyId) return;
     try {
-      // TODO: Implémenter importStandardChartOfAccounts dans useAccounting
-      toast({ variant: 'destructive', title: t('error'), description: 'Import functionality not yet implemented. Please create accounts manually for now.' });
+      // Import using the auto-creation service
+      const result = await accountsAutoCreationService.createEssentialAccounts(companyId);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to create essential accounts');
+      }
+      
+      toast({ 
+        title: t('success'), 
+        description: `${result.accountsCreated} comptes essentiels ont été créés avec succès` 
+      });
+      
+      // Refresh the accounts list
+      refresh();
     } catch (error) {
-      toast({ variant: 'destructive', title: t('error'), description: error.message || t('defaultChartImportError') });
+      toast({ 
+        variant: 'destructive', 
+        title: t('error'), 
+        description: error.message || t('defaultChartImportError') 
+      });
     }
   };
 
@@ -302,6 +318,9 @@ const ChartOfAccounts = ({ currentEnterpriseId: propCurrentEnterpriseId }) => {
             <CardDescription>{t('chartOfAccountsDescription')}</CardDescription>
           </div>
           <div className="flex gap-2">
+            <Button onClick={handleImportDefaults} variant="outline">
+              <Download className="mr-2 h-4 w-4" /> {t('importEssentialAccounts', 'Importer comptes essentiels')}
+            </Button>
             <Button onClick={() => setIsFormOpen(true)}>
               <PlusCircle className="mr-2 h-4 w-4" /> {t('newAccount')}
             </Button>
