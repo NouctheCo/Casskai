@@ -37,17 +37,17 @@ const JournalsManagement = ({ currentEnterpriseId: propCurrentEnterpriseId }) =>
   const [formData, setFormData] = useState({
     code: '',
     name: '',
-    type: 'VENTE',
+    type: 'sale',
     description: '',
     is_active: true
   });
   
   const journalTypes = [
-    { value: 'VENTE', label: t('accounting.journals.types.sale', { defaultValue: 'Sales' }), icon: Banknote },
-    { value: 'ACHAT', label: t('accounting.journals.types.purchase', { defaultValue: 'Purchases' }), icon: CreditCard },
-    { value: 'BANQUE', label: t('accounting.journals.types.bank', { defaultValue: 'Bank' }), icon: BarChart3 },
-    { value: 'CAISSE', label: t('accounting.journals.types.cash', { defaultValue: 'Cash' }), icon: Banknote },
-    { value: 'OD', label: t('accounting.journals.types.miscellaneous', { defaultValue: 'Miscellaneous' }), icon: Settings },
+    { value: 'sale', label: t('accounting.journals.types.sale', { defaultValue: 'Sales' }), icon: Banknote },
+    { value: 'purchase', label: t('accounting.journals.types.purchase', { defaultValue: 'Purchases' }), icon: CreditCard },
+    { value: 'bank', label: t('accounting.journals.types.bank', { defaultValue: 'Bank' }), icon: BarChart3 },
+    { value: 'cash', label: t('accounting.journals.types.cash', { defaultValue: 'Cash' }), icon: Banknote },
+    { value: 'miscellaneous', label: t('accounting.journals.types.miscellaneous', { defaultValue: 'Miscellaneous' }), icon: Settings },
   ];
   
   // Show error if any
@@ -60,13 +60,76 @@ const JournalsManagement = ({ currentEnterpriseId: propCurrentEnterpriseId }) =>
       });
     }
   }, [error, toast, t]);
+
+  // Auto-create default journals if none exist
+  useEffect(() => {
+    const initializeDefaultJournals = async () => {
+      if (!companyId || loading || journals.length > 0) return;
+      
+      try {
+        const defaultJournals = [
+          {
+            code: 'VTE',
+            name: t('accounting.journals.defaultSales', { defaultValue: 'Sales Journal' }),
+            type: 'sale',
+            description: t('accounting.journals.defaultSalesDesc', { defaultValue: 'Main journal for all sales transactions' }),
+            is_active: true
+          },
+          {
+            code: 'ACH',
+            name: t('accounting.journals.defaultPurchases', { defaultValue: 'Purchases Journal' }),
+            type: 'purchase',
+            description: t('accounting.journals.defaultPurchasesDesc', { defaultValue: 'Journal for purchases and supplier invoices' }),
+            is_active: true
+          },
+          {
+            code: 'BQ1',
+            name: t('accounting.journals.defaultBank', { defaultValue: 'Main Bank' }),
+            type: 'bank',
+            description: t('accounting.journals.defaultBankDesc', { defaultValue: 'Main bank account journal' }),
+            is_active: true
+          },
+          {
+            code: 'CAI',
+            name: t('accounting.journals.defaultCash', { defaultValue: 'Cash Register' }),
+            type: 'cash',
+            description: t('accounting.journals.defaultCashDesc', { defaultValue: 'Cash payments and receipts journal' }),
+            is_active: true
+          },
+          {
+            code: 'OD',
+            name: t('accounting.journals.defaultMisc', { defaultValue: 'Miscellaneous Operations' }),
+            type: 'miscellaneous',
+            description: t('accounting.journals.defaultMiscDesc', { defaultValue: 'Journal for miscellaneous and adjustment entries' }),
+            is_active: true
+          }
+        ];
+
+        await createDefaultJournals(defaultJournals);
+        
+        toast({
+          title: t('success'),
+          description: t('accounting.journals.defaultCreated', { defaultValue: 'Default journals have been created automatically' })
+        });
+        
+        refresh();
+      } catch (err) {
+        // Don't show error if journals already exist
+        if (!err.message?.includes('already exist')) {
+          console.error('Error creating default journals:', err);
+        }
+      }
+    };
+
+    initializeDefaultJournals();
+  }, [companyId, journals.length, loading, createDefaultJournals, refresh, toast, t]);
   
   const handleNewJournal = () => {
     setEditingJournal(null);
     setFormData({
       code: '',
       name: '',
-      type: 'VENTE',
+      type: 'sale',
       description: '',
       is_active: true
     });

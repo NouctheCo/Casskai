@@ -51,6 +51,7 @@ export default function ChartOfAccountsTab() {
     type: '',
     parentCode: '',
     description: '',
+    budgetCategory: '',
     isActive: true
   });
 
@@ -72,6 +73,17 @@ export default function ChartOfAccountsTab() {
     { value: 'EQUITY', label: 'Capitaux propres' },
     { value: 'REVENUE', label: 'Produit' },
     { value: 'EXPENSE', label: 'Charge' }
+  ];
+
+  const budgetCategories = [
+    { value: '', label: 'Aucune catégorie' },
+    { value: 'operating_expenses', label: 'Charges d\'exploitation' },
+    { value: 'personnel_costs', label: 'Charges de personnel' },
+    { value: 'financial_expenses', label: 'Charges financières' },
+    { value: 'operating_revenue', label: 'Produits d\'exploitation' },
+    { value: 'financial_revenue', label: 'Produits financiers' },
+    { value: 'investments', label: 'Investissements' },
+    { value: 'financing', label: 'Financement' }
   ];
 
   const mockAccounts = [
@@ -621,6 +633,25 @@ export default function ChartOfAccountsTab() {
                 placeholder="Description optionnelle du compte"
                 rows={3}
               />
+            </div>
+
+            <div>
+              <Label htmlFor="budgetCategory">Catégorie budgétaire</Label>
+              <Select value={accountForm.budgetCategory} onValueChange={(value) => handleFormChange('budgetCategory', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner une catégorie (optionnel)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {budgetCategories.map(cat => (
+                    <SelectItem key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                Utilisé pour la consolidation budgétaire et les rapports financiers
+              </p>
             </div>
             
             <div className="flex items-center space-x-2">
