@@ -486,7 +486,7 @@ const TaxPage: React.FC = () => {
                         <div>
                           <p className="text-sm font-medium text-gray-600">Total Déclarations</p>
                           <p className="text-2xl font-bold text-gray-900">
-                            {dashboardData.stats.total_declarations}
+                            {dashboardData?.stats?.total_declarations || 0}
                           </p>
                         </div>
                         <div className="p-3 bg-blue-100 rounded-full">
@@ -502,7 +502,7 @@ const TaxPage: React.FC = () => {
                         <div>
                           <p className="text-sm font-medium text-gray-600">En Attente</p>
                           <p className="text-2xl font-bold text-gray-900">
-                            {dashboardData.stats.pending_declarations}
+                            {dashboardData?.stats?.pending_declarations || 0}
                           </p>
                         </div>
                         <div className="p-3 bg-yellow-100 rounded-full">
@@ -518,7 +518,7 @@ const TaxPage: React.FC = () => {
                         <div>
                           <p className="text-sm font-medium text-gray-600">En Retard</p>
                           <p className="text-2xl font-bold text-gray-900">
-                            {dashboardData.stats.overdue_declarations}
+                            {dashboardData?.stats?.overdue_declarations || 0}
                           </p>
                         </div>
                         <div className="p-3 bg-red-100 rounded-full">
@@ -534,7 +534,7 @@ const TaxPage: React.FC = () => {
                         <div>
                           <p className="text-sm font-medium text-gray-600">Alertes Actives</p>
                           <p className="text-2xl font-bold text-gray-900">
-                            {dashboardData.stats.active_alerts}
+                            {dashboardData?.stats?.active_alerts || 0}
                           </p>
                         </div>
                         <div className="p-3 bg-purple-100 rounded-full">
@@ -557,7 +557,7 @@ const TaxPage: React.FC = () => {
                           <div>
                             <p className="text-sm text-gray-600">Taxes Dues</p>
                             <p className="text-xl font-bold text-red-600">
-                              {formatCurrency(dashboardData.stats.total_tax_due)}
+                              {formatCurrency(dashboardData?.stats?.total_tax_due || 0)}
                             </p>
                           </div>
                           <TrendingUp className="h-6 w-6 text-red-500" />
@@ -566,7 +566,7 @@ const TaxPage: React.FC = () => {
                           <div>
                             <p className="text-sm text-gray-600">Taxes Payées</p>
                             <p className="text-xl font-bold text-green-600">
-                              {formatCurrency(dashboardData.stats.total_tax_paid)}
+                              {formatCurrency(dashboardData?.stats?.total_tax_paid || 0)}
                             </p>
                           </div>
                           <CheckCircle className="h-6 w-6 text-green-500" />

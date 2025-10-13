@@ -110,16 +110,50 @@ const ThirdPartiesPage: React.FC = () => {
     try {
       const stats = await unifiedThirdPartiesService.getDashboardStats(currentEnterprise!.id);
       setDashboardData({
-        total_third_parties: stats.total_customers + stats.total_suppliers,
-        total_customers: stats.total_customers,
-        total_suppliers: stats.total_suppliers,
-        active_third_parties: stats.active_customers + stats.active_suppliers,
-        total_balance: stats.net_balance,
-        overdue_count: 0, // TODO: Implémenter si nécessaire
-        top_customers: [] // TODO: Implémenter si nécessaire
+        stats: {
+          total_third_parties: stats.total_customers + stats.total_suppliers,
+          total_customers: stats.total_customers,
+          total_suppliers: stats.total_suppliers,
+          active_clients: stats.active_customers,
+          active_suppliers: stats.active_suppliers,
+          new_this_month: 0, // TODO: Calculer depuis les dates de création
+          total_receivables: stats.total_receivables || 0,
+          total_payables: stats.total_payables || 0,
+          overdue_receivables: 0, // TODO: Calculer
+          overdue_payables: 0, // TODO: Calculer
+          top_clients_by_revenue: [],
+          top_suppliers_by_spending: []
+        },
+        alerts: {
+          overdue_invoices: 0,
+          credit_limit_exceeded: 0,
+          missing_information: 0
+        }
       } as unknown as ThirdPartyDashboardData);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
+      // Set empty data to prevent crashes
+      setDashboardData({
+        stats: {
+          total_third_parties: 0,
+          total_customers: 0,
+          total_suppliers: 0,
+          active_clients: 0,
+          active_suppliers: 0,
+          new_this_month: 0,
+          total_receivables: 0,
+          total_payables: 0,
+          overdue_receivables: 0,
+          overdue_payables: 0,
+          top_clients_by_revenue: [],
+          top_suppliers_by_spending: []
+        },
+        alerts: {
+          overdue_invoices: 0,
+          credit_limit_exceeded: 0,
+          missing_information: 0
+        }
+      } as unknown as ThirdPartyDashboardData);
     }
   };
 

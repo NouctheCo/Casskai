@@ -962,13 +962,22 @@
     "create": "Créer",
     "update": "Mettre à jour",
     "retry": "Réessayer",
+    "selectDate": "Sélectionner une date",
+    "selectJournal": "Sélectionner un journal",
+    "no_code": "Sans code",
+    "untitledJournal": "Journal sans nom",
+    "items_min_required": "Au moins deux lignes sont requises pour une écriture valide",
     "no_enterprise_selected": "Aucune entreprise sélectionnée",
     "supabase_not_configured": "Supabase n'est pas configuré. Veuillez configurer vos variables d'environnement.",
     "network_error": "Erreur réseau. Vérifiez votre connexion internet et la configuration Supabase.",
     "error_loading_accounts": "Erreur lors du chargement des comptes",
     "error_loading_journals": "Erreur lors du chargement des journaux",
     "no_accounts_found": "Aucun compte trouvé",
-    "no_journals_found": "Aucun journal trouvé"
+    "no_journals_found": "Aucun journal trouvé",
+    "accountEntity": {
+      "entityName": "compte",
+      "entityNamePlural": "comptes"
+    }
   },
   "common": {
     "success": "Succès",
@@ -2620,10 +2629,6 @@
     "supprimer": "Supprimer",
     "aucun_projet": "Aucun projet",
     "premier_projet": "Premier projet"
-  },
-  "journal_entries": {
-    "items_min_required": "Minimum 2 lignes requis",
-    "total": "Total"
   },
   "security": {
     "title": "Sécurité et Confidentialité",

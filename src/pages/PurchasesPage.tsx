@@ -29,6 +29,8 @@ export default function PurchasesPage() {
   const { currentEnterpriseId, currentEnterprise } = useEnterprise();
   const { ConfirmDialog, confirm } = useConfirmDialog();
   
+  const companyId = currentEnterpriseId || 'company-1'; // Use current enterprise or fallback
+  
   // State management
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -46,7 +48,10 @@ export default function PurchasesPage() {
     payment_status: 'all'
   });
   
-  const companyId = currentEnterpriseId || 'company-1'; // Use current enterprise or fallback
+  // Handler pour la création d'un nouveau fournisseur depuis EntitySelector
+  const handleSupplierCreated = (newSupplier: Supplier) => {
+    setSuppliers(prev => [...prev, newSupplier]);
+  };
 
   // Load data on component mount
   useEffect(() => {
@@ -424,6 +429,8 @@ export default function PurchasesPage() {
         purchase={editingPurchase}
         suppliers={suppliers}
         loading={formLoading}
+        currentCompany={{ id: companyId, name: currentEnterprise?.name || 'Entreprise' }}
+        onSupplierCreated={handleSupplierCreated}
       />
 
 

@@ -303,10 +303,10 @@ const CookiesPolicyPage = () => {
                       )}
                     </div>
                   </div>
-                  <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">
+                  <p className="text-xs text-gray-700 dark:text-gray-200 mb-2 font-medium">
                     {type.description}
                   </p>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-gray-600 dark:text-gray-300 font-medium">
                     Durée: {type.duration}
                   </div>
                 </div>
@@ -404,8 +404,8 @@ const CookiesPolicyPage = () => {
                     <div className="flex items-center mb-4">
                       <type.icon className={`w-8 h-8 ${type.color} mr-3`} />
                       <div>
-                        <h3 className="text-lg font-semibold">{type.title}</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">{type.description}</p>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{type.title}</h3>
+                        <p className="text-sm text-gray-700 dark:text-gray-200 font-medium">{type.description}</p>
                       </div>
                       <div className="ml-auto">
                         {type.required ? (
@@ -422,8 +422,8 @@ const CookiesPolicyPage = () => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <h4 className="font-semibold mb-2 text-sm">Exemples d'utilisation :</h4>
-                        <ul className="text-sm space-y-1">
+                        <h4 className="font-semibold mb-2 text-sm text-gray-900 dark:text-white">Exemples d'utilisation :</h4>
+                        <ul className="text-sm space-y-1 text-gray-700 dark:text-gray-200">
                           {type.examples.map((example, idx) => (
                             <li key={idx} className="flex items-center">
                               <CheckCircle className="w-3 h-3 text-green-500 mr-2 flex-shrink-0" />
@@ -433,8 +433,8 @@ const CookiesPolicyPage = () => {
                         </ul>
                       </div>
                       <div>
-                        <h4 className="font-semibold mb-2 text-sm">Informations :</h4>
-                        <div className="text-sm space-y-1">
+                        <h4 className="font-semibold mb-2 text-sm text-gray-900 dark:text-white">Informations :</h4>
+                        <div className="text-sm space-y-1 text-gray-700 dark:text-gray-200">
                           <p><strong>Durée de conservation :</strong> {type.duration}</p>
                           <p><strong>Finalité :</strong> {type.description}</p>
                           <p><strong>Base légale :</strong> {type.required ? 'Nécessité technique' : 'Consentement'}</p>
@@ -467,12 +467,12 @@ const CookiesPolicyPage = () => {
                     <h4 className="font-semibold">Google Analytics</h4>
                     <Badge variant="outline">Analytique</Badge>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                  <p className="text-sm text-gray-700 dark:text-gray-200 mb-2 font-medium">
                     Mesure d'audience et analyse d'utilisation anonymisée
                   </p>
-                  <div className="text-xs text-gray-500">
-                    Cookies: _ga, _ga_*, _gid • Durée: 2 ans • 
-                    <a href="https://policies.google.com/privacy" className="text-blue-600 hover:underline ml-1">
+                  <div className="text-xs text-gray-600 dark:text-gray-300 font-medium">
+                    Cookies: _ga, _ga_*, _gid • Durée: 2 ans •
+                    <a href="https://policies.google.com/privacy" className="text-blue-600 dark:text-blue-400 hover:underline ml-1">
                       Politique de confidentialité
                     </a>
                   </div>
@@ -483,28 +483,28 @@ const CookiesPolicyPage = () => {
                     <h4 className="font-semibold">Stripe</h4>
                     <Badge variant="outline">Paiement</Badge>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                  <p className="text-sm text-gray-700 dark:text-gray-200 mb-2 font-medium">
                     Traitement sécurisé des paiements
                   </p>
-                  <div className="text-xs text-gray-500">
-                    Cookies: __stripe_* • Durée: Session • 
-                    <a href="https://stripe.com/privacy" className="text-blue-600 hover:underline ml-1">
+                  <div className="text-xs text-gray-600 dark:text-gray-300 font-medium">
+                    Cookies: __stripe_* • Durée: Session •
+                    <a href="https://stripe.com/privacy" className="text-blue-600 dark:text-blue-400 hover:underline ml-1">
                       Politique de confidentialité
                     </a>
                   </div>
                 </div>
-                
+
                 <div className="p-4 border rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-semibold">Intercom</h4>
                     <Badge variant="outline">Support</Badge>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                  <p className="text-sm text-gray-700 dark:text-gray-200 mb-2 font-medium">
                     Chat de support client intégré
                   </p>
-                  <div className="text-xs text-gray-500">
-                    Cookies: intercom-* • Durée: 1 an • 
-                    <a href="https://www.intercom.com/legal/privacy" className="text-blue-600 hover:underline ml-1">
+                  <div className="text-xs text-gray-600 dark:text-gray-300 font-medium">
+                    Cookies: intercom-* • Durée: 1 an •
+                    <a href="https://www.intercom.com/legal/privacy" className="text-blue-600 dark:text-blue-400 hover:underline ml-1">
                       Politique de confidentialité
                     </a>
                   </div>

@@ -148,18 +148,6 @@ const HeroSection = () => {
 
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
-                size="lg"
-                onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSeP1H29iZLZ7CgEnJz-Mey9wZDWij0NVZ42EK-mqmbjb5vqzg/viewform', '_blank')}
-                className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-10 py-6 text-lg font-semibold shadow-2xl hover:shadow-3xl transition-all duration-300 rounded-xl"
-              >
-                <Users className="mr-3 w-6 h-6" />
-                {t('landing.hero.cta.beta', 'Devenir beta tester')}
-                <ArrowRight className="ml-3 w-6 h-6" />
-              </Button>
-            </motion.div>
-
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
                 variant="outline"
                 size="lg"
                 onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}

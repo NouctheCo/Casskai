@@ -5,6 +5,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/useToast';
+import { supabase } from '@/lib/supabase';
+import type {
+  BalanceSheetData,
+  IncomeStatementData,
+  TrialBalanceData,
+  GeneralLedgerData,
+  CashFlowData,
+  AgedReceivablesData,
+  AgedPayablesData,
+  FinancialRatiosData,
+  BudgetVarianceData,
+  KPIDashboardData,
+  TaxSummaryData,
+  TaxDeclarationVAT,
+  PDFReportConfig,
+  ExcelReportConfig,
+  CompanyInfo
+} from '@/utils/reportGeneration/types';
+
+
 import {
   TrendingUp,
   Download,
@@ -28,20 +48,24 @@ import {
   Target,
   Zap
 } from 'lucide-react';
-import { reportGenerationService } from '@/services/reportGenerationService';
-import { DEFAULT_REPORT_TEMPLATES } from '@/data/reportTemplates';
-import type { FinancialReport, ReportFormData } from '@/types/reports.types';
+import { reportsService } from '@/services/reportsService';
+import { reportStorageService } from '@/services/reportStorageService';
+import { PDFGenerator, ExcelGenerator } from '@/utils/reportGeneration';
+import type { FinancialReport } from '@/types/reports.types';
 import { useAuth } from '@/contexts/AuthContext';
+import EmptyReportState from './EmptyReportState';
 
 export default function OptimizedReportsTab() {
   const { showToast } = useToast();
   const { currentCompany } = useAuth();
   const [selectedPeriod, setSelectedPeriod] = useState('current-month');
   const [selectedReportType, setSelectedReportType] = useState('all_types');
+  const [exportFormat, setExportFormat] = useState<'pdf' | 'excel'>('pdf');
   const [isGenerating, setIsGenerating] = useState<string | null>(null);
   const [recentReports, setRecentReports] = useState<FinancialReport[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+  const [emptyStateReport, setEmptyStateReport] = useState<{type: string; name: string} | null>(null);
+
   // États pour les actions view/download
   const [viewingReport, setViewingReport] = useState<string | null>(null);
   const [downloadingReport, setDownloadingReport] = useState<string | null>(null);
@@ -187,13 +211,111 @@ export default function OptimizedReportsTab() {
     }
   ];
 
-  // État des statistiques rapides avec des données actualisées
-  const quickStats = [
-    { label: 'Chiffre d\'affaires', value: 125430, trend: 8.5, color: 'green' },
-    { label: 'Charges totales', value: 78650, trend: -2.3, color: 'red' },
-    { label: 'Résultat net', value: 46780, trend: 15.2, color: 'blue' },
-    { label: 'Marge nette', value: 37.3, trend: 4.1, color: 'purple', isPercentage: true }
-  ];
+  // État des statistiques rapides - chargées depuis la base de données
+  const [quickStats, setQuickStats] = useState<Array<{
+    label: string;
+    value: number;
+    trend: number;
+    color: string;
+    isPercentage?: boolean;
+  }>>([
+    { label: 'Chiffre d\'affaires', value: 0, trend: 0, color: 'green' },
+    { label: 'Charges totales', value: 0, trend: 0, color: 'red' },
+    { label: 'Résultat net', value: 0, trend: 0, color: 'blue' },
+    { label: 'Marge nette', value: 0, trend: 0, color: 'purple', isPercentage: true }
+  ]);
+
+  // Charger les statistiques rapides depuis les données réelles avec calcul des tendances
+  useEffect(() => {
+    const loadQuickStats = async () => {
+      if (!currentCompany?.id) return;
+
+      try {
+        const periodDates = getPeriodDates(selectedPeriod);
+        const previousPeriodDates = getPreviousPeriodDates(selectedPeriod);
+
+        // Récupérer les entrées comptables pour la période actuelle
+        const { data: entries, error } = await supabase
+          .from('journal_entries')
+          .select('debit_amount, credit_amount, account_number')
+          .eq('company_id', currentCompany.id)
+          .gte('entry_date', periodDates.start)
+          .lte('entry_date', periodDates.end);
+
+        if (error) throw error;
+
+        // Récupérer les entrées de la période précédente pour calcul des tendances
+        const { data: previousEntries } = await supabase
+          .from('journal_entries')
+          .select('debit_amount, credit_amount, account_number')
+          .eq('company_id', currentCompany.id)
+          .gte('entry_date', previousPeriodDates.start)
+          .lte('entry_date', previousPeriodDates.end);
+
+        // Calculer les valeurs de la période actuelle
+        const revenue = entries
+          ?.filter(e => e.account_number?.startsWith('7'))
+          .reduce((sum, e) => sum + (e.credit_amount || 0) - (e.debit_amount || 0), 0) || 0;
+
+        const expenses = entries
+          ?.filter(e => e.account_number?.startsWith('6'))
+          .reduce((sum, e) => sum + (e.debit_amount || 0) - (e.credit_amount || 0), 0) || 0;
+
+        const netIncome = revenue - expenses;
+        const netMargin = revenue > 0 ? (netIncome / revenue) * 100 : 0;
+
+        // Calculer les valeurs de la période précédente
+        const prevRevenue = previousEntries
+          ?.filter(e => e.account_number?.startsWith('7'))
+          .reduce((sum, e) => sum + (e.credit_amount || 0) - (e.debit_amount || 0), 0) || 0;
+
+        const prevExpenses = previousEntries
+          ?.filter(e => e.account_number?.startsWith('6'))
+          .reduce((sum, e) => sum + (e.debit_amount || 0) - (e.credit_amount || 0), 0) || 0;
+
+        const prevNetIncome = prevRevenue - prevExpenses;
+        const prevNetMargin = prevRevenue > 0 ? (prevNetIncome / prevRevenue) * 100 : 0;
+
+        // Calculer les tendances (variation en pourcentage)
+        const calculateTrend = (current: number, previous: number) => {
+          if (previous === 0) return 0;
+          return Math.round(((current - previous) / previous) * 100);
+        };
+
+        setQuickStats([
+          {
+            label: 'Chiffre d\'affaires',
+            value: Math.round(revenue),
+            trend: calculateTrend(revenue, prevRevenue),
+            color: 'green'
+          },
+          {
+            label: 'Charges totales',
+            value: Math.round(expenses),
+            trend: calculateTrend(expenses, prevExpenses),
+            color: 'red'
+          },
+          {
+            label: 'Résultat net',
+            value: Math.round(netIncome),
+            trend: calculateTrend(netIncome, prevNetIncome),
+            color: 'blue'
+          },
+          {
+            label: 'Marge nette',
+            value: Math.round(netMargin * 10) / 10,
+            trend: calculateTrend(netMargin, prevNetMargin),
+            color: 'purple',
+            isPercentage: true
+          }
+        ]);
+      } catch (error) {
+        console.error('Error loading quick stats:', error);
+      }
+    };
+
+    loadQuickStats();
+  }, [currentCompany?.id, selectedPeriod]);
 
   // Gestion des couleurs étendues pour tous les types de rapports
   const getColorClasses = (color: string) => {
@@ -215,79 +337,642 @@ export default function OptimizedReportsTab() {
     return colors[color] || colors.blue;
   };
 
+  // Helper pour vérifier si les données sont vides
+  const isReportDataEmpty = (reportType: string, data: any): boolean => {
+    if (!data) return true;
+
+    switch (reportType) {
+      case 'balance_sheet':
+        const bsData = data as BalanceSheetData;
+        return (
+          (!bsData.assets.fixed_assets || bsData.assets.fixed_assets.length === 0) &&
+          (!bsData.assets.inventory || bsData.assets.inventory.length === 0) &&
+          (!bsData.assets.receivables || bsData.assets.receivables.length === 0) &&
+          (!bsData.assets.cash || bsData.assets.cash.length === 0) &&
+          (!bsData.liabilities.payables || bsData.liabilities.payables.length === 0) &&
+          (!bsData.equity.capital || bsData.equity.capital.length === 0)
+        );
+
+      case 'income_statement':
+        const isData = data as IncomeStatementData;
+        return (
+          (!isData.revenue.sales || isData.revenue.sales.length === 0) &&
+          (!isData.revenue.other_revenue || isData.revenue.other_revenue.length === 0) &&
+          (!isData.expenses.purchases || isData.expenses.purchases.length === 0) &&
+          (!isData.expenses.external_charges || isData.expenses.external_charges.length === 0)
+        );
+
+      case 'trial_balance':
+        const tbData = data as TrialBalanceData;
+        return !tbData.accounts || tbData.accounts.length === 0;
+
+      case 'general_ledger':
+        const glData = data as GeneralLedgerData;
+        return !glData.entries || glData.entries.length === 0;
+
+      default:
+        return false;
+    }
+  };
+
   // Génération automatique d'un rapport financier
   const handleGenerateReport = async (reportType: string, reportName: string) => {
     setIsGenerating(reportType);
+    setEmptyStateReport(null); // Reset empty state
 
     try {
       const periodDates = getPeriodDates(selectedPeriod);
-
-      const reportData: ReportFormData = {
-        name: `${reportName} - ${selectedPeriod}`,
-        type: reportType as any,
-        format: 'detailed',
-        period_start: periodDates.start,
-        period_end: periodDates.end,
-        file_format: 'pdf',
-        currency: 'EUR'
-      };
 
       // Génération du rapport avec notre service
       if (!currentCompany?.id) {
         throw new Error('Aucune entreprise sélectionnée');
       }
 
-      const filters = {
-        companyId: currentCompany.id,
-        dateFrom: reportData.period_start,
-        dateTo: reportData.period_end,
-        currency: reportData.currency
+      // Préparer les informations de l'entreprise
+      const companyInfo: CompanyInfo = {
+        id: currentCompany.id,
+        name: currentCompany.name || 'Entreprise',
+        address: currentCompany.address || '',
+        city: currentCompany.city || '',
+        postal_code: currentCompany.postal_code || '',
+        country: currentCompany.country || 'FR',
+        siret: currentCompany.siret || '',
+        vat_number: currentCompany.vat_number || ''
       };
 
-      const exportOptions = {
-        format: reportData.file_format as 'pdf' | 'excel' | 'csv',
-        title: reportData.name,
-        companyInfo: {
-          name: currentCompany.name,
-          address: currentCompany.address,
-          phone: currentCompany.phone,
-          email: currentCompany.email
+      // Configuration commune pour PDF et Excel
+      const reportConfig = {
+        title: reportName.toUpperCase(),
+        subtitle: `Période: ${new Date(periodDates.start).toLocaleDateString('fr-FR')} - ${new Date(periodDates.end).toLocaleDateString('fr-FR')}`,
+        company: companyInfo,
+        period: {
+          start: periodDates.start,
+          end: periodDates.end
         }
       };
 
-      let downloadUrl: string;
-      switch (reportData.type) {
+      let result: any;
+
+      // Générer le rapport selon le type
+      switch (reportType) {
         case 'balance_sheet':
-          downloadUrl = await reportGenerationService.generateBalanceSheet(filters, exportOptions);
+          result = await reportsService.generateBalanceSheet(currentCompany.id, periodDates.end);
+          if (result.error) throw new Error(result.error.message);
+          if (!result.data) throw new Error('Aucune donnée retournée');
+
+          // Vérifier si les données sont vides
+          if (isReportDataEmpty(reportType, result.data)) {
+            setEmptyStateReport({ type: reportType, name: reportName });
+            showToast('Aucune donnée disponible pour cette période', 'info');
+            return;
+          }
+
+          if (exportFormat === 'excel') {
+            const excelConfig: ExcelReportConfig = reportConfig;
+            const blob = await ExcelGenerator.generateBalanceSheet(result.data as BalanceSheetData, excelConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.xlsx`;
+
+            // Upload to storage
+            const uploadResult = await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: blob,
+              fileFormat: 'xlsx',
+              periodStart: periodDates.start,
+              periodEnd: periodDates.end
+            });
+
+            if (!uploadResult.success) {
+              console.error('Upload failed:', uploadResult.error);
+            }
+
+            // Download locally
+            ExcelGenerator.downloadBlob(blob, filename);
+          } else {
+            const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
+            const pdf = PDFGenerator.generateBalanceSheet(result.data as BalanceSheetData, pdfConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.pdf`;
+
+            // Upload to storage
+            const uploadResult = await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: pdf.getBlob(),
+              fileFormat: 'pdf',
+              periodStart: periodDates.start,
+              periodEnd: periodDates.end
+            });
+
+            if (!uploadResult.success) {
+              console.error('Upload failed:', uploadResult.error);
+            }
+
+            // Download locally
+            pdf.save(filename);
+          }
           break;
+
         case 'income_statement':
-          downloadUrl = await reportGenerationService.generateIncomeStatement(filters, exportOptions);
+          result = await reportsService.generateIncomeStatement(currentCompany.id, periodDates.start, periodDates.end);
+          if (result.error) throw new Error(result.error.message);
+          if (!result.data) throw new Error('Aucune donnée retournée');
+
+          if (isReportDataEmpty(reportType, result.data)) {
+            setEmptyStateReport({ type: reportType, name: reportName });
+            showToast('Aucune donnée disponible pour cette période', 'info');
+            return;
+          }
+
+          if (exportFormat === 'excel') {
+            const excelConfig: ExcelReportConfig = reportConfig;
+            const blob = await ExcelGenerator.generateIncomeStatement(result.data as IncomeStatementData, excelConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.xlsx`;
+
+            // Upload to storage
+            await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: blob,
+              fileFormat: 'xlsx',
+              periodStart: periodDates.start,
+              periodEnd: periodDates.end
+            });
+
+            ExcelGenerator.downloadBlob(blob, filename);
+          } else {
+            const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
+            const pdf = PDFGenerator.generateIncomeStatement(result.data as IncomeStatementData, pdfConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.pdf`;
+
+            // Upload to storage
+            await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: pdf.getBlob(),
+              fileFormat: 'pdf',
+              periodStart: periodDates.start,
+              periodEnd: periodDates.end
+            });
+
+            pdf.save(filename);
+          }
           break;
+
         case 'trial_balance':
-          downloadUrl = await reportGenerationService.generateTrialBalance(filters, exportOptions);
+          result = await reportsService.generateTrialBalance(currentCompany.id, periodDates.end);
+          if (result.error) throw new Error(result.error.message);
+          if (!result.data) throw new Error('Aucune donnée retournée');
+
+          if (isReportDataEmpty(reportType, result.data)) {
+            setEmptyStateReport({ type: reportType, name: reportName });
+            showToast('Aucune donnée disponible pour cette période', 'info');
+            return;
+          }
+
+          if (exportFormat === 'excel') {
+            const excelConfig: ExcelReportConfig = reportConfig;
+            const blob = await ExcelGenerator.generateTrialBalance(result.data as TrialBalanceData, excelConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.xlsx`;
+
+            // Upload to storage
+            await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: blob,
+              fileFormat: 'xlsx',
+              periodStart: periodDates.start,
+              periodEnd: periodDates.end
+            });
+
+            ExcelGenerator.downloadBlob(blob, filename);
+          } else {
+            const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
+            const pdf = PDFGenerator.generateTrialBalance(result.data as TrialBalanceData, pdfConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.pdf`;
+
+            // Upload to storage
+            await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: pdf.getBlob(),
+              fileFormat: 'pdf',
+              periodStart: periodDates.start,
+              periodEnd: periodDates.end
+            });
+
+            pdf.save(filename);
+          }
           break;
+
         case 'general_ledger':
-          downloadUrl = await reportGenerationService.generateGeneralLedger(filters, exportOptions);
+          result = await reportsService.generateGeneralLedger(currentCompany.id, periodDates.start, periodDates.end);
+          if (result.error) throw new Error(result.error.message);
+          if (!result.data) throw new Error('Aucune donnée retournée');
+
+          if (isReportDataEmpty(reportType, result.data)) {
+            setEmptyStateReport({ type: reportType, name: reportName });
+            showToast('Aucune donnée disponible pour cette période', 'info');
+            return;
+          }
+
+          if (exportFormat === 'excel') {
+            const excelConfig: ExcelReportConfig = reportConfig;
+            const blob = await ExcelGenerator.generateGeneralLedger(result.data as GeneralLedgerData, excelConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.xlsx`;
+
+            // Upload to storage
+            await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: blob,
+              fileFormat: 'xlsx',
+              periodStart: periodDates.start,
+              periodEnd: periodDates.end
+            });
+
+            ExcelGenerator.downloadBlob(blob, filename);
+          } else {
+            const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
+            const pdf = PDFGenerator.generateGeneralLedger(result.data as GeneralLedgerData, pdfConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.pdf`;
+
+            // Upload to storage
+            await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: pdf.getBlob(),
+              fileFormat: 'pdf',
+              periodStart: periodDates.start,
+              periodEnd: periodDates.end
+            });
+
+            pdf.save(filename);
+          }
           break;
+
+        case 'cash_flow':
+          result = await reportsService.generateCashFlowStatement(currentCompany.id, periodDates.start, periodDates.end);
+          if (result.error) throw new Error(result.error.message);
+          if (!result.data) throw new Error('Aucune donnée retournée');
+
+          // Vérifier données vides
+          if (result.data.summary.net_cash_change === 0) {
+            setEmptyStateReport({ type: reportType, name: reportName });
+            showToast('Aucune donnée de trésorerie', 'info');
+            return;
+          }
+
+          if (exportFormat === 'excel') {
+            const excelConfig: ExcelReportConfig = reportConfig;
+            const blob = await ExcelGenerator.generateCashFlowStatement(result.data as CashFlowData, excelConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.xlsx`;
+
+            await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: blob,
+              fileFormat: 'xlsx',
+              periodStart: periodDates.start,
+              periodEnd: periodDates.end
+            });
+
+            ExcelGenerator.downloadBlob(blob, filename);
+          } else {
+            const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
+            const pdf = PDFGenerator.generateCashFlowStatement(result.data as CashFlowData, pdfConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.pdf`;
+
+            await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: pdf.getBlob(),
+              fileFormat: 'pdf',
+              periodStart: periodDates.start,
+              periodEnd: periodDates.end
+            });
+
+            pdf.save(filename);
+          }
+          break;
+
+        case 'aged_receivables':
+          result = await reportsService.generateAgedReceivables(currentCompany.id, periodDates.end);
+          if (result.error) throw new Error(result.error.message);
+          if (!result.data) throw new Error('Aucune donnée retournée');
+
+          if (!result.data.customers || result.data.customers.length === 0) {
+            setEmptyStateReport({ type: reportType, name: reportName });
+            showToast('Aucune créance client en cours', 'info');
+            return;
+          }
+
+          if (exportFormat === 'excel') {
+            const excelConfig: ExcelReportConfig = reportConfig;
+            const blob = await ExcelGenerator.generateAgedReceivables(result.data as AgedReceivablesData, excelConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.xlsx`;
+
+            await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: blob,
+              fileFormat: 'xlsx',
+              periodStart: periodDates.start,
+              periodEnd: periodDates.end
+            });
+
+            ExcelGenerator.downloadBlob(blob, filename);
+          } else {
+            const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
+            const pdf = PDFGenerator.generateAgedReceivables(result.data as AgedReceivablesData, pdfConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.pdf`;
+
+            await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: pdf.getBlob(),
+              fileFormat: 'pdf',
+              periodStart: periodDates.start,
+              periodEnd: periodDates.end
+            });
+
+            pdf.save(filename);
+          }
+          break;
+
+        case 'aged_payables':
+          result = await reportsService.generateAgedPayables(currentCompany.id, periodDates.end);
+          if (result.error) throw new Error(result.error.message);
+          if (!result.data) throw new Error('Aucune donnée retournée');
+
+          if (!result.data.suppliers || result.data.suppliers.length === 0) {
+            setEmptyStateReport({ type: reportType, name: reportName });
+            showToast('Aucune dette fournisseur en cours', 'info');
+            return;
+          }
+
+          if (exportFormat === 'excel') {
+            const excelConfig: ExcelReportConfig = reportConfig;
+            const blob = await ExcelGenerator.generateAgedPayables(result.data as AgedPayablesData, excelConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.xlsx`;
+
+            await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: blob,
+              fileFormat: 'xlsx',
+              periodStart: periodDates.start,
+              periodEnd: periodDates.end
+            });
+
+            ExcelGenerator.downloadBlob(blob, filename);
+          } else {
+            const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
+            const pdf = PDFGenerator.generateAgedPayables(result.data as AgedPayablesData, pdfConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.pdf`;
+
+            await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: pdf.getBlob(),
+              fileFormat: 'pdf',
+              periodStart: periodDates.start,
+              periodEnd: periodDates.end
+            });
+
+            pdf.save(filename);
+          }
+          break;
+
+        case 'financial_ratios':
+          result = await reportsService.generateFinancialRatios(currentCompany.id, periodDates.start, periodDates.end);
+          if (result.error) throw new Error(result.error.message);
+          if (!result.data) throw new Error('Aucune donnée retournée');
+
+          if (exportFormat === 'excel') {
+            const excelConfig: ExcelReportConfig = reportConfig;
+            const blob = await ExcelGenerator.generateFinancialRatios(result.data as FinancialRatiosData, excelConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.xlsx`;
+
+            await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: blob,
+              fileFormat: 'xlsx',
+              periodStart: periodDates.start,
+              periodEnd: periodDates.end
+            });
+
+            ExcelGenerator.downloadBlob(blob, filename);
+          } else {
+            const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
+            const pdf = PDFGenerator.generateFinancialRatios(result.data as FinancialRatiosData, pdfConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.pdf`;
+
+            await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: pdf.getBlob(),
+              fileFormat: 'pdf',
+              periodStart: periodDates.start,
+              periodEnd: periodDates.end
+            });
+
+            pdf.save(filename);
+          }
+          break;
+
+        case 'vat_report':
+          result = await reportsService.generateVATDeclaration(currentCompany.id, periodDates.start, periodDates.end);
+          if (result.error) throw new Error(result.error.message);
+          if (!result.data) throw new Error('Aucune donnée retournée');
+
+          if (exportFormat === 'excel') {
+            const excelConfig: ExcelReportConfig = reportConfig;
+            const blob = await ExcelGenerator.generateVATReport(result.data as TaxDeclarationVAT, excelConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.xlsx`;
+
+            await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: blob,
+              fileFormat: 'xlsx',
+              periodStart: periodDates.start,
+              periodEnd: periodDates.end
+            });
+
+            ExcelGenerator.downloadBlob(blob, filename);
+          } else {
+            const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
+            const pdf = PDFGenerator.generateVATReport(result.data as TaxDeclarationVAT, pdfConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.pdf`;
+
+            await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: pdf.getBlob(),
+              fileFormat: 'pdf',
+              periodStart: periodDates.start,
+              periodEnd: periodDates.end
+            });
+
+            pdf.save(filename);
+          }
+          break;
+
+        case 'budget_variance':
+          result = await reportsService.generateBudgetVariance(currentCompany.id, periodDates.start, periodDates.end);
+          if (result.error) throw new Error(result.error.message);
+          if (!result.data) throw new Error('Aucune donnée retournée');
+
+          if (exportFormat === 'excel') {
+            const excelConfig: ExcelReportConfig = reportConfig;
+            const blob = await ExcelGenerator.generateBudgetVariance(result.data as BudgetVarianceData, excelConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.xlsx`;
+
+            await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: blob,
+              fileFormat: 'xlsx',
+              periodStart: periodDates.start,
+              periodEnd: periodDates.end
+            });
+
+            ExcelGenerator.downloadBlob(blob, filename);
+          } else {
+            const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
+            const pdf = PDFGenerator.generateBudgetVariance(result.data as BudgetVarianceData, pdfConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.pdf`;
+
+            await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: pdf.getBlob(),
+              fileFormat: 'pdf',
+              periodStart: periodDates.start,
+              periodEnd: periodDates.end
+            });
+
+            pdf.save(filename);
+          }
+          break;
+
+        case 'kpi_dashboard':
+          result = await reportsService.generateKPIDashboard(currentCompany.id, periodDates.start, periodDates.end);
+          if (result.error) throw new Error(result.error.message);
+          if (!result.data) throw new Error('Aucune donnée retournée');
+
+          if (exportFormat === 'excel') {
+            const excelConfig: ExcelReportConfig = reportConfig;
+            const blob = await ExcelGenerator.generateKPIDashboard(result.data as KPIDashboardData, excelConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.xlsx`;
+
+            await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: blob,
+              fileFormat: 'xlsx',
+              periodStart: periodDates.start,
+              periodEnd: periodDates.end
+            });
+
+            ExcelGenerator.downloadBlob(blob, filename);
+          } else {
+            const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
+            const pdf = PDFGenerator.generateKPIDashboard(result.data as KPIDashboardData, pdfConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${periodDates.end}.pdf`;
+
+            await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: pdf.getBlob(),
+              fileFormat: 'pdf',
+              periodStart: periodDates.start,
+              periodEnd: periodDates.end
+            });
+
+            pdf.save(filename);
+          }
+          break;
+
+        case 'tax_summary':
+          const fiscalYear = new Date(periodDates.end).getFullYear().toString();
+          result = await reportsService.generateTaxSummary(currentCompany.id, fiscalYear);
+          if (result.error) throw new Error(result.error.message);
+          if (!result.data) throw new Error('Aucune donnée retournée');
+
+          if (exportFormat === 'excel') {
+            const excelConfig: ExcelReportConfig = reportConfig;
+            const blob = await ExcelGenerator.generateTaxSummary(result.data as TaxSummaryData, excelConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${fiscalYear}.xlsx`;
+
+            await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: blob,
+              fileFormat: 'xlsx',
+              periodStart: `${fiscalYear}-01-01`,
+              periodEnd: `${fiscalYear}-12-31`
+            });
+
+            ExcelGenerator.downloadBlob(blob, filename);
+          } else {
+            const pdfConfig: PDFReportConfig = { ...reportConfig, footer: 'Généré par CassKai - Comptabilité intelligente', pageNumbers: true, margins: { top: 20, right: 15, bottom: 15, left: 15 } };
+            const pdf = PDFGenerator.generateTaxSummary(result.data as TaxSummaryData, pdfConfig);
+            const filename = `${reportType}_${currentCompany.name.replace(/\s+/g, '_')}_${fiscalYear}.pdf`;
+
+            await reportStorageService.uploadReport({
+              companyId: currentCompany.id,
+              reportType,
+              reportName,
+              fileBlob: pdf.getBlob(),
+              fileFormat: 'pdf',
+              periodStart: `${fiscalYear}-01-01`,
+              periodEnd: `${fiscalYear}-12-31`
+            });
+
+            pdf.save(filename);
+          }
+          break;
+
         default:
-          throw new Error('Type de rapport non supporté');
+          showToast(`Type de rapport "${reportType}" en cours de développement`, 'info');
+          return;
       }
 
-      // Auto-download the generated report
-      if (downloadUrl) {
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.download = `${reportData.name}.${reportData.file_format}`;
-        link.click();
-      }
-
-      showToast(`Rapport "${reportName}" généré avec succès et disponible au téléchargement.`, 'success');
+      const formatLabel = exportFormat === 'excel' ? 'Excel' : 'PDF';
+      showToast(`Rapport "${reportName}" généré avec succès au format ${formatLabel}.`, 'success');
 
       // Actualiser la liste des rapports récents
       loadRecentReports();
 
     } catch (error) {
-      showToast("Impossible de générer le rapport. Veuillez réessayer.", 'error');
+      console.error('Erreur génération rapport:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Impossible de générer le rapport';
+      showToast(`Erreur: ${errorMessage}`, 'error');
     } finally {
       setIsGenerating(null);
     }
@@ -332,49 +1017,86 @@ export default function OptimizedReportsTab() {
     }
   };
 
-  // Chargement des rapports récents (simulation)
+  // Calcul des dates de la période précédente (pour comparaison des tendances)
+  const getPreviousPeriodDates = (period: string) => {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+
+    switch (period) {
+      case 'current-month':
+        // Mois précédent
+        const prevMonth = currentMonth - 1;
+        const prevYear = prevMonth < 0 ? currentYear - 1 : currentYear;
+        const month = prevMonth < 0 ? 11 : prevMonth;
+        return {
+          start: new Date(prevYear, month, 1).toISOString().split('T')[0],
+          end: new Date(prevYear, month + 1, 0).toISOString().split('T')[0]
+        };
+      case 'current-quarter':
+        // Trimestre précédent
+        const quarterStart = Math.floor(currentMonth / 3) * 3;
+        const prevQuarterStart = quarterStart - 3;
+        const qYear = prevQuarterStart < 0 ? currentYear - 1 : currentYear;
+        const qMonth = prevQuarterStart < 0 ? 9 : prevQuarterStart;
+        return {
+          start: new Date(qYear, qMonth, 1).toISOString().split('T')[0],
+          end: new Date(qYear, qMonth + 3, 0).toISOString().split('T')[0]
+        };
+      case 'current-year':
+        // Année précédente
+        return {
+          start: new Date(currentYear - 1, 0, 1).toISOString().split('T')[0],
+          end: new Date(currentYear - 1, 11, 31).toISOString().split('T')[0]
+        };
+      case 'last-month':
+        // Mois d'avant le mois dernier (N-2)
+        const lastMonth = currentMonth - 2;
+        const lYear = lastMonth < 0 ? currentYear - 1 : currentYear;
+        const lMonth = lastMonth < 0 ? 12 + lastMonth : lastMonth;
+        return {
+          start: new Date(lYear, lMonth, 1).toISOString().split('T')[0],
+          end: new Date(lYear, lMonth + 1, 0).toISOString().split('T')[0]
+        };
+      default:
+        // Par défaut: mois précédent
+        const defPrevMonth = currentMonth - 1;
+        const defYear = defPrevMonth < 0 ? currentYear - 1 : currentYear;
+        const defMonth = defPrevMonth < 0 ? 11 : defPrevMonth;
+        return {
+          start: new Date(defYear, defMonth, 1).toISOString().split('T')[0],
+          end: new Date(defYear, defMonth + 1, 0).toISOString().split('T')[0]
+        };
+    }
+  };
+
+  // Chargement des rapports récents depuis la base de données
   const loadRecentReports = async () => {
+    if (!currentCompany?.id) {
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
-    // Simulation d'un appel API
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    try {
+      const { data, error } = await supabase
+        .from('financial_reports')
+        .select('*')
+        .eq('company_id', currentCompany.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
 
-    const mockReports: FinancialReport[] = [
-      {
-        id: '1',
-        company_id: 'comp-1',
-        name: 'Bilan comptable - Décembre 2024',
-        type: 'balance_sheet',
-        format: 'detailed',
-        period_start: '2024-12-01',
-        period_end: '2024-12-31',
-        status: 'ready',
-        file_url: '/reports/balance-sheet-dec-2024.pdf',
-        file_format: 'pdf',
-        file_size: 2457600,
-        generated_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: '2',
-        company_id: 'comp-1',
-        name: 'Compte de résultat - Décembre 2024',
-        type: 'income_statement',
-        format: 'detailed',
-        period_start: '2024-12-01',
-        period_end: '2024-12-31',
-        status: 'ready',
-        file_url: '/reports/income-statement-dec-2024.pdf',
-        file_format: 'pdf',
-        file_size: 1843200,
-        generated_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
-    ];
+      if (error) throw error;
 
-    setRecentReports(mockReports);
-    setIsLoading(false);
+      setRecentReports(data || []);
+    } catch (error) {
+      console.error('Error loading recent reports:', error);
+      showToast("Impossible de charger les rapports récents.", 'error');
+      setRecentReports([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Gestionnaire pour consulter un rapport
@@ -396,21 +1118,31 @@ export default function OptimizedReportsTab() {
   // Gestionnaire pour télécharger un rapport
   const handleDownloadReport = async (report: FinancialReport) => {
     if (!userCanDownload) return;
-    
+
     setDownloadingReport(report.id);
     try {
-      // Simulation du téléchargement
-      await new Promise(resolve => setTimeout(resolve, 600));
-      
-      // Simuler le téléchargement
+      // Télécharger depuis le storage
+      const result = await reportStorageService.downloadReport(report.id);
+
+      if (!result.success || !result.blob) {
+        throw new Error(result.error || 'Échec du téléchargement');
+      }
+
+      // Créer un lien de téléchargement
+      const url = URL.createObjectURL(result.blob);
       const link = document.createElement('a');
-      link.href = report.file_url || '#';
+      link.href = url;
       link.download = `${report.name}.${report.file_format}`;
+      document.body.appendChild(link);
       link.click();
-      
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
       showToast(`Rapport "${report.name}" téléchargé avec succès.`, 'success');
-    } catch (_error) {
-      showToast("Impossible de télécharger le rapport. Veuillez réessayer.", 'error');
+    } catch (error) {
+      console.error('Download error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Impossible de télécharger le rapport';
+      showToast(errorMessage, 'error');
     } finally {
       setDownloadingReport(null);
     }
@@ -525,18 +1257,18 @@ export default function OptimizedReportsTab() {
 
             <div>
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                Actions rapides
+                Format d'export
               </label>
-              <div className="flex space-x-2">
-                <Button variant="outline" size="sm" className="flex-1">
-                  <Settings className="w-4 h-4 mr-1" />
-                  Modèles
-                </Button>
-                <Button variant="outline" size="sm" className="flex-1">
-                  <Download className="w-4 h-4 mr-1" />
-                  Historique
-                </Button>
-              </div>
+              <Select value={exportFormat} onValueChange={(value: 'pdf' | 'excel') => setExportFormat(value)}>
+                <SelectTrigger>
+                  <FileText className="w-4 h-4 mr-2" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pdf">PDF</SelectItem>
+                  <SelectItem value="excel">Excel (.xlsx)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardContent>
@@ -652,6 +1384,22 @@ export default function OptimizedReportsTab() {
           </Card>
         ))}
       </div>
+
+      {/* Empty State pour rapport sans données */}
+      {emptyStateReport && (
+        <EmptyReportState
+          reportType={emptyStateReport.type}
+          reportName={emptyStateReport.name}
+          onCreateEntry={() => {
+            // Navigate to journal entries tab
+            showToast('Redirection vers les écritures comptables...', 'info');
+            setEmptyStateReport(null);
+          }}
+          onViewDocs={() => {
+            window.open('https://docs.casskai.app/rapports', '_blank');
+          }}
+        />
+      )}
 
       {/* Section des rapports récents */}
       {!isLoading && recentReports.length > 0 && (

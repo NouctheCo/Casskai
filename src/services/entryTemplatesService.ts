@@ -14,54 +14,54 @@ export class EntryTemplatesService {
       id: 'template_sale_invoice',
       name: 'Facture de vente avec TVA',
       description: 'Template pour facturation client avec TVA 20%',
-      category: 'sale',
+      category: 'sales',
       isRecurring: false,
+      isActive: true,
       accounts: [
         {
           id: '1',
           accountType: 'debit',
-          accountNumber: '411',
-          label: 'Client',
+          accountNumber: '411100',
+          label: 'Clients',
           amountFormula: '#{amountTTC}',
           isVariable: false
         },
         {
           id: '2',
           accountType: 'credit',
-          accountNumber: '445',
-          label: 'TVA collectée',
-          amountFormula: '#{amountHT} * 0.20',
+          accountNumber: '707100',
+          label: 'Ventes de marchandises',
+          amountFormula: '#{amountHT}',
           isVariable: false
         },
         {
           id: '3',
           accountType: 'credit',
-          accountNumber: '707',
-          label: 'Ventes de marchandises',
-          amountFormula: '#{amountHT}',
+          accountNumber: '445710',
+          label: 'TVA collectée 20%',
+          amountFormula: '#{amountHT} * 0.20',
           isVariable: false
         }
       ],
-      vatRules: [{
-        id: 'vat_20',
-        name: 'TVA 20%',
-        rate: 0.20,
-        type: 'standard',
-        deductible: false,
-        accountCredit: '445'
+      conditions: [{
+        id: 'vat_condition',
+        field: 'taxRate',
+        operator: 'equals',
+        value: 20
       }]
     },
     {
       id: 'template_purchase_invoice',
       name: 'Facture d\'achat avec TVA',
       description: 'Template pour facture fournisseur avec TVA déductible',
-      category: 'purchase',
+      category: 'purchases',
       isRecurring: false,
+      isActive: true,
       accounts: [
         {
           id: '1',
           accountType: 'debit',
-          accountNumber: '607',
+          accountNumber: '607100',
           label: 'Achats de marchandises',
           amountFormula: '#{amountHT}',
           isVariable: false
@@ -69,7 +69,193 @@ export class EntryTemplatesService {
         {
           id: '2',
           accountType: 'debit',
-          accountNumber: '445',
+          accountNumber: '445660',
+          label: 'TVA déductible sur autres biens et services',
+          amountFormula: '#{amountHT} * 0.20',
+          isVariable: false
+        },
+        {
+          id: '3',
+          accountType: 'credit',
+          accountNumber: '401100',
+          label: 'Fournisseurs',
+          amountFormula: '#{amountTTC}',
+          isVariable: false
+        }
+      ],
+      conditions: [{
+        id: 'vat_condition',
+        field: 'taxRate',
+        operator: 'equals',
+        value: 20
+      }]
+    },
+    {
+      id: 'template_bank_payment_client',
+      name: 'Paiement client par virement',
+      description: 'Template pour règlement client par virement bancaire',
+      category: 'payments',
+      isRecurring: false,
+      isActive: true,
+      accounts: [
+        {
+          id: '1',
+          accountType: 'debit',
+          accountNumber: '512100',
+          label: 'Banques - Compte courant',
+          amountFormula: '#{amount}',
+          isVariable: false
+        },
+        {
+          id: '2',
+          accountType: 'credit',
+          accountNumber: '411100',
+          label: 'Clients',
+          amountFormula: '#{amount}',
+          isVariable: false
+        }
+      ]
+    },
+    {
+      id: 'template_bank_payment_supplier',
+      name: 'Paiement fournisseur par virement',
+      description: 'Template pour règlement fournisseur par virement bancaire',
+      category: 'payments',
+      isRecurring: false,
+      isActive: true,
+      accounts: [
+        {
+          id: '1',
+          accountType: 'debit',
+          accountNumber: '401100',
+          label: 'Fournisseurs',
+          amountFormula: '#{amount}',
+          isVariable: false
+        },
+        {
+          id: '2',
+          accountType: 'credit',
+          accountNumber: '512100',
+          label: 'Banques - Compte courant',
+          amountFormula: '#{amount}',
+          isVariable: false
+        }
+      ]
+    },
+    {
+      id: 'template_cash_receipt',
+      name: 'Encaissement espèces',
+      description: 'Template pour encaissement en espèces',
+      category: 'payments',
+      isRecurring: false,
+      isActive: true,
+      accounts: [
+        {
+          id: '1',
+          accountType: 'debit',
+          accountNumber: '530100',
+          label: 'Caisse',
+          amountFormula: '#{amount}',
+          isVariable: false
+        },
+        {
+          id: '2',
+          accountType: 'credit',
+          accountNumber: '411100',
+          label: 'Clients',
+          amountFormula: '#{amount}',
+          isVariable: false
+        }
+      ]
+    },
+    {
+      id: 'template_cash_payment',
+      name: 'Décaissement espèces',
+      description: 'Template pour décaissement en espèces',
+      category: 'payments',
+      isRecurring: false,
+      isActive: true,
+      accounts: [
+        {
+          id: '1',
+          accountType: 'debit',
+          accountNumber: '401100',
+          label: 'Fournisseurs',
+          amountFormula: '#{amount}',
+          isVariable: false
+        },
+        {
+          id: '2',
+          accountType: 'credit',
+          accountNumber: '530100',
+          label: 'Caisse',
+          amountFormula: '#{amount}',
+          isVariable: false
+        }
+      ]
+    },
+    {
+      id: 'template_salary_expense',
+      name: 'Charges de personnel',
+      description: 'Template pour les charges de personnel',
+      category: 'payroll',
+      isRecurring: true,
+      isActive: true,
+      accounts: [
+        {
+          id: '1',
+          accountType: 'debit',
+          accountNumber: '641100',
+          label: 'Rémunérations du personnel',
+          amountFormula: '#{grossSalary}',
+          isVariable: false
+        },
+        {
+          id: '2',
+          accountType: 'debit',
+          accountNumber: '645100',
+          label: 'Charges de sécurité sociale',
+          amountFormula: '#{socialCharges}',
+          isVariable: false
+        },
+        {
+          id: '3',
+          accountType: 'credit',
+          accountNumber: '421100',
+          label: 'Personnel - Rémunérations dues',
+          amountFormula: '#{netSalary}',
+          isVariable: false
+        },
+        {
+          id: '4',
+          accountType: 'credit',
+          accountNumber: '431100',
+          label: 'Sécurité sociale',
+          amountFormula: '#{socialCharges}',
+          isVariable: false
+        }
+      ]
+    },
+    {
+      id: 'template_inventory_in',
+      name: 'Entrée en stock',
+      description: 'Template pour les entrées en stock',
+      category: 'inventory',
+      isRecurring: false,
+      isActive: true,
+      accounts: [
+        {
+          id: '1',
+          accountType: 'debit',
+          accountNumber: '370000',
+          label: 'Stocks de marchandises',
+          amountFormula: '#{amountHT}',
+          isVariable: false
+        },
+        {
+          id: '2',
+          accountType: 'debit',
+          accountNumber: '445660',
           label: 'TVA déductible',
           amountFormula: '#{amountHT} * 0.20',
           isVariable: false
@@ -77,76 +263,87 @@ export class EntryTemplatesService {
         {
           id: '3',
           accountType: 'credit',
-          accountNumber: '401',
-          label: 'Fournisseur',
+          accountNumber: '401100',
+          label: 'Fournisseurs',
           amountFormula: '#{amountTTC}',
-          isVariable: false
-        }
-      ],
-      vatRules: [{
-        id: 'vat_20_deductible',
-        name: 'TVA 20% déductible',
-        rate: 0.20,
-        type: 'standard',
-        deductible: true,
-        accountDebit: '445'
-      }]
-    },
-    {
-      id: 'template_bank_payment',
-      name: 'Paiement fournisseur',
-      description: 'Template pour règlement fournisseur par virement',
-      category: 'payment',
-      isRecurring: false,
-      accounts: [
-        {
-          id: '1',
-          accountType: 'debit',
-          accountNumber: '401',
-          label: 'Fournisseur',
-          amountFormula: '#{amount}',
-          isVariable: true
-        },
-        {
-          id: '2',
-          accountType: 'credit',
-          accountNumber: '512',
-          label: 'Banque',
-          amountFormula: '#{amount}',
           isVariable: false
         }
       ]
     },
     {
-      id: 'template_salary_monthly',
-      name: 'Paie mensuelle',
-      description: 'Template pour écriture de paie mensuelle',
-      category: 'other',
-      isRecurring: true,
-      frequency: 'monthly',
+      id: 'template_inventory_out',
+      name: 'Sortie de stock',
+      description: 'Template pour les sorties de stock',
+      category: 'inventory',
+      isRecurring: false,
+      isActive: true,
       accounts: [
         {
           id: '1',
           accountType: 'debit',
-          accountNumber: '641',
-          label: 'Salaires bruts',
-          amountFormula: '#{salaireBrut}',
-          isVariable: true
+          accountNumber: '607100',
+          label: 'Achats de marchandises',
+          amountFormula: '#{costPrice}',
+          isVariable: false
         },
         {
           id: '2',
           accountType: 'credit',
-          accountNumber: '431',
-          label: 'Sécurité sociale',
-          amountFormula: '#{salaireBrut} * 0.45',
+          accountNumber: '370000',
+          label: 'Stocks de marchandises',
+          amountFormula: '#{costPrice}',
+          isVariable: false
+        }
+      ]
+    },
+    {
+      id: 'template_depreciation',
+      name: 'Dotation aux amortissements',
+      description: 'Template pour les dotations aux amortissements',
+      category: 'adjustments',
+      isRecurring: true,
+      isActive: true,
+      accounts: [
+        {
+          id: '1',
+          accountType: 'debit',
+          accountNumber: '681100',
+          label: 'Dotations aux amortissements',
+          amountFormula: '#{depreciationAmount}',
           isVariable: false
         },
         {
-          id: '3',
+          id: '2',
           accountType: 'credit',
-          accountNumber: '421',
-          label: 'Salaire net à payer',
-          amountFormula: '#{salaireBrut} * 0.55',
+          accountNumber: '281200',
+          label: 'Amortissements des immobilisations',
+          amountFormula: '#{depreciationAmount}',
+          isVariable: false
+        }
+      ]
+    },
+    {
+      id: 'template_tax_payment',
+      name: 'Paiement TVA',
+      description: 'Template pour le paiement de la TVA',
+      category: 'tax',
+      isRecurring: true,
+      isActive: true,
+      accounts: [
+        {
+          id: '1',
+          accountType: 'debit',
+          accountNumber: '445500',
+          label: 'TVA à décaisser',
+          amountFormula: '#{taxAmount}',
+          isVariable: false
+        },
+        {
+          id: '2',
+          accountType: 'credit',
+          accountNumber: '512100',
+          label: 'Banques - Compte courant',
+          amountFormula: '#{taxAmount}',
           isVariable: false
         }
       ]
@@ -181,7 +378,7 @@ export class EntryTemplatesService {
    */
   static async applyTemplate(
     templateId: string,
-    variables: Record<string, any>,
+    variables: Record<string, unknown>,
     companyId: string,
     journalId: string
   ): Promise<JournalEntryType> {
@@ -223,14 +420,31 @@ export class EntryTemplatesService {
    */
   private static async generateEntryItems(
     template: EntryTemplate,
-    variables: Record<string, any>,
+    variables: Record<string, unknown>,
     companyId: string
-  ): Promise<any[]> {
-    const items: any[] = [];
+  ): Promise<Array<{
+    accountId: string;
+    debitAmount: number;
+    creditAmount: number;
+    description: string;
+    auxiliaryAccount?: string;
+  }>> {
+    const items: Array<{
+      accountId: string;
+      debitAmount: number;
+      creditAmount: number;
+      description: string;
+      auxiliaryAccount?: string;
+    }> = [];
 
-    for (const templateAccount of template.accounts) {
-      // Résolution de l'ID du compte
-      const accountId = await this.resolveAccountId(templateAccount, companyId);
+    // Résoudre tous les IDs de comptes en parallèle
+    const accountIds = await Promise.all(
+      template.accounts.map(templateAccount => this.resolveAccountId(templateAccount, companyId))
+    );
+
+    for (let i = 0; i < template.accounts.length; i++) {
+      const templateAccount = template.accounts[i];
+      const accountId = accountIds[i];
       
       if (!accountId) {
         throw new Error(`Compte ${templateAccount.accountNumber || templateAccount.label} non trouvé`);
@@ -247,7 +461,7 @@ export class EntryTemplatesService {
         debitAmount: templateAccount.accountType === 'debit' ? amount : 0,
         creditAmount: templateAccount.accountType === 'credit' ? amount : 0,
         description: this.interpolateString(templateAccount.label, variables),
-        auxiliaryAccount: variables.auxiliaryAccount || undefined,
+        auxiliaryAccount: typeof variables.auxiliaryAccount === 'string' ? variables.auxiliaryAccount : undefined,
       };
 
       items.push(item);
@@ -291,7 +505,7 @@ export class EntryTemplatesService {
   /**
    * Calcule un montant à partir d'une formule
    */
-  private static calculateAmount(formula: string, variables: Record<string, any>): number {
+  private static calculateAmount(formula: string, variables: Record<string, unknown>): number {
     try {
       // Remplacement des variables dans la formule
       let processedFormula = formula;
@@ -326,17 +540,79 @@ export class EntryTemplatesService {
     }
 
     try {
-      // Utilisation de Function pour éviter eval() direct
-      return new Function(`"use strict"; return (${cleanExpression})`)();
-    } catch (error) {
+      // Évaluation sécurisée de l'expression mathématique
+      // Pour des raisons de sécurité, on utilise une approche plus restrictive
+      const result = this.safeEvalMath(cleanExpression);
+      return Math.round(result * 100) / 100; // Arrondi à 2 décimales
+    } catch (_error) {
       throw new Error(`Expression invalide: ${cleanExpression}`);
     }
   }
 
   /**
+   * Évaluation mathématique sécurisée sans eval()
+   */
+  private static safeEvalMath(expression: string): number {
+    // Approche simplifiée pour les expressions de base
+    // Supporte seulement les opérations de base sans parenthèses imbriquées
+    try {
+      // Remplacement des espaces
+      const expr = expression.replace(/\s+/g, '');
+      
+      // Validation basique
+      if (!/^[\d+\-*/.()]+$/.test(expr)) {
+        throw new Error('Expression invalide');
+      }
+      
+      // Pour la simplicité, on utilise une approche basique
+      // En production, considérez une bibliothèque dédiée
+      return this.simpleMathEval(expr);
+    } catch (_error) {
+      throw new Error('Erreur d\'évaluation mathématique');
+    }
+  }
+
+  /**
+   * Évaluation mathématique simple
+   */
+  private static simpleMathEval(expr: string): number {
+    // Gestion basique des parenthèses
+    const parenMatch = expr.match(/\(([^()]+)\)/);
+    if (parenMatch) {
+      const innerResult = this.simpleMathEval(parenMatch[1]);
+      return this.simpleMathEval(expr.replace(parenMatch[0], innerResult.toString()));
+    }
+    
+    // Gestion des opérateurs par priorité
+    const mulDivMatch = expr.match(/([\d.]+)([*/])([\d.]+)/);
+    if (mulDivMatch) {
+      const a = parseFloat(mulDivMatch[1]);
+      const b = parseFloat(mulDivMatch[3]);
+      const result = mulDivMatch[2] === '*' ? a * b : a / b;
+      return this.simpleMathEval(expr.replace(mulDivMatch[0], result.toString()));
+    }
+    
+    const addSubMatch = expr.match(/([\d.]+)([+-])([\d.]+)/);
+    if (addSubMatch) {
+      const a = parseFloat(addSubMatch[1]);
+      const b = parseFloat(addSubMatch[3]);
+      const result = addSubMatch[2] === '+' ? a + b : a - b;
+      return this.simpleMathEval(expr.replace(addSubMatch[0], result.toString()));
+    }
+    
+    // Si c'est juste un nombre
+    const num = parseFloat(expr);
+    if (!isNaN(num)) {
+      return num;
+    }
+    
+    throw new Error('Expression non reconnue');
+  }
+
+  /**
    * Interpolation de chaînes avec variables
    */
-  private static interpolateString(template: string, variables: Record<string, any>): string {
+  private static interpolateString(template: string, variables: Record<string, unknown>): string {
     return template.replace(/#{(\w+)}/g, (match, varName) => {
       return variables[varName]?.toString() || match;
     });
@@ -347,7 +623,7 @@ export class EntryTemplatesService {
    */
   private static evaluateConditions(
     conditions: TemplateCondition[],
-    variables: Record<string, any>
+    variables: Record<string, unknown>
   ): { isValid: boolean; failedConditions: string[] } {
     const failedConditions: string[] = [];
 
@@ -395,16 +671,28 @@ export class EntryTemplatesService {
    */
   private static async applyVATRules(
     vatRules: VATRule[],
-    variables: Record<string, any>,
+    variables: Record<string, unknown>,
     companyId: string
-  ): Promise<any[]> {
-    const vatItems: any[] = [];
+  ): Promise<Array<{
+    accountId: string;
+    debitAmount: number;
+    creditAmount: number;
+    description: string;
+  }>> {
+    const vatItems: Array<{
+      accountId: string;
+      debitAmount: number;
+      creditAmount: number;
+      description: string;
+    }> = [];
 
-    for (const rule of vatRules) {
-      const baseAmount = variables.amountHT || variables.amount || 0;
+    // Calculer tous les montants et comptes en parallèle
+    const vatPromises = vatRules.map(async (rule) => {
+      const baseAmount = typeof variables.amountHT === 'number' ? variables.amountHT :
+                        (typeof variables.amount === 'number' ? variables.amount : 0);
       const vatAmount = Math.round(baseAmount * rule.rate * 100) / 100;
 
-      if (vatAmount === 0) continue;
+      if (vatAmount === 0) return null;
 
       // Compte de TVA
       const vatAccountNumber = rule.deductible ? 
@@ -418,15 +706,18 @@ export class EntryTemplatesService {
         .eq('number', vatAccountNumber)
         .single();
 
-      if (vatAccount.data) {
-        vatItems.push({
-          accountId: vatAccount.data.id,
-          debitAmount: rule.deductible ? vatAmount : 0,
-          creditAmount: rule.deductible ? 0 : vatAmount,
-          description: `TVA ${rule.rate * 100}% ${rule.deductible ? 'déductible' : 'collectée'}`,
-        });
-      }
-    }
+      if (!vatAccount.data) return null;
+
+      return {
+        accountId: vatAccount.data.id,
+        debitAmount: rule.deductible ? vatAmount : 0,
+        creditAmount: rule.deductible ? 0 : vatAmount,
+        description: `TVA ${rule.rate * 100}% ${rule.deductible ? 'déductible' : 'collectée'}`,
+      };
+    });
+
+    const vatResults = await Promise.all(vatPromises);
+    vatItems.push(...vatResults.filter(item => item !== null));
 
     return vatItems;
   }
@@ -606,8 +897,8 @@ export class EntryTemplatesService {
   private static async getRecurringVariables(
     template: EntryTemplate,
     companyId: string
-  ): Promise<Record<string, any>> {
-    const variables: Record<string, any> = {
+  ): Promise<Record<string, unknown>> {
+    const variables: Record<string, unknown> = {
       date: new Date().toISOString(),
       reference: `AUTO-${template.name}-${new Date().toISOString().slice(0, 7)}`
     };

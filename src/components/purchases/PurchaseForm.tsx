@@ -10,6 +10,9 @@ import { Card, CardContent } from '../ui/card';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Loader2, Upload, X, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { EntitySelector, type EntityOption } from '../common/EntitySelector';
+import { thirdPartiesService } from '../../services/thirdPartiesService';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface PurchaseFormProps {
   isOpen: boolean;
@@ -18,6 +21,8 @@ interface PurchaseFormProps {
   purchase?: Purchase | null;
   suppliers: Supplier[];
   loading: boolean;
+  currentCompany?: { id: string; name: string };
+  onSupplierCreated?: (supplier: Supplier) => void;
 }
 
 const PurchaseForm: React.FC<PurchaseFormProps> = ({
@@ -26,9 +31,12 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
   onSubmit,
   purchase,
   suppliers,
-  loading
+  loading,
+  currentCompany,
+  onSupplierCreated
 }) => {
   const { t } = useTranslation();
+  const { currentCompany: authCompany } = useAuth();
   const [formData, setFormData] = useState<PurchaseFormData>({
     invoice_number: '',
     purchase_date: new Date().toISOString().split('T')[0],
@@ -164,6 +172,59 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
     }));
   };
 
+  // Handler pour créer un nouveau fournisseur
+  const handleCreateSupplier = async (data: Record<string, unknown>) => {
+    if (!currentCompany?.id) {
+      return { success: false, error: 'Aucune entreprise sélectionnée' };
+    }
+
+    try {
+      const result = await thirdPartiesService.createThirdParty({
+        type: 'supplier',
+        name: data.name as string,
+        email: data.email as string,
+        phone: data.phone as string,
+        address: data.address as string,
+        city: data.city as string,
+        postal_code: data.postal_code as string,
+        payment_terms: (data.payment_terms as number) || 30,
+        country: 'FR'
+      });
+
+      if (result && result.id) {
+        // Créer l'objet Supplier pour le callback
+        const newSupplier: Supplier = {
+          id: result.id,
+          name: result.name,
+          email: result.primary_email,
+          phone: result.primary_phone,
+          address: result.billing_address?.street,
+          company_id: currentCompany.id
+        };
+
+        // Notifier le parent pour rafraîchir la liste
+        if (onSupplierCreated) {
+          onSupplierCreated(newSupplier);
+        }
+
+        return { success: true, id: result.id };
+      }
+
+      return { success: false, error: 'Erreur lors de la création du fournisseur' };
+    } catch (error) {
+      console.error('Error creating supplier:', error);
+      return { success: false, error: 'Erreur lors de la création du fournisseur' };
+    }
+  };
+
+  // Préparer les options pour EntitySelector
+  const supplierOptions: EntityOption[] = suppliers.map(supplier => ({
+    id: supplier.id,
+    label: supplier.name,
+    sublabel: supplier.email ? `${supplier.email}${supplier.phone ? ` • ${supplier.phone}` : ''}` : (supplier.phone || ''),
+    metadata: supplier
+  }));
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
@@ -221,21 +282,66 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
               <Label htmlFor="supplier_id">
                 {t('purchases.form.supplier')} *
               </Label>
-              <Select
+              <EntitySelector
+                options={supplierOptions}
                 value={formData.supplier_id}
-                onValueChange={(value) => handleInputChange('supplier_id', value)}
-              >
-                <SelectTrigger className={errors.supplier_id ? 'border-red-500' : ''}>
-                  <SelectValue placeholder={t('purchases.form.selectSupplier')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {suppliers.map((supplier) => (
-                    <SelectItem key={supplier.id} value={supplier.id}>
-                      {supplier.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onChange={(value) => handleInputChange('supplier_id', value)}
+                entityName="un fournisseur"
+                entityNamePlural="des fournisseurs"
+                placeholder={t('purchases.form.selectSupplier')}
+                searchPlaceholder="Rechercher un fournisseur..."
+                emptyMessage="Aucun fournisseur trouvé"
+                canCreate={true}
+                createFormFields={[
+                  {
+                    name: 'name',
+                    label: 'Nom du fournisseur',
+                    type: 'text',
+                    required: true,
+                    placeholder: 'SARL Dupont Fournitures'
+                  },
+                  {
+                    name: 'email',
+                    label: 'Email',
+                    type: 'email',
+                    required: true,
+                    placeholder: 'contact@dupont.fr'
+                  },
+                  {
+                    name: 'phone',
+                    label: 'Téléphone',
+                    type: 'text',
+                    placeholder: '01 23 45 67 89'
+                  },
+                  {
+                    name: 'address',
+                    label: 'Adresse',
+                    type: 'text',
+                    placeholder: '123 Rue de la Paix'
+                  },
+                  {
+                    name: 'city',
+                    label: 'Ville',
+                    type: 'text',
+                    placeholder: 'Paris'
+                  },
+                  {
+                    name: 'postal_code',
+                    label: 'Code postal',
+                    type: 'text',
+                    placeholder: '75001'
+                  },
+                  {
+                    name: 'payment_terms',
+                    label: 'Délai de paiement (jours)',
+                    type: 'number',
+                    placeholder: '30',
+                    defaultValue: '30'
+                  }
+                ]}
+                onCreateEntity={handleCreateSupplier}
+                className={errors.supplier_id ? 'border-red-500' : ''}
+              />
               {errors.supplier_id && (
                 <p className="text-sm text-red-600">{errors.supplier_id}</p>
               )}

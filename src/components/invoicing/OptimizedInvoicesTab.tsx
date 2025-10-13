@@ -16,6 +16,8 @@ import { invoicingService } from '@/services/invoicingService';
 import { thirdPartiesService } from '@/services/thirdPartiesService';
 import CompanySettingsService from '@/services/companySettingsService';
 import { InvoicePdfService } from '@/services/invoicePdfService';
+import { EntitySelector, type EntityOption } from '@/components/common/EntitySelector';
+import { inventoryItemsService, type InventoryItem } from '@/services/inventoryItemsService';
 import type { InvoiceWithDetails } from '@/types/database/invoices.types';
 import type { ThirdParty } from '@/types/third-parties.types';
 import type { CompanySettings } from '@/types/company-settings.types';
@@ -52,6 +54,7 @@ interface InvoiceFormData {
   dueDate: string;
   description: string;
   items: Array<{
+    inventoryItemId?: string;
     description: string;
     quantity: number;
     unitPrice: number;
@@ -661,18 +664,20 @@ interface InvoiceFormDialogProps {
   onSuccess: () => void;
 }
 
-const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({ 
-  open, 
-  onClose, 
-  invoice, 
-  clients, 
+const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
+  open,
+  onClose,
+  invoice,
+  clients,
   companyId,
   companySettings,
-  onSuccess 
+  onSuccess
 }) => {
   const { toast } = useToast();
+  const { currentCompany } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showNewClientForm, setShowNewClientForm] = useState(false);
+  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const [newClientData, setNewClientData] = useState({
     name: '',
     email: '',
@@ -693,6 +698,24 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
     terms: ''
   });
 
+  // Charger les articles d'inventaire
+  useEffect(() => {
+    const loadInventoryItems = async () => {
+      if (!currentCompany?.id) return;
+
+      const result = await inventoryItemsService.getItems(currentCompany.id);
+      if (result.success) {
+        setInventoryItems(result.data);
+      } else {
+        console.error('Error loading inventory items:', result.error);
+      }
+    };
+
+    if (open) {
+      loadInventoryItems();
+    }
+  }, [open, currentCompany?.id]);
+
   // Initialiser le formulaire
   useEffect(() => {
     if (open && !invoice) {
@@ -701,7 +724,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
       // Reset form with company default terms
       const defaultTerms = companySettings?.branding?.defaultTermsConditions || '';
       const defaultTaxRate = companySettings?.accounting?.defaultVatRate || 20;
-      
+
       setFormData({
         clientId: '',
         invoiceNumber: '',
@@ -778,6 +801,70 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
     });
   };
 
+  // Préparer les options pour EntitySelector
+  const inventoryItemOptions: EntityOption[] = inventoryItems.map(item => ({
+    id: item.id,
+    label: item.name,
+    sublabel: `${item.code} - ${item.sale_price.toFixed(2)}€ HT (TVA ${item.sale_tax_rate}%)`,
+    metadata: item
+  }));
+
+  // Handler pour la sélection d'un article
+  const handleSelectInventoryItem = (index: number, itemId: string) => {
+    const selectedItem = inventoryItems.find(item => item.id === itemId);
+    if (!selectedItem) return;
+
+    setFormData(prev => {
+      const newItems = [...prev.items];
+      const quantity = newItems[index].quantity || 1;
+      const unitPrice = selectedItem.sale_price;
+      const taxRate = selectedItem.sale_tax_rate;
+      const totalHT = quantity * unitPrice;
+      const totalTTC = totalHT * (1 + taxRate / 100);
+
+      newItems[index] = {
+        ...newItems[index],
+        inventoryItemId: selectedItem.id,
+        description: selectedItem.name,
+        unitPrice: unitPrice,
+        taxRate: taxRate,
+        total: totalTTC
+      };
+      return { ...prev, items: newItems };
+    });
+  };
+
+  // Handler pour la création d'un nouvel article
+  const handleCreateInventoryItem = async (data: Record<string, any>) => {
+    if (!currentCompany?.id) {
+      return { success: false, error: 'Aucune entreprise sélectionnée' };
+    }
+
+    const result = await inventoryItemsService.createItem(currentCompany.id, {
+      reference: data.reference,
+      name: data.name,
+      category: data.category || 'Autre',
+      unit: data.unit || 'Pièce',
+      purchase_price: data.purchase_price || 0,
+      selling_price: data.selling_price,
+      current_stock: data.current_stock || 0,
+      min_stock: data.min_stock || 0,
+      max_stock: data.max_stock || 100,
+      sale_tax_rate: data.sale_tax_rate || companySettings?.accounting?.defaultVatRate || 20
+    });
+
+    if (result.success) {
+      // Rafraîchir la liste des articles
+      const updatedItems = await inventoryItemsService.getItems(currentCompany.id);
+      if (updatedItems.success) {
+        setInventoryItems(updatedItems.data);
+      }
+      return { success: true, id: result.data.id };
+    }
+
+    return { success: false, error: result.error };
+  };
+
   const calculateTotals = () => {
     const totalHT = formData.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
     const totalTVA = formData.items.reduce((sum, item) => {
@@ -785,7 +872,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
       return sum + (itemHT * item.taxRate / 100);
     }, 0);
     const totalTTC = totalHT + totalTVA;
-    
+
     return { totalHT, totalTVA, totalTTC };
   };
 
@@ -1122,14 +1209,100 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
               </div>
             </CardHeader>
             <CardContent>
+              {/* Titres de colonnes */}
+              <div className="grid grid-cols-12 gap-4 px-4 pb-2 text-sm font-medium text-gray-500">
+                <div className="col-span-4">Article / Désignation</div>
+                <div className="col-span-2">Quantité</div>
+                <div className="col-span-2">Prix HT (€)</div>
+                <div className="col-span-2">TVA</div>
+                <div className="col-span-1">Total TTC</div>
+                <div className="col-span-1">Actions</div>
+              </div>
+
               <div className="space-y-4">
                 {formData.items.map((item, index) => (
-                  <div key={index} className="grid grid-cols-12 gap-4 items-center p-4 border rounded-lg">
+                  <div key={index} className="grid grid-cols-12 gap-4 items-start p-4 border rounded-lg">
                     <div className="col-span-4">
-                      <Input
-                        placeholder="Description"
-                        value={item.description}
-                        onChange={(e) => updateItem(index, 'description', e.target.value)}
+                      <EntitySelector
+                        options={inventoryItemOptions}
+                        value={item.inventoryItemId || ''}
+                        onChange={(value) => handleSelectInventoryItem(index, value)}
+                        entityName="un article"
+                        entityNamePlural="des articles"
+                        placeholder="Sélectionner un article"
+                        searchPlaceholder="Rechercher un article..."
+                        emptyMessage="Aucun article trouvé"
+                        canCreate={true}
+                        createFormFields={[
+                          {
+                            name: 'reference',
+                            label: 'Référence',
+                            type: 'text',
+                            required: true,
+                            placeholder: 'REF-001'
+                          },
+                          {
+                            name: 'name',
+                            label: "Nom de l'article",
+                            type: 'text',
+                            required: true,
+                            placeholder: 'Ordinateur portable'
+                          },
+                          {
+                            name: 'category',
+                            label: 'Catégorie',
+                            type: 'select',
+                            options: [
+                              { value: 'Matériel informatique', label: 'Matériel informatique' },
+                              { value: 'Logiciels', label: 'Logiciels' },
+                              { value: 'Services', label: 'Services' },
+                              { value: 'Fournitures', label: 'Fournitures' },
+                              { value: 'Autre', label: 'Autre' }
+                            ]
+                          },
+                          {
+                            name: 'unit',
+                            label: 'Unité',
+                            type: 'select',
+                            required: true,
+                            options: [
+                              { value: 'Pièce', label: 'Pièce' },
+                              { value: 'Heure', label: 'Heure' },
+                              { value: 'Jour', label: 'Jour' },
+                              { value: 'Mois', label: 'Mois' },
+                              { value: 'Kg', label: 'Kg' },
+                              { value: 'Litre', label: 'Litre' }
+                            ],
+                            defaultValue: 'Pièce'
+                          },
+                          {
+                            name: 'purchase_price',
+                            label: "Prix d'achat (€)",
+                            type: 'number',
+                            placeholder: '100.00'
+                          },
+                          {
+                            name: 'selling_price',
+                            label: 'Prix de vente HT (€)',
+                            type: 'number',
+                            required: true,
+                            placeholder: '150.00'
+                          },
+                          {
+                            name: 'sale_tax_rate',
+                            label: 'Taux de TVA (%)',
+                            type: 'select',
+                            required: false,
+                            options: [
+                              { value: '0', label: '0% - Exonéré' },
+                              { value: '5.5', label: '5.5% - Taux réduit' },
+                              { value: '10', label: '10% - Taux intermédiaire' },
+                              { value: '20', label: '20% - Taux normal' }
+                            ],
+                            defaultValue: '20'
+                          }
+                        ]}
+                        onCreateEntity={handleCreateInventoryItem}
                       />
                     </div>
                     <div className="col-span-2">

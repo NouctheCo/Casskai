@@ -176,7 +176,7 @@ export class ChartOfAccountsService {
     try {
       // Vérifier qu'aucune écriture n'utilise ce compte
       const { data: lines } = await supabase
-        .from('journal_entry_lines')
+        .from('journal_entry_items')
         .select('id')
         .eq('account_id', id)
         .limit(1);
@@ -392,17 +392,17 @@ export class ChartOfAccountsService {
   async getAccountBalance(accountId: string, date?: string): Promise<number> {
     try {
       let query = supabase
-        .from('journal_entry_lines')
-        .select('debit, credit')
+        .from('journal_entry_items')
+        .select('debit_amount, credit_amount')
         .eq('account_id', accountId);
 
       if (date) {
         // Jointure avec journal_entries pour filtrer par date
         query = supabase
-          .from('journal_entry_lines')
+          .from('journal_entry_items')
           .select(`
-            debit, 
-            credit,
+            debit_amount,
+            credit_amount,
             journal_entries!inner(date)
           `)
           .eq('account_id', accountId)
@@ -415,7 +415,7 @@ export class ChartOfAccountsService {
 
       let balance = 0;
       data?.forEach(line => {
-        balance += (line.debit || 0) - (line.credit || 0);
+        balance += (line.debit_amount || 0) - (line.credit_amount || 0);
       });
 
       return balance;

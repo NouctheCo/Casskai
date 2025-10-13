@@ -4,9 +4,7 @@ import {
   ThirdPartyDashboardData, 
   AgingReport, 
   ThirdPartyServiceResponse,
-  ExportConfig,
-  ThirdPartyFormData,
-  ThirdPartyFilters
+  ExportConfig
 } from '@/types/third-parties.types';
 
 export type ThirdPartyType = 'customer' | 'supplier' | 'partner' | 'employee';
@@ -65,6 +63,15 @@ class ThirdPartiesService {
     return userCompanies.company_id;
   }
 
+  private createBillingAddress(item: any) {
+    return item.billing_address || {
+      street: item.address_line1 || '',
+      city: item.city || '',
+      postal_code: item.postal_code || '',
+      country: item.country || 'FR'
+    };
+  }
+
   async getThirdParties(enterpriseId?: string, type?: ThirdPartyType): Promise<ThirdParty[]> {
     try {
       const companyId = enterpriseId || await this.getCurrentCompanyId();
@@ -72,7 +79,7 @@ class ThirdPartiesService {
       let query = supabase
         .from('third_parties')
         .select('*')
-        .eq('enterprise_id', companyId)
+        .eq('company_id', companyId)
         .order('name');
 
       if (type) {
@@ -84,14 +91,9 @@ class ThirdPartiesService {
       if (error) throw error;
       
       // Transform data to match expected structure
-      const transformedData = (data || []).map(item => ({
+      const transformedData = (data || []).map((item) => ({
         ...item,
-        billing_address: item.billing_address || {
-          street: item.address || '',
-          city: item.city || '',
-          postal_code: item.postal_code || '',
-          country: item.country || 'FR'
-        },
+        billing_address: this.createBillingAddress(item),
         primary_email: item.email || item.primary_email || '',
         primary_phone: item.phone || item.primary_phone || '',
         current_balance: item.current_balance || 0,
@@ -136,12 +138,24 @@ class ThirdPartiesService {
     try {
       const companyId = await this.getCurrentCompanyId();
 
+      // Generate code if not provided
+      const code = await this.generateThirdPartyCode(companyId, thirdPartyData.type);
+
       const { data, error } = await supabase
         .from('third_parties')
         .insert({
           company_id: companyId,
-          ...thirdPartyData,
+          code,
+          type: thirdPartyData.type,
+          name: thirdPartyData.name,
+          legal_name: thirdPartyData.legal_name,
+          email: thirdPartyData.email,
+          phone: thirdPartyData.phone,
+          address_line1: thirdPartyData.address,
+          city: thirdPartyData.city,
+          postal_code: thirdPartyData.postal_code,
           country: thirdPartyData.country || 'FR',
+          vat_number: thirdPartyData.vat_number,
           payment_terms: thirdPartyData.payment_terms || 30,
           credit_limit: thirdPartyData.credit_limit || 0,
           is_active: true
@@ -155,6 +169,38 @@ class ThirdPartiesService {
       console.error('Error creating third party:', error);
       throw error;
     }
+  }
+
+  private async generateThirdPartyCode(companyId: string, type: ThirdPartyType): Promise<string> {
+    const prefix = type === 'customer' ? 'CLI' : type === 'supplier' ? 'FOU' : 'PAR';
+
+    // Get the last code for this type
+    const { data, error } = await supabase
+      .from('third_parties')
+      .select('code')
+      .eq('company_id', companyId)
+      .eq('type', type)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (error) {
+      console.error('Error generating code:', error);
+      return `${prefix}-${Date.now()}`;
+    }
+
+    if (!data || data.length === 0) {
+      return `${prefix}-001`;
+    }
+
+    // Extract number from last code and increment
+    const lastCode = data[0].code;
+    const match = lastCode.match(/\d+$/);
+    if (match) {
+      const nextNumber = parseInt(match[0]) + 1;
+      return `${prefix}-${String(nextNumber).padStart(3, '0')}`;
+    }
+
+    return `${prefix}-${Date.now()}`;
   }
 
   async updateThirdParty(id: string, updateData: UpdateThirdPartyData): Promise<ThirdParty> {
@@ -246,7 +292,7 @@ class ThirdPartiesService {
         id: customer.id,
         name: customer.name,
         total_invoices: customer.invoices?.length || 0,
-        total_amount: customer.invoices?.reduce((sum: number, inv: any) => sum + parseFloat(inv.total_amount || 0), 0) || 0
+        total_amount: customer.invoices?.reduce((sum: number, inv: { total_amount?: number | null }) => sum + parseFloat(inv.total_amount?.toString() || '0'), 0) || 0
       })).sort((a, b) => b.total_amount - a.total_amount);
 
       return {
@@ -346,21 +392,100 @@ class ThirdPartiesService {
 
   async getAgingReport(enterpriseId: string): Promise<ThirdPartyServiceResponse<AgingReport[]>> {
     try {
-      // TODO: Implement real aging report calculation
-      // For now, return empty data
-      const mockData: AgingReport[] = [];
-      
-      return { data: mockData };
+      // Récupérer toutes les factures non payées pour l'entreprise
+      const { data: invoices, error: invoicesError } = await supabase
+        .from('invoices')
+        .select(`
+          id,
+          third_party_id,
+          due_date,
+          total_amount,
+          paid_amount,
+          status,
+          third_parties (
+            id,
+            name
+          )
+        `)
+        .eq('company_id', enterpriseId)
+        .neq('status', 'paid');
+
+      if (invoicesError) throw invoicesError;
+
+      // Calculer le rapport de vieillissement
+      const agingMap = new Map<string, AgingReport>();
+
+      // Filtrer les factures vraiment impayées (montant dû > 0)
+      const unpaidInvoices = invoices?.filter(invoice =>
+        (invoice.total_amount - (invoice.paid_amount || 0)) > 0
+      ) || [];
+
+      unpaidInvoices.forEach(invoice => {
+        const thirdParty = Array.isArray(invoice.third_parties) 
+          ? invoice.third_parties[0] as { id: string; name: string }
+          : invoice.third_parties as { id: string; name: string };
+        if (!thirdParty) return;
+
+        const thirdPartyId = thirdParty.id;
+        const thirdPartyName = thirdParty.name;
+
+        // Calculer le montant dû
+        const outstandingAmount = invoice.total_amount - (invoice.paid_amount || 0);
+
+        // Calculer le nombre de jours d'écart
+        const dueDate = new Date(invoice.due_date);
+        const today = new Date();
+        const daysDiff = Math.floor((today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+
+        // Déterminer la tranche
+        let bucket: keyof AgingReport['aging_buckets'] = 'current';
+        if (daysDiff > 120) bucket = 'bucket_over_120';
+        else if (daysDiff > 90) bucket = 'bucket_90';
+        else if (daysDiff > 60) bucket = 'bucket_60';
+        else if (daysDiff > 30) bucket = 'bucket_30';
+
+        // Initialiser ou mettre à jour l'entrée pour ce tiers
+        const existingEntry = agingMap.get(thirdPartyId);
+        if (!existingEntry) {
+          agingMap.set(thirdPartyId, {
+            third_party_id: thirdPartyId,
+            third_party_name: thirdPartyName,
+            aging_buckets: {
+              current: 0,
+              bucket_30: 0,
+              bucket_60: 0,
+              bucket_90: 0,
+              bucket_over_120: 0
+            },
+            total_outstanding: 0,
+            oldest_invoice_date: invoice.due_date
+          });
+        }
+
+        const agingEntry = agingMap.get(thirdPartyId);
+        if (agingEntry) {
+          agingEntry.aging_buckets[bucket] += outstandingAmount;
+          agingEntry.total_outstanding += outstandingAmount;
+
+          // Mettre à jour la date de facture la plus ancienne si nécessaire
+          const currentOldest = agingEntry.oldest_invoice_date;
+          if (!currentOldest || new Date(invoice.due_date) < new Date(currentOldest)) {
+            agingEntry.oldest_invoice_date = invoice.due_date;
+          }
+        }
+      });
+
+      const agingReport = Array.from(agingMap.values());
+
+      return { data: agingReport };
     } catch (error) {
       console.error('Error fetching aging report:', error);
-      return { 
+      return {
         data: [],
-        error: { message: 'Failed to fetch aging report' } 
+        error: { message: 'Failed to fetch aging report' }
       };
     }
-  }
-
-  exportThirdPartiesToCSV(thirdParties: ThirdParty[], config: ExportConfig, filename: string): void {
+  }  exportThirdPartiesToCSV(thirdParties: ThirdParty[], config: ExportConfig, filename: string): void {
     const headers = ['Code', 'Name', 'Type', 'Email', 'Phone', 'Status', 'Current Balance'];
     const csvData = thirdParties.map(tp => [
       tp.code,

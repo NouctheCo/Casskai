@@ -243,6 +243,11 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
           setSubscriptionPlanState(planId);
           // Recharger les données complètes
           await fetchSubscription();
+          
+          // Émettre l'événement de changement d'abonnement
+          window.dispatchEvent(new CustomEvent('subscription-changed', {
+            detail: { userId: user.id, newPlanId: planId }
+          }));
         }
       } else {
         // Créer un nouvel abonnement si aucun n'existe
@@ -264,6 +269,11 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         } else {
           setSubscriptionPlanState(planId);
           await fetchSubscription();
+          
+          // Émettre l'événement de changement d'abonnement
+          window.dispatchEvent(new CustomEvent('subscription-changed', {
+            detail: { userId: user.id, newPlanId: planId }
+          }));
         }
       }
     } catch (error) {

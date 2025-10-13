@@ -1,4 +1,6 @@
 import { supabase } from '@/lib/supabase';
+import { journalEntriesService } from './journalEntriesService';
+import { EntryTemplatesService } from './entryTemplatesService';
 
 export interface Invoice {
   id: string;
@@ -290,6 +292,12 @@ class InvoicingService {
     try {
       const companyId = await this.getCurrentCompanyId();
 
+      // Get current invoice before status change
+      const currentInvoice = await this.getInvoiceById(id);
+      if (!currentInvoice) {
+        throw new Error('Invoice not found');
+      }
+
       const { error } = await supabase
         .from('invoices')
         .update({ status })
@@ -298,6 +306,16 @@ class InvoicingService {
 
       if (error) {
         throw new Error(`Failed to update invoice status: ${error.message}`);
+      }
+
+      // Auto-generate journal entry when invoice is sent
+      if (status === 'sent' && currentInvoice.status === 'draft') {
+        await this.createJournalEntryForInvoice(currentInvoice);
+      }
+
+      // Auto-generate payment journal entry when invoice is paid
+      if (status === 'paid' && currentInvoice.status !== 'paid') {
+        await this.createPaymentJournalEntryForInvoice(currentInvoice);
       }
 
       const updatedInvoice = await this.getInvoiceById(id);
@@ -513,6 +531,128 @@ class InvoicingService {
         quotesCount: 0,
         averageInvoiceValue: 0
       };
+    }
+  }
+
+  /**
+   * Crée automatiquement une écriture comptable lors de l'envoi d'une facture
+   */
+  private async createJournalEntryForInvoice(invoice: InvoiceWithDetails): Promise<void> {
+    try {
+      const companyId = await this.getCurrentCompanyId();
+
+      // Déterminer le template selon le type de facture
+      const templateId = invoice.type === 'sale' ? 'template_sale_invoice' : 'template_purchase_invoice';
+
+      // Calculer les montants HT et TTC
+      const amountHT = invoice.subtotal;
+      const amountTTC = invoice.total_amount;
+
+      // Variables pour le template
+      const variables = {
+        amountHT,
+        amountTTC,
+        invoiceNumber: invoice.invoice_number,
+        thirdPartyName: invoice.third_party?.name || 'Client/Fournisseur'
+      };
+
+      // Récupérer le journal approprié (VENTES pour les ventes, ACHATS pour les achats)
+      const journalCode = invoice.type === 'sale' ? 'VENTES' : 'ACHATS';
+      const journals = await journalEntriesService.getJournalsList(companyId);
+      const journal = journals.find(j => j.code === journalCode);
+
+      if (!journal) {
+        console.warn(`Journal ${journalCode} non trouvé, écriture non créée`);
+        return;
+      }
+
+      // Appliquer le template
+      const journalEntry = await EntryTemplatesService.applyTemplate(
+        templateId,
+        variables,
+        companyId,
+        journal.id
+      );
+
+      // Créer l'écriture comptable
+      const payload = {
+        companyId,
+        entryDate: invoice.issue_date,
+        description: `${invoice.type === 'sale' ? 'Facture' : 'Facture fournisseur'} ${invoice.invoice_number} - ${invoice.third_party?.name || ''}`,
+        referenceNumber: invoice.invoice_number,
+        journalId: journal.id,
+        status: 'posted' as const,
+        items: journalEntry.items
+      };
+
+      const result = await journalEntriesService.createJournalEntry(payload);
+
+      if (!result.success) {
+        console.error('Erreur création écriture comptable:', result.error);
+      } else {
+        console.warn(`Écriture comptable créée pour la facture ${invoice.invoice_number}`);
+      }
+    } catch (error) {
+      console.error('Erreur lors de la création automatique d\'écriture comptable:', error);
+      // Ne pas bloquer la mise à jour de la facture si l'écriture échoue
+    }
+  }
+
+  /**
+   * Crée automatiquement une écriture comptable lors du paiement d'une facture
+   */
+  private async createPaymentJournalEntryForInvoice(invoice: InvoiceWithDetails): Promise<void> {
+    try {
+      const companyId = await this.getCurrentCompanyId();
+
+      // Utiliser le template de paiement approprié selon le type de facture
+      const templateId = invoice.type === 'sale' ? 'template_bank_payment_client' : 'template_bank_payment_supplier';
+
+      // Variables pour le template
+      const variables = {
+        amount: invoice.total_amount,
+        invoiceNumber: invoice.invoice_number,
+        thirdPartyName: invoice.third_party?.name || 'Client/Fournisseur'
+      };
+
+      // Récupérer le journal de banque
+      const journals = await journalEntriesService.getJournalsList(companyId);
+      const journal = journals.find(j => j.code === 'BANQUE' || j.type === 'bank');
+
+      if (!journal) {
+        console.warn('Journal de banque non trouvé, écriture de paiement non créée');
+        return;
+      }
+
+      // Appliquer le template
+      const journalEntry = await EntryTemplatesService.applyTemplate(
+        templateId,
+        variables,
+        companyId,
+        journal.id
+      );
+
+      // Créer l'écriture comptable de paiement
+      const payload = {
+        companyId,
+        entryDate: new Date().toISOString().split('T')[0], // Date du jour
+        description: `Paiement ${invoice.type === 'sale' ? 'facture' : 'facture fournisseur'} ${invoice.invoice_number} - ${invoice.third_party?.name || ''}`,
+        referenceNumber: `PAY-${invoice.invoice_number}`,
+        journalId: journal.id,
+        status: 'posted' as const,
+        items: journalEntry.items
+      };
+
+      const result = await journalEntriesService.createJournalEntry(payload);
+
+      if (!result.success) {
+        console.error('Erreur création écriture de paiement:', result.error);
+      } else {
+        console.warn(`Écriture de paiement créée pour la facture ${invoice.invoice_number}`);
+      }
+    } catch (error) {
+      console.error('Erreur lors de la création automatique d\'écriture de paiement:', error);
+      // Ne pas bloquer la mise à jour de la facture si l'écriture échoue
     }
   }
 }

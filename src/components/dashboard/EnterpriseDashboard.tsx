@@ -765,8 +765,12 @@ export const EnterpriseDashboard: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* Résumé exécutif */}
+      {/* Résumé exécutif - Affiché uniquement si données réelles disponibles */}
       {dashboardData?.executive_summary && (
+        dashboardData.executive_summary.revenue_ytd > 0 ||
+        dashboardData.executive_summary.cash_runway_days > 0 ||
+        dashboardData.executive_summary.customer_satisfaction > 0
+      ) && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -775,43 +779,53 @@ export const EnterpriseDashboard: React.FC = () => {
           <Card className="border-0 shadow-lg bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
             <CardContent className="p-6">
               <div className="grid md:grid-cols-4 gap-6">
-                <div>
-                  <h3 className="text-sm font-medium opacity-90 mb-1">CA Année</h3>
-                  <p className="text-2xl font-bold">
-                    {new Intl.NumberFormat('fr-FR', {
-                      style: 'currency',
-                      currency: 'EUR',
-                      notation: 'compact'
-                    }).format(dashboardData.executive_summary.revenue_ytd)}
-                  </p>
-                  <p className="text-sm opacity-75">
-                    {dashboardData.executive_summary.revenue_growth > 0 ? '+' : ''}
-                    {dashboardData.executive_summary.revenue_growth.toFixed(1)}% vs N-1
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium opacity-90 mb-1">Marge</h3>
-                  <p className="text-2xl font-bold">
-                    {dashboardData.executive_summary.profit_margin.toFixed(1)}%
-                  </p>
-                  <p className="text-sm opacity-75">Marge nette</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium opacity-90 mb-1">Trésorerie</h3>
-                  <p className="text-2xl font-bold">
-                    {dashboardData.executive_summary.cash_runway_days} jours
-                  </p>
-                  <p className="text-sm opacity-75">Autonomie</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium opacity-90 mb-1">Position</h3>
-                  <p className="text-lg font-bold">
-                    {dashboardData.executive_summary.market_position}
-                  </p>
-                  <p className="text-sm opacity-75">
-                    Satisfaction: {dashboardData.executive_summary.customer_satisfaction.toFixed(1)}%
-                  </p>
-                </div>
+                {dashboardData.executive_summary.revenue_ytd > 0 && (
+                  <div>
+                    <h3 className="text-sm font-medium opacity-90 mb-1">CA Année</h3>
+                    <p className="text-2xl font-bold">
+                      {new Intl.NumberFormat('fr-FR', {
+                        style: 'currency',
+                        currency: 'EUR',
+                        notation: 'compact'
+                      }).format(dashboardData.executive_summary.revenue_ytd)}
+                    </p>
+                    <p className="text-sm opacity-75">
+                      {dashboardData.executive_summary.revenue_growth > 0 ? '+' : ''}
+                      {dashboardData.executive_summary.revenue_growth.toFixed(1)}% vs N-1
+                    </p>
+                  </div>
+                )}
+                {dashboardData.executive_summary.profit_margin > 0 && (
+                  <div>
+                    <h3 className="text-sm font-medium opacity-90 mb-1">Marge</h3>
+                    <p className="text-2xl font-bold">
+                      {dashboardData.executive_summary.profit_margin.toFixed(1)}%
+                    </p>
+                    <p className="text-sm opacity-75">Marge nette</p>
+                  </div>
+                )}
+                {dashboardData.executive_summary.cash_runway_days > 0 && (
+                  <div>
+                    <h3 className="text-sm font-medium opacity-90 mb-1">Trésorerie</h3>
+                    <p className="text-2xl font-bold">
+                      {dashboardData.executive_summary.cash_runway_days} jours
+                    </p>
+                    <p className="text-sm opacity-75">Autonomie</p>
+                  </div>
+                )}
+                {(dashboardData.executive_summary.customer_satisfaction > 0 || dashboardData.executive_summary.market_position !== 'Non défini') && (
+                  <div>
+                    <h3 className="text-sm font-medium opacity-90 mb-1">Position</h3>
+                    <p className="text-lg font-bold">
+                      {dashboardData.executive_summary.market_position}
+                    </p>
+                    {dashboardData.executive_summary.customer_satisfaction > 0 && (
+                      <p className="text-sm opacity-75">
+                        Satisfaction: {dashboardData.executive_summary.customer_satisfaction.toFixed(1)}%
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -853,10 +867,28 @@ export const EnterpriseDashboard: React.FC = () => {
 
         {/* Santé Financière */}
         <div className="space-y-6">
-          <FinancialHealthCard
-            healthScore={dashboardData?.financial_health || {} as any}
-            isLoading={isLoading}
-          />
+          {/* Afficher uniquement si score overall > 0 */}
+          {dashboardData?.financial_health && dashboardData.financial_health.overall_score > 0 ? (
+            <FinancialHealthCard
+              healthScore={dashboardData.financial_health}
+              isLoading={isLoading}
+            />
+          ) : !isLoading && (
+            <Card className="border-0 shadow-lg">
+              <CardContent className="text-center py-12">
+                <Shield className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Santé Financière
+                </h3>
+                <p className="text-gray-500 dark:text-gray-400 mb-4">
+                  Aucune donnée de santé financière disponible
+                </p>
+                <p className="text-sm text-gray-400 dark:text-gray-500">
+                  Les métriques apparaîtront une fois que vous aurez des données comptables
+                </p>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Alertes */}
           {dashboardData?.alerts && dashboardData.alerts.length > 0 && (

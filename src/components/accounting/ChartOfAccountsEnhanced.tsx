@@ -25,6 +25,35 @@ import {
 } from 'lucide-react';
 import type { Account } from '@/types/database.types';
 
+// Type étendu pour les comptes du plan comptable
+interface ChartOfAccount extends Account {
+  account_number: string;
+  account_name: string;
+  account_type: 'asset' | 'liability' | 'equity' | 'revenue' | 'expense';
+  parent_account_id?: string;
+  level: number;
+  balance_debit: number;
+  balance_credit: number;
+  current_balance: number;
+}
+
+interface ChartOfAccount {
+  id: string;
+  company_id: string;
+  account_number: string;
+  account_name: string;
+  account_type: 'asset' | 'liability' | 'equity' | 'revenue' | 'expense';
+  parent_account_id?: string;
+  level: number;
+  is_active: boolean;
+  balance_debit: number;
+  balance_credit: number;
+  current_balance: number;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 interface BudgetCategory {
   id: string;
   category: string;
@@ -38,11 +67,11 @@ interface AccountMapping {
 }
 
 export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { currentEnterpriseId?: string }) {
-  const { user } = useAuth();
+  const { currentCompany } = useAuth();
   const { toast } = useToast();
   const { t } = useLocale();
 
-  const companyId = currentEnterpriseId;
+  const companyId = currentEnterpriseId || currentCompany?.id;
 
   const {
     accounts,
@@ -55,10 +84,86 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
   const [budgetCategories, setBudgetCategories] = useState<BudgetCategory[]>([]);
   const [accountMappings, setAccountMappings] = useState<Map<string, string>>(new Map());
   const [searchTerm, setSearchTerm] = useState('');
-  const [classFilter, setClassFilter] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
+  const [classFilter, setClassFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
   const [initializingChart, setInitializingChart] = useState(false);
   const [savingMapping, setSavingMapping] = useState<string | null>(null);
+  const [hasChartOfAccounts, setHasChartOfAccounts] = useState<boolean | null>(null);
+
+  // Vérifier si le plan comptable existe et l'initialiser automatiquement si nécessaire
+  useEffect(() => {
+    if (!companyId) return;
+
+    const checkAndInitializeChart = async () => {
+      try {
+        // Vérifier s'il y a déjà des comptes dans chart_of_accounts
+        const { data: chartAccounts, error: chartError } = await supabase
+          .from('chart_of_accounts')
+          .select('id')
+          .eq('company_id', companyId)
+          .limit(1);
+
+        if (chartError) {
+          console.warn('Erreur vérification chart_of_accounts:', chartError);
+        }
+
+        // Vérifier aussi dans la table accounts (legacy)
+        const { data: legacyAccounts, error: legacyError } = await supabase
+          .from('accounts')
+          .select('id')
+          .eq('company_id', companyId)
+          .limit(1);
+
+        if (legacyError) {
+          console.warn('Erreur vérification accounts:', legacyError);
+        }
+
+        const hasChart = (chartAccounts && chartAccounts.length > 0) || (legacyAccounts && legacyAccounts.length > 0);
+        setHasChartOfAccounts(hasChart);
+
+        // Si aucun plan comptable n'existe, l'initialiser automatiquement
+        if (!hasChart) {
+          console.log('🔧 Plan comptable vide détecté, initialisation automatique...');
+
+          // Récupérer le pays de l'entreprise
+          const { data: companyData, error: companyError } = await supabase
+            .from('companies')
+            .select('country_code')
+            .eq('id', companyId)
+            .single();
+
+          if (companyError) {
+            console.warn('Erreur récupération pays entreprise:', companyError);
+            return;
+          }
+
+          const countryCode = companyData?.country_code || 'FR';
+
+          // Initialiser automatiquement le plan comptable
+          const { data: initResult, error: initError } = await supabase.rpc('initialize_company_chart_of_accounts', {
+            p_company_id: companyId,
+            p_country_code: countryCode
+          });
+
+          if (initError) {
+            console.error('Erreur initialisation automatique:', initError);
+            // Ne pas afficher d'erreur à l'utilisateur pour l'instant
+            return;
+          }
+
+          console.log(`✅ Plan comptable initialisé automatiquement: ${initResult || 0} comptes créés`);
+          setHasChartOfAccounts(true);
+
+          // Rafraîchir les données
+          await refresh();
+        }
+      } catch (err) {
+        console.error('Erreur vérification/initialisation plan comptable:', err);
+      }
+    };
+
+    checkAndInitializeChart();
+  }, [companyId, refresh]);
 
   // Charger les catégories budgétaires disponibles
   useEffect(() => {
@@ -227,10 +332,10 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
   const filteredAccounts = accounts?.filter(account => {
     const matchesSearch = !searchTerm ||
       account.account_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      account.name.toLowerCase().includes(searchTerm.toLowerCase());
+      account.account_name.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesClass = !classFilter || String(account.class) === classFilter;
-    const matchesType = !typeFilter || account.type === typeFilter;
+    const matchesClass = !classFilter || classFilter === 'all' || String(account.account_number.charAt(0)) === classFilter;
+    const matchesType = !typeFilter || typeFilter === 'all' || account.account_type === typeFilter;
 
     return matchesSearch && matchesClass && matchesType;
   });
@@ -286,21 +391,22 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
             </CardDescription>
           </div>
           <div className="flex gap-2">
-            {(!accounts || accounts.length === 0) && (
+            {hasChartOfAccounts === false && (
               <Button
                 onClick={handleInitializeChart}
                 disabled={initializingChart}
-                variant="default"
+                variant="outline"
+                className="border-orange-200 text-orange-700 hover:bg-orange-50"
               >
                 {initializingChart ? (
                   <>
                     <span className="animate-spin mr-2">⏳</span>
-                    Initialisation...
+                    Initialisation manuelle...
                   </>
                 ) : (
                   <>
-                    <Download className="mr-2 h-4 w-4" />
-                    Initialiser plan standard
+                    <AlertTriangle className="mr-2 h-4 w-4" />
+                    Initialisation manuelle du plan
                   </>
                 )}
               </Button>
@@ -325,7 +431,7 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
               <SelectValue placeholder="Classe" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Toutes les classes</SelectItem>
+              <SelectItem value="all">Toutes les classes</SelectItem>
               <SelectItem value="1">1 - Capitaux</SelectItem>
               <SelectItem value="2">2 - Immobilisations</SelectItem>
               <SelectItem value="3">3 - Stocks</SelectItem>
@@ -341,7 +447,7 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
               <SelectValue placeholder="Type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tous les types</SelectItem>
+              <SelectItem value="all">Tous les types</SelectItem>
               <SelectItem value="asset">Actif</SelectItem>
               <SelectItem value="liability">Passif</SelectItem>
               <SelectItem value="equity">Capitaux propres</SelectItem>
@@ -353,7 +459,15 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
       </CardHeader>
 
       <CardContent>
-        {loading ? (
+        {!companyId ? (
+          <div className="text-center py-10">
+            <AlertTriangle className="mx-auto h-12 w-12 text-yellow-500" />
+            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">Erreur de configuration</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Impossible de charger le plan comptable. Veuillez actualiser la page.
+            </p>
+          </div>
+        ) : loading ? (
           <Table>
             <TableHeader>
               <TableRow>
@@ -422,9 +536,34 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
                   return (
                     <TableRow key={account.id}>
                       <TableCell className="font-mono text-sm">{account.account_number}</TableCell>
-                      <TableCell className="font-medium">{account.name}</TableCell>
-                      <TableCell className="text-sm">{account.type}</TableCell>
-                      <TableCell className="text-sm">{account.class}</TableCell>
+                      <TableCell className="font-medium">{account.account_name}</TableCell>
+                      <TableCell className="text-sm">
+                        <Badge variant="outline" className={
+                          account.account_type === 'asset' ? 'border-blue-300 text-blue-700' :
+                          account.account_type === 'liability' ? 'border-orange-300 text-orange-700' :
+                          account.account_type === 'equity' ? 'border-green-300 text-green-700' :
+                          account.account_type === 'revenue' ? 'border-purple-300 text-purple-700' :
+                          'border-red-300 text-red-700'
+                        }>
+                          {account.account_type === 'asset' ? 'Actif' :
+                           account.account_type === 'liability' ? 'Passif' :
+                           account.account_type === 'equity' ? 'Capitaux' :
+                           account.account_type === 'revenue' ? 'Produits' : 'Charges'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        <Badge variant="outline" className="border-gray-300">
+                          Classe {account.account_number.charAt(0)} - {
+                            account.account_number.charAt(0) === '1' ? 'Capitaux' :
+                            account.account_number.charAt(0) === '2' ? 'Immobilisations' :
+                            account.account_number.charAt(0) === '3' ? 'Stocks' :
+                            account.account_number.charAt(0) === '4' ? 'Tiers' :
+                            account.account_number.charAt(0) === '5' ? 'Financiers' :
+                            account.account_number.charAt(0) === '6' ? 'Charges' :
+                            account.account_number.charAt(0) === '7' ? 'Produits' : 'Autre'
+                          }
+                        </Badge>
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Select

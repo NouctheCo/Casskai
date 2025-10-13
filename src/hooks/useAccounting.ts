@@ -49,7 +49,7 @@ export function useAccounting(companyId: string) {
 
     try {
       const { data, error: fetchError } = await supabase
-        .from('accounts')
+        .from('chart_of_accounts')
         .select('*')
         .eq('company_id', companyId)
         .eq('is_active', true)

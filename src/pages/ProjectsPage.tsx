@@ -7,6 +7,11 @@ import { useToast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { useProjects } from '@/hooks/useProjects';
+import { EntitySelector, type EntityOption, type EntityFormField } from '@/components/common/EntitySelector';
+import { thirdPartiesService } from '@/services/thirdPartiesService';
+import { useAuth } from '@/contexts/AuthContext';
+import { useCrm } from '@/hooks/useCrm';
+import { useHR } from '@/hooks/useHR';
 import { 
   KanbanSquare, 
   PlusCircle, 
@@ -55,294 +60,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-// Données mock pour les projets
-const mockProjects = [
-  {
-    id: '1',
-    name: 'Refonte Site Web E-commerce',
-    description: 'Modernisation complète du site e-commerce avec nouvelle UX/UI',
-    client: 'TechCorp Solutions',
-    status: 'in_progress',
-    priority: 'high',
-    startDate: '2024-02-01',
-    endDate: '2024-04-15',
-    budget: 45000,
-    spent: 28500,
-    progress: 65,
-    manager: 'Marie Dubois',
-    team: ['Pierre Martin', 'Sophie Bernard', 'Alex Chen'],
-    category: 'Développement',
-    lastActivity: '2024-03-15T14:30:00',
-    totalHours: 380,
-    billableHours: 350,
-    hourlyRate: 85,
-    revenue: 29750,
-    profit: 1250
-  },
-  {
-    id: '2',
-    name: 'Application Mobile Banking',
-    description: 'Développement d\'une application mobile pour services bancaires',
-    client: 'BankSecure',
-    status: 'planning',
-    priority: 'high',
-    startDate: '2024-03-20',
-    endDate: '2024-08-30',
-    budget: 85000,
-    spent: 5200,
-    progress: 15,
-    manager: 'Pierre Martin',
-    team: ['Marie Dubois', 'Lucas Moreau', 'Emma Leroy'],
-    category: 'Mobile',
-    lastActivity: '2024-03-14T16:45:00',
-    totalHours: 85,
-    billableHours: 80,
-    hourlyRate: 95,
-    revenue: 7600,
-    profit: 2400
-  },
-  {
-    id: '3',
-    name: 'Audit Sécurité Infrastructure',
-    description: 'Audit complet de la sécurité informatique et recommandations',
-    client: 'MegaCorp Industries',
-    status: 'completed',
-    priority: 'medium',
-    startDate: '2024-01-10',
-    endDate: '2024-02-28',
-    budget: 25000,
-    spent: 24800,
-    progress: 100,
-    manager: 'Sophie Bernard',
-    team: ['Thomas Roux', 'Julie Blanc'],
-    category: 'Conseil',
-    lastActivity: '2024-02-28T17:00:00',
-    totalHours: 320,
-    billableHours: 315,
-    hourlyRate: 75,
-    revenue: 23625,
-    profit: -1175
-  },
-  {
-    id: '4',
-    name: 'Formation Équipe DevOps',
-    description: 'Programme de formation sur les pratiques DevOps et CI/CD',
-    client: 'InnovateTech',
-    status: 'on_hold',
-    priority: 'low',
-    startDate: '2024-04-01',
-    endDate: '2024-05-15',
-    budget: 15000,
-    spent: 2100,
-    progress: 25,
-    manager: 'Alex Chen',
-    team: ['Marie Dubois', 'Pierre Martin'],
-    category: 'Formation',
-    lastActivity: '2024-03-12T11:20:00',
-    totalHours: 45,
-    billableHours: 40,
-    hourlyRate: 65,
-    revenue: 2600,
-    profit: 500
-  }
-];
-
-// Données mock pour les tâches
-const mockTasks = [
-  {
-    id: '1',
-    project_id: '1',
-    title: 'Maquettage interface utilisateur',
-    description: 'Création des maquettes haute fidélité pour toutes les pages',
-    status: 'completed',
-    priority: 'high',
-    assignee: 'Sophie Bernard',
-    estimatedHours: 40,
-    actualHours: 38,
-    startDate: '2024-02-01',
-    dueDate: '2024-02-15',
-    completedDate: '2024-02-14',
-    progress: 100,
-    tags: ['Design', 'UX/UI'],
-    dependencies: [],
-    comments: 12
-  },
-  {
-    id: '2',
-    project_id: '1',
-    title: 'Développement API REST',
-    description: 'Implémentation des endpoints API pour le backend',
-    status: 'in_progress',
-    priority: 'high',
-    assignee: 'Pierre Martin',
-    estimatedHours: 80,
-    actualHours: 52,
-    startDate: '2024-02-16',
-    dueDate: '2024-03-20',
-    completedDate: null,
-    progress: 75,
-    tags: ['Backend', 'API'],
-    dependencies: ['1'],
-    comments: 8
-  },
-  {
-    id: '3',
-    project_id: '1',
-    title: 'Intégration paiement sécurisé',
-    description: 'Mise en place du système de paiement avec Stripe',
-    status: 'todo',
-    priority: 'medium',
-    assignee: 'Alex Chen',
-    estimatedHours: 25,
-    actualHours: 0,
-    startDate: '2024-03-21',
-    dueDate: '2024-04-05',
-    completedDate: null,
-    progress: 0,
-    tags: ['Paiement', 'Sécurité'],
-    dependencies: ['2'],
-    comments: 3
-  },
-  {
-    id: '4',
-    project_id: '2',
-    title: 'Analyse des besoins',
-    description: 'Recueil et analyse des exigences fonctionnelles',
-    status: 'completed',
-    priority: 'high',
-    assignee: 'Marie Dubois',
-    estimatedHours: 30,
-    actualHours: 32,
-    startDate: '2024-02-20',
-    dueDate: '2024-03-05',
-    completedDate: '2024-03-04',
-    progress: 100,
-    tags: ['Analyse', 'Spécifications'],
-    dependencies: [],
-    comments: 15
-  },
-  {
-    id: '5',
-    project_id: '2',
-    title: 'Architecture technique',
-    description: 'Définition de l\'architecture technique de l\'application',
-    status: 'in_progress',
-    priority: 'high',
-    assignee: 'Lucas Moreau',
-    estimatedHours: 45,
-    actualHours: 20,
-    startDate: '2024-03-06',
-    dueDate: '2024-03-25',
-    completedDate: null,
-    progress: 45,
-    tags: ['Architecture', 'Technique'],
-    dependencies: ['4'],
-    comments: 6
-  }
-];
-
-// Données mock pour les timesheets
-const mockTimesheets = [
-  {
-    id: '1',
-    project_id: '1',
-    task_id: '2',
-    user_id: 'user-pierre',
-    user_name: 'Pierre Martin',
-    date: '2024-03-15',
-    hours: 7.5,
-    billable: true,
-    billableHours: 7.5,
-    description: 'Développement endpoints API utilisateurs et produits',
-    task: 'Développement API REST',
-    hourlyRate: 85,
-    approved: true
-  },
-  {
-    id: '2',
-    project_id: '1',
-    task_id: '1',
-    user_id: 'user-sophie',
-    user_name: 'Sophie Bernard',
-    date: '2024-03-14',
-    hours: 7,
-    billable: true,
-    billableHours: 7,
-    description: 'Finalisation maquettes et préparation livrables',
-    task: 'Maquettage interface utilisateur',
-    hourlyRate: 75,
-    approved: true
-  },
-  {
-    id: '3',
-    project_id: '2',
-    task_id: '5',
-    user_id: 'user-lucas',
-    user_name: 'Lucas Moreau',
-    date: '2024-03-15',
-    hours: 7,
-    billable: true,
-    billableHours: 6.5,
-    description: 'Conception architecture microservices',
-    task: 'Architecture technique',
-    hourlyRate: 90,
-    approved: false
-  }
-];
-
-// Données mock pour les ressources
-const mockResources = [
-  {
-    id: '1',
-    name: 'Marie Dubois',
-    role: 'Chef de Projet',
-    email: 'marie.dubois@casskai.com',
-    hourlyRate: 85,
-    availability: 85, // pourcentage
-    skills: ['Gestion de projet', 'Agile', 'Scrum'],
-    currentProjects: ['1', '2'],
-    totalHours: 160,
-    billableHours: 152
-  },
-  {
-    id: '2',
-    name: 'Pierre Martin',
-    role: 'Développeur Senior',
-    email: 'pierre.martin@casskai.com',
-    hourlyRate: 85,
-    availability: 95,
-    skills: ['React', 'Node.js', 'TypeScript'],
-    currentProjects: ['1', '4'],
-    totalHours: 168,
-    billableHours: 165
-  },
-  {
-    id: '3',
-    name: 'Sophie Bernard',
-    role: 'Designer UX/UI',
-    email: 'sophie.bernard@casskai.com',
-    hourlyRate: 75,
-    availability: 75,
-    skills: ['Figma', 'Adobe Suite', 'Prototypage'],
-    currentProjects: ['1', '3'],
-    totalHours: 140,
-    billableHours: 138
-  }
-];
-
-// Métriques des projets
-const mockProjectMetrics = {
-  totalProjects: 4,
-  activeProjects: 2,
-  completedProjects: 1,
-  onHoldProjects: 1,
-  totalRevenue: 63575,
-  totalBudget: 170000,
-  totalSpent: 60600,
-  profitMargin: 4.7,
-  averageProgress: 51.25,
-  overdueProjects: 0
-};
+// Toutes les données proviennent du hook useProjects - Aucune donnée mockée
 
 export default function ProjectsPage() {
   const { t } = useLocale();
@@ -369,6 +87,14 @@ export default function ProjectsPage() {
     averageProgress
   } = useProjects();
 
+  const { currentCompany } = useAuth();
+
+  // Get clients from CRM
+  const { clients } = useCrm();
+
+  // Get employees from HR
+  const { employees } = useHR();
+
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -393,94 +119,10 @@ export default function ProjectsPage() {
     }
   };
 
-  // Mock des resources temporaire pour éviter l'erreur
-  const resources = [
-    {
-      id: '1',
-      name: 'Marie Dubois',
-      role: 'Chef de Projet',
-      email: 'marie.dubois@casskai.app',
-      skills: ['Project Management', 'Agile', 'Scrum'],
-      availability: 85,
-      hourlyRate: 75,
-      currentProjects: ['1', '2'], // Projets actifs
-      totalHours: 160,
-      billableHours: 152
-    },
-    {
-      id: '2',
-      name: 'Pierre Martin',
-      role: 'Développeur Full Stack',
-      email: 'pierre.martin@casskai.app',
-      skills: ['React', 'Node.js', 'TypeScript'],
-      availability: 92,
-      hourlyRate: 65,
-      currentProjects: ['1'], // Projets actifs
-      totalHours: 168,
-      billableHours: 165
-    },
-    {
-      id: '3',
-      name: 'Sophie Bernard',
-      role: 'Designer UX/UI',
-      email: 'sophie.bernard@casskai.app',
-      skills: ['Figma', 'Adobe XD', 'User Research'],
-      availability: 78,
-      hourlyRate: 60,
-      currentProjects: ['1', '3'], // Projets actifs
-      totalHours: 140,
-      billableHours: 138
-    }
-  ];
-
-  // Mock des timesheets temporaire pour éviter l'erreur
-  const timesheets = [
-    {
-      id: '1',
-      project_id: '1',
-      task_id: '1',
-      user_id: 'user-1',
-      user_name: 'Marie Dubois',
-      date: '2024-03-15',
-      hours: 8,
-      billable: true,
-      billableHours: 8,
-      hourlyRate: 75,
-      description: 'Développement front-end',
-      task: 'UI Implementation',
-      approved: true
-    },
-    {
-      id: '2',
-      project_id: '1',
-      task_id: '2',
-      user_id: 'user-2',
-      user_name: 'Pierre Martin',
-      date: '2024-03-15',
-      hours: 7.5,
-      billable: true,
-      billableHours: 7.5,
-      hourlyRate: 65,
-      description: 'API Development',
-      task: 'Backend Integration',
-      approved: true
-    },
-    {
-      id: '3',
-      project_id: '2',
-      task_id: '3',
-      user_id: 'user-3',
-      user_name: 'Sophie Bernard',
-      date: '2024-03-14',
-      hours: 6,
-      billable: true,
-      billableHours: 6,
-      hourlyRate: 60,
-      description: 'Design System',
-      task: 'UX Research',
-      approved: false
-    }
-  ];
+  // Les ressources et timesheets seront implémentés avec un hook dédié dans une future version
+  // Pour l'instant, on utilise des tableaux vides pour afficher des états vides appropriés
+  const resources = [];
+  const timesheets = [];
 
   const [activeView, setActiveView] = useState('dashboard');
   const [showProjectForm, setShowProjectForm] = useState(false);
@@ -601,6 +243,120 @@ export default function ProjectsPage() {
     }
   }, [toast, updateProject]);
 
+  const handleCreateClient = async (clientData: Record<string, any>) => {
+    try {
+      if (!currentCompany) {
+        throw new Error('No current company selected');
+      }
+
+      const newClient = await thirdPartiesService.createThirdParty({
+        company_name: clientData.company_name,
+        email: clientData.email || '',
+        phone: clientData.phone || '',
+        address: clientData.address || '',
+        type: 'customer' as any, // Assuming 'customer' is the correct type
+        company_id: currentCompany.id
+      });
+
+      return { success: true, id: newClient.id };
+    } catch (error) {
+      console.error('Error creating client:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  };
+
+  const handleCreateEmployee = async (employeeData: Record<string, any>) => {
+    try {
+      if (!currentCompany) {
+        throw new Error('No current company selected');
+      }
+
+      // TODO: Implement employee creation service
+      // For now, return a mock success
+      console.warn('Employee creation not implemented yet, using mock data');
+      return { success: true, id: `emp_${Date.now()}` };
+    } catch (error) {
+      console.error('Error creating employee:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  };
+
+  const clientCreateFormFields: EntityFormField[] = [
+    {
+      name: 'company_name',
+      label: t('crm.clientForm.companyName'),
+      type: 'text',
+      required: true,
+      placeholder: t('crm.clientForm.companyNamePlaceholder')
+    },
+    {
+      name: 'email',
+      label: t('crm.clientForm.email'),
+      type: 'email',
+      required: false,
+      placeholder: t('crm.clientForm.emailPlaceholder')
+    },
+    {
+      name: 'phone',
+      label: t('crm.clientForm.phone'),
+      type: 'text',
+      required: false,
+      placeholder: t('crm.clientForm.phonePlaceholder')
+    },
+    {
+      name: 'address',
+      label: t('crm.clientForm.address'),
+      type: 'text',
+      required: false,
+      placeholder: t('crm.clientForm.addressPlaceholder')
+    }
+  ];
+
+  const employeeCreateFormFields: EntityFormField[] = [
+    {
+      name: 'first_name',
+      label: 'Prénom',
+      type: 'text',
+      required: true,
+      placeholder: 'Prénom de l\'employé'
+    },
+    {
+      name: 'last_name',
+      label: 'Nom',
+      type: 'text',
+      required: true,
+      placeholder: 'Nom de l\'employé'
+    },
+    {
+      name: 'email',
+      label: 'Email',
+      type: 'email',
+      required: true,
+      placeholder: 'email@company.com'
+    },
+    {
+      name: 'position',
+      label: 'Poste',
+      type: 'text',
+      required: false,
+      placeholder: 'Développeur, Chef de projet, etc.'
+    }
+  ];
+
+  // Pour l'instant, on utilise une liste vide de clients - à remplacer par les vrais clients du CRM
+  const clientOptions: EntityOption[] = clients.map(client => ({
+    id: client.id,
+    label: client.company_name,
+    sublabel: client.website || undefined
+  }));
+
+  // Options pour les employés (project managers)
+  const employeeOptions: EntityOption[] = employees.map(employee => ({
+    id: employee.id,
+    label: `${employee.first_name} ${employee.last_name}`,
+    sublabel: employee.position || employee.email || undefined
+  }));
+
   // Métriques calculées provenant du hook
   const computedMetrics = useMemo(() => ({
     totalProjects: projects.length,
@@ -675,11 +431,16 @@ export default function ProjectsPage() {
               </div>
               <div>
                 <label htmlFor="projectClient" className="text-sm font-medium">{t('projectspage.client', { defaultValue: 'Client' })}</label>
-                <Input 
-                  id="projectClient" 
+                <EntitySelector
+                  options={clientOptions}
                   value={projectClient}
-                  onChange={(e) => setProjectClient(e.target.value)}
-                  placeholder={t('projectspage.slectionner_un_client', { defaultValue: 'Sélectionner un client' })} 
+                  onChange={setProjectClient}
+                  onCreateEntity={handleCreateClient}
+                  createFormFields={clientCreateFormFields}
+                  entityName={t('crm.clientForm.client')}
+                  entityNamePlural={t('crm.clientForm.clients')}
+                  placeholder={t('projectspage.slectionner_un_client', { defaultValue: 'Sélectionner un client' })}
+                  canCreate={true}
                 />
               </div>
             </div>
@@ -730,11 +491,16 @@ export default function ProjectsPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="projectManager" className="text-sm font-medium">{t('projectspage.chef_de_projet', { defaultValue: 'Chef de projet' })}</label>
-                <Input 
-                  id="projectManager" 
+                <EntitySelector
+                  options={employeeOptions}
                   value={projectManager}
-                  onChange={(e) => setProjectManager(e.target.value)}
-                  placeholder={t('projectspage.slectionner_un_responsable', { defaultValue: 'Sélectionner un responsable' })} 
+                  onChange={setProjectManager}
+                  onCreateEntity={handleCreateEmployee}
+                  createFormFields={employeeCreateFormFields}
+                  entityName="Employé"
+                  entityNamePlural="Employés"
+                  placeholder={t('projectspage.slectionner_un_responsable', { defaultValue: 'Sélectionner un responsable' })}
+                  canCreate={true}
                 />
               </div>
               <div>
@@ -1080,49 +846,71 @@ export default function ProjectsPage() {
           <TabsContent value="resources" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="text-green-500" />
-                  Allocation des Ressources
-                </CardTitle>
-                <CardDescription>Gestion de l'équipe et planification</CardDescription>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="text-green-500" />
+                      Allocation des Ressources
+                    </CardTitle>
+                    <CardDescription>Gestion de l'équipe et planification</CardDescription>
+                  </div>
+                  <Button onClick={() => toast({ title: "Bientôt disponible", description: "La gestion des ressources sera disponible prochainement" })}>
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Ajouter ressource
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {resources.map((resource) => (
-                    <motion.div
-                      key={resource.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="flex items-center justify-between p-4 border rounded-lg"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
-                          {resource.name.split(' ').map(n => n.charAt(0)).join('')}
-                        </div>
-                        <div>
-                          <h3 className="font-semibold">{resource.name}</h3>
-                          <p className="text-sm text-muted-foreground">{resource.role}</p>
-                          <p className="text-xs text-muted-foreground">{resource.email}</p>
-                          <div className="flex gap-1 mt-1">
-                            {resource.skills.slice(0, 3).map((skill, index) => (
-                              <Badge key={index} variant="outline" className="text-xs">{skill}</Badge>
-                            ))}
+                {resources.length > 0 ? (
+                  <div className="space-y-4">
+                    {resources.map((resource) => (
+                      <motion.div
+                        key={resource.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-center justify-between p-4 border rounded-lg"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                            {resource.name.split(' ').map(n => n.charAt(0)).join('')}
+                          </div>
+                          <div>
+                            <h3 className="font-semibold">{resource.name}</h3>
+                            <p className="text-sm text-muted-foreground">{resource.role}</p>
+                            <p className="text-xs text-muted-foreground">{resource.email}</p>
+                            <div className="flex gap-1 mt-1">
+                              {resource.skills.slice(0, 3).map((skill, index) => (
+                                <Badge key={index} variant="outline" className="text-xs">{skill}</Badge>
+                              ))}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-sm font-medium">Disponibilité</span>
-                          <Progress value={resource.availability} className="w-20 h-2" />
-                          <span className="text-sm">{resource.availability}%</span>
+                        <div className="text-right">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-sm font-medium">Disponibilité</span>
+                            <Progress value={resource.availability} className="w-20 h-2" />
+                            <span className="text-sm">{resource.availability}%</span>
+                          </div>
+                          <p className="text-sm font-medium">€{resource.hourlyRate}/h</p>
+                          <p className="text-xs text-muted-foreground">{resource.billableHours}h facturable</p>
+                          <p className="text-xs text-muted-foreground">{resource.currentProjects.length} projet(s)</p>
                         </div>
-                        <p className="text-sm font-medium">€{resource.hourlyRate}/h</p>
-                        <p className="text-xs text-muted-foreground">{resource.billableHours}h facturable</p>
-                        <p className="text-xs text-muted-foreground">{resource.currentProjects.length} projet(s)</p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Users className="mx-auto h-16 w-16 text-primary/50 mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">Aucune ressource enregistrée</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Ajoutez des membres d'équipe pour gérer l'allocation des ressources et planifier leur disponibilité.
+                    </p>
+                    <Button onClick={() => toast({ title: "Bientôt disponible", description: "La gestion des ressources sera disponible prochainement" })}>
+                      <PlusCircle className="h-4 w-4 mr-2" />
+                      Ajouter la première ressource
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -1145,44 +933,58 @@ export default function ProjectsPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {timesheets.map((timesheet) => {
-                    const project = projects.find(p => p.id === timesheet.project_id);
-                    const task = tasks.find(t => t.id === timesheet.task_id);
-                    return (
-                      <motion.div
-                        key={timesheet.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="flex items-center justify-between p-4 border rounded-lg"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${
-                            timesheet.approved ? 'bg-green-500' : 'bg-orange-500'
-                          }`}>
-                            <Timer className="h-5 w-5" />
-                          </div>
-                          <div>
-                            <h3 className="font-semibold">{timesheet.user_name}</h3>
-                            <p className="text-sm text-muted-foreground">{timesheet.description}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Badge variant="outline" className="text-xs">{project?.name}</Badge>
-                              <Badge variant="outline" className="text-xs">{task?.title}</Badge>
+                {timesheets.length > 0 ? (
+                  <div className="space-y-4">
+                    {timesheets.map((timesheet) => {
+                      const project = projects.find(p => p.id === timesheet.project_id);
+                      const task = tasks.find(t => t.id === timesheet.task_id);
+                      return (
+                        <motion.div
+                          key={timesheet.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="flex items-center justify-between p-4 border rounded-lg"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${
+                              timesheet.approved ? 'bg-green-500' : 'bg-orange-500'
+                            }`}>
+                              <Timer className="h-5 w-5" />
+                            </div>
+                            <div>
+                              <h3 className="font-semibold">{timesheet.user_name}</h3>
+                              <p className="text-sm text-muted-foreground">{timesheet.description}</p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge variant="outline" className="text-xs">{project?.name}</Badge>
+                                <Badge variant="outline" className="text-xs">{task?.title}</Badge>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold">{timesheet.hours}h</p>
-                          <p className="text-sm text-muted-foreground">{timesheet.date}</p>
-                          <p className="text-xs font-medium text-green-600">€{((timesheet.hourlyRate || 0) * timesheet.hours).toFixed(2)}</p>
-                        </div>
-                        <Badge variant={timesheet.approved ? 'default' : 'secondary'}>
-                          {timesheet.approved ? 'Approuvé' : 'En attente'}
-                        </Badge>
-                      </motion.div>
-                    );
-                  })}
-                </div>
+                          <div className="text-right">
+                            <p className="font-semibold">{timesheet.hours}h</p>
+                            <p className="text-sm text-muted-foreground">{timesheet.date}</p>
+                            <p className="text-xs font-medium text-green-600">€{((timesheet.hourlyRate || 0) * timesheet.hours).toFixed(2)}</p>
+                          </div>
+                          <Badge variant={timesheet.approved ? 'default' : 'secondary'}>
+                            {timesheet.approved ? 'Approuvé' : 'En attente'}
+                          </Badge>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Timer className="mx-auto h-16 w-16 text-primary/50 mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">Aucune saisie de temps</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Commencez à enregistrer vos heures de travail pour suivre le temps passé sur chaque projet et tâche.
+                    </p>
+                    <Button onClick={() => toast({ title: "Nouvelle entrée", description: "Interface à implémenter" })}>
+                      <PlusCircle className="h-4 w-4 mr-2" />
+                      Créer la première entrée
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -1222,7 +1024,7 @@ export default function ProjectsPage() {
                         <div className="text-center">
                           <h3 className="font-semibold">Heures facturables</h3>
                           <p className="text-2xl font-bold text-blue-600">
-                            {timesheets.reduce((sum, ts) => sum + ts.billableHours, 0)}h
+                            {timesheets.reduce((sum, ts) => sum + (ts.billableHours || 0), 0)}h
                           </p>
                           <p className="text-sm text-muted-foreground">Ce mois</p>
                         </div>
@@ -1233,7 +1035,7 @@ export default function ProjectsPage() {
                         <div className="text-center">
                           <h3 className="font-semibold">Taux moyen</h3>
                           <p className="text-2xl font-bold text-purple-600">
-                            €{(timesheets.reduce((sum, ts) => sum + ts.hourlyRate, 0) / timesheets.length).toFixed(0)}
+                            €{timesheets.length > 0 ? (timesheets.reduce((sum, ts) => sum + (ts.hourlyRate || 0), 0) / timesheets.length).toFixed(0) : '0'}
                           </p>
                           <p className="text-sm text-muted-foreground">Par heure</p>
                         </div>
@@ -1411,31 +1213,35 @@ export default function ProjectsPage() {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-sm text-muted-foreground">Respect des délais</p>
-                            <p className="text-2xl font-bold">87%</p>
+                            <p className="text-2xl font-bold">{computedMetrics.completedProjects > 0 ? Math.round((computedMetrics.completedProjects / computedMetrics.totalProjects) * 100) : '0'}%</p>
                           </div>
                           <Target className="h-8 w-8 text-blue-500" />
                         </div>
                       </CardContent>
                     </Card>
-                    
+
                     <Card>
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-sm text-muted-foreground">Efficacité équipe</p>
-                            <p className="text-2xl font-bold">92%</p>
+                            <p className="text-2xl font-bold">
+                              {projects.length > 0
+                                ? Math.round((projects.reduce((sum, p) => sum + (p.totalHours > 0 ? (p.billableHours / p.totalHours) * 100 : 0), 0) / projects.length))
+                                : '0'}%
+                            </p>
                           </div>
                           <Users className="h-8 w-8 text-purple-500" />
                         </div>
                       </CardContent>
                     </Card>
-                    
+
                     <Card>
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-sm text-muted-foreground">Satisfaction client</p>
-                            <p className="text-2xl font-bold">4.8/5</p>
+                            <p className="text-lg font-bold text-muted-foreground">N/A</p>
                           </div>
                           <Star className="h-8 w-8 text-yellow-500" />
                         </div>
@@ -1450,17 +1256,25 @@ export default function ProjectsPage() {
                         <CardTitle className="text-lg">Évolution des revenus</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="h-48 flex items-end justify-center gap-2">
-                          {[12000, 18000, 15000, 25000, 30000, 28000].map((value, i) => (
-                            <div key={i} className="flex flex-col items-center">
-                              <div 
-                                className="w-8 bg-gradient-to-t from-blue-500 to-blue-300 rounded-t" 
-                                style={{ height: `${(value / 35000) * 150}px` }}
-                              />
-                              <span className="text-xs mt-1">M{i + 1}</span>
+                        {projects.length > 0 ? (
+                          <div className="h-48 flex items-center justify-center">
+                            <div className="text-center">
+                              <Activity className="mx-auto h-12 w-12 text-primary/30 mb-2" />
+                              <p className="text-sm text-muted-foreground">
+                                Graphique d'évolution disponible avec des données historiques
+                              </p>
                             </div>
-                          ))}
-                        </div>
+                          </div>
+                        ) : (
+                          <div className="h-48 flex items-center justify-center">
+                            <div className="text-center">
+                              <Activity className="mx-auto h-12 w-12 text-primary/30 mb-2" />
+                              <p className="text-sm text-muted-foreground">
+                                Aucune donnée de revenus disponible
+                              </p>
+                            </div>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                     

@@ -46,6 +46,7 @@ import OptimizedInvoicesTab from '@/components/invoicing/OptimizedInvoicesTab';
 import OptimizedClientsTab from '@/components/invoicing/OptimizedClientsTab';
 import OptimizedQuotesTab from '@/components/invoicing/OptimizedQuotesTab';
 import OptimizedPaymentsTab from '@/components/invoicing/OptimizedPaymentsTab';
+import { calculateTrend, getPreviousPeriodDates } from '@/utils/trendCalculations';
 
 // Invoicing KPI Card Component
 const InvoicingKPICard = ({ title, value, icon, trend, color = 'blue', description, onClick }) => {
@@ -162,12 +163,8 @@ const QuickInvoicingActions = ({ onNewInvoice, onNewQuote, onNewPayment, onViewC
 
 // Recent Invoicing Activities Component
 const RecentInvoicingActivities = () => {
-  const activities = [
-    { type: 'invoice', description: 'Facture F-2024-001 créée', time: '5 min', icon: FileText, color: 'blue' },
-    { type: 'payment', description: 'Paiement reçu - Client ABC', time: '1h', icon: CheckCircle, color: 'green' },
-    { type: 'quote', description: 'Devis D-2024-012 envoyé', time: '2h', icon: Send, color: 'purple' },
-    { type: 'reminder', description: 'Relance client XYZ Corp', time: '1j', icon: AlertTriangle, color: 'orange' }
-  ];
+  // Les activités seront générées dynamiquement à partir des données réelles dans une future version
+  const activities = [];
 
   return (
     <Card className="h-full">
@@ -178,39 +175,51 @@ const RecentInvoicingActivities = () => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
-          {activities.map((activity, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50"
-            >
-              <div className={`w-8 h-8 rounded-lg ${
-                activity.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/20' :
-                activity.color === 'green' ? 'bg-green-100 dark:bg-green-900/20' :
-                activity.color === 'purple' ? 'bg-purple-100 dark:bg-purple-900/20' :
-                'bg-orange-100 dark:bg-orange-900/20'
-              } flex items-center justify-center`}>
-                <activity.icon className={`w-4 h-4 ${
-                  activity.color === 'blue' ? 'text-blue-600 dark:text-blue-400' :
-                  activity.color === 'green' ? 'text-green-600 dark:text-green-400' :
-                  activity.color === 'purple' ? 'text-purple-600 dark:text-purple-400' :
-                  'text-orange-600 dark:text-orange-400'
-                }`} />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  {activity.description}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Il y a {activity.time}
-                </p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+        {activities.length > 0 ? (
+          <div className="space-y-3">
+            {activities.map((activity, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50"
+              >
+                <div className={`w-8 h-8 rounded-lg ${
+                  activity.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/20' :
+                  activity.color === 'green' ? 'bg-green-100 dark:bg-green-900/20' :
+                  activity.color === 'purple' ? 'bg-purple-100 dark:bg-purple-900/20' :
+                  'bg-orange-100 dark:bg-orange-900/20'
+                } flex items-center justify-center`}>
+                  <activity.icon className={`w-4 h-4 ${
+                    activity.color === 'blue' ? 'text-blue-600 dark:text-blue-400' :
+                    activity.color === 'green' ? 'text-green-600 dark:text-green-400' :
+                    activity.color === 'purple' ? 'text-purple-600 dark:text-purple-400' :
+                    'text-orange-600 dark:text-orange-400'
+                  }`} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                    {activity.description}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Il y a {activity.time}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <Activity className="mx-auto h-12 w-12 text-primary/30 mb-2" />
+            <p className="text-sm text-muted-foreground">
+              Aucune activité récente
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Les activités apparaîtront ici au fur et à mesure
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -236,7 +245,11 @@ export default function InvoicingPageOptimized() {
     invoicesCount: 0,
     clientsCount: 0,
     quotesCount: 0,
-    averageInvoiceValue: 0
+    averageInvoiceValue: 0,
+    revenueTrend: null,
+    paidTrend: null,
+    pendingTrend: null,
+    overdueTrend: null
   });
   const [error, setError] = useState(null);
 
@@ -245,15 +258,23 @@ export default function InvoicingPageOptimized() {
       try {
         setIsLoading(true);
         setError(null);
-        
+
         const periodStart = getPeriodStart(selectedPeriod);
         const periodEnd = getPeriodEnd(selectedPeriod);
-        
+
+        // Récupérer stats période actuelle
         const stats = await invoicingService.getInvoicingStats({
           periodStart,
           periodEnd
         });
-        
+
+        // Récupérer stats période précédente pour calcul trends
+        const previousPeriodDates = getPreviousPeriodDates(selectedPeriod);
+        const previousStats = await invoicingService.getInvoicingStats({
+          periodStart: previousPeriodDates.start,
+          periodEnd: previousPeriodDates.end
+        });
+
         setInvoicingData({
           totalRevenue: stats.totalRevenue,
           paidInvoices: stats.paidInvoices,
@@ -262,7 +283,11 @@ export default function InvoicingPageOptimized() {
           invoicesCount: stats.invoicesCount,
           clientsCount: stats.clientsCount,
           quotesCount: stats.quotesCount,
-          averageInvoiceValue: stats.averageInvoiceValue
+          averageInvoiceValue: stats.averageInvoiceValue,
+          revenueTrend: calculateTrend(stats.totalRevenue, previousStats.totalRevenue),
+          paidTrend: calculateTrend(stats.paidInvoices, previousStats.paidInvoices),
+          pendingTrend: calculateTrend(stats.pendingInvoices, previousStats.pendingInvoices),
+          overdueTrend: calculateTrend(stats.overdueInvoices, previousStats.overdueInvoices)
         });
       } catch (error) {
         console.error('Error loading invoicing data:', error);
@@ -276,7 +301,7 @@ export default function InvoicingPageOptimized() {
         setIsLoading(false);
       }
     };
-    
+
     loadInvoicingData();
   }, [selectedPeriod, customStartDate, customEndDate, toast]);
   
@@ -474,37 +499,37 @@ export default function InvoicingPageOptimized() {
             value={`${invoicingData.totalRevenue.toLocaleString('fr-FR')} €`}
             icon={Euro}
             color="blue"
-            trend={15.2}
+            trend={invoicingData.revenueTrend ?? undefined}
             description="CA total ce mois"
             onClick={() => {}}
           />
-          
+
           <InvoicingKPICard
             title="Factures payées"
             value={`${invoicingData.paidInvoices.toLocaleString('fr-FR')} €`}
             icon={CheckCircle}
             color="green"
-            trend={8.7}
+            trend={invoicingData.paidTrend ?? undefined}
             description="Paiements reçus"
             onClick={() => {}}
           />
-          
+
           <InvoicingKPICard
             title="En attente"
             value={`${invoicingData.pendingInvoices.toLocaleString('fr-FR')} €`}
             icon={Clock}
             color="orange"
-            trend={-3.2}
+            trend={invoicingData.pendingTrend ?? undefined}
             description="Factures en attente"
             onClick={() => {}}
           />
-          
+
           <InvoicingKPICard
             title="En retard"
             value={`${invoicingData.overdueInvoices.toLocaleString('fr-FR')} €`}
             icon={AlertTriangle}
             color="red"
-            trend={-12.5}
+            trend={invoicingData.overdueTrend ?? undefined}
             description="Factures en retard"
             onClick={() => {}}
           />

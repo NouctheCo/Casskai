@@ -46,31 +46,11 @@ if (!$SkipBuild) {
 # 3. Backup et preparation sur le VPS
 Write-Host "[BACKUP] Sauvegarde et preparation sur le VPS..." -ForegroundColor Blue
 
-# Créer un script temporaire pour éviter les problèmes d'échappement
-$tempScript = @"
-if [ -d '$VPS_PATH' ]; then
-    cp -r $VPS_PATH ${VPS_PATH}.backup.`$(date +%Y%m%d_%H%M%S)
-    echo 'Sauvegarde creee'
-fi
-mkdir -p ${VPS_PATH}.tmp
-rm -rf ${VPS_PATH}.tmp/*
-echo 'Repertoire temporaire prepare'
-"@ -replace '\$VPS_PATH', $VPS_PATH
+# Commande 1: Backup
+ssh -o ConnectTimeout=10 "$VPS_USER@$VPS_HOST" "if [ -d '$VPS_PATH' ]; then cp -r '$VPS_PATH' '${VPS_PATH}.backup.`$(date +%Y%m%d_%H%M%S)'; echo 'Sauvegarde creee'; fi"
 
-# Écrire le script dans un fichier temporaire
-$tempFile = [System.IO.Path]::GetTempFileName() + ".sh"
-$tempScript | Out-File -FilePath $tempFile -Encoding UTF8
-
-Write-Host "[DEBUG] Script temporaire: $tempFile" -ForegroundColor Yellow
-Write-Host "[DEBUG] Contenu:" -ForegroundColor Yellow
-Get-Content $tempFile | Write-Host -ForegroundColor Gray
-
-# Copier et exécuter le script sur le VPS
-scp -o ConnectTimeout=10 "$tempFile" "$VPS_USER@${VPS_HOST}:/tmp/deploy_backup.sh"
-ssh -o ConnectTimeout=10 "$VPS_USER@$VPS_HOST" "chmod +x /tmp/deploy_backup.sh && /tmp/deploy_backup.sh"
-
-# Nettoyer
-Remove-Item $tempFile -ErrorAction SilentlyContinue
+# Commande 2: Création du répertoire temporaire
+ssh -o ConnectTimeout=10 "$VPS_USER@$VPS_HOST" "mkdir -p '${VPS_PATH}.tmp' && rm -rf '${VPS_PATH}.tmp'/* && echo 'Repertoire temporaire prepare'"
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "[ERROR] Erreur lors de la preparation sur le VPS" -ForegroundColor Red
@@ -88,30 +68,18 @@ if ($LASTEXITCODE -ne 0) {
 
 # 5. Deploiement atomique
 Write-Host "[DEPLOY] Deploiement atomique des fichiers..." -ForegroundColor Blue
-$deployCommand = @"
-# Verification que les fichiers ont ete uploades
-if [ ! -f '${VPS_PATH}.tmp/index.html' ]; then
-    echo 'Erreur: index.html non trouve apres upload'
-    exit 1
-fi
 
-# Supprimer les anciens fichiers frontend (preserver api, scripts, etc.)
-find '$VPS_PATH' -maxdepth 1 -type f \( -name '*.html' -o -name '*.js' -o -name '*.css' -o -name '*.json' -o -name '*.ico' -o -name '*.svg' -o -name '*.br' -o -name '*.gz' \) -delete
-rm -rf '$VPS_PATH/assets' 2>/dev/null || true
+# Commande 1: Vérification
+ssh -o ConnectTimeout=10 "$VPS_USER@$VPS_HOST" "if [ ! -f '${VPS_PATH}.tmp/index.html' ]; then echo 'Erreur: index.html non trouve'; exit 1; fi && echo 'Fichiers uploadés OK'"
 
-# Deplacer les nouveaux fichiers
-mv ${VPS_PATH}.tmp/* '$VPS_PATH/'
-rmdir ${VPS_PATH}.tmp
+# Commande 2: Suppression des anciens fichiers frontend
+ssh -o ConnectTimeout=10 "$VPS_USER@$VPS_HOST" "find '$VPS_PATH' -maxdepth 1 -type f \( -name '*.html' -o -name '*.js' -o -name '*.css' -o -name '*.json' -o -name '*.ico' -o -name '*.svg' -o -name '*.br' -o -name '*.gz' \) -delete && rm -rf '$VPS_PATH/assets' '$VPS_PATH/css' '$VPS_PATH/icons' 2>/dev/null; echo 'Anciens fichiers supprimés'"
 
-# Corriger les permissions
-chown -R www-data:www-data '$VPS_PATH'
-chmod -R 644 '$VPS_PATH'/*
-find '$VPS_PATH' -type d -exec chmod 755 {} \;
+# Commande 3: Déplacement des nouveaux fichiers (avec force pour écraser les répertoires)
+ssh -o ConnectTimeout=10 "$VPS_USER@$VPS_HOST" "cp -rf '${VPS_PATH}.tmp'/* '$VPS_PATH/' && rm -rf '${VPS_PATH}.tmp' && echo 'Nouveaux fichiers déployés'"
 
-echo 'Fichiers deployes et permissions corrigees'
-"@ -replace '\$VPS_PATH', $VPS_PATH
-
-ssh -o ConnectTimeout=10 "$VPS_USER@$VPS_HOST" $deployCommand
+# Commande 4: Correction des permissions
+ssh -o ConnectTimeout=10 "$VPS_USER@$VPS_HOST" "chown -R www-data:www-data '$VPS_PATH' && chmod -R 644 '$VPS_PATH'/* && find '$VPS_PATH' -type d -exec chmod 755 {} \; && echo 'Permissions corrigées'"
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "[ERROR] Erreur lors du deploiement" -ForegroundColor Red
@@ -120,35 +88,15 @@ if ($LASTEXITCODE -ne 0) {
 
 # 6. Redemarrage des services
 Write-Host "[SERVICES] Redemarrage des services..." -ForegroundColor Blue
-$serviceCommand = @"
+
 # Test de la configuration Nginx
-nginx -t
-if [ `$? -ne 0 ]; then
-    echo 'Erreur dans la configuration Nginx'
-    exit 1
-fi
+ssh -o ConnectTimeout=10 "$VPS_USER@$VPS_HOST" "nginx -t"
 
-# Redemarrage de Nginx
-pkill nginx 2>/dev/null || true
-sleep 2
-nginx -g 'daemon on;'
-if [ `$? -ne 0 ]; then
-    echo 'Erreur lors du redemarrage de Nginx'
-    exit 1
-fi
+# Redémarrage de Nginx
+ssh -o ConnectTimeout=10 "$VPS_USER@$VPS_HOST" "pkill nginx 2>/dev/null; sleep 2; nginx -g 'daemon on;' && echo 'Nginx redémarré'"
 
-# Verification de l'API backend
-if pm2 status casskai-api | grep online > /dev/null; then
-    echo 'API backend operationnelle'
-else
-    echo 'Redemarrage de l API backend...'
-    pm2 restart casskai-api
-fi
-
-echo 'Services redemarres'
-"@
-
-ssh -o ConnectTimeout=10 "$VPS_USER@$VPS_HOST" $serviceCommand
+# Vérification de l'API backend
+ssh -o ConnectTimeout=10 "$VPS_USER@$VPS_HOST" "if pm2 status casskai-api | grep online > /dev/null; then echo 'API backend OK'; else pm2 restart casskai-api && echo 'API redémarrée'; fi"
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "[ERROR] Erreur lors du redemarrage des services" -ForegroundColor Red
@@ -160,16 +108,7 @@ Write-Host "[TEST] Tests de sante..." -ForegroundColor Blue
 Start-Sleep -Seconds 3
 
 # Test local depuis le VPS
-$healthCommand = @"
-HTTP_CODE=`$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/)
-if [ "`$HTTP_CODE" != "200" ]; then
-    echo 'Erreur: Le site ne repond pas correctement (Code: '`$HTTP_CODE')'
-    exit 1
-fi
-echo 'Site accessible localement (Code: '`$HTTP_CODE')'
-"@
-
-ssh -o ConnectTimeout=10 "$VPS_USER@$VPS_HOST" $healthCommand
+ssh -o ConnectTimeout=10 "$VPS_USER@$VPS_HOST" "HTTP_CODE=`$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/); if [ `"`$HTTP_CODE`" = '200' ]; then echo 'Site accessible (Code: '`$HTTP_CODE')'; else echo 'Erreur HTTP (Code: '`$HTTP_CODE')'; exit 1; fi"
 
 # Test HTTPS externe
 try {
@@ -189,16 +128,8 @@ Write-Host ""
 Write-Host "[SUCCESS] Deploiement termine avec succes!" -ForegroundColor Green
 Write-Host "[INFO] Informations de deploiement:" -ForegroundColor Blue
 
-$infoCommand = @"
-echo '   - Timestamp: '`$(date)
-echo '   - Taille index.html: '`$(stat -c%s $VPS_PATH/index.html)' bytes'
-echo '   - Derniere modification: '`$(stat -c%y $VPS_PATH/index.html)
-echo '   - Processus Nginx: '`$(pgrep nginx | wc -l)' processus'
-API_STATUS=`$(pm2 jlist 2>/dev/null | grep -o '"status":"[^"]*"' | head -1 | cut -d'"' -f4)
-echo '   - API Status: '`$API_STATUS
-"@
-
-ssh -o ConnectTimeout=10 "$VPS_USER@$VPS_HOST" $infoCommand
+# Récupérer les informations
+ssh -o ConnectTimeout=10 "$VPS_USER@$VPS_HOST" "echo '   - Timestamp: '`$(date) && echo '   - Taille index.html: '`$(stat -c%s '$VPS_PATH/index.html')' bytes' && echo '   - Derniere modification: '`$(stat -c%y '$VPS_PATH/index.html') && echo '   - Processus Nginx: '`$(pgrep nginx | wc -l)' processus'"
 
 Write-Host ""
 Write-Host "[READY] Votre site est maintenant disponible sur:" -ForegroundColor Cyan

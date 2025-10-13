@@ -30,6 +30,11 @@ import {
   Target
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { EntitySelector, type EntityOption, type EntityFormField } from '../common/EntitySelector';
+import { thirdPartiesService } from '../../services/thirdPartiesService';
+import { useAuth } from '../../contexts/AuthContext';
+import { useHR } from '../../hooks/useHR';
+import { hrService } from '../../services/hrService';
 
 interface CommercialActionsProps {
   actions: CommercialAction[];
@@ -59,6 +64,10 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
   const { t } = useTranslation();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingAction, setEditingAction] = useState<CommercialAction | null>(null);
+  const { currentCompany } = useAuth();
+
+  // Use HR hook to get employees and creation methods
+  const { employees, createEmployee, fetchEmployees } = useHR();
 
   const [formData, setFormData] = useState<CommercialActionFormData>({
     type: 'call',
@@ -139,6 +148,142 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
       [key]: value || undefined
     });
   };
+
+  const handleCreateClient = async (clientData: Record<string, any>) => {
+    try {
+      if (!currentCompany) {
+        throw new Error('No current company selected');
+      }
+
+      const newClient = await thirdPartiesService.createThirdParty({
+        company_name: clientData.company_name,
+        email: clientData.email || '',
+        phone: clientData.phone || '',
+        address: clientData.address || '',
+        type: 'customer' as any, // Assuming 'customer' is the correct type
+        company_id: currentCompany.id
+      });
+
+      return { success: true, id: newClient.id };
+    } catch (error) {
+      console.error('Error creating client:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  };
+
+  const handleCreateEmployee = async (employeeData: Record<string, any>) => {
+    try {
+      if (!currentCompany) {
+        throw new Error('No current company selected');
+      }
+
+      const success = await createEmployee({
+        employee_number: employeeData.employee_number || `EMP${Date.now()}`,
+        first_name: employeeData.first_name,
+        last_name: employeeData.last_name,
+        email: employeeData.email || '',
+        phone: employeeData.phone || '',
+        position: employeeData.position || '',
+        department: employeeData.department || '',
+        hire_date: employeeData.hire_date || new Date().toISOString().split('T')[0],
+        salary: employeeData.salary || 0,
+        contract_type: employeeData.contract_type || 'permanent',
+        status: 'active'
+      });
+
+      if (success) {
+        // Refresh employees list
+        await fetchEmployees();
+        return { success: true, id: 'new-employee-id' }; // We'll get the actual ID from the refreshed data
+      } else {
+        throw new Error('Failed to create employee');
+      }
+    } catch (error) {
+      console.error('Error creating employee:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  };
+
+  const clientCreateFormFields: EntityFormField[] = [
+    {
+      name: 'company_name',
+      label: t('crm.clientForm.companyName'),
+      type: 'text',
+      required: true,
+      placeholder: t('crm.clientForm.companyNamePlaceholder')
+    },
+    {
+      name: 'email',
+      label: t('crm.clientForm.email'),
+      type: 'email',
+      required: false,
+      placeholder: t('crm.clientForm.emailPlaceholder')
+    },
+    {
+      name: 'phone',
+      label: t('crm.clientForm.phone'),
+      type: 'text',
+      required: false,
+      placeholder: t('crm.clientForm.phonePlaceholder')
+    },
+    {
+      name: 'address',
+      label: t('crm.clientForm.address'),
+      type: 'text',
+      required: false,
+      placeholder: t('crm.clientForm.addressPlaceholder')
+    }
+  ];
+
+  const clientOptions: EntityOption[] = clients.map(client => ({
+    id: client.id,
+    label: client.company_name,
+    sublabel: client.website || undefined
+  }));
+
+  const employeeCreateFormFields: EntityFormField[] = [
+    {
+      name: 'first_name',
+      label: t('hr.employeeForm.firstName'),
+      type: 'text',
+      required: true,
+      placeholder: t('hr.employeeForm.firstNamePlaceholder')
+    },
+    {
+      name: 'last_name',
+      label: t('hr.employeeForm.lastName'),
+      type: 'text',
+      required: true,
+      placeholder: t('hr.employeeForm.lastNamePlaceholder')
+    },
+    {
+      name: 'email',
+      label: t('hr.employeeForm.email'),
+      type: 'email',
+      required: true,
+      placeholder: t('hr.employeeForm.emailPlaceholder')
+    },
+    {
+      name: 'position',
+      label: t('hr.employeeForm.position'),
+      type: 'text',
+      required: true,
+      placeholder: t('hr.employeeForm.positionPlaceholder')
+    },
+    {
+      name: 'department',
+      label: t('hr.employeeForm.department'),
+      type: 'text',
+      required: true,
+      placeholder: t('hr.employeeForm.departmentPlaceholder')
+    }
+  ];
+
+  const employeeOptions: EntityOption[] = employees.map(employee => ({
+    id: employee.id,
+    label: employee.full_name || `${employee.first_name} ${employee.last_name}`,
+    sublabel: employee.position || undefined
+  }));
 
   const handleCreateAction = () => {
     setEditingAction(null);
@@ -626,22 +771,17 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>{t('crm.actionForm.client')}</Label>
-                <Select
-                  value={formData.client_id || 'none'}
-                  onValueChange={(value) => setFormData({...formData, client_id: value === 'none' ? '' : value, contact_id: '', opportunity_id: ''})}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('crm.actionForm.selectClient')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">{t('crm.actionForm.noClient')}</SelectItem>
-                    {clients.map((client) => (
-                      <SelectItem key={client.id} value={client.id}>
-                        {client.company_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <EntitySelector
+                  options={clientOptions}
+                  value={formData.client_id}
+                  onChange={(value) => setFormData({...formData, client_id: value, contact_id: '', opportunity_id: ''})}
+                  onCreateEntity={handleCreateClient}
+                  createFormFields={clientCreateFormFields}
+                  entityName={t('crm.clientForm.client')}
+                  entityNamePlural={t('crm.clientForm.clients')}
+                  placeholder={t('crm.actionForm.selectClient')}
+                  canCreate={true}
+                />
               </div>
               <div className="space-y-2">
                 <Label>{t('crm.actionForm.contact')}</Label>
@@ -702,7 +842,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="due_date">{t('crm.actionForm.dueDate')}</Label>
+                <Label>{t('crm.actionForm.dueDate')}</Label>
                 <Input
                   id="due_date"
                   type="date"
@@ -711,11 +851,17 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="assigned_to">{t('crm.actionForm.assignedTo')}</Label>
-                <Input
-                  id="assigned_to"
+                <Label>{t('crm.actionForm.assignedTo')}</Label>
+                <EntitySelector
+                  options={employeeOptions}
                   value={formData.assigned_to}
-                  onChange={(e) => setFormData({...formData, assigned_to: e.target.value})}
+                  onChange={(value) => setFormData({...formData, assigned_to: value})}
+                  onCreateEntity={handleCreateEmployee}
+                  createFormFields={employeeCreateFormFields}
+                  entityName={t('hr.employee.entityName')}
+                  entityNamePlural={t('hr.employee.entityNamePlural')}
+                  placeholder={t('crm.actionForm.assignedToPlaceholder')}
+                  canCreate={true}
                 />
               </div>
             </div>

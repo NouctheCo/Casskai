@@ -57,91 +57,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Les données d'inventaire sont maintenant chargées depuis le service InventoryService
-
-// Données mock pour la production
-const mockProductionOrders = [
-  {
-    id: 'PROD-001',
-    productName: 'PC Bureau Complet',
-    description: 'Assemblage PC avec écran et périphériques',
-    quantity: 5,
-    status: 'in_progress',
-    startDate: '2024-03-10',
-    expectedDate: '2024-03-20',
-    priority: 'high',
-    components: [
-      { itemId: '1', itemName: 'Ordinateur portable Dell XPS 13', needed: 5, allocated: 5, available: 15 },
-      { itemId: '2', itemName: 'Souris sans fil Logitech', needed: 5, allocated: 3, available: 3 },
-      { itemId: '4', itemName: 'Barrette RAM DDR4 16GB', needed: 10, allocated: 10, available: 25 }
-    ],
-    cost: 6250.00,
-    responsible: 'Pierre Martin'
-  },
-  {
-    id: 'PROD-002',
-    productName: 'Kit Bureau Ergonomique',
-    description: 'Ensemble table + accessoires',
-    quantity: 3,
-    status: 'pending',
-    startDate: '2024-03-18',
-    expectedDate: '2024-03-25',
-    priority: 'medium',
-    components: [
-      { itemId: '3', itemName: 'Table de bureau ajustable', needed: 3, allocated: 0, available: 0 },
-      { itemId: '2', itemName: 'Souris sans fil Logitech', needed: 3, allocated: 0, available: 3 }
-    ],
-    cost: 1485.00,
-    responsible: 'Sophie Bernard'
-  }
-];
-
-// Données mock pour les fournisseurs
-const mockSuppliers = [
-  {
-    id: '1',
-    name: 'Dell France',
-    email: 'contact@dell.fr',
-    phone: '01 23 45 67 89',
-    address: '123 Avenue des Champs, 75008 Paris',
-    category: 'Matériel informatique',
-    rating: 4.5,
-    paymentTerms: '30 jours',
-    deliveryTime: '5-7 jours',
-    minOrder: 1000.00,
-    discount: 5.0,
-    lastOrder: '2024-03-15',
-    totalOrders: 15,
-    totalAmount: 18500.00
-  },
-  {
-    id: '2',
-    name: 'Logitech International',
-    email: 'orders@logitech.com',
-    phone: '04 56 78 90 12',
-    address: '456 Route de Genève, 1000 Lausanne',
-    category: 'Accessoires',
-    rating: 4.2,
-    paymentTerms: '45 jours',
-    deliveryTime: '3-5 jours',
-    minOrder: 500.00,
-    discount: 3.0,
-    lastOrder: '2024-03-10',
-    totalOrders: 8,
-    totalAmount: 3200.00
-  }
-];
-
-// Métriques d'inventaire
-const mockInventoryMetrics = {
-  totalItems: 4,
-  totalValue: 19270.50,
-  lowStockItems: 1,
-  outOfStockItems: 1,
-  averageRotation: 2.3,
-  totalMovements: 25,
-  monthlyTurnover: 45600.00,
-  profitMargin: 32.5
-};
+// Toutes les données proviennent de Supabase - Aucune donnée mockée
 
 export default function InventoryPage() {
   const { t } = useLocale();
@@ -410,17 +326,37 @@ export default function InventoryPage() {
   }, [supplierName, supplierEmail, supplierPhone, supplierContact, toast]);
 
   // Métriques calculées provenant du hook
-  const computedMetrics = useMemo(() => ({
-    totalItems: inventoryItems.length,
-    totalValue,
-    lowStockItems: lowStockItems.length,
-    outOfStockItems: outOfStockItems.length,
-    activeItems: inventoryItems.filter(item => item.status === 'active').length,
-    averageRotation: (metrics as any)?.totalMovementsValue || metrics?.totalMovements || 2.3,
-    totalMovements: stockMovements.length,
-    monthlyTurnover: 0,
-    profitMargin: 32.5
-  }), [inventoryItems, totalValue, lowStockItems, outOfStockItems, stockMovements, metrics]);
+  const computedMetrics = useMemo(() => {
+    // Calculer le chiffre d'affaires mensuel depuis les mouvements de sortie
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthlyRevenue = stockMovements
+      .filter(m => m.type === 'exit' && new Date(m.created_at) >= startOfMonth)
+      .reduce((sum, m) => sum + (m.total_value || 0), 0);
+
+    // Calculer la marge moyenne depuis les articles actifs
+    const activeItems = inventoryItems.filter(item => item.status === 'active');
+    const averageProfitMargin = activeItems.length > 0
+      ? activeItems.reduce((sum, item) => {
+          const margin = item.sellingPrice > 0
+            ? ((item.sellingPrice - item.purchasePrice) / item.sellingPrice) * 100
+            : 0;
+          return sum + margin;
+        }, 0) / activeItems.length
+      : 0;
+
+    return {
+      totalItems: inventoryItems.length,
+      totalValue,
+      lowStockItems: lowStockItems.length,
+      outOfStockItems: outOfStockItems.length,
+      activeItems: activeItems.length,
+      averageRotation: (metrics as any)?.totalMovementsValue || metrics?.totalMovements || 0,
+      totalMovements: stockMovements.length,
+      monthlyTurnover: monthlyRevenue,
+      profitMargin: Math.round(averageProfitMargin * 10) / 10
+    };
+  }, [inventoryItems, totalValue, lowStockItems, outOfStockItems, stockMovements, metrics]);
 
   return (
     <motion.div 
@@ -884,75 +820,23 @@ export default function InventoryPage() {
                     </CardTitle>
                     <CardDescription>Gestion de la production et assemblage</CardDescription>
                   </div>
-                  <Button onClick={() => toast({ title: "Nouvel ordre", description: "Interface à implémenter" })}>
+                  <Button onClick={() => toast({ title: "Bientôt disponible", description: "Le module de production sera disponible prochainement" })}>
                     <PlusCircle className="h-4 w-4 mr-2" />
                     Nouvel ordre
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-6">
-                  {mockProductionOrders.map((order) => (
-                    <motion.div
-                      key={order.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="border rounded-lg p-6"
-                    >
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="text-lg font-semibold">{order.productName}</h3>
-                          <p className="text-sm text-muted-foreground">{order.description}</p>
-                          <p className="text-xs text-muted-foreground">Responsable: {order.responsible}</p>
-                        </div>
-                        <div className="text-right">
-                          <Badge variant={order.status === 'in_progress' ? 'default' : order.status === 'completed' ? 'secondary' : 'outline'}>
-                            {order.status === 'in_progress' ? 'En cours' : order.status === 'completed' ? 'Terminé' : 'En attente'}
-                          </Badge>
-                          <p className="text-sm font-medium mt-1">Qté: {order.quantity}</p>
-                        </div>
-                      </div>
-
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <div>
-                          <h4 className="font-medium mb-2">Dates</h4>
-                          <div className="space-y-1 text-sm">
-                            <p>Début: {order.startDate}</p>
-                            <p>Fin prévue: {order.expectedDate}</p>
-                            <Badge variant={order.priority === 'high' ? 'destructive' : order.priority === 'medium' ? 'secondary' : 'outline'} className="text-xs">
-                              Priorité {order.priority === 'high' ? 'haute' : order.priority === 'medium' ? 'moyenne' : 'basse'}
-                            </Badge>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <h4 className="font-medium mb-2">Coût estimé</h4>
-                          <p className="text-lg font-bold text-green-600">€{order.cost.toFixed(2)}</p>
-                        </div>
-                      </div>
-
-                      <div className="mt-4">
-                        <h4 className="font-medium mb-3">Composants requis</h4>
-                        <div className="space-y-2">
-                          {order.components.map((component, index) => (
-                            <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                              <div>
-                                <p className="font-medium">{component.itemName}</p>
-                                <p className="text-sm text-muted-foreground">Requis: {component.needed} | Alloué: {component.allocated}</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="text-sm">Disponible: {component.available}</p>
-                                <Progress 
-                                  value={(component.allocated / component.needed) * 100} 
-                                  className="w-20 h-2" 
-                                />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
+                <div className="text-center py-12">
+                  <Factory className="mx-auto h-16 w-16 text-primary/50 mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Aucun ordre de production</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Créez des ordres de production pour gérer l'assemblage et la fabrication de vos produits.
+                  </p>
+                  <Button onClick={() => toast({ title: "Bientôt disponible", description: "Le module de production sera disponible prochainement" })}>
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Créer un ordre de production
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -976,38 +860,16 @@ export default function InventoryPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {mockSuppliers.map((supplier) => (
-                    <motion.div
-                      key={supplier.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold">
-                          {supplier.name.charAt(0)}
-                        </div>
-                        <div>
-                          <h3 className="font-semibold">{supplier.name}</h3>
-                          <p className="text-sm text-muted-foreground">{supplier.category}</p>
-                          <p className="text-xs text-muted-foreground">{supplier.email} • {supplier.phone}</p>
-                          <p className="text-xs text-muted-foreground">{supplier.address}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="flex items-center gap-1 mb-1">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <div key={star} className={`w-3 h-3 rounded-full ${star <= supplier.rating ? 'bg-yellow-400' : 'bg-gray-300'}`} />
-                          ))}
-                          <span className="text-sm ml-1">{supplier.rating}/5</span>
-                        </div>
-                        <p className="text-sm font-medium">€{(supplier.totalAmount || 0).toLocaleString()}</p>
-                        <p className="text-xs text-muted-foreground">{supplier.totalOrders} commandes</p>
-                        <p className="text-xs text-muted-foreground">Paiement: {supplier.paymentTerms}</p>
-                      </div>
-                    </motion.div>
-                  ))}
+                <div className="text-center py-12">
+                  <Truck className="mx-auto h-16 w-16 text-primary/50 mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Aucun fournisseur enregistré</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Ajoutez vos fournisseurs pour faciliter la gestion des approvisionnements et des commandes.
+                  </p>
+                  <Button onClick={handleNewSupplier}>
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Ajouter un fournisseur
+                  </Button>
                 </div>
               </CardContent>
             </Card>

@@ -270,14 +270,46 @@ export const ModulesProvider: React.FC<ModulesProviderProps> = ({
       syncFromStateMap(states);
     };
 
+    const handleSubscriptionChange = async (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const detail = customEvent.detail as { userId?: string; newPlanId?: string } | undefined;
+      
+      console.log('[ModulesProvider] Subscription changed:', detail);
+      
+      // Recharger les modules pour mettre à jour allowedModuleKeys
+      await loadModules();
+      
+      // Désactiver les modules qui ne sont plus disponibles dans le nouveau plan
+      if (detail?.newPlanId) {
+        const newPlanModules = getModulesForPlan(detail.newPlanId) || [];
+        const newAllowedModules = Array.from(new Set([...CORE_MODULES, ...newPlanModules]));
+        
+        const currentStates = localStorage.getItem('casskai-module-states');
+        const states = currentStates ? JSON.parse(currentStates) : {};
+        
+        // Désactiver les modules non autorisés
+        Object.keys(states).forEach(moduleKey => {
+          if (!newAllowedModules.includes(moduleKey)) {
+            console.log(`[ModulesProvider] Deactivating module ${moduleKey} (not in new plan)`);
+            states[moduleKey] = false;
+          }
+        });
+        
+        localStorage.setItem('casskai-module-states', JSON.stringify(states));
+        syncFromStateMap(states);
+      }
+    };
+
     window.addEventListener('module-state-changed', handleModuleStateChange as EventListener);
     window.addEventListener('module-states-reset', handleModuleStatesReset);
+    window.addEventListener('subscription-changed', handleSubscriptionChange as EventListener);
 
     return () => {
       window.removeEventListener('module-state-changed', handleModuleStateChange as EventListener);
       window.removeEventListener('module-states-reset', handleModuleStatesReset);
+      window.removeEventListener('subscription-changed', handleSubscriptionChange as EventListener);
     };
-  }, [persistModuleState, syncFromStateMap]);
+  }, [persistModuleState, syncFromStateMap, loadModules]);
 
   const currentPlanId = subscriptionPlan || (isTrialing ? 'trial' : 'starter');
   const isTrialUser = Boolean(isTrialing || currentPlanId === 'trial');

@@ -8,6 +8,7 @@ import {
   ReconciliationMatch,
   OpenBankingResponse
 } from '../../../types/openBanking.types';
+import { supabase } from '@/lib/supabase';
 
 // Service d'export vers logiciels comptables
 export class AccountingExportService {
@@ -23,6 +24,24 @@ export class AccountingExportService {
       this.instance = new AccountingExportService();
     }
     return this.instance;
+  }
+
+  private async getCurrentCompanyId(): Promise<string> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    const { data: userCompanies, error } = await supabase
+      .from('user_companies')
+      .select('company_id')
+      .eq('user_id', user.id)
+      .eq('is_default', true)
+      .single();
+
+    if (error || !userCompanies) {
+      throw new Error('No active company found');
+    }
+
+    return userCompanies.company_id;
   }
 
   async initialize(formats: ExportFormat[]): Promise<void> {
@@ -156,14 +175,137 @@ export class AccountingExportService {
     entries: AccountingEntry[];
     matches: ReconciliationMatch[];
   }> {
-    // En production, récupérer depuis la base de données
-    const mockData = {
-      transactions: [] as BankTransaction[],
-      entries: [] as AccountingEntry[],
-      matches: [] as ReconciliationMatch[]
-    };
+    try {
+      const companyId = await this.getCurrentCompanyId();
 
-    return mockData;
+      // Récupérer les transactions bancaires
+      const { data: bankTransactions, error: transactionsError } = await supabase
+        .from('bank_transactions')
+        .select(`
+          id,
+          bank_account_id,
+          transaction_date,
+          value_date,
+          amount,
+          currency,
+          description,
+          reference,
+          category,
+          reconciled,
+          created_at,
+          updated_at
+        `)
+        .eq('company_id', companyId)
+        .order('transaction_date', { ascending: false });
+
+      if (transactionsError) {
+        throw new Error(`Failed to fetch bank transactions: ${transactionsError.message}`);
+      }
+
+      // Transformer les transactions bancaires
+      const transactions: BankTransaction[] = (bankTransactions || []).map(tx => ({
+        id: tx.id,
+        accountId: tx.bank_account_id,
+        date: new Date(tx.transaction_date),
+        valueDate: tx.value_date ? new Date(tx.value_date) : new Date(tx.transaction_date),
+        amount: tx.amount,
+        currency: tx.currency || 'EUR',
+        description: tx.description,
+        reference: tx.reference,
+        category: tx.category,
+        reconciliationStatus: tx.reconciled ? 'reconciled' : 'unreconciled',
+        createdAt: new Date(tx.created_at),
+        updatedAt: new Date(tx.updated_at)
+      }));
+
+      // Récupérer les écritures comptables
+      const { data: accountingEntries, error: entriesError } = await supabase
+        .from('accounting_entries')
+        .select(`
+          id,
+          account_id,
+          date,
+          debit,
+          credit,
+          description,
+          reference,
+          reconciled,
+          bank_transaction_id,
+          created_at,
+          updated_at
+        `)
+        .eq('company_id', companyId)
+        .order('date', { ascending: false });
+
+      if (entriesError) {
+        throw new Error(`Failed to fetch accounting entries: ${entriesError.message}`);
+      }
+
+      // Transformer les écritures comptables
+      const entries: AccountingEntry[] = (accountingEntries || []).map(entry => ({
+        id: entry.id,
+        entryNumber: entry.id.substring(0, 8).toUpperCase(), // Générer un numéro d'écriture simple
+        date: new Date(entry.date),
+        description: entry.description,
+        amount: entry.debit > 0 ? entry.debit : entry.credit,
+        debitAccount: entry.account_id, // Pour simplifier, utiliser l'account_id comme numéro de compte
+        creditAccount: entry.account_id,
+        reference: entry.reference,
+        category: 'general', // Catégorie par défaut
+        isReconciled: entry.reconciled || false,
+        reconciledWith: entry.bank_transaction_id ? [entry.bank_transaction_id] : [],
+        createdAt: new Date(entry.created_at),
+        updatedAt: new Date(entry.updated_at)
+      }));
+
+      // Récupérer les correspondances de réconciliation
+      const { data: reconciliationMatches, error: matchesError } = await supabase
+        .from('bank_reconciliation_matches')
+        .select(`
+          id,
+          bank_transaction_id,
+          suggested_accounting_entry_id,
+          match_type,
+          confidence_score,
+          status,
+          reviewed_by,
+          reviewed_at,
+          review_notes,
+          created_at,
+          updated_at
+        `)
+        .eq('company_id', companyId)
+        .order('created_at', { ascending: false });
+
+      if (matchesError) {
+        throw new Error(`Failed to fetch reconciliation matches: ${matchesError.message}`);
+      }
+
+      // Transformer les correspondances de réconciliation
+      const matches: ReconciliationMatch[] = (reconciliationMatches || []).map(match => ({
+        id: match.id,
+        transactionId: match.bank_transaction_id,
+        accountingEntryId: match.suggested_accounting_entry_id,
+        matchType: match.match_type as 'automatic' | 'manual' | 'rule_based',
+        confidence: match.confidence_score,
+        status: match.status as 'matched' | 'partial' | 'disputed' | 'resolved',
+        reviewedBy: match.reviewed_by,
+        reviewedAt: match.reviewed_at ? new Date(match.reviewed_at) : undefined,
+        notes: match.review_notes,
+        createdAt: new Date(match.created_at),
+        updatedAt: new Date(match.updated_at)
+      }));
+
+      return {
+        transactions,
+        entries,
+        matches
+      };
+
+    } catch (error) {
+      console.error('Error fetching export data:', error);
+      throw error;
+    }
   }
 
   // Valider les données avant export

@@ -503,15 +503,15 @@ const ContractsPage: React.FC = () => {
         </div>
         
         <div className="flex items-center space-x-3">
-          <Button 
+          <Button
             onClick={() => exportContracts()}
             variant="outline"
             className="flex items-center gap-2"
           >
             <Download className="h-4 w-4" />
-            {t('contracts.export', 'Exporter')}
+            {t('common.export', 'Exporter')}
           </Button>
-          <Button 
+          <Button
             onClick={() => setActiveTab('contracts')}
             className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 flex items-center gap-2"
           >

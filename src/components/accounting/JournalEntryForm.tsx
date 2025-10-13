@@ -1,6 +1,6 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format } from 'date-fns';
@@ -9,7 +9,6 @@ import { useLocale } from '@/contexts/LocaleContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import {
-  Form,
   FormControl,
   FormField,
   FormItem,
@@ -26,6 +25,7 @@ import { CalendarIcon, AlertCircle, Loader2, PlusCircle, Trash2 } from 'lucide-r
 
 import { useAuth } from '@/contexts/AuthContext';
 import { journalEntriesService } from '@/services/journalEntriesService';
+import { EntitySelector, type EntityOption, type EntityFormField } from '../common/EntitySelector';
 import type {
   JournalEntryFormInitialValues,
   JournalEntryFormValues,
@@ -209,6 +209,78 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
     }
   }, [currentCompanyId, isSupabaseConfigured, t]);
 
+  // Données pour EntitySelector - comptes comptables
+  const accountCreateFormFields: EntityFormField[] = [
+    {
+      name: 'account_number',
+      label: t('accounting.accountForm.accountNumber'),
+      type: 'text',
+      required: true,
+      placeholder: t('accounting.accountForm.accountNumberPlaceholder')
+    },
+    {
+      name: 'name',
+      label: t('accounting.accountForm.accountName'),
+      type: 'text',
+      required: true,
+      placeholder: t('accounting.accountForm.accountNamePlaceholder')
+    },
+    {
+      name: 'type',
+      label: t('accounting.accountForm.accountType'),
+      type: 'select',
+      required: true,
+      options: [
+        { value: 'asset', label: t('accounting.accountTypes.asset') },
+        { value: 'liability', label: t('accounting.accountTypes.liability') },
+        { value: 'equity', label: t('accounting.accountTypes.equity') },
+        { value: 'income', label: t('accounting.accountTypes.income') },
+        { value: 'expense', label: t('accounting.accountTypes.expense') }
+      ]
+    }
+  ];
+
+  const accountOptions: EntityOption[] = localAccounts.map(account => ({
+    id: account.id,
+    label: `${account.account_number} - ${account.name}`,
+    sublabel: account.type || undefined
+  }));
+
+  const handleCreateAccount = async (accountData: Record<string, any>) => {
+    try {
+      if (!currentCompanyId) {
+        throw new Error('No current company selected');
+      }
+
+      // Simulation de création de compte comptable
+      // Dans un vrai système, cela ferait appel au service de comptes
+      const newAccount = {
+        id: `account_${Date.now()}`,
+        account_number: accountData.account_number,
+        name: accountData.name,
+        type: accountData.type,
+        class: accountData.type, // Utiliser le même type pour la classe
+        is_active: true,
+        company_id: currentCompanyId,
+        created_at: new Date().toISOString()
+      };
+
+      // Ajouter le nouveau compte à la liste (simulation)
+      setLocalAccounts(prev => [...prev, newAccount]);
+
+      toast({
+        title: t('accounting.accountCreated'),
+        description: t('accounting.accountCreatedDescription', { name: accountData.name }),
+        variant: "default"
+      });
+
+      return { success: true, id: newAccount.id };
+    } catch (error) {
+      console.error('Error creating account:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  };
+
   useEffect(() => {
     fetchDropdownData();
   }, [fetchDropdownData]);
@@ -315,7 +387,7 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
   }, [fetchDropdownData]);
 
   return (
-    <Form form={form}>
+    <FormProvider {...form}>
       <form className="space-y-6" onSubmit={handleSubmit(onSubmitHandler)}>
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-semibold">
@@ -467,38 +539,20 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
                   return (
                     <tr className="border-b" key={fieldItem.id}>
                       <td className="py-2 pr-2 align-top">
-                        <Select
+                        <EntitySelector
+                          options={accountOptions}
                           value={item.accountId}
-                          onValueChange={(value) => setValue(`items.${index}.accountId`, value, {
+                          onChange={(value) => setValue(`items.${index}.accountId`, value, {
                             shouldDirty: true,
                             shouldValidate: true,
                           })}
-                          disabled={loadingDropdowns || localAccounts.length === 0}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder={t('allAccounts')} />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[300px] overflow-y-auto">
-                            {loadingDropdowns ? (
-                              <div className="flex items-center justify-center p-4 text-sm">
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                {t('common.loading')}
-                              </div>
-                            ) : localAccounts.length === 0 ? (
-                              <div className="p-4 text-center text-muted-foreground text-sm">
-                                {t('journal_entries.no_accounts_found', {
-                                  defaultValue: 'Aucun compte trouvé',
-                                })}
-                              </div>
-                            ) : (
-                              localAccounts.map((account) => (
-                                <SelectItem key={account.id} value={account.id}>
-                                  {account.account_number} - {account.name}
-                                </SelectItem>
-                              ))
-                            )}
-                          </SelectContent>
-                        </Select>
+                          onCreateEntity={handleCreateAccount}
+                          createFormFields={accountCreateFormFields}
+                          entityName={t('accounting.accountEntity.entityName')}
+                          entityNamePlural={t('accounting.accountEntity.entityNamePlural')}
+                          placeholder={t('allAccounts')}
+                          canCreate={true}
+                        />
                       </td>
                       <td className="py-2 pr-2 align-top">
                         <Input
@@ -595,7 +649,7 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
           </Button>
         </div>
       </form>
-    </Form>
+    </FormProvider>
   );
 };
 

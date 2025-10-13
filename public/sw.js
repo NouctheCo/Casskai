@@ -1,5 +1,5 @@
 // Service Worker pour CassKai - Offline-First avec performance optimisée
-const CACHE_VERSION = 'v1.3.2';
+const CACHE_VERSION = 'v1.4.1'; // Fixed staleWhileRevalidate error handling
 const CACHE_NAMES = {
   static: `casskai-static-${CACHE_VERSION}`,
   dynamic: `casskai-dynamic-${CACHE_VERSION}`,
@@ -61,13 +61,26 @@ const CACHE_STRATEGIES = {
   staleWhileRevalidate: async (request) => {
     const cache = await caches.open(CACHE_NAMES.api);
     const cached = await cache.match(request);
-    
-    const fetchPromise = fetch(request).then(response => {
-      if (response.ok) {
-        cache.put(request, response.clone());
-      }
-      return response;
-    });
+
+    const fetchPromise = fetch(request)
+      .then(response => {
+        if (response.ok) {
+          cache.put(request, response.clone());
+        }
+        return response;
+      })
+      .catch(error => {
+        console.warn('SW: Fetch failed, returning cached or error', error);
+        // Si on a du cache, on le retourne, sinon on propage l'erreur
+        if (cached) {
+          return cached;
+        }
+        // Retourner une réponse d'erreur valide au lieu de propager
+        return new Response(JSON.stringify({ error: 'Network error' }), {
+          status: 503,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      });
 
     return cached || fetchPromise;
   },
@@ -171,11 +184,15 @@ async function handleRequest(request, url) {
     return fetch(request);
   }
 
-  // Assets statiques (CSS, JS, fonts)
-  if (request.destination === 'style' || 
-      request.destination === 'script' || 
-      request.destination === 'font' ||
+  // Assets statiques (CSS, JS) - Network First pour éviter les problèmes de cache
+  if (request.destination === 'style' ||
+      request.destination === 'script' ||
       url.pathname.includes('/assets/')) {
+    return CACHE_STRATEGIES.networkFirst(request);
+  }
+
+  // Fonts - Cache First (stable)
+  if (request.destination === 'font') {
     return CACHE_STRATEGIES.cacheFirst(request);
   }
 
