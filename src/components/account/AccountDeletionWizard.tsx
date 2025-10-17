@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { logger } from '@/utils/logger';
 import {
   AlertTriangle, Shield, Download, Users, Building, Calendar,
   CheckCircle, XCircle, ArrowRight, ArrowLeft, Heart, Star,
@@ -53,7 +54,7 @@ export const AccountDeletionWizard: React.FC<DeletionWizardProps> = ({
         setCurrentStep('export');
       }
     } catch (error) {
-      console.error('Erreur analyse:', error);
+      logger.error('Erreur analyse:', error)
     }
   };
 
@@ -88,7 +89,7 @@ export const AccountDeletionWizard: React.FC<DeletionWizardProps> = ({
         setCurrentStep('farewell');
       }
     } catch (error) {
-      console.error('Erreur suppression:', error);
+      logger.error('Erreur suppression:', error)
     } finally {
       setProcessing(false);
     }

@@ -25,11 +25,11 @@ Ce système fournit une gestion complète des abonnements basée sur des plans (
   - `QuotaIndicator`: Affichage de l'usage des quotas
 
 #### 3. Service Stripe
-- **Fichier**: `src/services/stripeSubscriptionService.ts`
+- **Fichier**: `src/services/stripeService.ts`
 - **Fonctionnalités**:
-  - Création de sessions de checkout
-  - Gestion des abonnements
-  - Accès au portail client Stripe
+  - Création de sessions de checkout via l'API backend sécurisée
+  - Gestion des abonnements (upgrade/downgrade, annulation)
+  - Accès au portail client Stripe et gestion des moyens de paiement
 
 #### 4. Webhooks Stripe
 - **Fichier**: `src/pages/api/stripe/webhooks.ts`

@@ -2,6 +2,7 @@ import { supabase } from '../lib/supabase';
 import { Purchase, PurchaseFormData, PurchaseFilters, PurchaseStats, Supplier } from '../types/purchase.types';
 import { journalEntriesService } from './journalEntriesService';
 import { EntryTemplatesService } from './entryTemplatesService';
+import { logger } from '@/utils/logger';
 
 export const purchasesService = {
   // Get all purchases with filters
@@ -69,7 +70,7 @@ export const purchasesService = {
 
       return { data: purchases };
     } catch (error) {
-      console.error('Error fetching purchases:', error);
+      logger.error('Error fetching purchases:', error);
       return {
         data: [],
         error: { message: 'Erreur lors de la récupération des achats' }
@@ -120,7 +121,7 @@ export const purchasesService = {
 
       return { data: purchase };
     } catch (error) {
-      console.error('Error fetching purchase by ID:', error);
+      logger.error('Error fetching purchase by ID:', error);
       return {
         data: null,
         error: { message: 'Erreur lors de la récupération de l\'achat' }
@@ -216,7 +217,7 @@ export const purchasesService = {
 
       return { data: result };
     } catch (error) {
-      console.error('Error creating purchase:', error);
+      logger.error('Error creating purchase:', error);
       return {
         data: null,
         error: 'Erreur lors de la création de l\'achat'
@@ -293,7 +294,7 @@ export const purchasesService = {
 
       return { data: result };
     } catch (error) {
-      console.error('Error updating purchase:', error);
+      logger.error('Error updating purchase:', error);
       return {
         data: null,
         error: 'Erreur lors de la mise à jour de l\'achat'
@@ -313,7 +314,7 @@ export const purchasesService = {
 
       return { success: true };
     } catch (error) {
-      console.error('Error deleting purchase:', error);
+      logger.error('Error deleting purchase:', error);
       return {
         success: false,
         error: 'Erreur lors de la suppression de l\'achat'
@@ -394,7 +395,7 @@ export const purchasesService = {
 
       return { data: result };
     } catch (error) {
-      console.error('Error marking purchase as paid:', error);
+      logger.error('Error marking purchase as paid:', error);
       return {
         data: null,
         error: 'Erreur lors du marquage comme payé'
@@ -421,7 +422,7 @@ export const purchasesService = {
 
       return { data: stats };
     } catch (error) {
-      console.error('Error fetching purchase stats:', error);
+      logger.error('Error fetching purchase stats:', error);
       return {
         data: {
           total_purchases: 0,
@@ -457,10 +458,10 @@ export const purchasesService = {
 
       return { data: suppliers };
     } catch (error) {
-      console.error('Error fetching suppliers:', error);
+      logger.error('Error fetching suppliers:', error);
       return {
         data: [],
-        error: { message: 'Erreur lors de la récupération des fournisseurs' }
+        error: 'Erreur lors de la récupération des fournisseurs'
       };
     }
   },
@@ -501,7 +502,7 @@ export const purchasesService = {
 
       return { data: csvData };
     } catch (error) {
-      console.error('Error exporting purchases to CSV:', error);
+      logger.error('Error exporting purchases to CSV:', error);
       return {
         data: '',
         error: 'Erreur lors de l\'export CSV'
@@ -530,7 +531,7 @@ export const purchasesService = {
       const journal = journals.find(j => j.code === 'ACHATS');
 
       if (!journal) {
-        console.warn('Journal ACHATS non trouvé, écriture non créée');
+        logger.warn('Journal ACHATS non trouvé, écriture non créée');
         return;
       }
 
@@ -559,18 +560,18 @@ export const purchasesService = {
         referenceNumber: purchase.invoice_number,
         journalId: journal.id,
         status: 'posted' as const,
-        items: mappedItems
+        lines: mappedItems
       };
 
       const result = await journalEntriesService.createJournalEntry(payload);
 
       if (!result.success) {
-        console.error('Erreur création écriture comptable achat:', (result as { success: false; error: string }).error);
+        logger.error('Erreur création écriture comptable achat:', (result as { success: false; error: string }).error);
       } else {
-        console.warn(`Écriture comptable créée pour l'achat ${purchase.invoice_number}`);
+        logger.warn(`Écriture comptable créée pour l'achat ${purchase.invoice_number}`)
       }
     } catch (error) {
-      console.error('Erreur lors de la création automatique d\'écriture d\'achat:', error);
+      logger.error('Erreur lors de la création automatique d\'écriture d\'achat:', error);
       // Don't block purchase creation if journal entry fails
     }
   },
@@ -595,7 +596,7 @@ export const purchasesService = {
       const journal = journals.find(j => j.code === 'BANQUE' || j.type === 'bank');
 
       if (!journal) {
-        console.warn('Journal de banque non trouvé, écriture de paiement non créée');
+        logger.warn('Journal de banque non trouvé, écriture de paiement non créée');
         return;
       }
 
@@ -624,18 +625,18 @@ export const purchasesService = {
         referenceNumber: `PAY-${purchase.invoice_number}`,
         journalId: journal.id,
         status: 'posted' as const,
-        items: mappedItems
+        lines: mappedItems
       };
 
       const result = await journalEntriesService.createJournalEntry(payload);
 
       if (!result.success) {
-        console.error('Erreur création écriture de paiement achat:', (result as { success: false; error: string }).error);
+        logger.error('Erreur création écriture de paiement achat:', (result as { success: false; error: string }).error);
       } else {
-        console.warn(`Écriture de paiement créée pour l'achat ${purchase.invoice_number}`);
+        logger.warn(`Écriture de paiement créée pour l'achat ${purchase.invoice_number}`)
       }
     } catch (error) {
-      console.error('Erreur lors de la création automatique d\'écriture de paiement achat:', error);
+      logger.error('Erreur lors de la création automatique d\'écriture de paiement achat:', error);
       // Don't block payment marking if journal entry fails
     }
   }

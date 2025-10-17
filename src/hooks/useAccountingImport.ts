@@ -15,6 +15,7 @@ import {
   CSVMapping, 
   FileParserOptions 
 } from '../types/accounting-import.types';
+import { logger } from '@/utils/logger';
 
 // Schéma de validation pour la configuration d'import
 const ImportConfigSchema = z.object({
@@ -73,7 +74,7 @@ export function useAccountingImport({
 
   // Gestion des erreurs
   const handleError = useCallback((error: string) => {
-    console.error('Import error:', error);
+    logger.error('Import error:', error);
     onError?.(error);
     setIsImporting(false);
     setImportSession(prev => prev ? { ...prev, status: 'failed' } : null);
@@ -262,7 +263,7 @@ export function useAccountingImport({
     try {
       await AutomaticLetterageService.performAutoLetterage(companyId);
     } catch (error) {
-      console.warn('Erreur lettrage automatique:', error);
+      logger.warn('Erreur lettrage automatique:', error);
       // N'interrompt pas l'import si le lettrage échoue
     }
   }, [companyId]);

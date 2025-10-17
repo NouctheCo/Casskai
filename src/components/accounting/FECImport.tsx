@@ -10,6 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import FECImportDropzone from './FECImportDropzone';
 import FECImportSummary from './FECImportSummary';
+import { logger } from '@/utils/logger';
 
 const FECImport = ({ currentEnterpriseId }) => {
   const { t } = useLocale();
@@ -63,7 +64,7 @@ const FECImport = ({ currentEnterpriseId }) => {
         });
       }
     } catch (error) {
-      console.error('Error parsing FEC file:', error);
+      logger.error('Error parsing FEC file:', error);
       toast({
         variant: 'destructive',
         title: t('error'),
@@ -142,7 +143,7 @@ const FECImport = ({ currentEnterpriseId }) => {
         });
       }
     } catch (error) {
-      console.error('Error importing FEC data:', error);
+      logger.error('Error importing FEC data:', error);
       toast({
         variant: 'destructive',
         title: t('error'),

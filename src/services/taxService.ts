@@ -10,14 +10,13 @@ import {
   TaxRate, 
   TaxDeclaration, 
   TaxPayment, 
-  TaxDocument, 
-  TaxSettings,
   TaxDashboardData,
   TaxCalendarEvent,
   TaxAlert,
   TaxObligation,
   TaxServiceResponse
 } from '../types/tax.types';
+import { logger } from '@/utils/logger';
 
 /**
  * Service for managing tax-related operations
@@ -41,7 +40,7 @@ export const taxService = {
         id: rate.id,
         name: rate.name,
         rate: rate.rate,
-        type: rate.type as any,
+        type: rate.type,
         description: rate.description,
         countryCode: 'FR', // This should come from the company
         isActive: rate.is_active,
@@ -53,7 +52,7 @@ export const taxService = {
 
       return { data: taxRates, error: null };
     } catch (error) {
-      console.error('Error fetching tax rates:', error);
+      logger.error('Error fetching tax rates:', error);
       const errorInfo = handleSupabaseError(error, 'Fetching tax rates');
       return { 
         data: null, 
@@ -99,7 +98,7 @@ export const taxService = {
         id: data.id,
         name: data.name,
         rate: data.rate,
-        type: data.type as any,
+        type: data.type,
         description: data.description,
         countryCode: taxRate.countryCode,
         isActive: data.is_active,
@@ -111,7 +110,7 @@ export const taxService = {
 
       return { data: newRate, error: null };
     } catch (error) {
-      console.error('Error creating tax rate:', error);
+      logger.error('Error creating tax rate:', error);
       const errorInfo = handleSupabaseError(error, 'Creating tax rate');
       return { 
         data: null, 
@@ -126,7 +125,7 @@ export const taxService = {
   async updateTaxRate(id: string, updates: Partial<TaxRate>): Promise<{ success: boolean; error: Error | null }> {
     try {
       // Prepare data for Supabase
-      const updateData: any = {};
+      const updateData: Record<string, unknown> = {};
       
       if (updates.name !== undefined) updateData.name = updates.name;
       if (updates.rate !== undefined) updateData.rate = updates.rate;
@@ -145,7 +144,7 @@ export const taxService = {
 
       return { success: true, error: null };
     } catch (error) {
-      console.error('Error updating tax rate:', error);
+      logger.error('Error updating tax rate:', error);
       const errorInfo = handleSupabaseError(error, 'Updating tax rate');
       return { 
         success: false, 
@@ -168,7 +167,7 @@ export const taxService = {
 
       return { success: true, error: null };
     } catch (error) {
-      console.error('Error deleting tax rate:', error);
+      logger.error('Error deleting tax rate:', error);
       const errorInfo = handleSupabaseError(error, 'Deleting tax rate');
       return { 
         success: false, 
@@ -219,10 +218,10 @@ export const taxService = {
       // Map DB data to TaxDeclaration model
       const declarations = data?.map(decl => ({
         id: decl.id,
-        type: decl.type as any,
+        type: decl.type,
         name: decl.name,
         dueDate: new Date(decl.due_date),
-        status: decl.status as any,
+        status: decl.status,
         amount: decl.amount,
         description: decl.description,
         companyId: decl.company_id,
@@ -237,7 +236,7 @@ export const taxService = {
 
       return { data: declarations, error: null };
     } catch (error) {
-      console.error('Error fetching tax declarations:', error);
+      logger.error('Error fetching tax declarations:', error);
       const errorInfo = handleSupabaseError(error, 'Fetching tax declarations');
       return { 
         data: null, 
@@ -277,10 +276,10 @@ export const taxService = {
       // Convert to TaxDeclaration model
       const newDeclaration: TaxDeclaration = {
         id: data.id,
-        type: data.type as any,
+        type: data.type,
         name: data.name,
         dueDate: new Date(data.due_date),
-        status: data.status as any,
+        status: data.status,
         amount: data.amount,
         description: data.description,
         companyId: data.company_id,
@@ -293,7 +292,7 @@ export const taxService = {
 
       return { data: newDeclaration, error: null };
     } catch (error) {
-      console.error('Error creating tax declaration:', error);
+      logger.error('Error creating tax declaration:', error);
       const errorInfo = handleSupabaseError(error, 'Creating tax declaration');
       return { 
         data: null, 
@@ -308,7 +307,7 @@ export const taxService = {
   async updateTaxDeclaration(id: string, updates: Partial<TaxDeclaration>): Promise<{ success: boolean; error: Error | null }> {
     try {
       // Prepare data for Supabase
-      const updateData: any = {};
+      const updateData: Record<string, unknown> = {};
       
       if (updates.name !== undefined) updateData.name = updates.name;
       if (updates.type !== undefined) updateData.type = updates.type;
@@ -333,7 +332,7 @@ export const taxService = {
 
       return { success: true, error: null };
     } catch (error) {
-      console.error('Error updating tax declaration:', error);
+      logger.error('Error updating tax declaration:', error);
       const errorInfo = handleSupabaseError(error, 'Updating tax declaration');
       return { 
         success: false, 
@@ -366,7 +365,7 @@ export const taxService = {
 
       return { success: true, error: null };
     } catch (error) {
-      console.error('Error marking declaration as submitted:', error);
+      logger.error('Error marking declaration as submitted:', error);
       const errorInfo = handleSupabaseError(error, 'Marking declaration as submitted');
       return { 
         success: false, 
@@ -415,15 +414,15 @@ export const taxService = {
         amount: data.amount,
         currency: data.currency,
         paymentDate: new Date(data.payment_date),
-        paymentMethod: data.payment_method as any,
+        paymentMethod: data.payment_method,
         reference: data.reference,
-        status: data.status as any,
+        status: data.status,
         receiptUrl: data.receipt_url
       };
 
       return { data: newPayment, error: null };
     } catch (error) {
-      console.error('Error creating tax payment:', error);
+      logger.error('Error creating tax payment:', error);
       const errorInfo = handleSupabaseError(error, 'Creating tax payment');
       return { 
         data: null, 
@@ -453,18 +452,10 @@ export const taxService = {
   /**
    * Export tax data to PDF
    */
-  async exportToPDF(data: any): Promise<{ success: boolean; error: Error | null }> {
-    try {
-      // This would be implemented with a PDF generation library
-      // For now, we'll just return success
-      return { success: true, error: null };
-    } catch (error) {
-      console.error('Error exporting to PDF:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error : new Error('Unknown error exporting to PDF') 
-      };
-    }
+  async exportToPDF(data: Record<string, unknown>): Promise<{ success: boolean; error: Error | null }> {
+    // This would be implemented with a PDF generation library
+    // For now, we'll just return success
+    return { success: true, error: null };
   },
 
   /**
@@ -575,7 +566,7 @@ export const taxService = {
 
       return { data: dashboardData };
     } catch (error) {
-      console.error('Error fetching tax dashboard data:', error);
+      logger.error('Error fetching tax dashboard data:', error);
       return {
         data: {} as TaxDashboardData,
         error: { message: 'Failed to fetch tax dashboard data' }
@@ -613,7 +604,7 @@ export const taxService = {
 
       return { data: taxDeclarations };
     } catch (error) {
-      console.error('Error fetching tax declarations:', error);
+      logger.error('Error fetching tax declarations:', error);
       return {
         data: [],
         error: { message: 'Failed to fetch declarations' }
@@ -656,7 +647,7 @@ export const taxService = {
 
       return { data: calendarEvents };
     } catch (error) {
-      console.error('Error fetching calendar events:', error);
+      logger.error('Error fetching calendar events:', error);
       return {
         data: [],
         error: { message: 'Failed to fetch calendar events' }
@@ -700,7 +691,7 @@ export const taxService = {
 
       return { data: taxAlerts };
     } catch (error) {
-      console.error('Error fetching tax alerts:', error);
+      logger.error('Error fetching tax alerts:', error);
       return {
         data: [],
         error: { message: 'Failed to fetch alerts' }
@@ -754,7 +745,7 @@ export const taxService = {
 
       return { data: defaultObligations };
     } catch (error) {
-      console.error('Error fetching tax obligations:', error);
+      logger.error('Error fetching tax obligations:', error);
       return {
         data: [],
         error: { message: 'Failed to fetch obligations' }

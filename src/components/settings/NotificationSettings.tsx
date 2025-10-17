@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Mail, Smartphone, Clock, Bell, Loader2, Save } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 interface NotificationSettingsData {
   email: {
@@ -68,10 +69,10 @@ export function NotificationSettings() {
       const { data, error } = await supabase.rpc('get_user_notifications');
 
       if (error) {
-        console.error('Erreur RPC get_user_notifications:', error);
+        logger.error('Erreur RPC get_user_notifications:', error);
         // Si pas de données, utiliser les valeurs par défaut (déjà définies dans le state)
         if (error.message?.includes('No rows found') || error.code === 'PGRST116') {
-          console.warn('Aucun paramètre de notification trouvé, utilisation des valeurs par défaut');
+          logger.warn('Aucun paramètre de notification trouvé, utilisation des valeurs par défaut')
         } else {
           throw error;
         }
@@ -103,7 +104,7 @@ export function NotificationSettings() {
         });
       }
     } catch (error) {
-      console.error('Erreur chargement paramètres notifications:', error);
+      logger.error('Erreur chargement paramètres notifications:', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de charger les paramètres de notifications',
@@ -141,7 +142,7 @@ export function NotificationSettings() {
       });
 
       if (error) {
-        console.error('Erreur RPC save_user_notifications:', error);
+        logger.error('Erreur RPC save_user_notifications:', error);
         throw error;
       }
 
@@ -153,7 +154,7 @@ export function NotificationSettings() {
       // Recharger les données après sauvegarde pour s'assurer que l'interface est à jour
       await loadNotificationSettings();
     } catch (error) {
-      console.error('Erreur sauvegarde paramètres notifications:', error);
+      logger.error('Erreur sauvegarde paramètres notifications:', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de sauvegarder les paramètres',

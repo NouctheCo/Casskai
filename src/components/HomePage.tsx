@@ -2,6 +2,8 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { LoadingFallback } from '@/components/ui/LoadingFallback';
+import { readUserScopedItem, STORAGE_KEYS } from '@/utils/userStorage';
+import { logger } from '@/utils/logger';
 
 /**
  * Composant qui gère la redirection de la page d'accueil
@@ -20,7 +22,7 @@ export const HomePage: React.FC = () => {
     return <Navigate to="/landing" replace />;
   }
 
-  const hasLocalCompany = localStorage.getItem('casskai_current_enterprise');
+  const hasLocalCompany = user ? readUserScopedItem(STORAGE_KEYS.CURRENT_ENTERPRISE, user.id) : null;
 
   console.log('🏠 HomePage Debug:', {
     userId: user?.id,
@@ -34,14 +36,14 @@ export const HomePage: React.FC = () => {
   // Si l'utilisateur est connecté mais l'onboarding n'est pas complété
   // ET qu'il n'y a pas de company dans Supabase ET pas d'entreprise locale
   if (user && !onboardingCompleted && !currentCompany && !hasLocalCompany) {
-    console.log('🎯 HomePage: Redirecting to onboarding');
+    logger.info('🎯 HomePage: Redirecting to onboarding');
     return <Navigate to="/onboarding" replace />;
   }
 
   // Si l'onboarding est marqué comme complété mais que currentCompany n'est pas encore chargé,
   // afficher un état de chargement pour éviter la redirection prématurée vers le dashboard
   if (user && onboardingCompleted && !currentCompany && !hasLocalCompany) {
-    console.log('⏳ HomePage: Onboarding completed but waiting for company data');
+    logger.info('⏳ HomePage: Onboarding completed but waiting for company data');
     return <LoadingFallback message="Chargement des données de l'entreprise..." />;
   }
 

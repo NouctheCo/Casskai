@@ -46,6 +46,7 @@ import {
   Shield,
   Sparkles
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 // Calendar setup
 const locales = {
@@ -138,7 +139,7 @@ const TaxPage: React.FC = () => {
         });
       }
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      logger.error('Error loading dashboard data:', error);
       toast({
         title: 'Erreur de chargement',
         description: 'Impossible de charger les données du tableau de bord',
@@ -161,7 +162,7 @@ const TaxPage: React.FC = () => {
         });
       }
     } catch (error) {
-      console.error('Error loading declarations:', error);
+      logger.error('Error loading declarations:', error);
       toast({
         title: 'Erreur de chargement',
         description: 'Impossible de charger les déclarations',
@@ -184,7 +185,7 @@ const TaxPage: React.FC = () => {
         setCalendarEvents(response.data);
       }
     } catch (error) {
-      console.error('Error loading calendar events:', error);
+      logger.error('Error loading calendar events:', error)
     }
   };
 
@@ -195,7 +196,7 @@ const TaxPage: React.FC = () => {
         setAlerts(response.data);
       }
     } catch (error) {
-      console.error('Error loading alerts:', error);
+      logger.error('Error loading alerts:', error)
     }
   };
 
@@ -207,7 +208,7 @@ const TaxPage: React.FC = () => {
       }
       setLoading(false);
     } catch (error) {
-      console.error('Error loading obligations:', error);
+      logger.error('Error loading obligations:', error);
       setLoading(false);
     }
   };
@@ -318,7 +319,7 @@ const TaxPage: React.FC = () => {
         description: 'La déclaration a été supprimée avec succès',
       });
     } catch (error) {
-      console.error('Error deleting declaration:', error);
+      logger.error('Error deleting declaration:', error);
       toast({
         title: 'Erreur de suppression',
         description: 'Impossible de supprimer la déclaration',
@@ -349,7 +350,7 @@ const TaxPage: React.FC = () => {
         description: 'L\'obligation a été supprimée avec succès',
       });
     } catch (error) {
-      console.error('Error deleting obligation:', error);
+      logger.error('Error deleting obligation:', error);
       toast({
         title: 'Erreur de suppression',
         description: 'Impossible de supprimer l\'obligation',

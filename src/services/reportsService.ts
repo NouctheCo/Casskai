@@ -31,6 +31,7 @@ import type {
 
 // Mock data
 import { supabase } from '../lib/supabase';
+import { logger } from '@/utils/logger';
 
 class ReportsService {
   // Explicit flag to control mock usage
@@ -78,13 +79,13 @@ class ReportsService {
       const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching reports:', error);
+        logger.error('Error fetching reports:', error);
         return { data: [], error: { message: error.message } };
       }
 
       return { data: data || [] };
     } catch (error) {
-      console.error('Exception in getReports:', error);
+      logger.error('Exception in getReports:', error);
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la récupération des rapports';
       return {
         data: [],
@@ -115,13 +116,13 @@ class ReportsService {
         .single();
 
       if (error) {
-        console.error('Error creating report:', error);
+        logger.error('Error creating report:', error);
         return { data: null, error: { message: error.message } };
       }
 
       return { data };
     } catch (error) {
-      console.error('Exception in createReport:', error);
+      logger.error('Exception in createReport:', error);
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la création du rapport';
       return {
         data: null,
@@ -140,13 +141,13 @@ class ReportsService {
         .single();
 
       if (error) {
-        console.error('Error updating report:', error);
+        logger.error('Error updating report:', error);
         return { data: null, error: { message: error.message } };
       }
 
       return { data };
     } catch (error) {
-      console.error('Exception in updateReport:', error);
+      logger.error('Exception in updateReport:', error);
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la mise à jour du rapport';
       return {
         data: null,
@@ -163,13 +164,13 @@ class ReportsService {
         .eq('id', reportId);
 
       if (error) {
-        console.error('Error deleting report:', error);
+        logger.error('Error deleting report:', error);
         return { data: false, error: { message: error.message } };
       }
 
       return { data: true };
     } catch (error) {
-      console.error('Exception in deleteReport:', error);
+      logger.error('Exception in deleteReport:', error);
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la suppression du rapport';
       return {
         data: false,
@@ -187,13 +188,13 @@ class ReportsService {
       });
 
       if (error) {
-        console.error('Error generating balance sheet:', error);
+        logger.error('Error generating balance sheet:', error);
         return { data: null, error: { message: error.message } };
       }
 
       return { data: data as BalanceSheetData };
     } catch (error) {
-      console.error('Exception in generateBalanceSheet:', error);
+      logger.error('Exception in generateBalanceSheet:', error);
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la génération du bilan';
       return {
         data: null,
@@ -211,13 +212,13 @@ class ReportsService {
       });
 
       if (error) {
-        console.error('Error generating income statement:', error);
+        logger.error('Error generating income statement:', error);
         return { data: null, error: { message: error.message } };
       }
 
       return { data: data as IncomeStatementData };
     } catch (error) {
-      console.error('Exception in generateIncomeStatement:', error);
+      logger.error('Exception in generateIncomeStatement:', error);
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la génération du compte de résultat';
       return {
         data: null,
@@ -235,13 +236,13 @@ class ReportsService {
       });
 
       if (error) {
-        console.error('Error generating cash flow statement:', error);
+        logger.error('Error generating cash flow statement:', error);
         return { data: null, error: { message: error.message } };
       }
 
       return { data: data as CashFlowData };
     } catch (error) {
-      console.error('Exception in generateCashFlowStatement:', error);
+      logger.error('Exception in generateCashFlowStatement:', error);
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la génération du tableau de flux de trésorerie';
       return {
         data: null,
@@ -258,13 +259,13 @@ class ReportsService {
       });
 
       if (error) {
-        console.error('Error generating trial balance:', error);
+        logger.error('Error generating trial balance:', error);
         return { data: null, error: { message: error.message } };
       }
 
       return { data: data as TrialBalanceData };
     } catch (error) {
-      console.error('Exception in generateTrialBalance:', error);
+      logger.error('Exception in generateTrialBalance:', error);
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la génération de la balance générale';
       return {
         data: null,
@@ -283,13 +284,13 @@ class ReportsService {
       });
 
       if (error) {
-        console.error('Error generating general ledger:', error);
+        logger.error('Error generating general ledger:', error);
         return { data: null, error: { message: error.message } };
       }
 
       return { data };
     } catch (error) {
-      console.error('Exception in generateGeneralLedger:', error);
+      logger.error('Exception in generateGeneralLedger:', error);
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la génération du grand livre';
       return {
         data: null,
@@ -308,13 +309,13 @@ class ReportsService {
       });
 
       if (error) {
-        console.error('Error generating VAT declaration:', error);
+        logger.error('Error generating VAT declaration:', error);
         return { data: null, error: { message: error.message } };
       }
 
       return { data };
     } catch (error) {
-      console.error('Exception in generateVATDeclaration:', error);
+      logger.error('Exception in generateVATDeclaration:', error);
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la génération de la déclaration de TVA';
       return {
         data: null,
@@ -332,13 +333,13 @@ class ReportsService {
       });
 
       if (error) {
-        console.error('Error generating form 2050:', error);
+        logger.error('Error generating form 2050:', error);
         return { data: null, error: { message: error.message } };
       }
 
       return { data };
     } catch (error) {
-      console.error('Exception in generateForm2050:', error);
+      logger.error('Exception in generateForm2050:', error);
       const message = error instanceof Error ? error.message : 'Erreur lors de la génération du formulaire 2050';
       return { data: null, error: { message } };
     }
@@ -353,13 +354,13 @@ class ReportsService {
       });
 
       if (error) {
-        console.error('Error generating form 2051:', error);
+        logger.error('Error generating form 2051:', error);
         return { data: null, error: { message: error.message } };
       }
 
       return { data };
     } catch (error) {
-      console.error('Exception in generateForm2051:', error);
+      logger.error('Exception in generateForm2051:', error);
       const message = error instanceof Error ? error.message : 'Erreur lors de la génération du formulaire 2051';
       return { data: null, error: { message } };
     }
@@ -375,13 +376,13 @@ class ReportsService {
       });
 
       if (error) {
-        console.error('Error generating form 2052:', error);
+        logger.error('Error generating form 2052:', error);
         return { data: null, error: { message: error.message } };
       }
 
       return { data };
     } catch (error) {
-      console.error('Exception in generateForm2052:', error);
+      logger.error('Exception in generateForm2052:', error);
       const message = error instanceof Error ? error.message : 'Erreur lors de la génération du formulaire 2052';
       return { data: null, error: { message } };
     }
@@ -397,13 +398,13 @@ class ReportsService {
       });
 
       if (error) {
-        console.error('Error generating form 2053:', error);
+        logger.error('Error generating form 2053:', error);
         return { data: null, error: { message: error.message } };
       }
 
       return { data };
     } catch (error) {
-      console.error('Exception in generateForm2053:', error);
+      logger.error('Exception in generateForm2053:', error);
       const message = error instanceof Error ? error.message : 'Erreur lors de la génération du formulaire 2053';
       return { data: null, error: { message } };
     }
@@ -445,7 +446,7 @@ class ReportsService {
 
       return { data: liasse };
     } catch (error) {
-      console.error('Exception in generateLiasseFiscale:', error);
+      logger.error('Exception in generateLiasseFiscale:', error);
       const message = error instanceof Error ? error.message : 'Erreur lors de la génération de la liasse fiscale';
       return { data: null, error: { message } };
     }
@@ -790,7 +791,7 @@ class ReportsService {
       const exportUrl = `/exports/${reportId}_${Date.now()}.${config.format}`;
 
       // Simulate export processing
-      console.warn(`Export du rapport ${report.name} en format ${config.format}`);
+      logger.warn(`Export du rapport ${report.name} en format ${config.format}`);
 
       return { data: exportUrl };
     } catch (_error) {
@@ -1164,7 +1165,7 @@ class ReportsService {
         .lte('due_date', asOfDate);
 
       if (error) {
-        console.error('Error fetching invoices:', error);
+        logger.error('Error fetching invoices:', error);
         return { data: null, error: { message: error.message } };
       }
 
@@ -1235,7 +1236,7 @@ class ReportsService {
 
       return { data: report };
     } catch (error) {
-      console.error('Exception in generateAgedReceivables:', error);
+      logger.error('Exception in generateAgedReceivables:', error);
       return {
         data: null,
         error: { message: error instanceof Error ? error.message : 'Erreur inconnue' }
@@ -1260,7 +1261,7 @@ class ReportsService {
         .lte('due_date', asOfDate);
 
       if (error) {
-        console.error('Error fetching bills:', error);
+        logger.error('Error fetching bills:', error);
         return { data: null, error: { message: error.message } };
       }
 
@@ -1330,7 +1331,7 @@ class ReportsService {
 
       return { data: report };
     } catch (error) {
-      console.error('Exception in generateAgedPayables:', error);
+      logger.error('Exception in generateAgedPayables:', error);
       return {
         data: null,
         error: { message: error instanceof Error ? error.message : 'Erreur inconnue' }
@@ -1365,17 +1366,17 @@ class ReportsService {
 
       // Calculer les ratios
       const totalAssets = balanceSheet?.totals?.total_assets || 1;
-      const currentAssets = balanceSheet?.assets?.cash?.reduce((sum: number, a: any) => sum + (a.balance || 0), 0) +
-                            balanceSheet?.assets?.receivables?.reduce((sum: number, a: any) => sum + (a.balance || 0), 0) +
-                            balanceSheet?.assets?.inventory?.reduce((sum: number, a: any) => sum + (a.balance || 0), 0) || 1;
-      const currentLiabilities = balanceSheet?.liabilities?.payables?.reduce((sum: number, a: any) => sum + (a.balance || 0), 0) || 1;
-      const inventory = balanceSheet?.assets?.inventory?.reduce((sum: number, a: any) => sum + (a.balance || 0), 0) || 0;
-      const cash = balanceSheet?.assets?.cash?.reduce((sum: number, a: any) => sum + (a.balance || 0), 0) || 0;
+      const currentAssets = balanceSheet?.assets?.cash?.reduce((sum: number, a: Record<string, unknown>) => sum + ((a as { balance?: number }).balance || 0), 0) +
+                            balanceSheet?.assets?.receivables?.reduce((sum: number, a: Record<string, unknown>) => sum + ((a as { balance?: number }).balance || 0), 0) +
+                            balanceSheet?.assets?.inventory?.reduce((sum: number, a: Record<string, unknown>) => sum + ((a as { balance?: number }).balance || 0), 0) || 1;
+      const currentLiabilities = balanceSheet?.liabilities?.payables?.reduce((sum: number, a: Record<string, unknown>) => sum + ((a as { balance?: number }).balance || 0), 0) || 1;
+      const inventory = balanceSheet?.assets?.inventory?.reduce((sum: number, a: Record<string, unknown>) => sum + ((a as { balance?: number }).balance || 0), 0) || 0;
+      const cash = balanceSheet?.assets?.cash?.reduce((sum: number, a: Record<string, unknown>) => sum + ((a as { balance?: number }).balance || 0), 0) || 0;
       const equity = balanceSheet?.equity?.total || 1;
       const totalLiabilities = balanceSheet?.totals?.total_liabilities || 0;
 
       const revenue = incomeStatement?.summary?.total_revenue || 1;
-      const grossProfit = revenue - (incomeStatement?.expenses?.purchases?.reduce((sum: number, e: any) => sum + (e.amount || 0), 0) || 0);
+      const grossProfit = revenue - (incomeStatement?.expenses?.purchases?.reduce((sum: number, e: Record<string, unknown>) => sum + ((e as { amount?: number }).amount || 0), 0) || 0);
       const operatingIncome = incomeStatement?.summary?.net_income || 0;
       const netIncome = incomeStatement?.summary?.net_income || 0;
 
@@ -1405,7 +1406,7 @@ class ReportsService {
         },
         efficiency_ratios: {
           asset_turnover: revenue / totalAssets,
-          receivables_turnover: revenue / Math.max(1, balanceSheet?.assets?.receivables?.reduce((s: number, a: any) => s + (a.balance || 0), 0) || 1),
+          receivables_turnover: revenue / Math.max(1, balanceSheet?.assets?.receivables?.reduce((s: number, a: Record<string, unknown>) => s + ((a as { balance?: number }).balance || 0), 0) || 1),
           payables_turnover: revenue / Math.max(1, currentLiabilities),
           inventory_turnover: revenue / Math.max(1, inventory)
         },
@@ -1414,7 +1415,7 @@ class ReportsService {
 
       return { data: report };
     } catch (error) {
-      console.error('Exception in generateFinancialRatios:', error);
+      logger.error('Exception in generateFinancialRatios:', error);
       return {
         data: null,
         error: { message: error instanceof Error ? error.message : 'Erreur inconnue' }
@@ -1476,7 +1477,7 @@ class ReportsService {
 
       return { data: report };
     } catch (error) {
-      console.error('Exception in generateBudgetVariance:', error);
+      logger.error('Exception in generateBudgetVariance:', error);
       return {
         data: null,
         error: { message: error instanceof Error ? error.message : 'Erreur inconnue' }
@@ -1545,7 +1546,7 @@ class ReportsService {
 
       return { data: report };
     } catch (error) {
-      console.error('Exception in generateKPIDashboard:', error);
+      logger.error('Exception in generateKPIDashboard:', error);
       return {
         data: null,
         error: { message: error instanceof Error ? error.message : 'Erreur inconnue' }
@@ -1605,7 +1606,7 @@ class ReportsService {
 
       return { data: report };
     } catch (error) {
-      console.error('Exception in generateTaxSummary:', error);
+      logger.error('Exception in generateTaxSummary:', error);
       return {
         data: null,
         error: { message: error instanceof Error ? error.message : 'Erreur inconnue' }

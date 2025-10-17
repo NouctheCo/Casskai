@@ -114,7 +114,7 @@ export const getPreviousPeriodDates = (period: string): { start: string; end: st
 
   switch (period) {
     case 'current-month':
-    case 'month':
+    case 'month': {
       // Mois précédent
       const prevMonth = currentMonth - 1;
       const prevYear = prevMonth < 0 ? currentYear - 1 : currentYear;
@@ -123,9 +123,10 @@ export const getPreviousPeriodDates = (period: string): { start: string; end: st
         start: new Date(prevYear, month, 1).toISOString().split('T')[0],
         end: new Date(prevYear, month + 1, 0).toISOString().split('T')[0]
       };
+    }
 
     case 'current-quarter':
-    case 'quarter':
+    case 'quarter': {
       // Trimestre précédent
       const quarterStart = Math.floor(currentMonth / 3) * 3;
       const prevQuarterStart = quarterStart - 3;
@@ -135,6 +136,7 @@ export const getPreviousPeriodDates = (period: string): { start: string; end: st
         start: new Date(qYear, qMonth, 1).toISOString().split('T')[0],
         end: new Date(qYear, qMonth + 3, 0).toISOString().split('T')[0]
       };
+    }
 
     case 'current-year':
     case 'year':
@@ -144,7 +146,7 @@ export const getPreviousPeriodDates = (period: string): { start: string; end: st
         end: new Date(currentYear - 1, 11, 31).toISOString().split('T')[0]
       };
 
-    case 'last-month':
+    case 'last-month': {
       // Mois d'avant le mois dernier (N-2)
       const lastMonth = currentMonth - 2;
       const lYear = lastMonth < 0 ? currentYear - 1 : currentYear;
@@ -153,8 +155,9 @@ export const getPreviousPeriodDates = (period: string): { start: string; end: st
         start: new Date(lYear, lMonth, 1).toISOString().split('T')[0],
         end: new Date(lYear, lMonth + 1, 0).toISOString().split('T')[0]
       };
+    }
 
-    case '7d':
+    case '7d': {
       // 7 jours précédents (J-14 à J-8)
       const end7d = new Date(now);
       end7d.setDate(end7d.getDate() - 8);
@@ -164,8 +167,9 @@ export const getPreviousPeriodDates = (period: string): { start: string; end: st
         start: start7d.toISOString().split('T')[0],
         end: end7d.toISOString().split('T')[0]
       };
+    }
 
-    case '30d':
+    case '30d': {
       // 30 jours précédents (J-60 à J-31)
       const end30d = new Date(now);
       end30d.setDate(end30d.getDate() - 31);
@@ -175,8 +179,9 @@ export const getPreviousPeriodDates = (period: string): { start: string; end: st
         start: start30d.toISOString().split('T')[0],
         end: end30d.toISOString().split('T')[0]
       };
+    }
 
-    default:
+    default: {
       // Par défaut: mois précédent
       const defPrevMonth = currentMonth - 1;
       const defYear = defPrevMonth < 0 ? currentYear - 1 : currentYear;
@@ -185,6 +190,7 @@ export const getPreviousPeriodDates = (period: string): { start: string; end: st
         start: new Date(defYear, defMonth, 1).toISOString().split('T')[0],
         end: new Date(defYear, defMonth + 1, 0).toISOString().split('T')[0]
       };
+    }
   }
 };
 
@@ -202,7 +208,7 @@ export const formatCurrency = (
 ): string => {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
-    currency: currency,
+    currency,
     minimumFractionDigits: 0,
     maximumFractionDigits: 2
   }).format(amount);

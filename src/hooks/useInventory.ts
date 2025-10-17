@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { InventoryService } from '@/services/inventoryService';
-import type {
-  InventoryItem,
-  StockMovement,
-  InventoryMetrics
+import {
+  InventoryService,
+  type InventoryItem,
+  type StockMovement,
+  type InventoryMetrics
 } from '@/services/inventoryService';
+import { logger } from '@/utils/logger';
 
 interface UseInventoryReturn {
   // Data
@@ -119,7 +120,7 @@ export function useInventory(): UseInventoryReturn {
       // getCategories doesn't exist, use empty array
       setCategories([]);
     } catch (err) {
-      console.warn('Failed to fetch categories:', err);
+      logger.warn('Failed to fetch categories:', err)
     }
   }, [currentCompany?.id]);
 

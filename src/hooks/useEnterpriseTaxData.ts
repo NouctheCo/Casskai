@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useEnterprise } from '../contexts/EnterpriseContext';
 import { TaxRate, TaxDeclaration, TaxPayment } from '../types/tax.types';
 import { supabase } from '../lib/supabase';
+import { logger } from '@/utils/logger';
 
 // Helper to format Supabase errors
 function handleSupabaseError(error: unknown, context: string) {
@@ -88,7 +89,7 @@ export function useEnterpriseTaxData() {
       }
       
     } catch (err) {
-      console.error('Error loading tax data:', err);
+      logger.error('Error loading tax data:', err);
       const errorInfo = handleSupabaseError(err, 'Loading tax data');
       setError(new Error(errorInfo.message));
       toast({
@@ -106,7 +107,7 @@ export function useEnterpriseTaxData() {
           setDeclarations(data.declarations || []);
           setPayments(data.payments || []);
         } catch (parseError) {
-          console.error('Error parsing saved tax data:', parseError);
+          logger.error('Error parsing saved tax data:', parseError)
         }
       }
     } finally {
@@ -146,7 +147,7 @@ export function useEnterpriseTaxData() {
       setTaxRates(mapTaxRatesFromDB(data || []));
       
     } catch (err) {
-      console.error('Error initializing default tax rates:', err);
+      logger.error('Error initializing default tax rates:', err);
       // Ne pas bloquer l'application si l'initialisation échoue
     }
   };
@@ -184,7 +185,7 @@ export function useEnterpriseTaxData() {
       setDeclarations(mapDeclarationsFromDB(data || []));
       
     } catch (err) {
-      console.error('Error initializing default declarations:', err);
+      logger.error('Error initializing default declarations:', err);
       // Ne pas bloquer l'application si l'initialisation échoue
     }
   };
@@ -257,7 +258,7 @@ export function useEnterpriseTaxData() {
       
       return newRate;
     } catch (err) {
-      console.error('Error adding tax rate:', err);
+      logger.error('Error adding tax rate:', err);
       const errorInfo = handleSupabaseError(err, 'Adding tax rate');
       toast({
         variant: 'destructive',
@@ -307,7 +308,7 @@ export function useEnterpriseTaxData() {
       ));
       
     } catch (err) {
-      console.error('Error updating tax rate:', err);
+      logger.error('Error updating tax rate:', err);
       const errorInfo = handleSupabaseError(err, 'Updating tax rate');
       toast({
         variant: 'destructive',
@@ -337,7 +338,7 @@ export function useEnterpriseTaxData() {
       setTaxRates(prev => prev.filter(rate => rate.id !== id));
       
     } catch (err) {
-      console.error('Error deleting tax rate:', err);
+      logger.error('Error deleting tax rate:', err);
       const errorInfo = handleSupabaseError(err, 'Deleting tax rate');
       toast({
         variant: 'destructive',
@@ -399,7 +400,7 @@ export function useEnterpriseTaxData() {
       
       return newDeclaration;
     } catch (err) {
-      console.error('Error adding declaration:', err);
+      logger.error('Error adding declaration:', err);
       const errorInfo = handleSupabaseError(err, 'Adding declaration');
       toast({
         variant: 'destructive',
@@ -451,7 +452,7 @@ export function useEnterpriseTaxData() {
       ));
       
     } catch (err) {
-      console.error('Error updating declaration:', err);
+      logger.error('Error updating declaration:', err);
       const errorInfo = handleSupabaseError(err, 'Updating declaration');
       toast({
         variant: 'destructive',
@@ -496,7 +497,7 @@ export function useEnterpriseTaxData() {
       ));
       
     } catch (err) {
-      console.error('Error marking declaration as submitted:', err);
+      logger.error('Error marking declaration as submitted:', err);
       const errorInfo = handleSupabaseError(err, 'Marking declaration as submitted');
       toast({
         variant: 'destructive',
@@ -554,7 +555,7 @@ export function useEnterpriseTaxData() {
       
       return newPayment;
     } catch (err) {
-      console.error('Error adding payment:', err);
+      logger.error('Error adding payment:', err);
       const errorInfo = handleSupabaseError(err, 'Adding payment');
       toast({
         variant: 'destructive',

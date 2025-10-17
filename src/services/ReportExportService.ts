@@ -4,6 +4,7 @@ import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { logger } from '@/utils/logger';
 
 export interface ExportOptions {
   format: 'pdf' | 'excel' | 'csv';
@@ -155,7 +156,7 @@ export class ReportExportService {
 
       return url;
     } catch (error) {
-      console.error('Erreur lors de la génération PDF:', error);
+      logger.error('Erreur lors de la génération PDF:', error);
       throw new Error('Impossible de générer le rapport PDF');
     }
   }
@@ -258,7 +259,7 @@ export class ReportExportService {
       const url = URL.createObjectURL(excelBlob);
       return url;
     } catch (error) {
-      console.error('Erreur lors de la génération Excel:', error);
+      logger.error('Erreur lors de la génération Excel:', error);
       throw new Error('Impossible de générer le rapport Excel');
     }
   }
@@ -287,7 +288,7 @@ export class ReportExportService {
       const url = URL.createObjectURL(csvBlob);
       return url;
     } catch (error) {
-      console.error('Erreur lors de la génération CSV:', error);
+      logger.error('Erreur lors de la génération CSV:', error);
       throw new Error('Impossible de générer le rapport CSV');
     }
   }
@@ -312,7 +313,7 @@ export class ReportExportService {
       try {
         pdf.addImage(companyInfo.logo, 'PNG', 20, 10, 30, 20);
       } catch (e) {
-        console.warn('Impossible de charger le logo:', e);
+        logger.warn('Impossible de charger le logo:', e)
       }
     }
 

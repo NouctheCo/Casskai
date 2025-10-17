@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import PerformanceOptimizer from '@/services/performanceOptimizer';
 import { ModuleDefinition } from '@/types/modules.types';
+import { logger } from '@/utils/logger';
 
 interface PerformanceState {
   isOptimized: boolean;
@@ -67,7 +68,7 @@ export const usePerformance = (modules?: ModuleDefinition[]) => {
         });
       }
     } catch (error) {
-      console.error('Erreur lors de l\'analyse des performances:', error);
+      logger.error('Erreur lors de l\'analyse des performances:', error);
       setState(prev => ({ ...prev, isLoading: false }));
     }
   }, [modules, optimizer]);
@@ -106,7 +107,7 @@ export const usePerformance = (modules?: ModuleDefinition[]) => {
     // Si des callbacks sont fournis, les intégrer
     if (callbacks) {
       // Implementation custom monitoring with callbacks
-      console.log('Custom monitoring callbacks registered');
+      logger.info('Custom monitoring callbacks registered')
     }
   }, [optimizer]);
 

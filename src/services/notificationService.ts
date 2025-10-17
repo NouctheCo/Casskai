@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 export interface Notification {
   id: string;
@@ -9,7 +10,7 @@ export interface Notification {
   type: 'info' | 'success' | 'warning' | 'error' | 'alert';
   category?: 'system' | 'invoice' | 'payment' | 'expense' | 'approval' | 'reminder' | 'security' | 'billing' | 'feature' | 'general';
   priority?: 'low' | 'normal' | 'high' | 'urgent';
-  is_read: boolean;
+  read: boolean;
   read_at?: string;
   archived?: boolean;
   archived_at?: string;
@@ -216,7 +217,7 @@ export class NotificationService {
 
       // Filtres optionnels
       if (options?.unreadOnly) {
-        query = query.eq('is_read', false);
+        query = query.eq('read', false);
       }
 
       if (options?.category) {
@@ -266,7 +267,7 @@ export class NotificationService {
       const { data, error } = await supabase
         .from('notifications')
         .update({
-          is_read: true,
+          read: true,
           read_at: new Date().toISOString()
         })
         .eq('id', notificationId)
@@ -297,11 +298,11 @@ export class NotificationService {
       const { data, error, count } = await supabase
         .from('notifications')
         .update({
-          is_read: true,
+          read: true,
           read_at: new Date().toISOString()
         })
         .eq('user_id', userId)
-        .eq('is_read', false)
+        .eq('read', false)
         .select();
 
       if (error) throw error;
@@ -355,7 +356,7 @@ export class NotificationService {
         .from('notifications')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', userId)
-        .eq('is_read', false)
+        .eq('read', false)
         .or(`expires_at.is.null,expires_at.gte.${new Date().toISOString()}`);
 
       if (error) throw error;
@@ -400,8 +401,8 @@ export class NotificationService {
   /**
    * Émet un événement temps réel pour les notifications
    */
-  private emitNotificationEvent(event: string, data: any): void {
-    console.log(`📱 Notification event: ${event}`, data);
+  private emitNotificationEvent(event: string, data: Record<string, unknown>): void {
+    logger.info(`📱 Notification event: ${event}`, data)
   }
 
   /**

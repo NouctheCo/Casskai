@@ -1,5 +1,6 @@
 // Service RH moderne intégré avec Supabase
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 // Types pour les ressources humaines
 export interface Employee {
@@ -141,7 +142,7 @@ export class HRService {
       const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching employees:', error);
+        logger.error('Error fetching employees:', error);
         return {
           success: false,
           data: null,
@@ -160,7 +161,7 @@ export class HRService {
         data: enrichedEmployees as Employee[]
       };
     } catch (error) {
-      console.error('Error in getEmployees:', error);
+      logger.error('Error in getEmployees:', error);
       return {
         success: false,
         data: null,
@@ -183,7 +184,7 @@ export class HRService {
         .single();
 
       if (error) {
-        console.error('Error creating employee:', error);
+        logger.error('Error creating employee:', error);
         return {
           success: false,
           data: null,
@@ -199,7 +200,7 @@ export class HRService {
         } as Employee
       };
     } catch (error) {
-      console.error('Error in createEmployee:', error);
+      logger.error('Error in createEmployee:', error);
       return {
         success: false,
         data: null,
@@ -221,7 +222,7 @@ export class HRService {
         .single();
 
       if (error) {
-        console.error('Error updating employee:', error);
+        logger.error('Error updating employee:', error);
         return {
           success: false,
           data: null,
@@ -237,7 +238,7 @@ export class HRService {
         } as Employee
       };
     } catch (error) {
-      console.error('Error in updateEmployee:', error);
+      logger.error('Error in updateEmployee:', error);
       return {
         success: false,
         data: null,
@@ -254,7 +255,7 @@ export class HRService {
         .eq('id', employeeId);
 
       if (error) {
-        console.error('Error deleting employee:', error);
+        logger.error('Error deleting employee:', error);
         return {
           success: false,
           data: null,
@@ -267,7 +268,7 @@ export class HRService {
         data: true
       };
     } catch (error) {
-      console.error('Error in deleteEmployee:', error);
+      logger.error('Error in deleteEmployee:', error);
       return {
         success: false,
         data: null,
@@ -312,7 +313,7 @@ export class HRService {
       const { data, error } = await query.order('start_date', { ascending: false });
 
       if (error) {
-        console.error('Error fetching leaves:', error);
+        logger.error('Error fetching leaves:', error);
         return {
           success: false,
           data: null,
@@ -331,7 +332,7 @@ export class HRService {
         data: enrichedLeaves as Leave[]
       };
     } catch (error) {
-      console.error('Error in getLeaves:', error);
+      logger.error('Error in getLeaves:', error);
       return {
         success: false,
         data: null,
@@ -354,7 +355,7 @@ export class HRService {
         .single();
 
       if (error) {
-        console.error('Error creating leave:', error);
+        logger.error('Error creating leave:', error);
         return {
           success: false,
           data: null,
@@ -367,7 +368,7 @@ export class HRService {
         data: data as Leave
       };
     } catch (error) {
-      console.error('Error in createLeave:', error);
+      logger.error('Error in createLeave:', error);
       return {
         success: false,
         data: null,
@@ -389,7 +390,7 @@ export class HRService {
         .single();
 
       if (error) {
-        console.error('Error updating leave:', error);
+        logger.error('Error updating leave:', error);
         return {
           success: false,
           data: null,
@@ -402,7 +403,7 @@ export class HRService {
         data: data as Leave
       };
     } catch (error) {
-      console.error('Error in updateLeave:', error);
+      logger.error('Error in updateLeave:', error);
       return {
         success: false,
         data: null,
@@ -449,7 +450,7 @@ export class HRService {
       const { data, error } = await query.order('expense_date', { ascending: false });
 
       if (error) {
-        console.error('Error fetching expenses:', error);
+        logger.error('Error fetching expenses:', error);
         return {
           success: false,
           data: null,
@@ -468,7 +469,7 @@ export class HRService {
         data: enrichedExpenses as Expense[]
       };
     } catch (error) {
-      console.error('Error in getExpenses:', error);
+      logger.error('Error in getExpenses:', error);
       return {
         success: false,
         data: null,
@@ -491,7 +492,7 @@ export class HRService {
         .single();
 
       if (error) {
-        console.error('Error creating expense:', error);
+        logger.error('Error creating expense:', error);
         return {
           success: false,
           data: null,
@@ -504,7 +505,7 @@ export class HRService {
         data: data as Expense
       };
     } catch (error) {
-      console.error('Error in createExpense:', error);
+      logger.error('Error in createExpense:', error);
       return {
         success: false,
         data: null,
@@ -550,7 +551,7 @@ export class HRService {
       const { data, error } = await query.order('date', { ascending: false });
 
       if (error) {
-        console.error('Error fetching time entries:', error);
+        logger.error('Error fetching time entries:', error);
         return {
           success: false,
           data: null,
@@ -569,7 +570,7 @@ export class HRService {
         data: enrichedEntries as TimeEntry[]
       };
     } catch (error) {
-      console.error('Error in getTimeEntries:', error);
+      logger.error('Error in getTimeEntries:', error);
       return {
         success: false,
         data: null,
@@ -592,7 +593,7 @@ export class HRService {
         .single();
 
       if (error) {
-        console.error('Error creating time entry:', error);
+        logger.error('Error creating time entry:', error);
         return {
           success: false,
           data: null,
@@ -605,7 +606,7 @@ export class HRService {
         data: data as TimeEntry
       };
     } catch (error) {
-      console.error('Error in createTimeEntry:', error);
+      logger.error('Error in createTimeEntry:', error);
       return {
         success: false,
         data: null,
@@ -677,7 +678,7 @@ export class HRService {
         data: metrics
       };
     } catch (error) {
-      console.error('Error in getHRMetrics:', error);
+      logger.error('Error in getHRMetrics:', error);
       return {
         success: false,
         data: null,

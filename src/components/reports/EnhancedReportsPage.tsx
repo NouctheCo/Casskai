@@ -39,6 +39,7 @@ import { fr } from 'date-fns/locale';
 import { useAuth } from '@/contexts/AuthContext';
 import { useReports } from '@/hooks/useReports';
 import { Report, ReportParameters, ReportExecution } from '@/domain/reports/entities/Report';
+import { logger } from '@/utils/logger';
 
 interface DateRange {
   from: Date;
@@ -136,7 +137,7 @@ export const EnhancedReportsPage: React.FC = () => {
       await generateReport(report.metadata.id, parameters);
       setShowGenerationModal(false);
     } catch (err) {
-      console.error('Failed to generate report:', err);
+      logger.error('Failed to generate report:', err)
     }
   };
 
@@ -151,9 +152,9 @@ export const EnhancedReportsPage: React.FC = () => {
 
     try {
       const estimation = await estimateGeneration(report.metadata.id, parameters);
-      console.log('Generation estimate:', estimation);
+      logger.info('Generation estimate:', estimation)
     } catch (err) {
-      console.error('Failed to estimate generation:', err);
+      logger.error('Failed to estimate generation:', err)
     }
   };
 

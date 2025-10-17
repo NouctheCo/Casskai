@@ -12,6 +12,7 @@ import {
   UnitCode,
   DocumentTypeCode
 } from '../../../types/einvoicing.types';
+import { logger } from '@/utils/logger';
 
 export class ValidationService {
   private readonly VALID_COUNTRY_CODES: CountryCode[] = ['FR', 'BE', 'BJ', 'CI', 'BF', 'ML', 'SN', 'TG', 'CM', 'GA'];
@@ -56,7 +57,7 @@ export class ValidationService {
       this.validateBusinessRules(invoice, errors, warnings);
 
       if (errors.length) {
-        console.error('EN16931 validation errors', { invoice: invoice.invoice_number, errors });
+        logger.error('EN16931 validation errors', { invoice: invoice.invoice_number, errors })
       }
 
       return {
@@ -66,7 +67,7 @@ export class ValidationService {
       };
 
     } catch (error) {
-      console.error('Error during validation:', error);
+      logger.error('Error during validation:', error);
       throw new EInvoicingError(
         `Validation failed: ${(error as Error).message}`,
         'VALIDATION_FAILED',

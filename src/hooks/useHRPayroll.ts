@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { hrPayrollService, PayrollCalculation } from '@/services/hrPayrollService';
 import { hrExportService } from '@/services/hrExportService';
 import { Employee, Leave, Expense, TimeEntry } from '@/services/hrService';
+import { logger } from '@/utils/logger';
 
 interface UseHRPayrollParams {
   employees: Employee[];
@@ -54,14 +55,14 @@ export function useHRPayroll({
   ): Promise<PayrollCalculation | null> => {
     const employee = employees.find(e => e.id === employeeId);
     if (!employee) {
-      console.error(`Employee ${employeeId} not found`);
+      logger.error(`Employee ${employeeId} not found`);
       return null;
     }
 
     try {
       return await hrPayrollService.calculatePayroll(employee, periodStart, periodEnd);
     } catch (error) {
-      console.error('Error calculating payroll:', error);
+      logger.error('Error calculating payroll:', error);
       return null;
     }
   }, [employees]);
@@ -110,11 +111,11 @@ export function useHRPayroll({
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
       } else {
-        console.error('Error generating payslip:', result.error);
+        logger.error('Error generating payslip:', result.error);
         throw new Error(result.error || 'Failed to generate payslip');
       }
     } catch (error) {
-      console.error('Error in generatePayslip:', error);
+      logger.error('Error in generatePayslip:', error);
       throw error;
     }
   }, []);

@@ -5,6 +5,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { fecExportService } from './fecExportService';
+import { logger } from '@/utils/logger';
 
 interface DeletionAnalysis {
   canDelete: boolean;
@@ -30,13 +31,6 @@ interface DeletionRequest {
   exportRequested: boolean;
   transferPlans: OwnershipTransferPlan[];
   scheduledDate?: Date;
-}
-
-interface DeletionProgress {
-  step: 'analysis' | 'transfer' | 'export' | 'archiving' | 'deletion' | 'completed';
-  message: string;
-  progress: number; // 0-100
-  details?: any;
 }
 
 export class AccountDeletionService {
@@ -75,7 +69,7 @@ export class AccountDeletionService {
       };
 
     } catch (error) {
-      console.error('❌ Erreur analyse suppression:', error);
+      logger.error('❌ Erreur analyse suppression:', error);
       throw error;
     }
   }
@@ -90,7 +84,7 @@ export class AccountDeletionService {
     last_activity: string;
   }>> {
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('user_companies')
         .select(`
           user_id,
@@ -106,15 +100,15 @@ export class AccountDeletionService {
 
       if (error) throw error;
 
-      return (data || []).map((uc: any) => ({
-        user_id: uc.user_id,
-        email: uc.auth_users?.email || 'email@inconnu.fr',
-        role: uc.role,
-        last_activity: uc.last_activity
+      return (data || []).map((uc: Record<string, unknown>) => ({
+        user_id: uc.user_id as string,
+        email: (uc.auth_users as Record<string, unknown>)?.email as string || 'email@inconnu.fr',
+        role: uc.role as string,
+        last_activity: uc.last_activity as string
       }));
 
     } catch (error) {
-      console.error('❌ Erreur récupération utilisateurs éligibles:', error);
+      logger.error('❌ Erreur récupération utilisateurs éligibles:', error);
       throw error;
     }
   }
@@ -170,7 +164,7 @@ export class AccountDeletionService {
       };
 
     } catch (error) {
-      console.error('❌ Erreur demande suppression:', error);
+      logger.error('❌ Erreur demande suppression:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur inconnue'
@@ -187,7 +181,7 @@ export class AccountDeletionService {
   ): Promise<void> {
     for (const plan of transferPlans) {
       try {
-        const { data, error } = await supabase
+        const { error } = await supabase
           .rpc('transfer_company_ownership', {
             p_company_id: plan.company_id,
             p_from_user_id: fromUserId,
@@ -195,14 +189,14 @@ export class AccountDeletionService {
           });
 
         if (error) {
-          console.error(`❌ Erreur transfert propriété ${plan.company_name}:`, error);
+          logger.error(`❌ Erreur transfert propriété ${plan.company_name}:`, error);
           // Continuer avec les autres transferts même en cas d'erreur
         } else {
-          console.log(`✅ Propriété transférée pour ${plan.company_name}`);
+          logger.warn(`✅ Propriété transférée pour ${plan.company_name}`)
         }
 
       } catch (error) {
-        console.error(`❌ Erreur transfert propriété ${plan.company_name}:`, error);
+        logger.error(`❌ Erreur transfert propriété ${plan.company_name}:`, error)
       }
     }
   }
@@ -222,13 +216,13 @@ export class AccountDeletionService {
       if (error) throw error;
 
       // Générer un export FEC pour chaque entreprise
-      const exportPromises = (userCompanies || []).map(async (uc: any) => {
+      const exportPromises = (userCompanies || []).map(async (uc: Record<string, unknown>) => {
         const currentYear = new Date().getFullYear();
         const startDate = new Date(currentYear, 0, 1);
         const endDate = new Date(currentYear, 11, 31);
 
         return fecExportService.generateFECExport({
-          companyId: uc.company_id,
+          companyId: uc.company_id as string,
           year: currentYear,
           startDate,
           endDate,
@@ -252,10 +246,10 @@ export class AccountDeletionService {
         })
         .eq('id', requestId);
 
-      console.log('✅ Exports générés pour suppression compte');
+      logger.warn('✅ Exports générés pour suppression compte')
 
     } catch (error) {
-      console.error('❌ Erreur génération exports:', error);
+      logger.error('❌ Erreur génération exports:', error)
     }
   }
 
@@ -264,7 +258,7 @@ export class AccountDeletionService {
    */
   private async notifyTeamMembers(userId: string, scheduledDate: Date): Promise<void> {
     // En production, implémenter l'envoi d'emails via service de mail
-    console.log(`📧 Notification programmée pour suppression le ${scheduledDate.toLocaleDateString()}`);
+    logger.warn(`📧 Notification programmée pour suppression le ${scheduledDate.toLocaleDateString()}`);
 
     // Récupérer les collègues à notifier
     // D'abord obtenir les company_ids de l'utilisateur
@@ -289,7 +283,7 @@ export class AccountDeletionService {
       .neq('user_id', userId);
 
     // En production, envoyer les emails de notification
-    console.log(`📧 ${teammates?.length || 0} personnes à notifier de la suppression`);
+    logger.warn(`📧 ${teammates?.length || 0} personnes à notifier de la suppression`)
   }
 
   /**
@@ -315,11 +309,11 @@ export class AccountDeletionService {
 
       if (error) throw error;
 
-      console.log('✅ Demande de suppression annulée');
+      logger.warn('✅ Demande de suppression annulée');
       return { success: true };
 
     } catch (error) {
-      console.error('❌ Erreur annulation suppression:', error);
+      logger.error('❌ Erreur annulation suppression:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur inconnue'
@@ -332,7 +326,7 @@ export class AccountDeletionService {
    */
   async getDeletionRequestStatus(userId?: string): Promise<{
     hasRequest: boolean;
-    request?: any;
+    request?: Record<string, unknown>;
     daysRemaining?: number;
   }> {
     const { data: { user } } = await supabase.auth.getUser();
@@ -341,7 +335,7 @@ export class AccountDeletionService {
     if (!targetUserId) throw new Error('Utilisateur non authentifié');
 
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('user_deletion_requests')
         .select('*')
         .eq('user_id', targetUserId)
@@ -365,7 +359,7 @@ export class AccountDeletionService {
       };
 
     } catch (error) {
-      console.error('❌ Erreur récupération statut suppression:', error);
+      logger.error('❌ Erreur récupération statut suppression:', error);
       throw error;
     }
   }
@@ -401,10 +395,10 @@ export class AccountDeletionService {
           })
           .eq('id', deletion.id);
 
-        console.log(`✅ Compte ${deletion.user_id} supprimé avec succès`);
+        logger.warn(`✅ Compte ${deletion.user_id} supprimé avec succès`)
 
       } catch (error) {
-        console.error(`❌ Erreur suppression compte ${deletion.user_id}:`, error);
+        logger.error(`❌ Erreur suppression compte ${deletion.user_id}:`, error)
       }
     }
   }
@@ -428,13 +422,13 @@ export class AccountDeletionService {
         is_encrypted: true
       });
 
-    console.log(`📚 Données utilisateur ${userId} archivées légalement`);
+    logger.warn(`📚 Données utilisateur ${userId} archivées légalement`)
   }
 
   /**
    * Collecte toutes les données d'un utilisateur
    */
-  private async collectUserData(userId: string): Promise<any> {
+  private async collectUserData(userId: string): Promise<Record<string, unknown>> {
     // Implémenter la collecte complète des données utilisateur
     // En production, inclure toutes les tables liées
     return {
@@ -449,7 +443,7 @@ export class AccountDeletionService {
    */
   private async removeUserFromCompanies(userId: string): Promise<void> {
     const { error } = await supabase
-      .from('user_companies')
+        .from('user_companies')
       .update({ is_active: false })
       .eq('user_id', userId);
 
@@ -461,8 +455,14 @@ export class AccountDeletionService {
    */
   private async deleteUserAccount(userId: string): Promise<void> {
     // En production, utiliser l'API admin de Supabase pour supprimer l'utilisateur
-    console.log(`🗑️ Suppression définitive compte ${userId}`);
+    logger.warn(`🗑️ Suppression définitive compte ${userId}`)
   }
 }
 
 export const accountDeletionService = AccountDeletionService.getInstance();
+
+
+
+
+
+

@@ -1,6 +1,7 @@
 // Service de gestion de la paie et intégration comptable
 import { supabase } from '@/lib/supabase';
 import { Employee } from './hrService';
+import { logger } from '@/utils/logger';
 
 export interface PayrollCalculation {
   employee_id: string;
@@ -190,7 +191,7 @@ export class HRPayrollService {
         entryId: journalEntry.id
       };
     } catch (error) {
-      console.error('Error creating payroll journal entry:', error);
+      logger.error('Error creating payroll journal entry:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'

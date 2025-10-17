@@ -237,14 +237,6 @@ export interface VATRule {
   description?: string;
 }
 
-// Conditions pour appliquer les templates
-export interface TemplateCondition {
-  id: string;
-  field: string;
-  operator: 'equals' | 'greater_than' | 'less_than' | 'contains';
-  value: any;
-}
-
 // Types pour les rapports
 export interface AccountingReport {
   id: string;
@@ -345,4 +337,33 @@ export interface Company {
   currency: string;
   created_at: string;
   updated_at: string;
+}
+
+// Types pour les plans comptables standardisés (SYSCOHADA, PCG, etc.)
+export interface AccountPlan {
+  standard: string;
+  country: string;
+  classes: PlanClass[];
+}
+
+export interface PlanClass {
+  number: string;
+  name: string;
+  type: string;
+  accounts: PlanAccount[];
+}
+
+export interface PlanAccount {
+  number: string;
+  name: string;
+  type: string;
+  isDebitNormal: boolean;
+  subAccounts?: PlanSubAccount[];
+}
+
+export interface PlanSubAccount {
+  number: string;
+  name: string;
+  type: string;
+  isDebitNormal: boolean;
 }

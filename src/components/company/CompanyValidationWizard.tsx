@@ -17,6 +17,7 @@ import {
   dataGovernanceService,
   type CompanySearchResult
 } from '@/services/dataGovernanceService';
+import { logger } from '@/utils/logger';
 
 interface CompanyFormData {
   name: string;
@@ -84,7 +85,7 @@ export const CompanyValidationWizard: React.FC<CompanyValidationWizardProps> = (
       setValidation(result);
       setHasValidated(true);
     } catch (error) {
-      console.error('❌ Erreur validation:', error);
+      logger.error('❌ Erreur validation:', error)
     } finally {
       setIsValidating(false);
     }
@@ -103,7 +104,7 @@ export const CompanyValidationWizard: React.FC<CompanyValidationWizardProps> = (
 
   const handleMergeWithExisting = async (targetCompanyId: string) => {
     // En production, implémenter la logique de fusion
-    console.log('Fusion avec:', targetCompanyId);
+    logger.info('Fusion avec:', targetCompanyId);
     onCancel(); // Pour l'instant, fermer le wizard
   };
 

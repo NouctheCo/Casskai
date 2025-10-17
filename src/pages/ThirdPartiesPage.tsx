@@ -41,6 +41,7 @@ import {
   DollarSign,
   Sparkles
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 const ThirdPartiesPage: React.FC = () => {
   const { t } = useTranslation();
@@ -131,7 +132,7 @@ const ThirdPartiesPage: React.FC = () => {
         }
       } as unknown as ThirdPartyDashboardData);
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      logger.error('Error loading dashboard data:', error);
       // Set empty data to prevent crashes
       setDashboardData({
         stats: {
@@ -190,7 +191,7 @@ const ThirdPartiesPage: React.FC = () => {
       }));
       setThirdParties(transformed as unknown as ThirdParty[]);
     } catch (error) {
-      console.error('Error loading third parties:', error);
+      logger.error('Error loading third parties:', error);
       toast({
         title: 'Erreur de chargement',
         description: 'Impossible de charger les tiers',
@@ -205,7 +206,7 @@ const ThirdPartiesPage: React.FC = () => {
       setAgingReport([]);
       setLoading(false);
     } catch (error) {
-      console.error('Error loading aging report:', error);
+      logger.error('Error loading aging report:', error);
       setLoading(false);
     }
   };
@@ -307,7 +308,7 @@ const ThirdPartiesPage: React.FC = () => {
         description: 'Le tiers a été supprimé avec succès',
       });
     } catch (error) {
-      console.error('Error deleting third party:', error);
+      logger.error('Error deleting third party:', error);
       toast({
         title: 'Erreur de suppression',
         description: 'Impossible de supprimer le tiers',

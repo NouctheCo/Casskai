@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { PageContainer } from '@/components/ui/PageContainer';
 import { PublicNavigation } from '@/components/navigation/PublicNavigation';
+import { logger } from '@/utils/logger';
 
 const CookiesPolicyPage = () => {
   const { t } = useTranslation();
@@ -53,7 +54,7 @@ const CookiesPolicyPage = () => {
           });
         }
       } catch (error) {
-        console.error('Error loading cookie preferences:', error);
+        logger.error('Error loading cookie preferences:', error);
         toast({
           variant: "destructive",
           title: "Erreur",
@@ -165,7 +166,7 @@ const CookiesPolicyPage = () => {
         description: "Vos préférences de cookies ont été mises à jour avec succès"
       } as any);
     } catch (error) {
-      console.error('Error saving cookie preferences:', error);
+      logger.error('Error saving cookie preferences:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -194,7 +195,7 @@ const CookiesPolicyPage = () => {
         description: "Toutes les catégories de cookies ont été activées"
       } as any);
     } catch (error) {
-      console.error('Error accepting all cookies:', error);
+      logger.error('Error accepting all cookies:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -228,7 +229,7 @@ const CookiesPolicyPage = () => {
         description: "Seuls les cookies essentiels sont activés"
       } as any);
     } catch (error) {
-      console.error('Error rejecting optional cookies:', error);
+      logger.error('Error rejecting optional cookies:', error);
       toast({
         variant: "destructive",
         title: "Erreur",

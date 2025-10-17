@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { reportsService } from '@/services/reportsService';
 import { PDFGenerator } from '@/utils/reportGeneration';
+import { logger } from '@/utils/logger';
 import type {
   BalanceSheetData,
   IncomeStatementData,
@@ -105,12 +106,13 @@ export const ReportGenerationPanel: React.FC<ReportGenerationPanelProps> = ({
           start: new Date(year, month, 1).toISOString().split('T')[0],
           end: new Date(year, month + 1, 0).toISOString().split('T')[0]
         };
-      case 'current-quarter':
+      case 'current-quarter': {
         const quarterStart = Math.floor(month / 3) * 3;
         return {
           start: new Date(year, quarterStart, 1).toISOString().split('T')[0],
           end: new Date(year, quarterStart + 3, 0).toISOString().split('T')[0]
         };
+      }
       case 'current-year':
         return {
           start: new Date(year, 0, 1).toISOString().split('T')[0],
@@ -175,7 +177,7 @@ export const ReportGenerationPanel: React.FC<ReportGenerationPanelProps> = ({
         description: `${config.title} généré avec succès`
       });
     } catch (error) {
-      console.error('Erreur génération rapport:', error);
+      logger.error('Erreur génération rapport:', error);
       toast({
         title: '❌ Erreur',
         description: error instanceof Error ? error.message : 'Impossible de générer le rapport',
@@ -230,7 +232,7 @@ export const ReportGenerationPanel: React.FC<ReportGenerationPanelProps> = ({
         description: filename
       });
     } catch (error) {
-      console.error('Erreur téléchargement PDF:', error);
+      logger.error('Erreur téléchargement PDF:', error);
       toast({
         title: '❌ Erreur',
         description: 'Impossible de télécharger le PDF',

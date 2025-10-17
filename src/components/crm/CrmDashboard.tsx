@@ -26,14 +26,44 @@ interface CrmDashboardProps {
   onCreateAction?: () => void;
 }
 
-const CrmDashboard: React.FC<CrmDashboardProps> = ({ 
-  dashboardData, 
-  loading, 
+const CrmDashboard: React.FC<CrmDashboardProps> = ({
+  dashboardData,
+  loading,
   onCreateClient,
   onCreateOpportunity,
   onCreateAction
 }) => {
   const { t } = useTranslation();
+
+  // Calculer les trends dynamiquement à partir des données revenue_data
+  // IMPORTANT: Hook appelé avant tout return conditionnel
+  const trends = useMemo(() => {
+    if (!dashboardData?.revenue_data || dashboardData.revenue_data.length < 2) {
+      return {
+        clientsTrend: null,
+        opportunitiesTrend: null,
+        pipelineValueTrend: null,
+        conversionRateTrend: null
+      };
+    }
+
+    const revenue_data = dashboardData.revenue_data;
+    // Utiliser les 2 derniers mois de données disponibles
+    const currentMonth = revenue_data[revenue_data.length - 1];
+    const previousMonth = revenue_data[revenue_data.length - 2];
+
+    // Calculer les trends basés sur le revenu comme proxy (si pas d'autres données historiques)
+    const revenueTrend = calculateTrend(currentMonth?.revenue || 0, previousMonth?.revenue || 0);
+
+    // Pour les autres métriques, utiliser des approximations basées sur les données disponibles
+    // Dans un système parfait, ces données viendraient du backend avec historique complet
+    return {
+      clientsTrend: revenueTrend, // Approximation: croissance clients suit croissance CA
+      opportunitiesTrend: revenueTrend, // Approximation: croissance opportunités suit croissance CA
+      pipelineValueTrend: revenueTrend, // Approximation: valeur pipeline suit croissance CA
+      conversionRateTrend: null // Pas de données historiques disponibles
+    };
+  }, [dashboardData?.revenue_data]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
@@ -101,34 +131,6 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
   }
 
   const { stats, pipeline_stats, revenue_data, recent_opportunities, recent_actions, top_clients } = dashboardData;
-
-  // Calculer les trends dynamiquement à partir des données revenue_data
-  const trends = useMemo(() => {
-    if (!revenue_data || revenue_data.length < 2) {
-      return {
-        clientsTrend: null,
-        opportunitiesTrend: null,
-        pipelineValueTrend: null,
-        conversionRateTrend: null
-      };
-    }
-
-    // Utiliser les 2 derniers mois de données disponibles
-    const currentMonth = revenue_data[revenue_data.length - 1];
-    const previousMonth = revenue_data[revenue_data.length - 2];
-
-    // Calculer les trends basés sur le revenu comme proxy (si pas d'autres données historiques)
-    const revenueTrend = calculateTrend(currentMonth?.revenue || 0, previousMonth?.revenue || 0);
-
-    // Pour les autres métriques, utiliser des approximations basées sur les données disponibles
-    // Dans un système parfait, ces données viendraient du backend avec historique complet
-    return {
-      clientsTrend: revenueTrend, // Approximation: croissance clients suit croissance CA
-      opportunitiesTrend: revenueTrend, // Approximation: croissance opportunités suit croissance CA
-      pipelineValueTrend: revenueTrend, // Approximation: valeur pipeline suit croissance CA
-      conversionRateTrend: null // Pas de données historiques disponibles
-    };
-  }, [revenue_data]);
 
   const mainStats = [
     {

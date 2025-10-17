@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/components/ui/use-toast';
 import { WHATSAPP_CONFIG, createWhatsAppUrl, isBusinessHoursOpen, getContextualMessage, sendToN8nWebhook } from '@/config/whatsapp.config';
+import { logger } from '@/utils/logger';
 
 interface WhatsAppChatProps {
   phoneNumber?: string;
@@ -45,7 +46,7 @@ export function WhatsAppChat({
 
     // Envoi asynchrone à N8n (sans bloquer)
     sendToN8nWebhook(webhookData).catch(error => {
-      console.warn('N8n webhook failed:', error);
+      logger.warn('N8n webhook failed:', error)
     });
 
     // Analytics/tracking
@@ -151,7 +152,7 @@ export function WhatsAppFloatingButton({
 
       // Envoi asynchrone à N8n (sans bloquer)
       sendToN8nWebhook(webhookData).catch(error => {
-        console.warn('N8n webhook failed:', error);
+        logger.warn('N8n webhook failed:', error)
       });
 
       // Analytics/tracking
@@ -179,7 +180,7 @@ export function WhatsAppFloatingButton({
       setTimeout(() => setIsVisible(true), 5000);
 
     } catch (error) {
-      console.error('WhatsApp error:', error);
+      logger.error('WhatsApp error:', error);
       toast({
         title: "Erreur",
         description: "Impossible d'ouvrir WhatsApp. Veuillez réessayer."

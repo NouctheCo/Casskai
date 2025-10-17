@@ -18,7 +18,7 @@ async function testSecurityFixes() {
 
     // Test 2: Vérifier l'accès aux vues sécurisées
     console.log('🔍 Test 2: Test des vues sécurisées...');
-    const { data: clients, error: clientsError } = await supabase
+    const { error: clientsError } = await supabase
       .from('clients')
       .select('*')
       .limit(1);
@@ -31,7 +31,7 @@ async function testSecurityFixes() {
 
     // Test 3: Vérifier l'accès aux données CRM
     console.log('🔍 Test 3: Test des données CRM...');
-    const { data: companies, error: companiesError } = await supabase
+    const { error: companiesError } = await supabase
       .from('companies')
       .select('id, name')
       .limit(1);
@@ -44,7 +44,7 @@ async function testSecurityFixes() {
 
     // Test 4: Test d'une table critique (encryption_keys)
     console.log('🔍 Test 4: Test table critique encryption_keys...');
-    const { data: keys, error: keysError } = await supabase
+    const { error: keysError } = await supabase
       .from('encryption_keys')
       .select('*')
       .limit(1);

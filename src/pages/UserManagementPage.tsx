@@ -25,6 +25,7 @@ import {
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { SYSTEM_ROLES, PERMISSION_MODULES } from '@/types/user.types';
+import { logger } from '@/utils/logger';
 
 const UserManagementPage = () => {
   const { user: currentUser } = useAuth();
@@ -102,7 +103,7 @@ const UserManagementPage = () => {
       setActivities([]);
       setLoading(false);
     } catch (error) {
-      console.error('Error loading user management data:', error);
+      logger.error('Error loading user management data:', error);
       setLoading(false);
     }
   };
@@ -269,6 +270,7 @@ const UserManagementPage = () => {
     setActivities(mockActivities);
     setLoading(false);
   };
+  */
 
   // Filter functions
   const filteredUsers = users.filter(user => {

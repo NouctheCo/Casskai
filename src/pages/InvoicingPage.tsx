@@ -47,6 +47,7 @@ import OptimizedClientsTab from '@/components/invoicing/OptimizedClientsTab';
 import OptimizedQuotesTab from '@/components/invoicing/OptimizedQuotesTab';
 import OptimizedPaymentsTab from '@/components/invoicing/OptimizedPaymentsTab';
 import { calculateTrend, getPreviousPeriodDates } from '@/utils/trendCalculations';
+import { logger } from '@/utils/logger';
 
 // Invoicing KPI Card Component
 const InvoicingKPICard = ({ title, value, icon, trend, color = 'blue', description, onClick }) => {
@@ -290,7 +291,7 @@ export default function InvoicingPageOptimized() {
           overdueTrend: calculateTrend(stats.overdueInvoices, previousStats.overdueInvoices)
         });
       } catch (error) {
-        console.error('Error loading invoicing data:', error);
+        logger.error('Error loading invoicing data:', error);
         setError(error.message);
         toast({
           title: "Erreur",
@@ -310,9 +311,10 @@ export default function InvoicingPageOptimized() {
     switch (period) {
       case 'current-month':
         return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-      case 'current-quarter':
+      case 'current-quarter': {
         const quarterMonth = Math.floor(now.getMonth() / 3) * 3;
         return new Date(now.getFullYear(), quarterMonth, 1).toISOString().split('T')[0];
+      }
       case 'current-year':
         return new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
       case 'last-month':
@@ -329,9 +331,10 @@ export default function InvoicingPageOptimized() {
     switch (period) {
       case 'current-month':
         return new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
-      case 'current-quarter':
+      case 'current-quarter': {
         const quarterMonth = Math.floor(now.getMonth() / 3) * 3;
         return new Date(now.getFullYear(), quarterMonth + 3, 0).toISOString().split('T')[0];
+      }
       case 'current-year':
         return new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0];
       case 'last-month':
@@ -364,7 +367,7 @@ export default function InvoicingPageOptimized() {
         description: "Prêt à créer une nouvelle facture."
       });
     } catch (error) {
-      console.error('Error preparing new invoice:', error);
+      logger.error('Error preparing new invoice:', error);
       toast({
         title: "Erreur",
         description: "Impossible de préparer la création de facture.",

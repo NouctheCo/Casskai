@@ -20,6 +20,7 @@ import { useOnboarding } from '@/hooks/useOnboarding';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { clearUserSession } from '@/utils/sessionCleanup';
+import { logger } from '@/utils/logger';
 
 const completionSteps = [
   { id: 'company', label: 'Création de votre entreprise', duration: 1500 },
@@ -287,7 +288,7 @@ export default function CompleteStep() {
           }
         }));
 
-        console.log('✅ Modules sauvegardés dans localStorage:', modulesRecord);
+        logger.info('✅ Modules sauvegardés dans localStorage:', modulesRecord)
       }
 
       clearProgress();
@@ -297,7 +298,7 @@ export default function CompleteStep() {
 
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : String(err);
-      console.error('Error completing onboarding:', errorMessage);
+      logger.error('Error completing onboarding:', errorMessage);
       setStatus('error');
 
       // Détection spécifique de l'erreur d'authentification

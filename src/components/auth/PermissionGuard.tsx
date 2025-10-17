@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCompanies } from '@/hooks/useCompanies';
+import { logger } from '@/utils/logger';
 import type { UserRole } from '@/types/types-fixes';
 
 interface PermissionGuardProps {
@@ -52,7 +53,7 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
   if (permissions && permissions.length > 0) {
     // Pour l'instant, on ignore les permissions string car hasPermission attend UserRole[]
     // Cette fonctionnalité nécessite une refactorisation du système de permissions
-    console.warn('String-based permissions not implemented yet');
+    logger.warn('String-based permissions not implemented yet')
   }
 
   // All checks passed, render children

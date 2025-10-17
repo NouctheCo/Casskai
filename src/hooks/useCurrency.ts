@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { CurrencyService, Currency, CurrencyConversion, ExchangeRate } from '../services/currencyService';
 import { useConfigContext } from '@/contexts/ConfigContext';
+import { logger } from '@/utils/logger';
 
 // Types d'erreurs spécifiques
 export class CurrencyError extends Error {
@@ -141,7 +142,7 @@ export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
 
       return currencyService.formatAmount(amount, targetCurrency);
     } catch (err) {
-      console.warn('Erreur formatage montant:', err);
+      logger.warn('Erreur formatage montant:', err);
       return amount.toString();
     }
   }, [currencyService, currentCurrency, getCurrency, validateAmount]);
@@ -157,7 +158,7 @@ export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
         await currencyService.updateExchangeRates();
         setLastUpdate(currencyService.getLastUpdate());
       } catch (err) {
-        console.warn('Impossible de mettre à jour les taux:', err);
+        logger.warn('Impossible de mettre à jour les taux:', err);
         // Ne pas bloquer l'application si les taux ne peuvent pas être mis à jour
       } finally {
         setIsLoading(false);
@@ -227,7 +228,7 @@ export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
     try {
       return currencyService.convertAmountSync(amount, fromCurrency, toCurrency || baseCurrency);
     } catch (err) {
-      console.warn('Erreur conversion synchrone:', err);
+      logger.warn('Erreur conversion synchrone:', err);
       return amount;
     }
   }, [currencyService, baseCurrency]);
@@ -285,12 +286,8 @@ export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
 
   // Historique des taux (placeholder - à implémenter si base de données disponible)
   const getExchangeRateHistory = useCallback(async (): Promise<ExchangeRate[]> => {
-    try {
-      return []; // Placeholder pour l'historique des taux
-    } catch (err) {
-      console.warn('Historique des taux non disponible:', err);
-      return [];
-    }
+    // Placeholder pour l'historique des taux
+    return [];
   }, []);
 
   // Rafraîchir tous les taux avec meilleure gestion des erreurs
@@ -522,7 +519,7 @@ export const useCurrencyStats = () => {
 
       return rates;
     } catch (error) {
-      console.warn('Impossible de récupérer les taux populaires:', error);
+      logger.warn('Impossible de récupérer les taux populaires:', error);
       return stats.popularRates;
     }
   }, [getExchangeRate, isCacheValid, stats.popularRates]);

@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/react';
+import { logger } from '@/utils/logger';
 
 /**
  * Initialize Sentry for error monitoring
@@ -10,7 +11,7 @@ export function initializeSentry() {
 
   // Only initialize if DSN is provided and not in development
   if (!SENTRY_DSN || ENV === 'development') {
-    console.log('📊 Sentry: Skipped (development mode)');
+    logger.info('📊 Sentry: Skipped (development mode);');
     return;
   }
 
@@ -92,7 +93,7 @@ export function initializeSentry() {
     Sentry.setTag('environment_type', 'staging');
   }
 
-  console.log('📊 Sentry: Initialized (' + ENV + (isBeta ? ' - BETA MODE' : '') + ')');
+  logger.info(`📊 Sentry: Initialized (${  ENV  }${isBeta ? ' - BETA MODE' : ''  });`);
 }
 
 /**
@@ -155,12 +156,13 @@ export function addBreadcrumb(message: string, category: string = 'custom', data
 
 /**
  * Start a performance transaction
+ * DEPRECATED: Sentry.startTransaction is deprecated. Use Sentry.startSpan instead.
+ * @deprecated Use startSpan instead
  */
-export function startTransaction(name: string, op: string = 'custom') {
-  return Sentry.startTransaction({
-    name,
-    op,
-  });
+export function startTransaction(name: string, op: string = 'custom'): any {
+  // TODO: Migrate to Sentry.startSpan
+  logger.warn('startTransaction is deprecated. Use Sentry.startSpan instead.');
+  return null; // Temporarily disabled
 }
 
 /**

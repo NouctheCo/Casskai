@@ -11,7 +11,14 @@ import type {
   IncomeStatementData,
   TrialBalanceData,
   GeneralLedgerData,
-  CashFlowData
+  CashFlowData,
+  AgedReceivablesData,
+  AgedPayablesData,
+  FinancialRatiosData,
+  TaxDeclarationVAT,
+  BudgetVarianceData,
+  KPIDashboardData,
+  TaxSummaryData
 } from '../types';
 
 /**
@@ -119,7 +126,7 @@ export class PDFGenerator {
   protected formatCurrency(amount: number, currency: string = 'EUR'): string {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: currency,
+      currency,
       minimumFractionDigits: 2
     }).format(amount);
   }
@@ -141,15 +148,19 @@ export class PDFGenerator {
   /**
    * Ajouter un tableau
    */
-  protected addTable(headers: string[], rows: any[][], startY?: number): void {
-    autoTable(this.doc, {
+  protected addTable(headers: string[], rows: any[][], options?: { highlightLastRow?: boolean; compact?: boolean } | number): void {
+    // Support pour l'ancienne signature avec startY comme number
+    const startY = typeof options === 'number' ? options : undefined;
+    const tableOptions = typeof options === 'object' ? options : {};
+
+    const config: any = {
       head: [headers],
       body: rows,
       startY: startY || this.currentY,
       theme: 'grid',
       styles: {
-        fontSize: 9,
-        cellPadding: 3
+        fontSize: tableOptions.compact ? 8 : 9,
+        cellPadding: tableOptions.compact ? 2 : 3
       },
       headStyles: {
         fillColor: [66, 139, 202],
@@ -162,10 +173,22 @@ export class PDFGenerator {
       columnStyles: {
         // Aligner à droite les colonnes de montants (dernières colonnes généralement)
       },
-      didDrawPage: (data) => {
+      didDrawPage: (data: any) => {
         this.currentY = data.cursor?.y || this.currentY;
       }
-    });
+    };
+
+    // Highlight last row if requested
+    if (tableOptions.highlightLastRow && rows.length > 0) {
+      config.didDrawCell = (data: any) => {
+        if (data.row.index === rows.length - 1 && data.section === 'body') {
+          this.doc.setFillColor(240, 240, 240);
+          this.doc.setFont('helvetica', 'bold');
+        }
+      };
+    }
+
+    autoTable(this.doc, config);
   }
 
   /**
@@ -184,6 +207,83 @@ export class PDFGenerator {
     this.doc.line(15, this.currentY + 2, 195, this.currentY + 2);
 
     this.currentY += 8;
+  }
+
+  /**
+   * Ajouter un titre principal
+   */
+  protected addTitle(title: string): void {
+    this.doc.setFontSize(16);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text(title, 105, this.currentY, { align: 'center' });
+    this.currentY += 10;
+  }
+
+  /**
+   * Ajouter un sous-titre
+   */
+  protected addSubtitle(subtitle: string): void {
+    this.doc.setFontSize(12);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text(subtitle, 105, this.currentY, { align: 'center' });
+    this.currentY += 8;
+  }
+
+  /**
+   * Ajouter les informations de l'entreprise
+   */
+  protected addCompanyInfo(): void {
+    const { company } = this.config;
+
+    this.doc.setFontSize(10);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text(company.name, 200, this.currentY, { align: 'right' });
+
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.setFontSize(8);
+    this.currentY += 5;
+
+    if (company.address) {
+      this.doc.text(company.address, 200, this.currentY, { align: 'right' });
+      this.currentY += 4;
+    }
+    if (company.city && company.postal_code) {
+      this.doc.text(`${company.postal_code} ${company.city}`, 200, this.currentY, { align: 'right' });
+      this.currentY += 4;
+    }
+    if (company.siret) {
+      this.doc.text(`SIRET: ${company.siret}`, 200, this.currentY, { align: 'right' });
+      this.currentY += 4;
+    }
+
+    this.currentY += 5;
+  }
+
+  /**
+   * Ajouter un titre de section (alias pour addSection)
+   */
+  protected addSectionTitle(title: string, marginTop: number = 10): void {
+    this.addSection(title, marginTop);
+  }
+
+  /**
+   * Ajouter du texte simple
+   */
+  protected addText(text: string, leftMargin: number = 20, incrementY: boolean = true): void {
+    this.doc.setFontSize(10);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text(text, leftMargin, this.currentY);
+    if (incrementY) {
+      this.currentY += 6;
+    }
+  }
+
+  /**
+   * Ajouter une nouvelle page
+   */
+  protected addPage(): void {
+    this.doc.addPage();
+    this.currentY = this.config.margins?.top || 20;
   }
 
   /**

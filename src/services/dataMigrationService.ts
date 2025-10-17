@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 /**
  * Service pour migrer et synchroniser les données entre localStorage et Supabase
@@ -8,7 +9,7 @@ class DataMigrationService {
   /**
    * Migrer les données d'une entreprise depuis localStorage vers Supabase
    */
-  async migrateCompanyData(userId: string, companyData: any): Promise<{ success: boolean; companyId?: string; error?: string }> {
+  async migrateCompanyData(userId: string, companyData: Record<string, unknown>): Promise<{ success: boolean; companyId?: string; error?: string }> {
     try {
       // 1. Créer l'entreprise
       const { data: company, error: companyError } = await supabase
@@ -32,7 +33,7 @@ class DataMigrationService {
         .single();
 
       if (companyError) {
-        console.error('Erreur création entreprise:', companyError);
+        logger.error('Erreur création entreprise:', companyError);
         return { success: false, error: companyError.message };
       }
 
@@ -48,7 +49,7 @@ class DataMigrationService {
         });
 
       if (userCompanyError) {
-        console.error('Erreur association utilisateur-entreprise:', userCompanyError);
+        logger.error('Erreur association utilisateur-entreprise:', userCompanyError);
         return { success: false, error: userCompanyError.message };
       }
 
@@ -60,7 +61,7 @@ class DataMigrationService {
         });
 
       if (trialError) {
-        console.warn('Erreur création essai:', trialError);
+        logger.warn('Erreur création essai:', trialError);
         // Non bloquant
       }
 
@@ -69,7 +70,7 @@ class DataMigrationService {
 
       return { success: true, companyId };
     } catch (error) {
-      console.error('Erreur migration données entreprise:', error);
+      logger.error('Erreur migration données entreprise:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Erreur inconnue' };
     }
   }
@@ -114,13 +115,13 @@ class DataMigrationService {
           .insert(modulesToInsert);
 
         if (error) {
-          console.error('Erreur migration modules:', error);
+          logger.error('Erreur migration modules:', error)
         } else {
-          console.log('Modules migrés avec succès:', modulesToInsert.length);
+          logger.info('Modules migrés avec succès:', modulesToInsert.length)
         }
       }
     } catch (error) {
-      console.error('Erreur migration modules:', error);
+      logger.error('Erreur migration modules:', error)
     }
   }
 
@@ -154,7 +155,7 @@ class DataMigrationService {
   /**
    * Synchroniser les données utilisateur avec Supabase
    */
-  async syncUserData(userId: string): Promise<{ success: boolean; companies: any[]; error?: string }> {
+  async syncUserData(userId: string): Promise<{ success: boolean; companies: unknown[]; error?: string }> {
     try {
       // Récupérer les entreprises de l'utilisateur
       const { data: companies, error } = await supabase
@@ -167,13 +168,13 @@ class DataMigrationService {
         .eq('user_companies.is_active', true);
 
       if (error) {
-        console.error('Erreur récupération entreprises:', error);
+        logger.error('Erreur récupération entreprises:', error);
         return { success: false, companies: [], error: error.message };
       }
 
       return { success: true, companies: companies || [] };
     } catch (error) {
-      console.error('Erreur sync données utilisateur:', error);
+      logger.error('Erreur sync données utilisateur:', error);
       return {
         success: false,
         companies: [],
@@ -197,7 +198,7 @@ class DataMigrationService {
       // Si l'utilisateur n'a pas d'entreprises en DB, il a besoin de migration
       return !companies || companies.length === 0;
     } catch (error) {
-      console.error('Erreur vérification migration:', error);
+      logger.error('Erreur vérification migration:', error);
       return true; // En cas d'erreur, forcer la migration
     }
   }
@@ -224,9 +225,9 @@ class DataMigrationService {
 
       toRemove.forEach(key => localStorage.removeItem(key));
 
-      console.log('localStorage nettoyé après migration:', toRemove.length, 'entrées supprimées');
+      logger.info('localStorage nettoyé après migration:', toRemove.length, 'entrées supprimées')
     } catch (error) {
-      console.warn('Erreur nettoyage localStorage:', error);
+      logger.warn('Erreur nettoyage localStorage:', error)
     }
   }
 
@@ -271,12 +272,12 @@ class DataMigrationService {
         .insert(accountsToInsert);
 
       if (error) {
-        console.error('Erreur création plan comptable:', error);
+        logger.error('Erreur création plan comptable:', error)
       } else {
-        console.log('Plan comptable de base créé');
+        logger.info('Plan comptable de base créé')
       }
     } catch (error) {
-      console.error('Erreur création plan comptable:', error);
+      logger.error('Erreur création plan comptable:', error)
     }
   }
 
@@ -285,7 +286,7 @@ class DataMigrationService {
    */
   async fullSync(userId: string): Promise<{ success: boolean; message: string }> {
     try {
-      console.log('Début synchronisation complète...');
+      logger.info('Début synchronisation complète...');
 
       // 1. Vérifier si migration nécessaire
       const needsMigration = await this.needsMigration(userId);
@@ -334,7 +335,7 @@ class DataMigrationService {
       }
 
     } catch (error) {
-      console.error('Erreur synchronisation complète:', error);
+      logger.error('Erreur synchronisation complète:', error);
       return {
         success: false,
         message: error instanceof Error ? error.message : 'Erreur inconnue'

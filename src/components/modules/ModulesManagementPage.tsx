@@ -30,6 +30,7 @@ import {
   ExternalLink,
   Star
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 // Fonction pour obtenir les classes de couleur avec support dark mode
 const getColorClasses = (color: string) => {
@@ -321,7 +322,7 @@ const ModuleCard: React.FC<ModuleCardProps> = ({
               <Switch
                 checked={isActive}
                 onCheckedChange={(checked) => {
-                  console.log(`Switch changé pour ${module.key}: ${checked}`);
+                  logger.info(`Switch changé pour ${module.key}: ${checked}`);
                   onToggle(module.key, checked);
                 }}
                 disabled={
@@ -383,13 +384,13 @@ export default function ModulesManagementPage() {
   // Écouter les changements d'état des modules
   useEffect(() => {
     const handleModuleStateChange = (event: CustomEvent) => {
-      console.log('Module state changed:', event.detail);
+      logger.info('Module state changed:', event.detail);
       const stored = localStorage.getItem('casskai-module-states');
       setModuleStates(stored ? JSON.parse(stored) : {});
     };
 
     const handleModuleStatesReset = () => {
-      console.log('Module states reset');
+      logger.info('Module states reset');
       const stored = localStorage.getItem('casskai-module-states');
       setModuleStates(stored ? JSON.parse(stored) : {});
     };
@@ -446,7 +447,7 @@ export default function ModulesManagementPage() {
   }, [filteredModules, categories]);
 
   const handleToggleModule = (key: string, active: boolean) => {
-    console.log(`Tentative de ${active ? 'activation' : 'désactivation'} du module ${key}`);
+    logger.info(`Tentative de ${active ? 'activation' : 'désactivation'} du module ${key}`);
 
     // En plan payant : vérifier si le module est autorisé pour ce plan
     if (!isTrialUser) {
@@ -493,22 +494,22 @@ export default function ModulesManagementPage() {
         }
       }));
 
-      console.log(`Module ${key} ${active ? 'activé' : 'désactivé'} avec succès`);
+      logger.info(`Module ${key} ${active ? 'activé' : 'désactivé'} avec succès`)
     } catch (error) {
-      console.error('Erreur lors du toggle du module:', error);
+      logger.error('Erreur lors du toggle du module:', error)
     }
   };
 
   const handleOpenModule = (path: string) => {
     // Vérifier que le chemin n'est pas vide et naviguer correctement
-    console.log('Navigation vers:', path);
+    logger.info('Navigation vers:', path);
     
     if (path && path !== '#') {
       // Utiliser React Router pour la navigation au lieu de window.location.href
       // Cela évite les rechargements de page et les redirections non désirées
       navigate(path);
     } else {
-      console.warn('Chemin de module invalide:', path);
+      logger.warn('Chemin de module invalide:', path)
     }
   };
 

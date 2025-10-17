@@ -1,5 +1,6 @@
 // Service fiscal multi-pays pour CassKai
 import { frenchTaxComplianceService } from './FrenchTaxComplianceService';
+import { logger } from '@/utils/logger';
 
 export interface CountryTaxConfig {
   country: string;
@@ -564,7 +565,7 @@ export class MultiCountryTaxService {
   getTaxConfig(countryCode: string): CountryTaxConfig {
     const config = COUNTRY_TAX_CONFIGS[countryCode];
     if (!config) {
-      console.warn(`Configuration fiscale non trouvée pour ${countryCode}, utilisation de FR par défaut`);
+      logger.warn(`Configuration fiscale non trouvée pour ${countryCode}, utilisation de FR par défaut`);
       return COUNTRY_TAX_CONFIGS.FR;
     }
     return config;

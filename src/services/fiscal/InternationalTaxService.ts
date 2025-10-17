@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 interface CountryTaxConfig {
   country: string;
@@ -374,7 +375,7 @@ export class InternationalTaxService {
 
       return { success: true };
     } catch (error) {
-      console.error('Erreur configuration fiscale:', error);
+      logger.error('Erreur configuration fiscale:', error);
       return {
         success: false,
         error: error.message || 'Erreur lors de la configuration fiscale'

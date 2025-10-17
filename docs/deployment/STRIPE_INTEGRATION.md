@@ -1,5 +1,10 @@
 # 💳 Guide d'Intégration Stripe - CassKai
 
+> **NOTE (2025-10)**  
+> Les Edge Functions Stripe (`create-checkout-session`, `update-subscription`, etc.) ont été retirées.  
+> Utilisez désormais les routes backend sécurisées (`/api/stripe/*`).  
+> Les étapes ci-dessous seront mises à jour pour refléter cette architecture.
+
 ## Vue d'Ensemble
 
 CassKai intègre Stripe pour gérer les abonnements et paiements des utilisateurs avec trois plans :

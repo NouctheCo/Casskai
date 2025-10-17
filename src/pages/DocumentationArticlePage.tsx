@@ -25,6 +25,7 @@ import { PageContainer } from '@/components/ui/PageContainer';
 import { PublicNavigation } from '@/components/navigation/PublicNavigation';
 import { categoriesData } from './DocumentationCategoryPage';
 import { WhatsAppChat } from '@/components/chat/WhatsAppChat';
+import { logger } from '@/utils/logger';
 
 // Base de données simplifiée des articles
 const articlesDatabase = {
@@ -1749,7 +1750,7 @@ const articlesDatabase = {
       '    }));',
       '',
       '    await sheet.addRows(rows);',
-      '    console.log(`${rows.length} factures exportées vers Google Sheets`);',
+      '    logger.info(`${rows.length} factures exportées vers Google Sheets`);',
       '  }',
       '}',
       '',
@@ -1797,7 +1798,7 @@ const articlesDatabase = {
       '      const data = await response.json();',
       '      setInvoices(data.data);',
       '    } catch (error) {',
-      '      console.error(\'Erreur fetch:\', error);',
+      '      logger.error(\'Erreur fetch:\', error);',
       '    } finally {',
       '      setLoading(false);',
       '    }',
@@ -1911,7 +1912,7 @@ const DocumentationArticlePage = () => {
           url: window.location.href
         });
       } catch (error) {
-        console.log('Partage annulé');
+        logger.info('Partage annulé')
       }
     } else {
       toast({

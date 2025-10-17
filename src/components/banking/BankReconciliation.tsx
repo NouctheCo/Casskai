@@ -37,6 +37,7 @@ import {
   Database,
   Zap
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 const BankReconciliation = ({ currentEnterprise, bankAccounts, onReconciliationComplete }) => {
   const { toast } = useToast();
@@ -225,7 +226,7 @@ const BankReconciliation = ({ currentEnterprise, bankAccounts, onReconciliationC
 
       return { success: true, id: newAccount.id };
     } catch (error) {
-      console.error('Error creating bank account:', error);
+      logger.error('Error creating bank account:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   };
@@ -305,7 +306,7 @@ const BankReconciliation = ({ currentEnterprise, bankAccounts, onReconciliationC
       });
 
     } catch (error) {
-      console.error('Erreur lors de la réconciliation automatique:', error);
+      logger.error('Erreur lors de la réconciliation automatique:', error);
       toast({
         title: "Erreur",
         description: "Échec de la réconciliation automatique",
@@ -334,7 +335,7 @@ const BankReconciliation = ({ currentEnterprise, bankAccounts, onReconciliationC
       ));
 
     } catch (error) {
-      console.error('Erreur lors de la validation:', error);
+      logger.error('Erreur lors de la validation:', error);
       toast({
         title: "Erreur",
         description: "Échec de la validation",
@@ -365,7 +366,7 @@ const BankReconciliation = ({ currentEnterprise, bankAccounts, onReconciliationC
       }
 
     } catch (error) {
-      console.error('Erreur lors de la récupération du résumé:', error);
+      logger.error('Erreur lors de la récupération du résumé:', error)
     }
   };
 

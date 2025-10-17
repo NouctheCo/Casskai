@@ -1,10 +1,10 @@
 // services/marketService.ts
 import { MarketConfig } from '../types/markets';
 import { MARKET_CONFIGS } from '../data/markets';
-import { SYSCOHADA_PLAN } from '../data/syscohada';
-import { PCG_ACCOUNTS as PCG_PLAN } from '../data/pcg';
+// import { SYSCOHADA_PLAN } from '../data/syscohada'; // REMOVED: Legacy, uses AccountPlan type that no longer exists
+// import { PCG_ACCOUNTS as PCG_PLAN } from '../data/pcg'; // REMOVED: Legacy
 // import { CurrencyService } from './currencyService';
-import { AccountingService } from './accountingService';
+// import { AccountingService } from './accountingService'; // REMOVED: Legacy service
 export class MarketService {
   private static instance: MarketService;
   private currentMarket: MarketConfig | null = null;
@@ -61,12 +61,9 @@ export class MarketService {
     // currencyService.setDefaultCurrency(market.defaultCurrency);
 
     // 2. Configurer le plan comptable
-    const accountingService = AccountingService.getInstance();
-    if (market.accountingStandard === 'SYSCOHADA') {
-      accountingService.setAccountPlan(SYSCOHADA_PLAN);
-    } else if (market.accountingStandard === 'PCG') {
-      accountingService.setAccountPlan(PCG_PLAN as any);
-    }
+    // NOTE: Chart of accounts is now initialized directly in database via
+    // initialize_company_chart_of_accounts() RPC function based on country_code
+    // No need for client-side plan configuration
 
     // 3. Configurer la localisation
     this.applyLocalization(market.localization);
@@ -75,13 +72,13 @@ export class MarketService {
     localStorage.setItem('casskai_market', market.id);
   }
 
-  private applyLocalization(localization: any): void {
+  private applyLocalization(localization: Record<string, unknown>): void {
     // Configuration des formats de date et nombre
-    document.documentElement.lang = localization.language;
+    document.documentElement.lang = localization.language as string;
     
     // Configuration du fuseau horaire
     // Peut être utilisé par les bibliothèques de date
-    (window as any).CASSKAI_TIMEZONE = localization.timezone;
+    (window as unknown as Record<string, unknown>).CASSKAI_TIMEZONE = localization.timezone;
   }
 
   getMarketPricing(marketId: string): MarketConfig['pricing'] | null {

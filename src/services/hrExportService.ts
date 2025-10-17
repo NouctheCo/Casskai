@@ -17,7 +17,7 @@ export class HRExportService {
   /**
    * Convertir les données en CSV
    */
-  private arrayToCSV(data: any[], headers: string[]): string {
+  private arrayToCSV(data: unknown[], headers: string[]): string {
     const headerRow = headers.join(',');
     const rows = data.map(item =>
       headers.map(header => {

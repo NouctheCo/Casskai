@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 // Types pour les préférences de cookies
 export interface CookiePreferences {
@@ -59,7 +60,7 @@ export class CookiesService {
         return this.saveToLocalStorage(preferences);
       }
     } catch (error) {
-      console.error('Error saving cookie preferences to database:', error);
+      logger.error('Error saving cookie preferences to database:', error);
       // Fallback vers le stockage local en cas d'erreur
       return this.saveToLocalStorage(preferences);
     }
@@ -88,7 +89,7 @@ export class CookiesService {
       // Fallback vers le stockage local
       return this.getFromLocalStorage();
     } catch (error) {
-      console.error('Error fetching cookie preferences:', error);
+      logger.error('Error fetching cookie preferences:', error);
       return this.getFromLocalStorage();
     }
   }
@@ -173,7 +174,7 @@ export class CookiesService {
       const data = await response.json();
       return data.ip;
     } catch (error) {
-      console.warn('Could not fetch client IP:', error);
+      logger.warn('Could not fetch client IP:', error);
       return 'unknown';
     }
   }
@@ -196,7 +197,7 @@ export class CookiesService {
       const stored = localStorage.getItem(this.STORAGE_KEY);
       return stored ? JSON.parse(stored) : null;
     } catch (error) {
-      console.error('Error reading cookie preferences from localStorage:', error);
+      logger.error('Error reading cookie preferences from localStorage:', error);
       return null;
     }
   }
@@ -327,7 +328,7 @@ export class CookiesService {
 
       return stats;
     } catch (error) {
-      console.error('Error fetching consent statistics:', error);
+      logger.error('Error fetching consent statistics:', error);
       return {
         total: 0,
         essential: 0,

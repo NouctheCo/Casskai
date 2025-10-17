@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 interface ChartOfAccountsConfig {
   country: string;
@@ -565,7 +566,7 @@ export class SampleDataService {
 
       return { success: true, results };
     } catch (error) {
-      console.error('Erreur génération données d\'exemple:', error);
+      logger.error('Erreur génération données d\'exemple:', error);
       return { success: false, error: error.message };
     }
   }
@@ -593,7 +594,7 @@ export class SampleDataService {
 
       return { success: true };
     } catch (error) {
-      console.error('Erreur suppression données d\'exemple:', error);
+      logger.error('Erreur suppression données d\'exemple:', error);
       return { success: false, error: error.message };
     }
   }

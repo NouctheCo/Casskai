@@ -45,6 +45,8 @@ import {
   useSiretInput
 } from './formHelpers';
 import { ValidationError, ValidationWarning } from './formData';
+import { useToast } from '@/components/ui/use-toast';
+import { logger } from '@/utils/logger';
 
 // =============================================================================
 // COMPOSANTS WRAPPER POUR VALIDATION
@@ -522,8 +524,8 @@ export function ValidationCounter({
  * Hook pour intégrer la validation avec les toasts existants
  */
 export function useValidationToasts() {
-  const { toast } = require('@/components/ui/toast').useToast();
-  
+  const { toast } = useToast();
+
   const showValidationErrors = useCallback((errors: ValidationError[]) => {
     if (errors.length === 0) return;
     
@@ -657,7 +659,7 @@ export function ValidatedForm<T extends FieldValues = FieldValues>({
       
       await onValidSubmit(data);
     } catch (error) {
-      console.error('Erreur lors de la soumission:', error);
+      logger.error('Erreur lors de la soumission:', error);
       showValidationErrors([{
         field: 'form',
         message: error instanceof Error ? error.message : 'Erreur inattendue',

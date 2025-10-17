@@ -3,6 +3,7 @@ import { Report, ReportExecution, ReportParameters } from '../domain/reports/ent
 import { ReportService } from '../application/reports/ReportService';
 import { SupabaseReportRepository } from '../infrastructure/reports/SupabaseReportRepository';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/utils/logger';
 
 // Legacy interfaces for backward compatibility
 export interface ReportFilters {
@@ -215,7 +216,7 @@ export function useReports(companyId: string): UseReportsReturn {
         }
       }
     } catch (err) {
-      console.error('Failed to refresh execution:', err);
+      logger.error('Failed to refresh execution:', err)
     }
   }, []);
 
@@ -232,7 +233,7 @@ export function useReports(companyId: string): UseReportsReturn {
           }
         }
       } catch (err) {
-        console.error('Polling error:', err);
+        logger.error('Polling error:', err);
         clearInterval(pollInterval);
       }
     }, 2000); // Poll every 2 seconds
@@ -356,14 +357,14 @@ export function useReports(companyId: string): UseReportsReturn {
   ): Promise<string | null> => {
     if (!user || !companyId) return null;
     // Legacy method - not implemented in new architecture
-    console.warn('saveReport is deprecated, use the new report execution system');
+    logger.warn('saveReport is deprecated, use the new report execution system');
     return null;
   }, [user, companyId]);
 
   const deleteReport = useCallback(async (reportId: string): Promise<void> => {
     if (!user || !companyId) return;
     // Legacy method - not implemented in new architecture
-    console.warn('deleteReport is deprecated, use the new report execution system');
+    logger.warn('deleteReport is deprecated, use the new report execution system')
   }, [user, companyId]);
 
   const refresh = useCallback(async () => {

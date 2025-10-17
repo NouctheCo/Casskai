@@ -9,6 +9,7 @@ import {
   OpenBankingResponse
 } from '../../../types/openBanking.types';
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 // Service d'export vers logiciels comptables
 export class AccountingExportService {
@@ -52,7 +53,7 @@ export class AccountingExportService {
       }
 
       this.isInitialized = true;
-      console.log(`Accounting export service initialized with ${formats.length} formats`);
+      logger.info(`Accounting export service initialized with ${formats.length} formats`)
     } catch (error) {
       throw new Error(`Failed to initialize accounting export service: ${error.message}`);
     }
@@ -130,10 +131,12 @@ export class AccountingExportService {
       }
 
       // Récupérer les données à exporter
+       
       job.progress = 10;
       const data = await this.fetchExportData(job.parameters);
 
       // Valider les données
+      // eslint-disable-next-line require-atomic-updates
       job.progress = 30;
       const validationResult = await this.validateExportData(data, format);
       if (!validationResult.valid) {
@@ -141,31 +144,42 @@ export class AccountingExportService {
       }
 
       // Transformer les données selon le format
+      // eslint-disable-next-line require-atomic-updates
       job.progress = 50;
       const transformedData = await this.transformData(data, format);
 
       // Générer le fichier d'export
+      // eslint-disable-next-line require-atomic-updates
       job.progress = 80;
       const exportedFile = await this.generateExportFile(transformedData, format);
 
       // Sauvegarder le fichier et générer l'URL
+      // eslint-disable-next-line require-atomic-updates
       job.progress = 90;
       const fileUrl = await this.saveExportFile(exportedFile, job.id, format);
 
       // Finaliser le job
+      // eslint-disable-next-line require-atomic-updates
       job.status = 'completed';
+      // eslint-disable-next-line require-atomic-updates
       job.progress = 100;
+      // eslint-disable-next-line require-atomic-updates
       job.resultUrl = fileUrl;
+      // eslint-disable-next-line require-atomic-updates
       job.completedAt = new Date();
+      // eslint-disable-next-line require-atomic-updates
       job.updatedAt = new Date();
 
-      console.log(`Export job ${job.id} completed successfully`);
+      logger.info(`Export job ${job.id} completed successfully`)
     } catch (error) {
+      // eslint-disable-next-line require-atomic-updates
       job.status = 'failed';
+      // eslint-disable-next-line require-atomic-updates
       job.errorMessage = error.message;
+      // eslint-disable-next-line require-atomic-updates
       job.updatedAt = new Date();
 
-      console.error(`Export job ${job.id} failed:`, error);
+      logger.error(`Export job ${job.id} failed:`, error)
     }
   }
 
@@ -206,14 +220,18 @@ export class AccountingExportService {
       const transactions: BankTransaction[] = (bankTransactions || []).map(tx => ({
         id: tx.id,
         accountId: tx.bank_account_id,
+        transactionId: tx.id, // Use ID as transaction ID since we don't have a separate field
         date: new Date(tx.transaction_date),
         valueDate: tx.value_date ? new Date(tx.value_date) : new Date(tx.transaction_date),
         amount: tx.amount,
         currency: tx.currency || 'EUR',
         description: tx.description,
+        originalDescription: tx.description, // Use description as originalDescription
         reference: tx.reference,
         category: tx.category,
-        reconciliationStatus: tx.reconciled ? 'reconciled' : 'unreconciled',
+        type: tx.amount >= 0 ? 'credit' : 'debit' as 'debit' | 'credit',
+        status: 'posted' as 'posted' | 'pending' | 'canceled',
+        isReconciled: tx.reconciled || false,
         createdAt: new Date(tx.created_at),
         updatedAt: new Date(tx.updated_at)
       }));
@@ -303,7 +321,7 @@ export class AccountingExportService {
       };
 
     } catch (error) {
-      console.error('Error fetching export data:', error);
+      logger.error('Error fetching export data:', error);
       throw error;
     }
   }
@@ -335,7 +353,7 @@ export class AccountingExportService {
   ): Promise<{ valid: boolean; error: string }> {
     try {
       switch (rule.type) {
-        case 'required':
+        case 'required': {
           if (!this.getFieldValue(data, rule.field)) {
             return {
               valid: false,
@@ -343,8 +361,9 @@ export class AccountingExportService {
             };
           }
           break;
+        }
 
-        case 'format':
+        case 'format': {
           const value = this.getFieldValue(data, rule.field);
           if (value && rule.parameters.pattern) {
             const regex = new RegExp(rule.parameters.pattern);
@@ -356,8 +375,9 @@ export class AccountingExportService {
             }
           }
           break;
+        }
 
-        case 'range':
+        case 'range': {
           const numValue = parseFloat(this.getFieldValue(data, rule.field));
           if (!isNaN(numValue)) {
             const min = rule.parameters.min;
@@ -370,14 +390,16 @@ export class AccountingExportService {
             }
           }
           break;
+        }
 
-        case 'custom':
+        case 'custom': {
           // Validation personnalisée
           const customResult = await this.applyCustomValidation(data, rule);
           if (!customResult.valid) {
             return customResult;
           }
           break;
+        }
       }
 
       return { valid: true, error: '' };
@@ -491,9 +513,10 @@ export class AccountingExportService {
           }
           break;
 
-        case 'lookup':
+        case 'lookup': {
           const lookupTable = transformation.parameters.table || {};
           return lookupTable[value] || transformation.parameters.defaultValue || value;
+        }
 
         default:
           return value;
@@ -501,7 +524,7 @@ export class AccountingExportService {
 
       return value;
     } catch (error) {
-      console.error('Transformation error:', error);
+      logger.error('Transformation error:', error);
       return value;
     }
   }
@@ -625,7 +648,7 @@ export class AccountingExportService {
       const url = URL.createObjectURL(blob);
 
       // Simuler la sauvegarde
-      console.log(`Export file saved: ${exportedFile.filename}`);
+      logger.info(`Export file saved: ${exportedFile.filename}`);
 
       return url;
     } catch (error) {

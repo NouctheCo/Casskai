@@ -3,15 +3,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { loadStripe } from '@stripe/stripe-js';
-import { supabase } from '@/lib/supabase';
 import { TrialStatusCard } from '@/components/TrialComponents';
 import { useTrial } from '@/hooks/trial.hooks';
 import { SUBSCRIPTION_PLANS, getPlanById, formatPrice } from '@/types/subscription.types';
 import { useToast } from '@/hooks/useToast';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+import stripeService from '@/services/stripeService';
+import { logger } from '@/utils/logger';
 
 export default function PricingPage() {
   const { subscriptionPlan } = useSubscription();
@@ -39,100 +37,73 @@ export default function PricingPage() {
   const plans = [freePlan, ...filteredPlans];
 
   const handleChoosePlan = async (planId: string) => {
-    if (!user) {
-      showToast('Vous devez être connecté pour choisir un plan', 'error');
+  if (!user) {
+    showToast('Vous devez être connecté pour choisir un plan', 'error');
+    return;
+  }
+
+  setIsLoading(true);
+
+  try {
+    const origin = window.location.origin;
+
+    if (planId === 'free') {
+      showToast('Plan gratuit activé ! Vous pouvez maintenant utiliser CassKai.', 'success');
+      window.location.href = `${origin}/dashboard`;
       return;
     }
 
-    setIsLoading(true);
-
-    try {
-      // Gestion spéciale pour le plan gratuit
-      if (planId === 'free') {
-        showToast('Plan gratuit activé ! Vous pouvez maintenant utiliser CassKai.', 'success');
-        window.location.href = '/dashboard';
-        return;
-      }
-
-      // Gestion spéciale pour le plan Enterprise
-      if (planId === 'enterprise_monthly' || planId === 'enterprise_yearly') {
-        showToast('Pour le plan Enterprise, veuillez nous contacter à contact@casskai.com pour une configuration personnalisée.', 'info');
-        return;
-      }
-
-      // Pour les autres plans, utiliser Stripe via Edge Functions
-      console.warn('🛒 [PricingPage] Starting checkout for plan:', planId);
-
-      const { data, error } = await supabase.functions.invoke('create-checkout-session', {
-        body: {
-          planId,
-          userId: user.id,
-          metadata: {
-            source: 'pricing-page',
-            timestamp: new Date().toISOString()
-          }
-        },
-      });
-
-      console.warn('🛒 [PricingPage] Edge function response:', { data, error });
-
-      if (error) {
-        showToast(`Erreur lors de la création de la session: ${error.message || 'Erreur inconnue'}`, 'error');
-        return;
-      }
-
-      if (!data || !data.sessionId) {
-        showToast('⚠️ Réponse du service de paiement invalide. Veuillez réessayer.', 'warning');
-        return;
-      }
-
-      // Redirection vers Stripe Checkout
-      console.warn('🛒 [PricingPage] About to load stripe...');
-      const stripe = await stripePromise;
-      console.warn('🛒 [PricingPage] Stripe loaded:', !!stripe);
-      
-      if (!stripe) {
-        console.error('🛒 [PricingPage] Stripe failed to load - using manual redirect');
-        console.warn('🛒 [PricingPage] Manual redirect to URL:', data.url);
-        window.location.href = data.url;
-        return;
-      }
-
-      // Try Stripe.js redirect first, but with a timeout fallback
-      console.warn('🛒 [PricingPage] Calling stripe.redirectToCheckout with sessionId:', data.sessionId);
-      
-      try {
-        const redirectPromise = stripe.redirectToCheckout({ sessionId: data.sessionId });
-        
-        // Set a timeout in case redirectToCheckout hangs
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Stripe redirect timeout')), 5000);
-        });
-        
-        const result = await Promise.race([redirectPromise, timeoutPromise]) as { error?: { message: string } };
-        console.warn('🛒 [PricingPage] redirectToCheckout result:', result);
-        
-        if (result.error) {
-          console.error('🛒 [PricingPage] Stripe redirect error:', result.error);
-          console.warn('🛒 [PricingPage] Using manual redirect fallback');
-          window.location.href = data.url;
-        }
-      } catch (error) {
-        console.error('🛒 [PricingPage] Stripe redirect failed or timed out:', error);
-        console.warn('🛒 [PricingPage] Using manual redirect to URL:', data.url);
-        window.location.href = data.url;
-      }
-    } catch (error) {
-      console.error('Erreur lors du choix du plan:', error);
-      if (error.name === 'TypeError') {
-        showToast('⚠️ Problème de connexion réseau. Vérifiez votre connexion Internet et réessayez.', 'warning');
-      } else {
-        showToast(`Erreur inattendue: ${error.message}`, 'error');
-      }
-    } finally {
-      setIsLoading(false);
+    if (planId === 'enterprise_monthly' || planId === 'enterprise_yearly') {
+      showToast('Pour le plan Enterprise, veuillez nous contacter à contact@casskai.com pour une configuration personnalisée.', 'info');
+      return;
     }
-  };
+
+    const selectedPlan = SUBSCRIPTION_PLANS.find(plan => plan.id === planId);
+    if (!selectedPlan || !selectedPlan.stripePriceId) {
+      showToast('Offre indisponible. Veuillez contacter le support.', 'error');
+      return;
+    }
+
+    const checkoutResponse = await stripeService.createCheckoutSession({
+      planId,
+      priceId: selectedPlan.stripePriceId,
+      successUrl: `${window.location.origin}/pricing?success=true`,
+      cancelUrl: `${window.location.origin}/pricing?canceled=true`,
+      metadata: {
+        source: 'pricing-page',
+        billingPeriod,
+        timestamp: new Date().toISOString()
+      }
+    });
+
+    if (!checkoutResponse.success) {
+      showToast(checkoutResponse.error ?? 'Impossible de créer la session de paiement.', 'error');
+      return;
+    }
+
+    if (checkoutResponse.sessionId) {
+      const redirectResult = await stripeService.redirectToCheckout(checkoutResponse.sessionId);
+      if (redirectResult.error && checkoutResponse.checkoutUrl) {
+        // eslint-disable-next-line require-atomic-updates
+        window.location.href = checkoutResponse.checkoutUrl;
+      }
+    } else if (checkoutResponse.checkoutUrl) {
+      // eslint-disable-next-line require-atomic-updates
+      window.location.href = checkoutResponse.checkoutUrl;
+    } else {
+      showToast('La redirection de paiement a échoué. Veuillez réessayer.', 'error');
+    }
+  } catch (error) {
+    logger.error('Erreur lors du choix du plan:', error);
+    if ((error as Error).name === 'TypeError') {
+      showToast('⚠️ Problème de connexion réseau. Vérifiez votre connexion Internet et réessayez.', 'warning');
+    } else {
+      showToast(`Erreur inattendue: ${(error as Error).message || 'Veuillez réessayer'}`, 'error');
+    }
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="space-y-6">
@@ -241,3 +212,4 @@ export default function PricingPage() {
     </div>
   );
 }
+

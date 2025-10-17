@@ -1,5 +1,6 @@
 import React, { ErrorInfo } from 'react';
 import ErrorBoundary from './ErrorBoundary';
+import { logger } from '@/utils/logger';
 
 // Types pour l'Error Boundary
 export interface ErrorBoundaryProps {
@@ -46,7 +47,7 @@ export class ErrorReportingService {
     _additionalContext?: Record<string, unknown>
   ): Promise<void> {
     // Désactivé pour éviter les erreurs 405 - endpoint /api/errors n'existe pas
-    console.warn('[ErrorBoundary] Error reporting disabled to avoid 405 errors');
+    logger.warn('[ErrorBoundary] Error reporting disabled to avoid 405 errors');
     return Promise.resolve();
   }
 
@@ -123,7 +124,7 @@ export const useErrorHandler = () => {
 
     // Log en développement
     if (process.env.NODE_ENV === 'development') {
-      console.error('[useErrorHandler]', error, context);
+      logger.error('[useErrorHandler]', error, context)
     }
   }, [reportingService]);
 

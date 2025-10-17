@@ -35,6 +35,7 @@ import { WidgetConfig, WidgetLayout, WIDGET_SIZE_MAP, DEFAULT_BREAKPOINTS, DEFAU
 // Import CSS pour react-grid-layout
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
+import { logger } from '@/utils/logger';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -294,7 +295,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
   const renderWidget = (widget: WidgetConfig, layout: WidgetLayout) => {
     // Validation et sécurisation des données
     if (!widget || !widget.id || !widget.type) {
-      console.warn('Widget invalide:', widget);
+      logger.warn('Widget invalide:', widget);
       return null;
     }
 

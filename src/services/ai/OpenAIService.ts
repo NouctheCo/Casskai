@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { AIAssistantMessage, AIInsight, SmartAlert, CashFlowPrediction, TaxOptimization, AnomalyDetection } from '@/types/ai-types';
+import { logger } from '@/utils/logger';
 
 interface AIServiceResponse<T = any> {
   data?: T;
@@ -81,7 +82,7 @@ export class OpenAIService {
         processingTime
       };
     } catch (error) {
-      console.error('OpenAI Chat Error:', error);
+      logger.error('OpenAI Chat Error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur de communication avec l\'IA'
@@ -122,7 +123,7 @@ export class OpenAIService {
         confidence: 0.85
       };
     } catch (error) {
-      console.error('Financial Health Analysis Error:', error);
+      logger.error('Financial Health Analysis Error:', error);
       return {
         success: false,
         error: 'Erreur lors de l\'analyse financière'
@@ -157,7 +158,7 @@ export class OpenAIService {
         confidence: 0.75
       };
     } catch (error) {
-      console.error('Cash Flow Prediction Error:', error);
+      logger.error('Cash Flow Prediction Error:', error);
       return {
         success: false,
         error: 'Erreur lors de la prédiction de trésorerie'
@@ -190,7 +191,7 @@ export class OpenAIService {
         confidence: 0.80
       };
     } catch (error) {
-      console.error('Anomaly Detection Error:', error);
+      logger.error('Anomaly Detection Error:', error);
       return {
         success: false,
         error: 'Erreur lors de la détection d\'anomalies'
@@ -229,7 +230,7 @@ export class OpenAIService {
         confidence: 0.70
       };
     } catch (error) {
-      console.error('Tax Optimization Error:', error);
+      logger.error('Tax Optimization Error:', error);
       return {
         success: false,
         error: 'Erreur lors de l\'analyse fiscale'
@@ -313,7 +314,7 @@ export class OpenAIService {
         confidence: 0.85
       };
     } catch (error) {
-      console.error('Smart Alerts Generation Error:', error);
+      logger.error('Smart Alerts Generation Error:', error);
       return {
         success: false,
         error: 'Erreur lors de la génération des alertes'

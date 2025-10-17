@@ -1,5 +1,6 @@
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 export interface ErrorContext {
   service?: string;
@@ -50,7 +51,7 @@ export class ErrorHandlingService {
         lastError = error as Error;
         
         // Log the attempt
-        console.warn(`[${context.service}/${context.method}] Attempt ${attempt + 1} failed:`, error);
+        logger.warn(`[${context.service}/${context.method}] Attempt ${attempt + 1} failed:`, error);
         
         // Don't retry if it's the last attempt or if error is not retryable
         if (attempt === maxRetries || !this.isRetryableError(error as Error)) {
@@ -442,7 +443,7 @@ export class ErrorHandlingService {
       }).select().single();
       
     } catch (reportingError) {
-      console.error('[ErrorHandlingService] Failed to report error:', reportingError);
+      logger.error('[ErrorHandlingService] Failed to report error:', reportingError)
     }
   }
 

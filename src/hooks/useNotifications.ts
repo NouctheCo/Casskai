@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { notificationService, type Notification } from '@/services/notificationService';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { logger } from '@/utils/logger';
 
 interface UseNotificationsOptions {
   autoSubscribe?: boolean;
@@ -84,7 +85,7 @@ export function useNotifications(options: UseNotificationsOptions = {}): UseNoti
         setUnreadCount(result.data);
       }
     } catch (err) {
-      console.error('Error fetching unread count:', err);
+      logger.error('Error fetching unread count:', err)
     }
   }, [user?.id]);
 
@@ -94,7 +95,7 @@ export function useNotifications(options: UseNotificationsOptions = {}): UseNoti
     setNotifications(prev => [notification, ...prev].slice(0, limit));
 
     // Update unread count
-    if (!notification.is_read) {
+    if (!notification.read) {
       setUnreadCount(prev => prev + 1);
     }
 
@@ -152,7 +153,7 @@ export function useNotifications(options: UseNotificationsOptions = {}): UseNoti
     const result = await notificationService.markAsRead(id);
     if (result.success) {
       setNotifications(prev =>
-        prev.map(n => n.id === id ? { ...n, is_read: true, read_at: new Date().toISOString() } : n)
+        prev.map(n => n.id === id ? { ...n, read: true, read_at: new Date().toISOString() } : n)
       );
       setUnreadCount(prev => Math.max(0, prev - 1));
     }
@@ -165,7 +166,7 @@ export function useNotifications(options: UseNotificationsOptions = {}): UseNoti
     const result = await notificationService.markAllAsRead(user.id);
     if (result.success) {
       setNotifications(prev =>
-        prev.map(n => ({ ...n, is_read: true, read_at: new Date().toISOString() }))
+        prev.map(n => ({ ...n, read: true, read_at: new Date().toISOString() }))
       );
       setUnreadCount(0);
       toast.success('Toutes les notifications ont été marquées comme lues');
@@ -179,7 +180,7 @@ export function useNotifications(options: UseNotificationsOptions = {}): UseNoti
       setNotifications(prev => prev.filter(n => n.id !== id));
       // Update unread count if it was unread
       const notification = notifications.find(n => n.id === id);
-      if (notification && !notification.is_read) {
+      if (notification && !notification.read) {
         setUnreadCount(prev => Math.max(0, prev - 1));
       }
       toast.success('Notification archivée');
@@ -193,7 +194,7 @@ export function useNotifications(options: UseNotificationsOptions = {}): UseNoti
       setNotifications(prev => prev.filter(n => n.id !== id));
       // Update unread count if it was unread
       const notification = notifications.find(n => n.id === id);
-      if (notification && !notification.is_read) {
+      if (notification && !notification.read) {
         setUnreadCount(prev => Math.max(0, prev - 1));
       }
       toast.success('Notification supprimée');

@@ -12,6 +12,7 @@ import { reportExportService } from '@/services/ReportExportService';
 import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { logger } from '@/utils/logger';
 
 interface ReportFilters {
   companyId: string;
@@ -133,7 +134,7 @@ export function ReportViewer() {
 
       toast.success(`Rapport ${REPORT_TYPES.find(t => t.value === reportType)?.label} généré avec succès!`);
     } catch (error) {
-      console.error('Erreur lors de la génération du rapport:', error);
+      logger.error('Erreur lors de la génération du rapport:', error);
       toast.error(`Erreur lors de la génération du rapport: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     } finally {
       setIsGenerating(false);

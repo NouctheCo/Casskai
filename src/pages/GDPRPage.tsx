@@ -32,6 +32,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { PageContainer } from '@/components/ui/PageContainer';
 import { PublicNavigation } from '@/components/navigation/PublicNavigation';
+import { logger } from '@/utils/logger';
 
 const GDPRPage = () => {
   const { t, i18n } = useTranslation();
@@ -45,7 +46,7 @@ const GDPRPage = () => {
       if (currentLang.startsWith('es') && fallbackEs) return fallbackEs;
       return fallbackFr;
     } catch (error) {
-      console.warn('Translation error:', error);
+      logger.warn('Translation error:', error);
       return fallbackFr;
     }
   };
@@ -250,7 +251,7 @@ const GDPRPage = () => {
       });
       
     } catch (error) {
-      console.error('Error submitting GDPR request:', error);
+      logger.error('Error submitting GDPR request:', error);
       toast({
         variant: "destructive",
         title: "Erreur",

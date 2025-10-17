@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, X, Plus, Trash2, Calculator, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
 import { budgetService } from '@/services/budgetService';
+import { logger } from '@/utils/logger';
 import type {
   BudgetFormData,
   BudgetCategoryFormData,
@@ -55,7 +56,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
       const { data, error } = await budgetService.getBudgetById(budgetId!);
 
       if (error || !data) {
-        console.error('Error loading budget:', error);
+        logger.error('Error loading budget:', error);
         return;
       }
 
@@ -89,7 +90,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
       });
 
     } catch (error) {
-      console.error('Error loading budget:', error);
+      logger.error('Error loading budget:', error)
     } finally {
       setLoading(false);
     }
@@ -335,13 +336,13 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
       }
 
       if (result.error) {
-        console.error('Error saving budget:', result.error);
+        logger.error('Error saving budget:', result.error)
       } else {
         onSave(result.data);
       }
 
     } catch (error) {
-      console.error('Error saving budget:', error);
+      logger.error('Error saving budget:', error)
     } finally {
       setSaving(false);
     }

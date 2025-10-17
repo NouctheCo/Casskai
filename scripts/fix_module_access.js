@@ -1,10 +1,9 @@
 // Script pour activer les modules critiques et corriger les problèmes d'accès
-import { createClient } from '@supabase/supabase-js';
-
 const supabaseUrl = 'https://smtdtgrymuzwvctattmx.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtdGR0Z3J5bXV6d3ZjdGF0dG14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1NzYwMjMsImV4cCI6MjA3MDE1MjAyM30.7SefKj_zSbmaYNbrai9sKeGqcPZtcaXENdA4bNrXa5I';
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+// supabase client intentionally unused - this script only manipulates localStorage
+console.log('Supabase config:', { url: supabaseUrl, key: `${supabaseKey.substring(0, 20)  }...` });
 
 async function fixModuleAccess() {
   console.log('🔧 Correction des problèmes d\'accès aux modules...\n');

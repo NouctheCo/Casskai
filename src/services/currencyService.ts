@@ -1,6 +1,7 @@
 // src/services/currencyService.ts - VERSION FINALE
 
 import ConfigService from './configService';
+import { logger } from '@/utils/logger';
 // import { supabase } from '../lib/supabase'; // Commenté pour la compatibilité de build
 
 // Types principaux (fusion de votre interface existante + nouvelles fonctionnalités)
@@ -40,6 +41,15 @@ export interface CurrencyConversion {
   convertedAmount: number;
   rate: number;
   date: string;
+}
+
+export interface ExchangeProvider {
+  name: string;
+  url: string;
+  priority: number;
+  isActive: boolean;
+  supportsCritical: boolean;
+  dailyLimit: number;
 }
 
 // Devises africaines (votre liste existante + améliorations)
@@ -182,7 +192,7 @@ export class CurrencyService {
   private lastUpdate: Date | null = null;
 
   // Providers d'APIs de taux de change - Priorité pour taux critiques
-  private exchangeProviders = [
+  private exchangeProviders: ExchangeProvider[] = [
     {
       name: 'ExchangeRate-API',
       url: 'https://api.exchangerate-api.com/v4/latest/',
@@ -209,7 +219,6 @@ export class CurrencyService {
     'USD-XOF', 'XOF-USD', // USD vers devises africaines
     'USD-XAF', 'XAF-USD'
   ];
-  setDefaultCurrency: any;
 
   constructor() {
     this.initializeCurrencies();
@@ -421,12 +430,12 @@ export class CurrencyService {
       try {
         await this.saveExchangeRateToDB(newRate);
       } catch (error) {
-        console.warn('Impossible de sauvegarder en DB:', error);
+        logger.warn('Impossible de sauvegarder en DB:', error)
       }
       
       return newRate.rate;
     } catch (error) {
-      console.error(`❌ Impossible de récupérer le taux ${fromCurrency}/${toCurrency}:`, error);
+      logger.error(`❌ Impossible de récupérer le taux ${fromCurrency}/${toCurrency}:`, error);
       throw new Error(`Taux de change indisponible pour ${fromCurrency}/${toCurrency}`);
     }
   }
@@ -434,26 +443,26 @@ export class CurrencyService {
   // Votre méthode updateExchangeRates existante (améliorée)
   async updateExchangeRates(): Promise<void> {
     try {
-      console.log('🔄 Mise à jour des taux de change...');
+      logger.info('🔄 Mise à jour des taux de change...');
       
       for (const provider of this.exchangeProviders.filter(p => p.isActive)) {
         try {
           await this.updateFromProvider(provider);
           break; // Succès avec ce provider, pas besoin des autres
         } catch (error) {
-          console.warn(`Erreur avec ${provider.name}:`, error);
+          logger.warn(`Erreur avec ${provider.name}:`, error);
           continue;
         }
       }
       
       this.lastUpdate = new Date();
-      console.log('✅ Taux de change mis à jour');
+      logger.info('✅ Taux de change mis à jour')
     } catch (error) {
-      console.error('❌ Erreur lors de la mise à jour des taux:', error);
+      logger.error('❌ Erreur lors de la mise à jour des taux:', error)
     }
   }
 
-  private async updateFromProvider(provider: any): Promise<void> {
+  private async updateFromProvider(provider: ExchangeProvider): Promise<void> {
     const response = await fetch(`${provider.url}EUR`);
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
@@ -547,20 +556,20 @@ export class CurrencyService {
   private startCriticalRatesUpdater(): void {
     // Mise à jour immédiate
     this.updateCriticalRates().catch(error => 
-      console.warn('Erreur mise à jour initiale taux critiques:', error)
+      logger.warn('Erreur mise à jour initiale taux critiques:', error)
     );
     
     // Mise à jour toutes les 6 heures
     setInterval(() => {
       this.updateCriticalRates().catch(error =>
-        console.warn('Erreur mise à jour automatique taux critiques:', error)
+        logger.warn('Erreur mise à jour automatique taux critiques:', error)
       );
     }, 6 * 60 * 60 * 1000); // 6 heures
   }
 
   // Mise à jour spécifique des taux critiques
   async updateCriticalRates(): Promise<void> {
-    console.log('🔄 Mise à jour des taux critiques (EUR/USD/XOF/XAF)...');
+    logger.info('🔄 Mise à jour des taux critiques (EUR/USD/XOF/XAF);...');
     
     try {
       // Récupérer EUR/USD en priorité
@@ -570,9 +579,9 @@ export class CurrencyService {
       // Calculer USD vers devises africaines via EUR (utilise les taux fixes)
       await this.calculateCrossRates();
       
-      console.log('✅ Taux critiques mis à jour avec succès');
+      logger.info('✅ Taux critiques mis à jour avec succès')
     } catch (error) {
-      console.error('❌ Erreur mise à jour taux critiques:', error);
+      logger.error('❌ Erreur mise à jour taux critiques:', error)
     }
   }
 
@@ -584,7 +593,7 @@ export class CurrencyService {
         source: `${rate.source}_CRITICAL`
       });
     } catch (error) {
-      console.warn(`Impossible de récupérer ${from}/${to}:`, error);
+      logger.warn(`Impossible de récupérer ${from}/${to}:`, error)
     }
   }
 
@@ -642,7 +651,7 @@ export class CurrencyService {
       }
       
     } catch (error) {
-      console.warn('Erreur calcul taux croisés USD:', error);
+      logger.warn('Erreur calcul taux croisés USD:', error)
     }
   }
 
@@ -651,7 +660,7 @@ export class CurrencyService {
       // const client = supabase; // Commenté pour la compatibilité de build
       const client = null;
       if (!client) {
-        console.warn('Supabase client non disponible, sauvegarde ignorée');
+        logger.warn('Supabase client non disponible, sauvegarde ignorée');
         return;
       }
       const { error } = await client
@@ -667,7 +676,7 @@ export class CurrencyService {
         }]);
 
       if (error) {
-        console.warn('Erreur sauvegarde taux:', error);
+        logger.warn('Erreur sauvegarde taux:', error)
       }
     } catch (error) {
       // Ignorer les erreurs de DB si pas de configuration
@@ -738,7 +747,7 @@ export class CurrencyService {
 
   // Force la mise à jour des taux critiques (pour les tests/debug)
   async forceCriticalRatesUpdate(): Promise<void> {
-    console.log('🔄 FORCE: Mise à jour des taux critiques...');
+    logger.info('🔄 FORCE: Mise à jour des taux critiques...');
     await this.updateCriticalRates();
   }
 
@@ -776,7 +785,7 @@ export class CurrencyService {
     allRates: string[];
     criticalRates: string[];
     outdatedRates: string[];
-    providers: any[];
+    providers: ExchangeProvider[];
   } {
     const allRates = Array.from(this.exchangeRates.keys());
     const criticalRates = allRates.filter(key => this.isCriticalPair(key));

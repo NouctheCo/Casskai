@@ -8,6 +8,7 @@ import { AutomaticLetterageService } from './automaticLetterageService';
 
 import { supabase } from '../lib/supabase';
 import { ImportResult, ImportSession, JournalEntryType, FECEntry } from '../types/accounting-import.types';
+import { logger } from '@/utils/logger';
 
 // Shape of rows returned by FEC export query
 type FECQueryRow = {
@@ -437,7 +438,7 @@ export class IntegratedAccountingService {
 
         if (entryItems.length > 0) {
           const { error: itemsError } = await supabase
-            .from('journal_entry_items')
+            .from('journal_entry_lines')
             .insert(entryItems);
 
           if (itemsError) {
@@ -447,7 +448,7 @@ export class IntegratedAccountingService {
 
         return { ...entry, id: journalEntry.id } as JournalEntryType;
       } catch (error) {
-        console.error(`Erreur sauvegarde écriture ${entry.entryNumber}:`, error);
+        logger.error(`Erreur sauvegarde écriture ${entry.entryNumber}:`, error);
         return entry; // fallback
       }
     });
@@ -461,7 +462,7 @@ export class IntegratedAccountingService {
   static async exportFEC(companyId: string, year: number): Promise<string> {
     // Récupération des écritures de l'année
     const { data: entries, error } = await supabase
-      .from('journal_entry_items')
+      .from('journal_entry_lines')
       .select(`
         debit_amount,
         credit_amount,

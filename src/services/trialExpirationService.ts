@@ -1,5 +1,5 @@
 import { subscriptionService } from './subscriptionService';
-import { getModulesForPlan } from '@/types/subscription.types';
+import { logger } from '@/utils/logger';
 
 /**
  * Service pour gérer l'expiration des périodes d'essai
@@ -13,12 +13,12 @@ class TrialExpirationService {
    */
   startPeriodicCheck(intervalMinutes: number = 60) {
     if (this.isRunning) {
-      console.warn('[TrialExpirationService] Service déjà en cours');
+      logger.warn('[TrialExpirationService] Service déjà en cours');
       return;
     }
 
     this.isRunning = true;
-    console.log(`[TrialExpirationService] Démarrage vérification périodique (${intervalMinutes}min)`);
+    logger.info(`[TrialExpirationService] Démarrage vérification périodique (${intervalMinutes}min);`);
 
     // Vérifier immédiatement
     this.checkExpiredTrials();
@@ -38,7 +38,7 @@ class TrialExpirationService {
       this.checkInterval = null;
     }
     this.isRunning = false;
-    console.log('[TrialExpirationService] Vérification périodique arrêtée');
+    logger.info('[TrialExpirationService] Vérification périodique arrêtée')
   }
 
   /**
@@ -46,18 +46,18 @@ class TrialExpirationService {
    */
   async checkExpiredTrials(): Promise<void> {
     try {
-      console.log('[TrialExpirationService] Vérification des essais expirés...');
+      logger.info('[TrialExpirationService] Vérification des essais expirés...');
 
       // Appeler la fonction Supabase pour expirer les essais
       const result = await subscriptionService.expireTrials();
 
       if (result.error) {
-        console.error('[TrialExpirationService] Erreur lors de l\'expiration des essais:', result.error);
+        logger.error('[TrialExpirationService] Erreur lors de l\'expiration des essais:', result.error);
         return;
       }
 
       if (result.expiredCount > 0) {
-        console.log(`[TrialExpirationService] ${result.expiredCount} essai(s) expiré(s)`);
+        logger.info(`[TrialExpirationService] ${result.expiredCount} essai(s); expiré(s)`);
 
         // Émettre un événement pour informer l'application
         window.dispatchEvent(new CustomEvent('trials-expired', {
@@ -65,7 +65,7 @@ class TrialExpirationService {
         }));
       }
     } catch (error) {
-      console.error('[TrialExpirationService] Erreur inattendue:', error);
+      logger.error('[TrialExpirationService] Erreur inattendue:', error)
     }
   }
 
@@ -109,7 +109,7 @@ class TrialExpirationService {
         daysRemaining: status.days_remaining
       };
     } catch (error) {
-      console.error('[TrialExpirationService] Erreur vérification statut utilisateur:', error);
+      logger.error('[TrialExpirationService] Erreur vérification statut utilisateur:', error);
       return {
         isExpired: true,
         canAccess: false,
@@ -137,7 +137,7 @@ class TrialExpirationService {
       );
 
       if (modulesToDeactivate.length > 0) {
-        console.log(`[TrialExpirationService] Désactivation de ${modulesToDeactivate.length} module(s) non autorisé(s):`, modulesToDeactivate);
+        logger.info(`[TrialExpirationService] Désactivation de ${modulesToDeactivate.length} module(s); non autorisé(s):`, modulesToDeactivate);
 
         // Désactiver les modules directement dans localStorage
         const updatedStates = { ...allActiveModules };
@@ -154,7 +154,7 @@ class TrialExpirationService {
         }));
       }
     } catch (error) {
-      console.error('[TrialExpirationService] Erreur application restrictions:', error);
+      logger.error('[TrialExpirationService] Erreur application restrictions:', error)
     }
   }
 
@@ -166,7 +166,7 @@ class TrialExpirationService {
       const status = await this.checkUserTrialStatus(userId);
 
       if (status.isExpired && !status.canAccess) {
-        console.log(`[TrialExpirationService] Essai expiré pour l'utilisateur ${userId}`);
+        logger.info(`[TrialExpirationService] Essai expiré pour l'utilisateur ${userId}`);
 
         // Appliquer les restrictions du plan par défaut (aucun accès)
         await this.applyPlanRestrictions(userId, 'expired');
@@ -183,7 +183,7 @@ class TrialExpirationService {
         await this.applyPlanRestrictions(userId, status.planId);
       }
     } catch (error) {
-      console.error('[TrialExpirationService] Erreur gestion expiration essai:', error);
+      logger.error('[TrialExpirationService] Erreur gestion expiration essai:', error)
     }
   }
 
@@ -191,7 +191,7 @@ class TrialExpirationService {
    * Vérifie l'état de l'utilisateur au démarrage de l'application
    */
   async checkUserOnStartup(userId: string): Promise<void> {
-    console.log(`[TrialExpirationService] Vérification utilisateur au démarrage: ${userId}`);
+    logger.info(`[TrialExpirationService] Vérification utilisateur au démarrage: ${userId}`);
     await this.handleTrialExpiration(userId);
   }
 

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/utils/logger';
 
 type ThirdParty = any;
 
@@ -110,7 +111,7 @@ export function useThirdParties(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch third parties';
       setError(errorMessage);
-      console.error('Error fetching third parties:', err);
+      logger.error('Error fetching third parties:', err);
       return { data: [], count: 0, error: errorMessage };
     } finally {
       setLoading(false);
@@ -143,7 +144,7 @@ export function useThirdParties(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create third party';
       setError(errorMessage);
-      console.error('Error creating third party:', err);
+      logger.error('Error creating third party:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -179,7 +180,7 @@ export function useThirdParties(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update third party';
       setError(errorMessage);
-      console.error('Error updating third party:', err);
+      logger.error('Error updating third party:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -206,7 +207,7 @@ export function useThirdParties(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete third party';
       setError(errorMessage);
-      console.error('Error deleting third party:', err);
+      logger.error('Error deleting third party:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -228,7 +229,7 @@ export function useThirdParties(companyId: string) {
       if (fetchError) throw fetchError;
       return data;
     } catch (err) {
-      console.error('Error fetching third party by ID:', err);
+      logger.error('Error fetching third party by ID:', err);
       return null;
     }
   }, [user, companyId]);
@@ -273,7 +274,7 @@ export function useThirdParties(companyId: string) {
 
       return stats;
     } catch (err) {
-      console.error('Error calculating third party statistics:', err);
+      logger.error('Error calculating third party statistics:', err);
       return null;
     }
   }, [user, companyId]);

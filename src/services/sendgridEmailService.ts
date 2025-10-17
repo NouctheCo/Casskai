@@ -9,6 +9,7 @@
  */
 
 import sgMail from '@sendgrid/mail';
+import { logger } from '@/utils/logger';
 
 // Types
 export interface EmailTemplate {
@@ -66,12 +67,12 @@ export interface PaymentConfirmationData {
  */
 export function initializeSendGrid(apiKey: string) {
   if (!apiKey) {
-    console.warn('⚠️  SendGrid API key not provided. Email sending disabled.');
+    logger.warn('⚠️  SendGrid API key not provided. Email sending disabled.');
     return false;
   }
 
   sgMail.setApiKey(apiKey);
-  console.log('✅ SendGrid initialized');
+  logger.info('✅ SendGrid initialized');
   return true;
 }
 
@@ -91,10 +92,10 @@ export async function sendEmail(template: EmailTemplate): Promise<boolean> {
     };
 
     await sgMail.send(msg);
-    console.log(`📧 Email sent to ${template.to}`);
+    logger.info(`📧 Email sent to ${template.to}`);
     return true;
   } catch (error) {
-    console.error('❌ Email sending failed:', error);
+    logger.error('❌ Email sending failed:', error);
     return false;
   }
 }

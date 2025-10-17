@@ -1,174 +1,236 @@
+import { STORAGE_KEYS, removeAllUserScopedEntriesForKey } from "@/utils/userStorage";
+import { logger } from '@/utils/logger';
+
 /**
  * Gestionnaire de cache pour CassKai
  * Gère la synchronisation entre localStorage et Supabase
  */
-
 export class CacheManager {
-  private static readonly ENTERPRISES_KEY = 'casskai_enterprises';
-  private static readonly CURRENT_ENTERPRISE_KEY = 'casskai_current_enterprise';
-  private static readonly AUTH_TOKEN_KEY = 'supabase.auth.token';
-  private static readonly ONBOARDING_STATE_KEY = 'casskai_onboarding_state';
+  private static readonly ENTERPRISES_KEY = STORAGE_KEYS.ENTERPRISES;
+  private static readonly CURRENT_ENTERPRISE_KEY = STORAGE_KEYS.CURRENT_ENTERPRISE;
+  private static readonly AUTH_TOKEN_KEY = "supabase.auth.token";
+  private static readonly ONBOARDING_STATE_KEY = "casskai_onboarding_state";
 
-  /**
-   * Nettoie complètement le cache localStorage
-   */
+  private static getScopedKeys(baseKey: string): string[] {
+    if (typeof window === "undefined" || !window.localStorage) {
+      return [];
+    }
+
+    const keys: string[] = [];
+    const prefix = `${baseKey}::`;
+
+    for (let index = 0; index < window.localStorage.length; index += 1) {
+      const key = window.localStorage.key(index);
+      if (key && (key === baseKey || key.startsWith(prefix))) {
+        keys.push(key);
+      }
+    }
+
+    return keys;
+  }
+
   static clearAll(): void {
-    console.log('🧹 Nettoyage complet du cache localStorage...');
+    if (typeof window === "undefined" || !window.localStorage) {
+      return;
+    }
+
+    logger.info("?? Nettoyage complet du cache localStorage...");
+
+    const scopedKeys = [
+      STORAGE_KEYS.ENTERPRISES,
+      STORAGE_KEYS.CURRENT_ENTERPRISE,
+      STORAGE_KEYS.CURRENT_COMPANY_ID,
+    ];
+
+    scopedKeys.forEach(removeAllUserScopedEntriesForKey);
 
     const keysToRemove = [
       this.ENTERPRISES_KEY,
       this.CURRENT_ENTERPRISE_KEY,
       this.AUTH_TOKEN_KEY,
-      this.ONBOARDING_STATE_KEY
+      this.ONBOARDING_STATE_KEY,
     ];
 
     keysToRemove.forEach(key => {
-      localStorage.removeItem(key);
-      console.log(`   ✅ ${key} supprimé`);
+      window.localStorage.removeItem(key);
+      logger.info(`   ? ${key} supprime`)
     });
 
-    // Aussi nettoyer toutes les clés Supabase
-    Object.keys(localStorage).forEach(key => {
-      if (key.startsWith('supabase.') || key.startsWith('casskai_')) {
-        localStorage.removeItem(key);
-        console.log(`   ✅ ${key} supprimé`);
+    Object.keys(window.localStorage).forEach(key => {
+      if (key.startsWith("supabase.") || key.startsWith("casskai_")) {
+        window.localStorage.removeItem(key);
+        logger.info(`   ? ${key} supprime`)
       }
     });
 
-    console.log('✅ Cache localStorage nettoyé');
+    logger.info("? Cache localStorage nettoye")
   }
 
-  /**
-   * Nettoie seulement le cache des entreprises
-   */
   static clearEnterprises(): void {
-    console.log('🏢 Nettoyage du cache des entreprises...');
+    if (typeof window === "undefined" || !window.localStorage) {
+      return;
+    }
 
-    localStorage.removeItem(this.ENTERPRISES_KEY);
-    localStorage.removeItem(this.CURRENT_ENTERPRISE_KEY);
+    logger.info("?? Nettoyage du cache des entreprises...");
 
-    console.log('✅ Cache des entreprises nettoyé');
+    removeAllUserScopedEntriesForKey(STORAGE_KEYS.ENTERPRISES);
+    removeAllUserScopedEntriesForKey(STORAGE_KEYS.CURRENT_ENTERPRISE);
+
+    window.localStorage.removeItem(this.ENTERPRISES_KEY);
+    window.localStorage.removeItem(this.CURRENT_ENTERPRISE_KEY);
+
+    logger.info("? Cache des entreprises nettoye")
   }
 
-  /**
-   * Force le rechargement de la page après nettoyage
-   */
   static clearAndReload(): void {
+    if (typeof window === "undefined") {
+      return;
+    }
+
     this.clearAll();
 
-    console.log('🔄 Rechargement de la page...');
+    logger.info("?? Rechargement de la page...");
     setTimeout(() => {
       window.location.reload();
     }, 500);
   }
 
-  /**
-   * Vérifie s'il y a des données en cache qui pourraient être obsolètes
-   */
   static hasObsoleteCache(): boolean {
-    const enterprises = localStorage.getItem(this.ENTERPRISES_KEY);
-    const currentEnterprise = localStorage.getItem(this.CURRENT_ENTERPRISE_KEY);
+    if (typeof window === "undefined" || !window.localStorage) {
+      return false;
+    }
 
-    return !!(enterprises || currentEnterprise);
+    return (
+      this.getScopedKeys(this.ENTERPRISES_KEY).length > 0 ||
+      this.getScopedKeys(this.CURRENT_ENTERPRISE_KEY).length > 0
+    );
   }
 
-  /**
-   * Obtient un rapport de l'état du cache
-   */
   static getCacheReport(): {
     hasEnterprises: boolean;
     hasCurrentEnterprise: boolean;
     enterprisesCount: number;
     lastModified: string | null;
   } {
-    const enterprisesRaw = localStorage.getItem(this.ENTERPRISES_KEY);
-    const currentEnterprise = localStorage.getItem(this.CURRENT_ENTERPRISE_KEY);
-
-    let enterprisesCount = 0;
-    if (enterprisesRaw) {
-      try {
-        const enterprises = JSON.parse(enterprisesRaw);
-        enterprisesCount = Array.isArray(enterprises) ? enterprises.length : 0;
-      } catch (e) {
-        console.warn('Erreur parsing enterprises cache:', e);
-      }
+    if (typeof window === "undefined" || !window.localStorage) {
+      return {
+        hasEnterprises: false,
+        hasCurrentEnterprise: false,
+        enterprisesCount: 0,
+        lastModified: null,
+      };
     }
 
+    const enterpriseKeys = this.getScopedKeys(this.ENTERPRISES_KEY);
+    const currentKeys = this.getScopedKeys(this.CURRENT_ENTERPRISE_KEY);
+
+    let enterprisesCount = 0;
+    enterpriseKeys.forEach(key => {
+      const raw = window.localStorage.getItem(key);
+      if (!raw) {
+        return;
+      }
+
+      try {
+        const enterprises = JSON.parse(raw);
+        if (Array.isArray(enterprises)) {
+          enterprisesCount += enterprises.length;
+        }
+      } catch (error) {
+        logger.warn("Erreur parsing enterprises cache:", error)
+      }
+    });
+
     return {
-      hasEnterprises: !!enterprisesRaw,
-      hasCurrentEnterprise: !!currentEnterprise,
+      hasEnterprises: enterpriseKeys.length > 0,
+      hasCurrentEnterprise: currentKeys.length > 0,
       enterprisesCount,
-      lastModified: null // Pourrait être ajouté plus tard
+      lastModified: null,
     };
   }
 
-  /**
-   * Valide la cohérence du cache
-   */
   static validateCache(): {
     isValid: boolean;
     issues: string[];
   } {
+    if (typeof window === "undefined" || !window.localStorage) {
+      return { isValid: true, issues: [] };
+    }
+
     const issues: string[] = [];
 
-    const enterprisesRaw = localStorage.getItem(this.ENTERPRISES_KEY);
-    const currentEnterpriseId = localStorage.getItem(this.CURRENT_ENTERPRISE_KEY);
+    const enterpriseKeys = this.getScopedKeys(this.ENTERPRISES_KEY);
+    const currentKeys = this.getScopedKeys(this.CURRENT_ENTERPRISE_KEY);
 
-    if (enterprisesRaw) {
-      try {
-        const enterprises = JSON.parse(enterprisesRaw);
-
-        if (!Array.isArray(enterprises)) {
-          issues.push('Format du cache enterprises invalide');
-        }
-
-        if (currentEnterpriseId) {
-          const currentExists = enterprises.some((e: any) => e.id === currentEnterpriseId);
-          if (!currentExists) {
-            issues.push('Entreprise courante introuvable dans la liste');
-          }
-        }
-
-      } catch (e) {
-        issues.push('Cache enterprises corrompu (JSON invalide)');
+    enterpriseKeys.forEach(key => {
+      const raw = window.localStorage.getItem(key);
+      if (!raw) {
+        return;
       }
-    }
+
+      try {
+        const enterprises = JSON.parse(raw);
+        if (!Array.isArray(enterprises)) {
+          issues.push(`Format du cache enterprises invalide pour ${key}`);
+        }
+      } catch (error) {
+        issues.push(`Cache enterprises corrompu (JSON invalide) pour ${key}`);
+      }
+    });
+
+    currentKeys.forEach(key => {
+      const value = window.localStorage.getItem(key);
+      if (!value) {
+        return;
+      }
+
+      const segments = key.split("::");
+      const userId = segments.length > 1 ? segments[1] : null;
+
+      if (userId) {
+        const associatedKey = `${this.ENTERPRISES_KEY}::${userId}`;
+        if (!window.localStorage.getItem(associatedKey)) {
+          issues.push(`Entreprise courante sans liste pour l'utilisateur ${userId}`);
+        }
+      }
+    });
 
     return {
       isValid: issues.length === 0,
-      issues
+      issues,
     };
   }
 
-  /**
-   * Déclenche un événement de rafraîchissement pour forcer la synchronisation
-   */
   static triggerEnterpriseRefresh(): void {
-    console.log('🔄 Déclenchement d\'un rafraîchissement du contexte Enterprise...');
+    if (typeof window === "undefined") {
+      return;
+    }
 
-    // Déclencher l'événement que l'EnterpriseContext écoute
-    const event = new CustomEvent('enterpriseContextRefresh');
+    logger.info("?? Déclenchement d'un rafraîchissement du contexte Enterprise...");
+
+    const event = new CustomEvent("enterpriseContextRefresh");
     window.dispatchEvent(event);
   }
 
-  /**
-   * Nettoyage intelligent : nettoie et force la synchronisation
-   */
   static smartClean(): void {
-    console.log('🧠 Nettoyage intelligent du cache...');
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    logger.info("?? Nettoyage intelligent du cache...");
 
     const report = this.getCacheReport();
     const validation = this.validateCache();
 
-    console.log('📊 Rapport du cache:', report);
-    console.log('✅ Validation:', validation);
+    logger.info("?? Rapport du cache:", report);
+    logger.info("? Validation:", validation);
 
     if (!validation.isValid || report.hasEnterprises) {
-      console.log('🧹 Nettoyage nécessaire...');
+      logger.info("?? Nettoyage nécessaire...");
       this.clearEnterprises();
       this.triggerEnterpriseRefresh();
     } else {
-      console.log('✅ Cache propre, aucun nettoyage nécessaire');
+      logger.info("? Cache propre, aucun nettoyage nécessaire")
     }
   }
 }

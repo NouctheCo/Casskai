@@ -50,7 +50,7 @@ async function deployCompleteSolution() {
     console.log('\n4️⃣ Tests de validation...');
 
     // Test 1: Vérifier la colonne owner_id
-    const { data: companiesData, error: companiesError } = await supabase
+    const { error: companiesError } = await supabase
       .from('companies')
       .select('id, name, owner_id')
       .limit(1);
@@ -62,7 +62,7 @@ async function deployCompleteSolution() {
     }
 
     // Test 2: Vérifier la table roles
-    const { data: rolesData, error: rolesTestError } = await supabase
+    const { error: rolesTestError } = await supabase
       .from('roles')
       .select('name')
       .limit(1);

@@ -9,6 +9,7 @@ import {
 
 } from '../../../types/openBanking.types';
 import { BankingProvider, BankingProviderError, AuthenticationError, NetworkError } from '../base/BankingProvider';
+import { logger } from '@/utils/logger';
 
 // Bridge API Response Types
 interface BridgeAuthResponse {
@@ -523,7 +524,7 @@ export class BridgeProvider extends BankingProvider {
           // Traiter la mise à jour du compte
           break;
         default:
-          console.log(`Unhandled webhook event: ${event.type}`);
+          logger.info(`Unhandled webhook event: ${event.type}`)
       }
 
       return this.createResponse(undefined);

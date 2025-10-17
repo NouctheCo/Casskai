@@ -9,6 +9,7 @@ import {
   StepValidationResult,
   OnboardingStepId
 } from '../types/onboarding.types';
+import { logger } from '@/utils/logger';
 
 // Types spécifiques au service
 export interface OnboardingResponse<T = unknown> {
@@ -116,7 +117,7 @@ class OnboardingService {
         data: initialData
       };
     } catch (error) {
-      console.error('Error initializing onboarding:', error);
+      logger.error('Error initializing onboarding:', error);
       return {
         success: false,
         error: this.formatError(error, 'Initialisation de l\'onboarding')
@@ -156,7 +157,7 @@ class OnboardingService {
         error: 'Aucune session d\'onboarding trouvée'
       };
     } catch (error) {
-      console.error('Error getting onboarding data:', error);
+      logger.error('Error getting onboarding data:', error);
       return {
         success: false,
         error: this.formatError(error, 'Récupération des données d\'onboarding')
@@ -224,7 +225,7 @@ class OnboardingService {
         data: updatedData
       };
     } catch (error) {
-      console.error('Error updating company profile:', error);
+      logger.error('Error updating company profile:', error);
       return {
         success: false,
         error: this.formatError(error, 'Mise à jour du profil entreprise')
@@ -277,7 +278,7 @@ class OnboardingService {
         data: updatedData
       };
     } catch (error) {
-      console.error('Error updating preferences:', error);
+      logger.error('Error updating preferences:', error);
       return {
         success: false,
         error: this.formatError(error, 'Mise à jour des préférences')
@@ -341,7 +342,7 @@ class OnboardingService {
         data: updatedData
       };
     } catch (error) {
-      console.error('Error completing step:', error);
+      logger.error('Error completing step:', error);
       return {
         success: false,
         error: this.formatError(error, 'Complétion de l\'\u00e9tape')
@@ -407,7 +408,7 @@ class OnboardingService {
         }
       };
     } catch (error) {
-      console.error('Error completing onboarding:', error);
+      logger.error('Error completing onboarding:', error);
       return {
         success: false,
         error: this.formatError(error, 'Finalisation de l\'onboarding')
@@ -884,7 +885,7 @@ class OnboardingService {
       const key = `casskai_onboarding_${userId}`;
       localStorage.setItem(key, JSON.stringify(data));
     } catch (error) {
-      console.warn('Erreur lors de la sauvegarde localStorage:', error);
+      logger.warn('Erreur lors de la sauvegarde localStorage:', error)
     }
   }
 
@@ -897,7 +898,7 @@ class OnboardingService {
       const stored = localStorage.getItem(key);
       return stored ? JSON.parse(stored) : null;
     } catch (error) {
-      console.warn('Erreur lors du chargement localStorage:', error);
+      logger.warn('Erreur lors du chargement localStorage:', error);
       return null;
     }
   }
@@ -910,7 +911,7 @@ class OnboardingService {
       const key = `casskai_onboarding_${userId}`;
       localStorage.removeItem(key);
     } catch (error) {
-      console.warn('Erreur lors du nettoyage localStorage:', error);
+      logger.warn('Erreur lors du nettoyage localStorage:', error)
     }
   }
 
@@ -962,7 +963,7 @@ class OnboardingService {
         createdAt: new Date().toISOString()
       };
 
-      console.log('Entreprise créée:', companyData);
+      logger.info('Entreprise créée:', companyData);
       
       return {
         success: true,

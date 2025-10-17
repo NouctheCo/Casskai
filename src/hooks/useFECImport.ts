@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { fecValidationService, ValidationResult } from '@/services/fecValidationService';
 import { FECEntry } from '@/types/accounting-import.types';
+import { logger } from '@/utils/logger';
 
 export interface FECImportData {
   journals: string[];
@@ -93,7 +94,7 @@ export function useFECImport(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error during FEC import';
       setError(errorMessage);
-      console.error('Error during FEC import:', err);
+      logger.error('Error during FEC import:', err);
       return {
         success: false,
         error: errorMessage
@@ -372,7 +373,7 @@ export function useFECImport(companyId: string) {
       for (let i = 0; i < journalEntryItemsToCreate.length; i += batchSize) {
         const batch = journalEntryItemsToCreate.slice(i, i + batchSize);
         const { error: itemsError } = await supabase
-          .from('journal_entry_items')
+          .from('journal_entry_lines')
           .insert(batch);
         
         if (itemsError) {

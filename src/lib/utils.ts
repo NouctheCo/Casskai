@@ -20,7 +20,7 @@ export function formatCurrency(
   try {
     return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency: currency,
+      currency,
       minimumFractionDigits: currency === 'XOF' ? 0 : 2,
       maximumFractionDigits: currency === 'XOF' ? 0 : 2,
     }).format(amount);
@@ -48,12 +48,13 @@ export function formatDate(
     return 'Invalid Date';
   }
 
-  const options: Intl.DateTimeFormatOptions = {
+  const formatOptions: Record<'short' | 'medium' | 'long' | 'full', Intl.DateTimeFormatOptions> = {
     short: { year: 'numeric', month: '2-digit', day: '2-digit' },
     medium: { year: 'numeric', month: 'short', day: 'numeric' },
     long: { year: 'numeric', month: 'long', day: 'numeric' },
     full: { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' },
-  }[format];
+  };
+  const options = formatOptions[format];
 
   return dateObj.toLocaleDateString(locale, options);
 }

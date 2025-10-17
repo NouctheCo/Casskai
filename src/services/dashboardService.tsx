@@ -1,5 +1,6 @@
 // src/services/dashboardService.js
 import { supabase } from '../lib/supabase';
+import { logger } from '@/utils/logger';
 
 export const dashboardService = {
   // Obtenir les statistiques principales du dashboard
@@ -18,7 +19,7 @@ export const dashboardService = {
 
       return { data, error: null };
     } catch (error) {
-      console.error('Error fetching dashboard stats:', error);
+      logger.error('Error fetching dashboard stats:', error);
       
       // Fallback : calculer manuellement si la fonction RPC n'est pas disponible
       return await dashboardService.calculateDashboardStatsManually(currentEnterpriseId);
@@ -99,7 +100,7 @@ export const dashboardService = {
 
       return { data: stats, error: null };
     } catch (error) {
-      console.error('Error calculating dashboard stats manually:', error);
+      logger.error('Error calculating dashboard stats manually:', error);
       return { data: null, error };
     }
   },
@@ -122,7 +123,7 @@ export const dashboardService = {
 
       return { data, error: null };
     } catch (error) {
-      console.error('Error fetching balance sheet:', error);
+      logger.error('Error fetching balance sheet:', error);
       return { data: null, error };
     }
   },
@@ -147,7 +148,7 @@ export const dashboardService = {
 
       return { data, error: null };
     } catch (error) {
-      console.error('Error fetching income statement:', error);
+      logger.error('Error fetching income statement:', error);
       return { data: null, error };
     }
   },
@@ -168,7 +169,7 @@ export const dashboardService = {
 
       return { data: data || [], error: null };
     } catch (error) {
-      console.error('Error fetching cash flow data:', error);
+      logger.error('Error fetching cash flow data:', error);
       
       // Fallback : simuler des données de cash-flow
       return await dashboardService.simulateCashFlowData(currentEnterpriseId, months);
@@ -206,7 +207,7 @@ export const dashboardService = {
 
       return { data: cashFlowData, error: null };
     } catch (error) {
-      console.error('Error simulating cash flow data:', error);
+      logger.error('Error simulating cash flow data:', error);
       return { data: [], error };
     }
   },
@@ -242,7 +243,7 @@ export const dashboardService = {
 
       return { data: entriesWithAmount, error: null };
     } catch (error) {
-      console.error('Error fetching recent journal entries:', error);
+      logger.error('Error fetching recent journal entries:', error);
       return { data: [], error };
     }
   },
@@ -257,7 +258,7 @@ export const dashboardService = {
       const dateFrom = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
       
       const { data, error } = await supabase
-        .from('journal_entry_items')
+        .from('journal_entry_lines')
         .select(`
           account_id,
           debit_amount,
@@ -295,7 +296,7 @@ export const dashboardService = {
 
       return { data: topAccounts, error: null };
     } catch (error) {
-      console.error('Error fetching top accounts by activity:', error);
+      logger.error('Error fetching top accounts by activity:', error);
       return { data: [], error };
     }
   },
@@ -396,7 +397,7 @@ export const dashboardService = {
 
       return { data: alerts, error: null };
     } catch (error) {
-      console.error('Error fetching dashboard alerts:', error);
+      logger.error('Error fetching dashboard alerts:', error);
       return { data: [], error };
     }
   },
@@ -472,7 +473,7 @@ export const dashboardService = {
 
       return { data: metrics, error: null };
     } catch (error) {
-      console.error('Error fetching performance metrics:', error);
+      logger.error('Error fetching performance metrics:', error);
       return { data: null, error };
     }
   }

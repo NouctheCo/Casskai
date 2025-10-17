@@ -57,7 +57,7 @@ export class ExcelGenerator {
   private formatCurrency(amount: number, currency: string = 'EUR'): string {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: currency
+      currency
     }).format(amount);
   }
 
@@ -423,8 +423,8 @@ export class ExcelGenerator {
       const row = worksheet.addRow({
         account: account.account_number,
         name: account.account_name,
-        debit: account.debit_total,
-        credit: account.credit_total,
+        debit: account.debit,
+        credit: account.credit,
         balance: account.balance
       });
 
@@ -816,7 +816,7 @@ public static async generateVATReport(
   worksheet.addRow([]);
 
   // Synthèse TVA
-  let row = worksheet.addRow(['DÉCLARATION TVA - ' + data.declaration_type]);
+  let row = worksheet.addRow([`DÉCLARATION TVA - ${  data.declaration_type}`]);
   row.font = { bold: true, size: 14, color: { argb: 'FF2C3E50' } };
   worksheet.addRow([]);
 

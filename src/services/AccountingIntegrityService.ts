@@ -272,8 +272,8 @@ export class AccountingIntegrityService {
     }
 
     const unbalanced = (unbalancedEntries || []).filter(entry => {
-      const totalDebit = entry.journal_entry_lines?.reduce((sum: number, line: any) => sum + (line.debit || 0), 0) || 0;
-      const totalCredit = entry.journal_entry_lines?.reduce((sum: number, line: any) => sum + (line.credit || 0), 0) || 0;
+      const totalDebit = entry.journal_entry_lines?.reduce((sum: number, line: Record<string, unknown>) => sum + (line.debit as number || 0), 0) || 0;
+      const totalCredit = entry.journal_entry_lines?.reduce((sum: number, line: Record<string, unknown>) => sum + (line.credit as number || 0), 0) || 0;
       return Math.abs(totalDebit - totalCredit) > 0.01;
     });
 
@@ -377,8 +377,8 @@ export class AccountingIntegrityService {
     }
 
     const invalidEntries = (entries || []).filter(entry => {
-      const hasDebit = entry.journal_entry_lines?.some((line: any) => (line.debit || 0) > 0);
-      const hasCredit = entry.journal_entry_lines?.some((line: any) => (line.credit || 0) > 0);
+      const hasDebit = entry.journal_entry_lines?.some((line: Record<string, unknown>) => (line.debit as number || 0) > 0);
+      const hasCredit = entry.journal_entry_lines?.some((line: Record<string, unknown>) => (line.credit as number || 0) > 0);
       return !hasDebit || !hasCredit;
     });
 
@@ -561,7 +561,7 @@ export class AccountingIntegrityService {
       };
     }
 
-    const inconsistencies = depreciationData?.filter((item: any) => item.inconsistent) || [];
+    const inconsistencies = depreciationData?.filter((item: Record<string, unknown>) => item.inconsistent as boolean) || [];
 
     if (inconsistencies.length > 0) {
       return {
@@ -601,7 +601,7 @@ export class AccountingIntegrityService {
       };
     }
 
-    const unreasonableProvisions = provisionData?.filter((item: any) => item.unreasonable) || [];
+    const unreasonableProvisions = provisionData?.filter((item: Record<string, unknown>) => item.unreasonable as boolean) || [];
 
     if (unreasonableProvisions.length > 0) {
       return {
@@ -653,16 +653,16 @@ export class AccountingIntegrityService {
     };
   }
 
-  private compareBalances(previousBalances: any[], currentBalances: any[]): any[] {
+  private compareBalances(previousBalances: Record<string, unknown>[], currentBalances: Record<string, unknown>[]): Record<string, unknown>[] {
     // Logique simplifiée de comparaison des soldes
-    const discrepancies: any[] = [];
+    const discrepancies: Record<string, unknown>[] = [];
 
     // Cette méthode devrait comparer les soldes compte par compte
     // et détecter les discontinuités
     return discrepancies;
   }
 
-  private calculateVATBalance(vatBalances: any[]): { difference: number; details: any } {
+  private calculateVATBalance(vatBalances: Record<string, unknown>[]): { difference: number; details: Record<string, unknown> } {
     // Logique simplifiée de calcul de l'équilibre TVA
     return {
       difference: 0,

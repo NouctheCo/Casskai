@@ -21,6 +21,7 @@ import { EncryptionService } from './security/EncryptionService';
 import { ReconciliationService } from './reconciliation/ReconciliationEngine';
 import { WebhookManager } from './webhooks/WebhookManager';
 import { AccountingExportService, ExportFormatFactory } from './export/AccountingExportService';
+import { logger } from '@/utils/logger';
 
 // Gestionnaire principal Open Banking
 export class OpenBankingManager {
@@ -66,7 +67,7 @@ export class OpenBankingManager {
       await this.initializeServices();
 
       this.isInitialized = true;
-      console.warn('Open Banking Manager initialized');
+      logger.warn('Open Banking Manager initialized')
     } catch (error) {
       const message = (error as { message?: string })?.message || 'unknown';
       throw new Error(`Failed to initialize Open Banking Manager: ${message}`);
@@ -151,9 +152,9 @@ export class OpenBankingManager {
         });
         await provider.initialize();
         this.providers.set(providerConfig.id, provider);
-        console.warn(`Provider ${providerConfig.id} initialized`);
+        logger.warn(`Provider ${providerConfig.id} initialized`)
       } catch (error) {
-        console.error(`Failed to initialize provider ${providerConfig.id}:`, error);
+        logger.error(`Failed to initialize provider ${providerConfig.id}:`, error)
       }
     }));
   }
@@ -175,7 +176,7 @@ export class OpenBankingManager {
       ];
       await this.exportService.initialize(exportFormats);
 
-      console.warn('Auxiliary services initialized');
+      logger.warn('Auxiliary services initialized')
     } catch (error) {
       const message = (error as { message?: string })?.message || 'unknown';
       throw new Error(`Failed to initialize services: ${message}`);
@@ -207,7 +208,7 @@ export class OpenBankingManager {
         this.connections.set(result.data.id, result.data);
         
         // En production, sauvegarder en base de données
-  console.warn(`Bank connection created: ${result.data.id}`);
+  logger.warn(`Bank connection created: ${result.data.id}`);
         
         // Configurer les webhooks si supportés
         if (provider.supportsWebhooks) {
@@ -398,7 +399,7 @@ export class OpenBankingManager {
       // Déclencher la réconciliation automatique si configurée
       if (result.success && this.config?.reconciliation.autoMatchThreshold) {
         // En production, récupérer les écritures comptables et lancer la réconciliation
-        console.warn('Auto-reconciliation triggered after sync');
+        logger.warn('Auto-reconciliation triggered after sync')
       }
 
       return result;
@@ -597,7 +598,7 @@ export class OpenBankingManager {
     this.connections.clear();
 
     this.isInitialized = false;
-  console.warn('Open Banking Manager disposed');
+  logger.warn('Open Banking Manager disposed')
   }
 }
 

@@ -26,6 +26,7 @@ import {
   Sparkles,
   Command
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 // Catégories organisées de manière intuitive
 const MODULE_CATEGORIES = {
@@ -113,7 +114,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
         setRecentModules(prefs.recent || []);
         setExpandedCategories(new Set(prefs.expanded || ['finances']));
       } catch (error) {
-        console.error('Error loading sidebar preferences:', error);
+        logger.error('Error loading sidebar preferences:', error)
       }
     }
   }, [user, activeModules]);

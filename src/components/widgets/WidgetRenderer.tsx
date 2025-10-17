@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useState, useEffect } from 'react';
+import React, { Suspense, lazy, useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { 
   TrendingUp, 
@@ -29,6 +29,8 @@ import { Badge } from '../ui/badge';
 import { Progress } from '../ui/progress';
 import { Skeleton } from '../ui/skeleton';
 import { cn } from '../../lib/utils';
+import { sanitizeHtml } from '@/utils/sanitizeHtml';
+import { logger } from '@/utils/logger';
 
 // Lazy loading des composants de widgets complexes
 const LazyChart = lazy(() =>
@@ -397,14 +399,19 @@ const WeatherWidget: React.FC<{ config: any }> = ({ config }) => {
 const TextWidget: React.FC<{ config: any }> = ({ config }) => {
   const { content = 'Contenu du widget texte', fontSize = 14, textAlign = 'left' } = config.textWidget || {};
 
+  const sanitizedContent = useMemo(
+    () => sanitizeHtml(content, { USE_PROFILES: { html: true } }),
+    [content]
+  );
+
   return (
-    <div 
+    <div
       className="prose prose-sm dark:prose-invert max-w-none"
-      style={{ 
+      style={{
         fontSize: `${fontSize}px`,
         textAlign: textAlign as any
       }}
-      dangerouslySetInnerHTML={{ __html: content }}
+      dangerouslySetInnerHTML={{ __html: sanitizedContent }}
     />
   );
 };
@@ -487,7 +494,7 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
         case 'line-chart':
         case 'bar-chart':
         case 'pie-chart':
-        case 'area-chart':
+        case 'area-chart': {
           const chartConfig = widget.config?.chart as any;
           const chartData = chartConfig?.data && Array.isArray(chartConfig.data)
             ? chartConfig.data
@@ -501,8 +508,9 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
               />
             </Suspense>
           );
-
-        case 'table':
+        }
+        
+        case 'table': {
           const tableConfig = widget.config?.table as any;
           const tableData = tableConfig?.data && Array.isArray(tableConfig.data)
             ? tableConfig.data
@@ -518,8 +526,9 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
               />
             </Suspense>
           );
-
-        case 'calendar':
+        }
+        
+        case 'calendar': {
           const calendarConfig = widget.config as any;
           const calendarEvents = calendarConfig?.calendar?.events && Array.isArray(calendarConfig.calendar.events)
             ? calendarConfig.calendar.events
@@ -529,6 +538,7 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
               <LazyCalendar events={calendarEvents} />
             </Suspense>
           );
+        }
         
         // Widgets non implémentés - placeholder
         case 'heatmap':
@@ -552,7 +562,7 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
           );
       }
     } catch (error) {
-      console.error(`Error rendering widget ${widget.id}:`, error);
+      logger.error(`Error rendering widget ${widget.id}:`, error);
       return (
         <div className="flex items-center justify-center h-full text-center">
           <div className="space-y-2">

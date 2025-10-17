@@ -1,5 +1,6 @@
 
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 import type { Database } from '@/types/supabase';
 import type {
   JournalEntryLineForm,
@@ -12,7 +13,7 @@ import type {
 
 type JournalEntryInsert = Database['public']['Tables']['journal_entries']['Insert'];
 type JournalEntryUpdate = Database['public']['Tables']['journal_entries']['Update'];
-type JournalEntryItemInsert = Database['public']['Tables']['journal_entry_items']['Insert'];
+type JournalEntryLineInsert = Database['public']['Tables']['journal_entry_lines']['Insert'];
 
 type PaginatedResult<T> = {
   data: T[];
@@ -48,7 +49,7 @@ function coerceNumber(value: unknown): number {
 class JournalEntriesService {
   async createJournalEntry(payload: JournalEntryPayload): Promise<ServiceResult<JournalEntryWithItems>> {
     try {
-      this.ensureBalanced(payload.items);
+      this.ensureBalanced(payload.lines);
 
       const entryNumber = payload.entryNumber ?? (await this.generateEntryNumber(payload.companyId, payload.journalId));
 
@@ -59,7 +60,7 @@ class JournalEntriesService {
         reference_number: payload.referenceNumber ?? null,
         journal_id: payload.journalId ?? null,
         status: payload.status ?? 'draft',
-        entry_number: entryNumber,
+        // entry_number: entryNumber, // Colonne inexistante dans la table
       };
 
       const { data: entry, error: entryError } = await supabase
@@ -72,12 +73,12 @@ class JournalEntriesService {
         throw entryError ?? new Error('Failed to create journal entry');
       }
 
-      const linesInsert = this.normalizeLines(payload.companyId, entry.id, payload.items);
+      const linesInsert = this.normalizeLines(payload.companyId, entry.id, payload.lines);
 
       const { data: lines, error: linesError } = await supabase
-        .from('journal_entry_items')
+        .from('journal_entry_lines')
         .insert(linesInsert)
-        .select('*, accounts (id, account_number, name, type, class)');
+        .select('*, chart_of_accounts (id, account_number, account_name, account_type, account_class)');
 
       if (linesError) {
         await supabase.from('journal_entries').delete().eq('id', entry.id);
@@ -88,7 +89,7 @@ class JournalEntriesService {
         success: true,
         data: {
           ...entry,
-          journal_entry_items: lines ?? [],
+          journal_entry_lines: lines ?? [],
         },
       };
     } catch (error) {
@@ -99,11 +100,11 @@ class JournalEntriesService {
 
   async updateJournalEntry(entryId: string, payload: JournalEntryPayload): Promise<ServiceResult<JournalEntryWithItems>> {
     try {
-      this.ensureBalanced(payload.items);
+      this.ensureBalanced(payload.lines);
 
       const { data: existingEntry, error: fetchError } = await supabase
         .from('journal_entries')
-        .select('id, company_id, entry_number, status')
+        .select('id, company_id, status')
         .eq('id', entryId)
         .single();
 
@@ -121,7 +122,7 @@ class JournalEntriesService {
         reference_number: payload.referenceNumber ?? null,
         journal_id: payload.journalId ?? null,
         status: payload.status ?? existingEntry.status ?? 'draft',
-        entry_number: payload.entryNumber ?? existingEntry.entry_number,
+        // entry_number: payload.entryNumber ?? existingEntry.entry_number, // Colonne inexistante
       };
 
       const { data: updatedEntry, error: updateError } = await supabase
@@ -136,7 +137,7 @@ class JournalEntriesService {
       }
 
       const { error: deleteError } = await supabase
-        .from('journal_entry_items')
+        .from('journal_entry_lines')
         .delete()
         .eq('journal_entry_id', entryId)
         .eq('company_id', payload.companyId);
@@ -145,12 +146,12 @@ class JournalEntriesService {
         throw deleteError;
       }
 
-      const linesInsert = this.normalizeLines(payload.companyId, entryId, payload.items);
+      const linesInsert = this.normalizeLines(payload.companyId, entryId, payload.lines);
 
       const { data: lines, error: linesError } = await supabase
-        .from('journal_entry_items')
+        .from('journal_entry_lines')
         .insert(linesInsert)
-        .select('*, accounts (id, account_number, name, type, class)');
+        .select('*, chart_of_accounts (id, account_number, account_name, account_type, account_class)');
 
       if (linesError) {
         throw linesError;
@@ -160,7 +161,7 @@ class JournalEntriesService {
         success: true,
         data: {
           ...updatedEntry,
-          journal_entry_items: lines ?? [],
+          journal_entry_lines: lines ?? [],
         },
       };
     } catch (error) {
@@ -172,7 +173,7 @@ class JournalEntriesService {
   async deleteJournalEntry(entryId: string, companyId: string): Promise<ServiceResult<null>> {
     try {
       const { error: linesError } = await supabase
-        .from('journal_entry_items')
+        .from('journal_entry_lines')
         .delete()
         .eq('journal_entry_id', entryId)
         .eq('company_id', companyId);
@@ -213,7 +214,7 @@ class JournalEntriesService {
 
       if (entryIds.length > 0) {
         await supabase
-          .from('journal_entry_items')
+          .from('journal_entry_lines')
           .delete()
           .in('journal_entry_id', entryIds)
           .eq('company_id', companyId);
@@ -259,9 +260,9 @@ class JournalEntriesService {
         .select(
           `*,
           journals (id, code, name),
-          journal_entry_items (
+          journal_entry_lines (
             *,
-            accounts (id, account_number, name, type, class)
+            chart_of_accounts (id, account_number, account_name, account_type, account_class)
           )
         `,
           { count: 'exact' },
@@ -294,7 +295,7 @@ class JournalEntriesService {
 
       if (accountId) {
         const { data: entryIds, error: accountFilterError } = await supabase
-          .from('journal_entry_items')
+          .from('journal_entry_lines')
           .select('journal_entry_id')
           .eq('account_id', accountId)
           .eq('company_id', companyId);
@@ -350,9 +351,9 @@ class JournalEntriesService {
         .eq('company_id', companyId)
         .select(
           `*,
-          journal_entry_items (
+          journal_entry_lines (
             *,
-            accounts (id, account_number, name, type, class)
+            chart_of_accounts (id, account_number, account_name, account_type, account_class)
           )
         `,
         )
@@ -388,7 +389,7 @@ class JournalEntriesService {
       }
 
       const { data: items, error: itemsError } = await supabase
-        .from('journal_entry_items')
+        .from('journal_entry_lines')
         .select('debit_amount, credit_amount')
         .eq('company_id', companyId);
 
@@ -423,18 +424,26 @@ class JournalEntriesService {
 
   async getAccountsList(companyId: string): Promise<MinimalAccount[]> {
     const { data, error } = await supabase
-      .from('accounts')
-      .select('id, account_number, name, type, class, is_active')
+      .from('chart_of_accounts')
+      .select('id, account_number, account_name, account_type, account_class, is_active')
       .eq('company_id', companyId)
       .eq('is_active', true)
       .order('account_number', { ascending: true });
 
     if (error) {
-      console.error('Error fetching accounts list:', error);
+      logger.error('Error fetching accounts list:', error);
       return [];
     }
 
-    return data ?? [];
+    // Mapper les noms de colonnes pour correspondre à MinimalAccount
+    return (data ?? []).map(account => ({
+      id: account.id,
+      account_number: account.account_number,
+      name: account.account_name,
+      type: account.account_type,
+      class: account.account_class.toString(),
+      is_active: account.is_active
+    }));
   }
 
   async getJournalsList(companyId: string): Promise<MinimalJournal[]> {
@@ -446,7 +455,7 @@ class JournalEntriesService {
       .order('code', { ascending: true });
 
     if (error) {
-      console.error('Error fetching journals list:', error);
+      logger.error('Error fetching journals list:', error);
       return [];
     }
 
@@ -460,9 +469,9 @@ class JournalEntriesService {
         .select(
           `*,
           journals (id, code, name),
-          journal_entry_items (
+          journal_entry_lines (
             *,
-            accounts (id, account_number, name, type, class)
+            chart_of_accounts (id, account_number, account_name, account_type, account_class)
           )
         `,
         )
@@ -490,15 +499,15 @@ class JournalEntriesService {
     }
   }
 
-  private normalizeLines(companyId: string, entryId: string, items: JournalEntryLineForm[]): JournalEntryItemInsert[] {
-    return items.map((item) => ({
+  private normalizeLines(companyId: string, entryId: string, items: JournalEntryLineForm[]): JournalEntryLineInsert[] {
+    return items.map((item, index) => ({
       journal_entry_id: entryId,
       company_id: companyId,
       account_id: item.accountId,
       debit_amount: coerceNumber(item.debitAmount),
       credit_amount: coerceNumber(item.creditAmount),
       description: item.description ?? null,
-      currency: item.currency ?? DEFAULT_CURRENCY,
+      line_order: index + 1,
     }));
   }
 
@@ -514,7 +523,7 @@ class JournalEntriesService {
       .single();
 
     if (error) {
-      console.warn('Failed to fetch journal code:', error);
+      logger.warn('Failed to fetch journal code:', error);
       return null;
     }
 
@@ -551,7 +560,7 @@ class JournalEntriesService {
 
       return `${sanitizedPrefix}-${year}-${String(nextSequence).padStart(4, '0')}`;
     } catch (error) {
-      console.warn('Failed to generate entry number, falling back to timestamp-based value:', error);
+      logger.warn('Failed to generate entry number, falling back to timestamp-based value:', error);
       return `JR-${Date.now()}`;
     }
   }

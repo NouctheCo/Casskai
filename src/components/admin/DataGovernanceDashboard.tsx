@@ -20,6 +20,7 @@ import {
   type CompanySearchResult,
   type DataQualityMetric
 } from '@/services/dataGovernanceService';
+import { logger } from '@/utils/logger';
 
 interface GovernanceStats {
   totalCompanies: number;
@@ -65,7 +66,7 @@ export const DataGovernanceDashboard: React.FC = () => {
       setDuplicates(duplicatesData);
       setQualityMetrics(metricsData);
     } catch (error) {
-      console.error('❌ Erreur chargement dashboard:', error);
+      logger.error('❌ Erreur chargement dashboard:', error);
       showToast("Impossible de charger les données de gouvernance", "error");
     } finally {
       setLoading(false);
@@ -80,7 +81,7 @@ export const DataGovernanceDashboard: React.FC = () => {
       const results = await dataGovernanceService.searchCompaniesIntelligent(searchTerm);
       setSearchResults(results);
     } catch (error) {
-      console.error('❌ Erreur recherche:', error);
+      logger.error('❌ Erreur recherche:', error);
       showToast("Erreur lors de la recherche", "error");
     } finally {
       setLoading(false);

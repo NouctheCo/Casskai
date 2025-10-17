@@ -19,6 +19,7 @@ import {
   Type,
   Volume2
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 // Définitions des standards d'accessibilité
 export const AccessibilityStandards = {
@@ -118,7 +119,7 @@ export const AccessibilityDemo: React.FC = () => {
   const handleKeyDown = (e: React.KeyboardEvent, action: string) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      console.log(`Action: ${action}`);
+      logger.info(`Action: ${action}`)
     }
   };
 

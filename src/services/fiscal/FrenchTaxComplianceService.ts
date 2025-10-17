@@ -1,5 +1,6 @@
 // Service de conformité fiscale française
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 export interface FrenchTaxDeclaration {
   id: string;
@@ -164,7 +165,7 @@ export class FrenchTaxComplianceService {
 
       return declaration;
     } catch (error) {
-      console.error('Erreur génération CA3:', error);
+      logger.error('Erreur génération CA3:', error);
       throw new Error('Impossible de générer la déclaration CA3');
     }
   }
@@ -273,7 +274,7 @@ export class FrenchTaxComplianceService {
         updatedAt: new Date()
       };
     } catch (error) {
-      console.error('Erreur génération CVAE:', error);
+      logger.error('Erreur génération CVAE:', error);
       throw new Error('Impossible de générer la déclaration CVAE');
     }
   }
@@ -350,7 +351,7 @@ export class FrenchTaxComplianceService {
 
       return fecLines.join('\n');
     } catch (error) {
-      console.error('Erreur génération FEC:', error);
+      logger.error('Erreur génération FEC:', error);
       throw new Error('Impossible de générer le FEC');
     }
   }
@@ -405,7 +406,7 @@ export class FrenchTaxComplianceService {
 
       return { errors, warnings, checks };
     } catch (error) {
-      console.error('Erreur validation cohérence:', error);
+      logger.error('Erreur validation cohérence:', error);
       return {
         errors: ['Erreur lors de la validation de cohérence'],
         warnings: [],

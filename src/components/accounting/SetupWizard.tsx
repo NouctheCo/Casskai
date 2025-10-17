@@ -14,6 +14,7 @@ import { useCompanies } from '@/hooks/useCompanies';
 import { useAuth } from '@/contexts/AuthContext';
 import { defaultChartOfAccounts, defaultJournals } from '@/utils/defaultAccountingData';
 import { Loader2, CheckCircle, BookOpen, Calendar, FileText, ArrowRight } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 const SetupWizard = ({ currentEnterpriseId: propCurrentEnterpriseId, onFinish }) => {
   const { t } = useLocale();
@@ -76,7 +77,7 @@ const SetupWizard = ({ currentEnterpriseId: propCurrentEnterpriseId, onFinish })
         setCompleted(prev => ({ ...prev, fiscalYear: false }));
         
       } catch (error) {
-        console.error('Error checking setup status:', error);
+        logger.error('Error checking setup status:', error)
       } finally {
         setLoading(false);
       }
@@ -106,17 +107,12 @@ const SetupWizard = ({ currentEnterpriseId: propCurrentEnterpriseId, onFinish })
         // TODO: Implement importStandardChartOfAccounts in useAccounting hook
         // await importStandardChartOfAccounts(defaultChartOfAccounts);
         throw new Error('Import functionality not yet implemented');
-        
-        toast({
-          title: t('success'),
-          description: t('defaultChartImportedSuccess')
-        });
       }
       
       setCompleted(prev => ({ ...prev, chartOfAccounts: true }));
       setShowChartOfAccountsDialog(false);
     } catch (error) {
-      console.error('Error setting up chart of accounts:', error);
+      logger.error('Error setting up chart of accounts:', error);
       toast({
         variant: 'destructive',
         title: t('error'),
@@ -146,7 +142,7 @@ const SetupWizard = ({ currentEnterpriseId: propCurrentEnterpriseId, onFinish })
       setCompleted(prev => ({ ...prev, fiscalYear: true }));
       setShowFiscalYearDialog(false);
     } catch (error) {
-      console.error('Error setting up fiscal year:', error);
+      logger.error('Error setting up fiscal year:', error);
       toast({
         variant: 'destructive',
         title: t('error'),
@@ -174,7 +170,7 @@ const SetupWizard = ({ currentEnterpriseId: propCurrentEnterpriseId, onFinish })
       setCompleted(prev => ({ ...prev, journals: true }));
       setShowJournalsDialog(false);
     } catch (error) {
-      console.error('Error setting up journals:', error);
+      logger.error('Error setting up journals:', error);
       toast({
         variant: 'destructive',
         title: t('error'),

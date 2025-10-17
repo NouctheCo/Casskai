@@ -9,6 +9,7 @@ import {
 import { OnboardingValidationService } from './OnboardingValidationService';
 import { OnboardingStorageService } from './OnboardingStorageService';
 import { OnboardingProgressService, OnboardingResponse, OnboardingProgress, OnboardingMetrics } from './OnboardingProgressService';
+import { logger } from '@/utils/logger';
 
 class OnboardingService {
   private static instance: OnboardingService;
@@ -76,7 +77,7 @@ class OnboardingService {
         data: initialData
       };
     } catch (error) {
-      console.error('Error initializing onboarding:', error);
+      logger.error('Error initializing onboarding:', error);
       return {
         success: false,
         error: this.formatError(error, 'Initialisation de l\'onboarding')
@@ -156,7 +157,7 @@ class OnboardingService {
         data: updatedData
       };
     } catch (error) {
-      console.error('Error updating company profile:', error);
+      logger.error('Error updating company profile:', error);
       return {
         success: false,
         error: this.formatError(error, 'Mise à jour du profil entreprise')
@@ -207,7 +208,7 @@ class OnboardingService {
         data: updatedData
       };
     } catch (error) {
-      console.error('Error updating preferences:', error);
+      logger.error('Error updating preferences:', error);
       return {
         success: false,
         error: this.formatError(error, 'Mise à jour des préférences')
@@ -267,7 +268,7 @@ class OnboardingService {
         data: updatedData
       };
     } catch (error) {
-      console.error('Error completing step:', error);
+      logger.error('Error completing step:', error);
       return {
         success: false,
         error: this.formatError(error, 'Finalisation de l\'étape')
@@ -319,7 +320,7 @@ class OnboardingService {
         }
       };
     } catch (error) {
-      console.error('Error completing onboarding:', error);
+      logger.error('Error completing onboarding:', error);
       return {
         success: false,
         error: this.formatError(error, 'Finalisation de l\'onboarding')
@@ -360,7 +361,7 @@ class OnboardingService {
       // Réinitialiser l'onboarding
       return this.initializeOnboarding(userId);
     } catch (error) {
-      console.error('Error resetting onboarding:', error);
+      logger.error('Error resetting onboarding:', error);
       return {
         success: false,
         error: this.formatError(error, 'Remise à zéro de l\'onboarding')

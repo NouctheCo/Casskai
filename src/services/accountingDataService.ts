@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 /**
  * Service de récupération et traitement des données comptables
  * Interface entre les écritures comptables et les rapports financiers
@@ -88,7 +89,7 @@ export class AccountingDataService {
       // Simulation de données pour le développement
       return this.generateMockTransactions(companyId, startDate, endDate);
     } catch (error) {
-      console.error('Erreur lors de la récupération des transactions:', error);
+      logger.error('Erreur lors de la récupération des transactions:', error);
       return [];
     }
   }
@@ -152,7 +153,7 @@ export class AccountingDataService {
       // TODO: Remplacer par l'appel réel à Supabase
       return this.getDefaultChartOfAccounts();
     } catch (error) {
-      console.error('Erreur lors de la récupération du plan comptable:', error);
+      logger.error('Erreur lors de la récupération du plan comptable:', error);
       return this.getDefaultChartOfAccounts();
     }
   }

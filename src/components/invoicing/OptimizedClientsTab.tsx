@@ -26,6 +26,7 @@ import {
   FileText,
   CheckCircle
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 // Client Form Dialog Component
 const ClientFormDialog = ({ open, onClose, client = null, onSave }) => {
@@ -423,7 +424,7 @@ export default function OptimizedClientsTab() {
 
       setClients(transformed);
     } catch (error) {
-      console.error('Error loading clients:', error);
+      logger.error('Error loading clients:', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de charger les clients',
@@ -484,7 +485,7 @@ export default function OptimizedClientsTab() {
       await loadClients();
       setEditingClient(null);
     } catch (error) {
-      console.error('Error saving client:', error);
+      logger.error('Error saving client:', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de sauvegarder le client',
@@ -511,7 +512,7 @@ export default function OptimizedClientsTab() {
         description: "Le client a été supprimé avec succès."
       });
     } catch (error) {
-      console.error('Error deleting client:', error);
+      logger.error('Error deleting client:', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de supprimer le client',

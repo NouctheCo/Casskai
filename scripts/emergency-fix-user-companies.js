@@ -14,12 +14,12 @@ const fixUserCompanies = async () => {
 
       // Test 1: Vérifier l'accès à user_companies sans filtres
       console.log('📊 Test 1: Accès user_companies...');
-      const { data: test1, error: error1 } = await supabase
+      const { error: error1 } = await supabase
         .from('user_companies')
         .select('id')
         .limit(1);
 
-      console.log('Test 1 résultat:', error1 ? `❌ ${error1.message}` : `✅ ${test1?.length || 0} rows`);
+      console.log('Test 1 résultat:', error1 ? `❌ ${error1.message}` : `✅ OK`);
 
       // Test 2: Vérifier avec un utilisateur connecté
       console.log('📊 Test 2: Utilisateur connecté...');
@@ -60,7 +60,7 @@ const fixUserCompanies = async () => {
       console.log('🔧 Supabase client créé via CDN');
 
       // Test basique
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('user_companies')
         .select('id')
         .limit(1);

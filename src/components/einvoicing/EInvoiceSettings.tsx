@@ -23,6 +23,7 @@ import {
   Download,
   Trash2
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface EInvoiceSettingsProps {
   companyId: string;
@@ -54,7 +55,7 @@ export const EInvoiceSettings: React.FC<EInvoiceSettingsProps> = ({
       setShowDisableConfirm(false);
       await onRefresh();
     } catch (error) {
-      console.error('Error disabling e-invoicing:', error);
+      logger.error('Error disabling e-invoicing:', error)
     } finally {
       setIsDisabling(false);
     }

@@ -55,6 +55,7 @@ import { useLocale } from '@/contexts/LocaleContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { logger } from '@/utils/logger';
 
 // Les données d'inventaire sont maintenant chargées depuis le service InventoryService
 // Toutes les données proviennent de Supabase - Aucune donnée mockée
@@ -199,7 +200,7 @@ export default function InventoryPage() {
         setShowArticleForm(false);
       }
     } catch (error) {
-      console.error('Error creating inventory item:', error);
+      logger.error('Error creating inventory item:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -231,7 +232,7 @@ export default function InventoryPage() {
         });
       }
     } catch (error) {
-      console.error('Error creating stock movement:', error);
+      logger.error('Error creating stock movement:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -278,7 +279,7 @@ export default function InventoryPage() {
         });
       }
     } catch (error) {
-      console.error('Error creating movement:', error);
+      logger.error('Error creating movement:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -316,7 +317,7 @@ export default function InventoryPage() {
       setSupplierContact('');
       setShowSupplierForm(false);
     } catch (error) {
-      console.error('Error creating supplier:', error);
+      logger.error('Error creating supplier:', error);
       toast({
         variant: "destructive",
         title: "Erreur",

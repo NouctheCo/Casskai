@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 import type { FinancialReport } from '@/types/reports.types';
 
 export interface UploadReportParams {
@@ -61,7 +62,7 @@ class ReportStorageService {
         });
 
       if (uploadError) {
-        console.error('Upload error:', uploadError);
+        logger.error('Upload error:', uploadError);
         throw new Error(`Échec de l'upload: ${uploadError.message}`);
       }
 
@@ -96,7 +97,7 @@ class ReportStorageService {
         .single();
 
       if (insertError) {
-        console.error('Insert error:', insertError);
+        logger.error('Insert error:', insertError);
         // Nettoyer le fichier uploadé en cas d'erreur
         await supabase.storage.from(this.BUCKET_NAME).remove([filePath]);
         throw new Error(`Échec de la sauvegarde des métadonnées: ${insertError.message}`);
@@ -108,7 +109,7 @@ class ReportStorageService {
       };
 
     } catch (error) {
-      console.error('Error uploading report:', error);
+      logger.error('Error uploading report:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur inconnue'
@@ -154,7 +155,7 @@ class ReportStorageService {
       };
 
     } catch (error) {
-      console.error('Error downloading report:', error);
+      logger.error('Error downloading report:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur inconnue'
@@ -185,7 +186,7 @@ class ReportStorageService {
           .remove([report.file_path]);
 
         if (deleteError) {
-          console.error('Storage delete error:', deleteError);
+          logger.error('Storage delete error:', deleteError);
           // Continue quand même pour supprimer les métadonnées
         }
       }
@@ -203,7 +204,7 @@ class ReportStorageService {
       return { success: true };
 
     } catch (error) {
-      console.error('Error deleting report:', error);
+      logger.error('Error deleting report:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur inconnue'
@@ -253,7 +254,7 @@ class ReportStorageService {
       };
 
     } catch (error) {
-      console.error('Error listing reports:', error);
+      logger.error('Error listing reports:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur inconnue'
@@ -304,7 +305,7 @@ class ReportStorageService {
       return { success: true, stats };
 
     } catch (error) {
-      console.error('Error getting storage stats:', error);
+      logger.error('Error getting storage stats:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur inconnue'

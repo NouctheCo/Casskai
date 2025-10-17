@@ -2,6 +2,7 @@
 // Implémente le système de forecast avec réel YTD + prorata + budget restant
 
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 // ============================================================================
 // Types
@@ -94,7 +95,7 @@ class BudgetForecastService {
     budgetId: string,
     asOfDate: Date = new Date(),
     mode: 'prorata' | 'run_rate' = 'prorata'
-  ): Promise<{ data: BudgetForecastData | null; error: any }> {
+  ): Promise<{ data: BudgetForecastData | null; error: Error | null }> {
     try {
       // 1. Appel à la fonction RPC pour les lignes de forecast
       const { data: lines, error: linesError } = await supabase.rpc(
@@ -108,7 +109,7 @@ class BudgetForecastService {
       );
 
       if (linesError) {
-        console.error('Error fetching forecast lines:', linesError);
+        logger.error('Error fetching forecast lines:', linesError);
         return { data: null, error: linesError };
       }
 
@@ -123,7 +124,7 @@ class BudgetForecastService {
       );
 
       if (kpiError) {
-        console.error('Error fetching forecast KPI:', kpiError);
+        logger.error('Error fetching forecast KPI:', kpiError);
         return { data: null, error: kpiError };
       }
 
@@ -168,7 +169,7 @@ class BudgetForecastService {
 
       return { data: forecastData, error: null };
     } catch (error) {
-      console.error('Error in getForecast:', error);
+      logger.error('Error in getForecast:', error);
       return { data: null, error };
     }
   }

@@ -41,6 +41,7 @@ import { CashFlowPredictionWidget } from './widgets/CashFlowPredictionWidget';
 import { AIAssistantChat } from './widgets/AIAssistantChat';
 import { SmartAlertsWidget } from './widgets/SmartAlertsWidget';
 import { TaxOptimizationWidget } from './widgets/TaxOptimizationWidget';
+import { logger } from '@/utils/logger';
 
 interface AIInsightsDashboardProps {
   transactions: Transaction[];
@@ -95,9 +96,9 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
       await aiAssistantService.initialize();
       aiVisualizationService.initialize();
       
-      console.warn('AI services initialized successfully');
+      logger.warn('AI services initialized successfully')
     } catch (error) {
-      console.error('Failed to initialize AI services:', error);
+      logger.error('Failed to initialize AI services:', error)
     } finally {
       setIsLoading(false);
     }
@@ -150,7 +151,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
       setLastAnalysis(new Date());
 
     } catch (error) {
-      console.error('Error running AI analysis:', error);
+      logger.error('Error running AI analysis:', error)
     } finally {
       setIsLoading(false);
     }
@@ -333,7 +334,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
         <SmartAlertsWidget 
           alerts={smartAlerts}
           onAlertAction={(alertId, action) => {
-            console.warn('Alert action:', alertId, action);
+            logger.warn('Alert action:', alertId, action)
           }}
           onDismissAlert={(alertId) => {
             setSmartAlerts(alerts => alerts.filter(a => a.id !== alertId));
@@ -394,7 +395,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
               <AnomalyDetectionWidget 
                 anomalies={anomalies}
                 onAnomalyAction={(anomalyId, action) => {
-                  console.warn('Anomaly action:', anomalyId, action);
+                  logger.warn('Anomaly action:', anomalyId, action)
                 }}
                 isLoading={isLoading}
               />
@@ -417,7 +418,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
               <TaxOptimizationWidget 
                 optimizations={taxOptimizations}
                 onOptimizationAction={(optimizationId, action) => {
-                  console.warn('Optimization action:', optimizationId, action);
+                  logger.warn('Optimization action:', optimizationId, action)
                 }}
                 isLoading={isLoading}
               />
@@ -428,7 +429,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
                 transactions={transactions}
                 currentBalance={currentBalance}
                 onQueryProcessed={(query, response) => {
-                  console.warn('AI query processed:', query, response);
+                  logger.warn('AI query processed:', query, response)
                 }}
               />
             </TabsContent>

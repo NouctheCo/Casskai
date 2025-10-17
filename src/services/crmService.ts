@@ -15,6 +15,7 @@ import {
   CrmServiceResponse,
   CrmDashboardData
 } from '../types/crm.types';
+import { logger } from '@/utils/logger';
 
 class CrmService {
   // Clients - Utilise la table third_parties existante
@@ -89,7 +90,7 @@ class CrmService {
 
       return { success: true, data: filteredClients };
     } catch (error) {
-      console.error('Error fetching CRM clients:', error);
+      logger.error('Error fetching CRM clients:', error);
       return {
         success: false,
         data: [],
@@ -144,7 +145,7 @@ class CrmService {
 
       return { success: true, data: newClient };
     } catch (error) {
-      console.error('Error creating CRM client:', error);
+      logger.error('Error creating CRM client:', error);
       return {
         success: false,
         data: {} as Client,
@@ -196,7 +197,7 @@ class CrmService {
       };
       return { success: true, data: updatedClient };
     } catch (error) {
-      console.error('Error updating CRM client:', error);
+      logger.error('Error updating CRM client:', error);
       return {
         success: false,
         data: {} as Client,
@@ -215,7 +216,7 @@ class CrmService {
       if (error) throw error;
       return { success: true, data: true };
     } catch (error) {
-      console.error('Error deleting CRM client:', error);
+      logger.error('Error deleting CRM client:', error);
       return {
         success: false,
         data: false,
@@ -245,7 +246,7 @@ class CrmService {
 
       return { success: true, data: data || [] };
     } catch (error) {
-      console.error('Error fetching CRM contacts:', error);
+      logger.error('Error fetching CRM contacts:', error);
       return {
         success: false,
         data: [],
@@ -275,7 +276,7 @@ class CrmService {
       if (error) throw error;
       return { success: true, data };
     } catch (error) {
-      console.error('Error creating CRM contact:', error);
+      logger.error('Error creating CRM contact:', error);
       return {
         success: false,
         data: {} as Contact,
@@ -296,7 +297,7 @@ class CrmService {
       if (error) throw error;
       return { success: true, data };
     } catch (error) {
-      console.error('Error updating CRM contact:', error);
+      logger.error('Error updating CRM contact:', error);
       return {
         success: false,
         data: {} as Contact,
@@ -315,7 +316,7 @@ class CrmService {
       if (error) throw error;
       return { success: true, data: true };
     } catch (error) {
-      console.error('Error deleting CRM contact:', error);
+      logger.error('Error deleting CRM contact:', error);
       return {
         success: false,
         data: false,
@@ -350,7 +351,7 @@ class CrmService {
 
       return { success: true, data: data || [] };
     } catch (error) {
-      console.error('Error fetching CRM opportunities:', error);
+      logger.error('Error fetching CRM opportunities:', error);
       return {
         success: false,
         data: [],
@@ -410,7 +411,7 @@ class CrmService {
       if (error) throw error;
       return { success: true, data };
     } catch (error) {
-      console.error('Error creating CRM opportunity:', error);
+      logger.error('Error creating CRM opportunity:', error);
       return {
         success: false,
         data: {} as Opportunity,
@@ -422,7 +423,7 @@ class CrmService {
   async updateOpportunity(opportunityId: string, formData: Partial<OpportunityFormData>): Promise<CrmServiceResponse<Opportunity>> {
     try {
       // Mettre à jour les noms dénormalisés si nécessaire
-      const updateData: any = { ...formData };
+      const updateData: Record<string, unknown> = { ...formData };
 
       if (formData.client_id) {
         const { data: client } = await supabase
@@ -452,7 +453,7 @@ class CrmService {
       if (error) throw error;
       return { success: true, data };
     } catch (error) {
-      console.error('Error updating CRM opportunity:', error);
+      logger.error('Error updating CRM opportunity:', error);
       return {
         success: false,
         data: {} as Opportunity,
@@ -471,7 +472,7 @@ class CrmService {
       if (error) throw error;
       return { success: true, data: true };
     } catch (error) {
-      console.error('Error deleting CRM opportunity:', error);
+      logger.error('Error deleting CRM opportunity:', error);
       return {
         success: false,
         data: false,
@@ -506,7 +507,7 @@ class CrmService {
 
       return { success: true, data: data || [] };
     } catch (error) {
-      console.error('Error fetching commercial actions:', error);
+      logger.error('Error fetching commercial actions:', error);
       return {
         success: false,
         data: [],
@@ -578,7 +579,7 @@ class CrmService {
       if (error) throw error;
       return { success: true, data };
     } catch (error) {
-      console.error('Error creating commercial action:', error);
+      logger.error('Error creating commercial action:', error);
       return {
         success: false,
         data: {} as CommercialAction,
@@ -590,7 +591,7 @@ class CrmService {
   async updateCommercialAction(actionId: string, formData: Partial<CommercialActionFormData>): Promise<CrmServiceResponse<CommercialAction>> {
     try {
       // Mettre à jour les noms dénormalisés si nécessaire
-      const updateData: any = { ...formData };
+      const updateData: Record<string, unknown> = { ...formData };
 
       if (formData.client_id) {
         const { data: client } = await supabase
@@ -629,7 +630,7 @@ class CrmService {
       if (error) throw error;
       return { success: true, data };
     } catch (error) {
-      console.error('Error updating commercial action:', error);
+      logger.error('Error updating commercial action:', error);
       return {
         success: false,
         data: {} as CommercialAction,
@@ -648,7 +649,7 @@ class CrmService {
       if (error) throw error;
       return { success: true, data: true };
     } catch (error) {
-      console.error('Error deleting commercial action:', error);
+      logger.error('Error deleting commercial action:', error);
       return {
         success: false,
         data: false,
@@ -709,7 +710,7 @@ class CrmService {
 
       return { success: true, data: stats };
     } catch (error) {
-      console.error('Error fetching CRM stats:', error);
+      logger.error('Error fetching CRM stats:', error);
       return {
         success: false,
         data: {} as CrmStats,
@@ -742,7 +743,7 @@ class CrmService {
 
       return { success: true, data: pipelineStats };
     } catch (error) {
-      console.error('Error fetching pipeline stats:', error);
+      logger.error('Error fetching pipeline stats:', error);
       return {
         success: false,
         data: [],

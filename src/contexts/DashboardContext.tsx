@@ -10,6 +10,7 @@ import {
   NotificationSettings,
   DashboardTemplate
 } from '../types/dashboard.types';
+import { logger } from '@/utils/logger';
 
 interface DashboardState {
   // Configuration
@@ -88,16 +89,17 @@ function dashboardReducer(state: DashboardState, action: DashboardAction): Dashb
     case 'SET_DASHBOARDS':
       return { ...state, dashboards: action.payload };
     
-    case 'UPDATE_DASHBOARD':
+    case 'UPDATE_DASHBOARD': {
       if (!state.currentDashboard) return state;
       const updatedDashboard = { ...state.currentDashboard, ...action.payload };
       return {
         ...state,
         currentDashboard: updatedDashboard,
-        dashboards: state.dashboards.map(d => 
+        dashboards: state.dashboards.map(d =>
           d.id === updatedDashboard.id ? updatedDashboard : d
         )
       };
+    }
     
     case 'SET_WIDGETS':
       return { ...state, widgets: action.payload };
@@ -260,7 +262,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'SET_WIDGETS', payload: exampleWidgets });
 
     } catch (error) {
-      console.error('Error initializing default dashboard:', error);
+      logger.error('Error initializing default dashboard:', error);
       dispatch({ type: 'SET_ERROR', payload: 'Erreur lors de l\'initialisation du dashboard' });
     }
   };
@@ -285,7 +287,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       
       dispatch({ type: 'SET_DASHBOARDS', payload: data || [] });
     } catch (error) {
-      console.error('Error loading dashboards:', error);
+      logger.error('Error loading dashboards:', error);
       dispatch({ type: 'SET_ERROR', payload: 'Failed to load dashboards' });
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
@@ -311,7 +313,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       
       return newDashboard.id;
     } catch (error) {
-      console.error('Error creating dashboard:', error);
+      logger.error('Error creating dashboard:', error);
       throw new Error('Failed to create dashboard');
     }
   };
@@ -334,7 +336,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
       dispatch({ type: 'UPDATE_DASHBOARD', payload: updatedData });
     } catch (error) {
-      console.error('Error updating dashboard:', error);
+      logger.error('Error updating dashboard:', error);
       dispatch({ type: 'SET_ERROR', payload: 'Failed to update dashboard' });
     }
   };
@@ -357,7 +359,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         dispatch({ type: 'SET_CURRENT_DASHBOARD', payload: null });
       }
     } catch (error) {
-      console.error('Error deleting dashboard:', error);
+      logger.error('Error deleting dashboard:', error);
       throw new Error('Failed to delete dashboard');
     }
   };
@@ -388,7 +390,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'SET_WIDGETS', payload: widgets || [] });
 
     } catch (error) {
-      console.error('Error setting current dashboard:', error);
+      logger.error('Error setting current dashboard:', error);
       dispatch({ type: 'SET_ERROR', payload: 'Failed to load dashboard' });
     }
   };
@@ -432,7 +434,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       
       return newWidget.id;
     } catch (error) {
-      console.error('Error adding widget:', error);
+      logger.error('Error adding widget:', error);
       throw new Error('Failed to add widget');
     }
   };
@@ -448,7 +450,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
       dispatch({ type: 'UPDATE_WIDGET', payload: { id, updates } });
     } catch (error) {
-      console.error('Error updating widget:', error);
+      logger.error('Error updating widget:', error);
       throw new Error('Failed to update widget');
     }
   };
@@ -464,7 +466,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
       dispatch({ type: 'REMOVE_WIDGET', payload: id });
     } catch (error) {
-      console.error('Error removing widget:', error);
+      logger.error('Error removing widget:', error);
       throw new Error('Failed to remove widget');
     }
   };
@@ -480,7 +482,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       try {
         await updateDashboard({ layout });
       } catch (error) {
-        console.error('Error updating layout:', error);
+        logger.error('Error updating layout:', error)
       }
     }, 1000);
   };
@@ -518,7 +520,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
       dispatch({ type: 'SET_TEMPLATES', payload: templates });
     } catch (error) {
-      console.error('Error loading templates:', error);
+      logger.error('Error loading templates:', error)
     }
   };
 
@@ -544,7 +546,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       });
 
     } catch (error) {
-      console.error('Error applying template:', error);
+      logger.error('Error applying template:', error);
       throw new Error('Failed to apply template');
     }
   };
@@ -561,7 +563,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       
       return newTemplate.id;
     } catch (error) {
-      console.error('Error saving template:', error);
+      logger.error('Error saving template:', error);
       throw new Error('Failed to save template');
     }
   };
@@ -644,7 +646,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         });
       }
     } catch (error) {
-      console.error('Error loading from storage:', error);
+      logger.error('Error loading from storage:', error)
     }
   };
 
@@ -680,7 +682,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       await setCurrentDashboard(dashboardId);
 
     } catch (error) {
-      console.error('Error importing dashboard:', error);
+      logger.error('Error importing dashboard:', error);
       throw new Error('Failed to import dashboard');
     }
   };

@@ -1,0 +1,147 @@
+  394:25  error  '_next' is defined but never used  no-unused-vars
+  0:0  error  Parsing error: "parserOptions.project" has been provided for @typescript-eslint/parser.
+  0:0  error  Parsing error: "parserOptions.project" has been provided for @typescript-eslint/parser.
+  0:0  error  Parsing error: "parserOptions.project" has been provided for @typescript-eslint/parser.
+  0:0  error  Parsing error: "parserOptions.project" has been provided for @typescript-eslint/parser.
+  0:0  error  Parsing error: "parserOptions.project" has been provided for @typescript-eslint/parser.
+  26:38  error  Parsing error: Unexpected token as
+  19:13  error  'data' is assigned a value but never used  no-unused-vars
+   51:15  error  'data' is assigned a value but never used  no-unused-vars
+   80:13  error  'data' is assigned a value but never used  no-unused-vars
+  101:13  error  'data' is assigned a value but never used  no-unused-vars
+  53:19  error  'companiesData' is assigned a value but never used  no-unused-vars
+  65:19  error  'rolesData' is assigned a value but never used      no-unused-vars
+  25:13  error  'data' is assigned a value but never used  no-unused-vars
+  14:19  error  'testData' is assigned a value but never used  no-unused-vars
+  46:16  error  'e' is defined but never used                  no-unused-vars
+  67:15  error  'data' is assigned a value but never used      no-unused-vars
+  21:19  error  'clients' is assigned a value but never used    no-unused-vars
+  34:19  error  'companies' is assigned a value but never used  no-unused-vars
+  47:19  error  'keys' is assigned a value but never used       no-unused-vars
+  28:17  error  'data' is assigned a value but never used  no-unused-vars
+  63:15  error  'data' is assigned a value but never used  no-unused-vars
+  67:39  error    '_newLink' is assigned a value but never used                                      no-unused-vars
+  7:7  error  'supabase' is assigned a value but never used  no-unused-vars
+  28:41  error    'companiesError' is assigned a value but never used                           no-unused-vars
+  38:45  error    'userCompaniesError' is assigned a value but never used                       no-unused-vars
+    9:8   error  'path' is defined but never used    no-unused-vars
+  232:10  error  '_error' is defined but never used  no-unused-vars
+  240:12  error  '_error' is defined but never used  no-unused-vars
+  253:12  error  '_error' is defined but never used  no-unused-vars
+  260:24  error  '_index' is defined but never used  no-unused-vars
+  45:7  error  'REQUIRED_PATTERNS' is assigned a value but never used  no-unused-vars
+  54:9  error  'lines' is assigned a value but never used              no-unused-vars
+  136:5   error    React Hook "useSEO" is called in function "setSEO" that is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use"  react-hooks/rules-of-hooks
+   346:9   error    Unexpected lexical declaration in case block                                                                          no-case-declarations
+   357:9   error    Unexpected lexical declaration in case block                                                                          no-case-declarations
+   366:9   error    Unexpected lexical declaration in case block                                                                          no-case-declarations
+   370:9   error    Unexpected lexical declaration in case block                                                                          no-case-declarations
+   921:11  error    Unexpected lexical declaration in case block                                                                          no-case-declarations
+   994:9   error    Unexpected lexical declaration in case block                                                                          no-case-declarations
+  1005:9   error    Unexpected lexical declaration in case block                                                                          no-case-declarations
+  1006:9   error    Unexpected lexical declaration in case block                                                                          no-case-declarations
+  1007:9   error    Unexpected lexical declaration in case block                                                                          no-case-declarations
+  1029:9   error    Unexpected lexical declaration in case block                                                                          no-case-declarations
+  1030:9   error    Unexpected lexical declaration in case block                                                                          no-case-declarations
+  1031:9   error    Unexpected lexical declaration in case block                                                                          no-case-declarations
+  1038:9   error    Unexpected lexical declaration in case block                                                                          no-case-declarations
+  1039:9   error    Unexpected lexical declaration in case block                                                                          no-case-declarations
+  1040:9   error    Unexpected lexical declaration in case block                                                                          no-case-declarations
+  1041:9   error    Unexpected lexical declaration in case block                                                                          no-case-declarations
+  1054:9   error    Unexpected lexical declaration in case block                                                                          no-case-declarations
+  1055:9   error    Unexpected lexical declaration in case block                                                                          no-case-declarations
+  1056:9   error    Unexpected lexical declaration in case block                                                                          no-case-declarations
+  1063:9   error    Unexpected lexical declaration in case block                                                                          no-case-declarations
+  1064:9   error    Unexpected lexical declaration in case block                                                                          no-case-declarations
+  1065:9   error    Unexpected lexical declaration in case block                                                                          no-case-declarations
+  110:9   error    Unreachable code                                                                          no-unreachable
+   57:11  error    Unexpected lexical declaration in case block                     no-case-declarations
+  106:18  error    React Hook "useMemo" is called conditionally. React Hooks must be called in the exact same order in every component render  react-hooks/rules-of-hooks
+  296:9   error    Unexpected lexical declaration in case block                                       no-case-declarations
+c:\Users\noutc\Casskai\src\components\errorBoundaryUtils.tsx
+   28:39  error    React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render  react-hooks/rules-of-hooks
+   29:39  error    React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render  react-hooks/rules-of-hooks
+    6:40  error    The `{}` ("empty object") type allows any non-nullish value, including literals like `0` and `""`.
+  176:41  error    The `{}` ("empty object") type allows any non-nullish value, including literals like `0` and `""`.
+  232:41  error    The `{}` ("empty object") type allows any non-nullish value, including literals like `0` and `""`.
+  279:39  error    The `{}` ("empty object") type allows any non-nullish value, including literals like `0` and `""`.
+  109:9   error    Unexpected lexical declaration in case block                     no-case-declarations
+   37:17  error    'CompanySettings' is already defined                                                                                                           no-redeclare
+   54:16  error    Do not access Object.prototype method 'hasOwnProperty' from target object               no-prototype-builtins
+   68:27  error    Do not access Object.prototype method 'hasOwnProperty' from target object               no-prototype-builtins
+  188:45  error    Do not access Object.prototype method 'hasOwnProperty' from target object               no-prototype-builtins
+  90:37  error    React Hook "React.useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?   react-hooks/rules-of-hooks
+  94:3   error    React Hook "React.useEffect" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+  125:9   error    Unexpected lexical declaration in case block                       no-case-declarations
+  26:11  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+  54:11  error    An interface declaring no members is equivalent to its supertype             @typescript-eslint/no-empty-object-type
+  65:11  error    An interface declaring no members is equivalent to its supertype             @typescript-eslint/no-empty-object-type
+  4:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+  5:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+  491:11  error    Unexpected lexical declaration in case block                                          no-case-declarations
+  492:11  error    Unexpected lexical declaration in case block                                          no-case-declarations
+  506:11  error    Unexpected lexical declaration in case block                                          no-case-declarations
+  507:11  error    Unexpected lexical declaration in case block                                          no-case-declarations
+  510:11  error    Unexpected lexical declaration in case block                                          no-case-declarations
+  523:11  error    Unexpected lexical declaration in case block                                          no-case-declarations
+  524:11  error    Unexpected lexical declaration in case block                                          no-case-declarations
+   93:7   error    Unexpected lexical declaration in case block                                                                                    no-case-declarations
+    6:11  error    An interface declaring no members is equivalent to its supertype                                                                @typescript-eslint/no-empty-object-type
+  290:19  error    Unreachable code                                                                                                     no-unreachable
+   4:1   error    '@/services/hrService' import is duplicated                        no-duplicate-imports
+    4:1    error    '@/services/inventoryService' import is duplicated                                      no-duplicate-imports
+   4:1   error    '@/services/projectsService' import is duplicated                                      no-duplicate-imports
+  525:21  error    A `require()` style import is forbidden                                                                                         @typescript-eslint/no-require-imports
+  525:21  error    Require statement not part of import statement                                                                                  @typescript-eslint/no-var-requires
+  0:0  error  Parsing error: "parserOptions.project" has been provided for @typescript-eslint/parser.
+    12:1   error    'lucide-react' import is duplicated                                                                                             no-duplicate-imports
+   26:1   error    'react' import is duplicated                                                                                                    no-duplicate-imports
+  314:9   error    Unexpected lexical declaration in case block                                                                                            no-case-declarations
+  333:9   error    Unexpected lexical declaration in case block                                                                                            no-case-declarations
+     3:1   error    'framer-motion' import is duplicated                                           no-duplicate-imports
+  656:8  error  Parsing error: Declaration or statement expected
+  135:9   error    Unexpected lexical declaration in case block                               no-case-declarations
+  141:9   error    Unexpected lexical declaration in case block                               no-case-declarations
+  147:9   error    Unexpected lexical declaration in case block                               no-case-declarations
+  153:9   error    Unexpected lexical declaration in case block                               no-case-declarations
+  109:11  error    Unexpected lexical declaration in case block                                         no-case-declarations
+  151:9   error    Unexpected lexical declaration in case block                                         no-case-declarations
+  437:11  error    Unexpected lexical declaration in case block                                               no-case-declarations
+  465:9    error    Unexpected lexical declaration in case block                                                 no-case-declarations
+  472:9    error    Unexpected lexical declaration in case block                                                 no-case-declarations
+  487:12  error    'first' is never reassigned. Use 'const' instead                                    prefer-const
+  487:19  error    'second' is never reassigned. Use 'const' instead                                   prefer-const
+  219:21  error    Unreachable code                                                                         no-unreachable
+    4:13  error    A `require()` style import is forbidden                                           @typescript-eslint/no-require-imports
+   30:11  error    Unexpected lexical declaration in case block                                       no-case-declarations
+  353:22  error    A `require()` style import is forbidden                                                @typescript-eslint/no-require-imports
+  353:22  error    Require statement not part of import statement                                         @typescript-eslint/no-var-requires
+  910:9   error    Unexpected lexical declaration in case block           no-case-declarations
+c:\Users\noutc\Casskai\src\services\errorHandlingService.ts
+  0:0  error  Parsing error: "parserOptions.project" has been provided for @typescript-eslint/parser.
+  137:7   error    Possible race condition: `job.progress` might be assigned based on an outdated state of `job`      require-atomic-updates
+  144:7   error    Possible race condition: `job.progress` might be assigned based on an outdated state of `job`      require-atomic-updates
+  148:7   error    Possible race condition: `job.progress` might be assigned based on an outdated state of `job`      require-atomic-updates
+  152:7   error    Possible race condition: `job.progress` might be assigned based on an outdated state of `job`      require-atomic-updates
+  156:7   error    Possible race condition: `job.status` might be assigned based on an outdated state of `job`        require-atomic-updates
+  157:7   error    Possible race condition: `job.progress` might be assigned based on an outdated state of `job`      require-atomic-updates
+  158:7   error    Possible race condition: `job.resultUrl` might be assigned based on an outdated state of `job`     require-atomic-updates
+  159:7   error    Possible race condition: `job.completedAt` might be assigned based on an outdated state of `job`   require-atomic-updates
+  160:7   error    Possible race condition: `job.updatedAt` might be assigned based on an outdated state of `job`     require-atomic-updates
+  164:7   error    Possible race condition: `job.status` might be assigned based on an outdated state of `job`        require-atomic-updates
+  165:7   error    Possible race condition: `job.errorMessage` might be assigned based on an outdated state of `job`  require-atomic-updates
+  166:7   error    Possible race condition: `job.updatedAt` might be assigned based on an outdated state of `job`     require-atomic-updates
+  348:11  error    Unexpected lexical declaration in case block                                                       no-case-declarations
+  361:11  error    Unexpected lexical declaration in case block                                                       no-case-declarations
+  376:11  error    Unexpected lexical declaration in case block                                                       no-case-declarations
+  495:11  error    Unexpected lexical declaration in case block                                                       no-case-declarations
+  325:11  error    Unexpected lexical declaration in case block                                    no-case-declarations
+  461:21  error    Unreachable code                                                                     no-unreachable
+  116:9   error    Unexpected lexical declaration in case block                                                    no-case-declarations
+  127:9   error    Unexpected lexical declaration in case block                                                    no-case-declarations
+  241:18  error    'TemplateCondition' is already defined    no-redeclare
+  143:14  error    The `Function` type accepts any function-like value.
+  151:14  error    The `Function` type accepts any function-like value.
+  24:0  error  Parsing error: Declaration or statement expected
+  23:0  error  Parsing error: Declaration or statement expected
+  6:7  error  '_supabase' is assigned a value but never used  no-unused-vars

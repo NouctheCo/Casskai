@@ -53,9 +53,10 @@ export const TaxOptimizationWidget: React.FC<TaxOptimizationWidgetProps> = ({
       switch (sortBy) {
         case 'saving':
           return b.potentialSavings - a.potentialSavings;
-        case 'effort':
+        case 'effort': {
           const effortOrder = { low: 1, medium: 2, high: 3 };
           return effortOrder[a.effort] - effortOrder[b.effort];
+        }
         case 'deadline':
           if (!a.deadline && !b.deadline) return 0;
           if (!a.deadline) return 1;

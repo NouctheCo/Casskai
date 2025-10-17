@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useCurrency, useCurrencySelector } from '../hooks/useCurrency';
 import { ArrowRightLeft, RefreshCw, TrendingUp, Calculator, AlertCircle, CheckCircle } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 // Sélecteur de devise
 export const CurrencySelector = ({ 
@@ -125,7 +126,7 @@ export const CurrencyConverter = () => {
       setResult(convertedAmount.toString());
       setRate(1);
     } catch (err) {
-      console.error('Erreur de conversion:', err);
+      logger.error('Erreur de conversion:', err);
       setResult('Erreur');
       setRate(null);
     } finally {
@@ -145,7 +146,7 @@ export const CurrencyConverter = () => {
       await refreshRates();
       await handleConvert();
     } catch (err) {
-      console.error('Erreur actualisation:', err);
+      logger.error('Erreur actualisation:', err)
     }
   };
 
@@ -288,7 +289,7 @@ export const ExchangeRateWidget = ({
           const rate = await getExchangeRate(pair.from, pair.to);
           newRates[`${pair.from}_${pair.to}`] = rate;
         } catch (error) {
-          console.error(`Erreur taux ${pair.from}/${pair.to}:`, error);
+          logger.error(`Erreur taux ${pair.from}/${pair.to}:`, error)
         }
       }
       

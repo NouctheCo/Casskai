@@ -4,6 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { PieChart } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/utils/logger';
 
 interface JournalData {
   name: string;
@@ -29,12 +30,12 @@ export default function JournalDistribution() {
     try {
       setIsLoading(true);
       
-      // Charger les journaux avec leurs totaux
+      // Charger les journaux avec le nombre d'écritures
       const { data, error } = await supabase
         .from('journals')
-        .select('code, name, total_debit, total_credit')
+        .select('code, name')
         .eq('company_id', currentCompany.id)
-        .eq('status', 'active');
+        .eq('is_active', true);
 
       if (error) throw error;
 
@@ -44,23 +45,54 @@ export default function JournalDistribution() {
         return;
       }
 
+      // Calculer les totaux pour chaque journal à partir des écritures
+      const journalAmounts = await Promise.all(
+        data.map(async (journal) => {
+          // D'abord trouver l'ID du journal par son code
+          const { data: journalData } = await supabase
+            .from('journals')
+            .select('id')
+            .eq('company_id', currentCompany.id)
+            .eq('code', journal.code)
+            .single();
+
+          if (!journalData) {
+            return { ...journal, amount: 0 };
+          }
+
+          // Puis récupérer les écritures de ce journal et calculer le total des lignes
+          const { data: entries } = await supabase
+            .from('journal_entries')
+            .select('id, journal_entry_lines(debit_amount, credit_amount)')
+            .eq('company_id', currentCompany.id)
+            .eq('journal_id', journalData.id);
+
+          // Calculer le total à partir des lignes (débit + crédit)
+          const amount = entries?.reduce((sum, entry) => {
+            const lineTotal = entry.journal_entry_lines?.reduce((lineSum, line) =>
+              lineSum + (line.debit_amount || 0) + (line.credit_amount || 0), 0
+            ) || 0;
+            return sum + lineTotal;
+          }, 0) || 0;
+
+          return { ...journal, amount };
+        })
+      );
+
       // Calculer le total général
-      const totalAmount = data.reduce((sum, journal) => {
-        return sum + (journal.total_debit || 0);
-      }, 0);
+      const totalAmount = journalAmounts.reduce((sum, journal) => sum + journal.amount, 0);
 
       // Assigner des couleurs aux journaux
       const colors = ['blue', 'green', 'purple', 'orange', 'red', 'indigo', 'cyan'];
-      
+
       // Mapper les données avec pourcentages
-      const journalData: JournalData[] = data.map((journal, index) => {
-        const amount = journal.total_debit || 0;
-        const percentage = totalAmount > 0 ? Math.round((amount / totalAmount) * 100) : 0;
-        
+      const journalData: JournalData[] = journalAmounts.map((journal, index) => {
+        const percentage = totalAmount > 0 ? Math.round((journal.amount / totalAmount) * 100) : 0;
+
         return {
           name: journal.name,
           code: journal.code,
-          amount,
+          amount: journal.amount,
           percentage,
           color: colors[index % colors.length]
         };
@@ -69,7 +101,7 @@ export default function JournalDistribution() {
       setJournals(journalData);
       setTotal(totalAmount);
     } catch (error) {
-      console.error('Error loading journal distribution:', error);
+      logger.error('Error loading journal distribution:', error);
       setJournals([]);
     } finally {
       setIsLoading(false);

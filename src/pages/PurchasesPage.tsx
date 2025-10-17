@@ -15,6 +15,7 @@ import PurchasesFilters from '../components/purchases/PurchasesFilters';
 import PurchaseForm from '../components/purchases/PurchaseForm';
 import { exportToCsv, generatePdfReport } from '../components/purchases/ExportUtils';
 import { Plus, RefreshCw, FileText, AlertTriangle, Sparkles } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 export default function PurchasesPage() {
   const { t, i18n } = useTranslation();
@@ -71,17 +72,17 @@ export default function PurchasesPage() {
       ]);
       
       if (purchasesResult.error) {
-        throw new Error(purchasesResult.error.message);
+        throw new Error(purchasesResult.error);
       }
-      
+
       if (statsResult.error) {
-        throw new Error(statsResult.error.message);
+        throw new Error(statsResult.error);
       }
       
       setPurchases(purchasesResult.data);
       setStats(statsResult.data);
     } catch (error) {
-      console.error('Error loading purchases:', error);
+      logger.error('Error loading purchases:', error);
       toast({
         title: t('common.error'),
         description: error instanceof Error ? error.message : 'Erreur lors du chargement des achats',
@@ -96,11 +97,11 @@ export default function PurchasesPage() {
     try {
       const result = await purchasesService.getSuppliers(companyId);
       if (result.error) {
-        throw new Error(result.error.message);
+        throw new Error(result.error);
       }
       setSuppliers(result.data);
     } catch (error) {
-      console.error('Error loading suppliers:', error);
+      logger.error('Error loading suppliers:', error)
     }
   };
 
@@ -123,7 +124,7 @@ export default function PurchasesPage() {
         description: t('purchases.notifications.exportSuccess')
       });
     } catch (error) {
-      console.error('Error exporting:', error);
+      logger.error('Error exporting:', error);
       toast({
         title: t('common.error'),
         description: 'Erreur lors de l\'export',
@@ -143,7 +144,7 @@ export default function PurchasesPage() {
         description: 'Rapport PDF généré avec succès'
       });
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      logger.error('Error generating PDF:', error);
       toast({
         title: t('common.error'),
         description: 'Erreur lors de la génération du PDF',
@@ -175,9 +176,9 @@ export default function PurchasesPage() {
       }
       
       if (result.error) {
-        throw new Error(result.error.message);
+        throw new Error(result.error);
       }
-      
+
       toast({
         title: t('common.success'),
         description: editingPurchase 
@@ -189,7 +190,7 @@ export default function PurchasesPage() {
       setIsFormOpen(false);
       setEditingPurchase(null);
     } catch (error) {
-      console.error('Error saving purchase:', error);
+      logger.error('Error saving purchase:', error);
       toast({
         title: t('common.error'),
         description: error instanceof Error ? error.message : 'Erreur lors de l\'enregistrement',
@@ -213,7 +214,7 @@ export default function PurchasesPage() {
       try {
         const result = await purchasesService.deletePurchase(id);
         if (result.error) {
-          throw new Error(result.error.message);
+          throw new Error(result.error);
         }
         
         toast({
@@ -223,7 +224,7 @@ export default function PurchasesPage() {
         
         loadPurchasesData();
       } catch (error) {
-        console.error('Error deleting purchase:', error);
+        logger.error('Error deleting purchase:', error);
         toast({
           title: t('common.error'),
           description: error instanceof Error ? error.message : 'Erreur lors de la suppression',
@@ -237,7 +238,7 @@ export default function PurchasesPage() {
     try {
       const result = await purchasesService.markAsPaid(id);
       if (result.error) {
-        throw new Error(result.error.message);
+        throw new Error(result.error);
       }
       
       toast({
@@ -247,7 +248,7 @@ export default function PurchasesPage() {
       
       loadPurchasesData();
     } catch (error) {
-      console.error('Error marking as paid:', error);
+      logger.error('Error marking as paid:', error);
       toast({
         title: t('common.error'),
         description: error instanceof Error ? error.message : 'Erreur lors de la mise à jour',

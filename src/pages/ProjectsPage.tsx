@@ -59,6 +59,7 @@ import { useLocale } from '@/contexts/LocaleContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { logger } from '@/utils/logger';
 
 // Toutes les données proviennent du hook useProjects - Aucune donnée mockée
 
@@ -199,7 +200,7 @@ export default function ProjectsPage() {
         setShowProjectForm(false);
       }
     } catch (error) {
-      console.error('Error creating project:', error);
+      logger.error('Error creating project:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -250,17 +251,16 @@ export default function ProjectsPage() {
       }
 
       const newClient = await thirdPartiesService.createThirdParty({
-        company_name: clientData.company_name,
+        name: clientData.company_name,
         email: clientData.email || '',
         phone: clientData.phone || '',
         address: clientData.address || '',
-        type: 'customer' as any, // Assuming 'customer' is the correct type
-        company_id: currentCompany.id
+        type: 'customer' as any // Assuming 'customer' is the correct type
       });
 
       return { success: true, id: newClient.id };
     } catch (error) {
-      console.error('Error creating client:', error);
+      logger.error('Error creating client:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   };
@@ -273,10 +273,10 @@ export default function ProjectsPage() {
 
       // TODO: Implement employee creation service
       // For now, return a mock success
-      console.warn('Employee creation not implemented yet, using mock data');
+      logger.warn('Employee creation not implemented yet, using mock data');
       return { success: true, id: `emp_${Date.now()}` };
     } catch (error) {
-      console.error('Error creating employee:', error);
+      logger.error('Error creating employee:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   };

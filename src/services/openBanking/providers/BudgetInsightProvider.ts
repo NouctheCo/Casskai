@@ -10,6 +10,7 @@ import {
   BankingProvider as OBProviderConfig,
 } from '../../../types/openBanking.types';
 import { BankingProvider, BankingProviderError, AuthenticationError, NetworkError } from '../base/BankingProvider';
+import { logger } from '@/utils/logger';
 
 // Provider spécialisé pour Budget Insight API
 export class BudgetInsightProvider extends BankingProvider {
@@ -545,7 +546,7 @@ export class BudgetInsightProvider extends BankingProvider {
           // Traiter la mise à jour du compte
           break;
         default:
-          console.warn(`Unhandled webhook event: ${event.type}`);
+          logger.warn(`Unhandled webhook event: ${event.type}`)
       }
 
       return this.createResponse(undefined);

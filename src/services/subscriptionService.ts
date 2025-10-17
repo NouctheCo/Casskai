@@ -4,9 +4,9 @@ import {
   SubscriptionPlan, 
   getModulesForPlan, 
   isModuleAllowedForPlan, 
-  isTrialUser,
   SUBSCRIPTION_PLANS as PREDEFINED_PLANS
 } from '@/types/subscription.types';
+import { logger } from '@/utils/logger';
 
 export interface UsageLimits {
   feature_name: string;
@@ -36,13 +36,13 @@ class SubscriptionService {
         });
 
       if (error) {
-        console.error('Error checking feature access:', error);
+        logger.error('Error checking feature access:', error);
         return { canAccess: false, reason: 'Erreur de vérification' };
       }
 
       return { canAccess: data };
     } catch (error) {
-      console.error('Error in canAccessFeature:', error);
+      logger.error('Error in canAccessFeature:', error);
       return { canAccess: false, reason: 'Erreur inattendue' };
     }
   }
@@ -64,13 +64,13 @@ class SubscriptionService {
         });
 
       if (error) {
-        console.error('Error incrementing usage:', error);
+        logger.error('Error incrementing usage:', error);
         return false;
       }
 
       return data;
     } catch (error) {
-      console.error('Error in incrementFeatureUsage:', error);
+      logger.error('Error in incrementFeatureUsage:', error);
       return false;
     }
   }
@@ -86,13 +86,13 @@ class SubscriptionService {
         });
 
       if (error) {
-        console.error('Error getting usage limits:', error);
+        logger.error('Error getting usage limits:', error);
         return [];
       }
 
       return data || [];
     } catch (error) {
-      console.error('Error in getUserUsageLimits:', error);
+      logger.error('Error in getUserUsageLimits:', error);
       return [];
     }
   }
@@ -102,7 +102,7 @@ class SubscriptionService {
    */
   async getCurrentSubscription(userId: string): Promise<UserSubscription | null> {
     try {
-      console.warn('[SubscriptionService] getCurrentSubscription called for user:', userId);
+      logger.warn('[SubscriptionService] getCurrentSubscription called for user:', userId);
 
       // First get the subscription
       const { data: subscription, error: subError } = await supabase
@@ -134,16 +134,16 @@ class SubscriptionService {
         .maybeSingle();
 
       if (subError) {
-        console.warn('[SubscriptionService] Erreur requête subscription:', subError);
+        logger.warn('[SubscriptionService] Erreur requête subscription:', subError);
         return null;
       }
 
       if (!subscription) {
-        console.warn('[SubscriptionService] No subscription found for user');
+        logger.warn('[SubscriptionService] No subscription found for user');
         return null;
       }
 
-      console.warn('[SubscriptionService] Found subscription:', subscription);
+      logger.warn('[SubscriptionService] Found subscription:', subscription);
 
       // Then get the plan details separately
       const { data: plan, error: planError } = await supabase
@@ -153,11 +153,11 @@ class SubscriptionService {
         .single();
 
       if (planError) {
-        console.error('[SubscriptionService] Error fetching plan:', planError);
+        logger.error('[SubscriptionService] Error fetching plan:', planError);
         return null;
       }
 
-      console.warn('[SubscriptionService] Plan fetched:', plan);
+      logger.warn('[SubscriptionService] Plan fetched:', plan);
 
       // Convert to UserSubscription format
       const userSubscription: UserSubscription = {
@@ -188,11 +188,11 @@ class SubscriptionService {
         } : undefined
       };
 
-      console.warn('[SubscriptionService] Converted subscription:', userSubscription);
+      logger.warn('[SubscriptionService] Converted subscription:', userSubscription);
       return userSubscription;
 
     } catch (error) {
-      console.error('Error getting current subscription:', error);
+      logger.error('Error getting current subscription:', error);
       return null;
     }
   }
@@ -203,7 +203,7 @@ class SubscriptionService {
   async updateSubscriptionStatus(
     subscriptionId: string,
     status: UserSubscription['status'],
-    metadata: Record<string, any> = {}
+    metadata: Record<string, unknown> = {}
   ): Promise<boolean> {
     try {
       const { error } = await supabase
@@ -216,13 +216,13 @@ class SubscriptionService {
         .eq('stripe_subscription_id', subscriptionId);
 
       if (error) {
-        console.error('Error updating subscription status:', error);
+        logger.error('Error updating subscription status:', error);
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('Error in updateSubscriptionStatus:', error);
+      logger.error('Error in updateSubscriptionStatus:', error);
       return false;
     }
   }
@@ -241,7 +241,7 @@ class SubscriptionService {
       });
 
       if (error) {
-        console.error('Error creating trial subscription:', error);
+        logger.error('Error creating trial subscription:', error);
         return { success: false, error: error.message };
       }
 
@@ -255,7 +255,7 @@ class SubscriptionService {
 
       return { success: true, subscriptionId: data };
     } catch (error) {
-      console.error('Error in createTrialSubscription:', error);
+      logger.error('Error in createTrialSubscription:', error);
       return { success: false, error: 'Erreur inattendue' };
     }
   }
@@ -268,13 +268,13 @@ class SubscriptionService {
       const { data, error } = await supabase.rpc('expire_trials');
 
       if (error) {
-        console.error('Error expiring trials:', error);
+        logger.error('Error expiring trials:', error);
         return { expiredCount: 0, error: error.message };
       }
 
       return { expiredCount: data || 0 };
     } catch (error) {
-      console.error('Error in expireTrials:', error);
+      logger.error('Error in expireTrials:', error);
       return { expiredCount: 0, error: 'Erreur inattendue' };
     }
   }
@@ -291,7 +291,7 @@ class SubscriptionService {
         .order('price', { ascending: true });
 
       if (error) {
-        console.error('Error getting plans:', error);
+        logger.error('Error getting plans:', error);
         return [];
       }
 
@@ -312,7 +312,7 @@ class SubscriptionService {
         supportLevel: plan.support_level as 'basic' | 'priority' | 'dedicated'
       }));
     } catch (error) {
-      console.error('Error in getAvailablePlans:', error);
+      logger.error('Error in getAvailablePlans:', error);
       return [];
     }
   }
@@ -386,7 +386,7 @@ class SubscriptionService {
 
       return { allowed: true, usage: featureLimit };
     } catch (error) {
-      console.error('Error checking quota:', error);
+      logger.error('Error checking quota:', error);
       return { allowed: false, message: 'Erreur de vérification des quotas' };
     }
   }
@@ -416,7 +416,7 @@ class SubscriptionService {
       // Vérifier si c'est un nouvel utilisateur (période d'essai)
       return await this.checkTrialStatus(userId);
     } catch (error) {
-      console.error('[SubscriptionService] Erreur récupération plan:', error);
+      logger.error('[SubscriptionService] Erreur récupération plan:', error);
       return await this.checkTrialStatus(userId);
     }
   }
@@ -502,7 +502,7 @@ class SubscriptionService {
           .eq('user_id', userId);
 
         if (error) {
-          console.warn('[SubscriptionService] Erreur mise à jour DB, fallback localStorage');
+          logger.warn('[SubscriptionService] Erreur mise à jour DB, fallback localStorage')
         }
       }
 
@@ -517,7 +517,7 @@ class SubscriptionService {
 
       return true;
     } catch (error) {
-      console.error('[SubscriptionService] Erreur changement plan:', error);
+      logger.error('[SubscriptionService] Erreur changement plan:', error);
       return false;
     }
   }
@@ -595,13 +595,13 @@ class SubscriptionService {
         });
 
       if (error) {
-        console.error('Error getting user subscription status:', error);
+        logger.error('Error getting user subscription status:', error);
         return null;
       }
 
       return data && data.length > 0 ? data[0] : null;
     } catch (error) {
-      console.error('Error in getUserSubscriptionStatus:', error);
+      logger.error('Error in getUserSubscriptionStatus:', error);
       return null;
     }
   }
@@ -617,13 +617,13 @@ class SubscriptionService {
         });
 
       if (error) {
-        console.error('Error getting allowed modules:', error);
+        logger.error('Error getting allowed modules:', error);
         return [];
       }
 
       return data || [];
     } catch (error) {
-      console.error('Error in getAllowedModulesForPlan:', error);
+      logger.error('Error in getAllowedModulesForPlan:', error);
       return [];
     }
   }

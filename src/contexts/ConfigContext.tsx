@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { logger } from '@/utils/logger';
 
 interface AppConfig {
   company: {
@@ -50,34 +51,34 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.warn('🔧 Chargement de la configuration...');
+    logger.warn('🔧 Chargement de la configuration...');
     
     try {
       // Charger la configuration depuis localStorage
       const savedConfig = localStorage.getItem('casskai_config');
       
       if (savedConfig) {
-        console.warn('📦 Configuration trouvée dans localStorage');
+        logger.warn('📦 Configuration trouvée dans localStorage');
         setConfig(JSON.parse(savedConfig));
       } else {
-        console.warn('📦 Utilisation de la configuration par défaut');
+        logger.warn('📦 Utilisation de la configuration par défaut');
         setConfig(DEFAULT_CONFIG);
         localStorage.setItem('casskai_config', JSON.stringify(DEFAULT_CONFIG));
       }
     } catch (err) {
-      console.error('❌ Erreur lors du chargement de la configuration:', err);
+      logger.error('❌ Erreur lors du chargement de la configuration:', err);
       setError('Erreur lors du chargement de la configuration');
       setConfig(DEFAULT_CONFIG);
     } finally {
       setIsLoading(false);
-      console.warn('🏁 Configuration chargée');
+      logger.warn('🏁 Configuration chargée')
     }
   }, []);
 
   const updateConfig = (updates: Partial<AppConfig>) => {
     if (!config) return;
     
-    console.warn('🔄 Mise à jour de la configuration:', updates);
+    logger.warn('🔄 Mise à jour de la configuration:', updates);
     
     const newConfig = {
       ...config,
@@ -88,7 +89,7 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setConfig(newConfig);
     localStorage.setItem('casskai_config', JSON.stringify(newConfig));
     
-    console.warn('✅ Configuration mise à jour');
+    logger.warn('✅ Configuration mise à jour')
   };
 
   const value: ConfigContextType = {

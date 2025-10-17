@@ -1,5 +1,6 @@
 // src/services/referentialsService.ts
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 // =============================================
 // TYPES POUR LES RÉFÉRENTIELS DYNAMIQUES
@@ -89,13 +90,13 @@ class ReferentialsService {
         .order('priority_order', { ascending: true });
 
       if (error) {
-        console.error('Erreur récupération pays:', error);
+        logger.error('Erreur récupération pays:', error);
         return this.getFallbackCountries();
       }
 
       return data || [];
     } catch (error) {
-      console.error('Erreur service pays:', error);
+      logger.error('Erreur service pays:', error);
       return this.getFallbackCountries();
     }
   }
@@ -106,13 +107,13 @@ class ReferentialsService {
         .rpc('get_country_config', { country_code_param: countryCode });
 
       if (error || !data) {
-        console.error('Erreur config pays:', error);
+        logger.error('Erreur config pays:', error);
         return null;
       }
 
       return data;
     } catch (error) {
-      console.error('Erreur service config pays:', error);
+      logger.error('Erreur service config pays:', error);
       return null;
     }
   }
@@ -127,13 +128,13 @@ class ReferentialsService {
         .order('priority_order', { ascending: true });
 
       if (error) {
-        console.error('Erreur récupération secteurs:', error);
+        logger.error('Erreur récupération secteurs:', error);
         return this.getFallbackSectors();
       }
 
       return data || [];
     } catch (error) {
-      console.error('Erreur service secteurs:', error);
+      logger.error('Erreur service secteurs:', error);
       return this.getFallbackSectors();
     }
   }
@@ -147,13 +148,13 @@ class ReferentialsService {
         });
 
       if (error) {
-        console.error('Erreur recherche secteurs:', error);
+        logger.error('Erreur recherche secteurs:', error);
         return this.getFallbackSectors();
       }
 
       return data || [];
     } catch (error) {
-      console.error('Erreur service recherche secteurs:', error);
+      logger.error('Erreur service recherche secteurs:', error);
       return this.getFallbackSectors();
     }
   }
@@ -168,13 +169,13 @@ class ReferentialsService {
         .order('priority_order', { ascending: true });
 
       if (error) {
-        console.error('Erreur récupération tailles:', error);
+        logger.error('Erreur récupération tailles:', error);
         return this.getFallbackCompanySizes();
       }
 
       return data || [];
     } catch (error) {
-      console.error('Erreur service tailles:', error);
+      logger.error('Erreur service tailles:', error);
       return this.getFallbackCompanySizes();
     }
   }
@@ -190,13 +191,13 @@ class ReferentialsService {
         .order('timezone_display', { ascending: true });
 
       if (error) {
-        console.error('Erreur récupération fuseaux:', error);
+        logger.error('Erreur récupération fuseaux:', error);
         return this.getFallbackTimezones();
       }
 
       return data || [];
     } catch (error) {
-      console.error('Erreur service fuseaux:', error);
+      logger.error('Erreur service fuseaux:', error);
       return this.getFallbackTimezones();
     }
   }
@@ -211,13 +212,13 @@ class ReferentialsService {
         .order('timezone_display', { ascending: true });
 
       if (error) {
-        console.error('Erreur récupération fuseaux populaires:', error);
+        logger.error('Erreur récupération fuseaux populaires:', error);
         return this.getFallbackTimezones();
       }
 
       return data || [];
     } catch (error) {
-      console.error('Erreur service fuseaux populaires:', error);
+      logger.error('Erreur service fuseaux populaires:', error);
       return this.getFallbackTimezones();
     }
   }
@@ -233,13 +234,13 @@ class ReferentialsService {
         .order('currency_name', { ascending: true });
 
       if (error) {
-        console.error('Erreur récupération devises:', error);
+        logger.error('Erreur récupération devises:', error);
         return this.getFallbackCurrencies();
       }
 
       return data || [];
     } catch (error) {
-      console.error('Erreur service devises:', error);
+      logger.error('Erreur service devises:', error);
       return this.getFallbackCurrencies();
     }
   }
@@ -256,13 +257,13 @@ class ReferentialsService {
         .order('tax_rate', { ascending: false });
 
       if (error) {
-        console.error('Erreur récupération taxes:', error);
+        logger.error('Erreur récupération taxes:', error);
         return [];
       }
 
       return data || [];
     } catch (error) {
-      console.error('Erreur service taxes:', error);
+      logger.error('Erreur service taxes:', error);
       return [];
     }
   }

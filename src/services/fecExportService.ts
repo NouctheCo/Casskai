@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 interface FECLine {
   JournalCode: string;         // Code journal
@@ -61,7 +62,7 @@ export class FECExportService {
    */
   async generateFECExport(params: FECExportParams): Promise<FECExportResult> {
     try {
-      console.log('🏭 Génération export FEC...', params);
+      logger.info('🏭 Génération export FEC...', params);
 
       // 1. Créer l'entrée d'export en base
       const { data: exportRecord, error: createError } = await supabase
@@ -107,7 +108,7 @@ export class FECExportService {
 
       if (updateError) throw updateError;
 
-      console.log('✅ Export FEC généré avec succès');
+      logger.info('✅ Export FEC généré avec succès');
 
       return {
         success: true,
@@ -120,7 +121,7 @@ export class FECExportService {
       };
 
     } catch (error) {
-      console.error('❌ Erreur génération FEC:', error);
+      logger.error('❌ Erreur génération FEC:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur inconnue'

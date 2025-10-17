@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { hrService } from '@/services/hrService';
 import {
+  hrService,
   Employee,
   Leave,
   Expense,

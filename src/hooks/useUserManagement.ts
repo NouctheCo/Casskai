@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/utils/logger';
 
 export interface User {
   id: string;
@@ -169,7 +170,7 @@ export function useUserManagement(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch users';
       setError(errorMessage);
-      console.error('Error fetching users:', err);
+      logger.error('Error fetching users:', err);
       return [];
     } finally {
       setLoading(false);
@@ -242,7 +243,7 @@ export function useUserManagement(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch user';
       setError(errorMessage);
-      console.error('Error fetching user:', err);
+      logger.error('Error fetching user:', err);
       return null;
     } finally {
       setLoading(false);
@@ -302,7 +303,7 @@ export function useUserManagement(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create invitation';
       setError(errorMessage);
-      console.error('Error creating invitation:', err);
+      logger.error('Error creating invitation:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -358,7 +359,7 @@ export function useUserManagement(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update user';
       setError(errorMessage);
-      console.error('Error updating user:', err);
+      logger.error('Error updating user:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -408,7 +409,7 @@ export function useUserManagement(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to toggle user status';
       setError(errorMessage);
-      console.error('Error toggling user status:', err);
+      logger.error('Error toggling user status:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -451,7 +452,7 @@ export function useUserManagement(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch invitations';
       setError(errorMessage);
-      console.error('Error fetching invitations:', err);
+      logger.error('Error fetching invitations:', err);
       return [];
     } finally {
       setLoading(false);
@@ -504,7 +505,7 @@ export function useUserManagement(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to resend invitation';
       setError(errorMessage);
-      console.error('Error resending invitation:', err);
+      logger.error('Error resending invitation:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -532,7 +533,7 @@ export function useUserManagement(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to cancel invitation';
       setError(errorMessage);
-      console.error('Error canceling invitation:', err);
+      logger.error('Error canceling invitation:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -570,7 +571,7 @@ export function useUserManagement(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch activities';
       setError(errorMessage);
-      console.error('Error fetching activities:', err);
+      logger.error('Error fetching activities:', err);
       return [];
     } finally {
       setLoading(false);
@@ -626,7 +627,7 @@ export function useUserManagement(companyId: string) {
 
       return stats;
     } catch (err) {
-      console.error('Error calculating user stats:', err);
+      logger.error('Error calculating user stats:', err);
       return {
         total: 0,
         active: 0,
@@ -652,7 +653,7 @@ export function useUserManagement(companyId: string) {
         return searchableText.includes(query.toLowerCase());
       });
     } catch (err) {
-      console.error('Error searching users:', err);
+      logger.error('Error searching users:', err);
       return [];
     }
   }, [getUsers]);
@@ -715,7 +716,7 @@ async function logActivity(
         user_agent: navigator.userAgent
       });
   } catch (error) {
-    console.error('Failed to log activity:', error);
+    logger.error('Failed to log activity:', error)
   }
 }
 

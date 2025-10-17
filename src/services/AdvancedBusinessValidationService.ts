@@ -1,6 +1,6 @@
 // src/services/AdvancedBusinessValidationService.ts
 import { supabase } from '../lib/supabase';
-import type { ValidationResult } from '../types/accounting';
+import type { ValidationResult, JournalEntry } from '../types/accounting';
 
 export interface BusinessValidationRule {
   id: string;
@@ -39,7 +39,7 @@ export class AdvancedBusinessValidationService {
    * Valide une écriture selon toutes les règles métier avancées
    */
   async validateBusinessRules(
-    entry: any,
+    entry: JournalEntry,
     context: ValidationContext
   ): Promise<ValidationResult> {
     const errors: Array<{ field: string; message: string; severity: 'error' | 'warning' | 'info' }> = [];
@@ -81,13 +81,13 @@ export class AdvancedBusinessValidationService {
    * Validation des règles temporelles avancées
    */
   private async validateTemporalRules(
-    entry: any,
+    entry: JournalEntry,
     context: ValidationContext
   ): Promise<ValidationResult> {
     const errors: Array<{ field: string; message: string; severity: 'error' | 'warning' | 'info' }> = [];
     const warnings: Array<{ field: string; message: string; severity: 'warning' | 'info' }> = [];
 
-    const entryDate = new Date(entry.date);
+    const entryDate = new Date(entry.entryDate);
 
     // Vérifier que la date n'est pas dans le futur
     const now = new Date();
@@ -124,36 +124,40 @@ export class AdvancedBusinessValidationService {
    * Validation des règles sectorielles
    */
   private async validateSectorRules(
-    entry: any,
+    entry: JournalEntry,
     context: ValidationContext
   ): Promise<ValidationResult> {
     const errors: Array<{ field: string; message: string; severity: 'error' | 'warning' | 'info' }> = [];
     const warnings: Array<{ field: string; message: string; severity: 'warning' | 'info' }> = [];
 
     switch (context.sector) {
-      case 'RESTAURATION':
+      case 'RESTAURATION': {
         const restaurantValidation = await this.validateRestaurantRules(entry, context);
         errors.push(...restaurantValidation.errors);
         warnings.push(...restaurantValidation.warnings);
         break;
+      }
 
-      case 'COMMERCE':
+      case 'COMMERCE': {
         const commerceValidation = await this.validateCommerceRules(entry, context);
         errors.push(...commerceValidation.errors);
         warnings.push(...commerceValidation.warnings);
         break;
+      }
 
-      case 'SERVICES_PROF':
+      case 'SERVICES_PROF': {
         const professionalValidation = await this.validateProfessionalServicesRules(entry, context);
         errors.push(...professionalValidation.errors);
         warnings.push(...professionalValidation.warnings);
         break;
+      }
 
-      case 'MANUFACTURING':
+      case 'MANUFACTURING': {
         const manufacturingValidation = await this.validateManufacturingRules(entry, context);
         errors.push(...manufacturingValidation.errors);
         warnings.push(...manufacturingValidation.warnings);
         break;
+      }
 
       default:
         // Règles générales pour les autres secteurs
@@ -167,7 +171,7 @@ export class AdvancedBusinessValidationService {
    * Validation des règles de conformité
    */
   private async validateComplianceRules(
-    entry: any,
+    entry: JournalEntry,
     context: ValidationContext
   ): Promise<ValidationResult> {
     const errors: Array<{ field: string; message: string; severity: 'error' | 'warning' | 'info' }> = [];
@@ -200,7 +204,7 @@ export class AdvancedBusinessValidationService {
    * Validation de cohérence inter-périodes
    */
   private async validateInterPeriodConsistency(
-    entry: any,
+    entry: JournalEntry,
     context: ValidationContext
   ): Promise<ValidationResult> {
     const errors: Array<{ field: string; message: string; severity: 'error' | 'warning' | 'info' }> = [];
@@ -231,7 +235,7 @@ export class AdvancedBusinessValidationService {
    * Validation des règles de balance
    */
   private async validateBalanceRules(
-    entry: any,
+    entry: JournalEntry,
     context: ValidationContext
   ): Promise<ValidationResult> {
     const errors: Array<{ field: string; message: string; severity: 'error' | 'warning' | 'info' }> = [];
@@ -310,17 +314,17 @@ export class AdvancedBusinessValidationService {
   }
 
   private async validateDeclarationDeadlines(
-    entry: any,
+    entry: JournalEntry,
     context: ValidationContext
   ): Promise<ValidationResult> {
     const warnings: Array<{ field: string; message: string; severity: 'warning' | 'info' }> = [];
 
     // Logique simplifiée - à adapter selon les pays
-    const entryDate = new Date(entry.date);
+    const entryDate = new Date(entry.entryDate);
     const currentMonth = entryDate.getMonth();
 
     // Exemple: vérification TVA mensuelle
-    if (context.countryCode === 'FR' && entry.lines?.some((line: any) => line.account_number?.startsWith('445'))) {
+    if (context.countryCode === 'FR' && entry.lines?.some((line) => (line as { account_number?: string }).account_number?.startsWith('445'))) {
       const nextMonth = new Date(entryDate);
       nextMonth.setMonth(currentMonth + 1, 20); // 20ème jour du mois suivant
 
@@ -343,21 +347,21 @@ export class AdvancedBusinessValidationService {
   // ============================================================================
 
   private async validateRestaurantRules(
-    entry: any,
+    entry: JournalEntry,
     context: ValidationContext
   ): Promise<ValidationResult> {
     const warnings: Array<{ field: string; message: string; severity: 'warning' | 'info' }> = [];
 
     // Vérifier les comptes spécifiques à la restauration
-    const hasFoodPurchases = entry.lines?.some((line: any) =>
-      line.account_number?.startsWith('60') || line.account_number?.startsWith('61')
+    const hasFoodPurchases = entry.lines?.some((line) =>
+      (line as { account_number?: string }).account_number?.startsWith('60') || (line as { account_number?: string }).account_number?.startsWith('61')
     );
 
     if (hasFoodPurchases) {
       // Vérifier si les achats alimentaires sont correctement catégorisés
       const foodAccounts = ['601', '602', '603']; // Exemple de comptes alimentaires
-      const hasProperFoodAccount = entry.lines?.some((line: any) =>
-        foodAccounts.some(account => line.account_number?.startsWith(account))
+      const hasProperFoodAccount = entry.lines?.some((line) =>
+        foodAccounts.some(account => (line as { account_number?: string }).account_number?.startsWith(account))
       );
 
       if (!hasProperFoodAccount) {
@@ -373,14 +377,14 @@ export class AdvancedBusinessValidationService {
   }
 
   private async validateCommerceRules(
-    entry: any,
+    entry: JournalEntry,
     context: ValidationContext
   ): Promise<ValidationResult> {
     const warnings: Array<{ field: string; message: string; severity: 'warning' | 'info' }> = [];
 
     // Validation des stocks et inventaires
-    const hasInventoryMovement = entry.lines?.some((line: any) =>
-      line.account_number?.startsWith('3') // Comptes de stocks
+    const hasInventoryMovement = entry.lines?.some((line) =>
+      (line as { account_number?: string }).account_number?.startsWith('3') // Comptes de stocks
     );
 
     if (hasInventoryMovement) {
@@ -395,14 +399,14 @@ export class AdvancedBusinessValidationService {
   }
 
   private async validateProfessionalServicesRules(
-    entry: any,
+    entry: JournalEntry,
     context: ValidationContext
   ): Promise<ValidationResult> {
     const warnings: Array<{ field: string; message: string; severity: 'warning' | 'info' }> = [];
 
     // Validation spécifique aux services professionnels
-    const hasServiceRevenue = entry.lines?.some((line: any) =>
-      line.account_number?.startsWith('70') || line.account_number?.startsWith('71')
+    const hasServiceRevenue = entry.lines?.some((line) =>
+      (line as { account_number?: string }).account_number?.startsWith('70') || (line as { account_number?: string }).account_number?.startsWith('71')
     );
 
     if (hasServiceRevenue) {
@@ -417,14 +421,14 @@ export class AdvancedBusinessValidationService {
   }
 
   private async validateManufacturingRules(
-    entry: any,
+    entry: JournalEntry,
     context: ValidationContext
   ): Promise<ValidationResult> {
     const warnings: Array<{ field: string; message: string; severity: 'warning' | 'info' }> = [];
 
     // Validation de la production et des coûts
-    const hasProductionCosts = entry.lines?.some((line: any) =>
-      line.account_number?.startsWith('6') && !line.account_number?.startsWith('60') && !line.account_number?.startsWith('61')
+    const hasProductionCosts = entry.lines?.some((line) =>
+      (line as { account_number?: string }).account_number?.startsWith('6') && !(line as { account_number?: string }).account_number?.startsWith('60') && !(line as { account_number?: string }).account_number?.startsWith('61')
     );
 
     if (hasProductionCosts) {
@@ -443,19 +447,22 @@ export class AdvancedBusinessValidationService {
   // ============================================================================
 
   private async validateVATCompliance(
-    entry: any,
+    entry: JournalEntry,
     context: ValidationContext
   ): Promise<ValidationResult> {
     const errors: Array<{ field: string; message: string; severity: 'error' | 'warning' | 'info' }> = [];
     const warnings: Array<{ field: string; message: string; severity: 'warning' | 'info' }> = [];
 
     // Validation TVA selon le pays
-    for (const line of entry.lines || []) {
-      if (line.vat_rate) {
-        const vatValidation = await this.validateVATRate(line.vat_rate, context.countryCode, entry.date);
-        if (!vatValidation.isValid) {
-          errors.push(...vatValidation.errors);
-        }
+    const vatValidations = await Promise.all(
+      (entry.lines || [])
+        .filter(line => (line as { vat_rate?: unknown }).vat_rate !== undefined)
+        .map(line => this.validateVATRate((line as { vat_rate: number }).vat_rate, context.countryCode, new Date(entry.entryDate)))
+    );
+
+    for (const vatValidation of vatValidations) {
+      if (!vatValidation.isValid) {
+        errors.push(...vatValidation.errors);
       }
     }
 
@@ -473,7 +480,7 @@ export class AdvancedBusinessValidationService {
   }
 
   private async validateAccountingStandards(
-    entry: any,
+    entry: JournalEntry,
     context: ValidationContext
   ): Promise<ValidationResult> {
     const errors: Array<{ field: string; message: string; severity: 'error' | 'warning' | 'info' }> = [];
@@ -482,8 +489,13 @@ export class AdvancedBusinessValidationService {
     // Validation selon PCG ou SYSCOHADA
     const standard = context.countryCode === 'FR' ? 'PCG' : 'SYSCOHADA';
 
-    for (const line of entry.lines || []) {
-      const accountValidation = await this.validateAccountByStandard(line.account_number, standard);
+    const accountValidations = await Promise.all(
+      (entry.lines || []).map(line =>
+        this.validateAccountByStandard((line as { account_number?: string }).account_number || '', standard)
+      )
+    );
+
+    for (const accountValidation of accountValidations) {
       if (!accountValidation.isValid) {
         errors.push(...accountValidation.errors);
       }
@@ -493,14 +505,14 @@ export class AdvancedBusinessValidationService {
   }
 
   private async validateLegalThresholds(
-    entry: any,
+    entry: JournalEntry,
     context: ValidationContext
   ): Promise<ValidationResult> {
     const warnings: Array<{ field: string; message: string; severity: 'warning' | 'info' }> = [];
 
     // Calcul du montant total de l'écriture
     const totalAmount = Math.abs(
-      (entry.lines || []).reduce((sum: number, line: any) => sum + (line.debit || 0) + (line.credit || 0), 0)
+      (entry.lines || []).reduce((sum: number, line) => sum + ((line as { debit?: number }).debit || 0) + ((line as { credit?: number }).credit || 0), 0)
     );
 
     // Seuils selon le pays (exemple simplifié)
@@ -528,26 +540,33 @@ export class AdvancedBusinessValidationService {
   // ============================================================================
 
   private async validateBalanceContinuity(
-    entry: any,
+    entry: JournalEntry,
     context: ValidationContext
   ): Promise<ValidationResult> {
     const errors: Array<{ field: string; message: string; severity: 'error' | 'warning' | 'info' }> = [];
 
     // Vérifier la continuité des soldes pour les comptes de bilan
-    for (const line of entry.lines || []) {
-      if (line.account_number?.startsWith('1') || line.account_number?.startsWith('2') ||
-          line.account_number?.startsWith('3') || line.account_number?.startsWith('4') ||
-          line.account_number?.startsWith('5')) {
+    const balanceLines = (entry.lines || []).filter(line =>
+      (line as { account_number?: string }).account_number?.startsWith('1') ||
+      (line as { account_number?: string }).account_number?.startsWith('2') ||
+      (line as { account_number?: string }).account_number?.startsWith('3') ||
+      (line as { account_number?: string }).account_number?.startsWith('4') ||
+      (line as { account_number?: string }).account_number?.startsWith('5')
+    );
 
-        const continuityCheck = await this.checkAccountBalanceContinuity(
-          line.account_number,
+    const continuityChecks = await Promise.all(
+      balanceLines.map(line =>
+        this.checkAccountBalanceContinuity(
+          (line as { account_number?: string }).account_number || '',
           context.companyId,
-          entry.date
-        );
+          new Date(entry.entryDate)
+        )
+      )
+    );
 
-        if (!continuityCheck.isValid) {
-          errors.push(...continuityCheck.errors);
-        }
+    for (const continuityCheck of continuityChecks) {
+      if (!continuityCheck.isValid) {
+        errors.push(...continuityCheck.errors);
       }
     }
 
@@ -555,14 +574,14 @@ export class AdvancedBusinessValidationService {
   }
 
   private async validateDepreciationConsistency(
-    entry: any,
+    entry: JournalEntry,
     context: ValidationContext
   ): Promise<ValidationResult> {
     const warnings: Array<{ field: string; message: string; severity: 'warning' | 'info' }> = [];
 
     // Vérifier la cohérence des amortissements
-    const hasDepreciation = entry.lines?.some((line: any) =>
-      line.account_number?.startsWith('68') || line.account_number?.startsWith('28')
+    const hasDepreciation = entry.lines?.some((line) =>
+      (line as { account_number?: string }).account_number?.startsWith('68') || (line as { account_number?: string }).account_number?.startsWith('28')
     );
 
     if (hasDepreciation) {
@@ -576,14 +595,14 @@ export class AdvancedBusinessValidationService {
   }
 
   private async validateProvisionConsistency(
-    entry: any,
+    entry: JournalEntry,
     context: ValidationContext
   ): Promise<ValidationResult> {
     const warnings: Array<{ field: string; message: string; severity: 'warning' | 'info' }> = [];
 
     // Vérifier la cohérence des provisions
-    const hasProvisions = entry.lines?.some((line: any) =>
-      line.account_number?.startsWith('15') || line.account_number?.startsWith('49')
+    const hasProvisions = entry.lines?.some((line) =>
+      (line as { account_number?: string }).account_number?.startsWith('15') || (line as { account_number?: string }).account_number?.startsWith('49')
     );
 
     if (hasProvisions) {
@@ -600,13 +619,13 @@ export class AdvancedBusinessValidationService {
   // MÉTHODES UTILITAIRES
   // ============================================================================
 
-  private checkEntryBalance(entry: any): { isBalanced: boolean; difference: number } {
+  private checkEntryBalance(entry: JournalEntry): { isBalanced: boolean; difference: number } {
     let totalDebit = 0;
     let totalCredit = 0;
 
     for (const line of entry.lines || []) {
-      totalDebit += line.debit || 0;
-      totalCredit += line.credit || 0;
+      totalDebit += (line as { debit?: number }).debit || 0;
+      totalCredit += (line as { credit?: number }).credit || 0;
     }
 
     const difference = Math.abs(totalDebit - totalCredit);
@@ -617,33 +636,40 @@ export class AdvancedBusinessValidationService {
   }
 
   private async validateAccountBalances(
-    entry: any,
+    entry: JournalEntry,
     context: ValidationContext
   ): Promise<ValidationResult> {
     const warnings: Array<{ field: string; message: string; severity: 'warning' | 'info' }> = [];
 
     // Vérifier les anomalies de solde par compte
-    for (const line of entry.lines || []) {
-      const accountBalance = await this.getAccountBalance(line.account_number, context.companyId, entry.date);
+    const balanceChecks = await Promise.all(
+      (entry.lines || []).map(async (line, index) => {
+        const accountBalance = await this.getAccountBalance((line as { account_number?: string }).account_number || '', context.companyId, new Date(entry.entryDate));
 
-      // Vérifier si le solde devient négatif pour un compte qui ne devrait pas l'être
-      if (accountBalance < 0 && this.shouldAccountBePositive(line.account_number)) {
-        warnings.push({
-          field: `lines[${entry.lines.indexOf(line)}].account_number`,
-          message: `Le compte ${line.account_number} a un solde négatif inhabituel`,
-          severity: 'warning'
-        });
-      }
+        // Vérifier si le solde devient négatif pour un compte qui ne devrait pas l'être
+        if (accountBalance < 0 && this.shouldAccountBePositive((line as { account_number?: string }).account_number || '')) {
+          return {
+            field: `lines[${index}].account_number`,
+            message: `Le compte ${(line as { account_number?: string }).account_number} a un solde négatif inhabituel`,
+            severity: 'warning' as const
+          };
+        }
+        return null;
+      })
+    );
+
+    for (const warning of balanceChecks.filter((w): w is NonNullable<typeof w> => w !== null)) {
+      warnings.push(warning);
     }
 
     return { isValid: true, errors: [], warnings };
   }
 
-  private validateAmounts(entry: any): ValidationResult {
+  private validateAmounts(entry: JournalEntry): ValidationResult {
     const warnings: Array<{ field: string; message: string; severity: 'warning' | 'info' }> = [];
 
     for (const line of entry.lines || []) {
-      const amount = (line.debit || 0) + (line.credit || 0);
+      const amount = ((line as { debit?: number }).debit || 0) + ((line as { credit?: number }).credit || 0);
 
       // Détecter les montants ronds suspects
       if (amount > 1000 && amount % 1000 === 0) {
@@ -676,19 +702,19 @@ export class AdvancedBusinessValidationService {
     return { isValid: true, errors: [], warnings: [] };
   }
 
-  private async validateStockMovements(_entry: any, _context: ValidationContext): Promise<ValidationResult> {
+  private async validateStockMovements(_entry: JournalEntry, _context: ValidationContext): Promise<ValidationResult> {
     return { isValid: true, errors: [], warnings: [] };
   }
 
-  private checkServiceVAT(_entry: any): ValidationResult {
+  private checkServiceVAT(_entry: JournalEntry): ValidationResult {
     return { isValid: true, errors: [], warnings: [] };
   }
 
-  private async validateProductionCosts(_entry: any, _context: ValidationContext): Promise<ValidationResult> {
+  private async validateProductionCosts(_entry: JournalEntry, _context: ValidationContext): Promise<ValidationResult> {
     return { isValid: true, errors: [], warnings: [] };
   }
 
-  private checkVATBalance(_entry: any): { isBalanced: boolean } {
+  private checkVATBalance(_entry: JournalEntry): { isBalanced: boolean } {
     return { isBalanced: true };
   }
 
@@ -696,11 +722,11 @@ export class AdvancedBusinessValidationService {
     return { isValid: true, errors: [], warnings: [] };
   }
 
-  private async checkDepreciationLogic(_entry: any, _context: ValidationContext): Promise<ValidationResult> {
+  private async checkDepreciationLogic(_entry: JournalEntry, _context: ValidationContext): Promise<ValidationResult> {
     return { isValid: true, errors: [], warnings: [] };
   }
 
-  private async checkProvisionLogic(_entry: any, _context: ValidationContext): Promise<ValidationResult> {
+  private async checkProvisionLogic(_entry: JournalEntry, _context: ValidationContext): Promise<ValidationResult> {
     return { isValid: true, errors: [], warnings: [] };
   }
 

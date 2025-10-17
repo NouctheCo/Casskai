@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 // Service de conversion des devises pour les marchés africains
 // Taux de change approximatifs (à mettre à jour régulièrement)
 
@@ -64,7 +65,7 @@ export const CURRENCY_RATES: Record<string, CurrencyRate> = {
 export function convertPrice(priceEUR: number, targetCurrency: string): number {
   const rate = CURRENCY_RATES[targetCurrency];
   if (!rate) {
-    console.warn(`Devise non supportée: ${targetCurrency}`);
+    logger.warn(`Devise non supportée: ${targetCurrency}`);
     return priceEUR;
   }
   

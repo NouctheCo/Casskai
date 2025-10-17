@@ -2,12 +2,13 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { 
-  Upload, 
-  Download, 
-  FileText, 
-  CheckCircle, 
-  AlertCircle, 
+import { logger } from '@/utils/logger';
+import {
+  Upload,
+  Download,
+  FileText,
+  CheckCircle,
+  AlertCircle,
   Settings,
   Play,
   RotateCcw
@@ -267,7 +268,7 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
       );
 
       // TODO: Sauvegarde de l'écriture générée
-      console.warn('Écriture générée:', entry);
+      logger.warn('Écriture générée:', entry);
       
       if (data.generateRecurring) {
         await EntryTemplatesService.processRecurringEntries(companyId);
@@ -286,7 +287,7 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
   const handleAutoLetterage = async () => {
     try {
       const result = await AutomaticLetterageService.performAutoLetterage(companyId);
-      console.warn('Résultat lettrage:', result);
+      logger.warn('Résultat lettrage:', result)
     } catch (error) {
       if (error instanceof Error) {
         onError?.(`Erreur lettrage: ${error.message}`);

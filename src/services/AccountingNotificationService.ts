@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { logger } from '@/utils/logger';
 
 // Types pour les notifications
 export interface AccountingNotification {
@@ -363,7 +364,7 @@ export class AccountingNotificationService {
       try {
         await this.sendToChannel(channel, notification);
       } catch (error) {
-        console.error(`Erreur lors de l'envoi vers le canal ${channel.type}:`, error);
+        logger.error(`Erreur lors de l'envoi vers le canal ${channel.type}:`, error)
       }
     }
   }
@@ -375,7 +376,7 @@ export class AccountingNotificationService {
     switch (channel.type) {
       case 'in_app':
         // Pour l'instant, on log simplement
-        console.log('Notification in-app:', notification);
+        logger.info('Notification in-app:', notification);
         break;
 
       case 'email':
@@ -392,7 +393,7 @@ export class AccountingNotificationService {
 
       case 'sms':
         // Implémentation SMS à ajouter si nécessaire
-        console.log('SMS notification:', notification);
+        logger.info('SMS notification:', notification);
         break;
     }
   }
@@ -402,7 +403,7 @@ export class AccountingNotificationService {
    */
   private async sendEmailNotification(config: any, notification: AccountingNotification): Promise<void> {
     // Implémentation SMTP à ajouter
-    console.log('Envoi email:', notification, config);
+    logger.info('Envoi email:', notification, config)
   }
 
   /**

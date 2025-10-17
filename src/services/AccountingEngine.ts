@@ -1,5 +1,5 @@
 // src/services/AccountingEngine.ts
-import { AccountingService } from './accountingService';
+// import { AccountingService } from './accountingService'; // REMOVED: Legacy service
 import { IntegratedAccountingService } from './integratedAccountingService';
 import { AccountingValidationService } from './accountingValidationService';
 import { JournalsService } from './journalsService';
@@ -8,7 +8,7 @@ import { VATCalculationService } from './vatCalculationService';
 import { AutomaticLetterageService } from './automaticLetterageService';
 import { EntryTemplatesService } from './entryTemplatesService';
 import { AdvancedBusinessValidationService } from './AdvancedBusinessValidationService';
-import { AccountingIntegrityService } from './AccountingIntegrityService';
+import { AccountingIntegrityService, IntegrityResult } from './AccountingIntegrityService';
 import { AccountingNotificationService } from './AccountingNotificationService';
 
 import { supabase } from '../lib/supabase';
@@ -26,7 +26,7 @@ export class AccountingEngine {
   private static instance: AccountingEngine;
 
   // Services consolidés
-  private accountingService: AccountingService;
+  // private accountingService: AccountingService; // REMOVED: Legacy service
   private integratedService: IntegratedAccountingService;
   private validationService: typeof AccountingValidationService;
   private advancedValidationService: AdvancedBusinessValidationService;
@@ -39,7 +39,7 @@ export class AccountingEngine {
   private notificationService: AccountingNotificationService;
 
   private constructor() {
-    this.accountingService = AccountingService.getInstance();
+    // this.accountingService = AccountingService.getInstance(); // REMOVED: Legacy service
     this.integratedService = new IntegratedAccountingService();
     this.validationService = AccountingValidationService;
     this.advancedValidationService = AdvancedBusinessValidationService.getInstance();
@@ -115,10 +115,11 @@ export class AccountingEngine {
 
   /**
    * Accès au service de comptabilité de base
+   * @deprecated Legacy service removed. Use ChartOfAccountsService instead.
    */
-  getAccountingService(): AccountingService {
-    return this.accountingService;
-  }
+  // getAccountingService(): AccountingService {
+  //   return this.accountingService;
+  // }
 
   /**
    * Accès au service d'import/export intégré
@@ -230,19 +231,31 @@ export class AccountingEngine {
    */
   async performIntegrityChecks(companyId: string): Promise<{
     passed: boolean;
-    results: any[];
+    results: IntegrityResult[];
     notifications: string[];
   }> {
-    const results = await this.integrityService.performAllChecks(companyId);
+    const report = await this.integrityService.runIntegrityChecks(companyId);
     const notifications: string[] = [];
 
-    for (const result of results) {
-      if (!result.passed) {
+    // IntegrityReport has a 'checks' property containing the array of results
+    for (const result of report.checks) {
+      if (result.status !== 'passed') {
+        // Map severity: critical -> critical, major -> high, minor -> medium, info -> low
+        const severityMap: Record<string, 'low' | 'medium' | 'high' | 'critical'> = {
+          'critical': 'critical',
+          'major': 'high',
+          'minor': 'medium',
+          'info': 'low'
+        };
+
+        // Get the severity from the check definition (default to medium)
+        const severity: 'low' | 'medium' | 'high' | 'critical' = result.status === 'failed' ? 'high' : 'medium';
+
         const notificationId = await this.notificationService.sendIntegrityFailure(
           companyId,
           result.checkName,
-          result.severity,
-          result.recommendation,
+          severity,
+          result.recommendations?.join(', ') || 'Vérifier les données',
           result.details
         );
         notifications.push(notificationId);
@@ -250,8 +263,8 @@ export class AccountingEngine {
     }
 
     return {
-      passed: results.every(r => r.passed),
-      results,
+      passed: report.checks.every(r => r.status === 'passed'),
+      results: report.checks,
       notifications
     };
   }
@@ -261,7 +274,7 @@ export class AccountingEngine {
    */
   async validateTransactionWithNotifications(
     companyId: string,
-    transaction: any,
+    transaction: Record<string, unknown>,
     sector: string
   ): Promise<{
     valid: boolean;
@@ -269,26 +282,35 @@ export class AccountingEngine {
     warnings: string[];
     notifications: string[];
   }> {
-    const validation = await this.advancedValidationService.validateTransaction(transaction, sector);
+    const validation = await this.advancedValidationService.validateBusinessRules(transaction, {
+      sector,
+      companyId,
+      countryCode: 'FR',
+      fiscalYearStart: new Date(),
+      entryDate: new Date((transaction.date as string | number) || Date.now()),
+      journalType: (transaction.journalType as string) || 'general'
+    });
     const notifications: string[] = [];
 
     // Envoyer des notifications pour les erreurs
+    // validation.errors is array of objects with { field, message, severity }
     for (const error of validation.errors) {
       const notificationId = await this.notificationService.sendValidationError(
         companyId,
         'Erreur de validation de transaction',
-        error,
-        { transaction, sector },
+        error.message, // Extract the message string
+        { transaction, sector, field: error.field },
         ['Corriger les données de la transaction', 'Revalider la transaction']
       );
       notifications.push(notificationId);
     }
 
     // Envoyer des notifications pour les avertissements
+    // validation.warnings is array of objects with { field, message, severity }
     for (const warning of validation.warnings) {
       const notificationId = await this.notificationService.sendBusinessRuleWarning(
         companyId,
-        warning,
+        warning.message, // Extract the message string
         transaction.amount || 'N/A',
         sector,
         ['Vérifier la conformité de la transaction', 'Consulter les règles métier']
@@ -297,9 +319,9 @@ export class AccountingEngine {
     }
 
     return {
-      valid: validation.valid,
-      errors: validation.errors,
-      warnings: validation.warnings,
+      valid: validation.isValid, // Use 'isValid' not 'valid'
+      errors: validation.errors.map(e => e.message), // Convert array of objects to array of strings
+      warnings: validation.warnings.map(w => w.message), // Convert array of objects to array of strings
       notifications
     };
   }
@@ -329,22 +351,11 @@ export class AccountingEngine {
 
     // Effectuer la clôture
     try {
-      await this.accountingService.closeAccountingPeriod(companyId, period);
-
-      // Notification de succès
-      const successNotificationId = await this.notificationService.sendNotification({
-        type: 'success',
-        category: 'system',
-        title: 'Clôture de période réussie',
-        message: `La période ${period} a été clôturée avec succès pour l'entreprise ${companyId}`,
-        companyId,
-        details: { period, integrityChecked: true }
-      });
-
+      // Period closing not yet implemented: return a not-implemented response
       return {
-        success: true,
+        success: false,
         integrityPassed: true,
-        notifications: [...integrityCheck.notifications, successNotificationId]
+        notifications: [...integrityCheck.notifications, 'Period closing not implemented']
       };
     } catch (error) {
       // Notification d'échec

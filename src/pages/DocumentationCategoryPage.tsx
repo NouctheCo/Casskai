@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { 
-  ArrowLeft, 
-  Clock, 
-  Star, 
+import {
+  ArrowLeft,
+  Clock,
+  Star,
   BookOpen,
   ArrowRight,
   Search,
@@ -23,7 +23,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PageContainer } from '@/components/ui/PageContainer';
 import { PublicNavigation } from '@/components/navigation/PublicNavigation';
-import { useState } from 'react';
 
 export const categoriesData = {
   'premiers-pas': {

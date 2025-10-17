@@ -1,9 +1,10 @@
 /**
  * Extensions du ReportsService pour les 8 rapports manquants
- * À intégrer dans reportsService.ts
+ * Refactorisé pour réduire la complexité des fonctions
  */
 
 import { supabase } from '../lib/supabase';
+import { logger } from '@/utils/logger';
 import type { ReportServiceResponse } from '../types/reports.types';
 import type {
   AgedReceivablesData,
@@ -13,6 +14,226 @@ import type {
   KPIDashboardData,
   TaxSummaryData
 } from '../utils/reportGeneration/types';
+
+// ========================================
+// TYPES
+// ========================================
+
+interface InvoiceWithCustomer {
+  id: string;
+  customer_id: string;
+  invoice_number: string;
+  invoice_date: string;
+  due_date: string;
+  total_amount: number;
+  customers?: {
+    name: string;
+  };
+}
+
+interface BillWithSupplier {
+  id: string;
+  supplier_id: string;
+  bill_number: string;
+  bill_date: string;
+  due_date: string;
+  total_amount: number;
+  suppliers?: {
+    name: string;
+  };
+}
+
+interface AgedInvoice {
+  invoice_id: string;
+  invoice_number: string;
+  invoice_date: string;
+  due_date: string;
+  amount: number;
+  days_overdue: number;
+}
+
+interface AgedBill {
+  bill_id: string;
+  bill_number: string;
+  bill_date: string;
+  due_date: string;
+  amount: number;
+  days_overdue: number;
+}
+
+interface AgedCustomer {
+  customer_id: string;
+  customer_name: string;
+  total_amount: number;
+  current: number;
+  days_30: number;
+  days_60: number;
+  days_90_plus: number;
+  invoices: AgedInvoice[];
+}
+
+interface AgedSupplier {
+  supplier_id: string;
+  supplier_name: string;
+  total_amount: number;
+  current: number;
+  days_30: number;
+  days_60: number;
+  days_90_plus: number;
+  bills: AgedBill[];
+}
+
+interface AccountEntry {
+  balance?: number;
+}
+
+interface ExpenseEntry {
+  amount?: number;
+}
+
+interface BalanceSheetData {
+  totals?: {
+    total_assets?: number;
+    total_liabilities?: number;
+  };
+  assets?: {
+    cash?: AccountEntry[];
+    receivables?: AccountEntry[];
+    inventory?: AccountEntry[];
+  };
+  liabilities?: {
+    payables?: AccountEntry[];
+  };
+  equity?: {
+    total?: number;
+  };
+}
+
+interface IncomeStatementData {
+  summary?: {
+    total_revenue?: number;
+    net_income?: number;
+  };
+  expenses?: {
+    purchases?: ExpenseEntry[];
+  };
+}
+
+// ========================================
+// UTILITY FUNCTIONS
+// ========================================
+
+/**
+ * Calcule le nombre de jours de retard entre deux dates
+ */
+function calculateDaysOverdue(dueDate: string, asOfDate: string): number {
+  const due = new Date(dueDate);
+  const now = new Date(asOfDate);
+  const daysDiff = Math.floor((now.getTime() - due.getTime()) / (1000 * 60 * 60 * 24));
+  return Math.max(0, daysDiff);
+}
+
+/**
+ * Catégorise un montant selon l'ancienneté
+ */
+function categorizeByAge(daysOverdue: number, amount: number): {
+  current: number;
+  days_30: number;
+  days_60: number;
+  days_90_plus: number;
+} {
+  if (daysOverdue <= 0) {
+    return { current: amount, days_30: 0, days_60: 0, days_90_plus: 0 };
+  } else if (daysOverdue <= 30) {
+    return { current: 0, days_30: amount, days_60: 0, days_90_plus: 0 };
+  } else if (daysOverdue <= 60) {
+    return { current: 0, days_30: 0, days_60: amount, days_90_plus: 0 };
+  } else {
+    return { current: 0, days_30: 0, days_60: 0, days_90_plus: amount };
+  }
+}
+
+/**
+ * Crée un nouvel objet customer vide
+ */
+function createEmptyCustomer(customerId: string, customerName: string): AgedCustomer {
+  return {
+    customer_id: customerId,
+    customer_name: customerName,
+    total_amount: 0,
+    current: 0,
+    days_30: 0,
+    days_60: 0,
+    days_90_plus: 0,
+    invoices: []
+  };
+}
+
+/**
+ * Crée un nouvel objet supplier vide
+ */
+function createEmptySupplier(supplierId: string, supplierName: string): AgedSupplier {
+  return {
+    supplier_id: supplierId,
+    supplier_name: supplierName,
+    total_amount: 0,
+    current: 0,
+    days_30: 0,
+    days_60: 0,
+    days_90_plus: 0,
+    bills: []
+  };
+}
+
+/**
+ * Calcule les totaux d'un ensemble de clients/fournisseurs
+ */
+function calculateAgingTotals<T extends { total_amount: number; current: number; days_30: number; days_60: number; days_90_plus: number }>(
+  items: T[]
+): {
+  total_receivables: number;
+  total_current: number;
+  total_30: number;
+  total_60: number;
+  total_90_plus: number;
+} {
+  return {
+    total_receivables: items.reduce((sum, item) => sum + item.total_amount, 0),
+    total_current: items.reduce((sum, item) => sum + item.current, 0),
+    total_30: items.reduce((sum, item) => sum + item.days_30, 0),
+    total_60: items.reduce((sum, item) => sum + item.days_60, 0),
+    total_90_plus: items.reduce((sum, item) => sum + item.days_90_plus, 0)
+  };
+}
+
+/**
+ * Gère les erreurs de manière uniforme
+ */
+function handleError<T>(error: unknown, context: string): ReportServiceResponse<T> {
+  logger.error(`Exception in ${context}:`, error);
+  return {
+    data: null,
+    error: { message: error instanceof Error ? error.message : 'Erreur inconnue' }
+  };
+}
+
+/**
+ * Extrait et somme les montants d'une catégorie d'actifs
+ */
+function sumAccountBalances(accounts: AccountEntry[] | undefined): number {
+  return accounts?.reduce((sum, acc) => sum + (acc.balance || 0), 0) || 0;
+}
+
+/**
+ * Extrait et somme les montants d'une catégorie de dépenses
+ */
+function sumExpenseAmounts(expenses: ExpenseEntry[] | undefined): number {
+  return expenses?.reduce((sum, exp) => sum + (exp.amount || 0), 0) || 0;
+}
+
+// ========================================
+// AGED RECEIVABLES / PAYABLES
+// ========================================
 
 /**
  * 1. Clients échéancier (Aged Receivables)
@@ -32,64 +253,13 @@ export async function generateAgedReceivables(
       .lte('due_date', asOfDate);
 
     if (error) {
-      console.error('Error fetching invoices:', error);
+      logger.error('Error fetching invoices:', error);
       return { data: null, error: { message: error.message } };
     }
 
-    const customers: Record<string, any> = {};
-    const now = new Date(asOfDate);
-
-    // Grouper par client et calculer les aging buckets
-    invoices?.forEach(invoice => {
-      const customerId = invoice.customer_id;
-      if (!customers[customerId]) {
-        customers[customerId] = {
-          customer_id: customerId,
-          customer_name: invoice.customers?.name || 'Client inconnu',
-          total_amount: 0,
-          current: 0,
-          days_30: 0,
-          days_60: 0,
-          days_90_plus: 0,
-          invoices: []
-        };
-      }
-
-      const dueDate = new Date(invoice.due_date);
-      const daysOverdue = Math.floor((now.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
-      const amount = invoice.total_amount || 0;
-
-      customers[customerId].total_amount += amount;
-      customers[customerId].invoices.push({
-        invoice_id: invoice.id,
-        invoice_number: invoice.invoice_number,
-        invoice_date: invoice.invoice_date,
-        due_date: invoice.due_date,
-        amount,
-        days_overdue: Math.max(0, daysOverdue)
-      });
-
-      // Catégoriser par ancienneté
-      if (daysOverdue <= 0) {
-        customers[customerId].current += amount;
-      } else if (daysOverdue <= 30) {
-        customers[customerId].days_30 += amount;
-      } else if (daysOverdue <= 60) {
-        customers[customerId].days_60 += amount;
-      } else {
-        customers[customerId].days_90_plus += amount;
-      }
-    });
-
+    const customers = processAgedInvoices(invoices || [], asOfDate);
     const customersList = Object.values(customers);
-
-    const totals = {
-      total_receivables: customersList.reduce((sum, c) => sum + c.total_amount, 0),
-      total_current: customersList.reduce((sum, c) => sum + c.current, 0),
-      total_30: customersList.reduce((sum, c) => sum + c.days_30, 0),
-      total_60: customersList.reduce((sum, c) => sum + c.days_60, 0),
-      total_90_plus: customersList.reduce((sum, c) => sum + c.days_90_plus, 0)
-    };
+    const totals = calculateAgingTotals(customersList);
 
     const report: AgedReceivablesData = {
       company_id: companyId,
@@ -103,12 +273,49 @@ export async function generateAgedReceivables(
 
     return { data: report };
   } catch (error) {
-    console.error('Exception in generateAgedReceivables:', error);
-    return {
-      data: null,
-      error: { message: error instanceof Error ? error.message : 'Erreur inconnue' }
-    };
+    return handleError(error, 'generateAgedReceivables');
   }
+}
+
+/**
+ * Traite les factures et les groupe par client avec calculs d'ancienneté
+ */
+function processAgedInvoices(invoices: InvoiceWithCustomer[], asOfDate: string): Record<string, AgedCustomer> {
+  const customers: Record<string, AgedCustomer> = {};
+
+  invoices.forEach(invoice => {
+    const customerId = invoice.customer_id;
+
+    if (!customers[customerId]) {
+      customers[customerId] = createEmptyCustomer(
+        customerId,
+        invoice.customers?.name || 'Client inconnu'
+      );
+    }
+
+    const daysOverdue = calculateDaysOverdue(invoice.due_date, asOfDate);
+    const amount = invoice.total_amount || 0;
+    const categories = categorizeByAge(daysOverdue, amount);
+
+    // Mettre à jour les totaux
+    customers[customerId].total_amount += amount;
+    customers[customerId].current += categories.current;
+    customers[customerId].days_30 += categories.days_30;
+    customers[customerId].days_60 += categories.days_60;
+    customers[customerId].days_90_plus += categories.days_90_plus;
+
+    // Ajouter la facture
+    customers[customerId].invoices.push({
+      invoice_id: invoice.id,
+      invoice_number: invoice.invoice_number,
+      invoice_date: invoice.invoice_date,
+      due_date: invoice.due_date,
+      amount,
+      days_overdue: daysOverdue
+    });
+  });
+
+  return customers;
 }
 
 /**
@@ -128,56 +335,12 @@ export async function generateAgedPayables(
       .lte('due_date', asOfDate);
 
     if (error) {
-      console.error('Error fetching bills:', error);
+      logger.error('Error fetching bills:', error);
       return { data: null, error: { message: error.message } };
     }
 
-    const suppliers: Record<string, any> = {};
-    const now = new Date(asOfDate);
-
-    // Grouper par fournisseur
-    bills?.forEach(bill => {
-      const supplierId = bill.supplier_id;
-      if (!suppliers[supplierId]) {
-        suppliers[supplierId] = {
-          supplier_id: supplierId,
-          supplier_name: bill.suppliers?.name || 'Fournisseur inconnu',
-          total_amount: 0,
-          current: 0,
-          days_30: 0,
-          days_60: 0,
-          days_90_plus: 0,
-          bills: []
-        };
-      }
-
-      const dueDate = new Date(bill.due_date);
-      const daysOverdue = Math.floor((now.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
-      const amount = bill.total_amount || 0;
-
-      suppliers[supplierId].total_amount += amount;
-      suppliers[supplierId].bills.push({
-        bill_id: bill.id,
-        bill_number: bill.bill_number,
-        bill_date: bill.bill_date,
-        due_date: bill.due_date,
-        amount,
-        days_overdue: Math.max(0, daysOverdue)
-      });
-
-      if (daysOverdue <= 0) {
-        suppliers[supplierId].current += amount;
-      } else if (daysOverdue <= 30) {
-        suppliers[supplierId].days_30 += amount;
-      } else if (daysOverdue <= 60) {
-        suppliers[supplierId].days_60 += amount;
-      } else {
-        suppliers[supplierId].days_90_plus += amount;
-      }
-    });
-
+    const suppliers = processAgedBills(bills || [], asOfDate);
     const suppliersList = Object.values(suppliers);
-
     const totals = {
       total_payables: suppliersList.reduce((sum, s) => sum + s.total_amount, 0),
       total_current: suppliersList.reduce((sum, s) => sum + s.current, 0),
@@ -198,13 +361,54 @@ export async function generateAgedPayables(
 
     return { data: report };
   } catch (error) {
-    console.error('Exception in generateAgedPayables:', error);
-    return {
-      data: null,
-      error: { message: error instanceof Error ? error.message : 'Erreur inconnue' }
-    };
+    return handleError(error, 'generateAgedPayables');
   }
 }
+
+/**
+ * Traite les factures fournisseurs et les groupe avec calculs d'ancienneté
+ */
+function processAgedBills(bills: BillWithSupplier[], asOfDate: string): Record<string, AgedSupplier> {
+  const suppliers: Record<string, AgedSupplier> = {};
+
+  bills.forEach(bill => {
+    const supplierId = bill.supplier_id;
+
+    if (!suppliers[supplierId]) {
+      suppliers[supplierId] = createEmptySupplier(
+        supplierId,
+        bill.suppliers?.name || 'Fournisseur inconnu'
+      );
+    }
+
+    const daysOverdue = calculateDaysOverdue(bill.due_date, asOfDate);
+    const amount = bill.total_amount || 0;
+    const categories = categorizeByAge(daysOverdue, amount);
+
+    // Mettre à jour les totaux
+    suppliers[supplierId].total_amount += amount;
+    suppliers[supplierId].current += categories.current;
+    suppliers[supplierId].days_30 += categories.days_30;
+    suppliers[supplierId].days_60 += categories.days_60;
+    suppliers[supplierId].days_90_plus += categories.days_90_plus;
+
+    // Ajouter la facture
+    suppliers[supplierId].bills.push({
+      bill_id: bill.id,
+      bill_number: bill.bill_number,
+      bill_date: bill.bill_date,
+      due_date: bill.due_date,
+      amount,
+      days_overdue: daysOverdue
+    });
+  });
+
+  return suppliers;
+}
+
+// ========================================
+// FINANCIAL RATIOS
+// ========================================
 
 /**
  * 3. Ratios financiers (Financial Ratios)
@@ -215,37 +419,21 @@ export async function generateFinancialRatios(
   periodEnd: string
 ): Promise<ReportServiceResponse<FinancialRatiosData>> {
   try {
-    // Récupérer bilan et compte de résultat
-    const { data: balanceSheet, error: bsError } = await supabase.rpc('generate_balance_sheet', {
-      p_company_id: companyId,
-      p_end_date: periodEnd
-    });
+    // Récupérer les données financières
+    const [balanceSheet, incomeStatement] = await Promise.all([
+      fetchBalanceSheet(companyId, periodEnd),
+      fetchIncomeStatement(companyId, periodStart, periodEnd)
+    ]);
 
-    const { data: incomeStatement, error: isError } = await supabase.rpc('generate_income_statement', {
-      p_company_id: companyId,
-      p_start_date: periodStart,
-      p_end_date: periodEnd
-    });
-
-    if (bsError || isError) {
+    if (!balanceSheet || !incomeStatement) {
       return { data: null, error: { message: 'Erreur lors de la récupération des données' } };
     }
 
-    // Calculer les ratios
-    const totalAssets = balanceSheet?.totals?.total_assets || 1;
-    const currentAssets = balanceSheet?.assets?.cash?.reduce((sum: number, a: any) => sum + (a.balance || 0), 0) +
-                          balanceSheet?.assets?.receivables?.reduce((sum: number, a: any) => sum + (a.balance || 0), 0) +
-                          balanceSheet?.assets?.inventory?.reduce((sum: number, a: any) => sum + (a.balance || 0), 0) || 1;
-    const currentLiabilities = balanceSheet?.liabilities?.payables?.reduce((sum: number, a: any) => sum + (a.balance || 0), 0) || 1;
-    const inventory = balanceSheet?.assets?.inventory?.reduce((sum: number, a: any) => sum + (a.balance || 0), 0) || 0;
-    const cash = balanceSheet?.assets?.cash?.reduce((sum: number, a: any) => sum + (a.balance || 0), 0) || 0;
-    const equity = balanceSheet?.equity?.total || 1;
-    const totalLiabilities = balanceSheet?.totals?.total_liabilities || 0;
+    // Extraire les valeurs financières
+    const financials = extractFinancialValues(balanceSheet, incomeStatement);
 
-    const revenue = incomeStatement?.summary?.total_revenue || 1;
-    const grossProfit = revenue - (incomeStatement?.expenses?.purchases?.reduce((sum: number, e: any) => sum + (e.amount || 0), 0) || 0);
-    const operatingIncome = incomeStatement?.summary?.net_income || 0;
-    const netIncome = incomeStatement?.summary?.net_income || 0;
+    // Calculer les ratios
+    const ratios = calculateFinancialRatios(financials);
 
     const report: FinancialRatiosData = {
       company_id: companyId,
@@ -254,41 +442,146 @@ export async function generateFinancialRatios(
       period_end: periodEnd,
       report_type: 'financial_ratios',
       currency: 'EUR',
-      liquidity_ratios: {
-        current_ratio: currentAssets / currentLiabilities,
-        quick_ratio: (currentAssets - inventory) / currentLiabilities,
-        cash_ratio: cash / currentLiabilities
-      },
-      profitability_ratios: {
-        gross_margin: (grossProfit / revenue) * 100,
-        operating_margin: (operatingIncome / revenue) * 100,
-        net_margin: (netIncome / revenue) * 100,
-        return_on_assets: (netIncome / totalAssets) * 100,
-        return_on_equity: (netIncome / equity) * 100
-      },
-      leverage_ratios: {
-        debt_ratio: totalLiabilities / totalAssets,
-        debt_to_equity: totalLiabilities / equity,
-        interest_coverage: operatingIncome / Math.max(1, 0) // À améliorer avec charges financières
-      },
-      efficiency_ratios: {
-        asset_turnover: revenue / totalAssets,
-        receivables_turnover: revenue / Math.max(1, balanceSheet?.assets?.receivables?.reduce((s: number, a: any) => s + (a.balance || 0), 0) || 1),
-        payables_turnover: revenue / Math.max(1, currentLiabilities),
-        inventory_turnover: revenue / Math.max(1, inventory)
-      },
+      ...ratios,
       generated_at: new Date().toISOString()
     };
 
     return { data: report };
   } catch (error) {
-    console.error('Exception in generateFinancialRatios:', error);
-    return {
-      data: null,
-      error: { message: error instanceof Error ? error.message : 'Erreur inconnue' }
-    };
+    return handleError(error, 'generateFinancialRatios');
   }
 }
+
+/**
+ * Récupère le bilan
+ */
+async function fetchBalanceSheet(companyId: string, endDate: string): Promise<BalanceSheetData | null> {
+  const { data, error } = await supabase.rpc('generate_balance_sheet', {
+    p_company_id: companyId,
+    p_end_date: endDate
+  });
+
+  if (error) {
+    logger.error('Error fetching balance sheet:', error);
+    return null;
+  }
+
+  return data;
+}
+
+/**
+ * Récupère le compte de résultat
+ */
+async function fetchIncomeStatement(companyId: string, startDate: string, endDate: string): Promise<IncomeStatementData | null> {
+  const { data, error } = await supabase.rpc('generate_income_statement', {
+    p_company_id: companyId,
+    p_start_date: startDate,
+    p_end_date: endDate
+  });
+
+  if (error) {
+    logger.error('Error fetching income statement:', error);
+    return null;
+  }
+
+  return data;
+}
+
+/**
+ * Extrait les valeurs financières des états financiers
+ */
+function extractFinancialValues(balanceSheet: BalanceSheetData, incomeStatement: IncomeStatementData) {
+  const totalAssets = balanceSheet.totals?.total_assets || 1;
+  const cash = sumAccountBalances(balanceSheet.assets?.cash);
+  const receivables = sumAccountBalances(balanceSheet.assets?.receivables);
+  const inventory = sumAccountBalances(balanceSheet.assets?.inventory);
+  const currentAssets = cash + receivables + inventory || 1;
+  const currentLiabilities = sumAccountBalances(balanceSheet.liabilities?.payables) || 1;
+  const equity = balanceSheet.equity?.total || 1;
+  const totalLiabilities = balanceSheet.totals?.total_liabilities || 0;
+
+  const revenue = incomeStatement.summary?.total_revenue || 1;
+  const purchases = sumExpenseAmounts(incomeStatement.expenses?.purchases);
+  const grossProfit = revenue - purchases;
+  const netIncome = incomeStatement.summary?.net_income || 0;
+
+  return {
+    totalAssets,
+    cash,
+    receivables,
+    inventory,
+    currentAssets,
+    currentLiabilities,
+    equity,
+    totalLiabilities,
+    revenue,
+    grossProfit,
+    netIncome
+  };
+}
+
+/**
+ * Calcule tous les ratios financiers
+ */
+function calculateFinancialRatios(financials: ReturnType<typeof extractFinancialValues>) {
+  return {
+    liquidity_ratios: calculateLiquidityRatios(financials),
+    profitability_ratios: calculateProfitabilityRatios(financials),
+    leverage_ratios: calculateLeverageRatios(financials),
+    efficiency_ratios: calculateEfficiencyRatios(financials)
+  };
+}
+
+/**
+ * Calcule les ratios de liquidité
+ */
+function calculateLiquidityRatios(f: ReturnType<typeof extractFinancialValues>) {
+  return {
+    current_ratio: f.currentAssets / f.currentLiabilities,
+    quick_ratio: (f.currentAssets - f.inventory) / f.currentLiabilities,
+    cash_ratio: f.cash / f.currentLiabilities
+  };
+}
+
+/**
+ * Calcule les ratios de rentabilité
+ */
+function calculateProfitabilityRatios(f: ReturnType<typeof extractFinancialValues>) {
+  return {
+    gross_margin: (f.grossProfit / f.revenue) * 100,
+    operating_margin: (f.netIncome / f.revenue) * 100,
+    net_margin: (f.netIncome / f.revenue) * 100,
+    return_on_assets: (f.netIncome / f.totalAssets) * 100,
+    return_on_equity: (f.netIncome / f.equity) * 100
+  };
+}
+
+/**
+ * Calcule les ratios d'endettement
+ */
+function calculateLeverageRatios(f: ReturnType<typeof extractFinancialValues>) {
+  return {
+    debt_ratio: f.totalLiabilities / f.totalAssets,
+    debt_to_equity: f.totalLiabilities / f.equity,
+    interest_coverage: f.netIncome / Math.max(1, 0) // À améliorer avec charges financières
+  };
+}
+
+/**
+ * Calcule les ratios d'efficacité
+ */
+function calculateEfficiencyRatios(f: ReturnType<typeof extractFinancialValues>) {
+  return {
+    asset_turnover: f.revenue / f.totalAssets,
+    receivables_turnover: f.revenue / Math.max(1, f.receivables),
+    payables_turnover: f.revenue / Math.max(1, f.currentLiabilities),
+    inventory_turnover: f.revenue / Math.max(1, f.inventory)
+  };
+}
+
+// ========================================
+// AUTRES RAPPORTS (Budget, KPI, Tax)
+// ========================================
 
 /**
  * 4. Analyse budgétaire (Budget Variance) - MOCK pour l'instant
@@ -300,7 +593,6 @@ export async function generateBudgetVariance(
 ): Promise<ReportServiceResponse<BudgetVarianceData>> {
   try {
     // TODO: Implémenter avec table budgets réelle
-    // Pour l'instant, retourne des données mockées
     const report: BudgetVarianceData = {
       company_id: companyId,
       report_date: periodEnd,
@@ -344,11 +636,7 @@ export async function generateBudgetVariance(
 
     return { data: report };
   } catch (error) {
-    console.error('Exception in generateBudgetVariance:', error);
-    return {
-      data: null,
-      error: { message: error instanceof Error ? error.message : 'Erreur inconnue' }
-    };
+    return handleError(error, 'generateBudgetVariance');
   }
 }
 
@@ -361,20 +649,11 @@ export async function generateKPIDashboard(
   periodEnd: string
 ): Promise<ReportServiceResponse<KPIDashboardData>> {
   try {
-    // Récupérer les KPIs financiers
-    const { data: incomeStatement } = await supabase.rpc('generate_income_statement', {
-      p_company_id: companyId,
-      p_start_date: periodStart,
-      p_end_date: periodEnd
-    });
-
-    // Récupérer les KPIs opérationnels
-    const { data: invoices } = await supabase
-      .from('invoices')
-      .select('*')
-      .eq('company_id', companyId)
-      .gte('invoice_date', periodStart)
-      .lte('invoice_date', periodEnd);
+    // Récupérer les données
+    const [incomeStatement, invoices] = await Promise.all([
+      fetchIncomeStatement(companyId, periodStart, periodEnd),
+      fetchInvoices(companyId, periodStart, periodEnd)
+    ]);
 
     const revenue = incomeStatement?.summary?.total_revenue || 0;
     const profit = incomeStatement?.summary?.net_income || 0;
@@ -413,12 +692,22 @@ export async function generateKPIDashboard(
 
     return { data: report };
   } catch (error) {
-    console.error('Exception in generateKPIDashboard:', error);
-    return {
-      data: null,
-      error: { message: error instanceof Error ? error.message : 'Erreur inconnue' }
-    };
+    return handleError(error, 'generateKPIDashboard');
   }
+}
+
+/**
+ * Récupère les factures d'une période
+ */
+async function fetchInvoices(companyId: string, periodStart: string, periodEnd: string) {
+  const { data } = await supabase
+    .from('invoices')
+    .select('*')
+    .eq('company_id', companyId)
+    .gte('invoice_date', periodStart)
+    .lte('invoice_date', periodEnd);
+
+  return data || [];
 }
 
 /**
@@ -473,10 +762,6 @@ export async function generateTaxSummary(
 
     return { data: report };
   } catch (error) {
-    console.error('Exception in generateTaxSummary:', error);
-    return {
-      data: null,
-      error: { message: error instanceof Error ? error.message : 'Erreur inconnue' }
-    };
+    return handleError(error, 'generateTaxSummary');
   }
 }

@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { SecuritySettings, PrivacySettings, SecurityIncident, GDPRRequest, ComplianceReport } from '@/types/security.types';
 import { securityService } from '@/services/securityService';
+import { logger } from '@/utils/logger';
 
 const SecuritySettingsPage: React.FC = () => {
   const { toast } = useToast();
@@ -52,7 +53,7 @@ const SecuritySettingsPage: React.FC = () => {
       setSecurityIncidents(incidents);
       setGDPRRequests(requests);
     } catch (error) {
-      console.error('Failed to load security data:', error);
+      logger.error('Failed to load security data:', error);
       toast({
         variant: "destructive",
         title: "Error",

@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { User, Mail, Phone, MapPin, Calendar, Building, Camera, Save, Loader2, Trash2, AlertTriangle } from 'lucide-react';
 import { AccountDeletionWizard } from '@/components/account/AccountDeletionWizard';
+import { logger } from '@/utils/logger';
 
 interface UserProfile {
   firstName: string;
@@ -66,7 +67,7 @@ export function UserProfileSettings() {
         .maybeSingle();
 
       if (error) {
-        console.error('Erreur Supabase:', error);
+        logger.error('Erreur Supabase:', error);
         throw error;
       }
 
@@ -106,7 +107,7 @@ export function UserProfileSettings() {
         });
       }
     } catch (error) {
-      console.error('Erreur chargement profil:', error);
+      logger.error('Erreur chargement profil:', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de charger votre profil',
@@ -145,7 +146,7 @@ export function UserProfileSettings() {
         twitter: profile.twitter.trim()
       };
 
-      console.warn('💾 Données à sauvegarder:', profileData);
+      logger.warn('💾 Données à sauvegarder:', profileData);
 
       // Sauvegarder dans Supabase - approche explicite insert/update
       const { data: existingProfile } = await supabase
@@ -171,7 +172,7 @@ export function UserProfileSettings() {
       }
 
       if (error) {
-        console.error('Erreur Supabase sauvegarde:', error);
+        logger.error('Erreur Supabase sauvegarde:', error);
         throw error;
       }
 
@@ -183,7 +184,7 @@ export function UserProfileSettings() {
         description: 'Vos informations ont été sauvegardées avec succès'
       });
     } catch (error) {
-      console.error('Erreur sauvegarde profil:', error);
+      logger.error('Erreur sauvegarde profil:', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de sauvegarder votre profil',
@@ -218,7 +219,7 @@ export function UserProfileSettings() {
         .upload(fileName, file, { upsert: true });
 
       if (uploadError) {
-        console.error('Erreur upload Storage:', uploadError);
+        logger.error('Erreur upload Storage:', uploadError);
         throw uploadError;
       }
 
@@ -239,7 +240,7 @@ export function UserProfileSettings() {
         });
 
       if (updateError) {
-        console.error('Erreur mise à jour profil:', updateError);
+        logger.error('Erreur mise à jour profil:', updateError);
         throw updateError;
       }
 
@@ -248,7 +249,7 @@ export function UserProfileSettings() {
         description: 'Votre photo de profil a été changée'
       });
     } catch (error) {
-      console.error('Erreur upload avatar:', error);
+      logger.error('Erreur upload avatar:', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de télécharger l\'avatar',

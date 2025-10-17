@@ -1,38 +1,15 @@
-// Test script to check Edge function deployment
-// Run this in browser console after loading the app
+// 2025-10: Les Edge Functions Stripe ont été retirées.
+// Ce script est conservé à titre informatif et indique la nouvelle marche à suivre.
 
-// Wait for app to load, then run:
-setTimeout(async () => {
-  try {
-    console.warn('🧪 Testing Edge function deployment...');
-
-    // Import supabase from the app (this assumes it's available globally)
-    const { supabase } = window;
-
-    if (!supabase) {
-      console.error('❌ Supabase not found in window object');
-      return;
-    }
-
-    console.warn('✅ Supabase found, testing function...');
-
-    const result = await supabase.functions.invoke('create-checkout-session', {
-      body: {
-        planId: 'pro_monthly',
-        userId: 'test-user-123',
-        debug: true
-      }
-    });
-
-    console.warn('🧪 Edge function test result:', result);
-
-    if (result.error) {
-      console.error('❌ Edge function error:', result.error);
-    } else {
-      console.warn('✅ Edge function success:', result.data);
-    }
-
-  } catch (error) {
-    console.error('❌ Test failed:', error);
-  }
-}, 2000);
+console.warn('[casskai] Les Edge Functions Stripe ont été remplacées par l\'API backend sécurisée.');
+console.info([
+  'Pour créer une session de paiement, utilisez le point d\'entrée backend :',
+  "fetch('/api/stripe/create-checkout-session', {",
+  "  method: 'POST',",
+  "  headers: {",
+  "    'Content-Type': 'application/json',",
+  "    Authorization: `Bearer ${session.access_token}`",
+  "  },",
+  "  body: JSON.stringify({ planId: 'pro_monthly' })",
+  "});"
+].join('\n'));

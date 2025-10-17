@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import ABTestingFramework, { UserContext as ABTestUserContext } from '@/utils/abTestingFramework';
 import { useAnalytics } from '@/components/analytics/AnalyticsProvider';
+import { logger } from '@/utils/logger';
 
 // Types pour A/B Testing - on utilise le type du framework
 type UserContext = Partial<ABTestUserContext> & {
@@ -288,7 +289,7 @@ export const ABTestProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   } catch {
     // AnalyticsProvider n'est pas disponible, créer un fallback
     trackEvent = () => {
-      console.warn('[ABTest] Analytics non disponible, événement ignoré');
+      logger.warn('[ABTest] Analytics non disponible, événement ignoré')
     };
   }
 
@@ -297,9 +298,9 @@ export const ABTestProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       try {
         await framework.initialize(AB_TESTS_CONFIG);
         setIsInitialized(true);
-        console.warn('[ABTest] Framework A/B Testing initialisé');
+        logger.warn('[ABTest] Framework A/B Testing initialisé')
       } catch (error) {
-        console.error('[ABTest] Erreur d\'initialisation:', error);
+        logger.error('[ABTest] Erreur d\'initialisation:', error)
       }
     };
 

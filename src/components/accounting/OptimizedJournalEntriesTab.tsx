@@ -28,6 +28,7 @@ import {
   RefreshCw,
   Loader2
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 // Entry Preview Dialog Component
 const EntryPreviewDialog = ({ open, onClose, entry }) => {
@@ -266,7 +267,7 @@ export default function OptimizedJournalEntriesTab({ shouldCreateNew = false, on
         if (error) throw error;
         setEntries(data || []);
       } catch (error) {
-        console.error('Error loading journal entries:', error);
+        logger.error('Error loading journal entries:', error);
         toast({
           title: "Erreur",
           description: "Impossible de charger les écritures comptables.",
@@ -311,12 +312,12 @@ export default function OptimizedJournalEntriesTab({ shouldCreateNew = false, on
     try {
       const payload = {
         companyId: currentCompany.id,
-        entryDate: values.entryDate instanceof Date ? values.entryDate.toISOString() : new Date(values.entryDate).toISOString(),
+        entryDate: typeof values.entryDate === 'string' ? new Date(values.entryDate).toISOString() : (values.entryDate as Date).toISOString(),
         description: values.description,
         referenceNumber: values.referenceNumber,
         journalId: values.journalId,
         status: values.status || 'draft',
-        items: values.items,
+        lines: values.lines,
         entryNumber: values.entryNumber
       };
 
@@ -337,7 +338,7 @@ export default function OptimizedJournalEntriesTab({ shouldCreateNew = false, on
         description: values.id ? "Écriture modifiée avec succès." : "Écriture créée avec succès."
       });
     } catch (error) {
-      console.error('Error saving entry:', error);
+      logger.error('Error saving entry:', error);
       toast({
         title: "Erreur",
         description: error instanceof Error ? error.message : "Impossible de sauvegarder l'écriture.",

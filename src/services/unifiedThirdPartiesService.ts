@@ -10,6 +10,7 @@
  */
 
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 export type ThirdPartyType = 'customer' | 'supplier';
 
@@ -131,7 +132,7 @@ class UnifiedThirdPartiesService {
   /**
    * CUSTOMERS - Créer un nouveau client
    */
-  async createCustomer(data: Customer): Promise<{ data: Customer | null; error: any }> {
+  async createCustomer(data: Customer): Promise<{ data: Customer | null; error: Error | null }> {
     try {
       const companyId = data.company_id || await this.getCurrentCompanyId();
 
@@ -157,7 +158,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return { data: created, error: null };
     } catch (error) {
-      console.error('Error creating customer:', error);
+      logger.error('Error creating customer:', error);
       return { data: null, error };
     }
   }
@@ -179,7 +180,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Error fetching customers:', error);
+      logger.error('Error fetching customers:', error);
       return [];
     }
   }
@@ -187,7 +188,7 @@ class UnifiedThirdPartiesService {
   /**
    * CUSTOMERS - Récupérer un client par ID
    */
-  async getCustomerById(id: string): Promise<{ data: Customer | null; error: any }> {
+  async getCustomerById(id: string): Promise<{ data: Customer | null; error: Error | null }> {
     try {
       const { data, error } = await supabase
         .from('customers')
@@ -198,7 +199,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return { data, error: null };
     } catch (error) {
-      console.error('Error fetching customer:', error);
+      logger.error('Error fetching customer:', error);
       return { data: null, error };
     }
   }
@@ -209,7 +210,7 @@ class UnifiedThirdPartiesService {
   async updateCustomer(
     id: string,
     data: Partial<Customer>
-  ): Promise<{ data: Customer | null; error: any }> {
+  ): Promise<{ data: Customer | null; error: Error | null }> {
     try {
       const { data: updated, error } = await supabase
         .from('customers')
@@ -221,7 +222,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return { data: updated, error: null };
     } catch (error) {
-      console.error('Error updating customer:', error);
+      logger.error('Error updating customer:', error);
       return { data: null, error };
     }
   }
@@ -229,7 +230,7 @@ class UnifiedThirdPartiesService {
   /**
    * CUSTOMERS - Supprimer (soft delete) un client
    */
-  async deleteCustomer(id: string): Promise<{ success: boolean; error: any }> {
+  async deleteCustomer(id: string): Promise<{ success: boolean; error: Error | null }> {
     try {
       const { error } = await supabase
         .from('customers')
@@ -239,7 +240,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return { success: true, error: null };
     } catch (error) {
-      console.error('Error deleting customer:', error);
+      logger.error('Error deleting customer:', error);
       return { success: false, error };
     }
   }
@@ -247,7 +248,7 @@ class UnifiedThirdPartiesService {
   /**
    * SUPPLIERS - Créer un nouveau fournisseur
    */
-  async createSupplier(data: Supplier): Promise<{ data: Supplier | null; error: any }> {
+  async createSupplier(data: Supplier): Promise<{ data: Supplier | null; error: Error | null }> {
     try {
       const companyId = data.company_id || await this.getCurrentCompanyId();
 
@@ -273,7 +274,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return { data: created, error: null };
     } catch (error) {
-      console.error('Error creating supplier:', error);
+      logger.error('Error creating supplier:', error);
       return { data: null, error };
     }
   }
@@ -295,7 +296,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Error fetching suppliers:', error);
+      logger.error('Error fetching suppliers:', error);
       return [];
     }
   }
@@ -303,7 +304,7 @@ class UnifiedThirdPartiesService {
   /**
    * SUPPLIERS - Récupérer un fournisseur par ID
    */
-  async getSupplierById(id: string): Promise<{ data: Supplier | null; error: any }> {
+  async getSupplierById(id: string): Promise<{ data: Supplier | null; error: Error | null }> {
     try {
       const { data, error } = await supabase
         .from('suppliers')
@@ -314,7 +315,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return { data, error: null };
     } catch (error) {
-      console.error('Error fetching supplier:', error);
+      logger.error('Error fetching supplier:', error);
       return { data: null, error };
     }
   }
@@ -325,7 +326,7 @@ class UnifiedThirdPartiesService {
   async updateSupplier(
     id: string,
     data: Partial<Supplier>
-  ): Promise<{ data: Supplier | null; error: any }> {
+  ): Promise<{ data: Supplier | null; error: Error | null }> {
     try {
       const { data: updated, error } = await supabase
         .from('suppliers')
@@ -337,7 +338,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return { data: updated, error: null };
     } catch (error) {
-      console.error('Error updating supplier:', error);
+      logger.error('Error updating supplier:', error);
       return { data: null, error };
     }
   }
@@ -345,7 +346,7 @@ class UnifiedThirdPartiesService {
   /**
    * SUPPLIERS - Supprimer (soft delete) un fournisseur
    */
-  async deleteSupplier(id: string): Promise<{ success: boolean; error: any }> {
+  async deleteSupplier(id: string): Promise<{ success: boolean; error: Error | null }> {
     try {
       const { error } = await supabase
         .from('suppliers')
@@ -355,7 +356,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return { success: true, error: null };
     } catch (error) {
-      console.error('Error deleting supplier:', error);
+      logger.error('Error deleting supplier:', error);
       return { success: false, error };
     }
   }
@@ -386,7 +387,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Error fetching unified third parties:', error);
+      logger.error('Error fetching unified third parties:', error);
       return [];
     }
   }
@@ -422,7 +423,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Error searching third parties:', error);
+      logger.error('Error searching third parties:', error);
       return [];
     }
   }
@@ -476,7 +477,7 @@ class UnifiedThirdPartiesService {
 
       return stats;
     } catch (error) {
-      console.error('Error fetching dashboard stats:', error);
+      logger.error('Error fetching dashboard stats:', error);
       return {
         total_customers: 0,
         total_suppliers: 0,

@@ -245,7 +245,7 @@ class InventoryItemsService {
     updates: Partial<CreateInventoryItemPayload>
   ): Promise<ServiceResult<InventoryItem>> {
     try {
-      const updateData: any = {};
+      const updateData: Record<string, unknown> = {};
       if (updates.reference) updateData.code = updates.reference;
       if (updates.name) updateData.name = updates.name;
       if (updates.description !== undefined) updateData.description = updates.description;

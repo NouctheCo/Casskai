@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { trialService, TrialInfo } from '@/services/trialService';
+import { logger } from '@/utils/logger';
 
 type TrialStatistics = { metric: string; value: number };
 import { useAuth } from '@/contexts/AuthContext';
@@ -49,7 +50,7 @@ export const useTrial = (): UseTrialReturn => {
       setTrialInfo(info);
     } catch (err) {
       setError('Erreur lors du chargement des informations d\'essai');
-      console.error('Error loading trial info:', err);
+      logger.error('Error loading trial info:', err)
     } finally {
       setIsLoading(false);
     }
@@ -62,7 +63,7 @@ export const useTrial = (): UseTrialReturn => {
       const canCreate = await trialService.canCreateTrial(user.id);
       setCanCreateTrial(canCreate);
     } catch (err) {
-      console.error('Error checking trial eligibility:', err);
+      logger.error('Error checking trial eligibility:', err)
     }
   };
 
@@ -201,7 +202,7 @@ export const useTrialStatistics = () => {
       setStatistics(stats);
     } catch (err) {
       setError('Erreur lors du chargement des statistiques');
-      console.error('Error loading trial statistics:', err);
+      logger.error('Error loading trial statistics:', err)
     } finally {
       setIsLoading(false);
     }
@@ -234,7 +235,7 @@ export const useExpiringTrials = (daysAhead: number = 7) => {
       setExpiringTrials(trials);
     } catch (err) {
       setError('Erreur lors du chargement des essais expirants');
-      console.error('Error loading expiring trials:', err);
+      logger.error('Error loading expiring trials:', err)
     } finally {
       setIsLoading(false);
     }

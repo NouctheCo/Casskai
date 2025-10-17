@@ -7,6 +7,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { BarChart3, FileText, CheckCircle, AlertCircle, Eye, RefreshCw, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/utils/logger';
 
 export default function OptimizedJournalsTab() {
   const { toast } = useToast();
@@ -32,7 +33,7 @@ export default function OptimizedJournalsTab() {
           .order('code', { ascending: true });
 
         if (error) {
-          console.error('Error loading journals:', error);
+          logger.error('Error loading journals:', error);
           toast({
             title: "Erreur",
             description: "Impossible de charger les journaux",
@@ -43,7 +44,7 @@ export default function OptimizedJournalsTab() {
           setJournals(data || []);
         }
       } catch (err) {
-        console.error('Unexpected error loading journals:', err);
+        logger.error('Unexpected error loading journals:', err);
         setJournals([]);
       } finally {
         setIsLoading(false);

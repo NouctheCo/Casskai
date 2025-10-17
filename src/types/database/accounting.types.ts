@@ -1,10 +1,10 @@
 // Types liés à la comptabilité
-import type { Database } from '../database-types-fix'
+import type { Database } from '../supabase'
 
 // Types pour les comptes comptables
-export type Account = Database['public']['Tables']['accounts']['Row']
-export type AccountInsert = Database['public']['Tables']['accounts']['Insert']
-export type AccountUpdate = Database['public']['Tables']['accounts']['Update']
+export type Account = Database['public']['Tables']['chart_of_accounts']['Row']
+export type AccountInsert = Database['public']['Tables']['chart_of_accounts']['Insert']
+export type AccountUpdate = Database['public']['Tables']['chart_of_accounts']['Update']
 
 // Types pour les journaux
 export type Journal = Database['public']['Tables']['journals']['Row']

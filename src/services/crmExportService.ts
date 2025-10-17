@@ -385,7 +385,7 @@ class CRMExportService {
 
   // Helper methods
 
-  private arrayToCSV(data: any[], headers: string[]): string {
+  private arrayToCSV<T extends Record<string, unknown>>(data: T[], headers: string[]): string {
     const headerRow = headers.join(',');
     const rows = data.map(item =>
       headers.map(header => {

@@ -1,4 +1,5 @@
 import { EncryptedCredentials, AuditLog } from '../../../types/openBanking.types';
+import { logger } from '@/utils/logger';
 
 // Service de chiffrement end-to-end pour les données sensibles
 export class EncryptionService {
@@ -50,7 +51,7 @@ export class EncryptionService {
       );
 
       this.isInitialized = true;
-      console.log('Encryption service initialized successfully');
+      logger.info('Encryption service initialized successfully')
     } catch (error) {
       throw new Error(`Failed to initialize encryption service: ${error.message}`);
     }
@@ -346,7 +347,7 @@ export class EncryptionService {
         encoder.encode(payload)
       );
     } catch (error) {
-      console.error('HMAC verification failed:', error);
+      logger.error('HMAC verification failed:', error);
       return false;
     }
   }
@@ -434,9 +435,9 @@ export class EncryptionService {
       };
 
       // En production, sauvegarder en base de données
-      console.log('Audit log:', auditEntry);
+      logger.info('Audit log:', auditEntry)
     } catch (error) {
-      console.error('Failed to create audit log:', error);
+      logger.error('Failed to create audit log:', error)
     }
   }
 
@@ -469,9 +470,9 @@ export class TokenRotationService {
     this.rotationTimer = setInterval(async () => {
       try {
         await callback();
-        console.log('Token rotation completed successfully');
+        logger.info('Token rotation completed successfully')
       } catch (error) {
-        console.error('Token rotation failed:', error);
+        logger.error('Token rotation failed:', error)
       }
     }, this.rotationInterval);
   }
@@ -488,9 +489,9 @@ export class TokenRotationService {
   async forceRotation(callback: () => Promise<void>): Promise<void> {
     try {
       await callback();
-      console.log('Forced token rotation completed successfully');
+      logger.info('Forced token rotation completed successfully')
     } catch (error) {
-      console.error('Forced token rotation failed:', error);
+      logger.error('Forced token rotation failed:', error);
       throw error;
     }
   }

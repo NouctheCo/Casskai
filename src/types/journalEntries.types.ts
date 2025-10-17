@@ -3,9 +3,9 @@ import type { JournalEntry, JournalEntryLine, Journal, AccountBalance, Validatio
 
 // Types de base depuis la base de données
 export type JournalEntryRow = Database['public']['Tables']['journal_entries']['Row'];
-export type JournalEntryItemRow = Database['public']['Tables']['journal_entry_items']['Row'];
+export type JournalEntryLineRow = Database['public']['Tables']['journal_entry_lines']['Row'];
 export type JournalRow = Database['public']['Tables']['journals']['Row'];
-export type AccountRow = Database['public']['Tables']['accounts']['Row'];
+export type ChartOfAccountRow = Database['public']['Tables']['chart_of_accounts']['Row'];
 
 export type JournalEntryStatus = JournalEntryRow['status'];
 
@@ -56,17 +56,22 @@ export interface JournalEntryPayload {
 
 // Types simplifiés pour les listes
 export type MinimalJournal = Pick<JournalRow, 'id' | 'code' | 'name' | 'type' | 'is_active'>;
-export type MinimalAccount = Pick<AccountRow, 'id' | 'account_number' | 'name' | 'type' | 'class' | 'is_active'>;
+export type MinimalAccount = Pick<ChartOfAccountRow, 'id' | 'account_number'> & {
+  name: string;
+  type: string;
+  class: string;
+  is_active: boolean;
+};
 
 // Écriture avec ses lignes (pour les réponses API)
 export type JournalEntryWithItems = JournalEntryRow & {
-  journal_entry_items?: (JournalEntryItemRow & {
-    accounts?: {
+  journal_entry_lines?: (JournalEntryLineRow & {
+    chart_of_accounts?: {
       id: string;
-      account_number: string | null;
-      name: string | null;
-      type?: string | null;
-      class?: string | null;
+      account_number: string;
+      account_name: string;
+      account_type: string;
+      account_class: number;
     };
   })[];
   journals?: {

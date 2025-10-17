@@ -1,5 +1,6 @@
 import { LetterageRule, LetterageCriteria, LetterageMatch } from '../types/accounting-import.types';
 import { supabase } from '../lib/supabase';
+import { logger } from '@/utils/logger';
 
 /**
  * Service de lettrage automatique des comptes
@@ -83,10 +84,15 @@ export class AutomaticLetterageService {
     let totalProcessed = 0;
     let totalMatched = 0;
     let totalLettered = 0;
-    const results: any[] = [];
+    const results: Array<{
+      ruleId: string;
+      ruleName: string;
+      matches: LetterageMatch[];
+      autoValidated: number;
+    }> = [];
 
     for (const rule of filteredRules) {
-      console.log(`Processing rule: ${rule.name}`);
+      logger.info(`Processing rule: ${rule.name}`);
       
       const ruleResult = await this.processLetterageRule(
         companyId, 
@@ -193,7 +199,7 @@ export class AutomaticLetterageService {
     entryId: string;
   }>> {
     let query = supabase
-      .from('journal_entry_items')
+      .from('journal_entry_lines')
       .select(`
         id,
         account_id,
@@ -216,28 +222,28 @@ export class AutomaticLetterageService {
 
     if (!result.data) return [];
 
-    return result.data.map((item: any) => ({
-      id: item.id,
-      accountId: item.account_id,
-      accountNumber: item.accounts.number,
-      date: item.journal_entries.date,
-      reference: item.journal_entries.reference || '',
-      description: item.description || item.journal_entries.description || '',
-      debitAmount: item.debit_amount || 0,
-      creditAmount: item.credit_amount || 0,
-      thirdParty: item.auxiliary_account,
-      entryId: item.journal_entries.id
+    return result.data.map((item: Record<string, unknown>) => ({
+      id: item.id as string,
+      accountId: item.account_id as string,
+      accountNumber: (item.accounts as Record<string, unknown>).number as string,
+      date: (item.journal_entries as Record<string, unknown>).date as string,
+      reference: (item.journal_entries as Record<string, unknown>).reference as string || '',
+      description: item.description as string || (item.journal_entries as Record<string, unknown>).description as string || '',
+      debitAmount: item.debit_amount as number,
+      creditAmount: item.credit_amount as number,
+      thirdParty: item.auxiliary_account as string,
+      entryId: (item.journal_entries as Record<string, unknown>).id as string
     }));
   }
 
   /**
    * Groupe les écritures par compte
    */
-  private static groupEntriesByAccount(entries: any[]): Map<string, any[]> {
-    const groups = new Map<string, any[]>();
+  private static groupEntriesByAccount(entries: Array<Record<string, unknown>>): Map<string, Array<Record<string, unknown>>> {
+    const groups = new Map<string, Array<Record<string, unknown>>>();
     
     entries.forEach(entry => {
-      const accountId = entry.accountId;
+      const accountId = entry.accountId as string;
       if (!groups.has(accountId)) {
         groups.set(accountId, []);
       }
@@ -252,14 +258,14 @@ export class AutomaticLetterageService {
    */
   private static async findMatchesForAccount(
     accountId: string,
-    entries: any[],
+    entries: Array<Record<string, unknown>>,
     rule: LetterageRule
   ): Promise<LetterageMatch[]> {
     const matches: LetterageMatch[] = [];
 
     // Séparation débit/crédit
-    const debits = entries.filter(e => e.debitAmount > 0);
-    const credits = entries.filter(e => e.creditAmount > 0);
+    const debits = entries.filter(e => (e.debitAmount as number) > 0);
+    const credits = entries.filter(e => (e.creditAmount as number) > 0);
 
     // Recherche de correspondances 1:1 (exact)
     const exactMatches = this.findExactMatches(debits, credits, rule);
@@ -278,8 +284,8 @@ export class AutomaticLetterageService {
    * Recherche de correspondances exactes 1:1
    */
   private static findExactMatches(
-    debits: any[],
-    credits: any[],
+    debits: Array<Record<string, unknown>>,
+    credits: Array<Record<string, unknown>>,
     rule: LetterageRule
   ): LetterageMatch[] {
     const matches: LetterageMatch[] = [];
@@ -287,12 +293,12 @@ export class AutomaticLetterageService {
 
     debits.forEach(debit => {
       credits.forEach(credit => {
-        if (usedCredits.has(credit.id)) return;
+        if (usedCredits.has(credit.id as string)) return;
 
         const match = this.evaluateMatch([debit], [credit], rule);
         if (match && match.confidence >= 0.8 && match.difference <= rule.tolerance) {
           matches.push(match);
-          usedCredits.add(credit.id);
+          usedCredits.add(credit.id as string);
         }
       });
     });
@@ -304,15 +310,15 @@ export class AutomaticLetterageService {
    * Recherche de correspondances multiples
    */
   private static async findMultipleMatches(
-    debits: any[],
-    credits: any[],
+    debits: Array<Record<string, unknown>>,
+    credits: Array<Record<string, unknown>>,
     rule: LetterageRule
   ): Promise<LetterageMatch[]> {
     const matches: LetterageMatch[] = [];
 
     // Correspondance n:1 (plusieurs débits pour un crédit)
     credits.forEach(credit => {
-      const combinations = this.findDebitCombinations(debits, credit.creditAmount, rule.tolerance);
+      const combinations = this.findDebitCombinations(debits, credit.creditAmount as number, rule.tolerance);
       combinations.forEach(combination => {
         const match = this.evaluateMatch(combination, [credit], rule);
         if (match && match.confidence >= 0.7) {
@@ -323,7 +329,7 @@ export class AutomaticLetterageService {
 
     // Correspondance 1:n (un débit pour plusieurs crédits)
     debits.forEach(debit => {
-      const combinations = this.findCreditCombinations(credits, debit.debitAmount, rule.tolerance);
+      const combinations = this.findCreditCombinations(credits, debit.debitAmount as number, rule.tolerance);
       combinations.forEach(combination => {
         const match = this.evaluateMatch([debit], combination, rule);
         if (match && match.confidence >= 0.7) {
@@ -339,18 +345,18 @@ export class AutomaticLetterageService {
    * Trouve les combinaisons de débits qui correspondent à un montant
    */
   private static findDebitCombinations(
-    debits: any[],
+    debits: Array<Record<string, unknown>>,
     targetAmount: number,
     tolerance: number
-  ): any[][] {
-    const combinations: any[][] = [];
+  ): Array<Array<Record<string, unknown>>> {
+    const combinations: Array<Array<Record<string, unknown>>> = [];
     const maxItems = Math.min(debits.length, 5); // Limite pour éviter l'explosion combinatoire
 
     for (let size = 2; size <= maxItems; size++) {
       const combos = this.generateCombinations(debits, size);
       
       combos.forEach(combo => {
-        const total = combo.reduce((sum, item) => sum + item.debitAmount, 0);
+        const total = combo.reduce((sum, item) => sum + (item.debitAmount as number), 0);
         if (Math.abs(total - targetAmount) <= tolerance) {
           combinations.push(combo);
         }
@@ -364,18 +370,18 @@ export class AutomaticLetterageService {
    * Trouve les combinaisons de crédits qui correspondent à un montant
    */
   private static findCreditCombinations(
-    credits: any[],
+    credits: Array<Record<string, unknown>>,
     targetAmount: number,
     tolerance: number
-  ): any[][] {
-    const combinations: any[][] = [];
+  ): Array<Array<Record<string, unknown>>> {
+    const combinations: Array<Array<Record<string, unknown>>> = [];
     const maxItems = Math.min(credits.length, 5);
 
     for (let size = 2; size <= maxItems; size++) {
       const combos = this.generateCombinations(credits, size);
       
       combos.forEach(combo => {
-        const total = combo.reduce((sum, item) => sum + item.creditAmount, 0);
+        const total = combo.reduce((sum, item) => sum + (item.creditAmount as number), 0);
         if (Math.abs(total - targetAmount) <= tolerance) {
           combinations.push(combo);
         }
@@ -408,12 +414,12 @@ export class AutomaticLetterageService {
    * Évalue une correspondance potentielle
    */
   private static evaluateMatch(
-    debits: any[],
-    credits: any[],
+    debits: Array<Record<string, unknown>>,
+    credits: Array<Record<string, unknown>>,
     rule: LetterageRule
   ): LetterageMatch | null {
-    const totalDebit = debits.reduce((sum, item) => sum + item.debitAmount, 0);
-    const totalCredit = credits.reduce((sum, item) => sum + item.creditAmount, 0);
+    const totalDebit = debits.reduce((sum, item) => sum + (item.debitAmount as number), 0);
+    const totalCredit = credits.reduce((sum, item) => sum + (item.creditAmount as number), 0);
     const difference = Math.abs(totalDebit - totalCredit);
 
     if (difference > rule.tolerance * 2) return null; // Écart trop important
@@ -433,12 +439,13 @@ export class AutomaticLetterageService {
           }
           break;
 
-        case 'date':
+        case 'date': {
           const avgDateDiff = this.calculateAverageDateDifference(debits, credits);
           if (criterion.daysWindow && avgDateDiff <= criterion.daysWindow) {
             points += 1 - (avgDateDiff / criterion.daysWindow) * 0.5;
           }
           break;
+        }
 
         case 'reference':
           if (this.hasMatchingReference(debits, credits, criterion.exactMatch || false)) {
@@ -463,8 +470,8 @@ export class AutomaticLetterageService {
     if (debits.length > 1 || credits.length > 1) confidence -= 0.1;
 
     return {
-      debitEntries: debits.map(d => d.id),
-      creditEntries: credits.map(c => c.id),
+      debitEntries: debits.map(d => d.id as string),
+      creditEntries: credits.map(c => c.id as string),
       difference,
       confidence: Math.min(1, Math.max(0, confidence)),
       letterCode: this.generateLetterCode()
@@ -474,7 +481,7 @@ export class AutomaticLetterageService {
   /**
    * Calcule la différence moyenne de dates
    */
-  private static calculateAverageDateDifference(debits: any[], credits: any[]): number {
+  private static calculateAverageDateDifference(debits: Array<Record<string, unknown>>, credits: Array<Record<string, unknown>>): number {
     if (debits.length === 0 || credits.length === 0) return Infinity;
 
     let totalDiff = 0;
@@ -482,8 +489,8 @@ export class AutomaticLetterageService {
 
     debits.forEach(debit => {
       credits.forEach(credit => {
-        const debitDate = new Date(debit.date);
-        const creditDate = new Date(credit.date);
+        const debitDate = new Date(debit.date as string);
+        const creditDate = new Date(credit.date as string);
         const diff = Math.abs(debitDate.getTime() - creditDate.getTime()) / (1000 * 60 * 60 * 24);
         totalDiff += diff;
         count++;
@@ -496,7 +503,7 @@ export class AutomaticLetterageService {
   /**
    * Vérifie s'il y a une référence commune
    */
-  private static hasMatchingReference(debits: any[], credits: any[], exactMatch: boolean): boolean {
+  private static hasMatchingReference(debits: Array<Record<string, unknown>>, credits: Array<Record<string, unknown>>, exactMatch: boolean): boolean {
     for (const debit of debits) {
       for (const credit of credits) {
         if (exactMatch) {
@@ -504,7 +511,7 @@ export class AutomaticLetterageService {
             return true;
           }
         } else {
-          if (this.referencesMatch(debit.reference, credit.reference)) {
+          if (this.referencesMatch(debit.reference as string, credit.reference as string)) {
             return true;
           }
         }
@@ -534,7 +541,7 @@ export class AutomaticLetterageService {
   /**
    * Vérifie s'il y a un tiers commun
    */
-  private static hasMatchingThirdParty(debits: any[], credits: any[]): boolean {
+  private static hasMatchingThirdParty(debits: Array<Record<string, unknown>>, credits: Array<Record<string, unknown>>): boolean {
     for (const debit of debits) {
       for (const credit of credits) {
         if (debit.thirdParty && credit.thirdParty && debit.thirdParty === credit.thirdParty) {
@@ -567,7 +574,7 @@ export class AutomaticLetterageService {
     const allEntries = [...match.debitEntries, ...match.creditEntries];
     
     await supabase
-      .from('journal_entry_items')
+      .from('journal_entry_lines')
       .update({ letterage: match.letterCode })
       .in('id', allEntries);
   }
@@ -593,14 +600,14 @@ export class AutomaticLetterageService {
   /**
    * Mapping des données Supabase vers LetterageRule
    */
-  private static mapSupabaseToRule(data: any): LetterageRule {
+  private static mapSupabaseToRule(data: Record<string, unknown>): LetterageRule {
     return {
-      id: data.id,
-      name: data.name,
-      accountPattern: data.account_pattern,
-      criteria: data.criteria || [],
-      tolerance: data.tolerance || 0.01,
-      autoValidate: data.auto_validate || false
+      id: data.id as string,
+      name: data.name as string,
+      accountPattern: data.account_pattern as string,
+      criteria: (data.criteria as LetterageCriteria[]) || [],
+      tolerance: (data.tolerance as number) || 0.01,
+      autoValidate: (data.auto_validate as boolean) || false
     };
   }
 
@@ -620,7 +627,7 @@ export class AutomaticLetterageService {
     unletteredCount: number;
   }> {
     const result = await supabase
-      .from('journal_entry_items')
+      .from('journal_entry_lines')
       .update({ letterage: null })
       .eq('letterage', letterCode)
       .eq('journal_entries.company_id', companyId)
@@ -664,7 +671,7 @@ export class AutomaticLetterageService {
   }> {
     // Statistiques globales
     let query = supabase
-      .from('journal_entry_items')
+      .from('journal_entry_lines')
       .select(`
         id,
         letterage,
@@ -693,33 +700,36 @@ export class AutomaticLetterageService {
     const letterageRate = totalEntries > 0 ? (letteredEntries / totalEntries) * 100 : 0;
 
     // Statistiques par compte
-    const accountStats = new Map<string, any>();
+    const accountStats = new Map<string, Record<string, unknown>>();
     
-    result.data.forEach((item: any) => {
-      const key = `${item.accounts.number}|${item.accounts.name}`;
+    result.data.forEach((item: Record<string, unknown>) => {
+      const key = `${(item.accounts as Record<string, unknown>).number as string}|${(item.accounts as Record<string, unknown>).name as string}`;
       if (!accountStats.has(key)) {
         accountStats.set(key, {
-          accountNumber: item.accounts.number,
-          accountName: item.accounts.name,
+          accountNumber: (item.accounts as Record<string, unknown>).number as string,
+          accountName: (item.accounts as Record<string, unknown>).name as string,
           totalEntries: 0,
           lettered: 0
         });
       }
 
       const stats = accountStats.get(key)!;
-      stats.totalEntries++;
-      if (item.letterage) stats.lettered++;
+      stats.totalEntries = (stats.totalEntries as number) + 1;
+      if (item.letterage) stats.lettered = (stats.lettered as number) + 1;
     });
 
     const byAccount = Array.from(accountStats.values()).map(stats => ({
-      ...stats,
-      unlettered: stats.totalEntries - stats.lettered,
-      rate: stats.totalEntries > 0 ? (stats.lettered / stats.totalEntries) * 100 : 0
+      accountNumber: stats.accountNumber as string,
+      accountName: stats.accountName as string,
+      totalEntries: stats.totalEntries as number,
+      lettered: stats.lettered as number,
+      unlettered: (stats.totalEntries as number) - (stats.lettered as number),
+      rate: (stats.totalEntries as number) > 0 ? ((stats.lettered as number) / (stats.totalEntries as number)) * 100 : 0
     }));
 
     // Lettrages récents
     const recentQuery = await supabase
-      .from('journal_entry_items')
+      .from('journal_entry_lines')
       .select(`
         letterage,
         debit_amount,
@@ -731,27 +741,32 @@ export class AutomaticLetterageService {
       .gte('journal_entries.date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
       .order('journal_entries.date', { ascending: false });
 
-    const recentLettering: any[] = [];
+    const recentLettering: Array<{ letterCode: string; date: string; entriesCount: number; totalAmount: number; }> = [];
     if (recentQuery.data) {
-      const letterGroups = new Map<string, any>();
+      const letterGroups = new Map<string, Record<string, unknown>>();
       
-      recentQuery.data.forEach((item: any) => {
-        const key = item.letterage!;
+      recentQuery.data.forEach((item: Record<string, unknown>) => {
+        const key = item.letterage as string;
         if (!letterGroups.has(key)) {
           letterGroups.set(key, {
             letterCode: key,
-            date: item.journal_entries.date,
+            date: (item.journal_entries as Record<string, unknown>).date as string,
             entriesCount: 0,
             totalAmount: 0
           });
         }
 
         const group = letterGroups.get(key)!;
-        group.entriesCount++;
-        group.totalAmount += (item.debit_amount || 0) + (item.credit_amount || 0);
+        group.entriesCount = (group.entriesCount as number) + 1;
+        group.totalAmount = (group.totalAmount as number) + ((item.debit_amount as number) || 0) + ((item.credit_amount as number) || 0);
       });
       
-      recentLettering.push(...Array.from(letterGroups.values()).slice(0, 10));
+      recentLettering.push(...Array.from(letterGroups.values()).map(group => ({
+        letterCode: group.letterCode as string,
+        date: group.date as string,
+        entriesCount: group.entriesCount as number,
+        totalAmount: group.totalAmount as number
+      })).slice(0, 10));
     }
 
     return {

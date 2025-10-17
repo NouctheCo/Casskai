@@ -125,6 +125,7 @@ import {
   Sparkles,
   ShoppingCart,
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 // Types pour les icônes
 export type IconName = keyof typeof icons;
@@ -283,7 +284,7 @@ export const Icon: React.FC<IconProps> = ({
   const IconComponent = icons[name];
   
   if (!IconComponent) {
-    console.warn(`Icon "${name}" not found. Using fallback.`);
+    logger.warn(`Icon "${name}" not found. Using fallback.`);
     return <Package size={size} className={className} color={color} />;
   }
   

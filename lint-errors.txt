@@ -1,0 +1,40 @@
+C:\Users\noutc\Casskai\e2e\auth.spec.ts
+C:\Users\noutc\Casskai\e2e\dashboard.spec.ts
+C:\Users\noutc\Casskai\e2e\invoicing.spec.ts
+C:\Users\noutc\Casskai\e2e\onboarding.spec.ts
+C:\Users\noutc\Casskai\e2e\payments.spec.ts
+C:\Users\noutc\Casskai\scripts\validate-pipeline.js
+  9:8  error  'path' is defined but never used  no-unused-vars
+  176:41  error    The `{}` ("empty object") type allows any non-nullish value, including literals like `0` and `""`.
+  232:41  error    The `{}` ("empty object") type allows any non-nullish value, including literals like `0` and `""`.
+  279:39  error    The `{}` ("empty object") type allows any non-nullish value, including literals like `0` and `""`.
+  188:45  error    Do not access Object.prototype method 'hasOwnProperty' from target object               no-prototype-builtins
+C:\Users\noutc\Casskai\src\components\ui\command.tsx
+  26:11  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+  54:11  error    An interface declaring no members is equivalent to its supertype             @typescript-eslint/no-empty-object-type
+  65:11  error    An interface declaring no members is equivalent to its supertype             @typescript-eslint/no-empty-object-type
+C:\Users\noutc\Casskai\src\components\ui\input.tsx
+  4:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+C:\Users\noutc\Casskai\src\components\ui\textarea.tsx
+  5:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+  290:19  error    Unreachable code                                                                                                     no-unreachable
+  525:21  error    A `require()` style import is forbidden                                                                                         @typescript-eslint/no-require-imports
+  525:21  error    Require statement not part of import statement                                                                                  @typescript-eslint/no-var-requires
+C:\Users\noutc\Casskai\src\lib\utils.test.ts
+  109:11  error    Unexpected lexical declaration in case block                                         no-case-declarations
+  437:11  error    Unexpected lexical declaration in case block                                               no-case-declarations
+  487:12  error    'first' is never reassigned. Use 'const' instead                                    prefer-const
+  487:19  error    'second' is never reassigned. Use 'const' instead                                   prefer-const
+  219:21  error    Unreachable code                                                                         no-unreachable
+  353:22  error    A `require()` style import is forbidden                                                @typescript-eslint/no-require-imports
+  353:22  error    Require statement not part of import statement                                         @typescript-eslint/no-var-requires
+C:\Users\noutc\Casskai\src\services\notificationService.test.ts
+  325:11  error    Unexpected lexical declaration in case block                                    no-case-declarations
+  461:21  error    Unreachable code                                                                     no-unreachable
+  241:18  error    'TemplateCondition' is already defined    no-redeclare
+  143:14  error    The `Function` type accepts any function-like value.
+  151:14  error    The `Function` type accepts any function-like value.
+  269:31  error    Unexpected string concatenation                                                         prefer-template
+C:\Users\noutc\Casskai\src\utils\reportGeneration\core\pdfGeneratorExtensions.ts
+C:\Users\noutc\Casskai\test-rpc.js
+  6:7  error  '_supabase' is assigned a value but never used  no-unused-vars

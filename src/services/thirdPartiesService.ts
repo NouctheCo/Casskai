@@ -6,6 +6,7 @@ import {
   ThirdPartyServiceResponse,
   ExportConfig
 } from '@/types/third-parties.types';
+import { logger } from '@/utils/logger';
 
 export type ThirdPartyType = 'customer' | 'supplier' | 'partner' | 'employee';
 
@@ -63,7 +64,7 @@ class ThirdPartiesService {
     return userCompanies.company_id;
   }
 
-  private createBillingAddress(item: any) {
+  private createBillingAddress(item: Record<string, unknown>) {
     return item.billing_address || {
       street: item.address_line1 || '',
       city: item.city || '',
@@ -108,7 +109,7 @@ class ThirdPartiesService {
 
       return transformedData;
     } catch (error) {
-      console.error('Error fetching third parties:', error);
+      logger.error('Error fetching third parties:', error);
       throw error;
     }
   }
@@ -129,7 +130,7 @@ class ThirdPartiesService {
 
       return data;
     } catch (error) {
-      console.error('Error fetching third party:', error);
+      logger.error('Error fetching third party:', error);
       throw error;
     }
   }
@@ -166,7 +167,7 @@ class ThirdPartiesService {
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error('Error creating third party:', error);
+      logger.error('Error creating third party:', error);
       throw error;
     }
   }
@@ -184,7 +185,7 @@ class ThirdPartiesService {
       .limit(1);
 
     if (error) {
-      console.error('Error generating code:', error);
+      logger.error('Error generating code:', error);
       return `${prefix}-${Date.now()}`;
     }
 
@@ -220,7 +221,7 @@ class ThirdPartiesService {
 
       return data;
     } catch (error) {
-      console.error('Error updating third party:', error);
+      logger.error('Error updating third party:', error);
       throw error;
     }
   }
@@ -250,7 +251,7 @@ class ThirdPartiesService {
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error deleting third party:', error);
+      logger.error('Error deleting third party:', error);
       throw error;
     }
   }
@@ -304,7 +305,7 @@ class ThirdPartiesService {
         top_customers: topCustomers
       };
     } catch (error) {
-      console.error('Error fetching third party stats:', error);
+      logger.error('Error fetching third party stats:', error);
       throw error;
     }
   }
@@ -333,7 +334,7 @@ class ThirdPartiesService {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Error searching third parties:', error);
+      logger.error('Error searching third parties:', error);
       throw error;
     }
   }
@@ -382,7 +383,7 @@ class ThirdPartiesService {
 
       return { data: dashboardData };
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      logger.error('Error fetching dashboard data:', error);
       return { 
         data: {} as ThirdPartyDashboardData,
         error: { message: 'Failed to fetch dashboard data' } 
@@ -479,7 +480,7 @@ class ThirdPartiesService {
 
       return { data: agingReport };
     } catch (error) {
-      console.error('Error fetching aging report:', error);
+      logger.error('Error fetching aging report:', error);
       return {
         data: [],
         error: { message: 'Failed to fetch aging report' }

@@ -20,6 +20,7 @@ import {
   getSubscriptionStatusLabel,
   formatPrice
 } from '@/types/subscription.types';
+import { logger } from '@/utils/logger';
 
 const SubscriptionWidget: React.FC = () => {
   const navigate = useNavigate();
@@ -32,6 +33,26 @@ const SubscriptionWidget: React.FC = () => {
     getUsageLimit,
     isLoading
   } = useSubscription();
+
+  // IMPORTANT: Tous les hooks doivent être appelés avant tout return conditionnel
+  const [usageData, setUsageData] = React.useState({
+    users: { current: 3, limit: null as number | null }
+  });
+
+  React.useEffect(() => {
+    if (!subscription || !plan) return; // Skip si pas d'abonnement
+
+    const fetchUsageData = async () => {
+      try {
+        const usersData = await getUsageLimit('users');
+        setUsageData({ users: usersData });
+      } catch (error) {
+        logger.error('Failed to fetch usage data:', error)
+      }
+    };
+
+    fetchUsageData();
+  }, [getUsageLimit, subscription, plan]);
 
   if (isLoading) {
     return (
@@ -86,24 +107,6 @@ const SubscriptionWidget: React.FC = () => {
 
   const statusColor = getSubscriptionStatusColor(subscription.status);
   const statusLabel = getSubscriptionStatusLabel(subscription.status);
-  
-  const [usageData, setUsageData] = React.useState({
-    users: { current: 3, limit: null as number | null }
-  });
-
-  React.useEffect(() => {
-    const fetchUsageData = async () => {
-      try {
-        const usersData = await getUsageLimit('users');
-        setUsageData({ users: usersData });
-      } catch (error) {
-        console.error('Failed to fetch usage data:', error);
-      }
-    };
-
-    fetchUsageData();
-  }, [getUsageLimit]);
-
   const usagePercentage = usageData.users.limit ? Math.min((usageData.users.current / usageData.users.limit) * 100, 100) : 0;
 
   return (

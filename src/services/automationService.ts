@@ -1,5 +1,7 @@
 import { supabase } from '@/lib/supabase';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
 export interface WorkflowTrigger {
   id: string;
   type: 'schedule' | 'event' | 'condition';
@@ -18,7 +20,7 @@ export interface WorkflowTrigger {
     condition?: {
       field: string;
       operator: 'equals' | 'greater_than' | 'less_than' | 'contains';
-      value: any;
+      value: unknown;
     };
   };
 }
@@ -89,7 +91,7 @@ export interface WorkflowExecution {
   results: {
     action_id: string;
     status: 'success' | 'failed';
-    result?: any;
+    result?: unknown;
     error?: string;
   }[];
 }
@@ -461,20 +463,22 @@ export class AutomationService {
         }
         break;
 
-      case 'weekly':
+      case 'weekly': {
         const targetDay = schedule.dayOfWeek || 1; // Monday by default
         while (nextRun.getDay() !== targetDay || nextRun <= now) {
           nextRun.setDate(nextRun.getDate() + 1);
         }
         break;
+      }
 
-      case 'monthly':
+      case 'monthly': {
         const targetDate = schedule.dayOfMonth || 1;
         nextRun.setDate(targetDate);
         if (nextRun <= now) {
           nextRun.setMonth(nextRun.getMonth() + 1);
         }
         break;
+      }
 
       case 'yearly':
         nextRun.setFullYear(nextRun.getFullYear() + 1);
@@ -590,20 +594,43 @@ export class AutomationService {
   // Déclenche l'exécution programmée des workflows
   async triggerScheduledWorkflows(): Promise<AutomationServiceResponse<any>> {
     try {
-      const { data, error } = await supabase.functions.invoke('workflow-scheduler', {
-        body: { action: 'schedule' }
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        return {
+          success: false,
+          error: 'Session utilisateur invalide',
+        };
+      }
+
+      const response = await fetch(`${API_BASE_URL}/workflows/scheduler`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ action: 'schedule' }),
       });
 
-      if (error) throw error;
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: payload?.error || 'Failed to trigger scheduled workflows',
+        };
+      }
 
       return {
         success: true,
-        data
+        data: payload,
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to trigger scheduled workflows'
+        error: error instanceof Error ? error.message : 'Failed to trigger scheduled workflows',
       };
     }
   }
@@ -611,23 +638,46 @@ export class AutomationService {
   // Exécute un workflow via le scheduler
   async executeWorkflowViaScheduler(workflowId: string): Promise<AutomationServiceResponse<any>> {
     try {
-      const { data, error } = await supabase.functions.invoke('workflow-scheduler', {
-        body: {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        return {
+          success: false,
+          error: 'Session utilisateur invalide',
+        };
+      }
+
+      const response = await fetch(`${API_BASE_URL}/workflows/scheduler`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
           action: 'execute',
-          workflowId
-        }
+          workflowId,
+        }),
       });
 
-      if (error) throw error;
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: payload?.error || 'Failed to execute workflow via scheduler',
+        };
+      }
 
       return {
         success: true,
-        data
+        data: payload,
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to execute workflow via scheduler'
+        error: error instanceof Error ? error.message : 'Failed to execute workflow via scheduler',
       };
     }
   }

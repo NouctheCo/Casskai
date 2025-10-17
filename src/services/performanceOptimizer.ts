@@ -1,5 +1,6 @@
 // Service d'optimisation des performances pour CassKai
 import { ModuleDefinition } from '@/types/modules.types';
+import { logger } from '@/utils/logger';
 
 interface PerformanceMetrics {
   loadTime: number;
@@ -51,7 +52,7 @@ export class PerformanceOptimizer {
       const lcpObserver = new PerformanceObserver((entryList) => {
         const entries = entryList.getEntries();
         const lcp = entries[entries.length - 1] as PerformanceEntry;
-        console.log('LCP:', lcp.startTime);
+        logger.info('LCP:', lcp.startTime)
       });
       lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
       this.observers.push(lcpObserver);
@@ -59,7 +60,7 @@ export class PerformanceOptimizer {
       // First Input Delay
       const fidObserver = new PerformanceObserver((entryList) => {
         for (const entry of entryList.getEntries()) {
-          console.log('FID:', (entry as any).processingStart - entry.startTime);
+          logger.info('FID:', (entry as any).processingStart - entry.startTime);
         }
       });
       fidObserver.observe({ entryTypes: ['first-input'] });
@@ -73,7 +74,7 @@ export class PerformanceOptimizer {
             clsValue += (entry as any).value;
           }
         }
-        console.log('CLS:', clsValue);
+        logger.info('CLS:', clsValue)
       });
       clsObserver.observe({ entryTypes: ['layout-shift'] });
       this.observers.push(clsObserver);
@@ -279,7 +280,7 @@ export class PerformanceOptimizer {
   }
 
   private enableComponentMemoization(): void {
-    console.log('Memoization hints enabled for React components');
+    logger.info('Memoization hints enabled for React components');
     // En production, ceci serait intégré avec React DevTools ou des outils de build
   }
 
@@ -287,10 +288,10 @@ export class PerformanceOptimizer {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js')
         .then(registration => {
-          console.log('Service Worker registered for caching optimization');
+          logger.info('Service Worker registered for caching optimization')
         })
         .catch(error => {
-          console.log('Service Worker registration failed:', error);
+          logger.info('Service Worker registration failed:', error)
         });
     }
   }
@@ -337,7 +338,7 @@ export class PerformanceOptimizer {
         const fps = Math.round((frames * 1000) / (currentTime - lastTime));
         
         if (fps < 30) {
-          console.warn(`Low FPS detected: ${fps}`);
+          logger.warn(`Low FPS detected: ${fps}`)
         }
         
         frames = 0;
@@ -355,7 +356,7 @@ export class PerformanceOptimizer {
       const memoryUsage = this.getMemoryUsage();
       
       if (memoryUsage > 200) { // 200MB threshold
-        console.warn(`High memory usage detected: ${memoryUsage.toFixed(2)}MB`);
+        logger.warn(`High memory usage detected: ${memoryUsage.toFixed(2)}MB`);
       }
     }, 30000); // Check every 30s
   }
@@ -365,7 +366,7 @@ export class PerformanceOptimizer {
       const observer = new PerformanceObserver((entryList) => {
         for (const entry of entryList.getEntries()) {
           if (entry.duration > 50) { // Long task threshold
-            console.warn(`Long task detected: ${entry.duration}ms`);
+            logger.warn(`Long task detected: ${entry.duration}ms`)
           }
         }
       });

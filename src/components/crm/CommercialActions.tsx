@@ -35,6 +35,7 @@ import { thirdPartiesService } from '../../services/thirdPartiesService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useHR } from '../../hooks/useHR';
 import { hrService } from '../../services/hrService';
+import { logger } from '@/utils/logger';
 
 interface CommercialActionsProps {
   actions: CommercialAction[];
@@ -156,17 +157,16 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
       }
 
       const newClient = await thirdPartiesService.createThirdParty({
-        company_name: clientData.company_name,
+        name: clientData.company_name,
         email: clientData.email || '',
         phone: clientData.phone || '',
         address: clientData.address || '',
-        type: 'customer' as any, // Assuming 'customer' is the correct type
-        company_id: currentCompany.id
+        type: 'customer' as any // Assuming 'customer' is the correct type
       });
 
       return { success: true, id: newClient.id };
     } catch (error) {
-      console.error('Error creating client:', error);
+      logger.error('Error creating client:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   };
@@ -199,7 +199,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
         throw new Error('Failed to create employee');
       }
     } catch (error) {
-      console.error('Error creating employee:', error);
+      logger.error('Error creating employee:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   };
@@ -344,7 +344,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
       setIsFormOpen(false);
       setEditingAction(null);
     } catch (error) {
-      console.error('Error submitting action form:', error);
+      logger.error('Error submitting action form:', error)
     }
   };
 
@@ -355,7 +355,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
         completed_date: new Date().toISOString()
       } as any);
     } catch (error) {
-      console.error('Error marking action as completed:', error);
+      logger.error('Error marking action as completed:', error)
     }
   };
 

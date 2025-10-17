@@ -1,18 +1,17 @@
 // Service pour la gestion budgétaire complète de CassKai
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 import type {
   Budget,
-  BudgetCategory,
-  BudgetAssumption,
   BudgetFormData,
-  BudgetAnalysis,
   BudgetTemplate,
-  BudgetImportData,
   BudgetFilter,
   BudgetValidationResult,
   BudgetStatus,
-  CategoryType,
-  BudgetVarianceAnalysis
+  BudgetVarianceAnalysis,
+  BudgetCategoryFormData,
+  BudgetValidationError,
+  BudgetValidationWarning
 } from '@/types/budget.types';
 
 export class BudgetService {
@@ -35,7 +34,7 @@ export class BudgetService {
   async getBudgets(
     companyId: string,
     filter?: BudgetFilter
-  ): Promise<{ data: Budget[] | null; error: any }> {
+  ): Promise<{ data: Budget[] | null; error: Record<string, unknown> | null }> {
     try {
       let query = supabase
         .from('budgets')
@@ -61,7 +60,7 @@ export class BudgetService {
 
       return { data, error: null };
     } catch (error) {
-      console.error('Error fetching budgets:', error);
+      logger.error('Error fetching budgets:', error);
       return { data: null, error };
     }
   }
@@ -69,7 +68,7 @@ export class BudgetService {
   /**
    * Récupère un budget spécifique avec toutes ses données
    */
-  async getBudgetById(budgetId: string): Promise<{ data: Budget | null; error: any }> {
+  async getBudgetById(budgetId: string): Promise<{ data: Budget | null; error: Record<string, unknown> | null }> {
     try {
       const { data, error } = await supabase
         .from('budgets')
@@ -85,7 +84,7 @@ export class BudgetService {
 
       return { data, error: null };
     } catch (error) {
-      console.error('Error fetching budget:', error);
+      logger.error('Error fetching budget:', error);
       return { data: null, error };
     }
   }
@@ -96,7 +95,7 @@ export class BudgetService {
   async getActiveBudget(
     companyId: string,
     year: number
-  ): Promise<{ data: Budget | null; error: any }> {
+  ): Promise<{ data: Budget | null; error: Error | null }> {
     try {
       const { data, error } = await supabase
         .from('budgets')
@@ -116,7 +115,7 @@ export class BudgetService {
 
       return { data, error: null };
     } catch (error) {
-      console.error('Error fetching active budget:', error);
+      logger.error('Error fetching active budget:', error);
       return { data: null, error };
     }
   }
@@ -127,7 +126,7 @@ export class BudgetService {
   async createBudget(
     companyId: string,
     budgetData: BudgetFormData
-  ): Promise<{ data: Budget | null; error: any }> {
+  ): Promise<{ data: Budget | null; error: Record<string, unknown> | null }> {
     try {
       // Validation des données
       const validation = this.validateBudgetData(budgetData);
@@ -211,7 +210,7 @@ export class BudgetService {
       return this.getBudgetById(budget.id);
 
     } catch (error) {
-      console.error('Error creating budget:', error);
+      logger.error('Error creating budget:', error);
       return { data: null, error };
     }
   }
@@ -222,9 +221,9 @@ export class BudgetService {
   async updateBudget(
     budgetId: string,
     budgetData: Partial<BudgetFormData>
-  ): Promise<{ data: Budget | null; error: any }> {
+  ): Promise<{ data: Budget | null; error: Record<string, unknown> | null }> {
     try {
-      let updateData: any = {};
+      let updateData: Record<string, unknown> = {};
 
       // Recalculer les totaux si les catégories ont changé
       if (budgetData.categories) {
@@ -319,7 +318,7 @@ export class BudgetService {
       return this.getBudgetById(budgetId);
 
     } catch (error) {
-      console.error('Error updating budget:', error);
+      logger.error('Error updating budget:', error);
       return { data: null, error };
     }
   }
@@ -331,9 +330,9 @@ export class BudgetService {
     budgetId: string,
     status: BudgetStatus,
     approvedBy?: string
-  ): Promise<{ data: Budget | null; error: any }> {
+  ): Promise<{ data: Budget | null; error: Record<string, unknown> | null }> {
     try {
-      const updateData: any = {
+      const updateData: Record<string, unknown> = {
         status,
         updated_at: new Date().toISOString()
       };
@@ -353,7 +352,7 @@ export class BudgetService {
       return this.getBudgetById(budgetId);
 
     } catch (error) {
-      console.error('Error updating budget status:', error);
+      logger.error('Error updating budget status:', error);
       return { data: null, error };
     }
   }
@@ -361,7 +360,7 @@ export class BudgetService {
   /**
    * Supprime un budget
    */
-  async deleteBudget(budgetId: string): Promise<{ error: any }> {
+  async deleteBudget(budgetId: string): Promise<{ error: Record<string, unknown> | null }> {
     try {
       const { error } = await supabase
         .from('budgets')
@@ -372,7 +371,7 @@ export class BudgetService {
 
       return { error: null };
     } catch (error) {
-      console.error('Error deleting budget:', error);
+      logger.error('Error deleting budget:', error);
       return { error };
     }
   }
@@ -389,7 +388,7 @@ export class BudgetService {
     budgetId: string,
     periodStart: string,
     periodEnd: string
-  ): Promise<{ data: BudgetVarianceAnalysis[] | null; error: any }> {
+  ): Promise<{ data: BudgetVarianceAnalysis[] | null; error: Record<string, unknown> | null }> {
     try {
       const { data, error } = await supabase.rpc('analyze_budget_variances', {
         p_company_id: companyId,
@@ -402,7 +401,7 @@ export class BudgetService {
 
       return { data: data || [], error: null };
     } catch (error) {
-      console.error('Error analyzing budget variances:', error);
+      logger.error('Error analyzing budget variances:', error);
       return { data: null, error };
     }
   }
@@ -413,7 +412,7 @@ export class BudgetService {
   async compareBudgets(
     currentBudgetId: string,
     previousBudgetId: string
-  ): Promise<{ data: any | null; error: any }> {
+  ): Promise<{ data: unknown | null; error: Record<string, unknown> | null }> {
     try {
       const { data, error } = await supabase.rpc('compare_budgets', {
         p_current_budget_id: currentBudgetId,
@@ -424,7 +423,7 @@ export class BudgetService {
 
       return { data, error: null };
     } catch (error) {
-      console.error('Error comparing budgets:', error);
+      logger.error('Error comparing budgets:', error);
       return { data: null, error };
     }
   }
@@ -436,7 +435,7 @@ export class BudgetService {
   /**
    * Récupère les templates de budget disponibles
    */
-  async getBudgetTemplates(): Promise<{ data: BudgetTemplate[] | null; error: any }> {
+  async getBudgetTemplates(): Promise<{ data: BudgetTemplate[] | null; error: Record<string, unknown> | null }> {
     try {
       const { data, error } = await supabase
         .from('budget_templates')
@@ -448,7 +447,7 @@ export class BudgetService {
 
       return { data: data || [], error: null };
     } catch (error) {
-      console.error('Error fetching budget templates:', error);
+      logger.error('Error fetching budget templates:', error);
       return { data: null, error };
     }
   }
@@ -460,7 +459,7 @@ export class BudgetService {
     companyId: string,
     templateId: string,
     year: number
-  ): Promise<{ data: Budget | null; error: any }> {
+  ): Promise<{ data: Budget | null; error: Record<string, unknown> | null }> {
     try {
       // Récupérer le template
       const { data: template, error: templateError } = await supabase
@@ -474,7 +473,7 @@ export class BudgetService {
       // Créer les données de budget basées sur le template
       const budgetData: BudgetFormData = {
         year,
-        categories: template.categories?.map((cat: any) => ({
+        categories: template.categories?.map((cat: Record<string, unknown>) => ({
           category: cat.category,
           subcategory: cat.subcategory,
           category_type: cat.category_type,
@@ -485,7 +484,7 @@ export class BudgetService {
           driver_type: cat.driver_type,
           notes: cat.description
         })) || [],
-        assumptions: template.assumptions?.map((ass: any) => ({
+        assumptions: template.assumptions?.map((ass: Record<string, unknown>) => ({
           key: ass.key,
           description: ass.description,
           value: ass.default_value || 0,
@@ -498,7 +497,7 @@ export class BudgetService {
       return this.createBudget(companyId, budgetData);
 
     } catch (error) {
-      console.error('Error creating budget from template:', error);
+      logger.error('Error creating budget from template:', error);
       return { data: null, error };
     }
   }
@@ -510,7 +509,7 @@ export class BudgetService {
     budgetId: string,
     newYear: number,
     growthRate: number = 0
-  ): Promise<{ data: Budget | null; error: any }> {
+  ): Promise<{ data: Budget | null; error: Record<string, unknown> | null }> {
     try {
       // Récupérer le budget source
       const { data: sourceBudget, error: sourceError } = await this.getBudgetById(budgetId);
@@ -552,7 +551,7 @@ export class BudgetService {
       return this.createBudget(sourceBudget.company_id, budgetData);
 
     } catch (error) {
-      console.error('Error duplicating budget:', error);
+      logger.error('Error duplicating budget:', error);
       return { data: null, error };
     }
   }
@@ -561,7 +560,7 @@ export class BudgetService {
   // Méthodes utilitaires privées
   // =============================================
 
-  private calculateBudgetTotals(categories: any[]): {
+  private calculateBudgetTotals(categories: BudgetCategoryFormData[]): {
     revenue: number;
     expense: number;
     capex: number;
@@ -586,8 +585,8 @@ export class BudgetService {
   }
 
   private validateBudgetData(budgetData: BudgetFormData): BudgetValidationResult {
-    const errors: any[] = [];
-    const warnings: any[] = [];
+    const errors: BudgetValidationError[] = [];
+    const warnings: BudgetValidationWarning[] = [];
 
     // Validation de l'année
     const currentYear = new Date().getFullYear();

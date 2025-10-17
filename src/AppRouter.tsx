@@ -1,5 +1,5 @@
-import React, { Suspense, useMemo } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import React, { Suspense, useMemo, useEffect } from 'react';
+import { useNavigate, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { LoadingFallback } from '@/components/ui/LoadingFallback';
 import { MainLayout } from '@/components/layout/MainLayout';
@@ -41,9 +41,31 @@ const LazyStripeCancelPage = React.lazy(() => import('@/pages/StripeCancelPage')
 const LazyBudgetPage = React.lazy(() => import('@/pages/BudgetPage'));
 const LazyAutomationPage = React.lazy(() => import('@/pages/AutomationPage'));
 const LazyThirdPartiesPage = React.lazy(() => import('@/pages/ThirdPartiesPage'));
+const LazyPostLoginExperience = React.lazy(() => import('@/pages/PostLoginExperience'));
 
 const AppRouter: React.FC = () => {
-  const { isAuthenticated, loading, onboardingCompleted, currentCompany, isCheckingOnboarding } = useAuth();
+  const { isAuthenticated, loading, onboardingCompleted, isCheckingOnboarding } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handler = () => {
+      try {
+        navigate('/experience');
+      } catch {
+        // ignore navigation errors in tests
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('show-experience', handler as EventListener);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('show-experience', handler as EventListener);
+      }
+    };
+  }, [navigate]);
 
   // Memoize the routing logic to prevent infinite re-renders
   const routingState = useMemo(() => {
@@ -69,6 +91,10 @@ const AppRouter: React.FC = () => {
 
   return (
     <Routes>
+      {/* Global listener for showing post-login experience */}
+      {isAuthenticated && (
+        <Route path="__show_experience_listener" element={<div />} />
+      )}
       {/* Public Routes */}
       {routingState === 'unauthenticated' && (
         <>
@@ -262,6 +288,13 @@ const AppRouter: React.FC = () => {
               <ProtectedRoute>
                 <Suspense fallback={<LoadingFallback />}>
                   <LazyThirdPartiesPage />
+                </Suspense>
+              </ProtectedRoute>
+            } />
+            <Route path="experience" element={
+              <ProtectedRoute>
+                <Suspense fallback={<LoadingFallback />}>
+                  <LazyPostLoginExperience />
                 </Suspense>
               </ProtectedRoute>
             } />

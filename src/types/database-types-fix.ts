@@ -40,14 +40,13 @@ export interface UserCompany {
 export interface Account {
   id: string
   account_number: string
-  name: string
-  type: AccountType
-  class: number
+  account_name: string
+  account_type: AccountType
+  account_class: number
   company_id: string
   parent_account_id?: string
   parent_code?: string
   description?: string
-  currency: string
   balance?: number
   tax_rate?: number
   tva_type?: string
@@ -61,7 +60,7 @@ export interface JournalEntry {
   entry_number: string
   journal_id: string
   company_id: string
-  date: string
+  entry_date: string
   description: string
   reference?: string
   status: JournalEntryStatus
@@ -121,8 +120,9 @@ export interface FECEntry {
   }>
 }
 
-// Types de base de données principal
-export interface Database {
+// Types de base de données principal - DEPRECATED: Import from @/types/supabase instead
+// Keeping for reference but DO NOT export
+interface Database_DEPRECATED {
   public: {
     Tables: {
       companies: {

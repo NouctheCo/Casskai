@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/utils/logger';
 import type { 
   Account, 
   JournalEntry, 
@@ -13,15 +14,15 @@ export interface CreateJournalEntryData {
   date: string;
   description: string;
   reference?: string;
-  journal_code?: string;
+  journal_id?: string;
   lines: CreateJournalEntryLineData[];
 }
 
 export interface CreateJournalEntryLineData {
   account_id: string;
   description?: string;
-  debit: number;
-  credit: number;
+  debit_amount: number;
+  credit_amount: number;
 }
 
 export interface BalanceSheetData {
@@ -50,7 +51,7 @@ export function useAccounting(companyId: string) {
     try {
       const { data, error: fetchError } = await supabase
         .from('chart_of_accounts')
-        .select('*')
+        .select('id, account_number, account_name, account_type, account_class, company_id, is_active, created_at, updated_at')
         .eq('company_id', companyId)
         .eq('is_active', true)
         .order('account_number');
@@ -59,7 +60,7 @@ export function useAccounting(companyId: string) {
       setAccounts(data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch accounts');
-      console.error('Error fetching accounts:', err);
+      logger.error('Error fetching accounts:', err)
     } finally {
       setLoading(false);
     }
@@ -79,21 +80,21 @@ export function useAccounting(companyId: string) {
           *,
           journal_entry_lines (
             *,
-            accounts (
+            chart_of_accounts (
               account_number,
-              name
+              account_name
             )
           )
         `)
         .eq('company_id', companyId)
-        .order('date', { ascending: false })
+        .order('entry_date', { ascending: false })
         .limit(limit);
 
       if (fetchError) throw fetchError;
       setJournalEntries(data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch journal entries');
-      console.error('Error fetching journal entries:', err);
+      logger.error('Error fetching journal entries:', err)
     } finally {
       setLoading(false);
     }
@@ -102,9 +103,9 @@ export function useAccounting(companyId: string) {
   // Create a new account
   const createAccount = useCallback(async (accountData: {
     account_number: string;
-    name: string;
-    type: AccountType;
-    class: number;
+    account_name: string;
+    account_type: AccountType;
+    account_class: number;
     description?: string;
     parent_account_id?: string;
   }): Promise<Account | null> => {
@@ -115,7 +116,7 @@ export function useAccounting(companyId: string) {
 
     try {
       const { data: newAccount, error: insertError } = await supabase
-        .from('accounts')
+        .from('chart_of_accounts')
         .insert({
           ...accountData,
           company_id: companyId,
@@ -133,7 +134,7 @@ export function useAccounting(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create account';
       setError(errorMessage);
-      console.error('Error creating account:', err);
+      logger.error('Error creating account:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -152,7 +153,7 @@ export function useAccounting(companyId: string) {
       .limit(1);
 
     if (error) {
-      console.warn('Could not fetch last entry number:', error);
+      logger.warn('Could not fetch last entry number:', error);
       return `${year}001`;
     }
 
@@ -174,9 +175,9 @@ export function useAccounting(companyId: string) {
     if (!user || !companyId) throw new Error('User not authenticated or company not selected');
 
     // Validate that debits equal credits
-    const totalDebits = entryData.lines.reduce((sum, line) => sum + line.debit, 0);
-    const totalCredits = entryData.lines.reduce((sum, line) => sum + line.credit, 0);
-    
+    const totalDebits = entryData.lines.reduce((sum, line) => sum + line.debit_amount, 0);
+    const totalCredits = entryData.lines.reduce((sum, line) => sum + line.credit_amount, 0);
+
     if (Math.abs(totalDebits - totalCredits) > 0.01) {
       throw new Error('Journal entry must balance: total debits must equal total credits');
     }
@@ -187,7 +188,19 @@ export function useAccounting(companyId: string) {
     try {
       // Generate entry number
       const entryNumber = await generateEntryNumber();
-      const totalAmount = totalDebits;
+
+      // Si pas de journal_id fourni, essayer de trouver le journal "OD" (Opérations Diverses)
+      let journalId = entryData.journal_id;
+      if (!journalId) {
+        const { data: defaultJournal } = await supabase
+          .from('journals')
+          .select('id')
+          .eq('company_id', companyId)
+          .eq('code', 'OD')
+          .single();
+
+        journalId = defaultJournal?.id;
+      }
 
       // Start transaction
       const { data: newEntry, error: entryError } = await supabase
@@ -195,12 +208,11 @@ export function useAccounting(companyId: string) {
         .insert({
           company_id: companyId,
           entry_number: entryNumber,
-          date: entryData.date,
+          entry_date: entryData.date,
           description: entryData.description,
-          reference: entryData.reference,
-          journal_code: entryData.journal_code || 'OD',
-          total_amount: totalAmount,
-          created_by: user.id,
+          reference_number: entryData.reference,
+          journal_id: journalId,
+          status: 'draft',
         })
         .select()
         .single();
@@ -209,13 +221,11 @@ export function useAccounting(companyId: string) {
 
       // Create journal entry lines
       const linesData = entryData.lines.map((line, index) => ({
-        company_id: companyId,
         journal_entry_id: newEntry.id,
         account_id: line.account_id,
         description: line.description,
-        debit: line.debit,
-        credit: line.credit,
-        line_order: index + 1,
+        debit_amount: line.debit_amount,
+        credit_amount: line.credit_amount,
       }));
 
       const { error: linesError } = await supabase
@@ -231,9 +241,9 @@ export function useAccounting(companyId: string) {
           *,
           journal_entry_lines (
             *,
-            accounts (
+            chart_of_accounts (
               account_number,
-              name
+              account_name
             )
           )
         `)
@@ -247,7 +257,7 @@ export function useAccounting(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create journal entry';
       setError(errorMessage);
-      console.error('Error creating journal entry:', err);
+      logger.error('Error creating journal entry:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -279,7 +289,7 @@ export function useAccounting(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to post journal entry';
       setError(errorMessage);
-      console.error('Error posting journal entry:', err);
+      logger.error('Error posting journal entry:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -334,7 +344,7 @@ export function useAccounting(companyId: string) {
         totalEquity,
       };
     } catch (err) {
-      console.error('Error generating balance sheet:', err);
+      logger.error('Error generating balance sheet:', err);
       setError(err instanceof Error ? err.message : 'Failed to generate balance sheet');
       return null;
     }
@@ -359,7 +369,7 @@ export function useAccounting(companyId: string) {
         credit: parseFloat(item.balance) < 0 ? Math.abs(parseFloat(item.balance)) : 0,
       }));
     } catch (err) {
-      console.error('Error generating trial balance:', err);
+      logger.error('Error generating trial balance:', err);
       setError(err instanceof Error ? err.message : 'Failed to generate trial balance');
       return null;
     }

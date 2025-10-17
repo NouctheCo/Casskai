@@ -101,6 +101,7 @@ export interface SubscriptionResponse {
   subscription?: UserSubscription;
   error?: string;
   checkoutUrl?: string;
+  sessionId?: string;
 }
 
 export interface PaymentResponse {

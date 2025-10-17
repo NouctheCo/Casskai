@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { configService as _configService } from '../services/configService';
+import { logger } from '@/utils/logger';
 import type { 
   AppConfig, 
   ConfigStatus, 
@@ -69,7 +70,7 @@ export const useConfig = (): UseConfigReturn => {
             // Appel à getSupabaseClient sans affectation inutile
             configService.getSupabaseClient();
           } catch (err) {
-            console.warn('Impossible d\'initialiser Supabase:', err);
+            logger.warn('Impossible d\'initialiser Supabase:', err)
           }
         }
       } else {

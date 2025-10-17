@@ -1,5 +1,6 @@
 // src/services/chartOfAccountsService.ts
 import { supabase } from '../lib/supabase';
+import { logger } from '@/utils/logger';
 import type { Database } from '../types/supabase';
 
 type Account = {
@@ -72,7 +73,7 @@ export class ChartOfAccountsService {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Erreur récupération comptes:', error);
+      logger.error('Erreur récupération comptes:', error);
       return [];
     }
   }
@@ -115,7 +116,7 @@ export class ChartOfAccountsService {
 
       return { success: true, data };
     } catch (error) {
-      console.error('Erreur création compte:', error);
+      logger.error('Erreur création compte:', error);
       return { success: false, error: error.message };
     }
   }
@@ -166,7 +167,7 @@ export class ChartOfAccountsService {
 
       return { success: true, data };
     } catch (error) {
-      console.error('Erreur modification compte:', error);
+      logger.error('Erreur modification compte:', error);
       return { success: false, error: error.message };
     }
   }
@@ -176,7 +177,7 @@ export class ChartOfAccountsService {
     try {
       // Vérifier qu'aucune écriture n'utilise ce compte
       const { data: lines } = await supabase
-        .from('journal_entry_items')
+        .from('journal_entry_lines')
         .select('id')
         .eq('account_id', id)
         .limit(1);
@@ -194,7 +195,7 @@ export class ChartOfAccountsService {
 
       return { success: true };
     } catch (error) {
-      console.error('Erreur suppression compte:', error);
+      logger.error('Erreur suppression compte:', error);
       return { success: false, error: error.message };
     }
   }
@@ -235,7 +236,7 @@ export class ChartOfAccountsService {
 
       return stats;
     } catch (error) {
-      console.error('Erreur stats comptes:', error);
+      logger.error('Erreur stats comptes:', error);
       return {
         totalAccounts: 0,
         activeAccounts: 0,
@@ -281,7 +282,7 @@ export class ChartOfAccountsService {
 
       return { success: true, data: csvContent };
     } catch (error) {
-      console.error('Erreur export CSV:', error);
+      logger.error('Erreur export CSV:', error);
       return { success: false, error: error.message };
     }
   }
@@ -353,7 +354,7 @@ export class ChartOfAccountsService {
         errors 
       };
     } catch (error) {
-      console.error('Erreur import CSV:', error);
+      logger.error('Erreur import CSV:', error);
       return { 
         success: false, 
         imported, 
@@ -392,14 +393,14 @@ export class ChartOfAccountsService {
   async getAccountBalance(accountId: string, date?: string): Promise<number> {
     try {
       let query = supabase
-        .from('journal_entry_items')
+        .from('journal_entry_lines')
         .select('debit_amount, credit_amount')
         .eq('account_id', accountId);
 
       if (date) {
         // Jointure avec journal_entries pour filtrer par date
         query = supabase
-          .from('journal_entry_items')
+          .from('journal_entry_lines')
           .select(`
             debit_amount,
             credit_amount,
@@ -420,7 +421,7 @@ export class ChartOfAccountsService {
 
       return balance;
     } catch (error) {
-      console.error('Erreur calcul solde:', error);
+      logger.error('Erreur calcul solde:', error);
       return 0;
     }
   }

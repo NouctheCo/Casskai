@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { openAIService } from '@/services/ai/OpenAIService';
 import { AIInsight, CashFlowPrediction, SmartAlert, TaxOptimization } from '@/types/ai-types';
+import { logger } from '@/utils/logger';
 
 interface PredictiveDashboardProps {
   companyId: string;
@@ -77,7 +78,7 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({
       calculateMetrics(insightsResult.data, predictionsResult.data, alertsResult.data);
 
     } catch (error) {
-      console.error('Error loading AI data:', error);
+      logger.error('Error loading AI data:', error)
     } finally {
       setIsLoading(false);
     }

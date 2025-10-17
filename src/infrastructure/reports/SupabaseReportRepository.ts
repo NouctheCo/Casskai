@@ -1,6 +1,7 @@
 import { supabase } from '../../lib/supabase';
 import { IReportRepository } from '../../domain/reports/repositories/IReportRepository';
 import { Report, ReportExecution, ReportParameters, ReportMetadata } from '../../domain/reports/entities/Report';
+import { logger } from '@/utils/logger';
 
 export class SupabaseReportRepository implements IReportRepository {
   async findReportById(id: string): Promise<Report | null> {
@@ -12,7 +13,7 @@ export class SupabaseReportRepository implements IReportRepository {
       .single();
 
     if (error || !data) {
-      console.error('Error fetching report template:', error);
+      logger.error('Error fetching report template:', error);
       return null;
     }
 
@@ -40,7 +41,7 @@ export class SupabaseReportRepository implements IReportRepository {
       .order('name');
 
     if (error) {
-      console.error('Error fetching reports by category:', error);
+      logger.error('Error fetching reports by category:', error);
       throw error;
     }
 
@@ -69,7 +70,7 @@ export class SupabaseReportRepository implements IReportRepository {
       .order('name', { ascending: true });
 
     if (error) {
-      console.error('Error fetching all reports:', error);
+      logger.error('Error fetching all reports:', error);
       throw error;
     }
 
@@ -113,10 +114,10 @@ export class SupabaseReportRepository implements IReportRepository {
       });
 
     if (error) {
-      console.error('Error creating report execution:', error);
+      logger.error('Error creating report execution:', error);
       // In development, continue without error to avoid blocking
       if (import.meta.env.DEV) {
-        console.warn('Using mock report execution in development mode');
+        logger.warn('Using mock report execution in development mode')
       } else {
         throw error;
       }
@@ -150,7 +151,7 @@ export class SupabaseReportRepository implements IReportRepository {
       .single();
 
     if (error) {
-      console.error('Error fetching report execution:', error);
+      logger.error('Error fetching report execution:', error);
       return null;
     }
 
@@ -166,7 +167,7 @@ export class SupabaseReportRepository implements IReportRepository {
       .limit(limit);
 
     if (error) {
-      console.error('Error fetching report executions:', error);
+      logger.error('Error fetching report executions:', error);
       throw error;
     }
 
@@ -187,7 +188,7 @@ export class SupabaseReportRepository implements IReportRepository {
       });
 
     if (error) {
-      console.error('Error fetching financial data:', error);
+      logger.error('Error fetching financial data:', error);
       throw error;
     }
 
@@ -214,7 +215,7 @@ export class SupabaseReportRepository implements IReportRepository {
       .order('date', { ascending: true });
 
     if (error) {
-      console.error('Error fetching accounting entries:', error);
+      logger.error('Error fetching accounting entries:', error);
       throw error;
     }
 
@@ -230,7 +231,7 @@ export class SupabaseReportRepository implements IReportRepository {
       .lte('date', dateTo.toISOString());
 
     if (error) {
-      console.error('Error fetching invoices:', error);
+      logger.error('Error fetching invoices:', error);
       throw error;
     }
 
@@ -246,7 +247,7 @@ export class SupabaseReportRepository implements IReportRepository {
       .lte('date', dateTo.toISOString());
 
     if (error) {
-      console.error('Error fetching expenses:', error);
+      logger.error('Error fetching expenses:', error);
       throw error;
     }
 
@@ -285,7 +286,7 @@ export class SupabaseReportRepository implements IReportRepository {
       });
 
     if (error) {
-      console.warn('Failed to cache report result:', error);
+      logger.warn('Failed to cache report result:', error)
     }
   }
 

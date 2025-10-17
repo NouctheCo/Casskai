@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 export interface Payment {
   id: string;
@@ -112,13 +113,13 @@ class PaymentsService {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Error fetching payments:', error);
+        logger.error('Error fetching payments:', error);
         throw new Error(`Failed to fetch payments: ${error.message}`);
       }
 
       return (data || []) as PaymentWithDetails[];
     } catch (error) {
-      console.error('Error in getPayments:', error);
+      logger.error('Error in getPayments:', error);
       throw error;
     }
   }
@@ -147,7 +148,7 @@ class PaymentsService {
 
       return data as PaymentWithDetails;
     } catch (error) {
-      console.error('Error in getPaymentById:', error);
+      logger.error('Error in getPaymentById:', error);
       throw error;
     }
   }
@@ -198,7 +199,7 @@ class PaymentsService {
 
       return createdPayment;
     } catch (error) {
-      console.error('Error in createPayment:', error);
+      logger.error('Error in createPayment:', error);
       throw error;
     }
   }
@@ -227,7 +228,7 @@ class PaymentsService {
 
       return updatedPayment;
     } catch (error) {
-      console.error('Error in updatePayment:', error);
+      logger.error('Error in updatePayment:', error);
       throw error;
     }
   }
@@ -254,7 +255,7 @@ class PaymentsService {
         await this.updateInvoicePaidAmount(payment.invoice_id);
       }
     } catch (error) {
-      console.error('Error in deletePayment:', error);
+      logger.error('Error in deletePayment:', error);
       throw error;
     }
   }
@@ -311,7 +312,7 @@ class PaymentsService {
         methodDistribution
       };
     } catch (error) {
-      console.error('Error in getPaymentStats:', error);
+      logger.error('Error in getPaymentStats:', error);
       throw error;
     }
   }
@@ -327,7 +328,7 @@ class PaymentsService {
         .eq('status', 'completed');
 
       if (error) {
-        console.error('Error fetching invoice payments:', error);
+        logger.error('Error fetching invoice payments:', error);
         return;
       }
 
@@ -340,7 +341,7 @@ class PaymentsService {
         .eq('id', invoiceId);
 
     } catch (error) {
-      console.error('Error updating invoice paid amount:', error);
+      logger.error('Error updating invoice paid amount:', error)
     }
   }
 
@@ -370,7 +371,7 @@ class PaymentsService {
       
       return `PAY-${year}-${paddedNumber}`;
     } catch (error) {
-      console.error('Error generating payment reference:', error);
+      logger.error('Error generating payment reference:', error);
       // Fallback
       return `PAY-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`;
     }

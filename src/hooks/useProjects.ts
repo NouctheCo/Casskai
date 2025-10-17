@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { projectsService } from '@/services/projectsService';
 import {
+  projectsService,
   Project,
   ProjectTask,
   ProjectTimeEntry,
   ProjectMetrics
 } from '@/services/projectsService';
+import { logger } from '@/utils/logger';
 
 interface UseProjectsReturn {
   // Data
@@ -170,7 +171,7 @@ export function useProjects(): UseProjectsReturn {
         setCategories(response.data);
       }
     } catch (err) {
-      console.warn('Failed to fetch categories:', err);
+      logger.warn('Failed to fetch categories:', err)
     }
   }, [currentCompany?.id]);
 
@@ -184,7 +185,7 @@ export function useProjects(): UseProjectsReturn {
         setManagers(response.data);
       }
     } catch (err) {
-      console.warn('Failed to fetch managers:', err);
+      logger.warn('Failed to fetch managers:', err)
     }
   }, [currentCompany?.id]);
 

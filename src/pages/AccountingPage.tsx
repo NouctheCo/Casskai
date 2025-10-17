@@ -28,10 +28,11 @@ import {
 } from 'lucide-react';
 import OptimizedJournalEntriesTab from '@/components/accounting/OptimizedJournalEntriesTab';
 import ChartOfAccountsEnhanced from '@/components/accounting/ChartOfAccountsEnhanced';
-import OptimizedJournalsTab from '@/components/accounting/OptimizedJournalsTab';
+import { JournalsList } from '@/components/accounting/JournalsList'; // Importer notre nouveau composant
 import OptimizedReportsTab from '@/components/accounting/OptimizedReportsTab';
 import JournalDistribution from '@/components/accounting/JournalDistribution';
 import { calculateTrend, getPreviousPeriodDates } from '@/utils/trendCalculations';
+import { logger } from '@/utils/logger';
 
 // Types
 interface AccountingKPICardProps {
@@ -280,7 +281,7 @@ export default function AccountingPageOptimized() {
           .limit(1);
 
         if (companiesError) {
-          console.warn('Erreur récupération entreprises:', companiesError);
+          logger.warn('Erreur récupération entreprises:', companiesError);
           setError("Impossible de récupérer les informations de l'entreprise");
           return;
         }
@@ -303,41 +304,49 @@ export default function AccountingPageOptimized() {
 
         const previousPeriodDates = getPreviousPeriodDates(selectedPeriod);
 
-        // Récupérer les écritures de la période actuelle
+        // Récupérer les écritures de la période actuelle avec leurs lignes
         const { data: currentEntries, error: currentEntriesError } = await supabase
           .from('journal_entries')
-          .select('debit_amount, credit_amount')
+          .select('id, journal_entry_lines!inner(debit_amount, credit_amount)')
           .eq('company_id', companyId)
           .gte('entry_date', currentPeriodStart)
           .lte('entry_date', currentPeriodEnd);
 
         if (currentEntriesError) {
-          console.warn('Erreur récupération écritures actuelles:', currentEntriesError);
+          logger.warn('Erreur récupération écritures actuelles:', currentEntriesError);
           // Ne pas bloquer si les écritures n'existent pas encore
         }
 
-        // Récupérer les écritures de la période précédente
+        // Récupérer les écritures de la période précédente avec leurs lignes
         const { data: previousEntries, error: previousEntriesError } = await supabase
           .from('journal_entries')
-          .select('debit_amount, credit_amount')
+          .select('id, journal_entry_lines!inner(debit_amount, credit_amount)')
           .eq('company_id', companyId)
           .gte('entry_date', previousPeriodDates.start)
           .lte('entry_date', previousPeriodDates.end);
 
         if (previousEntriesError) {
-          console.warn('Erreur récupération écritures précédentes:', previousEntriesError);
+          logger.warn('Erreur récupération écritures précédentes:', previousEntriesError);
           // Ne pas bloquer si les écritures n'existent pas encore
         }
 
-        // Calculer totaux période actuelle
-        const currentDebit = currentEntries?.reduce((sum, e) => sum + (e.debit_amount || 0), 0) || 0;
-        const currentCredit = currentEntries?.reduce((sum, e) => sum + (e.credit_amount || 0), 0) || 0;
+        // Calculer totaux période actuelle à partir des lignes
+        const currentDebit = currentEntries?.reduce((sum, e) => {
+          return sum + (e.journal_entry_lines?.reduce((lineSum, line) => lineSum + (line.debit_amount || 0), 0) || 0);
+        }, 0) || 0;
+        const currentCredit = currentEntries?.reduce((sum, e) => {
+          return sum + (e.journal_entry_lines?.reduce((lineSum, line) => lineSum + (line.credit_amount || 0), 0) || 0);
+        }, 0) || 0;
         const currentBalance = currentDebit - currentCredit;
         const currentEntriesCount = currentEntries?.length || 0;
 
-        // Calculer totaux période précédente
-        const previousDebit = previousEntries?.reduce((sum, e) => sum + (e.debit_amount || 0), 0) || 0;
-        const previousCredit = previousEntries?.reduce((sum, e) => sum + (e.credit_amount || 0), 0) || 0;
+        // Calculer totaux période précédente à partir des lignes
+        const previousDebit = previousEntries?.reduce((sum, e) => {
+          return sum + (e.journal_entry_lines?.reduce((lineSum, line) => lineSum + (line.debit_amount || 0), 0) || 0);
+        }, 0) || 0;
+        const previousCredit = previousEntries?.reduce((sum, e) => {
+          return sum + (e.journal_entry_lines?.reduce((lineSum, line) => lineSum + (line.credit_amount || 0), 0) || 0);
+        }, 0) || 0;
         const previousBalance = previousDebit - previousCredit;
         const previousEntriesCount = previousEntries?.length || 0;
 
@@ -352,10 +361,10 @@ export default function AccountingPageOptimized() {
         const journalsCount = journalsResult.error ? 0 : (journalsResult.count || 0);
 
         if (accountsResult.error) {
-          console.warn('Erreur comptage comptes:', accountsResult.error);
+          logger.warn('Erreur comptage comptes:', accountsResult.error)
         }
         if (journalsResult.error) {
-          console.warn('Erreur comptage journaux:', journalsResult.error);
+          logger.warn('Erreur comptage journaux:', journalsResult.error)
         }
 
         // Déterminer si c'est une première utilisation (base vide)
@@ -376,7 +385,7 @@ export default function AccountingPageOptimized() {
         });
 
       } catch (error) {
-        console.error('Erreur chargement données comptables:', error);
+        logger.error('Erreur chargement données comptables:', error);
         // Pour les erreurs de connexion/réseau, afficher l'erreur
         if (error.message?.includes('network') || error.message?.includes('fetch')) {
           setError("Impossible de charger les données comptables. Vérifiez votre connexion internet.");
@@ -414,7 +423,7 @@ export default function AccountingPageOptimized() {
         description: "Prêt à créer une nouvelle écriture comptable."
       });
     } catch (error) {
-      console.error('Error preparing new entry:', error);
+      logger.error('Error preparing new entry:', error);
       toast({
         title: "Erreur",
         description: "Impossible de préparer la création d'écriture.",
@@ -660,7 +669,7 @@ export default function AccountingPageOptimized() {
         </TabsContent>
 
         <TabsContent value="journals">
-          <OptimizedJournalsTab />
+          <JournalsList />
         </TabsContent>
 
         <TabsContent value="reports">

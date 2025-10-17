@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import { sankey, sankeyLinkHorizontal } from 'd3-sankey';
 import { hierarchy, treemap, treemapResquarify } from 'd3-hierarchy';
+import { logger } from '@/utils/logger';
 // Local type definitions
 type Transaction = any;
 type HeatmapData = any;
@@ -19,15 +20,15 @@ class AIVisualizationService {
   // Initialisation du service
   initialize(): void {
     try {
-      console.log('Initializing AI Visualization Service...');
+      logger.info('Initializing AI Visualization Service...');
       
       // Configuration des échelles de couleurs
       this.setupColorSchemes();
       
       this.isInitialized = true;
-      console.log('AI Visualization Service initialized successfully');
+      logger.info('AI Visualization Service initialized successfully')
     } catch (error) {
-      console.error('Failed to initialize AI Visualization Service:', error);
+      logger.error('Failed to initialize AI Visualization Service:', error);
       throw error;
     }
   }
@@ -90,7 +91,7 @@ class AIVisualizationService {
       };
 
     } catch (error) {
-      console.error('Error generating heatmap data:', error);
+      logger.error('Error generating heatmap data:', error);
       return {
         success: false,
         error: error.message
@@ -105,10 +106,11 @@ class AIVisualizationService {
       let key: string;
       
       switch (timeUnit) {
-        case 'week':
+        case 'week': {
           const weekStart = d3.timeWeek.floor(date);
           key = weekStart.toISOString().split('T')[0];
           break;
+        }
         case 'month':
           key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
           break;
@@ -147,9 +149,10 @@ class AIVisualizationService {
       case 'week':
       case 'day':
         return new Date(key);
-      case 'month':
+      case 'month': {
         const [year, month] = key.split('-').map(Number);
         return new Date(year, month - 1, 1);
+      }
       default:
         return new Date(key);
     }
@@ -233,7 +236,7 @@ class AIVisualizationService {
       };
 
     } catch (error) {
-      console.error('Error generating Sankey data:', error);
+      logger.error('Error generating Sankey data:', error);
       return {
         success: false,
         error: error.message
@@ -324,7 +327,7 @@ class AIVisualizationService {
       };
 
     } catch (error) {
-      console.error('Error generating treemap data:', error);
+      logger.error('Error generating treemap data:', error);
       return {
         success: false,
         error: error.message
@@ -496,7 +499,7 @@ class AIVisualizationService {
       };
 
     } catch (error) {
-      console.error('Error generating time series data:', error);
+      logger.error('Error generating time series data:', error);
       return {
         success: false,
         error: error.message
@@ -626,7 +629,7 @@ class AIVisualizationService {
   }
 
   // Configuration D3 pour Sankey
-  configureSankey(data: SankeyData, width: number = 800, height: number = 600): any {
+  configureSankey(data: SankeyData, width: number = 800, height: number = 600): unknown {
     const sankeyGenerator = sankey<SankeyNode, SankeyLink>()
       .nodeWidth(15)
       .nodePadding(10)
@@ -644,7 +647,7 @@ class AIVisualizationService {
   }
 
   // Configuration D3 pour Treemap
-  configureTreemap(data: TreemapNode, width: number = 800, height: number = 600): any {
+  configureTreemap(data: TreemapNode, width: number = 800, height: number = 600): unknown {
     const root = hierarchy(data)
       .sum(d => d.value)
       .sort((a, b) => b.value! - a.value!);

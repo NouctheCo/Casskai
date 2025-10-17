@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/utils/logger';
 
 interface FeedbackWidgetProps {
   className?: string;
@@ -56,7 +57,7 @@ export function FeedbackWidget({ className }: FeedbackWidgetProps) {
       setFeedbackType(null);
       setIsOpen(false);
     } catch (error) {
-      console.error('Error submitting feedback:', error);
+      logger.error('Error submitting feedback:', error);
       toast.error('Erreur lors de l\'envoi du feedback');
     } finally {
       setIsSubmitting(false);

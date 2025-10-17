@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 // Utilitaire pour nettoyer les sessions problématiques
 // À utiliser en cas de problèmes d'onboarding/auth
 
@@ -30,13 +31,13 @@ export const clearUserSession = () => {
       }
     });
 
-    console.log('✅ Session nettoyée avec succès');
+    logger.info('✅ Session nettoyée avec succès');
 
     // Recharger la page pour une session propre
     window.location.href = '/';
 
   } catch (error) {
-    console.error('Erreur lors du nettoyage de session:', error);
+    logger.error('Erreur lors du nettoyage de session:', error)
   }
 };
 

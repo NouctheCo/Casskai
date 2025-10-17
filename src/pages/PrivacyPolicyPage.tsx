@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { PageContainer } from '@/components/ui/PageContainer';
 import { PublicNavigation } from '@/components/navigation/PublicNavigation';
 import { tSafe } from '@/i18n/i18n';
+import { logger } from '@/utils/logger';
 
 const PrivacyPolicyPage = () => {
   const { t, i18n } = useTranslation();
@@ -32,7 +33,7 @@ const PrivacyPolicyPage = () => {
       // Fallback français par défaut
       return fallbackFr;
     } catch (error) {
-      console.warn('Translation error:', error);
+      logger.warn('Translation error:', error);
       return fallbackFr;
     }
   };

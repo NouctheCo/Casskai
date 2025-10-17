@@ -10,6 +10,7 @@ import {
   ModuleDependencyError,
   ModuleConflictError
 } from '@/types/modules.types';
+import { logger } from '@/utils/logger';
 
 // Service principal de gestion des modules
 export class ModuleManager {
@@ -42,9 +43,9 @@ export class ModuleManager {
       await this.initializeCoreModules(context);
 
       this.isInitialized = true;
-      console.warn('[ModuleManager] Initialisé avec succès');
+      logger.warn('[ModuleManager] Initialisé avec succès')
     } catch (error) {
-      console.error('[ModuleManager] Erreur d\'initialisation:', error);
+      logger.error('[ModuleManager] Erreur d\'initialisation:', error);
       throw error;
     }
   }
@@ -55,7 +56,7 @@ export class ModuleManager {
 
     if (this.modules.has(id)) {
       // Make registration idempotent: warn and ignore duplicate registrations
-      console.warn(`[ModuleManager] Module ${id} already registered - skipping duplicate registration`);
+      logger.warn(`[ModuleManager] Module ${id} already registered - skipping duplicate registration`);
       return;
     }
 
@@ -65,7 +66,7 @@ export class ModuleManager {
     this.modules.set(id, module);
     this.dependencies.set(id, module.definition.dependencies);
 
-    console.log(`[ModuleManager] Module ${id} enregistré`);
+    logger.info(`[ModuleManager] Module ${id} enregistré`)
   }
 
   // Activer un module
@@ -120,9 +121,9 @@ export class ModuleManager {
       this.activations.set(moduleId, activation);
       await this.saveActivation(activation);
 
-      console.log(`[ModuleManager] Module ${moduleId} activé avec succès`);
+      logger.info(`[ModuleManager] Module ${moduleId} activé avec succès`)
     } catch (error) {
-      console.error(`[ModuleManager] Erreur lors de l'activation de ${moduleId}:`, error);
+      logger.error(`[ModuleManager] Erreur lors de l'activation de ${moduleId}:`, error);
       throw new ModuleError(`Failed to activate module: ${error.message}`, moduleId, 'ACTIVATION_FAILED', error);
     }
   }
@@ -165,9 +166,9 @@ export class ModuleManager {
       this.activations.set(moduleId, activation);
       await this.saveActivation(activation);
 
-      console.log(`[ModuleManager] Module ${moduleId} désactivé avec succès`);
+      logger.info(`[ModuleManager] Module ${moduleId} désactivé avec succès`)
     } catch (error) {
-      console.error(`[ModuleManager] Erreur lors de la désactivation de ${moduleId}:`, error);
+      logger.error(`[ModuleManager] Erreur lors de la désactivation de ${moduleId}:`, error);
       throw new ModuleError(`Failed to deactivate module: ${error.message}`, moduleId, 'DEACTIVATION_FAILED', error);
     }
   }
@@ -223,7 +224,7 @@ export class ModuleManager {
     this.activations.set(moduleId, activation);
     await this.saveActivation(activation);
 
-    console.log(`[ModuleManager] Configuration du module ${moduleId} mise à jour`);
+    logger.info(`[ModuleManager] Configuration du module ${moduleId} mise à jour`)
   }
 
   // Vérification des dépendances
@@ -334,7 +335,7 @@ export class ModuleManager {
         try {
           await this.activateModule(module.definition.id, 'system', {});
         } catch (error) {
-          console.error(`[ModuleManager] Erreur activation module core ${module.definition.id}:`, error);
+          logger.error(`[ModuleManager] Erreur activation module core ${module.definition.id}:`, error)
         }
       }
     }
@@ -346,14 +347,14 @@ export class ModuleManager {
       // D'abord essayer de charger depuis Supabase si disponible
       if (supabase) {
         try {
-          console.warn('[ModuleManager] Loading modules from Supabase for tenant:', tenantId);
+          logger.warn('[ModuleManager] Loading modules from Supabase for tenant:', tenantId);
           const { data: modules, error } = await supabase
             .from('company_modules')
             .select('module_key, is_enabled')
             .eq('company_id', tenantId);
 
           if (!error && modules && modules.length > 0) {
-            console.warn('[ModuleManager] Found modules in Supabase:', modules.length);
+            logger.warn('[ModuleManager] Found modules in Supabase:', modules.length);
 
             // Convertir en activations
             modules.forEach(module => {
@@ -384,20 +385,20 @@ export class ModuleManager {
             const finalModules = { ...defaultModules, ...simpleModules };
             localStorage.setItem('casskai_modules', JSON.stringify(finalModules));
 
-            console.warn('[ModuleManager] Modules synchronized from Supabase to localStorage');
+            logger.warn('[ModuleManager] Modules synchronized from Supabase to localStorage');
             return;
           } else if (error) {
-            console.warn('[ModuleManager] Error loading from Supabase, falling back to localStorage:', error.message);
+            logger.warn('[ModuleManager] Error loading from Supabase, falling back to localStorage:', error.message)
           }
         } catch (supabaseError) {
-          console.warn('[ModuleManager] Supabase not available, using localStorage fallback:', supabaseError);
+          logger.warn('[ModuleManager] Supabase not available, using localStorage fallback:', supabaseError)
         }
       }
 
       // Fallback vers localStorage
       const simpleModules = localStorage.getItem('casskai_modules');
       if (simpleModules) {
-        console.warn('[ModuleManager] Loading modules from localStorage (casskai_modules)');
+        logger.warn('[ModuleManager] Loading modules from localStorage (casskai_modules);');
         const modulesData = JSON.parse(simpleModules) as Record<string, boolean>;
 
         // Convertir le format simple en activations
@@ -419,13 +420,13 @@ export class ModuleManager {
       // Fallback vers l'ancien format complexe
       const stored = localStorage.getItem(`casskai-modules-${tenantId}`);
       if (stored) {
-        console.warn('[ModuleManager] Loading modules from complex format (casskai-modules-${tenantId})');
+        logger.warn('[ModuleManager] Loading modules from complex format (casskai-modules-${tenantId});');
         const activations = JSON.parse(stored) as ModuleActivation[];
         activations.forEach(activation => {
           this.activations.set(activation.moduleId, activation);
         });
       } else {
-        console.warn('[ModuleManager] No modules found, using default modules');
+        logger.warn('[ModuleManager] No modules found, using default modules');
 
         // Modules par défaut si rien n'est trouvé
         const defaultModules = {
@@ -454,7 +455,7 @@ export class ModuleManager {
         localStorage.setItem('casskai_modules', JSON.stringify(defaultModules));
       }
     } catch (error) {
-      console.error('[ModuleManager] Error loading activations:', error);
+      logger.error('[ModuleManager] Error loading activations:', error);
 
       // En cas d'erreur, utiliser les modules par défaut
       const defaultModules = {
@@ -490,12 +491,12 @@ export class ModuleManager {
       });
 
       localStorage.setItem('casskai_modules', JSON.stringify(simpleModules));
-      console.warn('[ModuleManager] Modules saved to localStorage in simple format');
+      logger.warn('[ModuleManager] Modules saved to localStorage in simple format');
 
       // Sauvegarder aussi dans Supabase si tenantId est disponible
       if (this.tenantId && supabase) {
         try {
-          console.warn('[ModuleManager] Saving modules to Supabase for tenant:', this.tenantId);
+          logger.warn('[ModuleManager] Saving modules to Supabase for tenant:', this.tenantId);
 
           // Utiliser upsert pour insérer ou mettre à jour les modules de l'entreprise
           const moduleNames = {
@@ -526,17 +527,17 @@ export class ModuleManager {
               .upsert(modulesToUpsert, { onConflict: 'company_id,module_key' });
 
             if (error) {
-              console.error('[ModuleManager] Error upserting to Supabase:', error);
+              logger.error('[ModuleManager] Error upserting to Supabase:', error)
             } else {
-              console.warn('[ModuleManager] Modules upserted to Supabase successfully');
+              logger.warn('[ModuleManager] Modules upserted to Supabase successfully')
             }
           }
         } catch (supabaseError) {
-          console.error('[ModuleManager] Supabase save error:', supabaseError);
+          logger.error('[ModuleManager] Supabase save error:', supabaseError)
         }
       }
     } catch (error) {
-      console.error('[ModuleManager] Erreur sauvegarde activation:', error);
+      logger.error('[ModuleManager] Erreur sauvegarde activation:', error)
     }
   }
 

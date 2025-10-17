@@ -1,5 +1,8 @@
 # Déploiement des Edge Functions Stripe
 
+ > **NOTE (2025-10)**  
+ > Ce guide faisait référence aux Edge Functions Stripe désormais retirées.  
+ > Vous pouvez ignorer les étapes Supabase ci-dessous et utiliser les routes backend (`/api/stripe/*`).
 ## ✅ Code mis à jour
 
 Le code `PricingPage.tsx` utilise maintenant les **Edge Functions Supabase** pour gérer les paiements Stripe.

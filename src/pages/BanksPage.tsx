@@ -8,15 +8,15 @@ import { useToast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/contexts/AuthContext';
-import { Loader2 } from 'lucide-react';
-import { 
-  Landmark, 
-  PlusCircle, 
-  CreditCard, 
-  AlertTriangle, 
-  Shuffle, 
-  BarChartHorizontal, 
-  PiggyBank, 
+import {
+  Loader2,
+  Landmark,
+  PlusCircle,
+  CreditCard,
+  AlertTriangle,
+  Shuffle,
+  BarChartHorizontal,
+  PiggyBank,
   ArrowLeft,
   Upload,
   Download,
@@ -43,6 +43,7 @@ import {
 } from 'lucide-react';
 import { useLocale } from '@/contexts/LocaleContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { logger } from '@/utils/logger';
 
 // Données par défaut pour les règles de catégorisation
 const defaultCategorizationRules = [
@@ -87,7 +88,7 @@ const processImportedFile = async (file, extension) => {
         return generateFallbackTransactions(file, extension);
     }
   } catch (error) {
-    console.error('Error processing file:', error);
+    logger.error('Error processing file:', error);
     return generateFallbackTransactions(file, extension);
   }
 };
@@ -130,7 +131,7 @@ const parseXMLBankFile = (content, file) => {
       }));
     });
   } catch (error) {
-    console.warn('XML parsing failed, using heuristic analysis', error);
+    logger.warn('XML parsing failed, using heuristic analysis', error);
     return analyzeFileHeuristically(content, file, '.xml');
   }
   
@@ -205,7 +206,7 @@ const parseOFXBankFile = (content, file) => {
       }
     });
   } catch (error) {
-    console.warn('OFX parsing failed, using heuristic analysis', error);
+    logger.warn('OFX parsing failed, using heuristic analysis', error);
     return analyzeFileHeuristically(content, file, '.ofx');
   }
   
@@ -949,7 +950,7 @@ export default function BanksPage() {
       await loadReconciliationMetrics();
       
     } catch (error) {
-      console.error('Failed to load imported data:', error);
+      logger.error('Failed to load imported data:', error);
       toast({
         variant: "destructive",
         title: "Erreur de chargement",
@@ -979,7 +980,7 @@ export default function BanksPage() {
 
       setReconciliationMetrics(metrics);
     } catch (error) {
-      console.error('Failed to calculate reconciliation metrics:', error);
+      logger.error('Failed to calculate reconciliation metrics:', error)
     } finally {
       setIsLoadingMetrics(false);
     }
@@ -993,7 +994,7 @@ export default function BanksPage() {
       // Ici on pourrait filtrer par compte spécifique si nécessaire
       await loadReconciliationMetrics();
     } catch (error) {
-      console.error('Failed to load transactions:', error);
+      logger.error('Failed to load transactions:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -1051,7 +1052,7 @@ export default function BanksPage() {
       // Recalculer les métriques
       await loadReconciliationMetrics();
     } catch (error) {
-      console.error('File import failed:', error);
+      logger.error('File import failed:', error);
       toast({
         variant: "destructive",
         title: "Erreur d'import",
@@ -1082,7 +1083,7 @@ export default function BanksPage() {
       // Recalculer les métriques
       await loadReconciliationMetrics();
     } catch (error) {
-      console.error('Transaction reconciliation failed:', error);
+      logger.error('Transaction reconciliation failed:', error);
       toast({
         variant: "destructive",
         title: "Erreur de réconciliation",

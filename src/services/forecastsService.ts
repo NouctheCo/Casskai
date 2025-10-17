@@ -16,6 +16,7 @@ import {
   ExpenseLineItem,
   CashFlowItem
 } from '../types/forecasts.types';
+import { logger } from '@/utils/logger';
 
 export class ForecastsService {
   // Scenarios
@@ -42,7 +43,7 @@ export class ForecastsService {
 
       return { data: scenarios };
     } catch (error) {
-      console.error('Error fetching scenarios:', error);
+      logger.error('Error fetching scenarios:', error);
       return {
         data: [],
         error: { message: 'Erreur lors de la récupération des scénarios' }
@@ -82,7 +83,7 @@ export class ForecastsService {
 
       return { data: result };
     } catch (error) {
-      console.error('Error creating scenario:', error);
+      logger.error('Error creating scenario:', error);
       return {
         data: {} as ForecastScenario,
         error: { message: 'Erreur lors de la création du scénario' }
@@ -121,7 +122,7 @@ export class ForecastsService {
 
       return { data: result };
     } catch (error) {
-      console.error('Error updating scenario:', error);
+      logger.error('Error updating scenario:', error);
       return {
         data: {} as ForecastScenario,
         error: { message: 'Erreur lors de la mise à jour du scénario' }
@@ -140,7 +141,7 @@ export class ForecastsService {
 
       return { data: true };
     } catch (error) {
-      console.error('Error deleting scenario:', error);
+      logger.error('Error deleting scenario:', error);
       return {
         data: false,
         error: { message: 'Erreur lors de la suppression du scénario' }
@@ -171,7 +172,7 @@ export class ForecastsService {
 
       return { data: periods };
     } catch (error) {
-      console.error('Error fetching periods:', error);
+      logger.error('Error fetching periods:', error);
       return {
         data: [],
         error: { message: 'Erreur lors de la récupération des périodes' }
@@ -209,7 +210,7 @@ export class ForecastsService {
 
       return { data: result };
     } catch (error) {
-      console.error('Error creating period:', error);
+      logger.error('Error creating period:', error);
       return {
         data: {} as ForecastPeriod,
         error: { message: 'Erreur lors de la création de la période' }
@@ -293,7 +294,7 @@ export class ForecastsService {
 
       return { data: forecasts };
     } catch (error) {
-      console.error('Error fetching forecasts:', error);
+      logger.error('Error fetching forecasts:', error);
       return {
         data: [],
         error: { message: 'Erreur lors de la récupération des prévisions' }
@@ -361,7 +362,7 @@ export class ForecastsService {
 
       return { data: forecast };
     } catch (error) {
-      console.error('Error fetching forecast by ID:', error);
+      logger.error('Error fetching forecast by ID:', error);
       return {
         data: {} as ForecastData,
         error: { message: 'Erreur lors de la récupération de la prévision' }
@@ -434,7 +435,7 @@ export class ForecastsService {
 
       return { data: result };
     } catch (error) {
-      console.error('Error creating forecast:', error);
+      logger.error('Error creating forecast:', error);
       return {
         data: {} as ForecastData,
         error: { message: 'Erreur lors de la création de la prévision' }
@@ -520,7 +521,7 @@ export class ForecastsService {
 
       return { data: result };
     } catch (error) {
-      console.error('Error updating forecast:', error);
+      logger.error('Error updating forecast:', error);
       return {
         data: {} as ForecastData,
         error: { message: 'Erreur lors de la mise à jour de la prévision' }
@@ -539,7 +540,7 @@ export class ForecastsService {
 
       return { data: true };
     } catch (error) {
-      console.error('Error deleting forecast:', error);
+      logger.error('Error deleting forecast:', error);
       return {
         data: false,
         error: { message: 'Erreur lors de la suppression de la prévision' }
@@ -598,7 +599,7 @@ export class ForecastsService {
 
       return { data: dashboardData };
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      logger.error('Error fetching dashboard data:', error);
       return {
         data: {} as ForecastDashboardData,
         error: { message: 'Erreur lors de la récupération des données du tableau de bord' }
@@ -656,7 +657,7 @@ export class ForecastsService {
 
       return { data: analysis };
     } catch (error) {
-      console.error('Error performing what-if analysis:', error);
+      logger.error('Error performing what-if analysis:', error);
       return {
         data: {} as WhatIfAnalysis,
         error: { message: 'Erreur lors de l\'analyse what-if' }
@@ -706,7 +707,7 @@ export class ForecastsService {
 
   generatePDFReport(forecast: ForecastData): void {
     // Mock PDF generation - in real implementation, use a PDF library
-    console.log(`Génération du rapport PDF pour: ${forecast.name}`);
+    logger.info(`Génération du rapport PDF pour: ${forecast.name}`);
     // Implementation would use jsPDF or similar library
   }
 }

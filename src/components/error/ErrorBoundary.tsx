@@ -2,6 +2,7 @@ import React from 'react';
 import { ErrorBoundary as SentryErrorBoundary } from '@sentry/react';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { logger } from '@/utils/logger';
 
 interface ErrorFallbackProps {
   error: Error;
@@ -96,10 +97,12 @@ export function ErrorBoundary({ children, fallback }: ErrorBoundaryProps) {
     <SentryErrorBoundary
       fallback={({ error, resetError }) => {
         const FallbackComponent = fallback || ErrorFallback;
-        return <FallbackComponent error={error} resetError={resetError} />;
+        // Ensure error is a proper Error object
+        const errorObj = error instanceof Error ? error : new Error(String(error));
+        return <FallbackComponent error={errorObj} resetError={resetError} />;
       }}
       onError={(error, errorInfo) => {
-        console.error('ErrorBoundary caught an error:', error, errorInfo);
+        logger.error('ErrorBoundary caught an error:', error, errorInfo)
       }}
     >
       {children}

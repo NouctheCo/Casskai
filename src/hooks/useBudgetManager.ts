@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { budgetService } from '@/services/budgetService';
+import { logger } from '@/utils/logger';
 import type { Budget, BudgetFilter, BudgetStatus } from '@/types/budget.types';
 
 export const useBudgetManager = (companyId: string, initialFilter: BudgetFilter = {}) => {
@@ -18,7 +19,7 @@ export const useBudgetManager = (companyId: string, initialFilter: BudgetFilter 
       if (error) {
         // Pour les nouveaux utilisateurs, il est normal qu'il n'y ait pas de budgets
         // Ne pas afficher d'erreur toast dans ce cas, seulement logger
-        console.warn('Erreur lors du chargement des budgets:', error);
+        logger.warn('Erreur lors du chargement des budgets:', error);
         setBudgets([]);
       } else {
         setBudgets(data || []);

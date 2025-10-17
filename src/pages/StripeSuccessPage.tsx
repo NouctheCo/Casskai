@@ -6,6 +6,7 @@ import { CheckCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useToast } from '@/hooks/useToast';
+import { logger } from '@/utils/logger';
 
 export default function StripeSuccessPage() {
   const navigate = useNavigate();
@@ -22,13 +23,13 @@ export default function StripeSuccessPage() {
 
         if (sessionId && process.env.NODE_ENV === 'development') {
           // En développement, simuler la mise à jour d'abonnement
-          console.warn('🔄 Mode développement: simulation de mise à jour d\'abonnement...');
+          logger.warn('🔄 Mode développement: simulation de mise à jour d\'abonnement...');
 
           // Essayer de détecter le plan depuis l'URL ou utiliser une valeur par défaut
           const planFromUrl = searchParams.get('plan');
           const targetPlan = planFromUrl || 'starter_monthly'; // Plan par défaut
 
-          console.warn(`🔄 Mode développement: mise à jour locale vers plan ${targetPlan}`);
+          logger.warn(`🔄 Mode développement: mise à jour locale vers plan ${targetPlan}`);
           await setSubscriptionPlan(targetPlan);
         }
 
@@ -37,13 +38,13 @@ export default function StripeSuccessPage() {
         await new Promise(resolve => setTimeout(resolve, delay));
 
         // Recharger les données d'abonnement depuis la base de données
-        console.warn('🔄 Rechargement des données d\'abonnement après paiement...');
+        logger.warn('🔄 Rechargement des données d\'abonnement après paiement...');
         await refreshSubscription();
 
         showToast('Paiement confirmé avec succès ! Bienvenue dans CassKai Premium.', 'success');
         setIsProcessing(false);
       } catch (error) {
-        console.error('Erreur lors du traitement du succès:', error);
+        logger.error('Erreur lors du traitement du succès:', error);
         showToast('Paiement traité avec succès malgré une petite erreur technique.', 'warning');
         setIsProcessing(false);
       }

@@ -1,5 +1,6 @@
 import { supabase } from '../../lib/supabase';
 import { OnboardingData } from '../../types/onboarding.types';
+import { logger } from '@/utils/logger';
 
 export interface OnboardingResponse<T = unknown> {
   success: boolean;
@@ -98,7 +99,7 @@ export class OnboardingStorageService {
     try {
       return window.localStorage.getItem(this.getSessionTokenKey(userId));
     } catch (error) {
-      console.warn('Unable to read onboarding session token from localStorage:', error);
+      logger.warn('Unable to read onboarding session token from localStorage:', error);
       return null;
     }
   }
@@ -111,7 +112,7 @@ export class OnboardingStorageService {
     try {
       window.localStorage.setItem(this.getSessionTokenKey(userId), token);
     } catch (error) {
-      console.warn('Unable to persist onboarding session token:', error);
+      logger.warn('Unable to persist onboarding session token:', error)
     }
   }
 
@@ -123,7 +124,7 @@ export class OnboardingStorageService {
     try {
       window.localStorage.removeItem(this.getSessionTokenKey(userId));
     } catch (error) {
-      console.warn('Unable to clear onboarding session token:', error);
+      logger.warn('Unable to clear onboarding session token:', error)
     }
   }
 
@@ -197,7 +198,7 @@ export class OnboardingStorageService {
     try {
       window.localStorage.setItem(this.getLocalKey(userId), JSON.stringify(data));
     } catch (error) {
-      console.warn('Unable to save onboarding draft to localStorage:', error);
+      logger.warn('Unable to save onboarding draft to localStorage:', error)
     }
   }
 
@@ -213,7 +214,7 @@ export class OnboardingStorageService {
       const stored = window.localStorage.getItem(this.getLocalKey(userId));
       return stored ? (JSON.parse(stored) as OnboardingData) : null;
     } catch (error) {
-      console.warn('Unable to read onboarding draft from localStorage:', error);
+      logger.warn('Unable to read onboarding draft from localStorage:', error);
       return null;
     }
   }
@@ -229,7 +230,7 @@ export class OnboardingStorageService {
     try {
       window.localStorage.removeItem(this.getLocalKey(userId));
     } catch (error) {
-      console.warn('Unable to clear onboarding draft from localStorage:', error);
+      logger.warn('Unable to clear onboarding draft from localStorage:', error)
     }
   }
 
@@ -251,7 +252,7 @@ export class OnboardingStorageService {
       .maybeSingle();
 
     if (error) {
-      console.error('Unable to fetch onboarding session from Supabase:', error);
+      logger.error('Unable to fetch onboarding session from Supabase:', error);
       this.sessionCache.set(userId, null);
       return null;
     }
@@ -338,7 +339,7 @@ export class OnboardingStorageService {
         .single();
 
       if (error) {
-        console.error('Unable to update onboarding session in Supabase:', error);
+        logger.error('Unable to update onboarding session in Supabase:', error);
         return null;
       }
 
@@ -370,7 +371,7 @@ export class OnboardingStorageService {
       .single();
 
     if (error) {
-      console.error('Unable to create onboarding session in Supabase:', error);
+      logger.error('Unable to create onboarding session in Supabase:', error);
       return null;
     }
 
@@ -430,7 +431,7 @@ export class OnboardingStorageService {
         data: null
       };
     } catch (error) {
-      console.error('Error while retrieving onboarding session:', error);
+      logger.error('Error while retrieving onboarding session:', error);
       return {
         success: false,
         error: 'Erreur lors de la récupération de la session'
@@ -455,7 +456,7 @@ export class OnboardingStorageService {
         data: normalized
       };
     } catch (error) {
-      console.error('Error while saving onboarding data:', error);
+      logger.error('Error while saving onboarding data:', error);
       return {
         success: false,
         error: 'Erreur lors de la sauvegarde des données'
@@ -489,7 +490,7 @@ export class OnboardingStorageService {
           .eq('id', session.id);
 
         if (error) {
-          console.error('Unable to deactivate onboarding session in Supabase:', error);
+          logger.error('Unable to deactivate onboarding session in Supabase:', error)
         }
       }
 
@@ -501,7 +502,7 @@ export class OnboardingStorageService {
         success: true
       };
     } catch (error) {
-      console.error('Error while clearing onboarding data:', error);
+      logger.error('Error while clearing onboarding data:', error);
       return {
         success: false,
         error: 'Erreur lors de la suppression des données'
@@ -549,7 +550,7 @@ export class OnboardingStorageService {
         data: null
       };
     } catch (error) {
-      console.error('Error while fetching onboarding data:', error);
+      logger.error('Error while fetching onboarding data:', error);
       return {
         success: false,
         error: 'Erreur lors de la récupération des données'

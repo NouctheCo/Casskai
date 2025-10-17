@@ -31,6 +31,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { OpportunityCard } from './OpportunityCard';
+import { logger } from '@/utils/logger';
 
 interface OpportunityPipelineProps {
   enterpriseId: string;
@@ -84,7 +85,7 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
       }
       setOpportunities(response.data);
     } catch (error) {
-      console.error('Error loading opportunities:', error);
+      logger.error('Error loading opportunities:', error);
       toast({
         title: "Erreur",
         description: "Impossible de charger les opportunités",
@@ -151,7 +152,7 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
       });
 
     } catch (error) {
-      console.error('Error updating opportunity:', error);
+      logger.error('Error updating opportunity:', error);
       // Revert optimistic update
       await loadOpportunities();
       toast({

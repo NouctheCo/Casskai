@@ -32,6 +32,7 @@ import {
   OpportunityFormData,
   CommercialActionFormData
 } from '../types/crm.types';
+import { logger } from '@/utils/logger';
 
 export default function SalesCrmPage() {
   const { t } = useTranslation();
@@ -111,7 +112,7 @@ export default function SalesCrmPage() {
         });
       }
     } catch (error) {
-      console.error('Error creating client:', error);
+      logger.error('Error creating client:', error);
       toast({
         title: t('common.error'),
         description: 'Erreur lors de la création du client',
@@ -132,7 +133,7 @@ export default function SalesCrmPage() {
         });
       }
     } catch (error) {
-      console.error('Error creating contact:', error);
+      logger.error('Error creating contact:', error);
       toast({
         title: t('common.error'),
         description: 'Erreur lors de la création du contact',
@@ -153,7 +154,7 @@ export default function SalesCrmPage() {
         });
       }
     } catch (error) {
-      console.error('Error creating opportunity:', error);
+      logger.error('Error creating opportunity:', error);
       toast({
         title: t('common.error'),
         description: 'Erreur lors de la création de l\'opportunité',
@@ -174,7 +175,7 @@ export default function SalesCrmPage() {
         });
       }
     } catch (error) {
-      console.error('Error creating action:', error);
+      logger.error('Error creating action:', error);
       toast({
         title: t('common.error'),
         description: 'Erreur lors de la création de l\'action',
@@ -343,9 +344,9 @@ export default function SalesCrmPage() {
                 <CrmDashboard
                   dashboardData={dashboardData}
                   loading={loading}
-                  onCreateClient={() => console.log('Create client')}
-                  onCreateOpportunity={() => console.log('Create opportunity')}
-                  onCreateAction={() => console.log('Create action')}
+                  onCreateClient={() => logger.info('Create client')}
+                  onCreateOpportunity={() => logger.info('Create opportunity')}
+                  onCreateAction={() => logger.info('Create action')}
                 />
               ) : (
                 <Card>
@@ -451,7 +452,7 @@ export default function SalesCrmPage() {
                           Fonctionnalité complètement intégrée avec Supabase
                         </p>
                       </div>
-                      <Button onClick={() => console.log('Open client management')}>
+                      <Button onClick={() => logger.info('Open client management')}>
                         Ouvrir la Gestion des Clients
                       </Button>
                     </div>
@@ -471,11 +472,11 @@ export default function SalesCrmPage() {
                 onCreateOpportunity={handleCreateOpportunity}
                 onUpdateOpportunity={async (id, data) => {
                   // TODO: Implement update opportunity
-                  console.warn('Update opportunity not implemented yet', id, data);
+                  logger.warn('Update opportunity not implemented yet', id, data)
                 }}
                 onDeleteOpportunity={async (id) => {
                   // TODO: Implement delete opportunity
-                  console.warn('Delete opportunity not implemented yet', id);
+                  logger.warn('Delete opportunity not implemented yet', id)
                 }}
               />
             </motion.div>
@@ -492,15 +493,15 @@ export default function SalesCrmPage() {
                 onCreateAction={handleCreateAction}
                 onUpdateAction={async (id, data) => {
                   // TODO: Implement update action
-                  console.warn('Update action not implemented yet', id, data);
+                  logger.warn('Update action not implemented yet', id, data)
                 }}
                 onDeleteAction={async (id) => {
                   // TODO: Implement delete action
-                  console.warn('Delete action not implemented yet', id);
+                  logger.warn('Delete action not implemented yet', id)
                 }}
                 onFiltersChange={(filters) => {
                   // TODO: Implement filters change
-                  console.warn('Filters change not implemented yet', filters);
+                  logger.warn('Filters change not implemented yet', filters)
                 }}
                 filters={{}}
               />

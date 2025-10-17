@@ -45,6 +45,7 @@ import {
   Receipt,
   MoreHorizontal
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 // Types locaux
 interface InvoiceFormData {
@@ -101,14 +102,14 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
   const loadCompanySettings = async (): Promise<CompanySettings | null> => {
     try {
       if (!currentCompany?.id) {
-        console.warn('No current company available');
+        logger.warn('No current company available');
         return null;
       }
 
       const settings = await CompanySettingsService.getCompanySettings(currentCompany.id);
       return settings;
     } catch (error) {
-      console.warn('Could not load company settings:', error);
+      logger.warn('Could not load company settings:', error);
       // Return default settings if failed
       return {
         generalInfo: { name: '' },
@@ -163,7 +164,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
       setClients(clientsData);
       setCompanySettings(settingsData);
     } catch (error) {
-      console.error('Error loading data:', error);
+      logger.error('Error loading data:', error);
       toast({
         title: "Erreur",
         description: "Impossible de charger les données",
@@ -176,9 +177,9 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
   
   // Filtrage des factures
   const filteredInvoices = invoices.filter(invoice => {
-    const matchesSearch = !searchTerm || 
+    const matchesSearch = !searchTerm ||
       invoice.invoice_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      invoice.third_party?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+      invoice.client?.name?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter;
     
@@ -267,7 +268,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         description: `Aperçu de la facture ${invoice.invoice_number} dans un nouvel onglet`
       });
     } catch (error) {
-      console.error('Error viewing PDF:', error);
+      logger.error('Error viewing PDF:', error);
       toast({
         title: "Erreur",
         description: "Impossible d'afficher l'aperçu",
@@ -299,7 +300,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         description: `Facture ${invoice.invoice_number} téléchargée avec succès`
       });
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      logger.error('Error generating PDF:', error);
       toast({
         title: "Erreur",
         description: "Impossible de générer le PDF",
@@ -337,7 +338,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         description: `${filteredInvoices.length} facture(s) en cours d'exportation...`
       });
     } catch (error) {
-      console.error('Error during bulk export:', error);
+      logger.error('Error during bulk export:', error);
       toast({
         title: "Erreur",
         description: "Impossible d'exporter les factures",
@@ -362,7 +363,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         description: `Nouvelle facture créée: ${duplicatedInvoice.invoice_number}`
       });
     } catch (error) {
-      console.error('Error duplicating invoice:', error);
+      logger.error('Error duplicating invoice:', error);
       toast({
         title: "Erreur",
         description: "Impossible de dupliquer la facture.",
@@ -381,7 +382,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
           description: `Avoir créé: ${creditNote.invoice_number}`
         });
       } catch (error) {
-        console.error('Error creating credit note:', error);
+        logger.error('Error creating credit note:', error);
         toast({
           title: "Erreur",
           description: "Impossible de créer l'avoir.",
@@ -506,7 +507,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
                       <TableCell className="font-medium">
                         <div className="flex items-center space-x-2">
                           <span>{invoice.invoice_number}</span>
-                          {invoice.type === 'credit_note' && (
+                          {invoice.invoice_type === 'credit_note' && (
                             <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
                               Avoir
                             </Badge>
@@ -515,16 +516,16 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
                       </TableCell>
                       <TableCell>
                         <div className="space-y-1">
-                          <p className="font-medium">{invoice.third_party?.name || 'Client supprimé'}</p>
-                          {invoice.third_party?.email && (
-                            <p className="text-xs text-gray-500">{invoice.third_party.email}</p>
+                          <p className="font-medium">{invoice.client?.name || 'Client supprimé'}</p>
+                          {invoice.client?.email && (
+                            <p className="text-xs text-gray-500">{invoice.client.email}</p>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
                           <Calendar className="w-4 h-4 text-gray-400" />
-                          <span>{new Date(invoice.issue_date).toLocaleDateString('fr-FR')}</span>
+                          <span>{new Date(invoice.invoice_date).toLocaleDateString('fr-FR')}</span>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -586,7 +587,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
                                 Dupliquer
                               </DropdownMenuItem>
                               
-                              {invoice.status === 'paid' && invoice.type === 'sale' && (
+                              {invoice.status === 'paid' && invoice.invoice_type === 'sale' && (
                                 <DropdownMenuItem onClick={() => handleCreateCreditNote(invoice)}>
                                   <Receipt className="w-4 h-4 mr-2" />
                                   Créer un avoir
@@ -707,7 +708,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
       if (result.success) {
         setInventoryItems(result.data);
       } else {
-        console.error('Error loading inventory items:', result.error);
+        logger.error('Error loading inventory items:', (result as { success: false; error: string }).error);
       }
     };
 
@@ -740,7 +741,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
       setFormData({
         clientId: invoice.third_party_id || '',
         invoiceNumber: invoice.invoice_number,
-        issueDate: invoice.issue_date,
+        issueDate: invoice.invoice_date,
         dueDate: invoice.due_date || '',
         description: invoice.notes || '',
         items: invoice.invoice_lines?.map(line => ({
@@ -761,7 +762,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
       const number = await invoicingService.generateInvoiceNumber();
       setFormData(prev => ({ ...prev, invoiceNumber: number }));
     } catch (error) {
-      console.error('Error generating invoice number:', error);
+      logger.error('Error generating invoice number:', error)
     }
   };
 
@@ -826,8 +827,8 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
         ...newItems[index],
         inventoryItemId: selectedItem.id,
         description: selectedItem.name,
-        unitPrice: unitPrice,
-        taxRate: taxRate,
+        unitPrice,
+        taxRate,
         total: totalTTC
       };
       return { ...prev, items: newItems };
@@ -862,7 +863,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
       return { success: true, id: result.data.id };
     }
 
-    return { success: false, error: result.error };
+    return { success: false, error: (result as { success: false; error: string }).error };
   };
 
   const calculateTotals = () => {
@@ -924,7 +925,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
         description: `${newClient.name} a été ajouté avec succès.`
       });
     } catch (error) {
-      console.error('Error creating client:', error);
+      logger.error('Error creating client:', error);
       toast({
         title: "Erreur",
         description: "Impossible de créer le client.",
@@ -994,7 +995,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Error saving invoice:', error);
+      logger.error('Error saving invoice:', error);
       toast({
         title: "Erreur",
         description: "Impossible d'enregistrer la facture",

@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Loader2, AlertTriangle, RefreshCw, Settings } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface ConfigGuardProps {
   children: React.ReactNode;
@@ -27,7 +28,7 @@ const ConfigGuard: React.FC<ConfigGuardProps> = ({ children, fallback }) => {
       // Recharger la configuration
       window.location.reload();
     } catch (error) {
-      console.error('Erreur lors du retry:', error);
+      logger.error('Erreur lors du retry:', error)
     } finally {
       setIsRetrying(false);
     }

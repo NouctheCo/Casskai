@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 // Types pour les demandes RGPD
 export interface GDPRRequest {
@@ -52,7 +53,7 @@ export class GDPRService {
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error('Error creating GDPR request:', error);
+      logger.error('Error creating GDPR request:', error);
       // Fallback: retourner un objet mock si la base de données n'est pas disponible
       return {
         id: `gdpr_${Date.now()}`,
@@ -88,7 +89,7 @@ export class GDPRService {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Error fetching GDPR requests:', error);
+      logger.error('Error fetching GDPR requests:', error);
       // Retourner des données mock en cas d'erreur
       return this.getMockGDPRRequests();
     }
@@ -106,7 +107,7 @@ export class GDPRService {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Error fetching GDPR requests by email:', error);
+      logger.error('Error fetching GDPR requests by email:', error);
       return [];
     }
   }
@@ -119,7 +120,7 @@ export class GDPRService {
     response?: string
   ): Promise<GDPRRequest> {
     try {
-      const updates: any = {
+      const updates: Record<string, unknown> = {
         status,
         updated_at: new Date().toISOString()
       };
@@ -140,7 +141,7 @@ export class GDPRService {
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error('Error updating GDPR request status:', error);
+      logger.error('Error updating GDPR request status:', error);
       throw error;
     }
   }
@@ -149,13 +150,13 @@ export class GDPRService {
   static async sendConfirmationEmail(request: GDPRRequest): Promise<void> {
     try {
       // Dans un vrai projet, ceci utiliserait un service d'email comme SendGrid, Mailgun, etc.
-      console.log('Sending GDPR request confirmation email to:', request.email);
+      logger.info('Sending GDPR request confirmation email to:', request.email);
       
       // Simulation d'un envoi d'email
       // Ici on pourrait intégrer avec Supabase Edge Functions ou un service tiers
       
     } catch (error) {
-      console.error('Error sending confirmation email:', error);
+      logger.error('Error sending confirmation email:', error);
       // Ne pas faire échouer la création de la demande si l'email échoue
     }
   }

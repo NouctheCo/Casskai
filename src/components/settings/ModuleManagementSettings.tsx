@@ -8,6 +8,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useModules } from '@/hooks/modules.hooks';
 import { Settings, Zap, Star, CheckCircle, AlertCircle, Loader2, Save, Info } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 /**
  * Composant unifié pour la gestion des modules
@@ -51,7 +52,7 @@ export function ModuleManagementSettings() {
       const updated = { ...prev };
 
       // Si on toggle vers l'état actuel, supprimer du pending (annulation)
-      if (prev.hasOwnProperty(moduleKey)) {
+      if (Object.prototype.hasOwnProperty.call(prev, moduleKey)) {
         // Il y avait déjà un changement pending, l'annuler
         delete updated[moduleKey];
       } else {
@@ -65,7 +66,7 @@ export function ModuleManagementSettings() {
 
   const getEffectiveState = (moduleKey: string): boolean => {
     // Si on a un changement pending, utiliser ça, sinon l'état actuel
-    return pendingChanges.hasOwnProperty(moduleKey)
+    return Object.prototype.hasOwnProperty.call(pendingChanges, moduleKey)
       ? pendingChanges[moduleKey]
       : isModuleActive(moduleKey);
   };
@@ -77,7 +78,7 @@ export function ModuleManagementSettings() {
 
     setIsSaving(true);
     try {
-      console.log('🔧 Application des changements de modules:', pendingChanges);
+      logger.info('🔧 Application des changements de modules:', pendingChanges);
 
       const changeEntries = Object.entries(pendingChanges);
       const results = await Promise.allSettled(
@@ -97,14 +98,14 @@ export function ModuleManagementSettings() {
 
             if (willBeActive) {
               await activateModule(moduleKey);
-              console.log(`✅ Module ${moduleKey} activé`);
+              logger.info(`✅ Module ${moduleKey} activé`)
             } else {
               await deactivateModule(moduleKey);
-              console.log(`✅ Module ${moduleKey} désactivé`);
+              logger.info(`✅ Module ${moduleKey} désactivé`)
             }
             return { moduleKey, success: true };
           } catch (error) {
-            console.error(`❌ Erreur module ${moduleKey}:`, error);
+            logger.error(`❌ Erreur module ${moduleKey}:`, error);
             return { moduleKey, success: false, error };
           }
         })
@@ -163,7 +164,7 @@ export function ModuleManagementSettings() {
       });
 
     } catch (error) {
-      console.error('❌ Erreur globale sauvegarde modules:', error);
+      logger.error('❌ Erreur globale sauvegarde modules:', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de sauvegarder les modifications',
@@ -185,7 +186,7 @@ export function ModuleManagementSettings() {
   const getModuleStatus = (moduleKey: string) => {
     const currentState = isModuleActive(moduleKey);
     const effectiveState = getEffectiveState(moduleKey);
-    const hasPendingChange = pendingChanges.hasOwnProperty(moduleKey);
+    const hasPendingChange = Object.prototype.hasOwnProperty.call(pendingChanges, moduleKey);
 
     return {
       currentState,

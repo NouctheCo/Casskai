@@ -3,6 +3,7 @@ import { DashboardLayout, DashboardWidget, DashboardContextType } from '@/types/
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { inferSizeFromWidth } from '@/utils/dashboardLayout';
+import { logger } from '@/utils/logger';
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
@@ -168,10 +169,10 @@ export function DashboardWidgetProvider({ children }: { children: React.ReactNod
         .upsert({ user_id: user.id, layout: currentLayout });
 
       if (error) {
-        console.error('Error saving layout:', error);
+        logger.error('Error saving layout:', error)
       }
     } catch (error) {
-      console.error('Error saving layout:', error);
+      logger.error('Error saving layout:', error)
     }
   }, [currentLayout, user]);
 

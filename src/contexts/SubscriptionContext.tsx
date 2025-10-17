@@ -2,8 +2,9 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useAuth } from './AuthContext';
 import { supabase } from '@/lib/supabase';
 import { UserSubscription, SubscriptionPlan } from '@/types/subscription.types';
+import { logger } from '@/utils/logger';
 
-interface RawSubscription extends Record<string, any> {}
+type RawSubscription = Record<string, any>;
 
 const normalizeSubscription = (raw: RawSubscription): UserSubscription => ({
   id: raw.id,
@@ -77,7 +78,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       if (subscriptionError) {
         // Ne pas logger comme erreur si c'est juste "no rows found"
         if (subscriptionError.code !== 'PGRST116') {
-          console.error('Error fetching subscription:', subscriptionError);
+          logger.error('Error fetching subscription:', subscriptionError)
         }
         // Pas d'abonnement actif - utiliser plan gratuit
         setSubscriptionPlanState('free');
@@ -138,7 +139,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       });
       }
     } catch (error) {
-      console.error('Unexpected error in fetchSubscription:', error);
+      logger.error('Unexpected error in fetchSubscription:', error);
       // En cas d'erreur, utiliser plan gratuit par défaut
       setSubscriptionPlanState('free');
       setSubscription(null);
@@ -181,7 +182,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
           filter: `user_id=eq.${user.id}`
         },
         (payload) => {
-          console.warn('Subscription change detected:', payload);
+          logger.warn('Subscription change detected:', payload);
 
           if (payload.eventType === 'UPDATE' && payload.new) {
             const rawSubscription = payload.new as RawSubscription;
@@ -227,7 +228,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
       if (existingSubscription) {
         // Mettre à jour l'abonnement existant
-        console.warn(`🔄 Updating existing subscription from ${existingSubscription.plan_id} to ${planId}`);
+        logger.warn(`🔄 Updating existing subscription from ${existingSubscription.plan_id} to ${planId}`);
         const { error: updateError } = await supabase
           .from('subscriptions')
           .update({
@@ -238,7 +239,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
           .eq('id', existingSubscription.id);
 
         if (updateError) {
-          console.error('Error updating subscription:', updateError);
+          logger.error('Error updating subscription:', updateError)
         } else {
           setSubscriptionPlanState(planId);
           // Recharger les données complètes
@@ -251,7 +252,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         }
       } else {
         // Créer un nouvel abonnement si aucun n'existe
-        console.warn(`🆕 Creating new subscription with plan ${planId}`);
+        logger.warn(`🆕 Creating new subscription with plan ${planId}`);
         const { data: _data, error } = await supabase
           .from('subscriptions')
           .insert({
@@ -265,7 +266,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
           });
 
         if (error) {
-          console.error('Error creating subscription:', error);
+          logger.error('Error creating subscription:', error)
         } else {
           setSubscriptionPlanState(planId);
           await fetchSubscription();
@@ -277,7 +278,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         }
       }
     } catch (error) {
-      console.error('Error in setSubscriptionPlan:', error);
+      logger.error('Error in setSubscriptionPlan:', error)
     } finally {
       setIsLoading(false);
     }
@@ -296,10 +297,10 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const openBillingPortal = async (): Promise<{ success: boolean; error?: string }> => {
     try {
       // Implementation would open Stripe billing portal
-      console.warn('Open billing portal - not implemented yet');
+      logger.warn('Open billing portal - not implemented yet');
       return { success: true };
     } catch (error) {
-      console.error('Failed to open billing portal:', error);
+      logger.error('Failed to open billing portal:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   };

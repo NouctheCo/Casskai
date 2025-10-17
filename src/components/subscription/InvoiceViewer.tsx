@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/useToast';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { logger } from '@/utils/logger';
 
 interface Invoice {
   id: string;
@@ -78,7 +79,7 @@ export function InvoiceViewer() {
 
       setInvoices(mockInvoices);
     } catch (err) {
-      console.error('Erreur lors du chargement des factures:', err);
+      logger.error('Erreur lors du chargement des factures:', err);
       setError('Impossible de charger les factures');
       showToast('Erreur lors du chargement des factures', 'error');
     } finally {
@@ -94,7 +95,7 @@ export function InvoiceViewer() {
         showToast('PDF non disponible pour cette facture', 'warning');
       }
     } catch (err) {
-      console.error('Erreur lors du téléchargement:', err);
+      logger.error('Erreur lors du téléchargement:', err);
       showToast('Erreur lors du téléchargement de la facture', 'error');
     }
   };
@@ -107,7 +108,7 @@ export function InvoiceViewer() {
         showToast('Facture non disponible en ligne', 'warning');
       }
     } catch (err) {
-      console.error('Erreur lors de l\'ouverture:', err);
+      logger.error('Erreur lors de l\'ouverture:', err);
       showToast('Erreur lors de l\'ouverture de la facture', 'error');
     }
   };

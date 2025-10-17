@@ -16,7 +16,7 @@ async function deployFunctions() {
     console.log('📄 SQL content loaded, executing...\n');
 
     // Execute the entire SQL as one statement
-    const { data, error } = await supabase.rpc('exec_sql', {
+    const { error } = await supabase.rpc('exec_sql', {
       sql: sqlContent
     });
 

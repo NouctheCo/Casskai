@@ -27,6 +27,7 @@ import {
   ArrowRight,
   Loader2
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 const SubscriptionSettings: React.FC = () => {
   const { user } = useAuth();
@@ -42,7 +43,7 @@ const SubscriptionSettings: React.FC = () => {
           const planInfo = await subscriptionService.getCurrentPlanInfo(user.id);
           setCurrentPlanInfo(planInfo);
         } catch (error) {
-          console.error('Erreur chargement plan:', error);
+          logger.error('Erreur chargement plan:', error)
         }
       }
     };

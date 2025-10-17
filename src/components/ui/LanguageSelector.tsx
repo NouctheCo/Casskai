@@ -7,6 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Globe, Check } from 'lucide-react';
 import { SUPPORTED_LOCALES, changeLanguageAndDetectCountry } from '@/i18n/i18n';
 import { useLocale } from '@/contexts/LocaleContext';
+import { logger } from '@/utils/logger';
 
 interface LanguageSelectorProps {
   variant?: 'select' | 'dropdown' | 'button';
@@ -32,7 +33,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       setLocale(languageCode);
       await changeLanguageAndDetectCountry(languageCode);
     } catch (error) {
-      console.error('Failed to change language:', error);
+      logger.error('Failed to change language:', error)
     }
   };
 
@@ -140,7 +141,7 @@ export const useCurrentLocale = () => {
       setLocale(languageCode);
       await changeLanguageAndDetectCountry(languageCode);
     } catch (error) {
-      console.error('Failed to change language:', error);
+      logger.error('Failed to change language:', error)
     }
   };
   
@@ -186,7 +187,7 @@ export const RegionalLanguageSelector: React.FC<LanguageSelectorProps> = ({
       setLocale(languageCode);
       await changeLanguageAndDetectCountry(languageCode);
     } catch (error) {
-      console.error('Failed to change language:', error);
+      logger.error('Failed to change language:', error)
     }
   };
 

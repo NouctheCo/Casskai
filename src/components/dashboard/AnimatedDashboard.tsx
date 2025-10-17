@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useEnterprise } from '../../contexts/EnterpriseContext';
+import { logger } from '@/utils/logger';
 
 interface DashboardData {
   revenue: {
@@ -165,7 +166,7 @@ export const AnimatedDashboard: React.FC<AnimatedDashboardProps> = ({
 
       setRealData(dashboardData);
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      logger.error('Error fetching dashboard data:', error)
     } finally {
       setDataLoading(false);
     }

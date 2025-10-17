@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { useSubscription } from './SubscriptionContext';
 import { ALL_MODULE_DEFINITIONS } from '@/constants/modules.constants';
 import { getModulesForPlan } from '@/types/subscription.types';
+import { logger } from '@/utils/logger';
 
 const CORE_MODULES = ['dashboard', 'settings', 'security', 'users'];
 
@@ -98,7 +99,7 @@ export const ModulesProvider: React.FC<ModulesProviderProps> = ({
       localStorage.setItem('casskai_modules', JSON.stringify(simpleRecord));
       localStorage.setItem('casskai-module-states', JSON.stringify(effectiveStates));
     } catch (storageError) {
-      console.warn("[ModulesProvider] Impossible de persister l'état des modules dans localStorage:", storageError);
+      logger.warn("[ModulesProvider] Impossible de persister l'état des modules dans localStorage:", storageError)
     }
   }, []);
 
@@ -129,11 +130,11 @@ export const ModulesProvider: React.FC<ModulesProviderProps> = ({
         .upsert(payload, { onConflict: 'company_id,module_key' });
 
       if (upsertError) {
-        console.error('[ModulesProvider] Erreur persistance module:', upsertError);
+        logger.error('[ModulesProvider] Erreur persistance module:', upsertError);
         setError(upsertError.message ?? 'Erreur lors de la mise à jour des modules');
       }
     } catch (persistError) {
-      console.error('[ModulesProvider] Erreur inattendue persistance module:', persistError);
+      logger.error('[ModulesProvider] Erreur inattendue persistance module:', persistError);
       setError(persistError instanceof Error ? persistError.message : 'Erreur lors de la mise à jour des modules');
     }
   }, [tenantId, availableModules]);
@@ -197,7 +198,7 @@ export const ModulesProvider: React.FC<ModulesProviderProps> = ({
               });
               syncFromStateMap(stateMap);
             } catch (parseError) {
-              console.warn('[ModulesProvider] Impossible de parser casskai_modules:', parseError);
+              logger.warn('[ModulesProvider] Impossible de parser casskai_modules:', parseError);
               syncFromStateMap({});
             }
           } else {
@@ -207,7 +208,7 @@ export const ModulesProvider: React.FC<ModulesProviderProps> = ({
         setError(null);
       }
     } catch (loadError) {
-      console.error('[ModulesProvider] Erreur chargement modules:', loadError);
+      logger.error('[ModulesProvider] Erreur chargement modules:', loadError);
       setError(loadError instanceof Error ? loadError.message : 'Erreur lors du chargement des modules');
       const fallbackStates = localStorage.getItem('casskai-module-states');
       const states = fallbackStates ? JSON.parse(fallbackStates) : {};
@@ -274,7 +275,7 @@ export const ModulesProvider: React.FC<ModulesProviderProps> = ({
       const customEvent = event as CustomEvent;
       const detail = customEvent.detail as { userId?: string; newPlanId?: string } | undefined;
       
-      console.log('[ModulesProvider] Subscription changed:', detail);
+      logger.info('[ModulesProvider] Subscription changed:', detail);
       
       // Recharger les modules pour mettre à jour allowedModuleKeys
       await loadModules();
@@ -290,7 +291,7 @@ export const ModulesProvider: React.FC<ModulesProviderProps> = ({
         // Désactiver les modules non autorisés
         Object.keys(states).forEach(moduleKey => {
           if (!newAllowedModules.includes(moduleKey)) {
-            console.log(`[ModulesProvider] Deactivating module ${moduleKey} (not in new plan)`);
+            logger.info(`[ModulesProvider] Deactivating module ${moduleKey} (not in new plan);`);
             states[moduleKey] = false;
           }
         });
@@ -376,7 +377,7 @@ export const ModulesProvider: React.FC<ModulesProviderProps> = ({
 
     // Ne pas attendre la persistance pour éviter les blocages
     persistModuleState(moduleId, true, config).catch(error => {
-      console.error(`[ModulesProvider] Erreur persistance activation ${moduleId}:`, error);
+      logger.error(`[ModulesProvider] Erreur persistance activation ${moduleId}:`, error)
     });
 
     syncFromStateMap(states);
@@ -396,7 +397,7 @@ export const ModulesProvider: React.FC<ModulesProviderProps> = ({
 
   const deactivateModule = useCallback(async (moduleId: string) => {
     if (CORE_MODULES.includes(moduleId)) {
-      console.warn(`[ModulesProvider] Le module ${moduleId} est un module coeur et ne peut pas être désactivé.`);
+      logger.warn(`[ModulesProvider] Le module ${moduleId} est un module coeur et ne peut pas être désactivé.`);
       return;
     }
 
@@ -410,7 +411,7 @@ export const ModulesProvider: React.FC<ModulesProviderProps> = ({
 
     // Ne pas attendre la persistance pour éviter les blocages
     persistModuleState(moduleId, false).catch(error => {
-      console.error(`[ModulesProvider] Erreur persistance désactivation ${moduleId}:`, error);
+      logger.error(`[ModulesProvider] Erreur persistance désactivation ${moduleId}:`, error)
     });
 
     pendingConfigRef.current.delete(moduleId);

@@ -27,6 +27,7 @@ import {
   EInvoiceFormat,
   EInvoiceChannel
 } from '../../types/einvoicing.types';
+import { logger } from '@/utils/logger';
 
 interface EInvoiceSubmissionFormProps {
   companyId: string;
@@ -80,7 +81,7 @@ export const EInvoiceSubmissionForm: React.FC<EInvoiceSubmissionFormProps> = ({
           setInvoiceOptions(data.data || []);
         }
       } catch (err) {
-        console.error('Error loading invoices:', err);
+        logger.error('Error loading invoices:', err)
       } finally {
         setIsLoadingInvoices(false);
       }

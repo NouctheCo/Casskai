@@ -9,6 +9,7 @@ import {
 } from '../../../types/einvoicing.types';
 import { supabase } from '../../../lib/supabase';
 import { createHash } from 'crypto';
+import { logger } from '@/utils/logger';
 
 export class ArchiveService {
   private readonly BUCKET_NAME = 'einvoicing-documents';
@@ -26,7 +27,7 @@ export class ArchiveService {
     xml_url: string;
   }> {
     try {
-      console.log(`📁 Archiving documents for ${documentId}`);
+      logger.info(`📁 Archiving documents for ${documentId}`);
 
       // Generate file paths with timestamps for versioning
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -66,7 +67,7 @@ export class ArchiveService {
         archived_at: new Date().toISOString()
       });
 
-      console.log(`✅ Documents archived successfully for ${documentId}`);
+      logger.info(`✅ Documents archived successfully for ${documentId}`);
 
       return {
         pdf_url: pdfUrl,
@@ -74,7 +75,7 @@ export class ArchiveService {
       };
 
     } catch (error) {
-      console.error('Error archiving documents:', error);
+      logger.error('Error archiving documents:', error);
       
       if (error instanceof EInvoicingError) {
         throw error;
@@ -100,7 +101,7 @@ export class ArchiveService {
     metadata: any;
   }> {
     try {
-      console.log(`📥 Retrieving ${type.toUpperCase()} document for ${documentId}${version ? ` (version: ${version})` : ''}`);
+      logger.info(`📥 Retrieving ${type.toUpperCase()} document for ${documentId}${version ? ` (version: ${version})` : ''}`);
 
       // Find the document path
       const path = await this.findDocumentPath(documentId, type, version);
@@ -144,7 +145,7 @@ export class ArchiveService {
         file_size: content.length
       });
 
-      console.log(`✅ Document retrieved successfully: ${documentId} (${type})`);
+      logger.info(`✅ Document retrieved successfully: ${documentId} (${type});`);
 
       return {
         content,
@@ -157,7 +158,7 @@ export class ArchiveService {
       };
 
     } catch (error) {
-      console.error('Error retrieving document:', error);
+      logger.error('Error retrieving document:', error);
       
       if (error instanceof EInvoicingError) {
         throw error;
@@ -182,7 +183,7 @@ export class ArchiveService {
     version: string;
   }>> {
     try {
-      console.log(`📋 Listing document versions for ${documentId}`);
+      logger.info(`📋 Listing document versions for ${documentId}`);
 
       const { data, error } = await supabase.storage
         .from(this.BUCKET_NAME)
@@ -255,11 +256,11 @@ export class ArchiveService {
         }
       }
 
-      console.log(`📋 Found ${versions.length} document versions for ${documentId}`);
+      logger.info(`📋 Found ${versions.length} document versions for ${documentId}`);
       return versions;
 
     } catch (error) {
-      console.error('Error listing document versions:', error);
+      logger.error('Error listing document versions:', error);
       
       if (error instanceof EInvoicingError) {
         throw error;
@@ -281,7 +282,7 @@ export class ArchiveService {
     errors: string[];
   }> {
     try {
-      console.log(`🧹 Starting cleanup of expired documents (older than ${this.RETENTION_YEARS} years)`);
+      logger.info(`🧹 Starting cleanup of expired documents (older than ${this.RETENTION_YEARS} years);`);
 
       const cutoffDate = new Date();
       cutoffDate.setFullYear(cutoffDate.getFullYear() - this.RETENTION_YEARS);
@@ -311,7 +312,7 @@ export class ArchiveService {
         }
       }
 
-      console.log(`🗑️ Found ${expiredDocuments.length} expired documents to delete`);
+      logger.info(`🗑️ Found ${expiredDocuments.length} expired documents to delete`);
 
       // Delete expired documents
       let deletedCount = 0;
@@ -338,7 +339,7 @@ export class ArchiveService {
         }
       }
 
-      console.log(`✅ Cleanup complete: ${deletedCount} documents deleted, ${errors.length} errors`);
+      logger.info(`✅ Cleanup complete: ${deletedCount} documents deleted, ${errors.length} errors`);
 
       return {
         deleted_count: deletedCount,
@@ -346,7 +347,7 @@ export class ArchiveService {
       };
 
     } catch (error) {
-      console.error('Error during cleanup:', error);
+      logger.error('Error during cleanup:', error);
       
       throw new EInvoicingError(
         `Failed to cleanup expired documents: ${(error as Error).message}`,
@@ -366,7 +367,7 @@ export class ArchiveService {
     newest_document: string;
   }> {
     try {
-      console.log('📊 Calculating archive statistics');
+      logger.info('📊 Calculating archive statistics');
 
       const { data, error } = await supabase.storage
         .from(this.BUCKET_NAME)
@@ -406,11 +407,11 @@ export class ArchiveService {
         }
       }
 
-      console.log('📊 Archive statistics calculated:', stats);
+      logger.info('📊 Archive statistics calculated:', stats);
       return stats;
 
     } catch (error) {
-      console.error('Error calculating archive statistics:', error);
+      logger.error('Error calculating archive statistics:', error);
       
       if (error instanceof EInvoicingError) {
         throw error;
@@ -519,7 +520,7 @@ export class ArchiveService {
         p_meta_json: metadata
       });
     } catch (error) {
-      console.error('Error logging archival event:', error);
+      logger.error('Error logging archival event:', error)
     }
   }
 
@@ -534,7 +535,7 @@ export class ArchiveService {
         p_meta_json: metadata
       });
     } catch (error) {
-      console.error('Error logging access event:', error);
+      logger.error('Error logging access event:', error)
     }
   }
 
@@ -549,7 +550,7 @@ export class ArchiveService {
         p_meta_json: metadata
       });
     } catch (error) {
-      console.error('Error logging deletion event:', error);
+      logger.error('Error logging deletion event:', error)
     }
   }
 }

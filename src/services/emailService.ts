@@ -1,4 +1,7 @@
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export interface EmailConfig {
   to: string[];
@@ -191,7 +194,7 @@ export class EmailService {
   }
 
   /**
-   * Envoie un email via Supabase Edge Functions
+   * Envoie un email via l'API interne
    */
   async sendEmail(config: EmailConfig, companyId: string): Promise<EmailServiceResponse> {
     try {
@@ -215,25 +218,50 @@ export class EmailService {
         subject = this.replaceTemplateVariables(subject, config.variables);
       }
 
-      // Appeler la Edge Function Supabase pour l'envoi d'email
-      const { data, error } = await supabase.functions.invoke('send-email', {
-        body: {
+      const attachmentsPayload = (config.attachments || []).map(att => ({
+        filename: att.filename,
+        content: serializeAttachmentContent(att.content),
+        contentType: att.contentType,
+      }));
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        return {
+          success: false,
+          error: 'Session utilisateur invalide',
+        };
+      }
+
+      const response = await fetch(`${API_BASE_URL}/email/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
           to: config.to,
           cc: config.cc,
           bcc: config.bcc,
           subject,
           html,
           text: config.text,
-          attachments: config.attachments,
-          companyId
-        }
+          template: config.template,
+          variables: config.variables,
+          attachments: attachmentsPayload,
+          companyId,
+        }),
       });
 
-      if (error) {
-        console.error('Erreur envoi email:', error);
+      const payload = await response.json();
+
+      if (!response.ok) {
+        logger.error('Erreur envoi email:', payload);
         return {
           success: false,
-          error: error.message || 'Erreur lors de l\'envoi de l\'email'
+          error: payload?.error || 'Erreur lors de l\'envoi de l\'email'
         };
       }
 
@@ -249,11 +277,11 @@ export class EmailService {
 
       return {
         success: true,
-        messageId: data?.messageId
+        messageId: payload?.messageId
       };
 
     } catch (error) {
-      console.error('Erreur EmailService:', error);
+      logger.error('Erreur EmailService:', error);
 
       // En cas d'erreur, on peut fallback sur un faux envoi pour le développement
       if (process.env.NODE_ENV === 'development') {
@@ -295,7 +323,7 @@ export class EmailService {
           sent_at: new Date().toISOString()
         });
     } catch (error) {
-      console.warn('Impossible de logger l\'email:', error);
+      logger.warn('Impossible de logger l\'email:', error)
     }
   }
 

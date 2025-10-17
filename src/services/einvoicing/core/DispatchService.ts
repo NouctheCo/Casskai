@@ -12,6 +12,7 @@ import {
 } from '../../../types/einvoicing.types';
 import { ChannelProvider } from '../adapters/ChannelProviders/base/ChannelProvider';
 import { PPFProvider } from '../adapters/ChannelProviders/PPFProvider';
+import { logger } from '@/utils/logger';
 
 export class DispatchService {
   private providers: Map<string, ChannelProvider> = new Map();
@@ -30,7 +31,7 @@ export class DispatchService {
     documentId: string
   ): Promise<ChannelResponse> {
     try {
-      console.log(`📤 Submitting document ${documentId} via ${channel}`);
+      logger.info(`📤 Submitting document ${documentId} via ${channel}`);
 
       // Get appropriate provider
       const provider = this.getProvider(channel);
@@ -47,11 +48,11 @@ export class DispatchService {
       // Submit document
       const response = await provider.submitDocument(formattingResult, documentId);
       
-      console.log(`✅ Document ${documentId} submitted successfully via ${channel}:`, response.message_id);
+      logger.info(`✅ Document ${documentId} submitted successfully via ${channel}:`, response.message_id);
       return response;
 
     } catch (error) {
-      console.error(`❌ Error submitting document ${documentId} via ${channel}:`, error);
+      logger.error(`❌ Error submitting document ${documentId} via ${channel}:`, error);
       
       if (error instanceof SubmissionError) {
         throw error;
@@ -76,7 +77,7 @@ export class DispatchService {
     details?: any;
   }> {
     try {
-      console.log(`🔍 Getting delivery status for message ${messageId} via ${channel}`);
+      logger.info(`🔍 Getting delivery status for message ${messageId} via ${channel}`);
 
       const provider = this.getProvider(channel);
       if (!provider) {
@@ -85,11 +86,11 @@ export class DispatchService {
 
       const status = await provider.getDeliveryStatus(messageId);
       
-      console.log(`📊 Status for message ${messageId}:`, status.status);
+      logger.info(`📊 Status for message ${messageId}:`, status.status);
       return status;
 
     } catch (error) {
-      console.error(`❌ Error getting delivery status for ${messageId}:`, error);
+      logger.error(`❌ Error getting delivery status for ${messageId}:`, error);
       
       throw new EInvoicingError(
         `Failed to get delivery status: ${(error as Error).message}`,
@@ -108,7 +109,7 @@ export class DispatchService {
     reason: string
   ): Promise<boolean> {
     try {
-      console.log(`🚫 Cancelling document ${messageId} via ${channel}: ${reason}`);
+      logger.info(`🚫 Cancelling document ${messageId} via ${channel}: ${reason}`);
 
       const provider = this.getProvider(channel);
       if (!provider) {
@@ -118,15 +119,15 @@ export class DispatchService {
       const result = await provider.cancelDocument(messageId, reason);
       
       if (result) {
-        console.log(`✅ Document ${messageId} cancelled successfully`);
+        logger.info(`✅ Document ${messageId} cancelled successfully`)
       } else {
-        console.log(`⚠️ Document ${messageId} could not be cancelled (may not support cancellation)`);
+        logger.info(`⚠️ Document ${messageId} could not be cancelled (may not support cancellation);`);
       }
       
       return result;
 
     } catch (error) {
-      console.error(`❌ Error cancelling document ${messageId}:`, error);
+      logger.error(`❌ Error cancelling document ${messageId}:`, error);
       
       throw new EInvoicingError(
         `Failed to cancel document: ${(error as Error).message}`,
@@ -145,7 +146,7 @@ export class DispatchService {
     error?: string;
   }> {
     try {
-      console.log(`🧪 Testing connectivity for channel ${channel}`);
+      logger.info(`🧪 Testing connectivity for channel ${channel}`);
       
       const startTime = Date.now();
       const provider = this.getProvider(channel);
@@ -160,7 +161,7 @@ export class DispatchService {
       const isAvailable = await provider.isChannelAvailable();
       const latency = Date.now() - startTime;
 
-      console.log(`📊 Channel ${channel} test result: ${isAvailable ? 'OK' : 'FAILED'} (${latency}ms)`);
+      logger.info(`📊 Channel ${channel} test result: ${isAvailable ? 'OK' : 'FAILED'} (${latency}ms);`);
 
       return {
         available: isAvailable,
@@ -168,7 +169,7 @@ export class DispatchService {
       };
 
     } catch (error) {
-      console.error(`❌ Error testing channel ${channel}:`, error);
+      logger.error(`❌ Error testing channel ${channel}:`, error);
       
       return {
         available: false,
@@ -222,7 +223,7 @@ export class DispatchService {
         Array.from(this.providers.keys()).join(', '));
 
     } catch (error) {
-      console.error('Error initializing providers:', error);
+      logger.error('Error initializing providers:', error);
       throw new EInvoicingError(
         `Failed to initialize channel providers: ${(error as Error).message}`,
         'PROVIDER_INIT_ERROR'
@@ -243,7 +244,7 @@ export class DispatchService {
     if (channel.startsWith('PDP:')) {
       // For now, return null as PDP providers are not yet implemented
       // In the future, this would dynamically load the appropriate PDP provider
-      console.warn(`PDP provider not yet implemented for channel: ${channel}`);
+      logger.warn(`PDP provider not yet implemented for channel: ${channel}`);
       return null;
     }
 
@@ -297,7 +298,7 @@ export class DispatchService {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        console.log(`🔄 Submission attempt ${attempt}/${maxRetries}`);
+        logger.info(`🔄 Submission attempt ${attempt}/${maxRetries}`);
         return await operation();
       } catch (error) {
         lastError = error as Error;
@@ -308,7 +309,7 @@ export class DispatchService {
 
         // Exponential backoff: 1s, 2s, 4s, ...
         const delayMs = baseDelayMs * Math.pow(2, attempt - 1);
-        console.log(`⏳ Waiting ${delayMs}ms before retry...`);
+        logger.info(`⏳ Waiting ${delayMs}ms before retry...`);
         
         await new Promise(resolve => setTimeout(resolve, delayMs));
       }
@@ -330,10 +331,10 @@ export class DispatchService {
     const duration = Date.now() - startTime;
     const status = success ? 'SUCCESS' : 'FAILED';
     
-    console.log(`📊 Submission metrics - Channel: ${channel}, Document: ${documentId}, Status: ${status}, Duration: ${duration}ms`);
+    logger.info(`📊 Submission metrics - Channel: ${channel}, Document: ${documentId}, Status: ${status}, Duration: ${duration}ms`);
     
     if (error) {
-      console.log(`📊 Error details:`, error.message);
+      logger.info(`📊 Error details:`, error.message)
     }
 
     // In production, this would send metrics to a monitoring system

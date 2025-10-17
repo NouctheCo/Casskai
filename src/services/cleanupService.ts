@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { logger } from '@/utils/logger';
 
 export class CleanupService {
   /**
@@ -15,7 +16,7 @@ export class CleanupService {
         .like('reference_number', 'TEST-%');
 
       if (selectError) {
-        console.error('Erreur lors de la récupération des écritures à supprimer:', selectError);
+        logger.error('Erreur lors de la récupération des écritures à supprimer:', selectError);
         throw selectError;
       }
 
@@ -31,12 +32,12 @@ export class CleanupService {
 
       // Supprimer les lignes d'écritures
       const { error: itemsError } = await supabase
-        .from('journal_entry_items')
+        .from('journal_entry_lines')
         .delete()
         .in('journal_entry_id', entryIds);
 
       if (itemsError) {
-        console.error('Erreur lors de la suppression des lignes d\'écritures:', itemsError);
+        logger.error('Erreur lors de la suppression des lignes d\'écritures:', itemsError);
         throw itemsError;
       }
 
@@ -47,7 +48,7 @@ export class CleanupService {
         .in('id', entryIds);
 
       if (entriesError) {
-        console.error('Erreur lors de la suppression des écritures:', entriesError);
+        logger.error('Erreur lors de la suppression des écritures:', entriesError);
         throw entriesError;
       }
 
@@ -58,7 +59,7 @@ export class CleanupService {
       };
 
     } catch (error) {
-      console.error('Erreur lors du nettoyage des données d\'exemple:', error);
+      logger.error('Erreur lors du nettoyage des données d\'exemple:', error);
       return {
         success: false,
         message: 'Erreur lors du nettoyage des données d\'exemple. Veuillez réessayer.'
@@ -79,7 +80,7 @@ export class CleanupService {
 
       return (count || 0) > 0;
     } catch (error) {
-      console.error('Erreur lors de la vérification des données d\'exemple:', error);
+      logger.error('Erreur lors de la vérification des données d\'exemple:', error);
       return false;
     }
   }

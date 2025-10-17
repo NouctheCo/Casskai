@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { journalEntriesService } from './journalEntriesService';
 import { EntryTemplatesService } from './entryTemplatesService';
+import { logger } from '@/utils/logger';
 
 export interface Invoice {
   id: string;
@@ -147,7 +148,7 @@ class InvoicingService {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Error fetching invoices:', error);
+        logger.error('Error fetching invoices:', error);
         throw new Error(`Failed to fetch invoices: ${error.message}`);
       }
 
@@ -159,7 +160,7 @@ class InvoicingService {
 
       return enrichedInvoices;
     } catch (error) {
-      console.error('Error in getInvoices:', error);
+      logger.error('Error in getInvoices:', error);
       throw error;
     }
   }
@@ -192,7 +193,7 @@ class InvoicingService {
         invoice_lines: data.invoice_lines || []
       } as InvoiceWithDetails;
     } catch (error) {
-      console.error('Error in getInvoiceById:', error);
+      logger.error('Error in getInvoiceById:', error);
       throw error;
     }
   }
@@ -283,7 +284,7 @@ class InvoicingService {
 
       return createdInvoice;
     } catch (error) {
-      console.error('Error in createInvoice:', error);
+      logger.error('Error in createInvoice:', error);
       throw error;
     }
   }
@@ -325,7 +326,7 @@ class InvoicingService {
 
       return updatedInvoice;
     } catch (error) {
-      console.error('Error in updateInvoiceStatus:', error);
+      logger.error('Error in updateInvoiceStatus:', error);
       throw error;
     }
   }
@@ -344,7 +345,7 @@ class InvoicingService {
         throw new Error(`Failed to delete invoice: ${error.message}`);
       }
     } catch (error) {
-      console.error('Error in deleteInvoice:', error);
+      logger.error('Error in deleteInvoice:', error);
       throw error;
     }
   }
@@ -375,7 +376,7 @@ class InvoicingService {
       
       return `FAC-${year}-${paddedNumber}`;
     } catch (error) {
-      console.error('Error generating invoice number:', error);
+      logger.error('Error generating invoice number:', error);
       // Fallback
       return `FAC-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`;
     }
@@ -408,7 +409,7 @@ class InvoicingService {
 
       return await this.createInvoice(newInvoiceData, newLines);
     } catch (error) {
-      console.error('Error duplicating invoice:', error);
+      logger.error('Error duplicating invoice:', error);
       throw error;
     }
   }
@@ -441,7 +442,7 @@ class InvoicingService {
 
       return await this.createInvoice(creditNoteData, creditLines);
     } catch (error) {
-      console.error('Error creating credit note:', error);
+      logger.error('Error creating credit note:', error);
       throw error;
     }
   }
@@ -484,7 +485,7 @@ class InvoicingService {
         .select('id')
         .eq('company_id', companyId)
         .eq('type', 'quote');
-      if (quotesError) console.warn('Quotes table might not exist:', quotesError);
+      if (quotesError) logger.warn('Quotes table might not exist:', quotesError);
       
       const invoicesList = invoices || [];
       const clientsList = clients || [];
@@ -519,7 +520,7 @@ class InvoicingService {
         averageInvoiceValue
       };
     } catch (error) {
-      console.error('Error getting invoicing stats:', error);
+      logger.error('Error getting invoicing stats:', error);
       // Return default stats on error
       return {
         totalRevenue: 0,
@@ -562,7 +563,7 @@ class InvoicingService {
       const journal = journals.find(j => j.code === journalCode);
 
       if (!journal) {
-        console.warn(`Journal ${journalCode} non trouvé, écriture non créée`);
+        logger.warn(`Journal ${journalCode} non trouvé, écriture non créée`);
         return;
       }
 
@@ -582,18 +583,25 @@ class InvoicingService {
         referenceNumber: invoice.invoice_number,
         journalId: journal.id,
         status: 'posted' as const,
-        items: journalEntry.items
+        lines: journalEntry.items.map(item => ({
+          accountId: item.accountId,
+          debitAmount: item.debitAmount,
+          creditAmount: item.creditAmount,
+          description: item.description || '',
+          auxiliaryAccount: item.auxiliaryAccount,
+          letterage: item.letterage
+        }))
       };
 
       const result = await journalEntriesService.createJournalEntry(payload);
 
-      if (!result.success) {
-        console.error('Erreur création écriture comptable:', result.error);
+      if (!result.success && 'error' in result) {
+        logger.error('Erreur création écriture comptable:', result.error)
       } else {
-        console.warn(`Écriture comptable créée pour la facture ${invoice.invoice_number}`);
+        logger.warn(`Écriture comptable créée pour la facture ${invoice.invoice_number}`)
       }
     } catch (error) {
-      console.error('Erreur lors de la création automatique d\'écriture comptable:', error);
+      logger.error('Erreur lors de la création automatique d\'écriture comptable:', error);
       // Ne pas bloquer la mise à jour de la facture si l'écriture échoue
     }
   }
@@ -620,7 +628,7 @@ class InvoicingService {
       const journal = journals.find(j => j.code === 'BANQUE' || j.type === 'bank');
 
       if (!journal) {
-        console.warn('Journal de banque non trouvé, écriture de paiement non créée');
+        logger.warn('Journal de banque non trouvé, écriture de paiement non créée');
         return;
       }
 
@@ -640,18 +648,25 @@ class InvoicingService {
         referenceNumber: `PAY-${invoice.invoice_number}`,
         journalId: journal.id,
         status: 'posted' as const,
-        items: journalEntry.items
+        lines: journalEntry.items.map(item => ({
+          accountId: item.accountId,
+          debitAmount: item.debitAmount,
+          creditAmount: item.creditAmount,
+          description: item.description || '',
+          auxiliaryAccount: item.auxiliaryAccount,
+          letterage: item.letterage
+        }))
       };
 
       const result = await journalEntriesService.createJournalEntry(payload);
 
-      if (!result.success) {
-        console.error('Erreur création écriture de paiement:', result.error);
+      if (!result.success && 'error' in result) {
+        logger.error('Erreur création écriture de paiement:', result.error)
       } else {
-        console.warn(`Écriture de paiement créée pour la facture ${invoice.invoice_number}`);
+        logger.warn(`Écriture de paiement créée pour la facture ${invoice.invoice_number}`)
       }
     } catch (error) {
-      console.error('Erreur lors de la création automatique d\'écriture de paiement:', error);
+      logger.error('Erreur lors de la création automatique d\'écriture de paiement:', error);
       // Ne pas bloquer la mise à jour de la facture si l'écriture échoue
     }
   }

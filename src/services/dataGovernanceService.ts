@@ -5,6 +5,7 @@
  */
 
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 interface CompanyDuplicate {
   id: string;
@@ -87,7 +88,7 @@ export class DataGovernanceService {
       return data || [];
 
     } catch (error) {
-      console.error('❌ Erreur recherche intelligente:', error);
+      logger.error('❌ Erreur recherche intelligente:', error);
       throw error;
     }
   }
@@ -117,7 +118,7 @@ export class DataGovernanceService {
       return data || [];
 
     } catch (error) {
-      console.error('❌ Erreur récupération doublons:', error);
+      logger.error('❌ Erreur récupération doublons:', error);
       throw error;
     }
   }
@@ -142,7 +143,7 @@ export class DataGovernanceService {
       return data;
 
     } catch (error) {
-      console.error('❌ Erreur marquage doublon:', error);
+      logger.error('❌ Erreur marquage doublon:', error);
       return {
         success: false,
         message: 'Failed to mark company as duplicate',
@@ -171,7 +172,7 @@ export class DataGovernanceService {
       return data;
 
     } catch (error) {
-      console.error('❌ Erreur fusion entreprises:', error);
+      logger.error('❌ Erreur fusion entreprises:', error);
       return {
         success: false,
         message: 'Failed to merge companies',
@@ -199,7 +200,7 @@ export class DataGovernanceService {
       return { success: true };
 
     } catch (error) {
-      console.error('❌ Erreur marquage faux positif:', error);
+      logger.error('❌ Erreur marquage faux positif:', error);
       return { success: false };
     }
   }
@@ -214,7 +215,7 @@ export class DataGovernanceService {
       return data || [];
 
     } catch (error) {
-      console.error('❌ Erreur analyse qualité:', error);
+      logger.error('❌ Erreur analyse qualité:', error);
       throw error;
     }
   }
@@ -265,7 +266,7 @@ export class DataGovernanceService {
       };
 
     } catch (error) {
-      console.error('❌ Erreur statistiques gouvernance:', error);
+      logger.error('❌ Erreur statistiques gouvernance:', error);
       throw error;
     }
   }
@@ -344,7 +345,7 @@ export class DataGovernanceService {
       return data || [];
 
     } catch (error) {
-      console.error('❌ Erreur audit trail:', error);
+      logger.error('❌ Erreur audit trail:', error);
       throw error;
     }
   }
@@ -381,7 +382,7 @@ export class DataGovernanceService {
       };
 
     } catch (error) {
-      console.error('❌ Erreur nettoyage données:', error);
+      logger.error('❌ Erreur nettoyage données:', error);
       throw error;
     }
   }
@@ -414,7 +415,7 @@ export class DataGovernanceService {
       return { updated: updatedCount };
 
     } catch (error) {
-      console.error('❌ Erreur recalcul scores:', error);
+      logger.error('❌ Erreur recalcul scores:', error);
       throw error;
     }
   }

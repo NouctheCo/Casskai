@@ -27,6 +27,7 @@ import { thirdPartiesService } from '../../services/thirdPartiesService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useHR } from '../../hooks/useHR';
 import { hrService } from '../../services/hrService';
+import { logger } from '@/utils/logger';
 
 interface OpportunitiesKanbanProps {
   opportunities: Opportunity[];
@@ -182,7 +183,7 @@ const OpportunitiesKanban: React.FC<OpportunitiesKanbanProps> = ({
       setIsFormOpen(false);
       setEditingOpportunity(null);
     } catch (error) {
-      console.error('Error submitting opportunity form:', error);
+      logger.error('Error submitting opportunity form:', error)
     }
   };
 
@@ -190,7 +191,7 @@ const OpportunitiesKanban: React.FC<OpportunitiesKanbanProps> = ({
     try {
       await onUpdateOpportunity(opportunityId, { stage: newStage as any });
     } catch (error) {
-      console.error('Error updating opportunity stage:', error);
+      logger.error('Error updating opportunity stage:', error)
     }
   };
 
@@ -222,7 +223,7 @@ const OpportunitiesKanban: React.FC<OpportunitiesKanbanProps> = ({
         throw new Error('Failed to create employee');
       }
     } catch (error) {
-      console.error('Error creating employee:', error);
+      logger.error('Error creating employee:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   };
@@ -289,7 +290,7 @@ const OpportunitiesKanban: React.FC<OpportunitiesKanbanProps> = ({
 
       return { success: false, error: 'Échec de la création du client' };
     } catch (error) {
-      console.error('Error creating client:', error);
+      logger.error('Error creating client:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   };

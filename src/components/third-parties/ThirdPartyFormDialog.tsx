@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/components/ui/use-toast';
 import { unifiedThirdPartiesService } from '@/services/unifiedThirdPartiesService';
 import { Users, Building2 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface ThirdPartyFormDialogProps {
   open: boolean;
@@ -106,7 +107,7 @@ export function ThirdPartyFormDialog({
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Error creating third party:', error);
+      logger.error('Error creating third party:', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de créer le tiers',

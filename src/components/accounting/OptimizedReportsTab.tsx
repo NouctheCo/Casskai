@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/useToast';
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 import type {
   BalanceSheetData,
   IncomeStatementData,
@@ -310,7 +311,7 @@ export default function OptimizedReportsTab() {
           }
         ]);
       } catch (error) {
-        console.error('Error loading quick stats:', error);
+        logger.error('Error loading quick stats:', error)
       }
     };
 
@@ -342,7 +343,7 @@ export default function OptimizedReportsTab() {
     if (!data) return true;
 
     switch (reportType) {
-      case 'balance_sheet':
+      case 'balance_sheet': {
         const bsData = data as BalanceSheetData;
         return (
           (!bsData.assets.fixed_assets || bsData.assets.fixed_assets.length === 0) &&
@@ -352,8 +353,9 @@ export default function OptimizedReportsTab() {
           (!bsData.liabilities.payables || bsData.liabilities.payables.length === 0) &&
           (!bsData.equity.capital || bsData.equity.capital.length === 0)
         );
+      }
 
-      case 'income_statement':
+      case 'income_statement': {
         const isData = data as IncomeStatementData;
         return (
           (!isData.revenue.sales || isData.revenue.sales.length === 0) &&
@@ -361,14 +363,17 @@ export default function OptimizedReportsTab() {
           (!isData.expenses.purchases || isData.expenses.purchases.length === 0) &&
           (!isData.expenses.external_charges || isData.expenses.external_charges.length === 0)
         );
+      }
 
-      case 'trial_balance':
+      case 'trial_balance': {
         const tbData = data as TrialBalanceData;
         return !tbData.accounts || tbData.accounts.length === 0;
+      }
 
-      case 'general_ledger':
+      case 'general_ledger': {
         const glData = data as GeneralLedgerData;
         return !glData.entries || glData.entries.length === 0;
+      }
 
       default:
         return false;
@@ -444,7 +449,7 @@ export default function OptimizedReportsTab() {
             });
 
             if (!uploadResult.success) {
-              console.error('Upload failed:', uploadResult.error);
+              logger.error('Upload failed:', uploadResult.error)
             }
 
             // Download locally
@@ -466,7 +471,7 @@ export default function OptimizedReportsTab() {
             });
 
             if (!uploadResult.success) {
-              console.error('Upload failed:', uploadResult.error);
+              logger.error('Upload failed:', uploadResult.error)
             }
 
             // Download locally
@@ -917,7 +922,7 @@ export default function OptimizedReportsTab() {
           }
           break;
 
-        case 'tax_summary':
+        case 'tax_summary': {
           const fiscalYear = new Date(periodDates.end).getFullYear().toString();
           result = await reportsService.generateTaxSummary(currentCompany.id, fiscalYear);
           if (result.error) throw new Error(result.error.message);
@@ -957,6 +962,7 @@ export default function OptimizedReportsTab() {
             pdf.save(filename);
           }
           break;
+        }
 
         default:
           showToast(`Type de rapport "${reportType}" en cours de développement`, 'info');
@@ -970,7 +976,7 @@ export default function OptimizedReportsTab() {
       loadRecentReports();
 
     } catch (error) {
-      console.error('Erreur génération rapport:', error);
+      logger.error('Erreur génération rapport:', error);
       const errorMessage = error instanceof Error ? error.message : 'Impossible de générer le rapport';
       showToast(`Erreur: ${errorMessage}`, 'error');
     } finally {
@@ -985,23 +991,26 @@ export default function OptimizedReportsTab() {
     const currentMonth = now.getMonth();
 
     switch (period) {
-      case 'current-month':
+      case 'current-month': {
         return {
           start: new Date(currentYear, currentMonth, 1).toISOString().split('T')[0],
           end: new Date(currentYear, currentMonth + 1, 0).toISOString().split('T')[0]
         };
-      case 'current-quarter':
+      }
+      case 'current-quarter': {
         const quarterStart = Math.floor(currentMonth / 3) * 3;
         return {
           start: new Date(currentYear, quarterStart, 1).toISOString().split('T')[0],
           end: new Date(currentYear, quarterStart + 3, 0).toISOString().split('T')[0]
         };
-      case 'current-year':
+      }
+      case 'current-year': {
         return {
           start: new Date(currentYear, 0, 1).toISOString().split('T')[0],
           end: new Date(currentYear, 11, 31).toISOString().split('T')[0]
         };
-      case 'last-month':
+      }
+      case 'last-month': {
         const lastMonth = currentMonth - 1;
         const year = lastMonth < 0 ? currentYear - 1 : currentYear;
         const month = lastMonth < 0 ? 11 : lastMonth;
@@ -1009,11 +1018,13 @@ export default function OptimizedReportsTab() {
           start: new Date(year, month, 1).toISOString().split('T')[0],
           end: new Date(year, month + 1, 0).toISOString().split('T')[0]
         };
-      default:
+      }
+      default: {
         return {
           start: new Date(currentYear, currentMonth, 1).toISOString().split('T')[0],
           end: new Date(currentYear, currentMonth + 1, 0).toISOString().split('T')[0]
         };
+      }
     }
   };
 
@@ -1024,7 +1035,7 @@ export default function OptimizedReportsTab() {
     const currentMonth = now.getMonth();
 
     switch (period) {
-      case 'current-month':
+      case 'current-month': {
         // Mois précédent
         const prevMonth = currentMonth - 1;
         const prevYear = prevMonth < 0 ? currentYear - 1 : currentYear;
@@ -1033,7 +1044,8 @@ export default function OptimizedReportsTab() {
           start: new Date(prevYear, month, 1).toISOString().split('T')[0],
           end: new Date(prevYear, month + 1, 0).toISOString().split('T')[0]
         };
-      case 'current-quarter':
+      }
+      case 'current-quarter': {
         // Trimestre précédent
         const quarterStart = Math.floor(currentMonth / 3) * 3;
         const prevQuarterStart = quarterStart - 3;
@@ -1043,13 +1055,15 @@ export default function OptimizedReportsTab() {
           start: new Date(qYear, qMonth, 1).toISOString().split('T')[0],
           end: new Date(qYear, qMonth + 3, 0).toISOString().split('T')[0]
         };
-      case 'current-year':
+      }
+      case 'current-year': {
         // Année précédente
         return {
           start: new Date(currentYear - 1, 0, 1).toISOString().split('T')[0],
           end: new Date(currentYear - 1, 11, 31).toISOString().split('T')[0]
         };
-      case 'last-month':
+      }
+      case 'last-month': {
         // Mois d'avant le mois dernier (N-2)
         const lastMonth = currentMonth - 2;
         const lYear = lastMonth < 0 ? currentYear - 1 : currentYear;
@@ -1058,7 +1072,8 @@ export default function OptimizedReportsTab() {
           start: new Date(lYear, lMonth, 1).toISOString().split('T')[0],
           end: new Date(lYear, lMonth + 1, 0).toISOString().split('T')[0]
         };
-      default:
+      }
+      default: {
         // Par défaut: mois précédent
         const defPrevMonth = currentMonth - 1;
         const defYear = defPrevMonth < 0 ? currentYear - 1 : currentYear;
@@ -1067,6 +1082,7 @@ export default function OptimizedReportsTab() {
           start: new Date(defYear, defMonth, 1).toISOString().split('T')[0],
           end: new Date(defYear, defMonth + 1, 0).toISOString().split('T')[0]
         };
+      }
     }
   };
 
@@ -1091,7 +1107,7 @@ export default function OptimizedReportsTab() {
 
       setRecentReports(data || []);
     } catch (error) {
-      console.error('Error loading recent reports:', error);
+      logger.error('Error loading recent reports:', error);
       showToast("Impossible de charger les rapports récents.", 'error');
       setRecentReports([]);
     } finally {
@@ -1140,7 +1156,7 @@ export default function OptimizedReportsTab() {
 
       showToast(`Rapport "${report.name}" téléchargé avec succès.`, 'success');
     } catch (error) {
-      console.error('Download error:', error);
+      logger.error('Download error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Impossible de télécharger le rapport';
       showToast(errorMessage, 'error');
     } finally {

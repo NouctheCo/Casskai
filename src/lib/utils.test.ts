@@ -1,3 +1,4 @@
+ 
 import { describe, it, expect } from 'vitest';
 import { formatCurrency, formatDate, cn, truncate } from './utils';
 
@@ -79,7 +80,9 @@ describe('Utils', () => {
     });
 
     it('should handle conditional classes', () => {
-      const result = cn('base', true && 'active', false && 'inactive');
+      const isActive = true;
+      const isInactive = false;
+      const result = cn('base', isActive && 'active', isInactive && 'inactive');
       expect(result).toContain('base');
       expect(result).toContain('active');
       expect(result).not.toContain('inactive');

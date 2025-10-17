@@ -27,6 +27,7 @@ import { EInvoiceSubmissionForm } from './EInvoiceSubmissionForm';
 import { EInvoiceDocumentsList } from './EInvoiceDocumentsList';
 import { EInvoiceStatistics } from './EInvoiceStatistics';
 import { EInvoiceSettings } from './EInvoiceSettings';
+import { logger } from '@/utils/logger';
 
 interface EInvoicingDashboardProps {
   companyId: string;
@@ -69,7 +70,7 @@ export const EInvoicingDashboard: React.FC<EInvoicingDashboardProps> = ({
       await enableFeature();
       await refreshData();
     } catch (error) {
-      console.error('Error enabling e-invoicing:', error);
+      logger.error('Error enabling e-invoicing:', error)
     }
   };
 
@@ -78,7 +79,7 @@ export const EInvoicingDashboard: React.FC<EInvoicingDashboardProps> = ({
       await disableFeature();
       await refreshData();
     } catch (error) {
-      console.error('Error disabling e-invoicing:', error);
+      logger.error('Error disabling e-invoicing:', error)
     }
   };
 

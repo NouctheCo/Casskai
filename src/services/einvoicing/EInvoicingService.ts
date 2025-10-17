@@ -21,6 +21,7 @@ import { DispatchService } from './core/DispatchService';
 import { ArchiveService } from './core/ArchiveService';
 import { InvoiceToEN16931Mapper } from './adapters/InvoiceToEN16931Mapper';
 import { FeatureFlagService } from './utils/FeatureFlagService';
+import { logger } from '@/utils/logger';
 
 export class EInvoicingService {
   private formattingService: FormattingService;
@@ -56,7 +57,7 @@ export class EInvoicingService {
         archive = true
       } = options;
 
-      console.log(`🚀 Starting e-invoice submission for invoice ${invoiceId}`);
+      logger.info(`🚀 Starting e-invoice submission for invoice ${invoiceId}`);
       
       // Step 1: Load and validate invoice
       const invoice = await this.loadInvoice(invoiceId);
@@ -124,7 +125,7 @@ export class EInvoicingService {
           }
         } catch (e) {
           // Archiving is optional; continue without URLs if it fails
-          console.warn('Archiving documents failed:', e);
+          logger.warn('Archiving documents failed:', e)
         }
       }
 
@@ -181,7 +182,7 @@ export class EInvoicingService {
       }
 
     } catch (error) {
-      console.error('Error submitting e-invoice:', error);
+      logger.error('Error submitting e-invoice:', error);
       
       if (error instanceof EInvoicingError) {
         return {
@@ -209,13 +210,13 @@ export class EInvoicingService {
         .single();
 
       if (error) {
-        console.error('Error fetching document:', error);
+        logger.error('Error fetching document:', error);
         return null;
       }
 
       return data as EInvDocument;
     } catch (error) {
-      console.error('Error getting document status:', error);
+      logger.error('Error getting document status:', error);
       return null;
     }
   }
@@ -241,7 +242,7 @@ export class EInvoicingService {
         .single();
 
       if (error) {
-        console.error('Error updating document status:', error);
+        logger.error('Error updating document status:', error);
         return false;
       }
 
@@ -254,7 +255,7 @@ export class EInvoicingService {
 
       return true;
     } catch (error) {
-      console.error('Error updating document status:', error);
+      logger.error('Error updating document status:', error);
       return false;
     }
   }
@@ -300,13 +301,13 @@ export class EInvoicingService {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Error fetching company documents:', error);
+        logger.error('Error fetching company documents:', error);
         return [];
       }
 
       return data as EInvDocument[];
     } catch (error) {
-      console.error('Error getting company documents:', error);
+      logger.error('Error getting company documents:', error);
       return [];
     }
   }
@@ -328,7 +329,7 @@ export class EInvoicingService {
       .single();
 
     if (error) {
-      console.error('Error loading invoice:', error);
+      logger.error('Error loading invoice:', error);
       return null;
     }
 
@@ -349,7 +350,7 @@ export class EInvoicingService {
       .single();
 
     if (error && error.code !== 'PGRST116') { // Not found is OK
-      console.error('Error checking existing document:', error);
+      logger.error('Error checking existing document:', error)
     }
 
     return data as EInvDocument || null;
@@ -394,7 +395,7 @@ export class EInvoicingService {
       .eq('id', id);
 
     if (error) {
-      console.error('Error updating document:', error);
+      logger.error('Error updating document:', error)
     }
   }
 
@@ -438,7 +439,7 @@ export class EInvoicingService {
         }
 
       } catch (error) {
-        console.error('Async submission failed:', error);
+        logger.error('Async submission failed:', error);
         
         await this.updateDocument(documentId, {
           lifecycle_status: 'DRAFT',
@@ -465,7 +466,7 @@ export class EInvoicingService {
         p_meta_json: metadata
       });
     } catch (error) {
-      console.error('Error logging audit:', error);
+      logger.error('Error logging audit:', error)
     }
   }
 }

@@ -14,6 +14,9 @@ import {
 } from '../types/onboarding.types';
 import { OnboardingProgressService } from '../services/onboarding/OnboardingProgressService';
 import { OnboardingStorageService } from '../services/onboarding/OnboardingStorageService';
+import { logger } from '@/utils/logger';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
 
@@ -81,7 +84,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         progress: data.progress
       });
     } catch (error) {
-      console.error('Failed to initialize onboarding:', error);
+      logger.error('Failed to initialize onboarding:', error);
       setState(prev => ({
         ...prev,
         isLoading: false,
@@ -408,7 +411,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     
     // Protection contre les appels multiples
     if (finalizationInProgress.current) {
-      console.warn('Finalisation déjà en cours, appel ignoré');
+      logger.warn('Finalisation déjà en cours, appel ignoré');
       return { success: false, error: 'Finalisation déjà en cours' };
     }
     
@@ -432,21 +435,12 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
       // Vérification légère - laissons le système de gouvernance des données gérer les doublons
       // Cette vérification était trop restrictive et bloquait l'onboarding légitime
-      console.log('🔍 Préparation création entreprise:', state.data.companyProfile.name?.trim());
+      logger.info('🔍 Préparation création entreprise:', state.data.companyProfile.name?.trim());
 
-      // Create company in database
-      // Générer un id côté client pour éviter l'utilisation de .single() avec SELECT
-      const companyId = crypto.randomUUID();
-
-    // ============================================
-      // SAUVEGARDE COMPLÈTE COMPANIES - 8 NOUVELLES COLONNES
-      // ============================================
-
-    // SOLUTION NATIVE: Utiliser Supabase directement (triggers corrigés)
-    console.log('🔧 [OnboardingContextNew] Creating company via Supabase native client');
+      // Create company in database using RPC function
+      logger.info('🔧 [OnboardingContextNew] Creating company via RPC function');
     const companyData = {
-          id: companyId,
-          name: state.data.companyProfile.name,
+        name: state.data.companyProfile.name,
           country: state.data.companyProfile.country,
           default_currency: state.data.companyProfile.currency || (
             state.data.companyProfile.country === 'FR' ? 'EUR' :
@@ -486,123 +480,20 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           status: 'active'
         };
 
-    console.log('📤 [OnboardingContextNew] Company data to insert via Supabase:', companyData);
+    logger.info('📤 [OnboardingContextNew] Company data to insert via Supabase:', companyData);
     
-    // Insertion directe dans Supabase (trigger corrigé)
-    let { data: company, error: companyError } = await supabase
-      .from('companies')
-      .insert(companyData)
-      .select()
-      .single();
+      // Appel de la fonction RPC SECURITY DEFINER
+      // IMPORTANT: La fonction attend UN SEUL paramètre JSONB
+      let { data: company, error: companyError } = await supabase.rpc('create_company_with_defaults', { p_payload: companyData });
     
-    if (companyError) {
-      console.error('❌ [OnboardingContextNew] Company creation error:', companyError);
-
-      // Gestion spéciale des erreurs RLS/500 - tentative avec Service Role
-      if (companyError.message?.includes('500') ||
-          companyError.message?.includes('policy') ||
-          companyError.message?.includes('RLS') ||
-          companyError.message?.includes('Internal Server Error')) {
-
-        console.warn('🔄 Erreur RLS détectée - tentative de création simplifiée');
-
-        // Tentative avec données minimales pour contourner RLS
-        const minimalCompanyData = {
-          id: companyId,
-          name: state.data.companyProfile.name || 'Ma Société',
-          country: state.data.companyProfile.country || 'FR',
-          default_currency: state.data.companyProfile.currency || 'EUR',
-          owner_id: user.id,
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-
-        const { data: retryCompany, error: retryError } = await supabase
-          .from('companies')
-          .insert(minimalCompanyData)
-          .select()
-          .single();
-
-        if (retryError) {
-          console.error('❌ Échec de la création simplifiée aussi:', retryError);
-          throw new Error(`Impossible de créer l'entreprise. Erreur: ${retryError.message}`);
-        }
-
-        // Succès avec données simplifiées
-        company = retryCompany;
-        console.warn('✅ Entreprise créée avec données minimales');
-      } else {
-        throw new Error(`Failed to create company: ${companyError.message}`);
+      if (companyError) {
+        logger.error('❌ [OnboardingContextNew] Company creation error:', companyError);
+        throw new Error(`Impossible de créer l'entreprise. Erreur: ${companyError.message}`);
       }
-    }
 
       if (!company) throw new Error('Failed to create company - no data returned');
 
-      // Create user-company relationship - BYPASS RLS avec Edge Function
-      try {
-        console.log('🔧 Tentative création user_companies via Edge Function...');
-
-        // Tentative via Edge Function personnalisée pour bypass RLS
-        const { data: edgeFunctionResult, error: edgeFunctionError } = await supabase.functions.invoke('create-company-onboarding', {
-          body: {
-            user_id: user.id,
-            company_id: company.id,
-            company_data: {
-              name: company.name,
-              country: company.country,
-              currency: company.default_currency
-            }
-          }
-        });
-
-        if (edgeFunctionError) {
-          console.warn('⚠️ Edge Function non disponible, fallback vers méthode directe');
-
-          // Fallback: insertion directe mais on ignore complètement les erreurs RLS
-          const { error: userCompanyError } = await supabase
-            .from('user_companies')
-            .insert({
-              user_id: user.id,
-              company_id: company.id,
-              role: 'admin',
-              is_active: true,
-              is_default: true
-            });
-
-          if (userCompanyError) {
-            console.error('❌ Erreur création user_companies:', userCompanyError);
-
-            // RÉCURSION INFINIE: On ignore TOUTES les erreurs RLS/récursion
-            if (userCompanyError.message?.includes('recursion') ||
-                userCompanyError.message?.includes('infinite') ||
-                userCompanyError.message?.includes('policy') ||
-                userCompanyError.message?.includes('500')) {
-              console.warn('🔄 RÉCURSION/RLS détectée - IGNORÉE COMPLÈTEMENT pour finaliser onboarding');
-            } else {
-              throw new Error(`Failed to create user-company relationship: ${userCompanyError.message}`);
-            }
-          } else {
-            console.log('✅ user_companies créé avec succès');
-          }
-        } else {
-          console.log('✅ user_companies créé via Edge Function');
-        }
-
-      } catch (relationshipError: any) {
-        const errorMsg = relationshipError.message || String(relationshipError);
-
-        // Pour la récursion infinie, on continue absolument l'onboarding
-        if (errorMsg.includes('recursion') ||
-            errorMsg.includes('infinite') ||
-            errorMsg.includes('policy')) {
-          console.warn('🔄 RÉCURSION INFINIE DÉTECTÉE - ONBOARDING CONTINUE QUAND MÊME');
-        } else {
-          console.error('❌ Erreur inattendue relation user-company:', errorMsg);
-        }
-        // Dans tous les cas, on continue pour permettre à l'utilisateur d'utiliser l'application
-        console.warn('⚠️ user_companies ignoré - l\'utilisateur pourra tout de même utiliser l\'application');
-      }
+      logger.info('✅ [OnboardingContextNew] Company created successfully:', company);
 
       // Create company modules
       const selectedModules = state.data.selectedModules || [];
@@ -685,14 +576,14 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
       // Sauvegarder les préférences utilisateur (auparavant ENTIÈREMENT perdues !)
       if (state.data.preferences && Object.keys(state.data.preferences).length > 0) {
-        console.log('💾 Sauvegarde préférences utilisateur:', state.data.preferences);
+        logger.info('💾 Sauvegarde préférences utilisateur:', state.data.preferences);
 
         try {
           await supabase
             .from('user_preferences')
             .insert({
               user_id: user.id,
-              company_id: companyId,
+              company_id: company.id,
 
               // Notifications (PreferencesStep)
               email_notifications: state.data.preferences.emailNotifications ?? true,
@@ -719,9 +610,9 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
               auto_save: state.data.preferences.autoSave ?? true
             });
 
-          console.log('✅ Préférences utilisateur sauvegardées avec succès');
+          logger.info('✅ Préférences utilisateur sauvegardées avec succès')
         } catch (prefError) {
-          console.error('❌ Erreur sauvegarde préférences:', prefError);
+          logger.error('❌ Erreur sauvegarde préférences:', prefError);
           // Ne pas faire échouer tout l'onboarding pour les préférences
         }
       }
@@ -732,11 +623,11 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
       // Sauvegarder les features explorées et activées (auparavant ENTIÈREMENT perdues !)
       if (state.data.featuresExploration && Object.keys(state.data.featuresExploration).length > 0) {
-        console.log('💾 Sauvegarde features exploration:', state.data.featuresExploration);
+        logger.info('💾 Sauvegarde features exploration:', state.data.featuresExploration);
 
         try {
           const featuresToInsert = Object.entries(state.data.featuresExploration).map(([featureId, featureData]) => ({
-            company_id: companyId,
+            company_id: company.id,
             feature_name: featureId,
             feature_category: 'general', // À affiner selon vos besoins
             is_enabled: (featureData as any).completed || (featureData as any).viewed || false,
@@ -758,10 +649,10 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
               .from('company_features')
               .insert(featuresToInsert);
 
-            console.log(`✅ ${featuresToInsert.length} features sauvegardées avec succès`);
+            logger.info(`✅ ${featuresToInsert.length} features sauvegardées avec succès`)
           }
         } catch (featuresError) {
-          console.error('❌ Erreur sauvegarde features:', featuresError);
+          logger.error('❌ Erreur sauvegarde features:', featuresError);
           // Ne pas faire échouer tout l'onboarding pour les features
         }
       }
@@ -788,7 +679,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       const sessionUpsertPayload: Record<string, unknown> = {
         session_token: sessionToken,
         user_id: user.id,
-        company_id: companyId,
+        company_id: company.id,
         session_data: completedData,
         current_step: 'complete',
         completed_steps: completedSteps.length,
@@ -801,7 +692,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         updated_at: completionTimestamp,
         is_active: false,
         final_data: {
-          companyId,
+          companyId: company.id,
           completedAt: completionTimestamp,
           totalTimeSpent: totalTimeSpentMs
         }
@@ -821,23 +712,22 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       //   .upsert(sessionUpsertPayload, { onConflict: 'session_token' });
 
       // if (sessionUpsertError) {
-      //   console.error('❌ Erreur mise à jour session onboarding:', sessionUpsertError);
+      //   logger.error('❌ Erreur mise à jour session onboarding:', sessionUpsertError);
       // }
 
       try {
         const steps = [
           { name: 'welcome', order: 1, data: {} },
-          { name: 'company', order: 2, data: completedData.companyProfile },
-          { name: 'modules', order: 3, data: { selectedModules: completedData.selectedModules } },
-          { name: 'preferences', order: 4, data: completedData.preferences },
-          { name: 'features', order: 5, data: completedData.featuresExploration },
-          { name: 'complete', order: 6, data: { companyId } }
+          { name: 'preferences', order: 2, data: completedData.preferences },
+          { name: 'company', order: 3, data: completedData.companyProfile },
+          { name: 'modules', order: 4, data: { selectedModules: completedData.selectedModules } },
+          { name: 'complete', order: 5, data: { companyId: company.id } }
         ];
 
         const averageStepDurationSeconds = Math.max(1, Math.floor(totalTimeSpentMs / Math.max(steps.length, 1) / 1000));
 
         const historyEntries = steps.map(step => ({
-          company_id: companyId,
+          company_id: company.id,
           user_id: user.id,
           session_id: sessionToken,
           step_name: step.name,
@@ -857,7 +747,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           .from('onboarding_history')
           .insert(historyEntries);
       } catch (historyError) {
-        console.error('❌ Erreur sauvegarde historique:', historyError);
+        logger.error('❌ Erreur sauvegarde historique:', historyError)
       }
 
       // DISABLED OnboardingStorageService due to missing onboarding_sessions table
@@ -882,14 +772,14 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       localStorage.removeItem('onboarding_company_data');
       localStorage.removeItem('onboarding_modules');
 
-      console.log('✅ Onboarding terminé avec succès - État local mis à jour');
+      logger.info('✅ Onboarding terminé avec succès - État local mis à jour');
 
       return { success: true };
     } catch (error) {
-      console.error('Failed to finalize onboarding - Detailed error:', error);
-      console.error('Error type:', typeof error);
-      console.error('Error constructor:', error?.constructor?.name);
-      console.error('Error keys:', error && typeof error === 'object' ? Object.keys(error) : 'not object');
+      logger.error('Failed to finalize onboarding - Detailed error:', error);
+      logger.error('Error type:', typeof error);
+      logger.error('Error constructor:', error?.constructor?.name);
+      logger.error('Error keys:', error && typeof error === 'object' ? Object.keys(error) : 'not object');
       
       // Gestion spécifique des erreurs
       if (error && typeof error === 'object' && 'code' in error) {
@@ -921,7 +811,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       }
       
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error('Generic error message:', errorMessage);
+      logger.error('Generic error message:', errorMessage);
       return { success: false, error: `Erreur lors de la finalisation: ${errorMessage}` };
     } finally {
       finalizationInProgress.current = false;
@@ -1022,3 +912,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     </OnboardingContext.Provider>
   );
 };
+
+
+
+

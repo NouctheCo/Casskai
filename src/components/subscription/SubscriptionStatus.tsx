@@ -24,6 +24,7 @@ import {
   formatPrice,
   SUBSCRIPTION_PLANS
 } from '@/types/subscription.types';
+import { logger } from '@/utils/logger';
 
 const SubscriptionStatus: React.FC = () => {
   const {
@@ -59,7 +60,7 @@ const SubscriptionStatus: React.FC = () => {
           storage: storageData
         });
       } catch (error) {
-        console.error('Error fetching usage limits:', error);
+        logger.error('Error fetching usage limits:', error)
       }
     };
 
@@ -139,7 +140,7 @@ const SubscriptionStatus: React.FC = () => {
   const handleBillingPortal = async () => {
     const result = await openBillingPortal();
     if (!result.success) {
-      console.error('Failed to open billing portal:', result.error);
+      logger.error('Failed to open billing portal:', result.error)
     }
   };
 

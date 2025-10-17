@@ -10,8 +10,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Building, MapPin, Phone, Mail, Globe, Save, Loader2, Upload, Trash2, AlertTriangle, Calendar } from 'lucide-react';
 import { useCountries } from '@/hooks/useReferentials';
+import { logger } from '@/utils/logger';
 
-interface CompanySettings {
+interface CompanySettingsForm {
   name: string;
   siret: string;
   address: string;
@@ -42,7 +43,7 @@ export function CompanySettings() {
   const [isSaving, setIsSaving] = useState(false);
   const [showCompanyDeletion, setShowCompanyDeletion] = useState(false);
 
-  const [settings, setSettings] = useState<CompanySettings>({
+  const [settings, setSettings] = useState<CompanySettingsForm>({
     name: '',
     siret: '',
     address: '',
@@ -67,18 +68,18 @@ export function CompanySettings() {
 
   // Fonction pour charger les paramètres entreprise
   const loadCompanySettings = async () => {
-    console.log('📋 [DEBUG] loadCompanySettings appelé');
-    console.log('🏢 [DEBUG] currentCompany?.id:', currentCompany?.id);
+    logger.info('📋 [DEBUG] loadCompanySettings appelé');
+    logger.info('🏢 [DEBUG] currentCompany?.id:', currentCompany?.id);
 
     if (!currentCompany?.id) {
-      console.warn('❌ [DEBUG] Pas de currentCompany.id, arrêt du chargement');
+      logger.warn('❌ [DEBUG] Pas de currentCompany.id, arrêt du chargement');
       return;
     }
 
     setIsLoading(true);
     try {
-      console.log('🔍 [DEBUG] Requête Supabase SELECT...');
-      console.log('🆔 [DEBUG] Recherche entreprise avec ID:', currentCompany.id);
+      logger.info('🔍 [DEBUG] Requête Supabase SELECT...');
+      logger.info('🆔 [DEBUG] Recherche entreprise avec ID:', currentCompany.id);
 
       // Charger les données depuis Supabase
       const { data, error } = await supabase
@@ -87,8 +88,8 @@ export function CompanySettings() {
         .eq('id', currentCompany.id)
         .single();
 
-      console.log('📥 [DEBUG] Résultat chargement data:', data);
-      console.log('❌ [DEBUG] Résultat chargement error:', error);
+      logger.info('📥 [DEBUG] Résultat chargement data:', data);
+      logger.info('❌ [DEBUG] Résultat chargement error:', error);
 
       if (error) {
         console.error('💥 [DEBUG] Erreur Supabase chargement détaillée:', {
@@ -101,23 +102,23 @@ export function CompanySettings() {
       }
 
       if (data) {
-        console.log('✅ [DEBUG] Données brutes Supabase:', data);
-        console.log('🔍 [DEBUG] Type de data:', typeof data, Array.isArray(data));
+        logger.info('✅ [DEBUG] Données brutes Supabase:', data);
+        logger.info('🔍 [DEBUG] Type de data:', typeof data, Array.isArray(data));
 
         // ✅ CORRECTION : Extraire l'objet du tableau si nécessaire
         const company = Array.isArray(data) ? data[0] : data;
-        console.log('🔍 [DEBUG] Objet company extrait:', company);
-        console.log('🔍 [DEBUG] Colonnes disponibles:', Object.keys(company));
+        logger.info('🔍 [DEBUG] Objet company extrait:', company);
+        logger.info('🔍 [DEBUG] Colonnes disponibles:', Object.keys(company));
 
         // Tests de mapping individuels
-        console.log('🔍 [DEBUG] company.name:', company.name);
-        console.log('🔍 [DEBUG] company.address:', company.address);
-        console.log('🔍 [DEBUG] company.postal_code:', company.postal_code);
-        console.log('🔍 [DEBUG] company.city:', company.city);
-        console.log('🔍 [DEBUG] company.phone:', company.phone);
-        console.log('🔍 [DEBUG] company.email:', company.email);
-        console.log('🔍 [DEBUG] company.default_currency:', company.default_currency);
-        console.log('🔍 [DEBUG] company.fiscal_year_type:', company.fiscal_year_type);
+        logger.info('🔍 [DEBUG] company.name:', company.name);
+        logger.info('🔍 [DEBUG] company.address:', company.address);
+        logger.info('🔍 [DEBUG] company.postal_code:', company.postal_code);
+        logger.info('🔍 [DEBUG] company.city:', company.city);
+        logger.info('🔍 [DEBUG] company.phone:', company.phone);
+        logger.info('🔍 [DEBUG] company.email:', company.email);
+        logger.info('🔍 [DEBUG] company.default_currency:', company.default_currency);
+        logger.info('🔍 [DEBUG] company.fiscal_year_type:', company.fiscal_year_type);
 
         const newSettings = {
           // ✅ Informations de base (COLONNES CONFIRMÉES)
@@ -149,51 +150,51 @@ export function CompanySettings() {
           employees: company.employee_count || ''
         };
 
-        console.log('📊 [DEBUG] Settings mappés:', newSettings);
-        console.log('🔍 [DEBUG] Valeurs mappées - name:', newSettings.name);
-        console.log('🔍 [DEBUG] Valeurs mappées - address:', newSettings.address);
-        console.log('🔍 [DEBUG] Valeurs mappées - postalCode:', newSettings.postalCode);
+        logger.info('📊 [DEBUG] Settings mappés:', newSettings);
+        logger.info('🔍 [DEBUG] Valeurs mappées - name:', newSettings.name);
+        logger.info('🔍 [DEBUG] Valeurs mappées - address:', newSettings.address);
+        logger.info('🔍 [DEBUG] Valeurs mappées - postalCode:', newSettings.postalCode);
 
         setSettings(newSettings);
       } else {
-        console.warn('⚠️ [DEBUG] Aucune donnée retournée par Supabase');
+        logger.warn('⚠️ [DEBUG] Aucune donnée retournée par Supabase')
       }
     } catch (error) {
-      console.error('💥 [DEBUG] Erreur dans catch chargement:', error);
+      logger.error('💥 [DEBUG] Erreur dans catch chargement:', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de charger les paramètres entreprise',
         variant: 'destructive'
       });
     } finally {
-      console.log('🏁 [DEBUG] Fin chargement, setIsLoading(false)');
+      logger.info('🏁 [DEBUG] Fin chargement, setIsLoading(false);');
       setIsLoading(false);
     }
   };
 
   // Charger les paramètres entreprise
   useEffect(() => {
-    console.log('🔄 [DEBUG] useEffect loadCompanySettings déclenché');
-    console.log('🏢 [DEBUG] currentCompany dans useEffect:', currentCompany);
+    logger.info('🔄 [DEBUG] useEffect loadCompanySettings déclenché');
+    logger.info('🏢 [DEBUG] currentCompany dans useEffect:', currentCompany);
 
     loadCompanySettings();
   }, [currentCompany?.id, toast]);
 
   const handleSave = async () => {
-    console.log('🚀 [DEBUG] handleSave appelé');
-    console.log('🏢 [DEBUG] currentCompany:', currentCompany);
-    console.log('🏢 [DEBUG] currentCompany?.id:', currentCompany?.id);
+    logger.info('🚀 [DEBUG] handleSave appelé');
+    logger.info('🏢 [DEBUG] currentCompany:', currentCompany);
+    logger.info('🏢 [DEBUG] currentCompany?.id:', currentCompany?.id);
 
     if (!currentCompany?.id) {
-      console.warn('❌ [DEBUG] Pas de currentCompany.id, arrêt de la fonction');
+      logger.warn('❌ [DEBUG] Pas de currentCompany.id, arrêt de la fonction');
       return;
     }
 
-    console.log('📝 [DEBUG] Démarrage sauvegarde, données à sauvegarder:', settings);
+    logger.info('📝 [DEBUG] Démarrage sauvegarde, données à sauvegarder:', settings);
     setIsSaving(true);
 
     try {
-      console.log('🔄 [DEBUG] Appel Supabase UPDATE...');
+      logger.info('🔄 [DEBUG] Appel Supabase UPDATE...');
 
       // ✅ MAPPING COMPLET ALIGNÉ AVEC LE SCHÉMA SUPABASE
       const updateData = {
@@ -226,8 +227,8 @@ export function CompanySettings() {
         employee_count: settings.employees,
       };
 
-      console.log('📊 [DEBUG] Données sécurisées envoyées à Supabase:', updateData);
-      console.log('🆔 [DEBUG] ID entreprise pour WHERE:', currentCompany.id);
+      logger.info('📊 [DEBUG] Données sécurisées envoyées à Supabase:', updateData);
+      logger.info('🆔 [DEBUG] ID entreprise pour WHERE:', currentCompany.id);
 
       // Sauvegarder dans Supabase
       const { data, error } = await supabase
@@ -236,8 +237,8 @@ export function CompanySettings() {
         .eq('id', currentCompany.id)
         .select(); // Ajout de select() pour récupérer les données modifiées
 
-      console.log('📥 [DEBUG] Réponse Supabase data:', data);
-      console.log('❌ [DEBUG] Réponse Supabase error:', error);
+      logger.info('📥 [DEBUG] Réponse Supabase data:', data);
+      logger.info('❌ [DEBUG] Réponse Supabase error:', error);
 
       if (error) {
         console.error('💥 [DEBUG] Erreur Supabase détaillée:', {
@@ -249,20 +250,20 @@ export function CompanySettings() {
         throw error;
       }
 
-      console.log('✅ [DEBUG] Sauvegarde réussie!');
+      logger.info('✅ [DEBUG] Sauvegarde réussie!');
       toast({
         title: 'Paramètres sauvegardés',
         description: 'Les paramètres de l\'entreprise ont été mis à jour avec succès'
       });
 
       // Recharger les données après sauvegarde pour s'assurer que l'interface est à jour
-      console.log('🔄 [DEBUG] Rechargement des données après sauvegarde...');
+      logger.info('🔄 [DEBUG] Rechargement des données après sauvegarde...');
       await loadCompanySettings();
-      console.log('✅ [DEBUG] Données rechargées après sauvegarde');
+      logger.info('✅ [DEBUG] Données rechargées après sauvegarde')
     } catch (error) {
-      console.error('💥 [DEBUG] Erreur dans catch:', error);
-      console.error('💥 [DEBUG] Type d\'erreur:', typeof error);
-      console.error('💥 [DEBUG] Erreur complète:', JSON.stringify(error, null, 2));
+      logger.error('💥 [DEBUG] Erreur dans catch:', error);
+      logger.error('💥 [DEBUG] Type d\'erreur:', typeof error);
+      logger.error('💥 [DEBUG] Erreur complète:', JSON.stringify(error, null, 2));
 
       toast({
         title: 'Erreur',
@@ -270,7 +271,7 @@ export function CompanySettings() {
         variant: 'destructive'
       });
     } finally {
-      console.log('🏁 [DEBUG] Fin handleSave, setIsSaving(false)');
+      logger.info('🏁 [DEBUG] Fin handleSave, setIsSaving(false);');
       setIsSaving(false);
     }
   };
@@ -674,8 +675,8 @@ export function CompanySettings() {
       <div className="flex justify-end">
         <Button
           onClick={() => {
-            console.log('🔘 [DEBUG] Bouton "Sauvegarder" cliqué');
-            console.log('🔘 [DEBUG] isSaving:', isSaving);
+            logger.info('🔘 [DEBUG] Bouton "Sauvegarder" cliqué');
+            logger.info('🔘 [DEBUG] isSaving:', isSaving);
             handleSave();
           }}
           disabled={isSaving}

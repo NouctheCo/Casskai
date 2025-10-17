@@ -19,6 +19,7 @@ import {
   Info
 } from 'lucide-react';
 import { budgetForecastService, BudgetForecastData } from '@/services/budgetForecastService';
+import { logger } from '@/utils/logger';
 
 interface BudgetForecastViewProps {
   companyId: string;
@@ -59,12 +60,12 @@ export const BudgetForecastView: React.FC<BudgetForecastViewProps> = ({
           description: 'Impossible de charger le forecast',
           variant: 'destructive'
         });
-        console.error('Forecast error:', error);
+        logger.error('Forecast error:', error)
       } else {
         setForecastData(data);
       }
     } catch (err) {
-      console.error('Error loading forecast:', err);
+      logger.error('Error loading forecast:', err);
       toast({
         title: 'Erreur',
         description: 'Une erreur inattendue s\'est produite',

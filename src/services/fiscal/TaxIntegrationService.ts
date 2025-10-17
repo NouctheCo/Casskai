@@ -1,6 +1,7 @@
 // Service d'intégration fiscale avec les autres modules
 import { supabase } from '@/lib/supabase';
 import { frenchTaxComplianceService } from './FrenchTaxComplianceService';
+import { logger } from '@/utils/logger';
 
 export class TaxIntegrationService {
   private static instance: TaxIntegrationService;
@@ -48,7 +49,7 @@ export class TaxIntegrationService {
         message: 'Synchronisation comptabilité réussie'
       };
     } catch (error) {
-      console.error('Erreur sync comptabilité:', error);
+      logger.error('Erreur sync comptabilité:', error);
       return {
         success: false,
         error: 'Erreur lors de la synchronisation avec la comptabilité'
@@ -96,7 +97,7 @@ export class TaxIntegrationService {
         message: `${processedCount} facture(s) synchronisée(s)`
       };
     } catch (error) {
-      console.error('Erreur sync facturation:', error);
+      logger.error('Erreur sync facturation:', error);
       return {
         success: false,
         error: 'Erreur lors de la synchronisation avec la facturation'
@@ -134,7 +135,7 @@ export class TaxIntegrationService {
         message: 'Charges sociales intégrées'
       };
     } catch (error) {
-      console.error('Erreur sync RH:', error);
+      logger.error('Erreur sync RH:', error);
       return {
         success: false,
         error: 'Module RH non disponible ou erreur de synchronisation'
@@ -184,7 +185,7 @@ export class TaxIntegrationService {
         message: `${reconciledCount} paiement(s) de taxes identifié(s)`
       };
     } catch (error) {
-      console.error('Erreur sync banque:', error);
+      logger.error('Erreur sync banque:', error);
       return {
         success: false,
         error: 'Erreur lors de la synchronisation avec le module banque'
@@ -235,7 +236,7 @@ export class TaxIntegrationService {
         message: 'Rapport fiscal intégré généré avec succès'
       };
     } catch (error) {
-      console.error('Erreur génération rapport intégré:', error);
+      logger.error('Erreur génération rapport intégré:', error);
       return {
         success: false,
         error: 'Erreur lors de la génération du rapport intégré'
@@ -303,7 +304,7 @@ export class TaxIntegrationService {
         message: `${obligations.length} obligation(s) fiscale(s) configurée(s)`
       };
     } catch (error) {
-      console.error('Erreur configuration obligations:', error);
+      logger.error('Erreur configuration obligations:', error);
       return {
         success: false,
         error: 'Erreur lors de la configuration automatique'
@@ -321,7 +322,7 @@ export class TaxIntegrationService {
     try {
       await frenchTaxComplianceService.generateCA3Declaration(companyId, currentMonth);
     } catch (error) {
-      console.log('CA3 déjà générée ou erreur:', error);
+      logger.info('CA3 déjà générée ou erreur:', error)
     }
   }
 
@@ -400,7 +401,7 @@ export class TaxIntegrationService {
         });
       }
     } catch (error) {
-      console.log('Erreur génération recommandations:', error);
+      logger.info('Erreur génération recommandations:', error)
     }
 
     return recommendations;
@@ -418,7 +419,7 @@ export class TaxIntegrationService {
       });
 
     if (error) {
-      console.error('Erreur sauvegarde rapport:', error);
+      logger.error('Erreur sauvegarde rapport:', error)
     }
   }
 
@@ -436,7 +437,7 @@ export class TaxIntegrationService {
       });
 
     if (error && error.code !== '23505') { // Ignore duplicate key errors
-      console.error('Erreur création obligation:', error);
+      logger.error('Erreur création obligation:', error)
     }
   }
 

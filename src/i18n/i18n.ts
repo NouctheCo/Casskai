@@ -1,6 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import { logger } from '@/utils/logger';
 
 // Configuration des devises ouest-africaines pour le formatage
 export const WEST_AFRICAN_CURRENCIES = {
@@ -235,7 +236,7 @@ const initConfig = {
   saveMissing: process.env.NODE_ENV === 'development',
   missingKeyHandler: (lng, ns, key) => {
     if (process.env.NODE_ENV === 'development') {
-      console.warn(`🌍 Missing translation: ${lng}.${ns}.${key}`);
+      logger.warn(`🌍 Missing translation: ${lng}.${ns}.${key}`)
     }
   },
   
@@ -260,7 +261,7 @@ const initConfig = {
   postProcess: ['fallback'],
   parseMissingKeyHandler: (key) => {
     if (process.env.NODE_ENV === 'development') {
-      console.warn(`🌍 Parsing missing key: ${key}`);
+      logger.warn(`🌍 Parsing missing key: ${key}`)
     }
     return key;
   }
@@ -305,11 +306,11 @@ const initializeI18n = async () => {
     }
 
     if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_MODE === 'true') {
-      console.warn('i18n initialisé avec succès');
+      logger.warn('i18n initialisé avec succès')
     }
     return true;
   } catch (err) {
-    console.error('Erreur d\'initialisation i18n:', err);
+    logger.error('Erreur d\'initialisation i18n:', err);
     // Fallback: initialiser avec une configuration minimale
     try {
       await i18n.init({
@@ -321,10 +322,10 @@ const initializeI18n = async () => {
         react: { useSuspense: false },
         fallbackLng: 'fr'
       });
-      console.warn('i18n initialisé avec configuration de secours');
+      logger.warn('i18n initialisé avec configuration de secours');
       return true;
     } catch (fallbackErr) {
-      console.error('Erreur d\'initialisation fallback i18n:', fallbackErr);
+      logger.error('Erreur d\'initialisation fallback i18n:', fallbackErr);
       return false;
     }
   }
@@ -423,7 +424,7 @@ export async function changeLanguageAndDetectCountry(lng: string) {
   try {
     // Vérifier que i18n est correctement initialisé
     if (!i18n || !i18n.changeLanguage) {
-      console.warn('i18n not properly initialized, waiting...');
+      logger.warn('i18n not properly initialized, waiting...');
       await new Promise(resolve => setTimeout(resolve, 100));
     }
     
@@ -437,11 +438,11 @@ export async function changeLanguageAndDetectCountry(lng: string) {
       await i18n.changeLanguage(lng);
       return true;
     } else {
-      console.error('i18n.changeLanguage is not available');
+      logger.error('i18n.changeLanguage is not available');
       return false;
     }
   } catch (error) {
-    console.error('Erreur lors du changement de langue:', error);
+    logger.error('Erreur lors du changement de langue:', error);
     return false;
   }
 }
@@ -475,7 +476,7 @@ export function createSafeTranslation(i18nInstance = i18n) {
       // En dernier recours, retourner la clé
       return key;
     } catch (error) {
-      console.warn(`🌍 Translation error for key '${key}':`, error);
+      logger.warn(`🌍 Translation error for key '${key}':`, error);
       return fallback || key;
     }
   };

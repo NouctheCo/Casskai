@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { DashboardWidget } from '@/types/dashboard-widget.types';
+import { logger } from '@/utils/logger';
 
 interface WidgetDataCache {
   [widgetId: string]: {
@@ -129,7 +130,7 @@ export function useWidgetData(widgets: DashboardWidget[]) {
       }));
 
     } catch (error) {
-      console.error(`Error fetching data for widget ${widget.id}:`, error);
+      logger.error(`Error fetching data for widget ${widget.id}:`, error);
 
       // Messages d'erreur professionnels selon le type de widget et l'erreur
       let userFriendlyMessage = 'Données temporairement indisponibles';

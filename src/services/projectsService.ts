@@ -1,5 +1,6 @@
 // Service Projets moderne intégré avec Supabase
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 export interface Project {
   id: string;
@@ -152,7 +153,7 @@ export class ProjectsService {
       const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching projects:', error);
+        logger.error('Error fetching projects:', error);
         return {
           success: false,
           data: null,
@@ -177,7 +178,7 @@ export class ProjectsService {
         data: enrichedProjects as Project[]
       };
     } catch (error) {
-      console.error('Error in getProjects:', error);
+      logger.error('Error in getProjects:', error);
       return {
         success: false,
         data: null,
@@ -200,7 +201,7 @@ export class ProjectsService {
         .single();
 
       if (error) {
-        console.error('Error creating project:', error);
+        logger.error('Error creating project:', error);
         return {
           success: false,
           data: null,
@@ -213,7 +214,7 @@ export class ProjectsService {
         data: data as Project
       };
     } catch (error) {
-      console.error('Error in createProject:', error);
+      logger.error('Error in createProject:', error);
       return {
         success: false,
         data: null,
@@ -235,7 +236,7 @@ export class ProjectsService {
         .single();
 
       if (error) {
-        console.error('Error updating project:', error);
+        logger.error('Error updating project:', error);
         return {
           success: false,
           data: null,
@@ -248,7 +249,7 @@ export class ProjectsService {
         data: data as Project
       };
     } catch (error) {
-      console.error('Error in updateProject:', error);
+      logger.error('Error in updateProject:', error);
       return {
         success: false,
         data: null,
@@ -265,7 +266,7 @@ export class ProjectsService {
         .eq('id', projectId);
 
       if (error) {
-        console.error('Error deleting project:', error);
+        logger.error('Error deleting project:', error);
         return {
           success: false,
           data: null,
@@ -278,7 +279,7 @@ export class ProjectsService {
         data: true
       };
     } catch (error) {
-      console.error('Error in deleteProject:', error);
+      logger.error('Error in deleteProject:', error);
       return {
         success: false,
         data: null,
@@ -314,7 +315,7 @@ export class ProjectsService {
       const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching project tasks:', error);
+        logger.error('Error fetching project tasks:', error);
         return {
           success: false,
           data: null,
@@ -327,7 +328,7 @@ export class ProjectsService {
         data: data as ProjectTask[]
       };
     } catch (error) {
-      console.error('Error in getProjectTasks:', error);
+      logger.error('Error in getProjectTasks:', error);
       return {
         success: false,
         data: null,
@@ -350,7 +351,7 @@ export class ProjectsService {
         .single();
 
       if (error) {
-        console.error('Error creating task:', error);
+        logger.error('Error creating task:', error);
         return {
           success: false,
           data: null,
@@ -363,7 +364,7 @@ export class ProjectsService {
         data: data as ProjectTask
       };
     } catch (error) {
-      console.error('Error in createTask:', error);
+      logger.error('Error in createTask:', error);
       return {
         success: false,
         data: null,
@@ -407,7 +408,7 @@ export class ProjectsService {
       const { data, error } = await query.order('date', { ascending: false });
 
       if (error) {
-        console.error('Error fetching time entries:', error);
+        logger.error('Error fetching time entries:', error);
         return {
           success: false,
           data: null,
@@ -426,7 +427,7 @@ export class ProjectsService {
         data: enrichedEntries as ProjectTimeEntry[]
       };
     } catch (error) {
-      console.error('Error in getTimeEntries:', error);
+      logger.error('Error in getTimeEntries:', error);
       return {
         success: false,
         data: null,
@@ -452,7 +453,7 @@ export class ProjectsService {
         .single();
 
       if (error) {
-        console.error('Error creating time entry:', error);
+        logger.error('Error creating time entry:', error);
         return {
           success: false,
           data: null,
@@ -465,7 +466,7 @@ export class ProjectsService {
         data: data as ProjectTimeEntry
       };
     } catch (error) {
-      console.error('Error in createTimeEntry:', error);
+      logger.error('Error in createTimeEntry:', error);
       return {
         success: false,
         data: null,
@@ -579,7 +580,7 @@ export class ProjectsService {
         data: metrics
       };
     } catch (error) {
-      console.error('Error in getProjectMetrics:', error);
+      logger.error('Error in getProjectMetrics:', error);
       return {
         success: false,
         data: null,
@@ -599,7 +600,7 @@ export class ProjectsService {
         .not('category', 'is', null);
 
       if (error) {
-        console.error('Error fetching categories:', error);
+        logger.error('Error fetching categories:', error);
         return {
           success: false,
           data: null,
@@ -614,7 +615,7 @@ export class ProjectsService {
         data: categories
       };
     } catch (error) {
-      console.error('Error in getCategories:', error);
+      logger.error('Error in getCategories:', error);
       return {
         success: false,
         data: null,
@@ -632,7 +633,7 @@ export class ProjectsService {
         .not('manager', 'is', null);
 
       if (error) {
-        console.error('Error fetching managers:', error);
+        logger.error('Error fetching managers:', error);
         return {
           success: false,
           data: null,
@@ -647,7 +648,7 @@ export class ProjectsService {
         data: managers
       };
     } catch (error) {
-      console.error('Error in getManagers:', error);
+      logger.error('Error in getManagers:', error);
       return {
         success: false,
         data: null,

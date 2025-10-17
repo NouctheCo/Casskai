@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useEnterprisePlan } from '@/hooks/useEnterprisePlan';
-import { SUBSCRIPTION_PLANS, stripeSubscriptionService } from '@/services/stripeSubscriptionService';
+import { SUBSCRIPTION_PLANS } from '@/types/subscription.types';
+import stripeService from '@/services/stripeService';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +9,7 @@ import { Check, Crown, Zap, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { logger } from '@/utils/logger';
 
 interface SubscriptionManagerProps {
   enterpriseId?: string;
@@ -202,16 +204,40 @@ function useSubscriptionLogic(enterpriseId?: string) {
     setIsLoading(planId);
     try {
       const selectedPlan = SUBSCRIPTION_PLANS.find(p => p.id === planId);
-      if (!selectedPlan) return;
+      if (!selectedPlan || !selectedPlan.stripePriceId) {
+        logger.error('Plan introuvable ou non configuré pour Stripe:', planId);
+        return;
+      }
 
-      await stripeSubscriptionService.createCheckoutSession({
+      const origin = window.location.origin;
+      const checkoutResponse = await stripeService.createCheckoutSession({
+        planId,
         priceId: selectedPlan.stripePriceId,
-        enterpriseId: targetEnterpriseId,
-        successUrl: `${window.location.origin}/settings/subscription?success=true`,
-        cancelUrl: `${window.location.origin}/settings/subscription?canceled=true`
+        successUrl: `${origin}/settings/subscription?success=true`,
+        cancelUrl: `${origin}/settings/subscription?canceled=true`,
+        metadata: {
+          source: 'subscription-manager',
+          enterpriseId: targetEnterpriseId
+        }
       });
+
+      if (!checkoutResponse.success) {
+        logger.error('Erreur création session Stripe:', checkoutResponse.error);
+        return;
+      }
+
+      if (checkoutResponse.sessionId) {
+        const redirectResult = await stripeService.redirectToCheckout(checkoutResponse.sessionId);
+        if (redirectResult.error && checkoutResponse.checkoutUrl) {
+          // eslint-disable-next-line require-atomic-updates
+          window.location.href = checkoutResponse.checkoutUrl;
+        }
+      } else if (checkoutResponse.checkoutUrl) {
+        // eslint-disable-next-line require-atomic-updates
+        window.location.href = checkoutResponse.checkoutUrl;
+      }
     } catch (error) {
-      console.error('Error creating subscription:', error);
+      logger.error('Error creating subscription:', error);
       // TODO: Afficher une notification d'erreur
     } finally {
       setIsLoading(null);
@@ -222,12 +248,18 @@ function useSubscriptionLogic(enterpriseId?: string) {
     if (!targetEnterpriseId) return;
 
     try {
-      await stripeSubscriptionService.redirectToCustomerPortal(
-        targetEnterpriseId,
+      const portalResponse = await stripeService.createBillingPortalSession(
         `${window.location.origin}/settings/subscription`
       );
+
+      if (portalResponse.success && portalResponse.portalUrl) {
+        // eslint-disable-next-line require-atomic-updates
+        window.location.href = portalResponse.portalUrl;
+      } else {
+        logger.error('Erreur ouverture portail de facturation:', portalResponse.error)
+      }
     } catch (error) {
-      console.error('Error accessing customer portal:', error);
+      logger.error('Error accessing customer portal:', error);
       // TODO: Afficher une notification d'erreur
     }
   };

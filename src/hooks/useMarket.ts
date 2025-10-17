@@ -1,5 +1,6 @@
 // src/hooks/useMarket.ts
 import { useState, useEffect, useCallback } from 'react';
+import { logger } from '@/utils/logger';
 
 // Types pour le marché (vous pourrez les déplacer dans un fichier séparé)
 export interface MarketConfig {
@@ -227,7 +228,7 @@ export function useMarket() {
         setCurrentMarket(detected);
       }
     } catch (error) {
-      console.error('Erreur détection marché:', error);
+      logger.error('Erreur détection marché:', error);
       // Fallback sur France
       const fallback = getMarketByID('france');
       setDetectedMarket(fallback);

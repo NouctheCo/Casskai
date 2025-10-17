@@ -30,6 +30,7 @@ import type {
   RealTimeUpdate
 } from '@/types/enterprise-dashboard.types';
 import { AIAssistantChat } from '../ai/AIAssistantChat';
+import { logger } from '@/utils/logger';
 
 // Composant KPI Card Enterprise
 const EnterpriseKPICard: React.FC<{
@@ -292,7 +293,7 @@ const EnterpriseChart: React.FC<{
           </BarChart>
         );
 
-      case 'pie':
+      case 'pie': {
         const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#EC4899', '#84CC16'];
         return (
           <PieChart>
@@ -321,6 +322,7 @@ const EnterpriseChart: React.FC<{
             <Legend />
           </PieChart>
         );
+      }
 
       case 'combo':
         return (
@@ -636,7 +638,7 @@ export const EnterpriseDashboard: React.FC = () => {
 
       setDashboardData(data);
     } catch (err) {
-      console.error('Error loading dashboard data:', err);
+      logger.error('Error loading dashboard data:', err);
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
     } finally {
       setIsLoading(false);
@@ -652,7 +654,7 @@ export const EnterpriseDashboard: React.FC = () => {
       const unsubscribe = enterpriseDashboardService.subscribeToRealTimeUpdates(
         currentEnterprise.id,
         (update: RealTimeUpdate) => {
-          console.log('Real-time update received:', update);
+          logger.info('Real-time update received:', update);
           // Recharger les données ou mettre à jour spécifiquement
           if (update.type === 'data_refresh') {
             loadDashboardData();

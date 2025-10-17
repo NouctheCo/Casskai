@@ -25,6 +25,7 @@ import {
   X
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { logger } from '@/utils/logger';
 
 interface ClientsManagementProps {
   clients: Client[];
@@ -160,7 +161,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
       setIsClientFormOpen(false);
       setEditingClient(null);
     } catch (error) {
-      console.error('Error submitting client form:', error);
+      logger.error('Error submitting client form:', error)
     }
   };
 
@@ -183,7 +184,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
       await onCreateContact(contactFormData);
       setIsContactFormOpen(false);
     } catch (error) {
-      console.error('Error submitting contact form:', error);
+      logger.error('Error submitting contact form:', error)
     }
   };
 

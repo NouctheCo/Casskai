@@ -1,3 +1,4 @@
+ 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NotificationService } from './notificationService';
 import { supabase } from '@/lib/supabase';
@@ -21,7 +22,7 @@ describe('NotificationService', () => {
         type: 'info' as const,
         category: 'system' as const,
         priority: 'normal' as const,
-        is_read: false,
+        read: false,
         created_at: new Date().toISOString(),
       };
 
@@ -119,7 +120,7 @@ describe('NotificationService', () => {
     it('should mark notification as read', async () => {
       const mockUpdatedNotification = {
         id: '123',
-        is_read: true,
+        read: true,
         read_at: new Date().toISOString(),
       };
 
@@ -139,7 +140,7 @@ describe('NotificationService', () => {
       const result = await service.markAsRead('123');
 
       expect(result.success).toBe(true);
-      expect(result.data?.is_read).toBe(true);
+      expect(result.data?.read).toBe(true);
     });
   });
 

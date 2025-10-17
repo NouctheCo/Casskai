@@ -7,6 +7,7 @@ import { BudgetForm } from '@/components/budget/BudgetForm';
 import { BudgetForecastView } from '@/components/budget/BudgetForecastView';
 import { Building, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { logger } from '@/utils/logger';
 
 type ViewMode = 'list' | 'create' | 'edit' | 'forecast';
 
@@ -54,7 +55,7 @@ const BudgetPage: React.FC = () => {
   };
 
   const handleBudgetSaved = (budget: any) => {
-    console.log('Budget saved:', budget);
+    logger.info('Budget saved:', budget);
     setViewMode('list');
     setEditingBudgetId(undefined);
   };

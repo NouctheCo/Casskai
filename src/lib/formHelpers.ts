@@ -32,6 +32,7 @@ import {
   Parsers,
   Transformers
 } from './formData';
+import { logger } from '@/utils/logger';
 
 // =============================================================================
 // HOOKS POUR LA VALIDATION
@@ -462,7 +463,7 @@ export function useFormPersistence<T extends FieldValues = FieldValues>(
         });
       }
     } catch (error) {
-      console.warn('Erreur lors de la restauration des données du formulaire:', error);
+      logger.warn('Erreur lors de la restauration des données du formulaire:', error)
     }
   }, [form, key, storage, exclude]);
   
@@ -486,7 +487,7 @@ export function useFormPersistence<T extends FieldValues = FieldValues>(
           const transformedData = transformForApi(filteredData);
           storage.setItem(key, JSON.stringify(transformedData));
         } catch (error) {
-          console.warn('Erreur lors de la sauvegarde des données du formulaire:', error);
+          logger.warn('Erreur lors de la sauvegarde des données du formulaire:', error)
         }
       }, debounceMs);
     });
@@ -504,7 +505,7 @@ export function useFormPersistence<T extends FieldValues = FieldValues>(
     try {
       storage.removeItem(key);
     } catch (error) {
-      console.warn('Erreur lors de la suppression des données persistées:', error);
+      logger.warn('Erreur lors de la suppression des données persistées:', error)
     }
   }, [storage, key]);
   

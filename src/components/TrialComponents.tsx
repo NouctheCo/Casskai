@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { CalendarDays, Clock, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { logger } from '@/utils/logger';
 
 export const TrialStatusCard: React.FC = () => {
   const {
@@ -23,7 +24,7 @@ export const TrialStatusCard: React.FC = () => {
   const handleCreateTrial = async () => {
     const result = await createTrial();
     if (!result.success) {
-      console.error('Erreur lors de la création de l\'essai:', result.error);
+      logger.error('Erreur lors de la création de l\'essai:', result.error)
     }
   };
 
@@ -183,7 +184,7 @@ export const TrialActionsCard: React.FC = () => {
     // TODO: Ouvrir un modal de sélection de plan
     const result = await convertTrialToPaid('starter_monthly');
     if (!result.success) {
-      console.error('Erreur lors de la conversion:', result.error);
+      logger.error('Erreur lors de la conversion:', result.error);
       toast({
         title: "Erreur",
         description: result.error || 'Erreur lors de la conversion vers un abonnement payant',
@@ -201,7 +202,7 @@ export const TrialActionsCard: React.FC = () => {
   const handleCancelTrial = async () => {
     const result = await cancelTrial('Annulé par l\'utilisateur');
     if (!result.success) {
-      console.error('Erreur lors de l\'annulation:', result.error);
+      logger.error('Erreur lors de l\'annulation:', result.error);
       // Afficher un message d'erreur plus user-friendly
       if (result.error?.includes('check constraint')) {
         toast({

@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { EntitySelector, type EntityOption } from '../common/EntitySelector';
 import { thirdPartiesService } from '../../services/thirdPartiesService';
 import { useAuth } from '../../contexts/AuthContext';
+import { logger } from '@/utils/logger';
 
 interface PurchaseFormProps {
   isOpen: boolean;
@@ -137,7 +138,7 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
       await onSubmit(formData);
       onClose();
     } catch (error) {
-      console.error('Error submitting form:', error);
+      logger.error('Error submitting form:', error)
     }
   };
 
@@ -212,7 +213,7 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
 
       return { success: false, error: 'Erreur lors de la création du fournisseur' };
     } catch (error) {
-      console.error('Error creating supplier:', error);
+      logger.error('Error creating supplier:', error);
       return { success: false, error: 'Erreur lors de la création du fournisseur' };
     }
   };

@@ -30,9 +30,11 @@ import type {
   JournalEntryFormInitialValues,
   JournalEntryFormValues,
   JournalEntryLineForm,
+  MinimalJournal,
+  MinimalAccount,
 } from '@/types/journalEntries.types';
-import type { MinimalJournal, MinimalAccount } from '@/types/journalEntries.types';
 import { cn } from '@/lib/utils';
+import { logger } from '@/utils/logger';
 
 const DEFAULT_CURRENCY = 'EUR';
 const BALANCE_TOLERANCE = 0.01;
@@ -45,12 +47,12 @@ const DEFAULT_LINE: JournalEntryLineForm = {
   currency: DEFAULT_CURRENCY,
 };
 
-const ensureMinimumLines = (items: JournalEntryLineForm[]): JournalEntryLineForm[] => {
-  if (items.length >= 2) {
-    return items;
+const ensureMinimumLines = (lines: JournalEntryLineForm[]): JournalEntryLineForm[] => {
+  if (lines.length >= 2) {
+    return lines;
   }
-  const missing = 2 - items.length;
-  return [...items, ...Array.from({ length: missing }, () => ({ ...DEFAULT_LINE }))];
+  const missing = 2 - lines.length;
+  return [...lines, ...Array.from({ length: missing }, () => ({ ...DEFAULT_LINE }))];
 };
 
 const coerceNumber = (value: unknown): number => {
@@ -61,20 +63,20 @@ const coerceNumber = (value: unknown): number => {
 const mapInitialData = (initialData?: JournalEntryFormInitialValues): JournalEntryFormValues => {
   if (!initialData) {
     return {
-      entryDate: new Date(),
+      entryDate: format(new Date(), 'yyyy-MM-dd'),
       description: '',
       referenceNumber: '',
       journalId: '',
-      items: ensureMinimumLines([{ ...DEFAULT_LINE }, { ...DEFAULT_LINE }]),
+      lines: ensureMinimumLines([{ ...DEFAULT_LINE }, { ...DEFAULT_LINE }]),
     };
   }
 
-  const entryDate = initialData.entryDate instanceof Date
+  const entryDate = typeof initialData.entryDate === 'string'
     ? initialData.entryDate
-    : new Date(initialData.entryDate ?? new Date());
+    : format(new Date(initialData.entryDate || new Date()), 'yyyy-MM-dd');
 
-  const items = ensureMinimumLines(
-    initialData.items?.map((item) => ({
+  const lines = ensureMinimumLines(
+    initialData.lines?.map((item) => ({
       accountId: item.accountId,
       debitAmount: coerceNumber(item.debitAmount),
       creditAmount: coerceNumber(item.creditAmount),
@@ -88,7 +90,7 @@ const mapInitialData = (initialData?: JournalEntryFormInitialValues): JournalEnt
     description: initialData.description ?? '',
     referenceNumber: initialData.referenceNumber ?? '',
     journalId: initialData.journalId ?? '',
-    items,
+    lines,
   };
 };
 
@@ -102,14 +104,14 @@ const createSchema = (t: ReturnType<typeof useLocale>['t']) => {
   });
 
   return z.object({
-    entryDate: z.date({ required_error: t('fieldRequired') }),
+    entryDate: z.string({ required_error: t('fieldRequired') }),
     description: z.string().min(1, t('fieldRequired')),
     referenceNumber: z.string().optional(),
     journalId: z.string({ required_error: t('fieldRequired') }).uuid(t('fieldRequired')),
-    items: z
+    lines: z
       .array(lineSchema)
-      .min(2, t('journal_entries.items_min_required', {
-        defaultValue: 'At least two items are required for a valid journal entry',
+      .min(2, t('journal_entries.lines_min_required', {
+        defaultValue: 'At least two lines are required for a valid journal entry',
       })),
   });
 };
@@ -154,12 +156,12 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
   });
 
   const { control, handleSubmit, reset, watch, setValue } = form;
-  const { fields, append, remove, replace } = useFieldArray({ control, name: 'items' });
+  const { fields, append, remove, replace } = useFieldArray({ control, name: 'lines' });
 
-  const watchedItems = watch('items') ?? [];
+  const watchedLines = watch('lines') ?? [];
 
   const totals = useMemo(() => {
-    return watchedItems.reduce(
+    return watchedLines.reduce(
       (acc, line) => {
         acc.debit += coerceNumber(line.debitAmount);
         acc.credit += coerceNumber(line.creditAmount);
@@ -167,7 +169,7 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
       },
       { debit: 0, credit: 0 },
     );
-  }, [watchedItems]);
+  }, [watchedLines]);
 
   const isBalanced = Math.abs(totals.debit - totals.credit) < BALANCE_TOLERANCE;
 
@@ -276,7 +278,7 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
 
       return { success: true, id: newAccount.id };
     } catch (error) {
-      console.error('Error creating account:', error);
+      logger.error('Error creating account:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   };
@@ -288,7 +290,7 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
   useEffect(() => {
     const mapped = mapInitialData(initialData);
     reset(mapped);
-    replace(mapped.items);
+    replace(mapped.lines);
   }, [initialData, reset, replace]);
 
   const handleAddLine = useCallback(() => {
@@ -308,9 +310,9 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
   const handleDebitChange = useCallback(
     (index: number, value: string) => {
       const parsed = coerceNumber(value);
-      setValue(`items.${index}.debitAmount`, parsed, { shouldDirty: true, shouldValidate: true });
+      setValue(`lines.${index}.debitAmount`, parsed, { shouldDirty: true, shouldValidate: true });
       if (parsed > 0) {
-        setValue(`items.${index}.creditAmount`, 0, { shouldDirty: true, shouldValidate: true });
+        setValue(`lines.${index}.creditAmount`, 0, { shouldDirty: true, shouldValidate: true });
       }
     },
     [setValue],
@@ -319,9 +321,9 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
   const handleCreditChange = useCallback(
     (index: number, value: string) => {
       const parsed = coerceNumber(value);
-      setValue(`items.${index}.creditAmount`, parsed, { shouldDirty: true, shouldValidate: true });
+      setValue(`lines.${index}.creditAmount`, parsed, { shouldDirty: true, shouldValidate: true });
       if (parsed > 0) {
-        setValue(`items.${index}.debitAmount`, 0, { shouldDirty: true, shouldValidate: true });
+        setValue(`lines.${index}.debitAmount`, 0, { shouldDirty: true, shouldValidate: true });
       }
     },
     [setValue],
@@ -342,7 +344,7 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
 
       setSubmitting(true);
       try {
-        const normalizedItems = values.items.map((item) => ({
+        const normalizedLines = values.lines.map((item) => ({
           accountId: item.accountId,
           debitAmount: coerceNumber(item.debitAmount),
           creditAmount: coerceNumber(item.creditAmount),
@@ -358,13 +360,13 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
           description: values.description,
           referenceNumber: values.referenceNumber,
           journalId: values.journalId,
-          items: normalizedItems,
+          lines: normalizedLines,
         });
 
         if (!initialData?.id) {
           const resetValues = mapInitialData();
           reset(resetValues);
-          replace(resetValues.items);
+          replace(resetValues.lines);
         }
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
@@ -425,7 +427,7 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
                         )}
                         type="button"
                       >
-                        {field.value ? format(field.value, 'dd/MM/yyyy') : t('journal_entries.selectDate')}
+                        {field.value ? format(new Date(field.value), 'dd/MM/yyyy') : t('journal_entries.selectDate')}
                         <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
                       </Button>
                     </FormControl>
@@ -433,8 +435,8 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={field.value}
-                      onSelect={(date) => field.onChange(date ?? new Date())}
+                      selected={field.value ? new Date(field.value) : undefined}
+                      onSelect={(date) => field.onChange(date ? format(date, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'))}
                       initialFocus
                       className="rounded-md border"
                     />
@@ -515,10 +517,10 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
 
         <div className="border rounded-lg p-4 space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="font-medium text-lg">{t('journal_entries.items')}</h3>
+            <h3 className="font-medium text-lg">{t('journal_entries.lines')}</h3>
             <Button type="button" onClick={handleAddLine} variant="outline" size="sm">
               <PlusCircle className="mr-2 h-4 w-4" />
-              {t('journal_entries.add_item')}
+              {t('journal_entries.add_line')}
             </Button>
           </div>
 
@@ -535,14 +537,14 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
               </thead>
               <tbody>
                 {fields.map((fieldItem, index) => {
-                  const item = watchedItems[index] ?? DEFAULT_LINE;
+                  const item = watchedLines[index] ?? DEFAULT_LINE;
                   return (
                     <tr className="border-b" key={fieldItem.id}>
                       <td className="py-2 pr-2 align-top">
                         <EntitySelector
                           options={accountOptions}
                           value={item.accountId}
-                          onChange={(value) => setValue(`items.${index}.accountId`, value, {
+                          onChange={(value) => setValue(`lines.${index}.accountId`, value, {
                             shouldDirty: true,
                             shouldValidate: true,
                           })}
@@ -558,7 +560,7 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
                         <Input
                           value={item.description ?? ''}
                           onChange={(event) =>
-                            setValue(`items.${index}.description`, event.target.value, {
+                            setValue(`lines.${index}.description`, event.target.value, {
                               shouldDirty: true,
                             })
                           }
@@ -594,7 +596,7 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
                           disabled={fields.length <= 2}
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
-                          {t('journal_entries.remove_item')}
+                          {t('journal_entries.remove_line')}
                         </Button>
                       </td>
                     </tr>
@@ -634,7 +636,7 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
           </Button>
           <Button
             type="submit"
-            disabled={submitting || !isBalanced || watchedItems.some((item) => !(item?.accountId))}
+            disabled={submitting || !isBalanced || watchedLines.some((item) => !(item?.accountId))}
           >
             {submitting ? (
               <>

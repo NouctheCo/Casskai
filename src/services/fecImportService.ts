@@ -1,5 +1,6 @@
 import { supabase, getCurrentCompany } from '../lib/supabase';
 import { FECParser } from './fecParser';
+import { logger } from '@/utils/logger';
 import type { ImportResult, FECEntry } from '../types/accounting-import.types';
 
 interface ImportSummary {
@@ -52,7 +53,7 @@ export const fecImportService = {
       return await this.importParsedData(parseResult, enterpriseId);
       
     } catch (error) {
-      console.error('Erreur lors du parsing et import FEC:', error);
+      logger.error('Erreur lors du parsing et import FEC:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur inconnue'
@@ -109,7 +110,7 @@ export const fecImportService = {
         }
       };
     } catch (error) {
-      console.error('Erreur lors de l\'import FEC:', error);
+      logger.error('Erreur lors de l\'import FEC:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Une erreur est survenue lors de l\'importation'
@@ -125,7 +126,7 @@ export const fecImportService = {
       const company = await getCurrentCompany();
       return company ? (company as any).id : null;
     } catch (error) {
-      console.error('Erreur lors de la récupération de l\'entreprise:', error);
+      logger.error('Erreur lors de la récupération de l\'entreprise:', error);
       return null;
     }
   },
@@ -158,7 +159,7 @@ export const fecImportService = {
         }
       } as any;
     } catch (error) {
-      console.error('Erreur lors de l\'import FEC:', error);
+      logger.error('Erreur lors de l\'import FEC:', error);
       return {
         success: false,
         error: error.message || 'Une erreur est survenue lors de l\'importation'
@@ -297,7 +298,7 @@ export const fecImportService = {
         journals: []
       };
     } catch (error) {
-      console.error('Erreur lors de la création des journaux:', error);
+      logger.error('Erreur lors de la création des journaux:', error);
       throw error;
     }
   },
@@ -361,7 +362,7 @@ export const fecImportService = {
         accounts: []
       };
     } catch (error) {
-      console.error('Erreur lors de la création des comptes:', error);
+      logger.error('Erreur lors de la création des comptes:', error);
       throw error;
     }
   },
@@ -493,7 +494,7 @@ export const fecImportService = {
         for (let i = 0; i < journalEntryItemsToCreate.length; i += batchSize) {
           const batch = journalEntryItemsToCreate.slice(i, i + batchSize);
           const { error: itemsError } = await supabase
-            .from('journal_entry_items')
+            .from('journal_entry_lines')
             .insert(batch);
           
           if (itemsError) {
@@ -510,7 +511,7 @@ export const fecImportService = {
         errors
       };
     } catch (error) {
-      console.error('Erreur lors de la création des écritures:', error);
+      logger.error('Erreur lors de la création des écritures:', error);
       throw error;
     }
   }

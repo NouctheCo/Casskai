@@ -1,3 +1,5 @@
+import { STORAGE_KEYS, writeUserScopedItem, readUserScopedItem, removeUserScopedItem } from  '@/utils/userStorage'; 
+import { logger } from '@/utils/logger';
 /**
  * Script de validation pour tester les améliorations du flux onboarding
  */
@@ -32,12 +34,12 @@ class OnboardingValidator {
       };
 
       const testEnterprises = [testEnterprise];
-      localStorage.setItem('casskai_enterprises', JSON.stringify(testEnterprises));
-      localStorage.setItem('casskai_current_enterprise', testEnterprise.id);
+      const testUserId = 'onboarding-validator';
+      writeUserScopedItem(STORAGE_KEYS.ENTERPRISES, testUserId, JSON.stringify(testEnterprises));
+      writeUserScopedItem(STORAGE_KEYS.CURRENT_ENTERPRISE, testUserId, testEnterprise.id);
 
-      // Vérifier que les données peuvent être récupérées
-      const retrievedEnterprises = localStorage.getItem('casskai_enterprises');
-      const retrievedCurrentId = localStorage.getItem('casskai_current_enterprise');
+      const retrievedEnterprises = readUserScopedItem(STORAGE_KEYS.ENTERPRISES, testUserId);
+      const retrievedCurrentId = readUserScopedItem(STORAGE_KEYS.CURRENT_ENTERPRISE, testUserId);
 
       if (!retrievedEnterprises || !retrievedCurrentId) {
         throw new Error('Impossible de récupérer les données localStorage');
@@ -48,9 +50,8 @@ class OnboardingValidator {
         throw new Error('Données localStorage corrompues');
       }
 
-      // Nettoyer
-      localStorage.removeItem('casskai_enterprises');
-      localStorage.removeItem('casskai_current_enterprise');
+      removeUserScopedItem(STORAGE_KEYS.ENTERPRISES, testUserId);
+      removeUserScopedItem(STORAGE_KEYS.CURRENT_ENTERPRISE, testUserId);
 
       this.addResult('localStorage sync', 'PASS', 'Synchronisation localStorage fonctionnelle');
       return { test: 'localStorage sync', status: 'PASS', message: 'Synchronisation localStorage fonctionnelle' };
@@ -188,8 +189,8 @@ class OnboardingValidator {
    * Exécuter tous les tests
    */
   async runAllTests(): Promise<{ summary: string; results: ValidationResult[] }> {
-    // eslint-disable-next-line no-console
-    console.log('🚀 Démarrage de la validation du flux onboarding...\n');
+     
+    logger.info('🚀 Démarrage de la validation du flux onboarding...\n');
 
     // Exécuter les tests
     this.testLocalStorageSynchronization();
@@ -204,14 +205,14 @@ class OnboardingValidator {
 
     const summary = `Tests terminés: ${passed} réussis, ${failed} échoués, ${skipped} ignorés`;
     
-    // eslint-disable-next-line no-console
-    console.log(`\n📊 Résumé des tests:\n${summary}`);
+     
+    logger.info(`\n📊 Résumé des tests:\n${summary}`);
     
     if (failed === 0) {
-      // eslint-disable-next-line no-console
-      console.log('✅ Tous les tests sont passés ! Les améliorations semblent fonctionnelles.');
+       
+      logger.info('✅ Tous les tests sont passés ! Les améliorations semblent fonctionnelles.')
     } else {
-      console.error('❌ Certains tests ont échoué. Vérifiez les détails ci-dessus.');
+      logger.error('❌ Certains tests ont échoué. Vérifiez les détails ci-dessus.')
     }
 
     return { summary, results: this.results };
@@ -230,3 +231,4 @@ export const validateOnboardingImprovements = async () => {
 if (typeof window !== 'undefined') {
   (window as Window & typeof globalThis & { validateOnboarding: () => Promise<{ summary: string; results: ValidationResult[] }> }).validateOnboarding = validateOnboardingImprovements;
 }
+

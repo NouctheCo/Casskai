@@ -1,8 +1,9 @@
 // Service de génération de rapports financiers avec calculs avancés
 import { supabase } from '@/lib/supabase';
 import { reportExportService, TableData, ExportOptions } from './ReportExportService';
-import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subDays } from 'date-fns';
+import { format, startOfYear, endOfYear } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { logger } from '@/utils/logger';
 
 export interface FinancialData {
   compte: string;
@@ -36,18 +37,17 @@ export class ReportGenerationService {
     try {
       const { startDate, endDate, companyId } = filters;
 
-      // Récupérer les données comptables
-      const { data: journalEntries, error } = await supabase
-        .from('journal_entries')
-        .select('*')
+      // Récupérer les données directement du plan de comptes fiabilisé
+      const { data: accounts, error } = await supabase
+        .from('chart_of_accounts')
+        .select('account_number, name, type, class, balance')
         .eq('company_id', companyId)
-        .gte('date', startDate || startOfYear(new Date()).toISOString().split('T')[0])
-        .lte('date', endDate || endOfYear(new Date()).toISOString().split('T')[0]);
+        .in('class', [1, 2, 3, 4, 5]);
 
       if (error) throw error;
 
-      // Calculer les soldes par compte
-      const accountBalances = this.calculateAccountBalances(journalEntries || []);
+      // Calculer les soldes par compte (simplifié car le solde est déjà dans le compte)
+      const accountBalances = this.calculateAccountBalancesFromAccounts(accounts || []);
 
       // Séparer actif et passif
       const actifAccounts = accountBalances.filter(acc => acc.type === 'actif');
@@ -106,7 +106,7 @@ export class ReportGenerationService {
           return await reportExportService.exportToPDF(tables, defaultOptions);
       }
     } catch (error) {
-      console.error('Erreur génération bilan:', error);
+      logger.error('Erreur génération bilan:', error);
       throw new Error('Impossible de générer le bilan');
     }
   }
@@ -116,16 +116,15 @@ export class ReportGenerationService {
     try {
       const { startDate, endDate, companyId } = filters;
 
-      const { data: journalEntries, error } = await supabase
-        .from('journal_entries')
-        .select('*')
+      const { data: accounts, error } = await supabase
+        .from('chart_of_accounts')
+        .select('account_number, name, type, class, balance, debit, credit')
         .eq('company_id', companyId)
-        .gte('date', startDate || startOfYear(new Date()).toISOString().split('T')[0])
-        .lte('date', endDate || endOfYear(new Date()).toISOString().split('T')[0]);
+        .in('class', [6, 7]);
 
       if (error) throw error;
 
-      const accountBalances = this.calculateAccountBalances(journalEntries || []);
+      const accountBalances = this.calculateAccountBalancesFromAccounts(accounts || []);
 
       const charges = accountBalances.filter(acc => acc.type === 'charge');
       const produits = accountBalances.filter(acc => acc.type === 'produit');
@@ -192,7 +191,7 @@ export class ReportGenerationService {
           return await reportExportService.exportToPDF(tables, defaultOptions);
       }
     } catch (error) {
-      console.error('Erreur génération compte de résultat:', error);
+      logger.error('Erreur génération compte de résultat:', error);
       throw new Error('Impossible de générer le compte de résultat');
     }
   }
@@ -202,16 +201,14 @@ export class ReportGenerationService {
     try {
       const { startDate, endDate, companyId } = filters;
 
-      const { data: journalEntries, error } = await supabase
-        .from('journal_entries')
-        .select('*')
-        .eq('company_id', companyId)
-        .gte('date', startDate || startOfYear(new Date()).toISOString().split('T')[0])
-        .lte('date', endDate || endOfYear(new Date()).toISOString().split('T')[0]);
+      const { data: accounts, error } = await supabase
+        .from('chart_of_accounts')
+        .select('account_number, name, type, class, balance, debit, credit')
+        .eq('company_id', companyId);
 
       if (error) throw error;
 
-      const accountBalances = this.calculateAccountBalances(journalEntries || []);
+      const accountBalances = this.calculateAccountBalancesFromAccounts(accounts || []);
 
       const balanceTable: TableData = {
         title: 'BALANCE GÉNÉRALE',
@@ -250,7 +247,7 @@ export class ReportGenerationService {
           return await reportExportService.exportToPDF(balanceTable, defaultOptions);
       }
     } catch (error) {
-      console.error('Erreur génération balance:', error);
+      logger.error('Erreur génération balance:', error);
       throw new Error('Impossible de générer la balance');
     }
   }
@@ -320,47 +317,30 @@ export class ReportGenerationService {
           return await reportExportService.exportToPDF(tables, defaultOptions);
         case 'excel':
           return await reportExportService.exportToExcel(tables, defaultOptions);
-        case 'csv':
+        case 'csv': {
           // Pour CSV, on combine tout en une seule table
           const combinedTable = this.combineTables(tables, 'Grand Livre Complet');
           return reportExportService.exportToCSV(combinedTable, defaultOptions);
+        }
         default:
           return await reportExportService.exportToPDF(tables, defaultOptions);
       }
     } catch (error) {
-      console.error('Erreur génération grand livre:', error);
+      logger.error('Erreur génération grand livre:', error);
       throw new Error('Impossible de générer le grand livre');
     }
   }
 
   // Helpers privés
-  private calculateAccountBalances(journalEntries: any[]): FinancialData[] {
-    const balances: Record<string, FinancialData> = {};
-
-    journalEntries.forEach(entry => {
-      const accountNumber = entry.account_number;
-
-      if (!balances[accountNumber]) {
-        balances[accountNumber] = {
-          compte: accountNumber,
-          libelle: entry.account_name || entry.label,
-          debit: 0,
-          credit: 0,
-          solde: 0,
-          type: this.getAccountType(accountNumber)
-        };
-      }
-
-      balances[accountNumber].debit += entry.debit || 0;
-      balances[accountNumber].credit += entry.credit || 0;
-    });
-
-    // Calculer les soldes
-    Object.values(balances).forEach(balance => {
-      balance.solde = balance.debit - balance.credit;
-    });
-
-    return Object.values(balances).sort((a, b) => a.compte.localeCompare(b.compte));
+  private calculateAccountBalancesFromAccounts(accounts: any[]): FinancialData[] {
+    return accounts.map(acc => ({
+      compte: acc.account_number,
+      libelle: acc.name,
+      debit: acc.balance > 0 ? acc.balance : 0,
+      credit: acc.balance < 0 ? -acc.balance : 0,
+      solde: acc.balance || 0,
+      type: acc.type // Utilisation directe du type fiable
+    }));
   }
 
   private getAccountType(accountNumber: string): 'actif' | 'passif' | 'charge' | 'produit' {
@@ -370,15 +350,16 @@ export class ReportGenerationService {
       case '1':
       case '2':
       case '3':
+        return 'actif';
       case '4':
       case '5':
-        return accountNumber.charAt(0) <= '3' ? 'actif' : 'passif';
+        return 'passif';
       case '6':
         return 'charge';
       case '7':
         return 'produit';
       default:
-        return 'actif';
+        return 'actif'; // Fallback, ne devrait pas être utilisé avec des données fiables
     }
   }
 
