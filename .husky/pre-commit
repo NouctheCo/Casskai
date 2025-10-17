@@ -1,3 +1,23 @@
+#!/usr/bin/env bash
+# Pré-commit: scan de secrets (si outils installés)
+
+set -e
+
+if command -v ggshield >/dev/null 2>&1; then
+  ggshield secret scan pre-commit --staged || {
+    echo "❌ ggshield a détecté des secrets. Corrigez avant de committer." >&2
+    exit 1
+  }
+fi
+
+if command -v git-secrets >/dev/null 2>&1; then
+  git-secrets --pre_commit_hook -- "$@" || {
+    echo "❌ git-secrets a détecté des secrets. Corrigez avant de committer." >&2
+    exit 1
+  }
+fi
+
+exit 0
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 

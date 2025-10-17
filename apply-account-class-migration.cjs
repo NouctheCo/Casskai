@@ -2,15 +2,22 @@
 const fs = require('fs');
 const { createClient } = require('@supabase/supabase-js');
 
-const SUPABASE_URL = 'https://smtdtgrymuzwvctattmx.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtdGR0Z3J5bXV6d3ZjdGF0dG14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjcxMTQ3NjksImV4cCI6MjA0MjY5MDc2OX0.qSRx0vNgdVRf-GcMJgZ5QUufUj0WE_vQn7CxvxD2qH8';
+// Ne pas hardcoder d'URL/clé ici. Utilisez des variables d'environnement.
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.error('❌ Variables SUPABASE_URL et SUPABASE_ANON_KEY requises.');
+  console.error('   Exemple: SUPABASE_URL=https://xxx.supabase.co SUPABASE_ANON_KEY=xxxx node apply-account-class-migration.cjs');
+  process.exit(1);
+}
 
 async function applyMigration() {
   try {
     console.log('🔄 Connexion à Supabase...');
 
     // Créer le client Supabase
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     console.log('📝 Ajout de la colonne account_class...');
 

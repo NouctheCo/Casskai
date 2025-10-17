@@ -187,7 +187,7 @@ CREATE TRIGGER update_forecasts_updated_at
 
 **URL** : https://casskai.app
 **Statut HTTP** : 200 OK ✅
-**Serveur** : 89.116.111.88
+**Serveur** : [voir runbook interne]
 **SSL** : Actif (Let's Encrypt)
 
 **Services en ligne** :

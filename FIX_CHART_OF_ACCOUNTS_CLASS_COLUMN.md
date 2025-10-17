@@ -53,8 +53,8 @@ npx supabase migration repair --status reverted 20251012
 echo "Y" | npx supabase db push --include-all
 
 # Méthode 2: Application manuelle via psql (si disponible)
-psql "postgresql://postgres.smtdtgrymuzwvctattmx:Myriam2705+@aws-0-eu-central-1.pooler.supabase.com:6543/postgres" \
-  -f supabase/migrations/20251014100000_add_account_class_to_chart_of_accounts.sql
+psql "postgresql://postgres:[PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres" \
+   -f supabase/migrations/20251014100000_add_account_class_to_chart_of_accounts.sql
 ```
 
 ## Contenu de la Migration SQL

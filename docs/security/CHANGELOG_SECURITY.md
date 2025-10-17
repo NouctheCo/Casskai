@@ -6,9 +6,7 @@
 
 #### Secrets Hardcodés Supprimés
 - **Fichier**: `supabase/functions/stripe-webhook/index.ts`
-  - ❌ Supprimé: Clé Stripe secrète hardcodée (`sk_test_51RN...`)
-  - ❌ Supprimé: Clé Service Role Supabase hardcodée
-  - ❌ Supprimé: Secret webhook Stripe hardcodé (`whsec_6Nm...`)
+  - ❌ Supprimé: Clés secrètes hardcodées (Stripe, Supabase Service Role, Webhook)
   - ✅ Ajouté: Validation fail-fast des variables d'environnement
   - ✅ Ajouté: Messages d'erreur explicites si secrets manquants
 
@@ -149,9 +147,9 @@ Documentés dans `SECURITY_CONFIGURATION_GUIDE.md`:
 ### ⚠️ Actions Post-Déploiement REQUISES
 
 1. **Révoquer immédiatement les clés exposées**
-   - [ ] Stripe: `sk_test_51RNdfwR73rjyEju05...`
-   - [ ] Stripe webhook: `whsec_6NmLfU1hliTsI1Zop0p7rLeWRfDIqQrv`
-   - [ ] Supabase Service Role Key (régénérer)
+  - [ ] Stripe Secret Key (test/live)
+  - [ ] Stripe Webhook Secret
+  - [ ] Supabase Service Role Key
 
 2. **Configurer les nouveaux secrets**
    ```bash

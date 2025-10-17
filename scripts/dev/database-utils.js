@@ -5,13 +5,21 @@
  * Usage: node scripts/database-utils.js [command] [options]
  */
 
+import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
 
-// Configuration Supabase (local)
-const SUPABASE_URL = 'http://127.0.0.1:54321';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU';
+// Configuration Supabase (locale) via variables d'environnement
+// Ne JAMAIS committer de clés ici. Utiliser DEV_SUPABASE_* ou SUPABASE_* dans votre env.
+const SUPABASE_URL = process.env.DEV_SUPABASE_URL || process.env.SUPABASE_URL || 'http://127.0.0.1:54321';
+const SUPABASE_SERVICE_ROLE_KEY = process.env.DEV_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+if (!SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('❌ Variable d\'environnement SUPABASE_SERVICE_ROLE_KEY manquante.');
+    console.error('   Définissez DEV_SUPABASE_SERVICE_ROLE_KEY (ou SUPABASE_SERVICE_ROLE_KEY) pour exécuter ce script localement.');
+    process.exit(1);
+}
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 async function listTables() {
     try {

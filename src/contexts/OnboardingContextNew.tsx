@@ -482,18 +482,179 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     logger.info('📤 [OnboardingContextNew] Company data to insert via Supabase:', companyData);
     
-      // Appel de la fonction RPC SECURITY DEFINER
-      // IMPORTANT: La fonction attend UN SEUL paramètre JSONB
-      let { data: company, error: companyError } = await supabase.rpc('create_company_with_defaults', { p_payload: companyData });
-    
-      if (companyError) {
-        logger.error('❌ [OnboardingContextNew] Company creation error:', companyError);
-        throw new Error(`Impossible de créer l'entreprise. Erreur: ${companyError.message}`);
+      const getExistingCompany = async (): Promise<Record<string, any> | null> => {
+        try {
+          const { data: link, error: linkError } = await supabase
+            .from('user_companies')
+            .select('company_id, is_active, is_default, role, updated_at, created_at')
+            .eq('user_id', user.id)
+            .order('is_default', { ascending: false, nullsFirst: false })
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (linkError && linkError.code !== 'PGRST116') {
+            logger.error('❌ [OnboardingContextNew] Failed to lookup existing company link:', linkError);
+            return null;
+          }
+
+          if (!link?.company_id) {
+            return null;
+          }
+
+          const { data: companyRecord, error: companyFetchError } = await supabase
+            .from('companies')
+            .select('*')
+            .eq('id', link.company_id)
+            .maybeSingle();
+
+          if (companyFetchError && companyFetchError.code !== 'PGRST116') {
+            logger.error('❌ [OnboardingContextNew] Failed to fetch existing company record:', companyFetchError);
+            return null;
+          }
+
+          if (!companyRecord) {
+            return null;
+          }
+
+          return companyRecord as Record<string, any>;
+        } catch (lookupError) {
+          logger.error('❌ [OnboardingContextNew] Exception while checking existing company:', lookupError);
+          return null;
+        }
+      };
+
+      const createCompanyViaRpc = async (): Promise<Record<string, any>> => {
+        const { data: companyResult, error: companyError } = await supabase.rpc('create_company_with_defaults', { p_payload: companyData });
+
+        if (companyError) {
+          logger.error('❌ [OnboardingContextNew] Company creation error:', companyError);
+          throw new Error(`Impossible de créer l'entreprise. Erreur: ${companyError.message}`);
+        }
+
+        if (!companyResult) {
+          throw new Error('Failed to create company - no data returned');
+        }
+
+        const rpcPayload = companyResult as Record<string, any>;
+
+        if (rpcPayload.success === false) {
+          const rpcMessage = rpcPayload.message || 'RPC returned an error while creating the company';
+          logger.error('❌ [OnboardingContextNew] Company creation RPC reported failure:', rpcPayload);
+          throw new Error(rpcMessage);
+        }
+
+        const rawCompanyData = ((rpcPayload.data && rpcPayload.data.company) || {}) as Record<string, any>;
+        const companyIdFromPayload = rawCompanyData.id ?? rpcPayload.company_id ?? rpcPayload.id;
+
+        if (!companyIdFromPayload) {
+          logger.error('❌ [OnboardingContextNew] Invalid RPC payload:', rpcPayload);
+          throw new Error('Failed to create company - no company identifier returned by Supabase');
+        }
+
+        return {
+          ...rawCompanyData,
+          id: companyIdFromPayload,
+          name: rawCompanyData.name ?? companyData.name,
+          country: rawCompanyData.country ?? companyData.country,
+          default_currency: rawCompanyData.default_currency ?? companyData.default_currency,
+          currency: rawCompanyData.currency ?? companyData.default_currency,
+          owner_id: rawCompanyData.owner_id ?? user.id
+        };
+      };
+
+      const buildCompanyUpdatePayload = (): Record<string, unknown> => {
+        const payload: Record<string, unknown> = {
+          name: companyData.name,
+          country: companyData.country,
+          default_currency: companyData.default_currency,
+          timezone: companyData.timezone,
+          share_capital: companyData.share_capital,
+          ceo_name: companyData.ceo_name,
+          sector: companyData.sector,
+          ceo_title: companyData.ceo_title,
+          industry_type: companyData.industry_type,
+          company_size: companyData.company_size,
+          registration_date: companyData.registration_date,
+          email: companyData.email,
+          phone: companyData.phone,
+          website: companyData.website,
+          updated_at: new Date().toISOString()
+        };
+
+        Object.keys(payload).forEach((key) => {
+          if (payload[key] === undefined) {
+            delete payload[key];
+          }
+        });
+
+        return payload;
+      };
+
+      let company = null as Record<string, any> | null;
+      let companyCreatedDuringRun = false;
+
+      try {
+        company = await createCompanyViaRpc();
+        companyCreatedDuringRun = true;
+      } catch (creationError) {
+        const errorMessage = creationError instanceof Error ? creationError.message : String(creationError);
+        if (errorMessage.includes('journals_company_id_code_key') || errorMessage.toLowerCase().includes('duplicate key')) {
+          logger.warn('⚠️ [OnboardingContextNew] Duplicate journal constraint triggered, attempting to reuse existing company');
+          company = await getExistingCompany();
+
+          if (!company) {
+            throw creationError;
+          }
+        } else {
+          throw creationError;
+        }
       }
 
-      if (!company) throw new Error('Failed to create company - no data returned');
+      if (!company) {
+        throw new Error('No company available after creation attempt');
+      }
 
-      logger.info('✅ [OnboardingContextNew] Company created successfully:', company);
+      company.default_currency = company.default_currency ?? companyData.default_currency;
+      company.country = company.country ?? companyData.country;
+      company.name = company.name ?? companyData.name;
+      company.owner_id = company.owner_id ?? user.id;
+
+      if (!companyCreatedDuringRun) {
+        const updatePayload = buildCompanyUpdatePayload();
+        if (Object.keys(updatePayload).length > 0) {
+          try {
+            await supabase
+              .from('companies')
+              .update(updatePayload)
+              .eq('id', company.id);
+            logger.info('🛠️ [OnboardingContextNew] Existing company updated with onboarding data');
+          } catch (updateError) {
+            logger.error('❌ [OnboardingContextNew] Failed to update existing company during onboarding:', updateError);
+          }
+        }
+
+        try {
+          await supabase
+            .from('user_companies')
+            .upsert({
+              user_id: user.id,
+              company_id: company.id,
+              role: 'owner',
+              is_default: true,
+              is_active: true,
+              status: 'active',
+              updated_at: new Date().toISOString()
+            }, { onConflict: 'user_id,company_id' });
+        } catch (linkUpsertError) {
+          logger.error('❌ [OnboardingContextNew] Failed to ensure user-company link during onboarding:', linkUpsertError);
+        }
+      }
+
+      logger.info('✅ [OnboardingContextNew] Company ready for onboarding finalisation:', {
+        companyId: company.id,
+        createdThisRun: companyCreatedDuringRun
+      });
 
       // Create company modules
       const selectedModules = state.data.selectedModules || [];
@@ -567,7 +728,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
         await supabase
           .from('company_modules')
-          .insert(modulesToInsert);
+          .upsert(modulesToInsert, { onConflict: 'company_id,module_key' });
       }
 
       // ============================================
@@ -581,7 +742,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         try {
           await supabase
             .from('user_preferences')
-            .insert({
+            .upsert({
               user_id: user.id,
               company_id: company.id,
 
@@ -608,7 +769,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
               compact_view: state.data.preferences.compactView ?? false,
               show_tooltips: state.data.preferences.showTooltips ?? true,
               auto_save: state.data.preferences.autoSave ?? true
-            });
+            }, { onConflict: 'user_id,company_id' });
 
           logger.info('✅ Préférences utilisateur sauvegardées avec succès')
         } catch (prefError) {
@@ -647,7 +808,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           if (featuresToInsert.length > 0) {
             await supabase
               .from('company_features')
-              .insert(featuresToInsert);
+              .upsert(featuresToInsert, { onConflict: 'company_id,feature_name' });
 
             logger.info(`✅ ${featuresToInsert.length} features sauvegardées avec succès`)
           }
@@ -661,6 +822,12 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       const completedSteps = Array.from(new Set([...(state.data.completedSteps || []), 'complete']));
       const completedData = {
         ...state.data,
+        companyProfile: {
+          ...state.data.companyProfile,
+          name: company.name ?? state.data.companyProfile?.name,
+          country: company.country ?? state.data.companyProfile?.country,
+          currency: company.default_currency ?? company.currency ?? (state.data.companyProfile as any)?.currency
+        },
         completedSteps,
         completedAt: completionTimestamp,
         progress: 100
@@ -912,7 +1079,5 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     </OnboardingContext.Provider>
   );
 };
-
-
 
 
