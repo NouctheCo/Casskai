@@ -11,10 +11,13 @@ export interface Contact {
   id: string;
   first_name: string;
   last_name: string;
-  email: string;
+  email?: string;
   phone?: string;
   position?: string;
-  client_id: string;
+  client_id?: string;
+  company_id?: string;
+  notes?: string;
+  is_primary?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -65,7 +68,7 @@ export interface Opportunity {
 
 export interface CommercialAction {
   id: string;
-  type: 'call' | 'email' | 'meeting' | 'task' | 'note' | 'demo' | 'proposal';
+  type: 'call' | 'email' | 'meeting' | 'demo' | 'proposal' | 'follow_up' | 'other';
   title: string;
   description?: string;
   client_id?: string;
@@ -74,15 +77,17 @@ export interface CommercialAction {
   contact_name?: string;
   opportunity_id?: string;
   opportunity_title?: string;
-  status: 'planned' | 'completed' | 'cancelled';
+  status: 'planned' | 'in_progress' | 'completed' | 'cancelled';
   due_date?: string;
   completed_date?: string;
   assigned_to?: string;
-  priority: 'low' | 'medium' | 'high';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
   outcome?: string;
   follow_up_required?: boolean;
   follow_up_date?: string;
-  enterprise_id: string;
+  duration_minutes?: number;
+  company_id?: string;
+  enterprise_id?: string;
   created_at: string;
   updated_at: string;
 }
@@ -131,10 +136,12 @@ export interface ClientFormData {
 export interface ContactFormData {
   first_name: string;
   last_name: string;
-  email: string;
+  email?: string;
   phone?: string;
   position?: string;
-  client_id: string;
+  client_id?: string;
+  notes?: string;
+  is_primary?: boolean;
 }
 
 export interface OpportunityFormData {
@@ -155,19 +162,21 @@ export interface OpportunityFormData {
 }
 
 export interface CommercialActionFormData {
-  type: 'call' | 'email' | 'meeting' | 'task' | 'note' | 'demo' | 'proposal';
+  type: 'call' | 'email' | 'meeting' | 'demo' | 'proposal' | 'follow_up' | 'other';
   title: string;
   description?: string;
   client_id?: string;
   contact_id?: string;
   opportunity_id?: string;
-  status: 'planned' | 'completed' | 'cancelled';
+  status: 'planned' | 'in_progress' | 'completed' | 'cancelled';
   due_date?: string;
+  completed_date?: string;
   assigned_to?: string;
-  priority: 'low' | 'medium' | 'high';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
   outcome?: string;
   follow_up_required?: boolean;
   follow_up_date?: string;
+  duration_minutes?: number;
 }
 
 export interface CrmFilters {
@@ -185,8 +194,9 @@ export interface CrmFilters {
 
 // Service response types
 export interface CrmServiceResponse<T> {
-  data: T;
-  error?: {
+  success: boolean;
+  data: T | null;
+  error?: string | {
     message: string;
     code?: string;
   };

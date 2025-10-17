@@ -1,16 +1,12 @@
-// @ts-nocheck
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const DiagnosticPage = () => {
   const navigate = useNavigate();
-  const { 
-    user, 
-    loading, 
-    currentEnterpriseId, 
-    currentEnterpriseName, 
-    userCompanies 
+  const {
+    user,
+    loading
   } = useAuth();
 
   return (
@@ -26,21 +22,7 @@ const DiagnosticPage = () => {
         
         <div className="bg-blue-100 p-4 rounded">
           <h2 className="font-semibold">Entreprises</h2>
-          <p>Nombre d'entreprises: {userCompanies?.length || 0}</p>
-          <p>Entreprise actuelle: {currentEnterpriseName || 'Aucune'}</p>
-          <p>ID entreprise: {currentEnterpriseId || 'Aucun'}</p>
-          
-          {userCompanies && userCompanies.length > 0 && (
-            <div className="mt-2">
-              <h3 className="font-medium">Liste des entreprises:</h3>
-              {userCompanies.map((uc, index) => (
-                <div key={index} className="ml-4">
-                  • {uc.companies?.name} ({uc.companies?.country}) 
-                  {uc.is_default && ' - Par défaut'}
-                </div>
-              ))}
-            </div>
-          )}
+          <p>Info: Enterprise context should be checked separately</p>
         </div>
         
         <div className="bg-green-100 p-4 rounded">

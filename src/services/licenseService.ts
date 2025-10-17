@@ -1,5 +1,8 @@
-// @ts-nocheck
 // services/licenseService.ts
+import { LicenseType, LicenseFeatures, LicenseLimits } from '../types/licensing';
+import { LICENSE_PLANS } from '../data/licensePlans';
+import { logger } from '@/utils/logger';
+
 export class LicenseService {
   private static instance: LicenseService;
   private currentLicense: LicenseType | null = null;
@@ -27,7 +30,7 @@ export class LicenseService {
       }
       return false;
     } catch (error) {
-      console.error('Erreur validation licence:', error);
+      logger.error('Erreur validation licence:', error);
       return false;
     }
   }

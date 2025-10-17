@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -32,6 +31,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { OpportunityCard } from './OpportunityCard';
+import { logger } from '@/utils/logger';
 
 interface OpportunityPipelineProps {
   enterpriseId: string;
@@ -80,11 +80,12 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
       setLoading(true);
       const response = await crmService.getOpportunities(enterpriseId);
       if (response.error) {
-        throw new Error(response.error.message);
+        const errorMessage = typeof response.error === 'string' ? response.error : response.error.message;
+        throw new Error(errorMessage);
       }
       setOpportunities(response.data);
     } catch (error) {
-      console.error('Error loading opportunities:', error);
+      logger.error('Error loading opportunities:', error);
       toast({
         title: "Erreur",
         description: "Impossible de charger les opportunités",
@@ -141,7 +142,8 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
       // Update in service
       const response = await crmService.updateOpportunity(opportunityId, { stage: newStage as any });
       if (response.error) {
-        throw new Error(response.error.message);
+        const errorMessage = typeof response.error === 'string' ? response.error : response.error.message;
+        throw new Error(errorMessage);
       }
 
       toast({
@@ -150,7 +152,7 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
       });
 
     } catch (error) {
-      console.error('Error updating opportunity:', error);
+      logger.error('Error updating opportunity:', error);
       // Revert optimistic update
       await loadOpportunities();
       toast({

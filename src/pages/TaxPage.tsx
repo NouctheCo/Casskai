@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -16,6 +15,7 @@ import { fr } from 'date-fns/locale';
 import { useToast } from '../components/ui/use-toast';
 import { useEnterprise } from '../contexts/EnterpriseContext';
 import { taxService } from '../services/taxService';
+import { TaxCompliancePanel } from '../components/fiscal/TaxCompliancePanel';
 import {
   TaxDeclaration,
   TaxCalendarEvent,
@@ -46,6 +46,7 @@ import {
   Shield,
   Sparkles
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 // Calendar setup
 const locales = {
@@ -138,7 +139,7 @@ const TaxPage: React.FC = () => {
         });
       }
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      logger.error('Error loading dashboard data:', error);
       toast({
         title: 'Erreur de chargement',
         description: 'Impossible de charger les données du tableau de bord',
@@ -161,7 +162,7 @@ const TaxPage: React.FC = () => {
         });
       }
     } catch (error) {
-      console.error('Error loading declarations:', error);
+      logger.error('Error loading declarations:', error);
       toast({
         title: 'Erreur de chargement',
         description: 'Impossible de charger les déclarations',
@@ -184,7 +185,7 @@ const TaxPage: React.FC = () => {
         setCalendarEvents(response.data);
       }
     } catch (error) {
-      console.error('Error loading calendar events:', error);
+      logger.error('Error loading calendar events:', error)
     }
   };
 
@@ -195,7 +196,7 @@ const TaxPage: React.FC = () => {
         setAlerts(response.data);
       }
     } catch (error) {
-      console.error('Error loading alerts:', error);
+      logger.error('Error loading alerts:', error)
     }
   };
 
@@ -207,7 +208,7 @@ const TaxPage: React.FC = () => {
       }
       setLoading(false);
     } catch (error) {
-      console.error('Error loading obligations:', error);
+      logger.error('Error loading obligations:', error);
       setLoading(false);
     }
   };
@@ -253,7 +254,7 @@ const TaxPage: React.FC = () => {
   };
 
   const handleExportDeclarations = () => {
-    taxService.exportDeclarationsToCSV(filteredDeclarations, 'declarations_fiscales');
+    (taxService as any).exportDeclarationsToCSV(filteredDeclarations, 'declarations_fiscales');
     toast({
       title: 'Export réussi',
       description: 'Les déclarations ont été exportées en CSV'
@@ -262,7 +263,7 @@ const TaxPage: React.FC = () => {
 
   const handleAcknowledgeAlert = async (alertId: string) => {
     try {
-      const response = await taxService.acknowledgeAlert(alertId);
+      const response = await (taxService as any).acknowledgeAlert(alertId);
       if (response.data) {
         setAlerts(prev => prev.map(alert => 
           alert.id === alertId ? response.data : alert
@@ -318,7 +319,7 @@ const TaxPage: React.FC = () => {
         description: 'La déclaration a été supprimée avec succès',
       });
     } catch (error) {
-      console.error('Error deleting declaration:', error);
+      logger.error('Error deleting declaration:', error);
       toast({
         title: 'Erreur de suppression',
         description: 'Impossible de supprimer la déclaration',
@@ -330,7 +331,7 @@ const TaxPage: React.FC = () => {
   const handleEditObligation = (obligation: TaxObligation) => {
     toast({
       title: 'Modification de l\'obligation',
-      description: `Édition de ${obligation.name}`,
+      description: `Édition de ${(obligation as any).name}`,
     });
     // TODO: Open edit modal or navigate to edit form
   };
@@ -349,7 +350,7 @@ const TaxPage: React.FC = () => {
         description: 'L\'obligation a été supprimée avec succès',
       });
     } catch (error) {
-      console.error('Error deleting obligation:', error);
+      logger.error('Error deleting obligation:', error);
       toast({
         title: 'Erreur de suppression',
         description: 'Impossible de supprimer l\'obligation',
@@ -464,8 +465,9 @@ const TaxPage: React.FC = () => {
       {/* Tabs Navigation */}
       <motion.div variants={itemVariants}>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="dashboard">Tableau de Bord</TabsTrigger>
+            <TabsTrigger value="compliance">Conformité Fiscale</TabsTrigger>
             <TabsTrigger value="declarations">Déclarations</TabsTrigger>
             <TabsTrigger value="calendar">Calendrier</TabsTrigger>
             <TabsTrigger value="alerts">Alertes</TabsTrigger>
@@ -485,7 +487,7 @@ const TaxPage: React.FC = () => {
                         <div>
                           <p className="text-sm font-medium text-gray-600">Total Déclarations</p>
                           <p className="text-2xl font-bold text-gray-900">
-                            {dashboardData.stats.total_declarations}
+                            {dashboardData?.stats?.total_declarations || 0}
                           </p>
                         </div>
                         <div className="p-3 bg-blue-100 rounded-full">
@@ -501,7 +503,7 @@ const TaxPage: React.FC = () => {
                         <div>
                           <p className="text-sm font-medium text-gray-600">En Attente</p>
                           <p className="text-2xl font-bold text-gray-900">
-                            {dashboardData.stats.pending_declarations}
+                            {dashboardData?.stats?.pending_declarations || 0}
                           </p>
                         </div>
                         <div className="p-3 bg-yellow-100 rounded-full">
@@ -517,7 +519,7 @@ const TaxPage: React.FC = () => {
                         <div>
                           <p className="text-sm font-medium text-gray-600">En Retard</p>
                           <p className="text-2xl font-bold text-gray-900">
-                            {dashboardData.stats.overdue_declarations}
+                            {dashboardData?.stats?.overdue_declarations || 0}
                           </p>
                         </div>
                         <div className="p-3 bg-red-100 rounded-full">
@@ -533,7 +535,7 @@ const TaxPage: React.FC = () => {
                         <div>
                           <p className="text-sm font-medium text-gray-600">Alertes Actives</p>
                           <p className="text-2xl font-bold text-gray-900">
-                            {dashboardData.stats.active_alerts}
+                            {dashboardData?.stats?.active_alerts || 0}
                           </p>
                         </div>
                         <div className="p-3 bg-purple-100 rounded-full">
@@ -556,7 +558,7 @@ const TaxPage: React.FC = () => {
                           <div>
                             <p className="text-sm text-gray-600">Taxes Dues</p>
                             <p className="text-xl font-bold text-red-600">
-                              {formatCurrency(dashboardData.stats.total_tax_due)}
+                              {formatCurrency(dashboardData?.stats?.total_tax_due || 0)}
                             </p>
                           </div>
                           <TrendingUp className="h-6 w-6 text-red-500" />
@@ -565,7 +567,7 @@ const TaxPage: React.FC = () => {
                           <div>
                             <p className="text-sm text-gray-600">Taxes Payées</p>
                             <p className="text-xl font-bold text-green-600">
-                              {formatCurrency(dashboardData.stats.total_tax_paid)}
+                              {formatCurrency(dashboardData?.stats?.total_tax_paid || 0)}
                             </p>
                           </div>
                           <CheckCircle className="h-6 w-6 text-green-500" />
@@ -574,6 +576,7 @@ const TaxPage: React.FC = () => {
                     </CardContent>
                   </Card>
 
+{dashboardData.compliance_score && (
                   <Card>
                     <CardHeader>
                       <CardTitle>Score de Conformité</CardTitle>
@@ -581,15 +584,17 @@ const TaxPage: React.FC = () => {
                     <CardContent>
                       <div className="text-center mb-4">
                         <div className="text-3xl font-bold text-blue-600 mb-2">
-                          {dashboardData.compliance_score.current_score}/{dashboardData.compliance_score.max_score}
+                          {dashboardData.compliance_score.current_score || 0}/{dashboardData.compliance_score.max_score || 100}
                         </div>
-                        <Progress 
-                          value={(dashboardData.compliance_score.current_score / dashboardData.compliance_score.max_score) * 100} 
+                        <Progress
+                          value={dashboardData.compliance_score.current_score && dashboardData.compliance_score.max_score
+                            ? (dashboardData.compliance_score.current_score / dashboardData.compliance_score.max_score) * 100
+                            : 0}
                           className="w-full"
                         />
                       </div>
                       <div className="space-y-2">
-                        {dashboardData.compliance_score.factors.map((factor, index) => (
+                        {(dashboardData.compliance_score.factors || []).map((factor, index) => (
                           <div key={index} className="flex justify-between items-center text-sm">
                             <span className={`flex items-center gap-2 ${
                               factor.status === 'good' ? 'text-green-600' :
@@ -602,13 +607,14 @@ const TaxPage: React.FC = () => {
                               {factor.name}
                             </span>
                             <span className="font-medium">
-                              {factor.score}/{factor.max_score}
+                              {factor.score || 0}/{factor.max_score || 0}
                             </span>
                           </div>
                         ))}
                       </div>
                     </CardContent>
                   </Card>
+                )}
                 </div>
 
                 {/* Breakdown by Type */}
@@ -618,7 +624,7 @@ const TaxPage: React.FC = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {dashboardData.stats.by_type.map((typeData) => (
+                      {(dashboardData.stats?.by_type || []).map((typeData) => (
                         <div key={typeData.type} className="p-4 border rounded-lg">
                           <div className="flex justify-between items-center mb-3">
                             <div className="flex items-center gap-2">
@@ -656,7 +662,7 @@ const TaxPage: React.FC = () => {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        {dashboardData.recent_declarations.map((declaration) => (
+                        {(dashboardData.recent_declarations || []).map((declaration) => (
                           <div key={declaration.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                             <div>
                               <div className="flex items-center gap-2 mb-1">
@@ -691,7 +697,7 @@ const TaxPage: React.FC = () => {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        {dashboardData.upcoming_obligations.map((obligation) => (
+                        {(dashboardData.upcoming_obligations || []).map((obligation) => (
                           <div key={obligation.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                             <div>
                               <div className="flex items-center gap-2 mb-1">
@@ -718,6 +724,16 @@ const TaxPage: React.FC = () => {
                   </Card>
                 </div>
               </>
+            )}
+          </TabsContent>
+
+          {/* Conformité Fiscale Multi-pays Tab */}
+          <TabsContent value="compliance" className="space-y-6">
+            {currentEnterprise?.id && (
+              <TaxCompliancePanel
+                companyId={currentEnterprise.id}
+                countryCode={(currentEnterprise as any).country || 'FR'}
+              />
             )}
           </TabsContent>
 
@@ -917,7 +933,7 @@ const TaxPage: React.FC = () => {
           {/* Alerts Tab */}
           <TabsContent value="alerts" className="space-y-6">
             <div className="grid gap-4">
-              {alerts.map((alert) => (
+              {(alerts || []).map((alert) => (
                 <Card key={alert.id}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
@@ -988,7 +1004,7 @@ const TaxPage: React.FC = () => {
           {/* Obligations Tab */}
           <TabsContent value="obligations" className="space-y-6">
             <div className="grid gap-6">
-              {obligations.map((obligation) => (
+              {(obligations || []).map((obligation) => (
                 <Card key={obligation.id}>
                   <CardContent className="p-6">
                     <div className="flex justify-between items-start mb-4">
@@ -1071,7 +1087,7 @@ const TaxPage: React.FC = () => {
                       <div className="mt-4">
                         <p className="text-sm font-medium text-gray-700 mb-2">Emails de notification:</p>
                         <div className="flex flex-wrap gap-2">
-                          {obligation.notification_emails.map((email, index) => (
+                          {(obligation.notification_emails || []).map((email, index) => (
                             <Badge key={index} variant="outline" className="text-xs">
                               📧 {email}
                             </Badge>

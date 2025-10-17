@@ -4,9 +4,9 @@ import {
   SubscriptionPlan, 
   getModulesForPlan, 
   isModuleAllowedForPlan, 
-  isTrialUser,
   SUBSCRIPTION_PLANS as PREDEFINED_PLANS
 } from '@/types/subscription.types';
+import { logger } from '@/utils/logger';
 
 export interface UsageLimits {
   feature_name: string;
@@ -36,13 +36,13 @@ class SubscriptionService {
         });
 
       if (error) {
-        console.error('Error checking feature access:', error);
+        logger.error('Error checking feature access:', error);
         return { canAccess: false, reason: 'Erreur de vérification' };
       }
 
       return { canAccess: data };
     } catch (error) {
-      console.error('Error in canAccessFeature:', error);
+      logger.error('Error in canAccessFeature:', error);
       return { canAccess: false, reason: 'Erreur inattendue' };
     }
   }
@@ -64,13 +64,13 @@ class SubscriptionService {
         });
 
       if (error) {
-        console.error('Error incrementing usage:', error);
+        logger.error('Error incrementing usage:', error);
         return false;
       }
 
       return data;
     } catch (error) {
-      console.error('Error in incrementFeatureUsage:', error);
+      logger.error('Error in incrementFeatureUsage:', error);
       return false;
     }
   }
@@ -86,13 +86,13 @@ class SubscriptionService {
         });
 
       if (error) {
-        console.error('Error getting usage limits:', error);
+        logger.error('Error getting usage limits:', error);
         return [];
       }
 
       return data || [];
     } catch (error) {
-      console.error('Error in getUserUsageLimits:', error);
+      logger.error('Error in getUserUsageLimits:', error);
       return [];
     }
   }
@@ -102,11 +102,30 @@ class SubscriptionService {
    */
   async getCurrentSubscription(userId: string): Promise<UserSubscription | null> {
     try {
-      const { data, error } = await supabase
-        .from('user_subscriptions')
+      logger.warn('[SubscriptionService] getCurrentSubscription called for user:', userId);
+
+      // First get the subscription
+      const { data: subscription, error: subError } = await supabase
+        .from('subscriptions')
         .select(`
-          *,
-          subscription_plans (*)
+          id,
+          user_id,
+          plan_id,
+          stripe_subscription_id,
+          stripe_customer_id,
+          status,
+          current_period_start,
+          current_period_end,
+          cancel_at_period_end,
+          canceled_at,
+          trial_start,
+          trial_end,
+          created_at,
+          updated_at,
+          company_id,
+          cancel_at,
+          cancel_reason,
+          metadata
         `)
         .eq('user_id', userId)
         .in('status', ['active', 'trialing'])
@@ -114,32 +133,66 @@ class SubscriptionService {
         .limit(1)
         .maybeSingle();
 
-      if (error) {
-        console.warn('[SubscriptionService] Erreur requête subscription:', error);
+      if (subError) {
+        logger.warn('[SubscriptionService] Erreur requête subscription:', subError);
         return null;
       }
 
-      if (!data) {
+      if (!subscription) {
+        logger.warn('[SubscriptionService] No subscription found for user');
         return null;
       }
 
-      return {
-        id: data.id,
-        userId: data.user_id,
-        planId: data.plan_id,
-        stripeSubscriptionId: data.stripe_subscription_id || '',
-        stripeCustomerId: data.stripe_customer_id || '',
-        status: data.status as UserSubscription['status'],
-        currentPeriodStart: new Date(data.current_period_start),
-        currentPeriodEnd: new Date(data.current_period_end),
-        cancelAtPeriodEnd: data.cancel_at_period_end || false,
-        trialEnd: data.trial_end ? new Date(data.trial_end) : undefined,
-        metadata: data.metadata || {},
-        createdAt: new Date(data.created_at),
-        updatedAt: new Date(data.updated_at)
+      logger.warn('[SubscriptionService] Found subscription:', subscription);
+
+      // Then get the plan details separately
+      const { data: plan, error: planError } = await supabase
+        .from('subscription_plans')
+        .select('id, name, price, currency, billing_period, is_trial, trial_days, stripe_price_id, is_active')
+        .eq('id', subscription.plan_id)
+        .single();
+
+      if (planError) {
+        logger.error('[SubscriptionService] Error fetching plan:', planError);
+        return null;
+      }
+
+      logger.warn('[SubscriptionService] Plan fetched:', plan);
+
+      // Convert to UserSubscription format
+      const userSubscription: UserSubscription = {
+        id: subscription.id,
+        userId: subscription.user_id,
+        planId: subscription.plan_id,
+        stripeSubscriptionId: subscription.stripe_subscription_id || '',
+        stripeCustomerId: subscription.stripe_customer_id || '',
+        status: subscription.status as UserSubscription['status'],
+        currentPeriodStart: new Date(subscription.current_period_start || subscription.created_at),
+        currentPeriodEnd: new Date(subscription.current_period_end || subscription.trial_end || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)),
+        cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
+        trialEnd: subscription.trial_end ? new Date(subscription.trial_end) : undefined,
+        metadata: subscription.metadata || {},
+        createdAt: new Date(subscription.created_at),
+        updatedAt: new Date(subscription.updated_at || subscription.created_at),
+        plan: plan ? {
+          id: plan.id,
+          name: plan.name,
+          description: '',
+          price: plan.price,
+          currency: plan.currency,
+          interval: plan.billing_period === 'yearly' ? 'year' : 'month',
+          features: [],
+          stripePriceId: plan.stripe_price_id || '',
+          stripeProductId: '',
+          supportLevel: 'basic'
+        } : undefined
       };
+
+      logger.warn('[SubscriptionService] Converted subscription:', userSubscription);
+      return userSubscription;
+
     } catch (error) {
-      console.error('Error getting current subscription:', error);
+      logger.error('Error getting current subscription:', error);
       return null;
     }
   }
@@ -150,11 +203,11 @@ class SubscriptionService {
   async updateSubscriptionStatus(
     subscriptionId: string,
     status: UserSubscription['status'],
-    metadata: Record<string, any> = {}
+    metadata: Record<string, unknown> = {}
   ): Promise<boolean> {
     try {
       const { error } = await supabase
-        .from('user_subscriptions')
+        .from('subscriptions')
         .update({
           status,
           metadata: { ...metadata },
@@ -163,13 +216,13 @@ class SubscriptionService {
         .eq('stripe_subscription_id', subscriptionId);
 
       if (error) {
-        console.error('Error updating subscription status:', error);
+        logger.error('Error updating subscription status:', error);
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('Error in updateSubscriptionStatus:', error);
+      logger.error('Error in updateSubscriptionStatus:', error);
       return false;
     }
   }
@@ -188,7 +241,7 @@ class SubscriptionService {
       });
 
       if (error) {
-        console.error('Error creating trial subscription:', error);
+        logger.error('Error creating trial subscription:', error);
         return { success: false, error: error.message };
       }
 
@@ -202,7 +255,7 @@ class SubscriptionService {
 
       return { success: true, subscriptionId: data };
     } catch (error) {
-      console.error('Error in createTrialSubscription:', error);
+      logger.error('Error in createTrialSubscription:', error);
       return { success: false, error: 'Erreur inattendue' };
     }
   }
@@ -215,13 +268,13 @@ class SubscriptionService {
       const { data, error } = await supabase.rpc('expire_trials');
 
       if (error) {
-        console.error('Error expiring trials:', error);
+        logger.error('Error expiring trials:', error);
         return { expiredCount: 0, error: error.message };
       }
 
       return { expiredCount: data || 0 };
     } catch (error) {
-      console.error('Error in expireTrials:', error);
+      logger.error('Error in expireTrials:', error);
       return { expiredCount: 0, error: 'Erreur inattendue' };
     }
   }
@@ -238,7 +291,7 @@ class SubscriptionService {
         .order('price', { ascending: true });
 
       if (error) {
-        console.error('Error getting plans:', error);
+        logger.error('Error getting plans:', error);
         return [];
       }
 
@@ -259,7 +312,7 @@ class SubscriptionService {
         supportLevel: plan.support_level as 'basic' | 'priority' | 'dedicated'
       }));
     } catch (error) {
-      console.error('Error in getAvailablePlans:', error);
+      logger.error('Error in getAvailablePlans:', error);
       return [];
     }
   }
@@ -333,7 +386,7 @@ class SubscriptionService {
 
       return { allowed: true, usage: featureLimit };
     } catch (error) {
-      console.error('Error checking quota:', error);
+      logger.error('Error checking quota:', error);
       return { allowed: false, message: 'Erreur de vérification des quotas' };
     }
   }
@@ -363,7 +416,7 @@ class SubscriptionService {
       // Vérifier si c'est un nouvel utilisateur (période d'essai)
       return await this.checkTrialStatus(userId);
     } catch (error) {
-      console.error('[SubscriptionService] Erreur récupération plan:', error);
+      logger.error('[SubscriptionService] Erreur récupération plan:', error);
       return await this.checkTrialStatus(userId);
     }
   }
@@ -444,12 +497,12 @@ class SubscriptionService {
       
       if (subscription) {
         const { error } = await supabase
-          .from('user_subscriptions')
+          .from('subscriptions')
           .update({ plan_id: newPlanId, updated_at: new Date().toISOString() })
           .eq('user_id', userId);
 
         if (error) {
-          console.warn('[SubscriptionService] Erreur mise à jour DB, fallback localStorage');
+          logger.warn('[SubscriptionService] Erreur mise à jour DB, fallback localStorage')
         }
       }
 
@@ -464,7 +517,7 @@ class SubscriptionService {
 
       return true;
     } catch (error) {
-      console.error('[SubscriptionService] Erreur changement plan:', error);
+      logger.error('[SubscriptionService] Erreur changement plan:', error);
       return false;
     }
   }
@@ -529,6 +582,50 @@ class SubscriptionService {
   async getCurrentPlanInfo(userId: string): Promise<SubscriptionPlan | null> {
     const planId = await this.getCurrentUserPlan(userId);
     return PREDEFINED_PLANS.find(p => p.id === planId) || null;
+  }
+
+  /**
+   * Obtenir le statut complet de l'abonnement d'un utilisateur
+   */
+  async getUserSubscriptionStatus(userId: string) {
+    try {
+      const { data, error } = await supabase
+        .rpc('get_user_subscription_status', {
+          p_user_id: userId
+        });
+
+      if (error) {
+        logger.error('Error getting user subscription status:', error);
+        return null;
+      }
+
+      return data && data.length > 0 ? data[0] : null;
+    } catch (error) {
+      logger.error('Error in getUserSubscriptionStatus:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Obtenir les modules autorisés pour un plan depuis Supabase
+   */
+  async getAllowedModulesForPlan(planId: string): Promise<string[]> {
+    try {
+      const { data, error } = await supabase
+        .rpc('get_allowed_modules_for_plan', {
+          p_plan_id: planId
+        });
+
+      if (error) {
+        logger.error('Error getting allowed modules:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      logger.error('Error in getAllowedModulesForPlan:', error);
+      return [];
+    }
   }
 }
 

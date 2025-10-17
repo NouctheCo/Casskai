@@ -55,6 +55,7 @@ const iconMap = {
 };
 
 // Générer les options de modules depuis le service centralisé
+// Tous les modules sont disponibles en ~1 minute après installation
 const availableModules: ModuleOption[] = moduleService.getAllModules().map(module => ({
   id: module.key,
   name: module.name,
@@ -62,7 +63,7 @@ const availableModules: ModuleOption[] = moduleService.getAllModules().map(modul
   icon: iconMap[module.key as keyof typeof iconMap] || <Settings className="h-5 w-5" />,
   category: module.category,
   recommended: module.required || ['dashboard', 'accounting', 'invoicing'].includes(module.key),
-  estimatedSetupTime: module.required ? 5 : 10
+  estimatedSetupTime: 1 // Tous les modules sont prêts en ~1 minute
 }));
 
 const ModulesStep: React.FC = () => {

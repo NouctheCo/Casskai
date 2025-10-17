@@ -3,6 +3,15 @@ import type { AccountPlan, AccountClass, Account, AccountType } from '../types/a
 import { PCG_ACCOUNTS, PCG_CLASSES } from '../data/pcg';
 import { SYSCOHADA_PLAN } from '../data/syscohada';
 import { supabase } from '../lib/supabase';
+import { logger } from '@/utils/logger';
+
+interface AccountTreeNode {
+  id: string;
+  label: string;
+  type: AccountType;
+  isDebitNormal?: boolean;
+  children?: AccountTreeNode[];
+}
 
 export class AccountingService {
   private static instance: AccountingService;
@@ -34,11 +43,11 @@ export class AccountingService {
     for (const accountClass of this.currentPlan.classes) {
       for (const account of accountClass.accounts) {
         if (account.number === accountNumber) {
-          return account;
+          return { ...account, isActive: true } as Account;
         }
         if (account.subAccounts) {
           const subAccount = account.subAccounts.find(sub => sub.number === accountNumber);
-          if (subAccount) return subAccount;
+          if (subAccount) return { ...subAccount, isActive: true } as Account;
         }
       }
     }
@@ -52,10 +61,10 @@ export class AccountingService {
     for (const accountClass of this.currentPlan.classes) {
       for (const account of accountClass.accounts) {
         if (account.type === type) {
-          accounts.push(account);
+          accounts.push({ ...account, isActive: true } as Account);
         }
         if (account.subAccounts) {
-          accounts.push(...account.subAccounts.filter(sub => sub.type === type));
+          accounts.push(...account.subAccounts.filter(sub => sub.type === type).map(sub => ({ ...sub, isActive: true } as Account)));
         }
       }
     }
@@ -68,9 +77,9 @@ export class AccountingService {
     const allAccounts: Account[] = [];
     for (const accountClass of this.currentPlan.classes) {
       for (const account of accountClass.accounts) {
-        allAccounts.push(account);
+        allAccounts.push({ ...account, isActive: true } as Account);
         if (account.subAccounts) {
-          allAccounts.push(...account.subAccounts);
+          allAccounts.push(...account.subAccounts.map(sub => ({ ...sub, isActive: true } as Account)));
         }
       }
     }
@@ -101,22 +110,22 @@ export class AccountingService {
     return hierarchy;
   }
 
-  generateAccountTree(): any[] {
+  generateAccountTree(): AccountTreeNode[] {
     if (!this.currentPlan) return [];
 
     return this.currentPlan.classes.map(accountClass => ({
       id: accountClass.number,
       label: `${accountClass.number} - ${accountClass.name}`,
-      type: accountClass.type,
+      type: accountClass.type as AccountType,
       children: accountClass.accounts.map(account => ({
         id: account.number,
         label: `${account.number} - ${account.name}`,
-        type: account.type,
+        type: account.type as AccountType,
         isDebitNormal: account.isDebitNormal,
         children: account.subAccounts?.map(subAccount => ({
           id: subAccount.number,
           label: `${subAccount.number} - ${subAccount.name}`,
-          type: subAccount.type,
+          type: subAccount.type as AccountType,
           isDebitNormal: subAccount.isDebitNormal
         })) || []
       }))
@@ -224,7 +233,7 @@ export class AccountingService {
       
       return { success: false, accountsCreated: 0, error: 'Standard comptable non supporté' };
     } catch (error) {
-      console.error('Erreur création plan comptable:', error);
+      logger.error('Erreur création plan comptable:', error);
       return { success: false, accountsCreated: 0, error: error.message };
     }
   }
@@ -238,15 +247,13 @@ export class AccountingService {
       const accountsToCreate = PCG_ACCOUNTS.map(account => ({
         company_id: companyId,
         account_number: account.code,
-        name: account.name,
-        type: this.mapPCGTypeToDBType(account.type),
-        class: parseInt(account.code.charAt(0)),
-        parent_account_id: null, // À implémenter si nécessaire
+        account_name: account.name,
+        account_type: this.mapPCGTypeToDBType(account.type),
+        account_class: parseInt(account.code.charAt(0)),
+        parent_account_id: null,
         description: account.description || null,
-        is_active: account.isActive,
-        balance: 0,
-        currency: 'EUR',
-        tax_rate: 0
+        is_active: account.isActive || true,
+        normal_balance: this.getAccountNormalBalance(account.type)
       }));
 
       const { data, error } = await supabase
@@ -258,7 +265,7 @@ export class AccountingService {
 
       return { success: true, accountsCreated: data?.length || 0 };
     } catch (error) {
-      console.error('Erreur création comptes PCG:', error);
+      logger.error('Erreur création comptes PCG:', error);
       return { success: false, accountsCreated: 0, error: error.message };
     }
   }
@@ -268,7 +275,7 @@ export class AccountingService {
    */
   private async createSYSCOHADAAccounts(companyId: string): Promise<{ success: boolean; accountsCreated: number; error?: string }> {
     try {
-      const accountsToCreate: any[] = [];
+      const accountsToCreate: Array<Record<string, unknown>> = [];
       
       // Parcourir le plan SYSCOHADA et créer les comptes
       for (const accountClass of SYSCOHADA_PLAN.classes) {
@@ -278,7 +285,7 @@ export class AccountingService {
             account_number: account.number,
             name: account.name,
             type: this.mapSYSCOHADATypeToDBType(account.type),
-            class: parseInt(account.number.charAt(0)),
+            account_class: parseInt(account.number.charAt(0)),
             parent_account_id: null,
             description: null,
             is_active: true,
@@ -295,7 +302,7 @@ export class AccountingService {
                 account_number: subAccount.number,
                 name: subAccount.name,
                 type: this.mapSYSCOHADATypeToDBType(subAccount.type),
-                class: parseInt(subAccount.number.charAt(0)),
+                account_class: parseInt(subAccount.number.charAt(0)),
                 parent_account_id: null, // Sera défini après création du compte parent
                 description: null,
                 is_active: true,
@@ -317,7 +324,7 @@ export class AccountingService {
 
       return { success: true, accountsCreated: data?.length || 0 };
     } catch (error) {
-      console.error('Erreur création comptes SYSCOHADA:', error);
+      logger.error('Erreur création comptes SYSCOHADA:', error);
       return { success: false, accountsCreated: 0, error: error.message };
     }
   }
@@ -328,12 +335,28 @@ export class AccountingService {
   private mapPCGTypeToDBType(pcgType: string): string {
     const typeMapping: { [key: string]: string } = {
       'asset': 'asset',
-      'liability': 'liability', 
+      'liability': 'liability',
       'equity': 'equity',
       'revenue': 'revenue',
-      'expense': 'expense'
+      'expense': 'expense',
+      'capitaux': 'equity',
+      'immobilisations': 'asset',
+      'stocks': 'asset',
+      'dettes': 'liability',
+      'creances': 'asset',
+      'tresorerie': 'asset',
+      'charges': 'expense',
+      'produits': 'revenue'
     };
     return typeMapping[pcgType] || 'asset';
+  }
+
+  /**
+   * Détermine le sens normal du solde d'un compte
+   */
+  private getAccountNormalBalance(accountType: string): 'debit' | 'credit' {
+    const debitAccounts = ['asset', 'expense', 'immobilisations', 'stocks', 'creances', 'tresorerie', 'charges'];
+    return debitAccounts.includes(accountType) ? 'debit' : 'credit';
   }
 
   /**

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -6,12 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
-import { useModules } from '@/contexts/ModulesContext';
+import { useNavigate } from 'react-router-dom';
 import { subscriptionService } from '@/services/subscriptionService';
 import { trialService } from '@/services/trialService';
 import { TrialStatusCard, TrialActionsCard } from '@/components/TrialComponents';
 import { useTrial } from '@/hooks/trial.hooks';
-import { SUBSCRIPTION_PLANS, formatPrice } from '@/types/subscription.types';
+import { useModulesSafe } from '@/hooks/modules.hooks';
+import { SUBSCRIPTION_PLANS, formatPrice, SubscriptionPlan } from '@/types/subscription.types';
 import {
   Crown,
   Check,
@@ -27,12 +27,14 @@ import {
   ArrowRight,
   Loader2
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 const SubscriptionSettings: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { currentPlan, isTrialUser, trialDaysRemaining, getAvailableModulesForPlan } = useModulesSafe();
   const [isLoading, setIsLoading] = useState(false);
-  const [currentPlanInfo, setCurrentPlanInfo] = useState(null);
+  const [currentPlanInfo, setCurrentPlanInfo] = useState<SubscriptionPlan | null>(null);
 
   useEffect(() => {
     const loadCurrentPlan = async () => {
@@ -41,7 +43,7 @@ const SubscriptionSettings: React.FC = () => {
           const planInfo = await subscriptionService.getCurrentPlanInfo(user.id);
           setCurrentPlanInfo(planInfo);
         } catch (error) {
-          console.error('Erreur chargement plan:', error);
+          logger.error('Erreur chargement plan:', error)
         }
       }
     };
@@ -50,20 +52,8 @@ const SubscriptionSettings: React.FC = () => {
   }, [user?.id, currentPlan]);
 
   const handlePlanChange = async (newPlanId: string) => {
-    if (!user?.id) return;
-
-    setIsLoading(true);
-    try {
-      const success = await subscriptionService.changePlan(user.id, newPlanId);
-      if (success) {
-        // Le changement sera détecté par l'event listener dans ModulesContext
-        console.log(`Plan changé vers ${newPlanId}`);
-      }
-    } catch (error) {
-      console.error('Erreur changement plan:', error);
-    } finally {
-      setIsLoading(false);
-    }
+    // Rediriger vers la page pricing pour le processus complet de sélection/paiement
+    navigate('/pricing');
   };
 
   const getPlanStatusColor = (planId: string) => {
@@ -74,9 +64,12 @@ const SubscriptionSettings: React.FC = () => {
   const getPlanIcon = (planId: string) => {
     switch (planId) {
       case 'trial': return <Clock className="h-5 w-5" />;
-      case 'starter': return <Zap className="h-5 w-5" />;
-      case 'professional': return <TrendingUp className="h-5 w-5" />;
-      case 'enterprise': return <Crown className="h-5 w-5" />;
+      case 'starter_monthly':
+      case 'starter_yearly': return <Zap className="h-5 w-5" />;
+      case 'pro_monthly':
+      case 'pro_yearly': return <TrendingUp className="h-5 w-5" />;
+      case 'enterprise_monthly':
+      case 'enterprise_yearly': return <Crown className="h-5 w-5" />;
       default: return <Shield className="h-5 w-5" />;
     }
   };
@@ -101,7 +94,7 @@ const SubscriptionSettings: React.FC = () => {
                 <div className="flex items-center space-x-3">
                   {getPlanIcon(currentPlan || '')}
                   <div>
-                    <h3 className="font-semibold">{currentPlanInfo.displayName || currentPlanInfo.name}</h3>
+                    <h3 className="font-semibold">{('displayName' in currentPlanInfo ? (currentPlanInfo as any).displayName : currentPlanInfo.name)}</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       {isTrialUser ? `${trialDaysRemaining} jours d'essai restants` : 'Plan actuel'}
                     </p>
@@ -132,9 +125,9 @@ const SubscriptionSettings: React.FC = () => {
               <div>
                 <h4 className="font-medium mb-2">Modules disponibles :</h4>
                 <div className="flex flex-wrap gap-2">
-                  {getAvailableModulesForPlan().slice(0, 6).map((moduleKey) => (
-                    <Badge key={moduleKey} variant="outline" className="text-xs">
-                      {moduleKey}
+                  {getAvailableModulesForPlan().slice(0, 6).map((module) => (
+                    <Badge key={typeof module === 'string' ? module : module.id} variant="outline" className="text-xs">
+                      {typeof module === 'string' ? module : module.name || module.id}
                     </Badge>
                   ))}
                   {getAvailableModulesForPlan().length > 6 && (
@@ -198,13 +191,15 @@ const SubscriptionSettings: React.FC = () => {
                     <div className="flex justify-center mb-2">
                       {getPlanIcon(plan.id)}
                     </div>
-                    <h3 className="text-xl font-bold">{plan.displayName || plan.name}</h3>
+                    <h3 className="text-xl font-bold">{('displayName' in plan ? (plan as any).displayName : plan.name)}</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                       {plan.description}
                     </p>
                     <div className="text-3xl font-bold">
                       {formatPrice(plan.price)}
-                      <span className="text-sm font-normal text-gray-500">/ mois</span>
+                      <span className="text-sm font-normal text-gray-500">
+                        / {plan.interval === 'year' ? 'an' : 'mois'}
+                      </span>
                     </div>
                   </div>
 
@@ -212,9 +207,9 @@ const SubscriptionSettings: React.FC = () => {
                     <div className="text-sm">
                       <p className="font-medium mb-2">Modules inclus ({availableModules.length}) :</p>
                       <div className="flex flex-wrap gap-1">
-                        {availableModules.slice(0, 4).map((moduleKey) => (
-                          <Badge key={moduleKey} variant="outline" className="text-xs">
-                            {moduleKey}
+                        {availableModules.slice(0, 4).map((module) => (
+                          <Badge key={typeof module === 'string' ? module : module.id} variant="outline" className="text-xs">
+                            {typeof module === 'string' ? module : module.name || module.id}
                           </Badge>
                         ))}
                         {availableModules.length > 4 && (

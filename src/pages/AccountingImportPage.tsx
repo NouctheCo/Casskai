@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { AccountingImportExport } from '../components/accounting/AccountingImportExport';
 import { useConfig } from '../hooks/useConfig';
@@ -11,7 +10,7 @@ const AccountingImportPage: React.FC = () => {
   const { config } = useConfig();
   const { toast } = useToast();
   
-  const companyId = config?.currentCompany?.id;
+  const companyId = (config as any)?.currentCompany?.id;
 
   if (!companyId) {
     return (

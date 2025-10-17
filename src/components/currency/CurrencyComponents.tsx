@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useCurrency, useCurrencySelector } from '../hooks/useCurrency';
 import { ArrowRightLeft, RefreshCw, TrendingUp, Calculator, AlertCircle, CheckCircle } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 // Sélecteur de devise
 export const CurrencySelector = ({ 
@@ -35,8 +35,8 @@ export const CurrencySelector = ({
         className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
       >
         {currencyOptions.map(option => (
-          <option key={option.value} value={option.value}>
-            {option.label}
+          <option key={option.code} value={option.code}>
+            {option.name} ({option.symbol})
           </option>
         ))}
       </select>
@@ -63,9 +63,10 @@ export const AmountDisplay = ({
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (showConverted && currency.code !== baseCurrency.code) {
+    if (showConverted && currency !== baseCurrency.code) {
       setIsLoading(true);
-      const converted = formatAmountWithConversion(amount, currency);
+      const currencyObj: any = { code: currency, name: '', symbol: '' };
+      const converted = formatAmountWithConversion(amount, currencyObj);
       setConvertedAmount(converted);
       setIsLoading(false);
     }
@@ -73,7 +74,7 @@ export const AmountDisplay = ({
 
   const originalAmount = formatAmount(amount);
 
-  if (showConverted && currency.code !== baseCurrency.code) {
+  if (showConverted && currency !== baseCurrency.code) {
     return (
       <div className={className}>
         <span className="font-medium">{originalAmount}</span>
@@ -125,7 +126,7 @@ export const CurrencyConverter = () => {
       setResult(convertedAmount.toString());
       setRate(1);
     } catch (err) {
-      console.error('Erreur de conversion:', err);
+      logger.error('Erreur de conversion:', err);
       setResult('Erreur');
       setRate(null);
     } finally {
@@ -145,7 +146,7 @@ export const CurrencyConverter = () => {
       await refreshRates();
       await handleConvert();
     } catch (err) {
-      console.error('Erreur actualisation:', err);
+      logger.error('Erreur actualisation:', err)
     }
   };
 
@@ -288,7 +289,7 @@ export const ExchangeRateWidget = ({
           const rate = await getExchangeRate(pair.from, pair.to);
           newRates[`${pair.from}_${pair.to}`] = rate;
         } catch (error) {
-          console.error(`Erreur taux ${pair.from}/${pair.to}:`, error);
+          logger.error(`Erreur taux ${pair.from}/${pair.to}:`, error)
         }
       }
       
@@ -337,7 +338,7 @@ export const ExchangeRateWidget = ({
                   <div>
                     <span className="font-mono text-sm">{rate.toFixed(4)}</span>
                     <div className="text-xs text-gray-500">
-                      1 {pair.from} = {formatAmount(rate, pair.to)}
+                      1 {pair.from} = {rate.toFixed(4)} {pair.to}
                     </div>
                   </div>
                 ) : (
@@ -408,12 +409,4 @@ export const CurrencyInput = ({
       </div>
     </div>
   );
-};
-
-export default {
-  CurrencySelector,
-  AmountDisplay,
-  CurrencyConverter,
-  ExchangeRateWidget,
-  CurrencyInput
 };

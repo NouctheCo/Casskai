@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle2, AlertTriangle, Info, AlertCircle, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { logger } from '@/utils/logger';
 
 export interface SmartNotification {
   id: string;
@@ -107,7 +108,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   const markAsRead = useCallback((id: string) => {
     // For future implementation with read status
-    console.log('Mark as read:', id);
+    logger.info('Mark as read:', id)
   }, []);
 
   const value = {

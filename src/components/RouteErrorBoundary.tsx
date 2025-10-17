@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface Props {
   children: ReactNode;
@@ -24,7 +25,7 @@ class RouteErrorBoundaryClass extends Component<Props & { navigate: (path: strin
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error(`RouteErrorBoundary caught an error in ${this.props.routeName || 'unknown route'}:`, error, errorInfo);
+    logger.error(`RouteErrorBoundary caught an error in ${this.props.routeName || 'unknown route'}:`, error, errorInfo);
     
     // Log error to external service in production
     if (process.env.NODE_ENV === 'production') {

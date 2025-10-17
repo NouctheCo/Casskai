@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Système d'icônes centralisé pour CassKai
 import {
   // Navigation et layout
@@ -33,7 +32,7 @@ import {
   Minus,
   Search,
   Filter,
-  Sort,
+  // Sort, // Not exported from lucide-react
   
   // États
   CheckCircle,
@@ -126,6 +125,7 @@ import {
   Sparkles,
   ShoppingCart,
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 // Types pour les icônes
 export type IconName = keyof typeof icons;
@@ -167,7 +167,7 @@ export const icons = {
   'remove': Minus,
   'search': Search,
   'filter': Filter,
-  'sort': Sort,
+  // 'sort': Sort, // Not exported from lucide-react
   
   // === ÉTATS ET STATUTS ===
   'success': CheckCircle,
@@ -284,7 +284,7 @@ export const Icon: React.FC<IconProps> = ({
   const IconComponent = icons[name];
   
   if (!IconComponent) {
-    console.warn(`Icon "${name}" not found. Using fallback.`);
+    logger.warn(`Icon "${name}" not found. Using fallback.`);
     return <Package size={size} className={className} color={color} />;
   }
   

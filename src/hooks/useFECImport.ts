@@ -1,6 +1,9 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { fecValidationService, ValidationResult } from '@/services/fecValidationService';
+import { FECEntry } from '@/types/accounting-import.types';
+import { logger } from '@/utils/logger';
 
 export interface FECImportData {
   journals: string[];
@@ -45,6 +48,14 @@ export function useFECImport(companyId: string) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
+
+  // Validate FEC entries before import
+  const validateFECEntries = useCallback((entries: FECEntry[]): ValidationResult => {
+    const result = fecValidationService.validateFEC(entries);
+    setValidationResult(result);
+    return result;
+  }, []);
 
   // Import FEC data
   const importFECData = useCallback(async (data: FECImportData): Promise<FECImportResult> => {
@@ -83,7 +94,7 @@ export function useFECImport(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error during FEC import';
       setError(errorMessage);
-      console.error('Error during FEC import:', err);
+      logger.error('Error during FEC import:', err);
       return {
         success: false,
         error: errorMessage
@@ -362,7 +373,7 @@ export function useFECImport(companyId: string) {
       for (let i = 0; i < journalEntryItemsToCreate.length; i += batchSize) {
         const batch = journalEntryItemsToCreate.slice(i, i + batchSize);
         const { error: itemsError } = await supabase
-          .from('journal_entry_items')
+          .from('journal_entry_lines')
           .insert(batch);
         
         if (itemsError) {
@@ -383,6 +394,8 @@ export function useFECImport(companyId: string) {
   return {
     loading,
     error,
+    validationResult,
+    validateFECEntries,
     importFECData,
     createMissingJournals,
     createMissingAccounts,

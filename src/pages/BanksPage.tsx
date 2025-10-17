@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,15 +8,15 @@ import { useToast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/contexts/AuthContext';
-import { Loader2 } from 'lucide-react';
-import { 
-  Landmark, 
-  PlusCircle, 
-  CreditCard, 
-  AlertTriangle, 
-  Shuffle, 
-  BarChartHorizontal, 
-  PiggyBank, 
+import {
+  Loader2,
+  Landmark,
+  PlusCircle,
+  CreditCard,
+  AlertTriangle,
+  Shuffle,
+  BarChartHorizontal,
+  PiggyBank,
   ArrowLeft,
   Upload,
   Download,
@@ -44,6 +43,7 @@ import {
 } from 'lucide-react';
 import { useLocale } from '@/contexts/LocaleContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { logger } from '@/utils/logger';
 
 // Données par défaut pour les règles de catégorisation
 const defaultCategorizationRules = [
@@ -88,7 +88,7 @@ const processImportedFile = async (file, extension) => {
         return generateFallbackTransactions(file, extension);
     }
   } catch (error) {
-    console.error('Error processing file:', error);
+    logger.error('Error processing file:', error);
     return generateFallbackTransactions(file, extension);
   }
 };
@@ -124,14 +124,14 @@ const parseXMLBankFile = (content, file) => {
       transactions.push(createTransactionObject({
         date: formatDate(date),
         description: description.trim(),
-        amount: amount,
-        reference: reference,
+        amount,
+        reference,
         source: `${file.name} (XML)`,
         category: categorizeTransaction(description)
       }));
     });
   } catch (error) {
-    console.warn('XML parsing failed, using heuristic analysis', error);
+    logger.warn('XML parsing failed, using heuristic analysis', error);
     return analyzeFileHeuristically(content, file, '.xml');
   }
   
@@ -167,7 +167,7 @@ const parseCSVBankFile = (content, file) => {
       transactions.push(createTransactionObject({
         date: formatDate(date),
         description: description.trim(),
-        amount: amount,
+        amount,
         reference: reference || `CSV${i.toString().padStart(3, '0')}`,
         source: `${file.name} (CSV)`,
         category: categorizeTransaction(description)
@@ -198,15 +198,15 @@ const parseOFXBankFile = (content, file) => {
         transactions.push(createTransactionObject({
           date: formatDate(date),
           description: description.trim(),
-          amount: amount,
-          reference: reference,
+          amount,
+          reference,
           source: `${file.name} (OFX)`,
           category: categorizeTransaction(description)
         }));
       }
     });
   } catch (error) {
-    console.warn('OFX parsing failed, using heuristic analysis', error);
+    logger.warn('OFX parsing failed, using heuristic analysis', error);
     return analyzeFileHeuristically(content, file, '.ofx');
   }
   
@@ -217,7 +217,7 @@ const parseOFXBankFile = (content, file) => {
 const parseQIFBankFile = (content, file) => {
   const transactions = [];
   const lines = content.split('\n');
-  let currentTransaction = {};
+  let currentTransaction: { date?: string; amount?: number; description?: string; reference?: string } = {};
   
   lines.forEach(line => {
     const trimmedLine = line.trim();
@@ -286,7 +286,7 @@ const analyzeFileHeuristically = (content, file, extension) => {
         
         transactions.push(createTransactionObject({
           date: formatDate(dateMatch[0]),
-          description: description,
+          description,
           amount: potentialAmount,
           reference: `${extension.replace('.', '').toUpperCase()}${index.toString().padStart(3, '0')}`,
           source: `${file.name} (${extension})`,
@@ -336,7 +336,7 @@ const formatDate = (dateString) => {
     } else if (dateString.match(/^\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}/)) {
       // Format DD/MM/YYYY ou MM/DD/YYYY
       const parts = dateString.split(/[\/\-\.]/);
-      if (parts[2].length === 2) parts[2] = '20' + parts[2]; // Convert YY to YYYY
+      if (parts[2].length === 2) parts[2] = `20${  parts[2]}`; // Convert YY to YYYY
       date = new Date(parts[2], parseInt(parts[1]) - 1, parts[0]); // Assume DD/MM/YYYY
     } else {
       date = new Date(dateString);
@@ -459,13 +459,16 @@ const BankAccountCard = ({
         <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2 bg-secondary/30">
           <div className="flex items-center gap-3">
             {logoUrl ? (
-              <img 
-                src={logoUrl} 
-                alt={`${name} logo`} 
-                className="h-8 w-8 rounded-full" 
+              <img
+                src={logoUrl}
+                alt={`${name} logo`}
+                className="h-8 w-8 rounded-full"
                 onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.nextSibling.style.display = 'block';
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  if (target.nextSibling) {
+                    (target.nextSibling as HTMLElement).style.display = 'block';
+                  }
                 }}
               />
             ) : null}
@@ -628,7 +631,7 @@ const TransactionsList = ({ transactions, onMatch, onEdit }) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {transactions.map((transaction) => (
+          {(transactions || []).map((transaction) => (
             <motion.div
               key={transaction.id}
               initial={{ opacity: 0, y: 20 }}
@@ -694,7 +697,7 @@ const FileImportInterface = ({ onImport }) => {
     if (!file) return;
 
     const allowedTypes = ['.xml', '.csv', '.ofx', '.qif'];
-    const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+    const fileExtension = `.${  file.name.split('.').pop().toLowerCase()}`;
     
     if (!allowedTypes.includes(fileExtension)) {
       toast({
@@ -825,7 +828,7 @@ const CategorizationRules = ({ rules, onEdit, onToggle, onAdd }) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {rules.map((rule) => (
+          {(rules || []).map((rule) => (
             <motion.div
               key={rule.id}
               initial={{ opacity: 0, y: 10 }}
@@ -947,7 +950,7 @@ export default function BanksPage() {
       await loadReconciliationMetrics();
       
     } catch (error) {
-      console.error('Failed to load imported data:', error);
+      logger.error('Failed to load imported data:', error);
       toast({
         variant: "destructive",
         title: "Erreur de chargement",
@@ -977,7 +980,7 @@ export default function BanksPage() {
 
       setReconciliationMetrics(metrics);
     } catch (error) {
-      console.error('Failed to calculate reconciliation metrics:', error);
+      logger.error('Failed to calculate reconciliation metrics:', error)
     } finally {
       setIsLoadingMetrics(false);
     }
@@ -991,7 +994,7 @@ export default function BanksPage() {
       // Ici on pourrait filtrer par compte spécifique si nécessaire
       await loadReconciliationMetrics();
     } catch (error) {
-      console.error('Failed to load transactions:', error);
+      logger.error('Failed to load transactions:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -1049,7 +1052,7 @@ export default function BanksPage() {
       // Recalculer les métriques
       await loadReconciliationMetrics();
     } catch (error) {
-      console.error('File import failed:', error);
+      logger.error('File import failed:', error);
       toast({
         variant: "destructive",
         title: "Erreur d'import",
@@ -1080,7 +1083,7 @@ export default function BanksPage() {
       // Recalculer les métriques
       await loadReconciliationMetrics();
     } catch (error) {
-      console.error('Transaction reconciliation failed:', error);
+      logger.error('Transaction reconciliation failed:', error);
       toast({
         variant: "destructive",
         title: "Erreur de réconciliation",

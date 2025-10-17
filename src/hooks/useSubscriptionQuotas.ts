@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { subscriptionService, UsageLimits, FeatureAccess } from '@/services/subscriptionService';
 import { useToast } from '@/components/ui/use-toast';
+import { logger } from '@/utils/logger';
 
 export interface QuotaStatus {
   canAccess: boolean;
@@ -29,7 +30,7 @@ export const useSubscriptionQuotas = () => {
       const limits = await subscriptionService.getUserUsageLimits(user.id);
       setUsageLimits(limits);
     } catch (error) {
-      console.error('Error loading usage limits:', error);
+      logger.error('Error loading usage limits:', error)
     } finally {
       setIsLoading(false);
     }
@@ -49,7 +50,7 @@ export const useSubscriptionQuotas = () => {
     try {
       return await subscriptionService.canAccessFeature(user.id, featureName);
     } catch (error) {
-      console.error('Error checking feature access:', error);
+      logger.error('Error checking feature access:', error);
       return { canAccess: false, reason: 'Erreur de vérification' };
     }
   }, [user?.id]);
@@ -114,7 +115,7 @@ export const useSubscriptionQuotas = () => {
 
       return success;
     } catch (error) {
-      console.error('Error incrementing usage:', error);
+      logger.error('Error incrementing usage:', error);
       return false;
     }
   }, [user?.id, loadUsageLimits, toast]);

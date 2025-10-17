@@ -1,6 +1,39 @@
-// @ts-nocheck
 // data/licensePlans.ts
+type LicenseType = any;
+
 export const LICENSE_PLANS: LicenseType[] = [
+  {
+    id: 'free',
+    name: 'Gratuit',
+    price: 0,
+    currency: 'XOF',
+    duration: 'monthly',
+    features: {
+      multiCompany: false,
+      multiCurrency: false,
+      advancedReports: false,
+      apiAccess: false,
+      customBranding: false,
+      prioritySupport: false,
+      mobileApp: false,
+      cloudBackup: true,
+      auditTrail: false,
+      customFields: false
+    },
+    limits: {
+      maxUsers: 1,
+      maxCompanies: 1,
+      maxTransactions: 50,
+      storageGB: 0.5,
+      supportLevel: 'community'
+    },
+    restrictions: {
+      hasWatermark: true,
+      dataRetentionDays: 90,
+      exportFormats: ['pdf'],
+      features: ['invoicing', 'clients', 'dashboard']
+    }
+  },
   {
     id: 'starter',
     name: 'Starter',

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
+import {
   Building,
   MapPin,
   Phone,
@@ -15,10 +15,13 @@ import {
   Users,
   ArrowRight,
   ArrowLeft,
-  AlertCircle
+  AlertCircle,
+  Loader2,
+  Calendar
 } from 'lucide-react';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { useTranslation } from 'react-i18next';
+import { useOnboardingReferentials, useCountryAutoConfig } from '@/hooks/useReferentials';
 
 type CompanyFormData = {
   name?: string;
@@ -39,33 +42,47 @@ type CompanyFormData = {
   sector?: string;
   fiscalYearStart?: number;
   fiscalYearEnd?: number;
+  fiscalYearType?: string;
+  fiscalYearStartMonth?: number;
+  fiscalYearStartDay?: number;
   siret?: string;
   address?: string;
   ceoTitle?: string;
 };
 
-const sectors = [
-  { code: 'services', name: 'Services aux entreprises', icon: '💼' },
-  { code: 'commerce', name: 'Commerce de détail', icon: '🏪' },
-  { code: 'commerce-gros', name: 'Commerce de gros', icon: '🏭' },
-  { code: 'industrie', name: 'Industrie manufacturière', icon: '🏭' },
-  { code: 'agriculture', name: 'Agriculture & Agroalimentaire', icon: '🌾' },
-  { code: 'btp', name: 'BTP & Construction', icon: '🏗️' },
-  { code: 'transport', name: 'Transport & Logistique', icon: '🚚' },
-  { code: 'tech', name: 'Technologies & Digital', icon: '💻' },
-  { code: 'sante', name: 'Santé & Bien-être', icon: '🏥' },
-  { code: 'education', name: 'Éducation & Formation', icon: '🎓' },
-  { code: 'restauration', name: 'Restauration & Hôtellerie', icon: '🍽️' },
-  { code: 'immobilier', name: 'Immobilier', icon: '🏠' },
-  { code: 'autres', name: 'Autres secteurs', icon: '⚙️' }
-];
+// Icônes par secteur (mapping dynamique)
+const getSectorIcon = (sectorCode: string): string => {
+  const iconMap: Record<string, string> = {
+    'SERVICES_PROF': '💼',
+    'SERVICES_PERSO': '👥',
+    'COMMERCE_DETAIL': '🏪',
+    'COMMERCE_GROS': '🏭',
+    'INDUSTRIE_MANUF': '🏭',
+    'INDUSTRIE_ALIM': '🍎',
+    'AGRICULTURE': '🌾',
+    'CONSTRUCTION': '🏗️',
+    'TRANSPORT': '🚚',
+    'TECH_INFO': '💻',
+    'SANTE': '🏥',
+    'EDUCATION': '🎓',
+    'FINANCE': '💰',
+    'IMMOBILIER': '🏠',
+    'AUTRES': '⚙️'
+  };
+  return iconMap[sectorCode] || '🏢';
+};
 
 // Composant pour les informations générales
 const GeneralInfoSection: React.FC<{
   companyData: CompanyFormData;
-  updateField: (field: string, value: string) => void;
+  updateField: (field: string, value: string | number) => void;
   errors: Record<string, string>;
-}> = ({ companyData, updateField, errors }) => (
+  // ✨ RÉFÉRENTIELS DYNAMIQUES - PHASE 3
+  countries?: any[];
+  sectors?: any[];
+  companySizes?: any[];
+  getSectorIcon: (code: string) => string;
+}> = ({ companyData, updateField, errors, countries = [], sectors = [], companySizes = [], getSectorIcon }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -111,10 +128,10 @@ const GeneralInfoSection: React.FC<{
           </SelectTrigger>
           <SelectContent>
             {sectors.map(sector => (
-              <SelectItem key={sector.code} value={sector.code}>
+              <SelectItem key={sector.sector_code} value={sector.sector_code}>
                 <div className="flex items-center space-x-2">
-                  <span>{sector.icon}</span>
-                  <span>{sector.name}</span>
+                  <span>{getSectorIcon(sector.sector_code)}</span>
+                  <span>{sector.sector_name}</span>
                 </div>
               </SelectItem>
             ))}
@@ -160,9 +177,12 @@ const GeneralInfoSection: React.FC<{
 // Composant pour les coordonnées
 const AddressSection: React.FC<{
   companyData: CompanyFormData;
-  updateField: (field: string, value: string) => void;
+  updateField: (field: string, value: string | number) => void;
   errors: Record<string, string>;
-}> = ({ companyData, updateField, errors }) => (
+  // ✨ RÉFÉRENTIELS DYNAMIQUES - PHASE 3
+  countries?: any[];
+  timezones?: any[];
+}> = ({ companyData, updateField, errors, countries = [], timezones = [] }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -224,14 +244,11 @@ const AddressSection: React.FC<{
               <SelectValue placeholder="Sélectionnez un pays" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="FR">🇫🇷 France</SelectItem>
-              <SelectItem value="SN">🇸🇳 Sénégal</SelectItem>
-              <SelectItem value="CI">🇨🇮 Côte d'Ivoire</SelectItem>
-              <SelectItem value="MA">🇲🇦 Maroc</SelectItem>
-              <SelectItem value="TN">🇹🇳 Tunisie</SelectItem>
-              <SelectItem value="CM">🇨🇲 Cameroun</SelectItem>
-              <SelectItem value="BF">🇧🇫 Burkina Faso</SelectItem>
-              <SelectItem value="ML">🇲🇱 Mali</SelectItem>
+              {countries.map(country => (
+                <SelectItem key={country.code} value={country.code}>
+                  {country.name} ({country.currency_symbol})
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           {errors.country && (
@@ -249,7 +266,7 @@ const AddressSection: React.FC<{
 // Composant pour les informations de contact
 const ContactSection: React.FC<{
   companyData: CompanyFormData;
-  updateField: (field: string, value: string) => void;
+  updateField: (field: string, value: string | number) => void;
   errors: Record<string, string>;
 }> = ({ companyData, updateField, errors }) => (
   <motion.div
@@ -331,7 +348,7 @@ const ContactSection: React.FC<{
 // Composant pour les informations du dirigeant
 const CeoSection: React.FC<{
   companyData: CompanyFormData;
-  updateField: (field: string, value: string) => void;
+  updateField: (field: string, value: string | number) => void;
 }> = ({ companyData, updateField }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -345,7 +362,7 @@ const CeoSection: React.FC<{
         Dirigeant
       </h3>
     </div>
-    
+
     <div className="grid md:grid-cols-2 gap-4">
       <div className="space-y-2">
         <Label htmlFor="ceo-name">Nom du dirigeant</Label>
@@ -358,7 +375,7 @@ const CeoSection: React.FC<{
           autoComplete="name"
         />
       </div>
-      
+
       <div className="space-y-2">
         <Label htmlFor="ceo-title">Fonction</Label>
   <Select value={companyData.ceoTitle ?? ''} onValueChange={(value) => updateField('ceoTitle', value)}>
@@ -374,6 +391,106 @@ const CeoSection: React.FC<{
           </SelectContent>
         </Select>
       </div>
+    </div>
+  </motion.div>
+);
+
+// Composant pour l'exercice fiscal
+const FiscalYearSection: React.FC<{
+  companyData: CompanyFormData;
+  updateField: (field: string, value: string | number) => void;
+}> = ({ companyData, updateField }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 0.7, duration: 0.5 }}
+    className="space-y-4"
+  >
+    <div className="flex items-center space-x-2 mb-4">
+      <Calendar className="w-5 h-5 text-indigo-600" />
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        Exercice fiscal
+      </h3>
+    </div>
+
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="fiscal-year-type">Type d'exercice fiscal</Label>
+        <Select value={companyData.fiscalYearType ?? 'calendar'} onValueChange={(value) => updateField('fiscalYearType', value)}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="calendar">Calendrier (Janvier - Décembre)</SelectItem>
+            <SelectItem value="april">Avril - Mars</SelectItem>
+            <SelectItem value="july">Juillet - Juin</SelectItem>
+            <SelectItem value="october">Octobre - Septembre</SelectItem>
+            <SelectItem value="custom">Personnalisé</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {companyData.fiscalYearType === 'custom' && (
+        <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 space-y-4">
+          <h4 className="text-sm font-medium text-indigo-900">Configuration personnalisée</h4>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="fiscal-start-month">Mois de début</Label>
+              <Select
+                value={(companyData.fiscalYearStartMonth ?? 1).toString()}
+                onValueChange={(value) => updateField('fiscalYearStartMonth', parseInt(value))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">Janvier</SelectItem>
+                  <SelectItem value="2">Février</SelectItem>
+                  <SelectItem value="3">Mars</SelectItem>
+                  <SelectItem value="4">Avril</SelectItem>
+                  <SelectItem value="5">Mai</SelectItem>
+                  <SelectItem value="6">Juin</SelectItem>
+                  <SelectItem value="7">Juillet</SelectItem>
+                  <SelectItem value="8">Août</SelectItem>
+                  <SelectItem value="9">Septembre</SelectItem>
+                  <SelectItem value="10">Octobre</SelectItem>
+                  <SelectItem value="11">Novembre</SelectItem>
+                  <SelectItem value="12">Décembre</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="fiscal-start-day">Jour de début</Label>
+              <Select
+                value={(companyData.fiscalYearStartDay ?? 1).toString()}
+                onValueChange={(value) => updateField('fiscalYearStartDay', parseInt(value))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 31 }, (_, i) => (
+                    <SelectItem key={i + 1} value={(i + 1).toString()}>
+                      {i + 1}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="bg-indigo-100 border border-indigo-300 rounded-lg p-3">
+            <p className="text-indigo-800 text-sm">
+              <strong>Exercice fiscal :</strong> Du {companyData.fiscalYearStartDay || 1} {
+                ['', 'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+                 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'][companyData.fiscalYearStartMonth || 1]
+              } au {(companyData.fiscalYearStartDay || 1) - 1 || 31} {
+                ['', 'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+                 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'][(companyData.fiscalYearStartMonth || 1) === 12 ? 1 : (companyData.fiscalYearStartMonth || 1) + 1]
+              } (année suivante)
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   </motion.div>
 );
@@ -467,10 +584,38 @@ export default function CompanyStep() {
   const { t } = useTranslation();
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const updateField = (field: string, value: string) => {
+  // ✨ RÉFÉRENTIELS DYNAMIQUES - PHASE 3
+  const {
+    countries,
+    sectors,
+    companySizes,
+    timezones,
+    currencies,
+    loading: referentialsLoading
+  } = useOnboardingReferentials();
+
+  const { config: countryConfig, loadCountryConfig } = useCountryAutoConfig();
+
+  const updateField = (field: string, value: string | number) => {
     updateCompanyProfile({ [field]: value });
     clearFieldError(field, errors, setErrors);
+
+    // ✨ AUTO-CONFIGURATION PAYS - PHASE 3
+    if (field === 'country') {
+      loadCountryConfig(value as string);
+    }
   };
+
+  // Auto-complétion quand configuration pays chargée
+  useEffect(() => {
+    if (countryConfig && countryConfig.country) {
+      const country = countryConfig.country;
+      updateCompanyProfile({
+        currency: country.currency_code,
+        timezone: country.timezone
+      });
+    }
+  }, [countryConfig, updateCompanyProfile]);
 
   const handleNext = () => {
     // Sanitiser le nom de l'entreprise avant validation
@@ -501,30 +646,52 @@ export default function CompanyStep() {
         {renderHeader(t)}
 
         <CardContent className="p-6 space-y-6">
-          <GeneralInfoSection 
-            companyData={state.data?.companyProfile || {}} 
-            updateField={updateField} 
-            errors={errors} 
-          />
-          
-          <AddressSection 
-            companyData={state.data?.companyProfile || {}} 
-            updateField={updateField} 
-            errors={errors} 
-          />
-          
-          <ContactSection 
-            companyData={state.data?.companyProfile || {}} 
-            updateField={updateField} 
-            errors={errors} 
-          />
-          
-          <CeoSection 
-            companyData={state.data?.companyProfile || {}} 
-            updateField={updateField} 
-          />
+          {referentialsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-orange-600 mr-2" />
+              <span className="text-gray-600 dark:text-gray-400">Chargement des référentiels...</span>
+            </div>
+          ) : (
+            <>
+              <GeneralInfoSection
+                companyData={state.data?.companyProfile || {}}
+                updateField={updateField}
+                errors={errors}
+                // ✨ RÉFÉRENTIELS DYNAMIQUES
+                countries={countries}
+                sectors={sectors}
+                companySizes={companySizes}
+                getSectorIcon={getSectorIcon}
+              />
 
-          {renderNavigation(goToPreviousStep, handleNext)}
+              <AddressSection
+                companyData={state.data?.companyProfile || {}}
+                updateField={updateField}
+                errors={errors}
+                // ✨ RÉFÉRENTIELS DYNAMIQUES
+                countries={countries}
+                timezones={timezones}
+              />
+
+              <ContactSection
+                companyData={state.data?.companyProfile || {}}
+                updateField={updateField}
+                errors={errors}
+              />
+
+              <CeoSection
+                companyData={state.data?.companyProfile || {}}
+                updateField={updateField}
+              />
+
+              <FiscalYearSection
+                companyData={state.data?.companyProfile || {}}
+                updateField={updateField}
+              />
+
+              {renderNavigation(goToPreviousStep, handleNext)}
+            </>
+          )}
         </CardContent>
       </Card>
     </motion.div>

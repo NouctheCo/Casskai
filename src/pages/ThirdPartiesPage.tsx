@@ -10,7 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { useToast } from '../components/ui/use-toast';
 import { useEnterprise } from '../contexts/EnterpriseContext';
-import { thirdPartiesService } from '../services/thirdPartiesService';
+import { unifiedThirdPartiesService } from '@/services/unifiedThirdPartiesService';
+import { ThirdPartyFormDialog } from '@/components/third-parties/ThirdPartyFormDialog';
 import {
   ThirdParty,
   ThirdPartyFilters,
@@ -40,6 +41,7 @@ import {
   DollarSign,
   Sparkles
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 const ThirdPartiesPage: React.FC = () => {
   const { t } = useTranslation();
@@ -55,6 +57,7 @@ const ThirdPartiesPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedThirdParty, setSelectedThirdParty] = useState<ThirdParty | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   // Animation variants
   const containerVariants = {
@@ -106,21 +109,89 @@ const ThirdPartiesPage: React.FC = () => {
 
   const loadDashboardData = async () => {
     try {
-      const response = await thirdPartiesService.getDashboardData(currentEnterprise!.id);
-      if (response.data) {
-        setDashboardData(response.data);
-      }
+      const stats = await unifiedThirdPartiesService.getDashboardStats(currentEnterprise!.id);
+      setDashboardData({
+        stats: {
+          total_third_parties: stats.total_customers + stats.total_suppliers,
+          total_customers: stats.total_customers,
+          total_suppliers: stats.total_suppliers,
+          active_clients: stats.active_customers,
+          active_suppliers: stats.active_suppliers,
+          new_this_month: 0, // TODO: Calculer depuis les dates de création
+          total_receivables: stats.total_receivables || 0,
+          total_payables: stats.total_payables || 0,
+          overdue_receivables: 0, // TODO: Calculer
+          overdue_payables: 0, // TODO: Calculer
+          top_clients_by_revenue: [],
+          top_suppliers_by_spending: []
+        },
+        alerts: {
+          overdue_invoices: 0,
+          credit_limit_exceeded: 0,
+          missing_information: 0
+        }
+      } as unknown as ThirdPartyDashboardData);
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      logger.error('Error loading dashboard data:', error);
+      // Set empty data to prevent crashes
+      setDashboardData({
+        stats: {
+          total_third_parties: 0,
+          total_customers: 0,
+          total_suppliers: 0,
+          active_clients: 0,
+          active_suppliers: 0,
+          new_this_month: 0,
+          total_receivables: 0,
+          total_payables: 0,
+          overdue_receivables: 0,
+          overdue_payables: 0,
+          top_clients_by_revenue: [],
+          top_suppliers_by_spending: []
+        },
+        alerts: {
+          overdue_invoices: 0,
+          credit_limit_exceeded: 0,
+          missing_information: 0
+        }
+      } as unknown as ThirdPartyDashboardData);
     }
   };
 
   const loadThirdParties = async () => {
     try {
-      const response = await thirdPartiesService.getThirdParties(currentEnterprise!.id);
-      setThirdParties(response || []);
+      const unified = await unifiedThirdPartiesService.getUnifiedThirdParties(currentEnterprise!.id);
+      // Transform to match ThirdParty type expected by the page
+      const transformed = unified.map(tp => ({
+        id: tp.id,
+        type: tp.party_type,
+        name: tp.name,
+        email: tp.email || '',
+        phone: tp.phone || '',
+        primary_email: tp.email || '',
+        primary_phone: tp.phone || '',
+        company_name: tp.company_name,
+        tax_number: tp.tax_number,
+        billing_address: {
+          street: tp.primary_address_line1 || '',
+          city: tp.primary_city || '',
+          postal_code: tp.primary_postal_code || '',
+          country: tp.primary_country || 'FR'
+        },
+        payment_terms: tp.payment_terms || 30,
+        currency: tp.currency || 'EUR',
+        is_active: tp.is_active,
+        notes: tp.notes,
+        current_balance: tp.balance,
+        total_receivables: tp.party_type === 'customer' ? tp.balance : 0,
+        total_payables: tp.party_type === 'supplier' ? tp.balance : 0,
+        tags: [],
+        created_at: tp.created_at,
+        updated_at: tp.updated_at
+      }));
+      setThirdParties(transformed as unknown as ThirdParty[]);
     } catch (error) {
-      console.error('Error loading third parties:', error);
+      logger.error('Error loading third parties:', error);
       toast({
         title: 'Erreur de chargement',
         description: 'Impossible de charger les tiers',
@@ -131,13 +202,11 @@ const ThirdPartiesPage: React.FC = () => {
 
   const loadAgingReport = async () => {
     try {
-      const response = await thirdPartiesService.getAgingReport(currentEnterprise!.id);
-      if (response.data) {
-        setAgingReport(response.data);
-      }
+      // TODO: Implémenter via RPC function si nécessaire
+      setAgingReport([]);
       setLoading(false);
     } catch (error) {
-      console.error('Error loading aging report:', error);
+      logger.error('Error loading aging report:', error);
       setLoading(false);
     }
   };
@@ -186,8 +255,8 @@ const ThirdPartiesPage: React.FC = () => {
   };
 
   const handleExportThirdParties = () => {
-    thirdPartiesService.exportThirdPartiesToCSV(
-      filteredThirdParties, 
+    (unifiedThirdPartiesService as any).exportThirdPartiesToCSV(
+      filteredThirdParties,
       { format: 'csv', include_contacts: true, include_transactions: false, include_balances: true },
       'tiers'
     );
@@ -222,26 +291,35 @@ const ThirdPartiesPage: React.FC = () => {
     // TODO: Open edit modal or navigate to edit form
   };
 
-  const handleDeleteThirdParty = async (thirdPartyId: string) => {
+  const handleDeleteThirdParty = async (thirdParty: ThirdParty) => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce tiers ?')) {
       return;
     }
-    
+
     try {
-      await thirdPartiesService.deleteThirdParty(thirdPartyId);
+      if ((thirdParty.type as any) === 'customer' || thirdParty.type === 'client') {
+        await unifiedThirdPartiesService.deleteCustomer(thirdParty.id);
+      } else {
+        await unifiedThirdPartiesService.deleteSupplier(thirdParty.id);
+      }
       await loadThirdParties();
       toast({
         title: 'Suppression réussie',
         description: 'Le tiers a été supprimé avec succès',
       });
     } catch (error) {
-      console.error('Error deleting third party:', error);
+      logger.error('Error deleting third party:', error);
       toast({
         title: 'Erreur de suppression',
         description: 'Impossible de supprimer le tiers',
         variant: 'destructive'
       });
     }
+  };
+
+  const handleCreateSuccess = () => {
+    loadThirdParties();
+    loadDashboardData();
   };
 
   const getTypeColor = (type: string) => {
@@ -314,9 +392,9 @@ const ThirdPartiesPage: React.FC = () => {
             <FileDown className="h-4 w-4" />
             Exporter
           </Button>
-          <Button 
+          <Button
             className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 flex items-center gap-2"
-            onClick={() => setActiveTab('new-third-party')}
+            onClick={() => setShowCreateDialog(true)}
           >
             <Plus className="h-4 w-4" />
             Nouveau Tiers
@@ -723,7 +801,7 @@ const ThirdPartiesPage: React.FC = () => {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => handleDeleteThirdParty(thirdParty.id)}
+                          onClick={() => handleDeleteThirdParty(thirdParty)}
                           title="Supprimer"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -907,6 +985,16 @@ const ThirdPartiesPage: React.FC = () => {
           </TabsContent>
         </Tabs>
       </motion.div>
+      {/* Dialog de création */}
+      {currentEnterprise && (
+        <ThirdPartyFormDialog
+          open={showCreateDialog}
+          onClose={() => setShowCreateDialog(false)}
+          onSuccess={handleCreateSuccess}
+          companyId={currentEnterprise.id}
+          defaultType="customer"
+        />
+      )}
     </motion.div>
   );
 };

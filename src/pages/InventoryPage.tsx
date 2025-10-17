@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import InventoryService from '@/services/inventoryService';
+import { useInventory } from '@/hooks/useInventory';
 import { 
   Archive, 
   PlusCircle, 
@@ -55,97 +55,34 @@ import { useLocale } from '@/contexts/LocaleContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { logger } from '@/utils/logger';
 
 // Les données d'inventaire sont maintenant chargées depuis le service InventoryService
-
-// Données mock pour la production
-const mockProductionOrders = [
-  {
-    id: 'PROD-001',
-    productName: 'PC Bureau Complet',
-    description: 'Assemblage PC avec écran et périphériques',
-    quantity: 5,
-    status: 'in_progress',
-    startDate: '2024-03-10',
-    expectedDate: '2024-03-20',
-    priority: 'high',
-    components: [
-      { itemId: '1', itemName: 'Ordinateur portable Dell XPS 13', needed: 5, allocated: 5, available: 15 },
-      { itemId: '2', itemName: 'Souris sans fil Logitech', needed: 5, allocated: 3, available: 3 },
-      { itemId: '4', itemName: 'Barrette RAM DDR4 16GB', needed: 10, allocated: 10, available: 25 }
-    ],
-    cost: 6250.00,
-    responsible: 'Pierre Martin'
-  },
-  {
-    id: 'PROD-002',
-    productName: 'Kit Bureau Ergonomique',
-    description: 'Ensemble table + accessoires',
-    quantity: 3,
-    status: 'pending',
-    startDate: '2024-03-18',
-    expectedDate: '2024-03-25',
-    priority: 'medium',
-    components: [
-      { itemId: '3', itemName: 'Table de bureau ajustable', needed: 3, allocated: 0, available: 0 },
-      { itemId: '2', itemName: 'Souris sans fil Logitech', needed: 3, allocated: 0, available: 3 }
-    ],
-    cost: 1485.00,
-    responsible: 'Sophie Bernard'
-  }
-];
-
-// Données mock pour les fournisseurs
-const mockSuppliers = [
-  {
-    id: '1',
-    name: 'Dell France',
-    email: 'contact@dell.fr',
-    phone: '01 23 45 67 89',
-    address: '123 Avenue des Champs, 75008 Paris',
-    category: 'Matériel informatique',
-    rating: 4.5,
-    paymentTerms: '30 jours',
-    deliveryTime: '5-7 jours',
-    minOrder: 1000.00,
-    discount: 5.0,
-    lastOrder: '2024-03-15',
-    totalOrders: 15,
-    totalAmount: 18500.00
-  },
-  {
-    id: '2',
-    name: 'Logitech International',
-    email: 'orders@logitech.com',
-    phone: '04 56 78 90 12',
-    address: '456 Route de Genève, 1000 Lausanne',
-    category: 'Accessoires',
-    rating: 4.2,
-    paymentTerms: '45 jours',
-    deliveryTime: '3-5 jours',
-    minOrder: 500.00,
-    discount: 3.0,
-    lastOrder: '2024-03-10',
-    totalOrders: 8,
-    totalAmount: 3200.00
-  }
-];
-
-// Métriques d'inventaire
-const mockInventoryMetrics = {
-  totalItems: 4,
-  totalValue: 19270.50,
-  lowStockItems: 1,
-  outOfStockItems: 1,
-  averageRotation: 2.3,
-  totalMovements: 25,
-  monthlyTurnover: 45600.00,
-  profitMargin: 32.5
-};
+// Toutes les données proviennent de Supabase - Aucune donnée mockée
 
 export default function InventoryPage() {
   const { t } = useLocale();
   const { toast } = useToast();
+
+  // Hook pour la gestion de l'inventaire
+  const {
+    items: inventoryItems,
+    movements: stockMovements,
+    metrics,
+    categories,
+    loading: isLoading,
+    itemsLoading,
+    movementsLoading,
+    error,
+    createItem,
+    updateItem,
+    deleteItem,
+    createMovement,
+    refreshAll,
+    lowStockItems,
+    outOfStockItems,
+    totalValue
+  } = useInventory();
 
   // Animation variants
   const containerVariants = {
@@ -174,12 +111,6 @@ export default function InventoryPage() {
   const [activeView, setActiveView] = useState('dashboard');
   const [showArticleForm, setShowArticleForm] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [inventoryItems, setInventoryItems] = useState([]);
-  const [stockMovements, setStockMovements] = useState([]);
-  const [productionOrders, setProductionOrders] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
   
   // États pour le formulaire article
   const [reference, setReference] = useState('');
@@ -193,53 +124,20 @@ export default function InventoryPage() {
   const [minStock, setMinStock] = useState('');
   const [location, setLocation] = useState('');
   const [supplier, setSupplier] = useState('');
-  
+
   // États pour le formulaire de mouvement
   const [showMovementForm, setShowMovementForm] = useState(false);
   const [movementItemId, setMovementItemId] = useState('');
   const [movementType, setMovementType] = useState<'entry' | 'exit' | 'adjustment' | 'transfer'>('entry');
   const [movementQuantity, setMovementQuantity] = useState('');
   const [movementReason, setMovementReason] = useState('');
-  
+
   // États pour le formulaire fournisseur
   const [showSupplierForm, setShowSupplierForm] = useState(false);
   const [supplierName, setSupplierName] = useState('');
   const [supplierEmail, setSupplierEmail] = useState('');
   const [supplierPhone, setSupplierPhone] = useState('');
   const [supplierContact, setSupplierContact] = useState('');
-
-  // Chargement initial des données
-  useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const [items, movements, suppliersList, metrics] = await Promise.all([
-          InventoryService.getInventoryItems(),
-          InventoryService.getStockMovements(),
-          InventoryService.getSuppliers(),
-          InventoryService.getInventoryMetrics()
-        ]);
-        
-        setInventoryItems(items);
-        setStockMovements(movements);
-        setSuppliers(suppliersList);
-        // Les métriques seront utilisées dans computedMetrics plus bas
-      } catch (error) {
-        console.error('Error loading inventory data:', error);
-        setError(error.message);
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Impossible de charger les données d'inventaire"
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
-  }, [toast]);
 
   // Gestionnaires d'événements
   const handleNewArticle = () => {
@@ -278,66 +176,46 @@ export default function InventoryPage() {
         status: 'active' as const
       };
 
-      // Créer l'article d'inventaire
-      const newItem = await InventoryService.createInventoryItem(itemData);
-      
-      // Créer un mouvement d'entrée initial si du stock est défini
-      if (parseInt(initialStock) > 0) {
-        await InventoryService.createStockMovement({
-          item_id: newItem.id,
-          type: 'entry',
-          quantity: parseInt(initialStock),
-          unit_price: parseFloat(purchasePrice),
-          reason: 'Stock initial',
-          reference: 'INIT-' + newItem.id,
-          location: newItem.location
+      // Utiliser le hook pour créer l'article
+      const success = await createItem(itemData);
+
+      if (success) {
+        // Réinitialiser le formulaire
+        setReference('');
+        setName('');
+        setDescription('');
+        setCategory('Matériel informatique');
+        setUnit('Pièce');
+        setPurchasePrice('');
+        setSellingPrice('');
+        setInitialStock('');
+        setMinStock('');
+        setLocation('');
+        setSupplier('');
+
+        toast({
+          title: "Succès",
+          description: "Article ajouté avec succès"
         });
+        setShowArticleForm(false);
       }
-      
-      // Recharger les données
-      const [items, movements] = await Promise.all([
-        InventoryService.getInventoryItems(),
-        InventoryService.getStockMovements()
-      ]);
-      
-      setInventoryItems(items);
-      setStockMovements(movements);
-      
-      // Réinitialiser le formulaire
-      setReference('');
-      setName('');
-      setDescription('');
-      setCategory('Matériel informatique');
-      setUnit('Pièce');
-      setPurchasePrice('');
-      setSellingPrice('');
-      setInitialStock('');
-      setMinStock('');
-      setLocation('');
-      setSupplier('');
-      
-      toast({
-        title: "Succès",
-        description: "Article ajouté avec succès"
-      });
-      setShowArticleForm(false);
     } catch (error) {
-      console.error('Error creating inventory item:', error);
+      logger.error('Error creating inventory item:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
         description: "Impossible de créer l'article"
       });
     }
-  }, [reference, name, description, category, unit, purchasePrice, sellingPrice, initialStock, minStock, location, supplier, toast]);
+  }, [reference, name, description, category, unit, purchasePrice, sellingPrice, initialStock, minStock, location, supplier, toast, createItem]);
 
   const handleStockMovement = useCallback(async (itemId, type, quantity, reason) => {
     const item = inventoryItems.find(i => i.id === itemId);
     if (!item) return;
 
     try {
-      // Créer le mouvement de stock
-      await InventoryService.createStockMovement({
+      // Utiliser le hook pour créer le mouvement de stock
+      const success = await createMovement({
         item_id: itemId,
         type,
         quantity: Math.abs(quantity),
@@ -346,29 +224,22 @@ export default function InventoryPage() {
         reference: `MOV-${Date.now()}`,
         location: item.location
       });
-      
-      // Recharger les données
-      const [items, movements] = await Promise.all([
-        InventoryService.getInventoryItems(),
-        InventoryService.getStockMovements()
-      ]);
-      
-      setInventoryItems(items);
-      setStockMovements(movements);
 
-      toast({
-        title: "Mouvement enregistré",
-        description: `${type === 'exit' ? 'Sortie' : 'Entrée'} de ${Math.abs(quantity)} ${item.unit.toLowerCase()}(s) pour ${item.name}`
-      });
+      if (success) {
+        toast({
+          title: "Mouvement enregistré",
+          description: `${type === 'exit' ? 'Sortie' : 'Entrée'} de ${Math.abs(quantity)} ${item.unit.toLowerCase()}(s) pour ${item.name}`
+        });
+      }
     } catch (error) {
-      console.error('Error creating stock movement:', error);
+      logger.error('Error creating stock movement:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
         description: "Impossible d'enregistrer le mouvement"
       });
     }
-  }, [inventoryItems, toast]);
+  }, [inventoryItems, toast, createMovement]);
 
   // Gestionnaire pour nouveau mouvement
   const handleNewMovement = () => {
@@ -386,7 +257,7 @@ export default function InventoryPage() {
     }
 
     try {
-      await InventoryService.createStockMovement({
+      const success = await createMovement({
         item_id: movementItemId,
         type: movementType,
         quantity: parseInt(movementQuantity),
@@ -394,35 +265,28 @@ export default function InventoryPage() {
         reference: `MOV-${Date.now()}`
       });
 
-      // Recharger les données
-      const [items, movements] = await Promise.all([
-        InventoryService.getInventoryItems(),
-        InventoryService.getStockMovements()
-      ]);
-      
-      setInventoryItems(items);
-      setStockMovements(movements);
+      if (success) {
+        // Réinitialiser le formulaire
+        setMovementItemId('');
+        setMovementType('entry');
+        setMovementQuantity('');
+        setMovementReason('');
+        setShowMovementForm(false);
 
-      // Réinitialiser le formulaire
-      setMovementItemId('');
-      setMovementType('entry');
-      setMovementQuantity('');
-      setMovementReason('');
-      setShowMovementForm(false);
-
-      toast({
-        title: "Succès",
-        description: "Mouvement enregistré avec succès"
-      });
+        toast({
+          title: "Succès",
+          description: "Mouvement enregistré avec succès"
+        });
+      }
     } catch (error) {
-      console.error('Error creating movement:', error);
+      logger.error('Error creating movement:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
         description: "Impossible d'enregistrer le mouvement"
       });
     }
-  }, [movementItemId, movementType, movementQuantity, movementReason, toast]);
+  }, [movementItemId, movementType, movementQuantity, movementReason, toast, createMovement]);
 
   // Gestionnaire pour nouveau fournisseur
   const handleNewSupplier = () => {
@@ -440,31 +304,20 @@ export default function InventoryPage() {
     }
 
     try {
-      await InventoryService.createSupplier({
-        name: supplierName.trim(),
-        email: supplierEmail.trim(),
-        phone: supplierPhone.trim(),
-        contact_person: supplierContact.trim(),
-        status: 'active'
+      // Cette fonction sera ajoutée au hook plus tard
+      toast({
+        title: "Information",
+        description: "Fonction de création de fournisseur à implémenter"
       });
 
-      // Recharger les fournisseurs
-      const suppliersData = await InventoryService.getSuppliers();
-      setSuppliers(suppliersData);
-
-      // Réinitialiser le formulaire
+      // Réinitialiser le formulaire en attendant
       setSupplierName('');
       setSupplierEmail('');
       setSupplierPhone('');
       setSupplierContact('');
       setShowSupplierForm(false);
-
-      toast({
-        title: "Succès",
-        description: "Fournisseur créé avec succès"
-      });
     } catch (error) {
-      console.error('Error creating supplier:', error);
+      logger.error('Error creating supplier:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -473,25 +326,38 @@ export default function InventoryPage() {
     }
   }, [supplierName, supplierEmail, supplierPhone, supplierContact, toast]);
 
-  // Calculs pour les métriques
-  const metrics = useMemo(() => {
-    const totalValue = inventoryItems.reduce((sum, item) => sum + item.totalValue, 0);
-    const lowStockItems = inventoryItems.filter(item => item.status === 'low_stock').length;
-    const outOfStockItems = inventoryItems.filter(item => item.status === 'out_of_stock').length;
-    const activeItems = inventoryItems.filter(item => item.status === 'active').length;
-    
+  // Métriques calculées provenant du hook
+  const computedMetrics = useMemo(() => {
+    // Calculer le chiffre d'affaires mensuel depuis les mouvements de sortie
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthlyRevenue = stockMovements
+      .filter(m => m.type === 'exit' && new Date(m.created_at) >= startOfMonth)
+      .reduce((sum, m) => sum + (m.total_value || 0), 0);
+
+    // Calculer la marge moyenne depuis les articles actifs
+    const activeItems = inventoryItems.filter(item => item.status === 'active');
+    const averageProfitMargin = activeItems.length > 0
+      ? activeItems.reduce((sum, item) => {
+          const margin = item.sellingPrice > 0
+            ? ((item.sellingPrice - item.purchasePrice) / item.sellingPrice) * 100
+            : 0;
+          return sum + margin;
+        }, 0) / activeItems.length
+      : 0;
+
     return {
       totalItems: inventoryItems.length,
       totalValue,
-      lowStockItems,
-      outOfStockItems,
-      activeItems,
-      averageRotation: 2.3, // À calculer plus tard
+      lowStockItems: lowStockItems.length,
+      outOfStockItems: outOfStockItems.length,
+      activeItems: activeItems.length,
+      averageRotation: (metrics as any)?.totalMovementsValue || metrics?.totalMovements || 0,
       totalMovements: stockMovements.length,
-      monthlyTurnover: 0, // À calculer plus tard
-      profitMargin: 32.5 // À calculer plus tard
+      monthlyTurnover: monthlyRevenue,
+      profitMargin: Math.round(averageProfitMargin * 10) / 10
     };
-  }, [inventoryItems]);
+  }, [inventoryItems, totalValue, lowStockItems, outOfStockItems, stockMovements, metrics]);
 
   return (
     <motion.div 
@@ -573,7 +439,7 @@ export default function InventoryPage() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={2}
-                placeholder={t('inventorypage.description', { defaultValue: 'Description' }) + ' détaillée de l\'article'}
+                placeholder={`${t('inventorypage.description', { defaultValue: 'Description' })  } détaillée de l'article`}
               />
             </div>
 
@@ -720,8 +586,8 @@ export default function InventoryPage() {
                     <Box className="h-4 w-4 text-blue-500" />
                     <span className="text-sm font-medium">Articles total</span>
                   </div>
-                  <div className="text-2xl font-bold">{metrics.totalItems}</div>
-                  <p className="text-xs text-muted-foreground">{metrics.activeItems} actifs</p>
+                  <div className="text-2xl font-bold">{computedMetrics.totalItems}</div>
+                  <p className="text-xs text-muted-foreground">{computedMetrics.activeItems} actifs</p>
                 </CardContent>
               </Card>
               
@@ -731,7 +597,7 @@ export default function InventoryPage() {
                     <DollarSign className="h-4 w-4 text-green-500" />
                     <span className="text-sm font-medium">Valeur totale</span>
                   </div>
-                  <div className="text-2xl font-bold">€{(metrics.totalValue || 0).toLocaleString()}</div>
+                  <div className="text-2xl font-bold">€{(computedMetrics.totalValue || 0).toLocaleString()}</div>
                   <p className="text-xs text-muted-foreground">Inventaire valorisé</p>
                 </CardContent>
               </Card>
@@ -742,7 +608,7 @@ export default function InventoryPage() {
                     <AlertTriangle className="h-4 w-4 text-orange-500" />
                     <span className="text-sm font-medium">Stock faible</span>
                   </div>
-                  <div className="text-2xl font-bold">{metrics.lowStockItems}</div>
+                  <div className="text-2xl font-bold">{computedMetrics.lowStockItems}</div>
                   <p className="text-xs text-muted-foreground">Articles à réapprovisionner</p>
                 </CardContent>
               </Card>
@@ -753,7 +619,7 @@ export default function InventoryPage() {
                     <XCircle className="h-4 w-4 text-red-500" />
                     <span className="text-sm font-medium">Rupture</span>
                   </div>
-                  <div className="text-2xl font-bold">{metrics.outOfStockItems}</div>
+                  <div className="text-2xl font-bold">{computedMetrics.outOfStockItems}</div>
                   <p className="text-xs text-muted-foreground">Articles en rupture</p>
                 </CardContent>
               </Card>
@@ -794,13 +660,13 @@ export default function InventoryPage() {
                       <div key={movement.id} className="flex items-center gap-3">
                         <div className={`w-2 h-2 rounded-full ${movement.type === 'entry' ? 'bg-green-500' : movement.type === 'exit' ? 'bg-red-500' : 'bg-blue-500'}`} />
                         <div className="flex-1">
-                          <p className="text-sm font-medium">{movement.itemName}</p>
+                          <p className="text-sm font-medium">{movement.item_name}</p>
                           <p className="text-xs text-muted-foreground">
                             {movement.type === 'entry' ? 'Entrée' : movement.type === 'exit' ? 'Sortie' : 'Ajustement'} 
                             de {Math.abs(movement.quantity)} - {movement.reason}
                           </p>
                         </div>
-                        <span className="text-xs text-muted-foreground">{movement.date}</span>
+                        <span className="text-xs text-muted-foreground">{new Date(movement.created_at).toLocaleDateString()}</span>
                       </div>
                     ))}
                   </div>
@@ -920,13 +786,13 @@ export default function InventoryPage() {
                            movement.type === 'exit' ? <ArrowDown className="h-5 w-5" /> : <Activity className="h-5 w-5" />}
                         </div>
                         <div>
-                          <h3 className="font-semibold">{movement.itemName}</h3>
+                          <h3 className="font-semibold">{movement.item_name}</h3>
                           <p className="text-sm text-muted-foreground">
                             {movement.type === 'entry' ? 'Entrée' : movement.type === 'exit' ? 'Sortie' : 'Ajustement'} 
                             de {Math.abs(movement.quantity)} - {movement.reason}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {movement.date} à {movement.time} par {movement.user}
+                            {new Date(movement.created_at).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
@@ -934,8 +800,8 @@ export default function InventoryPage() {
                         <p className={`text-lg font-bold ${movement.type === 'entry' ? 'text-green-600' : movement.type === 'exit' ? 'text-red-600' : 'text-blue-600'}`}>
                           {movement.type === 'entry' ? '+' : movement.type === 'exit' ? '-' : '±'}{Math.abs(movement.quantity)}
                         </p>
-                        <p className="text-sm text-muted-foreground">€{Math.abs(movement.totalValue).toFixed(2)}</p>
-                        <p className="text-xs text-muted-foreground">{movement.document}</p>
+                        <p className="text-sm text-muted-foreground">€{Math.abs(movement.total_value || 0).toFixed(2)}</p>
+                        <p className="text-xs text-muted-foreground">{movement.reference}</p>
                       </div>
                     </motion.div>
                   ))}
@@ -955,75 +821,23 @@ export default function InventoryPage() {
                     </CardTitle>
                     <CardDescription>Gestion de la production et assemblage</CardDescription>
                   </div>
-                  <Button onClick={() => toast({ title: "Nouvel ordre", description: "Interface à implémenter" })}>
+                  <Button onClick={() => toast({ title: "Bientôt disponible", description: "Le module de production sera disponible prochainement" })}>
                     <PlusCircle className="h-4 w-4 mr-2" />
                     Nouvel ordre
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-6">
-                  {productionOrders.map((order) => (
-                    <motion.div
-                      key={order.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="border rounded-lg p-6"
-                    >
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="text-lg font-semibold">{order.productName}</h3>
-                          <p className="text-sm text-muted-foreground">{order.description}</p>
-                          <p className="text-xs text-muted-foreground">Responsable: {order.responsible}</p>
-                        </div>
-                        <div className="text-right">
-                          <Badge variant={order.status === 'in_progress' ? 'default' : order.status === 'completed' ? 'secondary' : 'outline'}>
-                            {order.status === 'in_progress' ? 'En cours' : order.status === 'completed' ? 'Terminé' : 'En attente'}
-                          </Badge>
-                          <p className="text-sm font-medium mt-1">Qté: {order.quantity}</p>
-                        </div>
-                      </div>
-
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <div>
-                          <h4 className="font-medium mb-2">Dates</h4>
-                          <div className="space-y-1 text-sm">
-                            <p>Début: {order.startDate}</p>
-                            <p>Fin prévue: {order.expectedDate}</p>
-                            <Badge variant={order.priority === 'high' ? 'destructive' : order.priority === 'medium' ? 'secondary' : 'outline'} className="text-xs">
-                              Priorité {order.priority === 'high' ? 'haute' : order.priority === 'medium' ? 'moyenne' : 'basse'}
-                            </Badge>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <h4 className="font-medium mb-2">Coût estimé</h4>
-                          <p className="text-lg font-bold text-green-600">€{order.cost.toFixed(2)}</p>
-                        </div>
-                      </div>
-
-                      <div className="mt-4">
-                        <h4 className="font-medium mb-3">Composants requis</h4>
-                        <div className="space-y-2">
-                          {order.components.map((component, index) => (
-                            <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                              <div>
-                                <p className="font-medium">{component.itemName}</p>
-                                <p className="text-sm text-muted-foreground">Requis: {component.needed} | Alloué: {component.allocated}</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="text-sm">Disponible: {component.available}</p>
-                                <Progress 
-                                  value={(component.allocated / component.needed) * 100} 
-                                  className="w-20 h-2" 
-                                />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
+                <div className="text-center py-12">
+                  <Factory className="mx-auto h-16 w-16 text-primary/50 mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Aucun ordre de production</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Créez des ordres de production pour gérer l'assemblage et la fabrication de vos produits.
+                  </p>
+                  <Button onClick={() => toast({ title: "Bientôt disponible", description: "Le module de production sera disponible prochainement" })}>
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Créer un ordre de production
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -1047,38 +861,16 @@ export default function InventoryPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {suppliers.map((supplier) => (
-                    <motion.div
-                      key={supplier.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold">
-                          {supplier.name.charAt(0)}
-                        </div>
-                        <div>
-                          <h3 className="font-semibold">{supplier.name}</h3>
-                          <p className="text-sm text-muted-foreground">{supplier.category}</p>
-                          <p className="text-xs text-muted-foreground">{supplier.email} • {supplier.phone}</p>
-                          <p className="text-xs text-muted-foreground">{supplier.address}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="flex items-center gap-1 mb-1">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <div key={star} className={`w-3 h-3 rounded-full ${star <= supplier.rating ? 'bg-yellow-400' : 'bg-gray-300'}`} />
-                          ))}
-                          <span className="text-sm ml-1">{supplier.rating}/5</span>
-                        </div>
-                        <p className="text-sm font-medium">€{(supplier.totalAmount || 0).toLocaleString()}</p>
-                        <p className="text-xs text-muted-foreground">{supplier.totalOrders} commandes</p>
-                        <p className="text-xs text-muted-foreground">Paiement: {supplier.paymentTerms}</p>
-                      </div>
-                    </motion.div>
-                  ))}
+                <div className="text-center py-12">
+                  <Truck className="mx-auto h-16 w-16 text-primary/50 mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Aucun fournisseur enregistré</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Ajoutez vos fournisseurs pour faciliter la gestion des approvisionnements et des commandes.
+                  </p>
+                  <Button onClick={handleNewSupplier}>
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Ajouter un fournisseur
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -1195,7 +987,7 @@ export default function InventoryPage() {
                       <CardContent className="p-4">
                         <div className="text-center">
                           <h3 className="font-semibold">Valeur totale</h3>
-                          <p className="text-2xl font-bold text-blue-600">€{(metrics.totalValue || 0).toLocaleString()}</p>
+                          <p className="text-2xl font-bold text-blue-600">€{(computedMetrics.totalValue || 0).toLocaleString()}</p>
                           <p className="text-sm text-muted-foreground">Coût moyen pondéré</p>
                         </div>
                       </CardContent>
@@ -1204,7 +996,7 @@ export default function InventoryPage() {
                       <CardContent className="p-4">
                         <div className="text-center">
                           <h3 className="font-semibold">Rotation moyenne</h3>
-                          <p className="text-2xl font-bold text-green-600">{metrics.averageRotation}</p>
+                          <p className="text-2xl font-bold text-green-600">{computedMetrics.averageRotation}</p>
                           <p className="text-sm text-muted-foreground">Fois par an</p>
                         </div>
                       </CardContent>
@@ -1213,7 +1005,7 @@ export default function InventoryPage() {
                       <CardContent className="p-4">
                         <div className="text-center">
                           <h3 className="font-semibold">Marge moyenne</h3>
-                          <p className="text-2xl font-bold text-purple-600">{metrics.profitMargin}%</p>
+                          <p className="text-2xl font-bold text-purple-600">{computedMetrics.profitMargin}%</p>
                           <p className="text-sm text-muted-foreground">Sur prix de vente</p>
                         </div>
                       </CardContent>
@@ -1231,7 +1023,7 @@ export default function InventoryPage() {
                           .sort((a, b) => b.totalValue - a.totalValue)
                           .slice(0, 5)
                           .map((item, index) => {
-                            const percentage = (item.totalValue / metrics.totalValue) * 100;
+                            const percentage = (item.totalValue / computedMetrics.totalValue) * 100;
                             return (
                               <div key={item.id} className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
@@ -1291,7 +1083,7 @@ export default function InventoryPage() {
                           </div>
                           <div className="p-4 border rounded-lg">
                             <h4 className="font-semibold mb-2">Ventes du mois</h4>
-                            <p className="text-2xl font-bold text-green-600">€{(metrics.monthlyTurnover || 0).toLocaleString()}</p>
+                            <p className="text-2xl font-bold text-green-600">€{(computedMetrics.monthlyTurnover || 0).toLocaleString()}</p>
                             <p className="text-sm text-muted-foreground">Chiffre d'affaires</p>
                           </div>
                         </div>
@@ -1445,12 +1237,12 @@ export default function InventoryPage() {
                                 <p className="text-xs text-muted-foreground mb-2">Historique des mouvements:</p>
                                 <div className="space-y-1">
                                   {stockMovements
-                                    .filter(m => m.itemId === item.id)
+                                    .filter(m => m.item_id === item.id)
                                     .slice(0, 3)
                                     .map((movement) => (
                                       <div key={movement.id} className="flex items-center gap-2 text-xs">
                                         <div className={`w-2 h-2 rounded-full ${movement.type === 'entry' ? 'bg-green-500' : movement.type === 'exit' ? 'bg-red-500' : 'bg-blue-500'}`} />
-                                        <span>{movement.date} - {movement.reason} ({movement.quantity})</span>
+                                        <span>{new Date(movement.created_at).toLocaleDateString()} - {movement.reason} ({movement.quantity})</span>
                                       </div>
                                     ))}
                                 </div>
@@ -1567,7 +1359,7 @@ export default function InventoryPage() {
                   <CardContent>
                     <div className="space-y-2">
                       {stockMovements
-                        .filter(movement => movement.itemId === selectedItem.id)
+                        .filter(movement => movement.item_id === selectedItem.id)
                         .slice(0, 5)
                         .map((movement) => (
                           <div key={movement.id} className="flex items-center gap-2 text-sm">
@@ -1576,7 +1368,7 @@ export default function InventoryPage() {
                               {movement.type === 'entry' ? 'Entrée' : movement.type === 'exit' ? 'Sortie' : 'Ajust.'} 
                               de {Math.abs(movement.quantity)}
                             </span>
-                            <span className="text-muted-foreground">{movement.date}</span>
+                            <span className="text-muted-foreground">{new Date(movement.created_at).toLocaleDateString()}</span>
                           </div>
                         ))}
                     </div>

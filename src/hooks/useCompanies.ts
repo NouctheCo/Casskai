@@ -1,7 +1,7 @@
-// @ts-nocheck
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/utils/logger';
 import type { Company, UserCompany, UserRole } from '@/types/database.types';
 
 export interface CompanyWithRole extends Company {
@@ -74,7 +74,7 @@ export function useCompanies() {
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch companies');
-      console.error('Error fetching companies:', err);
+      logger.error('Error fetching companies:', err)
     } finally {
       setLoading(false);
     }
@@ -99,7 +99,7 @@ export function useCompanies() {
           user_uuid: user.id,
           country_code: companyData.country || 'FR',
           currency_code: companyData.currency || 'EUR',
-          accounting_standard_param: companyData.accountingStandard || null,
+          accounting_standard_param: (companyData as any).accountingStandard || null,
         }
       );
 
@@ -116,7 +116,7 @@ export function useCompanies() {
 
       const newCompany: CompanyWithRole = {
         ...company,
-        role: 'owner' as UserRole,
+        role: 'owner' as unknown as UserRole,
         is_default: companies.length === 0, // First company becomes default
       };
 
@@ -131,7 +131,7 @@ export function useCompanies() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create company';
       setError(errorMessage);
-      console.error('Error creating company:', err);
+      logger.error('Error creating company:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -182,7 +182,7 @@ export function useCompanies() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update company';
       setError(errorMessage);
-      console.error('Error updating company:', err);
+      logger.error('Error updating company:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -219,7 +219,7 @@ export function useCompanies() {
           is_default: c.id === companyId
         })));
       } catch (err) {
-        console.error('Error updating default company:', err);
+        logger.error('Error updating default company:', err);
         // Continue with local switch even if DB update fails
       }
     }

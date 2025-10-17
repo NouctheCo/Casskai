@@ -1,20 +1,22 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { CrmDashboardData } from '../../types/crm.types';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { 
-  Users, 
-  TrendingUp, 
-  Target, 
-  DollarSign, 
-  Calendar, 
+import {
+  Users,
+  TrendingUp,
+  Target,
+  DollarSign,
+  Calendar,
   Activity,
   ArrowUpRight,
   ArrowDownRight,
-  Eye
+  Eye,
+  Minus
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { calculateTrend, formatTrend } from '@/utils/trendCalculations';
 
 interface CrmDashboardProps {
   dashboardData: CrmDashboardData;
@@ -24,14 +26,44 @@ interface CrmDashboardProps {
   onCreateAction?: () => void;
 }
 
-const CrmDashboard: React.FC<CrmDashboardProps> = ({ 
-  dashboardData, 
-  loading, 
+const CrmDashboard: React.FC<CrmDashboardProps> = ({
+  dashboardData,
+  loading,
   onCreateClient,
   onCreateOpportunity,
   onCreateAction
 }) => {
   const { t } = useTranslation();
+
+  // Calculer les trends dynamiquement à partir des données revenue_data
+  // IMPORTANT: Hook appelé avant tout return conditionnel
+  const trends = useMemo(() => {
+    if (!dashboardData?.revenue_data || dashboardData.revenue_data.length < 2) {
+      return {
+        clientsTrend: null,
+        opportunitiesTrend: null,
+        pipelineValueTrend: null,
+        conversionRateTrend: null
+      };
+    }
+
+    const revenue_data = dashboardData.revenue_data;
+    // Utiliser les 2 derniers mois de données disponibles
+    const currentMonth = revenue_data[revenue_data.length - 1];
+    const previousMonth = revenue_data[revenue_data.length - 2];
+
+    // Calculer les trends basés sur le revenu comme proxy (si pas d'autres données historiques)
+    const revenueTrend = calculateTrend(currentMonth?.revenue || 0, previousMonth?.revenue || 0);
+
+    // Pour les autres métriques, utiliser des approximations basées sur les données disponibles
+    // Dans un système parfait, ces données viendraient du backend avec historique complet
+    return {
+      clientsTrend: revenueTrend, // Approximation: croissance clients suit croissance CA
+      opportunitiesTrend: revenueTrend, // Approximation: croissance opportunités suit croissance CA
+      pipelineValueTrend: revenueTrend, // Approximation: valeur pipeline suit croissance CA
+      conversionRateTrend: null // Pas de données historiques disponibles
+    };
+  }, [dashboardData?.revenue_data]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
@@ -107,8 +139,9 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
       icon: Users,
       color: 'text-blue-600',
       bgColor: 'bg-blue-100',
-      change: '+12%',
-      positive: true
+      change: formatTrend(trends.clientsTrend),
+      trend: trends.clientsTrend,
+      positive: trends.clientsTrend !== null && trends.clientsTrend > 0
     },
     {
       title: t('crm.dashboard.stats.activeOpportunities'),
@@ -116,8 +149,9 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
       icon: Target,
       color: 'text-green-600',
       bgColor: 'bg-green-100',
-      change: '+8%',
-      positive: true
+      change: formatTrend(trends.opportunitiesTrend),
+      trend: trends.opportunitiesTrend,
+      positive: trends.opportunitiesTrend !== null && trends.opportunitiesTrend > 0
     },
     {
       title: t('crm.dashboard.stats.pipelineValue'),
@@ -125,8 +159,9 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
       icon: DollarSign,
       color: 'text-purple-600',
       bgColor: 'bg-purple-100',
-      change: '+15%',
-      positive: true
+      change: formatTrend(trends.pipelineValueTrend),
+      trend: trends.pipelineValueTrend,
+      positive: trends.pipelineValueTrend !== null && trends.pipelineValueTrend > 0
     },
     {
       title: t('crm.dashboard.stats.conversionRate'),
@@ -134,7 +169,8 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
       icon: TrendingUp,
       color: 'text-orange-600',
       bgColor: 'bg-orange-100',
-      change: '-2%',
+      change: formatTrend(trends.conversionRateTrend),
+      trend: trends.conversionRateTrend,
       positive: false
     }
   ];
@@ -161,17 +197,29 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
                     <div className={`text-2xl font-bold ${stat.color} mb-1`}>
                       {stat.value}
                     </div>
-                    <div className="flex items-center text-xs">
-                      {stat.positive ? (
-                        <ArrowUpRight className="w-3 h-3 text-green-600 mr-1" />
-                      ) : (
-                        <ArrowDownRight className="w-3 h-3 text-red-600 mr-1" />
-                      )}
-                      <span className={stat.positive ? 'text-green-600' : 'text-red-600'}>
-                        {stat.change}
-                      </span>
-                      <span className="text-gray-500 ml-1">vs mois dernier</span>
-                    </div>
+                    {stat.trend !== null ? (
+                      <div className="flex items-center text-xs">
+                        {stat.trend === 0 ? (
+                          <Minus className="w-3 h-3 text-gray-400 mr-1" />
+                        ) : stat.positive ? (
+                          <ArrowUpRight className="w-3 h-3 text-green-600 mr-1" />
+                        ) : (
+                          <ArrowDownRight className="w-3 h-3 text-red-600 mr-1" />
+                        )}
+                        <span className={
+                          stat.trend === 0 ? 'text-gray-400' :
+                          stat.positive ? 'text-green-600' : 'text-red-600'
+                        }>
+                          {stat.change}
+                        </span>
+                        <span className="text-gray-500 ml-1">vs mois dernier</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center text-xs">
+                        <span className="text-gray-400">-</span>
+                        <span className="text-gray-500 ml-1">Pas de données historiques</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardContent>

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState } from 'react';
 import { 
   Select, 
@@ -165,7 +164,7 @@ function EnterpriseManagement({ onClose }: { onClose: () => void }) {
               <span className="text-2xl">{getCountryFlag(enterprise.countryCode)}</span>
               <div>
                 <h3 className="font-semibold">{enterprise.name}</h3>
-                <p className="text-sm text-muted-foreground">{enterprise.legalName}</p>
+                <p className="text-sm text-muted-foreground">{enterprise.registrationNumber}</p>
               </div>
               {enterprise.id === currentEnterpriseId && (
                 <Badge variant="default" className="ml-2">

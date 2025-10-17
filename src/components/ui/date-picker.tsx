@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as React from "react";
 import { format } from "date-fns";
 import { fr, enUS, es } from "date-fns/locale";
@@ -10,9 +9,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useLocale } from "@/contexts/LocaleContext";
 
 const localeMap = {
-  fr: fr,
+  fr,
   en: enUS,
-  es: es,
+  es,
 };
 
 export function DatePicker({ value, onChange, placeholder, className }) {

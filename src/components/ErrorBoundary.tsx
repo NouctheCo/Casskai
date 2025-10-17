@@ -3,6 +3,7 @@ import { AlertTriangle, RefreshCw, Home, Bug, ChevronDown, ChevronUp } from 'luc
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { logger } from '@/utils/logger';
 
 // Types pour l'Error Boundary
 interface ErrorBoundaryState {
@@ -57,7 +58,7 @@ class ErrorReportingService {
     _additionalContext?: Record<string, unknown>
   ): Promise<void> {
     // Désactivé pour éviter les erreurs 405 - endpoint /api/errors n'existe pas
-    console.warn('[ErrorBoundary] Error reporting disabled to avoid 405 errors');
+    logger.warn('[ErrorBoundary] Error reporting disabled to avoid 405 errors');
     return Promise.resolve();
   }
 
@@ -300,7 +301,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       );
       
       // Feedback utilisateur
-      console.warn('Erreur signalée avec succès à l\'équipe technique');
+      logger.warn('Erreur signalée avec succès à l\'équipe technique');
       // Au lieu d'utiliser alert(), on pourrait utiliser un toast ou une notification
       // toast.success('Merci ! Le problème a été signalé à notre équipe technique.');
     }
@@ -366,7 +367,7 @@ const _useErrorHandler = () => {
 
     // Log en développement
     if (process.env.NODE_ENV === 'development') {
-      console.error('[useErrorHandler]', error, context);
+      logger.error('[useErrorHandler]', error, context)
     }
   };
 

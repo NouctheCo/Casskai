@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState } from 'react';
 import { Opportunity, OpportunityFormData, Client, Contact } from '../../types/crm.types';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
@@ -23,6 +22,12 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { EntitySelector, type EntityOption, type EntityFormField } from '../common/EntitySelector';
+import { thirdPartiesService } from '../../services/thirdPartiesService';
+import { useAuth } from '../../contexts/AuthContext';
+import { useHR } from '../../hooks/useHR';
+import { hrService } from '../../services/hrService';
+import { logger } from '@/utils/logger';
 
 interface OpportunitiesKanbanProps {
   opportunities: Opportunity[];
@@ -47,6 +52,11 @@ const OpportunitiesKanban: React.FC<OpportunitiesKanbanProps> = ({
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingOpportunity, setEditingOpportunity] = useState<Opportunity | null>(null);
   const [_selectedStage, setSelectedStage] = useState<string>('');
+
+  const { currentCompany } = useAuth();
+
+  // Use HR hook to get employees and creation methods
+  const { employees, createEmployee, fetchEmployees } = useHR();
 
   const [formData, setFormData] = useState<OpportunityFormData>({
     title: '',
@@ -173,7 +183,7 @@ const OpportunitiesKanban: React.FC<OpportunitiesKanbanProps> = ({
       setIsFormOpen(false);
       setEditingOpportunity(null);
     } catch (error) {
-      console.error('Error submitting opportunity form:', error);
+      logger.error('Error submitting opportunity form:', error)
     }
   };
 
@@ -181,13 +191,158 @@ const OpportunitiesKanban: React.FC<OpportunitiesKanbanProps> = ({
     try {
       await onUpdateOpportunity(opportunityId, { stage: newStage as any });
     } catch (error) {
-      console.error('Error updating opportunity stage:', error);
+      logger.error('Error updating opportunity stage:', error)
+    }
+  };
+
+  const handleCreateEmployee = async (employeeData: Record<string, any>) => {
+    try {
+      if (!currentCompany) {
+        throw new Error('No current company selected');
+      }
+
+      const success = await createEmployee({
+        employee_number: employeeData.employee_number || `EMP${Date.now()}`,
+        first_name: employeeData.first_name,
+        last_name: employeeData.last_name,
+        email: employeeData.email || '',
+        phone: employeeData.phone || '',
+        position: employeeData.position || '',
+        department: employeeData.department || '',
+        hire_date: employeeData.hire_date || new Date().toISOString().split('T')[0],
+        salary: employeeData.salary || 0,
+        contract_type: employeeData.contract_type || 'permanent',
+        status: 'active'
+      });
+
+      if (success) {
+        // Refresh employees list
+        await fetchEmployees();
+        return { success: true, id: 'new-employee-id' }; // We'll get the actual ID from the refreshed data
+      } else {
+        throw new Error('Failed to create employee');
+      }
+    } catch (error) {
+      logger.error('Error creating employee:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  };
+
+  const clientCreateFormFields: EntityFormField[] = [
+    {
+      name: 'company_name',
+      label: t('crm.clientForm.companyName'),
+      type: 'text',
+      required: true,
+      placeholder: t('crm.clientForm.companyNamePlaceholder')
+    },
+    {
+      name: 'email',
+      label: t('crm.clientForm.email'),
+      type: 'email',
+      required: false,
+      placeholder: t('crm.clientForm.emailPlaceholder')
+    },
+    {
+      name: 'phone',
+      label: t('crm.clientForm.phone'),
+      type: 'text',
+      required: false,
+      placeholder: t('crm.clientForm.phonePlaceholder')
+    },
+    {
+      name: 'address',
+      label: t('crm.clientForm.address'),
+      type: 'text',
+      required: false,
+      placeholder: t('crm.clientForm.addressPlaceholder')
+    }
+  ];
+
+  const clientOptions: EntityOption[] = clients.map(client => ({
+    id: client.id,
+    label: client.company_name,
+    sublabel: client.website || undefined
+  }));
+
+  const handleCreateClient = async (clientData: Record<string, any>) => {
+    try {
+      if (!currentCompany?.id) {
+        return { success: false, error: 'Aucune entreprise sélectionnée' };
+      }
+
+      const result = await thirdPartiesService.createThirdParty({
+        type: 'customer',
+        name: clientData.company_name,
+        email: clientData.email,
+        phone: clientData.phone,
+        address: clientData.address,
+        city: clientData.city || '',
+        postal_code: clientData.postal_code || '',
+        country: 'FR'
+      });
+
+      if (result) {
+        // TODO: Rafraîchir la liste des clients
+        // Il faudrait ajouter une fonction pour recharger les clients depuis le parent
+        return { success: true, id: result.id };
+      }
+
+      return { success: false, error: 'Échec de la création du client' };
+    } catch (error) {
+      logger.error('Error creating client:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   };
 
   const getClientContacts = (clientId: string) => {
+    if (!clientId) return [];
     return contacts.filter(contact => contact.client_id === clientId);
   };
+
+  const employeeCreateFormFields: EntityFormField[] = [
+    {
+      name: 'first_name',
+      label: t('hr.employeeForm.firstName'),
+      type: 'text',
+      required: true,
+      placeholder: t('hr.employeeForm.firstNamePlaceholder')
+    },
+    {
+      name: 'last_name',
+      label: t('hr.employeeForm.lastName'),
+      type: 'text',
+      required: true,
+      placeholder: t('hr.employeeForm.lastNamePlaceholder')
+    },
+    {
+      name: 'email',
+      label: t('hr.employeeForm.email'),
+      type: 'email',
+      required: true,
+      placeholder: t('hr.employeeForm.emailPlaceholder')
+    },
+    {
+      name: 'position',
+      label: t('hr.employeeForm.position'),
+      type: 'text',
+      required: true,
+      placeholder: t('hr.employeeForm.positionPlaceholder')
+    },
+    {
+      name: 'department',
+      label: t('hr.employeeForm.department'),
+      type: 'text',
+      required: true,
+      placeholder: t('hr.employeeForm.departmentPlaceholder')
+    }
+  ];
+
+  const employeeOptions: EntityOption[] = employees.map(employee => ({
+    id: employee.id,
+    label: employee.full_name || `${employee.first_name} ${employee.last_name}`,
+    sublabel: employee.position || undefined
+  }));
 
   if (loading) {
     return (
@@ -424,22 +579,17 @@ const OpportunitiesKanban: React.FC<OpportunitiesKanbanProps> = ({
               </div>
               <div className="space-y-2">
                 <Label>{t('crm.opportunityForm.client')} *</Label>
-                <Select
+                <EntitySelector
+                  options={clientOptions}
                   value={formData.client_id}
-                  onValueChange={(value) => setFormData({...formData, client_id: value, contact_id: ''})}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('crm.opportunityForm.selectClient')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clients.map((client) => (
-                      <SelectItem key={client.id} value={client.id}>
-                        {client.company_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onChange={(value) => setFormData({...formData, client_id: value, contact_id: ''})}
+                  onCreateEntity={handleCreateClient}
+                  createFormFields={clientCreateFormFields}
+                  entityName={t('crm.clientForm.client')}
+                  entityNamePlural={t('crm.clientForm.clients')}
+                  placeholder={t('crm.opportunityForm.selectClient')}
+                  canCreate={true}
+                />
               </div>
               <div className="space-y-2">
                 <Label>{t('crm.opportunityForm.contact')}</Label>
@@ -518,11 +668,17 @@ const OpportunitiesKanban: React.FC<OpportunitiesKanbanProps> = ({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="assigned_to">{t('crm.opportunityForm.assignedTo')}</Label>
-                <Input
-                  id="assigned_to"
+                <Label>{t('crm.opportunityForm.assignedTo')}</Label>
+                <EntitySelector
+                  options={employeeOptions}
                   value={formData.assigned_to}
-                  onChange={(e) => setFormData({...formData, assigned_to: e.target.value})}
+                  onChange={(value) => setFormData({...formData, assigned_to: value})}
+                  onCreateEntity={handleCreateEmployee}
+                  createFormFields={employeeCreateFormFields}
+                  entityName={t('hr.employee.entityName')}
+                  entityNamePlural={t('hr.employee.entityNamePlural')}
+                  placeholder={t('crm.opportunityForm.assignedToPlaceholder')}
+                  canCreate={true}
                 />
               </div>
             </div>

@@ -1,6 +1,5 @@
-// @ts-nocheck
 // Types liés aux factures, devis et clients
-import type { Database } from '../database-types-fix'
+import type { Database } from '../supabase'
 
 // Types pour les factures
 export type Invoice = Database['public']['Tables']['invoices']['Row']

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,8 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
-import { useModulesSafe, useModules } from '@/contexts/ModulesContext';
-import { moduleStateService } from '@/services/moduleStateService';
+import { useModulesSafe } from '@/contexts/ModulesContext';
 import { motion } from 'framer-motion';
 import { 
   Home,
@@ -32,6 +30,7 @@ import {
   ExternalLink,
   Star
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 // Fonction pour obtenir les classes de couleur avec support dark mode
 const getColorClasses = (color: string) => {
@@ -73,7 +72,7 @@ const MODULES_CONFIG = [
     description: 'Gestion complète de votre comptabilité générale',
     category: 'FINANCE & COMPTABILITÉ',
     icon: Briefcase,
-    type: 'premium' as const,
+    type: 'starter' as const,
     path: '/accounting',
     color: 'green'
   },
@@ -83,7 +82,7 @@ const MODULES_CONFIG = [
     description: 'Synchronisation et rapprochement bancaire automatisé',
     category: 'FINANCE & COMPTABILITÉ',
     icon: Landmark,
-    type: 'premium' as const,
+    type: 'starter' as const,
     path: '/banks',
     color: 'emerald'
   },
@@ -93,19 +92,29 @@ const MODULES_CONFIG = [
     description: 'Création et gestion de vos factures clients',
     category: 'FINANCE & COMPTABILITÉ',
     icon: FileText,
-    type: 'premium' as const,
+    type: 'starter' as const,
     path: '/invoicing',
     color: 'purple'
   },
   {
-    key: 'tax',
-    name: 'Fiscalité',
-    description: 'Gestion fiscale et préparation des déclarations',
+    key: 'purchases',
+    name: 'Achats',
+    description: 'Gestion des achats et des fournisseurs',
     category: 'FINANCE & COMPTABILITÉ',
-    icon: Zap,
-    type: 'premium' as const,
-    path: '/tax',
-    color: 'yellow'
+    icon: ShoppingCart,
+    type: 'starter' as const,
+    path: '/purchases',
+    color: 'orange'
+  },
+  {
+    key: 'thirdParties',
+    name: 'Tiers',
+    description: 'Gestion centralisée de tous vos contacts',
+    category: 'FINANCE & COMPTABILITÉ',
+    icon: UsersRound,
+    type: 'starter' as const,
+    path: '/sales-crm',
+    color: 'amber'
   },
   {
     key: 'reports',
@@ -113,93 +122,81 @@ const MODULES_CONFIG = [
     description: 'Génération de rapports financiers détaillés',
     category: 'FINANCE & COMPTABILITÉ',
     icon: BarChart3,
-    type: 'premium' as const,
+    type: 'pro' as const,
     path: '/reports',
     color: 'indigo'
   },
-
-  // BUSINESS & VENTES
   {
-    key: 'salesCrm',
-    name: 'CRM & Ventes',
-    description: 'Gestion complète de la relation client',
-    category: 'BUSINESS & VENTES',
-    icon: Users,
-    type: 'premium' as const,
-    path: '/modules/crm',
-    color: 'rose'
+    key: 'budget',
+    name: '💰 Budget & Prévisions',
+    description: '🎯 Création et suivi des budgets annuels avec analyses complètes',
+    category: 'FINANCE & COMPTABILITÉ',
+    icon: BarChart3,
+    type: 'pro' as const,
+    path: '/budget',
+    color: 'amber'
   },
   {
-    key: 'purchases',
-    name: 'Achats',
-    description: 'Gestion des achats et des fournisseurs',
-    category: 'BUSINESS & VENTES',
-    icon: ShoppingCart,
-    type: 'premium' as const,
-    path: '/purchases',
-    color: 'orange'
-  },
-  {
-    key: 'inventory',
-    name: 'Stock & Inventaire',
-    description: 'Suivi des stocks et gestion des inventaires',
-    category: 'BUSINESS & VENTES',
-    icon: Archive,
-    type: 'premium' as const,
-    path: '/inventory',
-    color: 'teal'
-  },
-  {
-    key: 'contracts',
-    name: 'Contrats',
-    description: 'Gestion des contrats et documents légaux',
-    category: 'BUSINESS & VENTES',
-    icon: FileText,
-    type: 'premium' as const,
-    path: '/contracts',
-    color: 'slate'
-  },
-  {
-    key: 'forecasts',
-    name: 'Prévisions',
-    description: 'Analyses prédictives et prévisions financières',
-    category: 'BUSINESS & VENTES',
-    icon: Sparkles,
-    type: 'premium' as const,
-    path: '/forecasts',
-    color: 'cyan'
-  },
-
-  // GESTION & PROJETS
-  {
-    key: 'projects',
-    name: 'Projets',
-    description: 'Gestion de projets et suivi des tâches',
-    category: 'GESTION & PROJETS',
-    icon: KanbanSquare,
-    type: 'premium' as const,
-    path: '/modules/projects',
-    color: 'blue'
+    key: 'tax',
+    name: 'Fiscalité',
+    description: 'Gestion fiscale et préparation des déclarations',
+    category: 'FINANCE & COMPTABILITÉ',
+    icon: Zap,
+    type: 'pro' as const,
+    path: '/tax',
+    color: 'yellow'
   },
   {
     key: 'humanResources',
     name: 'Ressources Humaines',
     description: 'Gestion RH complète et paie',
-    category: 'GESTION & PROJETS',
+    category: 'FINANCE & COMPTABILITÉ',
     icon: Users2,
-    type: 'premium' as const,
+    type: 'pro' as const,
     path: '/modules/hr',
     color: 'green'
   },
+
+  // MODULES ENTERPRISE
   {
-    key: 'thirdParties',
-    name: 'Tiers',
-    description: 'Gestion centralisée de tous vos contacts',
-    category: 'GESTION & PROJETS',
-    icon: UsersRound,
-    type: 'premium' as const,
-    path: '/third-parties',
-    color: 'amber'
+    key: 'salesCrm',
+    name: 'CRM & Ventes',
+    description: 'Gestion complète de la relation client',
+    category: 'MODULES ENTERPRISE',
+    icon: Users,
+    type: 'enterprise' as const,
+    path: '/modules/crm',
+    color: 'rose'
+  },
+  {
+    key: 'inventory',
+    name: 'Stock & Inventaire',
+    description: 'Suivi des stocks et gestion des inventaires',
+    category: 'MODULES ENTERPRISE',
+    icon: Archive,
+    type: 'enterprise' as const,
+    path: '/inventory',
+    color: 'teal'
+  },
+  {
+    key: 'projects',
+    name: 'Projets',
+    description: 'Gestion de projets et suivi des tâches',
+    category: 'MODULES ENTERPRISE',
+    icon: KanbanSquare,
+    type: 'enterprise' as const,
+    path: '/modules/projects',
+    color: 'blue'
+  },
+  {
+    key: 'contracts',
+    name: 'Contrats',
+    description: 'Gestion des contrats et documents légaux',
+    category: 'MODULES ENTERPRISE',
+    icon: FileText,
+    type: 'enterprise' as const,
+    path: '/contracts',
+    color: 'slate'
   },
 
   // ADMINISTRATION
@@ -266,15 +263,6 @@ const ModuleCard: React.FC<ModuleCardProps> = ({
           ? 'border-green-200 dark:border-green-700 bg-green-50/30 dark:bg-green-900/20' 
           : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
       }`}>
-        {/* Badge Premium */}
-        {module.type === 'premium' && (
-          <div className="absolute top-2 right-2">
-            <Badge className="bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 border-amber-200 dark:border-amber-700">
-              <Crown className="w-3 h-3 mr-1" />
-              Premium
-            </Badge>
-          </div>
-        )}
         
         <CardHeader className="pb-3">
           <div className="flex items-start gap-3">
@@ -334,10 +322,14 @@ const ModuleCard: React.FC<ModuleCardProps> = ({
               <Switch
                 checked={isActive}
                 onCheckedChange={(checked) => {
-                  console.log(`Switch changé pour ${module.key}: ${checked}`);
+                  logger.info(`Switch changé pour ${module.key}: ${checked}`);
                   onToggle(module.key, checked);
                 }}
-                disabled={module.type === 'core'} // Les modules core sont toujours actifs
+                disabled={
+                  module.type === 'core' || // Les modules core sont toujours actifs
+                  (!canAccess && !isTrialUser) || // Modules non autorisés en plan payant
+                  (!isTrialUser && canAccess && isActive) // Modules inclus dans le plan = forcément actifs
+                }
               />
               <div className="text-sm">
                 <div className="font-medium">
@@ -385,19 +377,22 @@ export default function ModulesManagementPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [moduleStates, setModuleStates] = useState<Record<string, boolean>>(() => {
-    return moduleStateService.getAllModuleStates();
+    const stored = localStorage.getItem('casskai-module-states');
+    return stored ? JSON.parse(stored) : {};
   });
 
   // Écouter les changements d'état des modules
   useEffect(() => {
     const handleModuleStateChange = (event: CustomEvent) => {
-      console.log('Module state changed:', event.detail);
-      setModuleStates(moduleStateService.getAllModuleStates());
+      logger.info('Module state changed:', event.detail);
+      const stored = localStorage.getItem('casskai-module-states');
+      setModuleStates(stored ? JSON.parse(stored) : {});
     };
 
     const handleModuleStatesReset = () => {
-      console.log('Module states reset');
-      setModuleStates(moduleStateService.getAllModuleStates());
+      logger.info('Module states reset');
+      const stored = localStorage.getItem('casskai-module-states');
+      setModuleStates(stored ? JSON.parse(stored) : {});
     };
 
     window.addEventListener('module-state-changed', handleModuleStateChange as EventListener);
@@ -412,22 +407,21 @@ export default function ModulesManagementPage() {
   // Calcul des statistiques réelles
   const stats = useMemo(() => {
     const activeModules = MODULES_CONFIG.filter(m => moduleStates[m.key] !== false);
-    const premiumModules = MODULES_CONFIG.filter(m => m.type === 'premium');
+    const coreModules = MODULES_CONFIG.filter(m => m.type === 'core');
     const accessibleModules = MODULES_CONFIG.filter(m => canAccessModule(m.key));
-    
+
     return {
       total: MODULES_CONFIG.length,
       active: activeModules.length,
-      premium: premiumModules.length,
+      core: coreModules.length,
       accessible: accessibleModules.length
     };
   }, [moduleStates, canAccessModule]);
 
-  // Catégories
+  // Catégories - Toutes les catégories utilisées dans MODULES_CONFIG
   const categories = [
     'FINANCE & COMPTABILITÉ',
-    'BUSINESS & VENTES', 
-    'GESTION & PROJETS',
+    'MODULES ENTERPRISE',
     'ADMINISTRATION'
   ];
 
@@ -453,46 +447,69 @@ export default function ModulesManagementPage() {
   }, [filteredModules, categories]);
 
   const handleToggleModule = (key: string, active: boolean) => {
-    console.log(`Tentative de ${active ? 'activation' : 'désactivation'} du module ${key}`);
-    
-    // Vérifier les permissions d'abonnement
-    if (active && !canAccessModule(key) && !isTrialUser) {
-      alert('Ce module nécessite une mise à niveau de votre abonnement');
-      return;
-    }
+    logger.info(`Tentative de ${active ? 'activation' : 'désactivation'} du module ${key}`);
 
-    // Utiliser le service pour la logique d'activation/désactivation
-    try {
-      const success = active 
-        ? moduleStateService.activateModule(key, false) // pas de check permissions ici
-        : moduleStateService.deactivateModule(key);
-
-      if (!success) {
-        // Le service a rejeté l'opération (probablement un module core)
-        console.warn(`Opération rejetée pour le module ${key}`);
+    // En plan payant : vérifier si le module est autorisé pour ce plan
+    if (!isTrialUser) {
+      if (active && !canAccessModule(key)) {
+        alert('Ce module n\'est pas inclus dans votre abonnement actuel. Veuillez mettre à niveau votre plan.');
         return;
       }
 
+      // En plan payant, on ne peut pas désactiver les modules autorisés
+      // Seuls les modules core peuvent être désactivés/activés librement
+      const isCoreModule = ['dashboard', 'settings', 'users', 'security'].includes(key);
+      if (!isCoreModule && canAccessModule(key)) {
+        // Module inclus dans le plan = toujours actif
+        if (!active) {
+          alert('Ce module est inclus dans votre abonnement et ne peut pas être désactivé.');
+          return;
+        }
+      }
+    }
+
+    // En mode essai : libre choix de tous les modules
+    // En plan payant : seuls les modules core peuvent être librement activés/désactivés
+
+    // Utiliser localStorage directement pour la logique d'activation/désactivation
+    try {
+      const currentStates = localStorage.getItem('casskai-module-states');
+      const states = currentStates ? JSON.parse(currentStates) : {};
+
+      // Mettre à jour l'état
+      states[key] = active;
+
+      // Sauvegarder dans localStorage
+      localStorage.setItem('casskai-module-states', JSON.stringify(states));
+
       // Mettre à jour l'état local immédiatement
-      const newStates = moduleStateService.getAllModuleStates();
-      setModuleStates(newStates);
-      
-      console.log(`Module ${key} ${active ? 'activé' : 'désactivé'} avec succès`);
+      setModuleStates(states);
+
+      // Émettre un événement pour synchroniser avec d'autres composants
+      window.dispatchEvent(new CustomEvent('module-state-changed', {
+        detail: {
+          moduleKey: key,
+          isActive: active,
+          allStates: states
+        }
+      }));
+
+      logger.info(`Module ${key} ${active ? 'activé' : 'désactivé'} avec succès`)
     } catch (error) {
-      console.error('Erreur lors du toggle du module:', error);
+      logger.error('Erreur lors du toggle du module:', error)
     }
   };
 
   const handleOpenModule = (path: string) => {
     // Vérifier que le chemin n'est pas vide et naviguer correctement
-    console.log('Navigation vers:', path);
+    logger.info('Navigation vers:', path);
     
     if (path && path !== '#') {
       // Utiliser React Router pour la navigation au lieu de window.location.href
       // Cela évite les rechargements de page et les redirections non désirées
       navigate(path);
     } else {
-      console.warn('Chemin de module invalide:', path);
+      logger.warn('Chemin de module invalide:', path)
     }
   };
 
@@ -563,12 +580,12 @@ export default function ModulesManagementPage() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
-                  <Crown className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                  <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Premium</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.premium}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Core</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.core}</p>
                 </div>
               </div>
             </CardContent>

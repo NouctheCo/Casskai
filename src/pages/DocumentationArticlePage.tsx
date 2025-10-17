@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -26,6 +25,7 @@ import { PageContainer } from '@/components/ui/PageContainer';
 import { PublicNavigation } from '@/components/navigation/PublicNavigation';
 import { categoriesData } from './DocumentationCategoryPage';
 import { WhatsAppChat } from '@/components/chat/WhatsAppChat';
+import { logger } from '@/utils/logger';
 
 // Base de données simplifiée des articles
 const articlesDatabase = {
@@ -1750,7 +1750,7 @@ const articlesDatabase = {
       '    }));',
       '',
       '    await sheet.addRows(rows);',
-      '    console.log(`${rows.length} factures exportées vers Google Sheets`);',
+      '    logger.info(`${rows.length} factures exportées vers Google Sheets`);',
       '  }',
       '}',
       '',
@@ -1798,7 +1798,7 @@ const articlesDatabase = {
       '      const data = await response.json();',
       '      setInvoices(data.data);',
       '    } catch (error) {',
-      '      console.error(\'Erreur fetch:\', error);',
+      '      logger.error(\'Erreur fetch:\', error);',
       '    } finally {',
       '      setLoading(false);',
       '    }',
@@ -1894,10 +1894,10 @@ const DocumentationArticlePage = () => {
     setHasRated(true);
     setUserRating(rating);
     
-    toast({
+    (toast as any)({
       title: "Merci pour votre retour !",
-      description: rating === 'positive' 
-        ? "Nous sommes ravis que cet article vous ait été utile." 
+      description: rating === 'positive'
+        ? "Nous sommes ravis que cet article vous ait été utile."
         : "Nous prendrons en compte votre retour pour améliorer cet article.",
       duration: 3000
     });
@@ -1912,7 +1912,7 @@ const DocumentationArticlePage = () => {
           url: window.location.href
         });
       } catch (error) {
-        console.log('Partage annulé');
+        logger.info('Partage annulé')
       }
     } else {
       toast({
@@ -1941,7 +1941,7 @@ const DocumentationArticlePage = () => {
   // handleLiveChat supprimé - remplacé par WhatsAppChat
 
   const handleContactSupport = () => {
-    window.open('mailto:support@casskai.app?subject=' + encodeURIComponent('Question sur: ' + (article?.title || 'Documentation')));
+    window.open(`mailto:support@casskai.app?subject=${  encodeURIComponent(`Question sur: ${  article?.title || 'Documentation'}`)}`);
     toast({
       title: "Contact support",
       description: "Votre client email va s'ouvrir"

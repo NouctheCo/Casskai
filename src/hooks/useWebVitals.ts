@@ -1,7 +1,7 @@
-// @ts-nocheck
 import { useEffect, useCallback, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { useLocation } from 'react-router-dom';
+import { logger } from '@/utils/logger';
 
 // Types pour les Core Web Vitals
 declare const gtag: ((event: string, name: string, params: Record<string, unknown>) => void) | undefined;
@@ -126,7 +126,7 @@ export const useWebVitals = (options?: {
       observer.observe({ type: 'event', buffered: true });
       observer.observe({ type: 'first-input', buffered: true });
     } catch (e) {
-      console.warn('[WebVitals] INP tracking non supporté:', e);
+      logger.warn('[WebVitals] INP tracking non supporté:', e)
     }
   }, []);
 
@@ -186,7 +186,7 @@ export const useWebVitals = (options?: {
   // Mark as ready once listeners are registered
   setIsLoading(false);
       } catch (error) {
-        console.warn('[WebVitals] Erreur lors du chargement de web-vitals:', error);
+        logger.warn('[WebVitals] Erreur lors du chargement de web-vitals:', error);
         setIsLoading(false);
       }
     };
@@ -320,7 +320,7 @@ export const usePerformanceMonitoring = (alertThresholds?: Partial<typeof THRESH
           metric: metric.name,
           value: metric.value,
           threshold: severity === 'critical' ? threshold.poor : threshold.good,
-          severity,
+          severity: severity as 'critical' | 'warning',
           timestamp: Date.now(),
         }].slice(-10)); // Garder seulement les 10 dernières alertes
       }

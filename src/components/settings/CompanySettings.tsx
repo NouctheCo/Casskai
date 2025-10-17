@@ -7,9 +7,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { Building, MapPin, Phone, Mail, Globe, Save, Loader2, Upload } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { Building, MapPin, Phone, Mail, Globe, Save, Loader2, Upload, Trash2, AlertTriangle, Calendar } from 'lucide-react';
+import { useCountries } from '@/hooks/useReferentials';
+import { logger } from '@/utils/logger';
 
-interface CompanySettings {
+interface CompanySettingsForm {
   name: string;
   siret: string;
   address: string;
@@ -22,6 +25,8 @@ interface CompanySettings {
   logo: string;
   currency: string;
   fiscalYear: string;
+  fiscalYearStartMonth: number;
+  fiscalYearStartDay: number;
   accountingMethod: string;
   taxId: string;
   legalForm: string;
@@ -31,24 +36,28 @@ interface CompanySettings {
 }
 
 export function CompanySettings() {
-  const { user, currentCompany } = useAuth();
+  const { user: _user, currentCompany } = useAuth();
   const { toast } = useToast();
+  const { countries, loading: countriesLoading } = useCountries();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showCompanyDeletion, setShowCompanyDeletion] = useState(false);
 
-  const [settings, setSettings] = useState<CompanySettings>({
+  const [settings, setSettings] = useState<CompanySettingsForm>({
     name: '',
     siret: '',
     address: '',
     postalCode: '',
     city: '',
-    country: 'France',
+    country: 'FR',
     phone: '',
     email: '',
     website: '',
     logo: '',
     currency: 'EUR',
     fiscalYear: 'calendar',
+    fiscalYearStartMonth: 1,
+    fiscalYearStartDay: 1,
     accountingMethod: 'accrual',
     taxId: '',
     legalForm: '',
@@ -57,70 +66,212 @@ export function CompanySettings() {
     description: ''
   });
 
-  // Charger les paramètres entreprise
-  useEffect(() => {
-    const loadCompanySettings = async () => {
-      if (!currentCompany?.id) return;
+  // Fonction pour charger les paramètres entreprise
+  const loadCompanySettings = async () => {
+    logger.info('📋 [DEBUG] loadCompanySettings appelé');
+    logger.info('🏢 [DEBUG] currentCompany?.id:', currentCompany?.id);
 
-      setIsLoading(true);
-      try {
-        // TODO: Intégrer Supabase pour charger les paramètres entreprise
-        // Simulation des données - TODO: Intégrer Supabase
-        setSettings({
-          name: currentCompany?.name || '',
-          siret: (currentCompany as any)?.siret || '',
-          address: (currentCompany as any)?.address || '',
-          postalCode: (currentCompany as any)?.postal_code || '',
-          city: (currentCompany as any)?.city || '',
-          country: (currentCompany as any)?.country || 'France',
-          phone: (currentCompany as any)?.phone || '',
-          email: (currentCompany as any)?.email || '',
-          website: (currentCompany as any)?.website || '',
-          logo: (currentCompany as any)?.logo || '',
-          currency: (currentCompany as any)?.currency || 'EUR',
-          fiscalYear: (currentCompany as any)?.fiscal_year || 'calendar',
-          accountingMethod: (currentCompany as any)?.accounting_method || 'accrual',
-          taxId: (currentCompany as any)?.tax_id || '',
-          legalForm: (currentCompany as any)?.legal_form || '',
-          activity: (currentCompany as any)?.activity || '',
-          employees: (currentCompany as any)?.employees || '',
-          description: (currentCompany as any)?.description || ''
-        });
-      } catch (error) {
-        console.error('Erreur chargement paramètres entreprise:', error);
-        toast({
-          title: 'Erreur',
-          description: 'Impossible de charger les paramètres entreprise',
-          variant: 'destructive'
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    if (!currentCompany?.id) {
+      logger.warn('❌ [DEBUG] Pas de currentCompany.id, arrêt du chargement');
+      return;
+    }
 
-    loadCompanySettings();
-  }, [currentCompany, toast]);
-
-  const handleSave = async () => {
-    if (!currentCompany?.id) return;
-
-    setIsSaving(true);
+    setIsLoading(true);
     try {
-      // TODO: Intégrer Supabase pour sauvegarder les paramètres entreprise
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      logger.info('🔍 [DEBUG] Requête Supabase SELECT...');
+      logger.info('🆔 [DEBUG] Recherche entreprise avec ID:', currentCompany.id);
 
-      toast({
-        title: 'Paramètres sauvegardés',
-        description: 'Les paramètres de l\'entreprise ont été mis à jour'
-      });
+      // Charger les données depuis Supabase
+      const { data, error } = await supabase
+        .from('companies')
+        .select('*')
+        .eq('id', currentCompany.id)
+        .single();
+
+      logger.info('📥 [DEBUG] Résultat chargement data:', data);
+      logger.info('❌ [DEBUG] Résultat chargement error:', error);
+
+      if (error) {
+        console.error('💥 [DEBUG] Erreur Supabase chargement détaillée:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw error;
+      }
+
+      if (data) {
+        logger.info('✅ [DEBUG] Données brutes Supabase:', data);
+        logger.info('🔍 [DEBUG] Type de data:', typeof data, Array.isArray(data));
+
+        // ✅ CORRECTION : Extraire l'objet du tableau si nécessaire
+        const company = Array.isArray(data) ? data[0] : data;
+        logger.info('🔍 [DEBUG] Objet company extrait:', company);
+        logger.info('🔍 [DEBUG] Colonnes disponibles:', Object.keys(company));
+
+        // Tests de mapping individuels
+        logger.info('🔍 [DEBUG] company.name:', company.name);
+        logger.info('🔍 [DEBUG] company.address:', company.address);
+        logger.info('🔍 [DEBUG] company.postal_code:', company.postal_code);
+        logger.info('🔍 [DEBUG] company.city:', company.city);
+        logger.info('🔍 [DEBUG] company.phone:', company.phone);
+        logger.info('🔍 [DEBUG] company.email:', company.email);
+        logger.info('🔍 [DEBUG] company.default_currency:', company.default_currency);
+        logger.info('🔍 [DEBUG] company.fiscal_year_type:', company.fiscal_year_type);
+
+        const newSettings = {
+          // ✅ Informations de base (COLONNES CONFIRMÉES)
+          name: company.name || '',
+          address: company.address || '',
+          postalCode: company.postal_code || '',
+          city: company.city || '',
+          country: company.country || 'FR',
+          phone: company.phone || '',
+          email: company.email || '',
+          website: company.website || '',
+          logo: company.logo || '',
+          currency: company.default_currency || 'EUR',
+
+          // ✅ Identifiants fiscaux (COLONNES CONFIRMÉES + NOUVELLES)
+          taxId: company.vat_number || '',  // NOUVELLE COLONNE
+          siret: company.siret || '',
+          description: company.description || '',  // NOUVELLE COLONNE
+
+          // ✅ Paramètres comptables et fiscaux (COLONNES CONFIRMÉES)
+          fiscalYear: company.fiscal_year_type || 'calendar',
+          fiscalYearStartMonth: company.fiscal_year_start_month || 1,
+          fiscalYearStartDay: company.fiscal_year_start_day || 1,
+          accountingMethod: company.accounting_method || 'accrual',  // NOUVELLE COLONNE
+
+          // ✅ Informations légales (COLONNES CONFIRMÉES)
+          legalForm: company.legal_form || '',
+          activity: company.activity_sector || '',
+          employees: company.employee_count || ''
+        };
+
+        logger.info('📊 [DEBUG] Settings mappés:', newSettings);
+        logger.info('🔍 [DEBUG] Valeurs mappées - name:', newSettings.name);
+        logger.info('🔍 [DEBUG] Valeurs mappées - address:', newSettings.address);
+        logger.info('🔍 [DEBUG] Valeurs mappées - postalCode:', newSettings.postalCode);
+
+        setSettings(newSettings);
+      } else {
+        logger.warn('⚠️ [DEBUG] Aucune donnée retournée par Supabase')
+      }
     } catch (error) {
-      console.error('Erreur sauvegarde paramètres entreprise:', error);
+      logger.error('💥 [DEBUG] Erreur dans catch chargement:', error);
       toast({
         title: 'Erreur',
-        description: 'Impossible de sauvegarder les paramètres',
+        description: 'Impossible de charger les paramètres entreprise',
         variant: 'destructive'
       });
     } finally {
+      logger.info('🏁 [DEBUG] Fin chargement, setIsLoading(false);');
+      setIsLoading(false);
+    }
+  };
+
+  // Charger les paramètres entreprise
+  useEffect(() => {
+    logger.info('🔄 [DEBUG] useEffect loadCompanySettings déclenché');
+    logger.info('🏢 [DEBUG] currentCompany dans useEffect:', currentCompany);
+
+    loadCompanySettings();
+  }, [currentCompany?.id, toast]);
+
+  const handleSave = async () => {
+    logger.info('🚀 [DEBUG] handleSave appelé');
+    logger.info('🏢 [DEBUG] currentCompany:', currentCompany);
+    logger.info('🏢 [DEBUG] currentCompany?.id:', currentCompany?.id);
+
+    if (!currentCompany?.id) {
+      logger.warn('❌ [DEBUG] Pas de currentCompany.id, arrêt de la fonction');
+      return;
+    }
+
+    logger.info('📝 [DEBUG] Démarrage sauvegarde, données à sauvegarder:', settings);
+    setIsSaving(true);
+
+    try {
+      logger.info('🔄 [DEBUG] Appel Supabase UPDATE...');
+
+      // ✅ MAPPING COMPLET ALIGNÉ AVEC LE SCHÉMA SUPABASE
+      const updateData = {
+        // Informations de base
+        name: settings.name.trim(),
+        address: settings.address.trim(),
+        postal_code: settings.postalCode.trim(),
+        city: settings.city.trim(),
+        country: settings.country,
+        phone: settings.phone.trim(),
+        email: settings.email.trim(),
+        website: settings.website.trim(),
+        default_currency: settings.currency,
+        updated_at: new Date().toISOString(),
+
+        // Identifiants fiscaux
+        vat_number: settings.taxId.trim(),  // NOUVELLE COLONNE
+        siret: settings.siret.trim(),
+        description: settings.description.trim(),  // NOUVELLE COLONNE
+
+        // Paramètres comptables et fiscaux
+        fiscal_year_type: settings.fiscalYear,
+        fiscal_year_start_month: settings.fiscalYearStartMonth,
+        fiscal_year_start_day: settings.fiscalYearStartDay,
+        accounting_method: settings.accountingMethod,  // NOUVELLE COLONNE
+
+        // Informations légales
+        legal_form: settings.legalForm,
+        activity_sector: settings.activity.trim(),
+        employee_count: settings.employees,
+      };
+
+      logger.info('📊 [DEBUG] Données sécurisées envoyées à Supabase:', updateData);
+      logger.info('🆔 [DEBUG] ID entreprise pour WHERE:', currentCompany.id);
+
+      // Sauvegarder dans Supabase
+      const { data, error } = await supabase
+        .from('companies')
+        .update(updateData)
+        .eq('id', currentCompany.id)
+        .select(); // Ajout de select() pour récupérer les données modifiées
+
+      logger.info('📥 [DEBUG] Réponse Supabase data:', data);
+      logger.info('❌ [DEBUG] Réponse Supabase error:', error);
+
+      if (error) {
+        console.error('💥 [DEBUG] Erreur Supabase détaillée:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw error;
+      }
+
+      logger.info('✅ [DEBUG] Sauvegarde réussie!');
+      toast({
+        title: 'Paramètres sauvegardés',
+        description: 'Les paramètres de l\'entreprise ont été mis à jour avec succès'
+      });
+
+      // Recharger les données après sauvegarde pour s'assurer que l'interface est à jour
+      logger.info('🔄 [DEBUG] Rechargement des données après sauvegarde...');
+      await loadCompanySettings();
+      logger.info('✅ [DEBUG] Données rechargées après sauvegarde')
+    } catch (error) {
+      logger.error('💥 [DEBUG] Erreur dans catch:', error);
+      logger.error('💥 [DEBUG] Type d\'erreur:', typeof error);
+      logger.error('💥 [DEBUG] Erreur complète:', JSON.stringify(error, null, 2));
+
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de sauvegarder les paramètres. Veuillez réessayer.',
+        variant: 'destructive'
+      });
+    } finally {
+      logger.info('🏁 [DEBUG] Fin handleSave, setIsSaving(false);');
       setIsSaving(false);
     }
   };
@@ -153,6 +304,7 @@ export function CompanySettings() {
             <div className="space-y-2">
               <Label htmlFor="companyName">Nom de l'entreprise</Label>
               <Input
+                key={`companyName-${settings.name}`}
                 id="companyName"
                 value={settings.name}
                 onChange={(e) => setSettings(prev => ({ ...prev, name: e.target.value }))}
@@ -233,6 +385,7 @@ export function CompanySettings() {
           <div className="space-y-2">
             <Label htmlFor="address">Adresse</Label>
             <Input
+              key={`address-${settings.address}`}
               id="address"
               value={settings.address}
               onChange={(e) => setSettings(prev => ({ ...prev, address: e.target.value }))}
@@ -244,6 +397,7 @@ export function CompanySettings() {
             <div className="space-y-2">
               <Label htmlFor="postalCode">Code postal</Label>
               <Input
+                key={`postalCode-${settings.postalCode}`}
                 id="postalCode"
                 value={settings.postalCode}
                 onChange={(e) => setSettings(prev => ({ ...prev, postalCode: e.target.value }))}
@@ -253,6 +407,7 @@ export function CompanySettings() {
             <div className="space-y-2">
               <Label htmlFor="city">Ville</Label>
               <Input
+                key={`city-${settings.city}`}
                 id="city"
                 value={settings.city}
                 onChange={(e) => setSettings(prev => ({ ...prev, city: e.target.value }))}
@@ -266,10 +421,11 @@ export function CompanySettings() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="France">France</SelectItem>
-                  <SelectItem value="Belgique">Belgique</SelectItem>
-                  <SelectItem value="Suisse">Suisse</SelectItem>
-                  <SelectItem value="Canada">Canada</SelectItem>
+                  {countries.map(country => (
+                    <SelectItem key={country.code} value={country.code}>
+                      {country.name} ({country.currency_symbol})
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -289,6 +445,7 @@ export function CompanySettings() {
               <div className="relative">
                 <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
+                  key={`companyPhone-${settings.phone}`}
                   id="companyPhone"
                   value={settings.phone}
                   onChange={(e) => setSettings(prev => ({ ...prev, phone: e.target.value }))}
@@ -302,6 +459,7 @@ export function CompanySettings() {
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
+                  key={`companyEmail-${settings.email}`}
                   id="companyEmail"
                   type="email"
                   value={settings.email}
@@ -358,6 +516,9 @@ export function CompanySettings() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="calendar">Calendrier (Jan-Déc)</SelectItem>
+                  <SelectItem value="april">Avril - Mars</SelectItem>
+                  <SelectItem value="july">Juillet - Juin</SelectItem>
+                  <SelectItem value="october">Octobre - Septembre</SelectItem>
                   <SelectItem value="custom">Personnalisé</SelectItem>
                 </SelectContent>
               </Select>
@@ -375,6 +536,85 @@ export function CompanySettings() {
               </Select>
             </div>
           </div>
+
+          {/* Configuration exercice fiscal personnalisé */}
+          {settings.fiscalYear === 'custom' && (
+            <Card className="bg-blue-50 border-blue-200">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Configuration de l'exercice fiscal
+                </CardTitle>
+                <CardDescription>
+                  Définissez les dates de début et de fin de votre exercice fiscal
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fiscalYearStartMonth">Mois de début</Label>
+                    <Select
+                      value={settings.fiscalYearStartMonth.toString()}
+                      onValueChange={(value) => setSettings(prev => ({
+                        ...prev,
+                        fiscalYearStartMonth: parseInt(value)
+                      }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">Janvier</SelectItem>
+                        <SelectItem value="2">Février</SelectItem>
+                        <SelectItem value="3">Mars</SelectItem>
+                        <SelectItem value="4">Avril</SelectItem>
+                        <SelectItem value="5">Mai</SelectItem>
+                        <SelectItem value="6">Juin</SelectItem>
+                        <SelectItem value="7">Juillet</SelectItem>
+                        <SelectItem value="8">Août</SelectItem>
+                        <SelectItem value="9">Septembre</SelectItem>
+                        <SelectItem value="10">Octobre</SelectItem>
+                        <SelectItem value="11">Novembre</SelectItem>
+                        <SelectItem value="12">Décembre</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fiscalYearStartDay">Jour de début</Label>
+                    <Select
+                      value={settings.fiscalYearStartDay.toString()}
+                      onValueChange={(value) => setSettings(prev => ({
+                        ...prev,
+                        fiscalYearStartDay: parseInt(value)
+                      }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 31 }, (_, i) => (
+                          <SelectItem key={i + 1} value={(i + 1).toString()}>
+                            {i + 1}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="bg-blue-100 border border-blue-300 rounded-lg p-3">
+                  <p className="text-blue-800 text-sm">
+                    <strong>Exercice fiscal :</strong> Du {settings.fiscalYearStartDay} {
+                      ['', 'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+                       'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'][settings.fiscalYearStartMonth]
+                    } au {settings.fiscalYearStartDay - 1 || 31} {
+                      ['', 'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+                       'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'][settings.fiscalYearStartMonth === 12 ? 1 : settings.fiscalYearStartMonth + 1]
+                    } (année suivante)
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="employees">Nombre d'employés</Label>
@@ -394,9 +634,53 @@ export function CompanySettings() {
         </CardContent>
       </Card>
 
+      {/* Actions dangereuses */}
+      <Card className="border-red-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-red-600">
+            <AlertTriangle className="h-5 w-5" />
+            Zone de danger
+          </CardTitle>
+          <CardDescription>
+            Ces actions sont irréversibles et peuvent supprimer définitivement l'entreprise et ses données.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <h3 className="font-medium text-red-900">
+                  Supprimer cette entreprise
+                </h3>
+                <p className="text-sm text-red-700">
+                  Suppression définitive de l'entreprise avec consensus des propriétaires.
+                  Inclut l'export FEC et l'archivage légal des données.
+                </p>
+              </div>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setShowCompanyDeletion(true)}
+                className="ml-4 shrink-0"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Supprimer
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Bouton de sauvegarde */}
       <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={isSaving}>
+        <Button
+          onClick={() => {
+            logger.info('🔘 [DEBUG] Bouton "Sauvegarder" cliqué');
+            logger.info('🔘 [DEBUG] isSaving:', isSaving);
+            handleSave();
+          }}
+          disabled={isSaving}
+        >
           {isSaving ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -410,6 +694,48 @@ export function CompanySettings() {
           )}
         </Button>
       </div>
+
+      {/* Placeholder pour Company Deletion Dialog */}
+      {showCompanyDeletion && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <Card className="max-w-md w-full">
+            <CardHeader>
+              <CardTitle className="text-red-600">Suppression d'entreprise</CardTitle>
+              <CardDescription>
+                Cette fonctionnalité sera bientôt disponible avec le système de consensus des propriétaires.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-gray-600">
+                La suppression d'entreprise nécessite l'accord de tous les propriétaires
+                et inclura un export FEC automatique avant suppression.
+              </p>
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setShowCompanyDeletion(false)}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  variant="destructive"
+                  className="flex-1"
+                  onClick={() => {
+                    toast({
+                      title: "Fonctionnalité à venir",
+                      description: "La suppression d'entreprise sera disponible prochainement.",
+                    });
+                    setShowCompanyDeletion(false);
+                  }}
+                >
+                  Continuer
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

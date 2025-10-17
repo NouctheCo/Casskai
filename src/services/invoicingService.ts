@@ -1,5 +1,7 @@
-// @ts-nocheck
 import { supabase } from '@/lib/supabase';
+import { journalEntriesService } from './journalEntriesService';
+import { EntryTemplatesService } from './entryTemplatesService';
+import { logger } from '@/utils/logger';
 
 export interface Invoice {
   id: string;
@@ -146,7 +148,7 @@ class InvoicingService {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Error fetching invoices:', error);
+        logger.error('Error fetching invoices:', error);
         throw new Error(`Failed to fetch invoices: ${error.message}`);
       }
 
@@ -158,7 +160,7 @@ class InvoicingService {
 
       return enrichedInvoices;
     } catch (error) {
-      console.error('Error in getInvoices:', error);
+      logger.error('Error in getInvoices:', error);
       throw error;
     }
   }
@@ -191,7 +193,7 @@ class InvoicingService {
         invoice_lines: data.invoice_lines || []
       } as InvoiceWithDetails;
     } catch (error) {
-      console.error('Error in getInvoiceById:', error);
+      logger.error('Error in getInvoiceById:', error);
       throw error;
     }
   }
@@ -282,7 +284,7 @@ class InvoicingService {
 
       return createdInvoice;
     } catch (error) {
-      console.error('Error in createInvoice:', error);
+      logger.error('Error in createInvoice:', error);
       throw error;
     }
   }
@@ -290,6 +292,12 @@ class InvoicingService {
   async updateInvoiceStatus(id: string, status: Invoice['status']): Promise<InvoiceWithDetails> {
     try {
       const companyId = await this.getCurrentCompanyId();
+
+      // Get current invoice before status change
+      const currentInvoice = await this.getInvoiceById(id);
+      if (!currentInvoice) {
+        throw new Error('Invoice not found');
+      }
 
       const { error } = await supabase
         .from('invoices')
@@ -301,6 +309,16 @@ class InvoicingService {
         throw new Error(`Failed to update invoice status: ${error.message}`);
       }
 
+      // Auto-generate journal entry when invoice is sent
+      if (status === 'sent' && currentInvoice.status === 'draft') {
+        await this.createJournalEntryForInvoice(currentInvoice);
+      }
+
+      // Auto-generate payment journal entry when invoice is paid
+      if (status === 'paid' && currentInvoice.status !== 'paid') {
+        await this.createPaymentJournalEntryForInvoice(currentInvoice);
+      }
+
       const updatedInvoice = await this.getInvoiceById(id);
       if (!updatedInvoice) {
         throw new Error('Failed to retrieve updated invoice');
@@ -308,7 +326,7 @@ class InvoicingService {
 
       return updatedInvoice;
     } catch (error) {
-      console.error('Error in updateInvoiceStatus:', error);
+      logger.error('Error in updateInvoiceStatus:', error);
       throw error;
     }
   }
@@ -327,59 +345,7 @@ class InvoicingService {
         throw new Error(`Failed to delete invoice: ${error.message}`);
       }
     } catch (error) {
-      console.error('Error in deleteInvoice:', error);
-      throw error;
-    }
-  }
-
-  async getInvoicingStats(options?: {
-    periodStart?: string;
-    periodEnd?: string;
-  }): Promise<InvoicingStats> {
-    try {
-      const companyId = await this.getCurrentCompanyId();
-      const now = new Date();
-      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-      const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
-      
-      const periodStart = options?.periodStart || firstDayOfMonth;
-      const periodEnd = options?.periodEnd || lastDayOfMonth;
-
-      const { data: invoicesData, error } = await supabase
-        .from('invoices')
-        .select('id, status, total_amount, paid_amount, issue_date, due_date')
-        .eq('company_id', companyId)
-        .gte('issue_date', periodStart)
-        .lte('issue_date', periodEnd);
-
-      if (error) {
-        throw new Error(`Failed to fetch invoicing stats: ${error.message}`);
-      }
-
-      const invoices = invoicesData || [];
-      const now_date = new Date();
-      
-      const totalRevenue = invoices.reduce((sum, inv) => sum + parseFloat(inv.total_amount), 0);
-      const paidInvoices = invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + parseFloat(inv.total_amount), 0);
-      const pendingInvoices = invoices.filter(inv => ['draft', 'sent'].includes(inv.status)).reduce((sum, inv) => sum + parseFloat(inv.total_amount), 0);
-      const overdueInvoices = invoices.filter(inv => {
-        const dueDate = new Date(inv.due_date);
-        return inv.status !== 'paid' && dueDate < now_date;
-      }).reduce((sum, inv) => sum + parseFloat(inv.total_amount), 0);
-      
-      const invoicesCount = invoices.length;
-      const averageInvoiceValue = invoicesCount > 0 ? totalRevenue / invoicesCount : 0;
-
-      return {
-        totalRevenue,
-        paidInvoices,
-        pendingInvoices,
-        overdueInvoices,
-        invoicesCount,
-        averageInvoiceValue
-      };
-    } catch (error) {
-      console.error('Error in getInvoicingStats:', error);
+      logger.error('Error in deleteInvoice:', error);
       throw error;
     }
   }
@@ -410,7 +376,7 @@ class InvoicingService {
       
       return `FAC-${year}-${paddedNumber}`;
     } catch (error) {
-      console.error('Error generating invoice number:', error);
+      logger.error('Error generating invoice number:', error);
       // Fallback
       return `FAC-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`;
     }
@@ -443,7 +409,7 @@ class InvoicingService {
 
       return await this.createInvoice(newInvoiceData, newLines);
     } catch (error) {
-      console.error('Error duplicating invoice:', error);
+      logger.error('Error duplicating invoice:', error);
       throw error;
     }
   }
@@ -476,7 +442,7 @@ class InvoicingService {
 
       return await this.createInvoice(creditNoteData, creditLines);
     } catch (error) {
-      console.error('Error creating credit note:', error);
+      logger.error('Error creating credit note:', error);
       throw error;
     }
   }
@@ -519,7 +485,7 @@ class InvoicingService {
         .select('id')
         .eq('company_id', companyId)
         .eq('type', 'quote');
-      if (quotesError) console.warn('Quotes table might not exist:', quotesError);
+      if (quotesError) logger.warn('Quotes table might not exist:', quotesError);
       
       const invoicesList = invoices || [];
       const clientsList = clients || [];
@@ -554,7 +520,7 @@ class InvoicingService {
         averageInvoiceValue
       };
     } catch (error) {
-      console.error('Error getting invoicing stats:', error);
+      logger.error('Error getting invoicing stats:', error);
       // Return default stats on error
       return {
         totalRevenue: 0,
@@ -566,6 +532,142 @@ class InvoicingService {
         quotesCount: 0,
         averageInvoiceValue: 0
       };
+    }
+  }
+
+  /**
+   * Crée automatiquement une écriture comptable lors de l'envoi d'une facture
+   */
+  private async createJournalEntryForInvoice(invoice: InvoiceWithDetails): Promise<void> {
+    try {
+      const companyId = await this.getCurrentCompanyId();
+
+      // Déterminer le template selon le type de facture
+      const templateId = invoice.type === 'sale' ? 'template_sale_invoice' : 'template_purchase_invoice';
+
+      // Calculer les montants HT et TTC
+      const amountHT = invoice.subtotal;
+      const amountTTC = invoice.total_amount;
+
+      // Variables pour le template
+      const variables = {
+        amountHT,
+        amountTTC,
+        invoiceNumber: invoice.invoice_number,
+        thirdPartyName: invoice.third_party?.name || 'Client/Fournisseur'
+      };
+
+      // Récupérer le journal approprié (VENTES pour les ventes, ACHATS pour les achats)
+      const journalCode = invoice.type === 'sale' ? 'VENTES' : 'ACHATS';
+      const journals = await journalEntriesService.getJournalsList(companyId);
+      const journal = journals.find(j => j.code === journalCode);
+
+      if (!journal) {
+        logger.warn(`Journal ${journalCode} non trouvé, écriture non créée`);
+        return;
+      }
+
+      // Appliquer le template
+      const journalEntry = await EntryTemplatesService.applyTemplate(
+        templateId,
+        variables,
+        companyId,
+        journal.id
+      );
+
+      // Créer l'écriture comptable
+      const payload = {
+        companyId,
+        entryDate: invoice.issue_date,
+        description: `${invoice.type === 'sale' ? 'Facture' : 'Facture fournisseur'} ${invoice.invoice_number} - ${invoice.third_party?.name || ''}`,
+        referenceNumber: invoice.invoice_number,
+        journalId: journal.id,
+        status: 'posted' as const,
+        lines: journalEntry.items.map(item => ({
+          accountId: item.accountId,
+          debitAmount: item.debitAmount,
+          creditAmount: item.creditAmount,
+          description: item.description || '',
+          auxiliaryAccount: item.auxiliaryAccount,
+          letterage: item.letterage
+        }))
+      };
+
+      const result = await journalEntriesService.createJournalEntry(payload);
+
+      if (!result.success && 'error' in result) {
+        logger.error('Erreur création écriture comptable:', result.error)
+      } else {
+        logger.warn(`Écriture comptable créée pour la facture ${invoice.invoice_number}`)
+      }
+    } catch (error) {
+      logger.error('Erreur lors de la création automatique d\'écriture comptable:', error);
+      // Ne pas bloquer la mise à jour de la facture si l'écriture échoue
+    }
+  }
+
+  /**
+   * Crée automatiquement une écriture comptable lors du paiement d'une facture
+   */
+  private async createPaymentJournalEntryForInvoice(invoice: InvoiceWithDetails): Promise<void> {
+    try {
+      const companyId = await this.getCurrentCompanyId();
+
+      // Utiliser le template de paiement approprié selon le type de facture
+      const templateId = invoice.type === 'sale' ? 'template_bank_payment_client' : 'template_bank_payment_supplier';
+
+      // Variables pour le template
+      const variables = {
+        amount: invoice.total_amount,
+        invoiceNumber: invoice.invoice_number,
+        thirdPartyName: invoice.third_party?.name || 'Client/Fournisseur'
+      };
+
+      // Récupérer le journal de banque
+      const journals = await journalEntriesService.getJournalsList(companyId);
+      const journal = journals.find(j => j.code === 'BANQUE' || j.type === 'bank');
+
+      if (!journal) {
+        logger.warn('Journal de banque non trouvé, écriture de paiement non créée');
+        return;
+      }
+
+      // Appliquer le template
+      const journalEntry = await EntryTemplatesService.applyTemplate(
+        templateId,
+        variables,
+        companyId,
+        journal.id
+      );
+
+      // Créer l'écriture comptable de paiement
+      const payload = {
+        companyId,
+        entryDate: new Date().toISOString().split('T')[0], // Date du jour
+        description: `Paiement ${invoice.type === 'sale' ? 'facture' : 'facture fournisseur'} ${invoice.invoice_number} - ${invoice.third_party?.name || ''}`,
+        referenceNumber: `PAY-${invoice.invoice_number}`,
+        journalId: journal.id,
+        status: 'posted' as const,
+        lines: journalEntry.items.map(item => ({
+          accountId: item.accountId,
+          debitAmount: item.debitAmount,
+          creditAmount: item.creditAmount,
+          description: item.description || '',
+          auxiliaryAccount: item.auxiliaryAccount,
+          letterage: item.letterage
+        }))
+      };
+
+      const result = await journalEntriesService.createJournalEntry(payload);
+
+      if (!result.success && 'error' in result) {
+        logger.error('Erreur création écriture de paiement:', result.error)
+      } else {
+        logger.warn(`Écriture de paiement créée pour la facture ${invoice.invoice_number}`)
+      }
+    } catch (error) {
+      logger.error('Erreur lors de la création automatique d\'écriture de paiement:', error);
+      // Ne pas bloquer la mise à jour de la facture si l'écriture échoue
     }
   }
 }

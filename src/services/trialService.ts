@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 export interface TrialInfo {
   subscriptionId: string;
@@ -40,7 +41,7 @@ class TrialService {
       });
 
       if (error) {
-        console.error('Error creating trial subscription:', error);
+        logger.error('Error creating trial subscription:', error);
         return { success: false, error: error.message };
       }
 
@@ -54,7 +55,7 @@ class TrialService {
 
       return { success: true, subscriptionId: data };
     } catch (error) {
-      console.error('Error in createTrialSubscription:', error);
+      logger.error('Error in createTrialSubscription:', error);
       return { success: false, error: 'Erreur inattendue' };
     }
   }
@@ -69,13 +70,13 @@ class TrialService {
       });
 
       if (error) {
-        console.error('Error checking trial creation eligibility:', error);
+        logger.error('Error checking trial creation eligibility:', error);
         return false;
       }
 
       return data || false;
     } catch (error) {
-      console.error('Error in canCreateTrial:', error);
+      logger.error('Error in canCreateTrial:', error);
       return false;
     }
   }
@@ -90,7 +91,7 @@ class TrialService {
       });
 
       if (error) {
-        console.error('Error getting trial info:', error);
+        logger.error('Error getting trial info:', error);
         return null;
       }
 
@@ -109,7 +110,7 @@ class TrialService {
         isExpired: trial.is_expired
       };
     } catch (error) {
-      console.error('Error in getUserTrialInfo:', error);
+      logger.error('Error in getUserTrialInfo:', error);
       return null;
     }
   }
@@ -132,7 +133,7 @@ class TrialService {
       });
 
       if (error) {
-        console.error('Error converting trial to paid:', error);
+        logger.error('Error converting trial to paid:', error);
         return { success: false, error: error.message };
       }
 
@@ -150,38 +151,46 @@ class TrialService {
 
       return { success: false, error: 'Erreur lors de la conversion' };
     } catch (error) {
-      console.error('Error in convertTrialToPaid:', error);
+      logger.error('Error in convertTrialToPaid:', error);
       return { success: false, error: 'Erreur inattendue' };
     }
   }
 
   /**
-   * Annule un essai
+   * Annule un abonnement d'essai
    */
-  async cancelTrial(userId: string, reason?: string): Promise<{ success: boolean; error?: string }> {
+  async cancelTrial(
+    userId: string,
+    reason?: string
+  ): Promise<{ success: boolean; error?: string }> {
     try {
-      const { data, error } = await supabase.rpc('cancel_trial', {
-        p_user_id: userId,
-        p_reason: reason || null
-      });
+      // Utiliser une approche directe au lieu de la fonction RPC
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .update({
+          status: 'canceled',
+          canceled_at: new Date().toISOString(),
+          cancel_reason: reason || null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId)
+        .eq('status', 'trialing')
+        .eq('plan_id', 'trial')
+        .select();
 
       if (error) {
-        console.error('Error canceling trial:', error);
+        logger.error('Error canceling trial:', error);
         return { success: false, error: error.message };
       }
 
-      if (data === 'NO_ACTIVE_TRIAL') {
-        return { success: false, error: 'Aucun essai actif trouvé' };
+      if (!data || data.length === 0) {
+        return { success: false, error: 'Aucun essai actif trouvé pour cet utilisateur' };
       }
 
-      if (data === 'SUCCESS') {
-        return { success: true };
-      }
-
-      return { success: false, error: 'Erreur lors de l\'annulation' };
+      return { success: true };
     } catch (error) {
-      console.error('Error in cancelTrial:', error);
-      return { success: false, error: 'Erreur inattendue' };
+      logger.error('Error in cancelTrial:', error);
+      return { success: false, error: 'Erreur lors de l\'annulation de l\'essai' };
     }
   }
 
@@ -193,13 +202,13 @@ class TrialService {
       const { data, error } = await supabase.rpc('get_trial_statistics');
 
       if (error) {
-        console.error('Error getting trial statistics:', error);
+        logger.error('Error getting trial statistics:', error);
         return [];
       }
 
       return data || [];
     } catch (error) {
-      console.error('Error in getTrialStatistics:', error);
+      logger.error('Error in getTrialStatistics:', error);
       return [];
     }
   }
@@ -210,7 +219,7 @@ class TrialService {
   async getExpiringTrials(daysAhead: number = 7): Promise<ExpiringTrial[]> {
     try {
       const { data, error } = await supabase
-        .from('user_subscriptions')
+        .from('subscriptions')
         .select(`
           id,
           user_id,
@@ -231,13 +240,13 @@ class TrialService {
         .order('trial_end', { ascending: true });
 
       if (error) {
-        console.error('Error getting expiring trials:', error);
+        logger.error('Error getting expiring trials:', error);
         return [];
       }
 
       return (data || []) as ExpiringTrial[];
     } catch (error) {
-      console.error('Error in getExpiringTrials:', error);
+      logger.error('Error in getExpiringTrials:', error);
       return [];
     }
   }
@@ -250,13 +259,13 @@ class TrialService {
       const { data, error } = await supabase.rpc('expire_trials');
 
       if (error) {
-        console.error('Error expiring trials:', error);
+        logger.error('Error expiring trials:', error);
         return { expiredCount: 0, error: error.message };
       }
 
       return { expiredCount: data || 0 };
     } catch (error) {
-      console.error('Error in checkAndExpireTrials:', error);
+      logger.error('Error in checkAndExpireTrials:', error);
       return { expiredCount: 0, error: 'Erreur inattendue' };
     }
   }

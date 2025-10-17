@@ -2,6 +2,7 @@ import React, { Component, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { logger } from '@/utils/logger';
 
 interface Props {
   children: ReactNode;
@@ -33,8 +34,8 @@ export class DashboardErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: any) {
-    console.error('Dashboard Error Boundary caught an error:', error);
-    console.error('Error Info:', errorInfo);
+    logger.error('Dashboard Error Boundary caught an error:', error);
+    logger.error('Error Info:', errorInfo);
     
     this.setState({
       error,

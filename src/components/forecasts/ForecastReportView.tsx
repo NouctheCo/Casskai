@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -18,6 +17,7 @@ import {
   BarChart3,
   ArrowLeft
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface ForecastReportViewProps {
   forecast: ForecastData;
@@ -60,9 +60,9 @@ const ForecastReportView: React.FC<ForecastReportViewProps> = ({
         }
       };
 
-      await forecastsService.generatePDFReport(forecast.id, reportConfig);
+      await forecastsService.generatePDFReport(forecast as any);
     } catch (error) {
-      console.error('Erreur lors de la génération du PDF:', error);
+      logger.error('Erreur lors de la génération du PDF:', error)
     }
   };
 

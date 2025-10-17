@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { logger } from '@/utils/logger';
 
 /**
  * Récupère toutes les entreprises associées à un utilisateur.
@@ -17,16 +18,28 @@ export const getUserCompanies = async (userId: string) => {
     .eq('user_id', userId);
 
   if (linksError) {
-    console.error("Erreur lors de la récupération des liaisons user_companies:", linksError);
-    if (linksError.code === '42P17' || linksError.message?.includes('infinite recursion')) {
-      console.warn('RLS policy recursion detected on user_companies, returning empty array');
+    logger.error("Erreur lors de la récupération des liaisons user_companies:", linksError);
+
+    // Gestion des erreurs RLS communes
+    if (linksError.code === '42P17' ||
+        linksError.message?.includes('infinite recursion') ||
+        linksError.message?.includes('500') ||
+        linksError.message?.includes('Internal Server Error') ||
+        linksError.message?.includes('policy')) {
+      logger.warn('🔄 RLS/Policy error detected on user_companies, returning empty array for onboarding');
       return [];
     }
+
     throw new Error("Impossible de récupérer les entreprises de l'utilisateur.");
   }
 
   const companyIds = (links || []).map(l => l.company_id).filter(Boolean);
-  if (companyIds.length === 0) return [];
+  if (companyIds.length === 0) {
+    logger.warn('getUserCompanies: No company links found for user');
+    return [];
+  }
+
+  logger.warn(`getUserCompanies: Found ${companyIds.length} company link(s): ${companyIds.join(', ')}`);
 
   // Étape 2: récupérer les entreprises par leurs IDs (RLS sur companies autorise si relation existe)
   const { data: companies, error: companiesError } = await supabase
@@ -35,13 +48,29 @@ export const getUserCompanies = async (userId: string) => {
     .in('id', companyIds);
 
   if (companiesError) {
-    console.error('Erreur lors de la récupération des entreprises:', companiesError);
-    if (companiesError.code === '42P17' || companiesError.message?.includes('infinite recursion')) {
-      console.warn('RLS policy recursion detected on companies, returning empty array');
+    logger.error('Erreur lors de la récupération des entreprises:', companiesError);
+
+    // Gestion des erreurs RLS communes
+    if (companiesError.code === '42P17' ||
+        companiesError.message?.includes('infinite recursion') ||
+        companiesError.message?.includes('500') ||
+        companiesError.message?.includes('Internal Server Error') ||
+        companiesError.message?.includes('policy')) {
+      logger.warn('🔄 RLS/Policy error detected on companies, returning empty array for onboarding');
       return [];
     }
+
     throw new Error("Impossible de récupérer les entreprises de l'utilisateur.");
   }
+
+  // Log diagnostic pour détecter liens orphelins
+  if (companies && companies.length < companyIds.length) {
+    logger.warn(`⚠️ Orphaned links detected! Expected ${companyIds.length} companies, got ${companies.length}. Missing IDs:`, 
+      companyIds.filter(id => !companies.find((c: any) => c.id === id))
+    );
+  }
+
+  logger.warn(`getUserCompanies: Returning ${(companies || []).length} valid company(ies)`);
 
   // Retourne un tableau d'entreprises avec champs communs (dev/prod)
   return (companies || []) as Array<{
@@ -78,7 +107,7 @@ export const getCompanyDetails = async (companyId: string) => {
     .eq('id', companyId);
 
   if (error) {
-    console.error("Erreur lors de la récupération des détails de l'entreprise:", error);
+    logger.error("Erreur lors de la récupération des détails de l'entreprise:", error);
     throw new Error("Impossible de récupérer les détails de l'entreprise.");
   }
 
@@ -105,7 +134,7 @@ export const getCompanyModules = async (companyId: string) => {
     .eq('company_id', companyId);
 
   if (error) {
-    console.error("Erreur lors de la récupération des modules de l'entreprise:", error);
+    logger.error("Erreur lors de la récupération des modules de l'entreprise:", error);
     // Retourner un objet de modules par défaut en cas d'erreur
     return { dashboard: true, settings: true };
   }

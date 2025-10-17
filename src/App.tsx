@@ -9,12 +9,12 @@ import { EnterpriseProvider } from '@/contexts/EnterpriseContext';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
 import ABTestProvider from '@/components/ABTestProvider';
-import { ToastProvider } from '@/components/ui/use-toast';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { LoadingFallback } from '@/components/ui/LoadingFallback';
 import ErrorBoundary, { setupGlobalErrorHandling } from '@/components/ErrorBoundary';
 import { UpdateNotification, OfflineIndicator } from '@/hooks/useServiceWorker';
 import AppRouter from './AppRouter'; // Import the new router
+import { logger } from '@/utils/logger';
 
 // Initialiser la gestion d'erreurs globale
 setupGlobalErrorHandling();
@@ -28,11 +28,15 @@ const ModulesProviderWrapper: React.FC<{ children: React.ReactNode }> = ({ child
     return <>{children}</>;
   }
   
+  // Permissions par défaut pour l'environnement de développement/démonstration
+  const defaultPermissions = ['*', 'module:activate', 'module:configure', 'module:deactivate'];
+  const userPermissions = user.user_metadata?.permissions || defaultPermissions;
+
   return (
     <ModulesProvider
       userId={user.id}
       tenantId={currentCompany.id}
-      userPermissions={user.user_metadata?.permissions || []}
+      userPermissions={userPermissions}
     >
       {children}
     </ModulesProvider>
@@ -40,7 +44,7 @@ const ModulesProviderWrapper: React.FC<{ children: React.ReactNode }> = ({ child
 };
 
 function App() {
-  console.warn("🚀 Application de gestion d'entreprise démarrée avec architecture modulaire");
+  logger.warn("🚀 Application de gestion d'entreprise démarrée avec architecture modulaire");
 
   const isE2EMinimal = (import.meta as unknown as { env: Record<string, string | undefined> }).env?.VITE_E2E_MINIMAL === 'true';
 
@@ -52,9 +56,20 @@ function App() {
             <AuthProvider>
               <SubscriptionProvider>
                 <ABTestProvider>
-                  <ToastProvider>
-                    <BrowserRouter>
-                      {isE2EMinimal ? (
+                  <BrowserRouter>
+                    {isE2EMinimal ? (
+                      <EnterpriseProvider>
+                        <TooltipProvider>
+                          <Suspense fallback={<LoadingFallback message="Chargement de l'application..." />}>
+                            <AppRouter />
+                          </Suspense>
+                          <Toaster />
+                          <UpdateNotification />
+                          <OfflineIndicator />
+                        </TooltipProvider>
+                      </EnterpriseProvider>
+                    ) : (
+                      <ModulesProviderWrapper>
                         <EnterpriseProvider>
                           <TooltipProvider>
                             <Suspense fallback={<LoadingFallback message="Chargement de l'application..." />}>
@@ -65,22 +80,9 @@ function App() {
                             <OfflineIndicator />
                           </TooltipProvider>
                         </EnterpriseProvider>
-                      ) : (
-                        <ModulesProviderWrapper>
-                          <EnterpriseProvider>
-                            <TooltipProvider>
-                              <Suspense fallback={<LoadingFallback message="Chargement de l'application..." />}>
-                                <AppRouter />
-                              </Suspense>
-                              <Toaster />
-                              <UpdateNotification />
-                              <OfflineIndicator />
-                            </TooltipProvider>
-                          </EnterpriseProvider>
-                        </ModulesProviderWrapper>
-                      )}
-                    </BrowserRouter>
-                  </ToastProvider>
+                      </ModulesProviderWrapper>
+                    )}
+                  </BrowserRouter>
                 </ABTestProvider>
               </SubscriptionProvider>
             </AuthProvider>

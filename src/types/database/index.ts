@@ -54,10 +54,11 @@ export type {
 } from './invoices.types'
 
 // Utilitaires de base de données
-export type {
-  DatabaseRow,
-  DatabaseInsert,
-  DatabaseUpdate,
-  DatabaseTable,
-  DatabaseFunction
-} from './database.utils'
+// Fichier database.utils supprimé (types dupliqués)
+// export type {
+//   DatabaseRow,
+//   DatabaseInsert,
+//   DatabaseUpdate,
+//   DatabaseTable,
+//   DatabaseFunction
+// } from './database.utils'

@@ -105,6 +105,13 @@ export const PublicNavigation: React.FC<PublicNavigationProps> = ({ variant = 'l
 
           {/* Actions Desktop */}
           <div className="hidden md:flex items-center space-x-4">
+            <button
+              onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSeP1H29iZLZ7CgEnJz-Mey9wZDWij0NVZ42EK-mqmbjb5vqzg/viewform', '_blank')}
+              className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium"
+            >
+              Beta
+            </button>
+            <div className="w-px h-4 bg-gray-300 dark:bg-gray-600"></div>
             <Button
               variant="ghost"
               onClick={() => navigate('/login')}

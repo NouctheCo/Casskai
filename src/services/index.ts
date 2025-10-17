@@ -4,13 +4,16 @@
  */
 
 import { stripeService as realStripeService } from './stripeService';
+import { CleanupService } from './cleanupService';
 
 // Check if we should use mock services
 // const USE_MOCK_SERVICES = import.meta.env.VITE_USE_MOCK_SERVICES === 'true';
 
 // Export the appropriate service
 export const stripeService = realStripeService;
+export { CleanupService };
 
 export default {
-  stripe: stripeService
+  stripe: stripeService,
+  cleanup: CleanupService
 };

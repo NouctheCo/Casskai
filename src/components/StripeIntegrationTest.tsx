@@ -51,12 +51,12 @@ export function StripeIntegrationTest() {
       });
 
       // Test 3: Tester la création d'une session de checkout (simulation)
-      const checkoutResult = await stripeService.createCheckoutSession(
-        'professional',
-        user.id,
-        'http://localhost:5173/success',
-        'http://localhost:5173/pricing'
-      );
+      const checkoutResult = await stripeService.createCheckoutSession({
+        planId: 'pro_monthly',
+        successUrl: 'http://localhost:5173/success',
+        cancelUrl: 'http://localhost:5173/pricing',
+        metadata: { source: 'integration-test' }
+      });
 
       addTestResult({
         success: checkoutResult.success,

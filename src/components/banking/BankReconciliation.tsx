@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -10,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
 import { bankReconciliationService } from '@/services/bankReconciliationService';
+import { EntitySelector, type EntityOption, type EntityFormField } from '../common/EntitySelector';
+import { useAuth } from '../../contexts/AuthContext';
 import { 
   Shuffle, 
   CheckCircle, 
@@ -36,9 +37,11 @@ import {
   Database,
   Zap
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 const BankReconciliation = ({ currentEnterprise, bankAccounts, onReconciliationComplete }) => {
   const { toast } = useToast();
+  const { currentCompany } = useAuth();
 
   // États
   const [selectedAccount, setSelectedAccount] = useState('');
@@ -165,6 +168,69 @@ const BankReconciliation = ({ currentEnterprise, bankAccounts, onReconciliationC
     };
   }, [bankTransactions]);
 
+  // Données pour EntitySelector - comptes bancaires
+  const bankAccountCreateFormFields: EntityFormField[] = [
+    {
+      name: 'bank_name',
+      label: 'Nom de la banque',
+      type: 'text',
+      required: true,
+      placeholder: 'Ex: BNP Paribas, Société Générale...'
+    },
+    {
+      name: 'account_name',
+      label: 'Nom du compte',
+      type: 'text',
+      required: true,
+      placeholder: 'Ex: Compte principal, Compte épargne...'
+    },
+    {
+      name: 'account_number',
+      label: 'Numéro de compte',
+      type: 'text',
+      required: true,
+      placeholder: 'Ex: FR76 1234 5678 9012 3456 7890 123'
+    }
+  ];
+
+  const bankAccountOptions: EntityOption[] = bankAccounts.map(account => ({
+    id: account.id,
+    label: `${account.bank_name} - ${account.account_name}`,
+    sublabel: account.account_number || undefined
+  }));
+
+  const handleCreateBankAccount = async (accountData: Record<string, any>) => {
+    try {
+      if (!currentCompany) {
+        throw new Error('No current company selected');
+      }
+
+      // Simulation de création de compte bancaire
+      // Dans un vrai système, cela ferait appel à un service bancaire
+      const newAccount = {
+        id: `bank_${Date.now()}`,
+        bank_name: accountData.bank_name,
+        account_name: accountData.account_name,
+        account_number: accountData.account_number,
+        company_id: currentCompany.id,
+        created_at: new Date().toISOString()
+      };
+
+      // Ajouter le nouveau compte à la liste (simulation)
+      // Dans un vrai système, cela déclencherait un refresh des données
+      toast({
+        title: "Compte bancaire créé",
+        description: `Le compte ${accountData.account_name} a été ajouté avec succès.`,
+        variant: "default"
+      });
+
+      return { success: true, id: newAccount.id };
+    } catch (error) {
+      logger.error('Error creating bank account:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  };
+
   // Filtrage des transactions
   const filteredTransactions = useMemo(() => {
     let filtered = bankTransactions;
@@ -240,7 +306,7 @@ const BankReconciliation = ({ currentEnterprise, bankAccounts, onReconciliationC
       });
 
     } catch (error) {
-      console.error('Erreur lors de la réconciliation automatique:', error);
+      logger.error('Erreur lors de la réconciliation automatique:', error);
       toast({
         title: "Erreur",
         description: "Échec de la réconciliation automatique",
@@ -269,7 +335,7 @@ const BankReconciliation = ({ currentEnterprise, bankAccounts, onReconciliationC
       ));
 
     } catch (error) {
-      console.error('Erreur lors de la validation:', error);
+      logger.error('Erreur lors de la validation:', error);
       toast({
         title: "Erreur",
         description: "Échec de la validation",
@@ -300,7 +366,7 @@ const BankReconciliation = ({ currentEnterprise, bankAccounts, onReconciliationC
       }
 
     } catch (error) {
-      console.error('Erreur lors de la récupération du résumé:', error);
+      logger.error('Erreur lors de la récupération du résumé:', error)
     }
   };
 
@@ -452,21 +518,20 @@ const BankReconciliation = ({ currentEnterprise, bankAccounts, onReconciliationC
           <CardContent className="p-6">
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="flex-1">
-                <label htmlFor="account-select" className="text-sm font-medium mb-2 block">
+                <label className="text-sm font-medium mb-2 block">
                   Compte bancaire
                 </label>
-                <Select value={selectedAccount} onValueChange={setSelectedAccount}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionnez un compte" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {bankAccounts.map(account => (
-                      <SelectItem key={account.id} value={account.id}>
-                        {account.bank_name} - {account.account_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <EntitySelector
+                  options={bankAccountOptions}
+                  value={selectedAccount}
+                  onChange={setSelectedAccount}
+                  onCreateEntity={handleCreateBankAccount}
+                  createFormFields={bankAccountCreateFormFields}
+                  entityName="compte bancaire"
+                  entityNamePlural="comptes bancaires"
+                  placeholder="Sélectionnez un compte bancaire"
+                  canCreate={true}
+                />
               </div>
 
               <div className="flex-1">

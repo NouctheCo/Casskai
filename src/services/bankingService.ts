@@ -5,8 +5,10 @@ import {
   BankTransaction, 
   OpenBankingResponse,
   PSD2AuthFlow,
-  ReconciliationMatch
+  ReconciliationMatch,
+  AccountingEntry
 } from '../types/openBanking.types';
+import { logger } from '@/utils/logger';
 
 // Service unifié pour l'intégration bancaire
 export class BankingService {
@@ -65,9 +67,9 @@ export class BankingService {
 
       await openBankingManager.initialize(config);
       this.isInitialized = true;
-      console.log('Banking Service initialized successfully');
+      logger.info('Banking Service initialized successfully')
     } catch (error) {
-      console.error('Failed to initialize Banking Service:', error);
+      logger.error('Failed to initialize Banking Service:', error);
       throw error;
     }
   }
@@ -156,7 +158,7 @@ export class BankingService {
   }
 
   // Synchroniser les transactions
-  async syncBankTransactions(connectionId: string, accountId: string): Promise<OpenBankingResponse<any>> {
+  async syncBankTransactions(connectionId: string, accountId: string): Promise<OpenBankingResponse<unknown>> {
     await this.ensureInitialized();
     return await openBankingManager.syncTransactions(connectionId, accountId);
   }
@@ -192,7 +194,7 @@ export class BankingService {
   // Réconcilier une transaction
   async reconcileTransaction(
     transactionId: string,
-    accountingEntries: any[]
+    accountingEntries: AccountingEntry[]
   ): Promise<OpenBankingResponse<ReconciliationMatch[]>> {
     await this.ensureInitialized();
     return await openBankingManager.reconcileTransaction(transactionId, accountingEntries);
@@ -203,7 +205,7 @@ export class BankingService {
   // Traiter un webhook
   async processWebhook(
     providerId: string,
-    payload: any,
+    payload: Record<string, unknown>,
     signature: string,
     headers: Record<string, string>
   ): Promise<OpenBankingResponse<void>> {
@@ -226,7 +228,7 @@ export class BankingService {
       includeReconciled?: boolean;
       includeUnreconciled?: boolean;
     }
-  ): Promise<OpenBankingResponse<any>> {
+  ): Promise<OpenBankingResponse<unknown>> {
     await this.ensureInitialized();
     return await openBankingManager.createExport(userId, formatId, parameters);
   }
@@ -395,12 +397,8 @@ export class BankingService {
   }
 
   private formatCurrency(amount: number, currency: string = 'EUR'): string {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(amount);
+    const formatted = new Intl.NumberFormat('fr-FR', {}).format(amount);
+    return formatted.replace(/\u00a0/g, ' ');
   }
 
   private formatLastSync(date: Date): string {
@@ -439,3 +437,6 @@ export class BankingService {
 
 // Instance singleton
 export const bankingService = BankingService.getInstance();
+
+
+

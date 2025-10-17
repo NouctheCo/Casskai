@@ -1,6 +1,7 @@
 import { useContext, useState, useEffect, useCallback, ComponentType } from 'react';
 import { Module } from '@/types/modules.types';
 import { ModulesContext, ModulesContextType } from '../contexts/ModulesContext';
+import { logger } from '@/utils/logger';
 
 // Hook pour utiliser le contexte des modules
 export const useModules = (): ModulesContextType => {
@@ -104,7 +105,7 @@ export const useModuleComponents = (moduleId: string) => {
               const loaded = await (importFn as () => Promise<{ default: ComponentType<unknown> } | ComponentType<unknown>>)();
               return { name, component: 'default' in loaded ? loaded.default : loaded };
             } catch (error) {
-              console.error(`[useModuleComponents] Erreur chargement composant ${name}:`, error);
+              logger.error(`[useModuleComponents] Erreur chargement composant ${name}:`, error);
               return null;
             }
           });
@@ -119,7 +120,7 @@ export const useModuleComponents = (moduleId: string) => {
           setComponents(resolvedComponents);
         }
       } catch (error) {
-        console.error(`[useModuleComponents] Erreur chargement composants ${moduleId}:`, error);
+        logger.error(`[useModuleComponents] Erreur chargement composants ${moduleId}:`, error)
       } finally {
         setIsLoading(false);
       }

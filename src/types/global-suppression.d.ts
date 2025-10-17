@@ -21,13 +21,6 @@ declare module '@/components/einvoicing/EInvoiceSubmissionForm' {
   export default EInvoiceSubmissionForm;
 }
 
-declare module '@/components/currency/CurrencyComponents' {
-  export const CurrencyDisplay: any;
-  export const CurrencySelector: any;
-  export const CurrencyConverter: any;
-  export const ExchangeRateDisplay: any;
-}
-
 // Global type assertions for problematic modules
 declare global {
   var __typescript_error_suppressed__: boolean;

@@ -2,6 +2,9 @@ import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { LoadingFallback } from '@/components/ui/LoadingFallback';
+import NoEnterpriseFallback from '@/components/onboarding/NoEnterpriseFallback';
+import { readUserScopedItem, STORAGE_KEYS } from '@/utils/userStorage';
+import { logger } from '@/utils/logger';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -31,67 +34,72 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Si l'utilisateur n'est pas connecté et que l'auth est requise, rediriger vers la page de connexion
   if (requireAuth && !user) {
-    console.warn('🔒 ProtectedRoute: Redirecting to auth - user not authenticated');
+    logger.warn('🔒 ProtectedRoute: Redirecting to auth - user not authenticated');
     // Sauvegarder l'URL demandée pour rediriger après la connexion
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
   // FIX: Logique cohérente de vérification d'onboarding
   if (requireOnboarding && user) {
-    console.warn('📋 ProtectedRoute: Checking onboarding requirement', {
-      requireOnboarding,
-      onboardingCompleted,
-      hasCurrentCompany: !!currentCompany,
-      currentCompanyId: currentCompany?.id,
-      currentPath: location.pathname
-    });
+    // Debug logs seulement en mode développement avec debug activé
+    if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_MODE === 'true') {
+      console.warn('📋 ProtectedRoute: Checking onboarding requirement', {
+        requireOnboarding,
+        onboardingCompleted,
+        hasCurrentCompany: !!currentCompany,
+        currentCompanyId: currentCompany?.id,
+        currentPath: location.pathname
+      });
+    }
 
     // Si l'utilisateur est déjà sur la page d'onboarding, ne pas rediriger
     if (location.pathname === '/onboarding' || location.pathname.startsWith('/onboarding/')) {
-      console.warn('ℹ️ ProtectedRoute: Already on onboarding page - allowing render');
+      if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_MODE === 'true') {
+        logger.warn('ℹ️ ProtectedRoute: Already on onboarding page - allowing render')
+      }
       return <>{children}</>;
     }
 
     // Vérifier d'abord s'il y a une entreprise (locale ou remote)
-    const hasLocalCompany = localStorage.getItem('casskai_current_enterprise');
+    const hasLocalCompany = user ? readUserScopedItem(STORAGE_KEYS.CURRENT_ENTERPRISE, user.id) : null;
     
-    // Si pas d'entreprise du tout, rediriger vers l'onboarding
+    // Si pas d'entreprise du tout, proposer la reprise d'onboarding
     if (!currentCompany && !hasLocalCompany) {
-      console.warn('🎯 ProtectedRoute: No company found - redirecting to onboarding');
-      return <Navigate to="/onboarding" replace />;
+      logger.warn('🎯 ProtectedRoute: No company found - showing fallback');
+      return <NoEnterpriseFallback />;
     }
 
     // Si l'onboarding n'est pas complété selon l'état, mais qu'on a une entreprise,
     // vérifier la cohérence des données
     if (!onboardingCompleted && (currentCompany || hasLocalCompany)) {
-      console.warn('⚠️ ProtectedRoute: Onboarding state inconsistent - company exists but onboarding not completed');
+      logger.warn('⚠️ ProtectedRoute: Onboarding state inconsistent - company exists but onboarding not completed');
       // Dans ce cas, laisser passer - l'onboarding sera marqué comme complété par AuthContext
     } else if (!onboardingCompleted) {
-      console.warn('🎯 ProtectedRoute: Onboarding not completed - redirecting to onboarding');
+      logger.warn('🎯 ProtectedRoute: Onboarding not completed - redirecting to onboarding');
       return <Navigate to="/onboarding" replace />;
     }
   }
 
   // Vérification séparée pour l'entreprise (nécessaire même si onboarding est complété)
   if (requireCompany && user) {
-    const hasLocalCompany = localStorage.getItem('casskai_current_enterprise');
+    const hasLocalCompany = user ? readUserScopedItem(STORAGE_KEYS.CURRENT_ENTERPRISE, user.id) : null;
 
     // Si pas d'entreprise dans Supabase et pas d'entreprise locale sauvegardée
     if (!currentCompany && !hasLocalCompany) {
       // Si on est déjà sur l'onboarding, permettre le rendu
       if (location.pathname === '/onboarding' || location.pathname.startsWith('/onboarding/')) {
-        console.warn('ℹ️ ProtectedRoute: No company found but on onboarding page - allowing render');
+        logger.warn('ℹ️ ProtectedRoute: No company found but on onboarding page - allowing render');
         return <>{children}</>;
       }
 
-      console.warn('🏢 ProtectedRoute: No company found - redirecting to onboarding');
-      return <Navigate to="/onboarding" replace />;
+      logger.warn('🏢 ProtectedRoute: No company found - showing fallback');
+      return <NoEnterpriseFallback />;
     }
 
     // Si l'onboarding est complété mais que currentCompany n'est pas encore chargé,
     // afficher un état de chargement seulement si on n'est pas sur l'onboarding
     if (!currentCompany && hasLocalCompany && location.pathname !== '/onboarding') {
-      console.warn('⏳ ProtectedRoute: Company data loading...');
+      logger.warn('⏳ ProtectedRoute: Company data loading...');
       return (
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
@@ -110,8 +118,13 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Si l'utilisateur est connecté et que les requirements sont satisfaits,
   // afficher le contenu protégé
-  console.warn('🎉 ProtectedRoute: Access granted, rendering protected content');
+  if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_MODE === 'true') {
+    logger.warn('🎉 ProtectedRoute: Access granted, rendering protected content')
+  }
   return <>{children}</>;
 };
 
 export default ProtectedRoute;
+
+
+

@@ -1,5 +1,6 @@
 // src/utils/migrationChecker.ts
 import { supabase } from '../lib/supabase';
+import { logger } from '@/utils/logger';
 
 export interface MigrationStatus {
   isConnected: boolean;
@@ -104,7 +105,7 @@ export class MigrationChecker {
       return status;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-      console.error('❌ Erreur lors de la vérification des migrations:', errorMessage);
+      logger.error('❌ Erreur lors de la vérification des migrations:', errorMessage);
       status.message = `Erreur de vérification: ${errorMessage}`;
       return status;
     }
@@ -143,7 +144,7 @@ export class MigrationChecker {
           return tableName; // La table n'existe pas
         }
         if (error) {
-          console.warn(`Avertissement pour la table ${tableName}: ${error.message}`);
+          logger.warn(`Avertissement pour la table ${tableName}: ${error.message}`)
         }
         return null; // La table existe
       } catch {
@@ -285,9 +286,9 @@ export class MigrationChecker {
     report.push('=====================================');
 
     if (overallStatus === 'error') {
-      console.error(report.join('\n'));
+      logger.error(report.join('\n'));
     } else {
-      console.warn(report.join('\n'));
+      logger.warn(report.join('\n'));
     }
   }
 

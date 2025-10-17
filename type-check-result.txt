@@ -1,0 +1,376 @@
+src/components/invoicing/OptimizedInvoicesTab.tsx(711,101): error TS1005: ')' expected.
+src/components/invoicing/OptimizedInvoicesTab.tsx(711,102): error TS1128: Declaration or statement expected.
+src/components/invoicing/OptimizedInvoicesTab.tsx(711,103): error TS1434: Unexpected keyword or identifier.
+src/components/invoicing/OptimizedInvoicesTab.tsx(711,108): error TS1128: Declaration or statement expected.
+src/components/invoicing/OptimizedInvoicesTab.tsx(713,5): error TS1128: Declaration or statement expected.
+src/components/invoicing/OptimizedInvoicesTab.tsx(718,3): error TS1128: Declaration or statement expected.
+src/components/invoicing/OptimizedInvoicesTab.tsx(718,4): error TS1128: Declaration or statement expected.
+src/components/invoicing/OptimizedInvoicesTab.tsx(718,32): error TS1005: ';' expected.
+src/components/invoicing/OptimizedInvoicesTab.tsx(1429,1): error TS1128: Declaration or statement expected.
+src/components/modules/ModuleManager.tsx(258,117): error TS1005: ')' expected.
+src/components/modules/ModuleManager.tsx(258,118): error TS1128: Declaration or statement expected.
+src/components/modules/ModuleManager.tsx(258,119): error TS1128: Declaration or statement expected.
+src/components/settings/CompanySettings.tsx(106,81): error TS1005: ')' expected.
+src/components/settings/CompanySettings.tsx(106,82): error TS1128: Declaration or statement expected.
+src/components/settings/CompanySettings.tsx(111,77): error TS1005: ')' expected.
+src/components/settings/CompanySettings.tsx(111,78): error TS1128: Declaration or statement expected.
+src/components/settings/CompanySettings.tsx(266,81): error TS1005: ')' expected.
+src/components/settings/CompanySettings.tsx(266,82): error TS1128: Declaration or statement expected.
+src/contexts/OnboardingContextNew.tsx(438,96): error TS1005: ')' expected.
+src/contexts/OnboardingContextNew.tsx(438,97): error TS1128: Declaration or statement expected.
+src/contexts/OnboardingContextNew.tsx(924,7): error TS1005: ',' expected.
+src/contexts/OnboardingContextNew.tsx(928,90): error TS1005: ':' expected.
+src/contexts/OnboardingContextNew.tsx(928,92): error TS1128: Declaration or statement expected.
+src/contexts/OnboardingContextNew.tsx(928,106): error TS1005: ';' expected.
+src/contexts/OnboardingContextNew.tsx(965,3): error TS1128: Declaration or statement expected.
+src/contexts/OnboardingContextNew.tsx(965,4): error TS1128: Declaration or statement expected.
+src/contexts/OnboardingContextNew.tsx(965,44): error TS1005: ';' expected.
+src/contexts/OnboardingContextNew.tsx(1060,1): error TS1128: Declaration or statement expected.
+src/main.tsx(16,74): error TS1005: ')' expected.
+src/main.tsx(16,75): error TS1128: Declaration or statement expected.
+src/main.tsx(16,114): error TS1005: ';' expected.
+src/pages/PricingPage.tsx(68,20): error TS1005: ',' expected.
+src/pages/PricingPage.tsx(68,27): error TS1005: ',' expected.
+src/pages/PricingPage.tsx(68,65): error TS1005: ':' expected.
+src/pages/PricingPage.tsx(69,16): error TS1005: ',' expected.
+src/pages/PricingPage.tsx(69,19): error TS1005: ',' expected.
+src/pages/PricingPage.tsx(69,26): error TS1005: ',' expected.
+src/pages/PricingPage.tsx(69,65): error TS1005: ':' expected.
+src/pages/PricingPage.tsx(70,15): error TS1005: ',' expected.
+src/pages/PricingPage.tsx(75,5): error TS1005: ',' expected.
+src/pages/PricingPage.tsx(75,6): error TS1472: 'catch' or 'finally' expected.
+src/pages/PricingPage.tsx(92,5): error TS1005: ',' expected.
+src/pages/PricingPage.tsx(97,24): error TS1005: ',' expected.
+src/pages/PricingPage.tsx(97,34): error TS1005: ',' expected.
+src/pages/PricingPage.tsx(97,36): error TS1135: Argument expression expected.
+src/pages/PricingPage.tsx(210,1): error TS1128: Declaration or statement expected.
+src/pages/SalesCrmPage.tsx(347,69): error TS1005: '}' expected.
+src/pages/SalesCrmPage.tsx(347,70): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/SalesCrmPage.tsx(348,79): error TS1005: '}' expected.
+src/pages/SalesCrmPage.tsx(348,80): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/SalesCrmPage.tsx(349,69): error TS1005: '}' expected.
+src/pages/SalesCrmPage.tsx(349,70): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/SalesCrmPage.tsx(350,18): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/SalesCrmPage.tsx(368,16): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/SalesCrmPage.tsx(455,83): error TS1005: '}' expected.
+src/pages/SalesCrmPage.tsx(455,84): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/pages/SalesCrmPage.tsx(455,85): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/pages/SalesCrmPage.tsx(457,25): error TS17002: Expected corresponding JSX closing tag for 'div'.
+src/pages/SalesCrmPage.tsx(459,21): error TS17002: Expected corresponding JSX closing tag for 'CardContent'.
+src/pages/SalesCrmPage.tsx(460,19): error TS17002: Expected corresponding JSX closing tag for 'Card'.
+src/pages/SalesCrmPage.tsx(461,17): error TS17002: Expected corresponding JSX closing tag for 'motion.div'.
+src/pages/SalesCrmPage.tsx(462,15): error TS17002: Expected corresponding JSX closing tag for 'TabsContent'.
+src/pages/SalesCrmPage.tsx(463,13): error TS17002: Expected corresponding JSX closing tag for 'Tabs'.
+src/pages/SalesCrmPage.tsx(510,11): error TS17002: Expected corresponding JSX closing tag for 'motion.div'.
+src/pages/SalesCrmPage.tsx(511,9): error TS17002: Expected corresponding JSX closing tag for 'div'.
+src/pages/SalesCrmPage.tsx(512,5): error TS1005: ')' expected.
+src/pages/SalesCrmPage.tsx(513,3): error TS1109: Expression expected.
+src/services/currencyService.ts(551,72): error TS1005: ')' expected.
+src/services/currencyService.ts(552,5): error TS1128: Declaration or statement expected.
+src/services/currencyService.ts(557,77): error TS1005: ')' expected.
+src/services/currencyService.ts(558,7): error TS1128: Declaration or statement expected.
+src/services/currencyService.ts(559,6): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
+src/services/currencyService.ts(559,10): error TS1005: ';' expected.
+src/services/currencyService.ts(559,15): error TS1005: '(' expected.
+src/services/currencyService.ts(559,20): error TS1005: '(' expected.
+src/services/currencyService.ts(559,26): error TS1005: '(' expected.
+src/services/currencyService.ts(563,3): error TS1434: Unexpected keyword or identifier.
+src/services/currencyService.ts(563,30): error TS1005: ';' expected.
+src/services/currencyService.ts(563,44): error TS1109: Expression expected.
+src/services/currencyService.ts(564,11): error TS1005: ',' expected.
+src/services/currencyService.ts(564,75): error TS1005: ',' expected.
+src/services/currencyService.ts(566,9): error TS1005: ':' expected.
+src/services/currencyService.ts(568,13): error TS1005: ',' expected.
+src/services/currencyService.ts(568,17): error TS1005: ':' expected.
+src/services/currencyService.ts(568,57): error TS1005: ',' expected.
+src/services/currencyService.ts(569,13): error TS1005: ',' expected.
+src/services/currencyService.ts(569,17): error TS1005: ':' expected.
+src/services/currencyService.ts(569,57): error TS1005: ',' expected.
+src/services/currencyService.ts(572,13): error TS1005: ',' expected.
+src/services/currencyService.ts(572,17): error TS1005: ':' expected.
+src/services/currencyService.ts(572,39): error TS1005: ',' expected.
+src/services/currencyService.ts(574,13): error TS1005: ',' expected.
+src/services/currencyService.ts(574,61): error TS1005: ',' expected.
+src/services/currencyService.ts(575,7): error TS1005: ',' expected.
+src/services/currencyService.ts(580,3): error TS1128: Declaration or statement expected.
+src/services/currencyService.ts(580,11): error TS1434: Unexpected keyword or identifier.
+src/services/currencyService.ts(580,47): error TS1005: ',' expected.
+src/services/currencyService.ts(580,59): error TS1005: ',' expected.
+src/services/currencyService.ts(580,68): error TS1005: ';' expected.
+src/services/currencyService.ts(580,82): error TS1109: Expression expected.
+src/services/currencyService.ts(581,9): error TS1005: ':' expected.
+src/services/currencyService.ts(582,13): error TS1005: ':' expected.
+src/services/currencyService.ts(582,65): error TS1005: ',' expected.
+src/services/currencyService.ts(583,11): error TS1005: ':' expected.
+src/services/currencyService.ts(586,9): error TS1005: ',' expected.
+src/services/currencyService.ts(587,7): error TS1005: ',' expected.
+src/services/currencyService.ts(593,3): error TS1128: Declaration or statement expected.
+src/services/currencyService.ts(593,11): error TS1434: Unexpected keyword or identifier.
+src/services/currencyService.ts(593,38): error TS1005: ';' expected.
+src/services/currencyService.ts(593,52): error TS1109: Expression expected.
+src/services/currencyService.ts(594,9): error TS1005: ':' expected.
+src/services/currencyService.ts(595,13): error TS1005: ':' expected.
+src/services/currencyService.ts(595,59): error TS1005: ',' expected.
+src/services/currencyService.ts(596,13): error TS1005: ':' expected.
+src/services/currencyService.ts(596,59): error TS1005: ',' expected.
+src/services/currencyService.ts(597,13): error TS1005: ':' expected.
+src/services/currencyService.ts(597,59): error TS1005: ',' expected.
+src/services/currencyService.ts(599,22): error TS1005: ',' expected.
+src/services/currencyService.ts(599,35): error TS1005: ',' expected.
+src/services/currencyService.ts(599,37): error TS1136: Property assignment expected.
+src/services/currencyService.ts(645,5): error TS1128: Declaration or statement expected.
+src/services/currencyService.ts(645,7): error TS1005: 'try' expected.
+src/services/currencyService.ts(648,3): error TS1128: Declaration or statement expected.
+src/services/currencyService.ts(650,3): error TS1128: Declaration or statement expected.
+src/services/currencyService.ts(650,11): error TS1434: Unexpected keyword or identifier.
+src/services/currencyService.ts(650,42): error TS1005: ',' expected.
+src/services/currencyService.ts(650,57): error TS1005: ';' expected.
+src/services/currencyService.ts(650,71): error TS1109: Expression expected.
+src/services/currencyService.ts(651,9): error TS1005: ':' expected.
+src/services/currencyService.ts(653,13): error TS1005: ':' expected.
+src/services/currencyService.ts(653,26): error TS1005: ',' expected.
+src/services/currencyService.ts(654,11): error TS1003: Identifier expected.
+src/services/currencyService.ts(658,7): error TS1005: ',' expected.
+src/services/currencyService.ts(658,13): error TS1005: ':' expected.
+src/services/currencyService.ts(668,12): error TS1005: ',' expected.
+src/services/currencyService.ts(673,7): error TS1005: ',' expected.
+src/services/currencyService.ts(678,3): error TS1128: Declaration or statement expected.
+src/services/currencyService.ts(678,29): error TS1005: ',' expected.
+src/services/currencyService.ts(678,51): error TS1005: ',' expected.
+src/services/currencyService.ts(678,60): error TS1005: ';' expected.
+src/services/currencyService.ts(678,62): error TS1434: Unexpected keyword or identifier.
+src/services/currencyService.ts(684,3): error TS1128: Declaration or statement expected.
+src/services/currencyService.ts(684,28): error TS1005: ';' expected.
+src/services/currencyService.ts(684,30): error TS1434: Unexpected keyword or identifier.
+src/services/currencyService.ts(694,31): error TS1005: ',' expected.
+src/services/currencyService.ts(694,52): error TS1109: Expression expected.
+src/services/currencyService.ts(694,61): error TS1005: ';' expected.
+src/services/currencyService.ts(694,63): error TS1434: Unexpected keyword or identifier.
+src/services/currencyService.ts(699,27): error TS1005: ';' expected.
+src/services/currencyService.ts(699,38): error TS1011: An element access expression should take an argument.
+src/services/currencyService.ts(699,40): error TS1005: ';' expected.
+src/services/currencyService.ts(703,3): error TS1434: Unexpected keyword or identifier.
+src/services/currencyService.ts(703,26): error TS1005: ';' expected.
+src/services/currencyService.ts(703,40): error TS1109: Expression expected.
+src/services/currencyService.ts(704,11): error TS1005: ',' expected.
+src/services/currencyService.ts(704,15): error TS1005: ':' expected.
+src/services/currencyService.ts(704,37): error TS1005: ',' expected.
+src/services/currencyService.ts(707,18): error TS1005: ';' expected.
+src/services/currencyService.ts(707,32): error TS1005: ';' expected.
+src/services/currencyService.ts(712,3): error TS1434: Unexpected keyword or identifier.
+src/services/currencyService.ts(712,33): error TS1005: ',' expected.
+src/services/currencyService.ts(716,6): error TS1005: ';' expected.
+src/services/currencyService.ts(716,35): error TS1011: An element access expression should take an argument.
+src/services/currencyService.ts(717,11): error TS1005: ':' expected.
+src/services/currencyService.ts(719,6): error TS1005: ',' expected.
+src/services/currencyService.ts(721,12): error TS1005: ':' expected.
+src/services/currencyService.ts(721,33): error TS1005: ',' expected.
+src/services/currencyService.ts(727,21): error TS1005: ';' expected.
+src/services/currencyService.ts(727,29): error TS1005: ',' expected.
+src/services/currencyService.ts(727,38): error TS1005: ';' expected.
+src/services/currencyService.ts(741,3): error TS1434: Unexpected keyword or identifier.
+src/services/currencyService.ts(741,35): error TS1005: ';' expected.
+src/services/currencyService.ts(741,49): error TS1109: Expression expected.
+src/services/currencyService.ts(742,11): error TS1005: ',' expected.
+src/services/currencyService.ts(742,63): error TS1005: ',' expected.
+src/services/currencyService.ts(743,11): error TS1005: ',' expected.
+src/services/currencyService.ts(743,15): error TS1005: ':' expected.
+src/services/currencyService.ts(743,37): error TS1005: ',' expected.
+src/services/currencyService.ts(747,20): error TS1005: ';' expected.
+src/services/currencyService.ts(776,17): error TS1005: ';' expected.
+src/services/currencyService.ts(777,22): error TS1011: An element access expression should take an argument.
+src/services/currencyService.ts(778,27): error TS1011: An element access expression should take an argument.
+src/services/currencyService.ts(779,27): error TS1011: An element access expression should take an argument.
+src/services/currencyService.ts(780,20): error TS1011: An element access expression should take an argument.
+src/services/currencyService.ts(796,1): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(63,45): error TS1005: ')' expected.
+src/services/performanceOptimizer.ts(63,46): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(63,80): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(65,8): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
+src/services/performanceOptimizer.ts(66,7): error TS1434: Unexpected keyword or identifier.
+src/services/performanceOptimizer.ts(66,18): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
+src/services/performanceOptimizer.ts(66,42): error TS1181: Array element destructuring pattern expected.
+src/services/performanceOptimizer.ts(66,55): error TS1005: ':' expected.
+src/services/performanceOptimizer.ts(66,58): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(81,5): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(82,3): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(84,3): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(84,34): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(86,11): error TS1005: ':' expected.
+src/services/performanceOptimizer.ts(86,100): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(99,5): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(99,9): error TS1005: ':' expected.
+src/services/performanceOptimizer.ts(99,31): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(102,3): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(102,27): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(102,29): error TS1434: Unexpected keyword or identifier.
+src/services/performanceOptimizer.ts(109,3): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(109,32): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(110,11): error TS1005: ':' expected.
+src/services/performanceOptimizer.ts(110,94): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(111,9): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(111,22): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(113,14): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(117,7): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(119,13): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(119,21): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(119,23): error TS1136: Property assignment expected.
+src/services/performanceOptimizer.ts(122,3): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(125,35): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(125,54): error TS1011: An element access expression should take an argument.
+src/services/performanceOptimizer.ts(125,56): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(125,58): error TS1434: Unexpected keyword or identifier.
+src/services/performanceOptimizer.ts(140,3): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(140,38): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(140,40): error TS1434: Unexpected keyword or identifier.
+src/services/performanceOptimizer.ts(165,3): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(166,12): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(167,18): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(167,37): error TS1011: An element access expression should take an argument.
+src/services/performanceOptimizer.ts(168,4): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(168,44): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(247,3): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(247,29): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(247,67): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(256,3): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(256,30): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(256,32): error TS1434: Unexpected keyword or identifier.
+src/services/performanceOptimizer.ts(267,28): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(268,9): error TS1005: ':' expected.
+src/services/performanceOptimizer.ts(268,34): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(269,9): error TS1005: ':' expected.
+src/services/performanceOptimizer.ts(269,38): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(270,9): error TS1005: ':' expected.
+src/services/performanceOptimizer.ts(270,38): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(271,9): error TS1005: ':' expected.
+src/services/performanceOptimizer.ts(271,31): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(274,3): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(274,35): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(276,11): error TS1005: ':' expected.
+src/services/performanceOptimizer.ts(276,67): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(277,11): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(279,7): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(282,3): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(282,39): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(283,11): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(283,66): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(287,3): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(287,39): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(288,9): error TS1003: Identifier expected.
+src/services/performanceOptimizer.ts(299,3): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(299,32): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(301,11): error TS1005: ':' expected.
+src/services/performanceOptimizer.ts(301,31): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(304,11): error TS1005: ':' expected.
+src/services/performanceOptimizer.ts(304,55): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(305,16): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(305,32): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(306,16): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(306,29): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(307,16): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(307,40): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(308,9): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(308,34): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(311,11): error TS1005: ':' expected.
+src/services/performanceOptimizer.ts(311,55): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(312,16): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(312,37): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(313,16): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(313,48): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(314,9): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(314,34): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(318,31): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(320,9): error TS1005: ':' expected.
+src/services/performanceOptimizer.ts(320,22): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(323,9): error TS1005: ':' expected.
+src/services/performanceOptimizer.ts(323,30): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(326,9): error TS1005: ':' expected.
+src/services/performanceOptimizer.ts(326,28): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(329,3): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(329,23): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(330,9): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(330,37): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(331,9): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(331,19): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(333,11): error TS1005: ':' expected.
+src/services/performanceOptimizer.ts(349,6): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(354,3): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(354,31): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(355,17): error TS1138: Parameter declaration expected.
+src/services/performanceOptimizer.ts(355,20): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(361,6): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(361,13): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(362,3): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(364,3): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(364,29): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(365,9): error TS1003: Identifier expected.
+src/services/performanceOptimizer.ts(380,12): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(381,9): error TS1005: ':' expected.
+src/services/performanceOptimizer.ts(381,62): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(382,9): error TS1005: ':' expected.
+src/services/performanceOptimizer.ts(382,24): error TS1005: ',' expected.
+src/services/performanceOptimizer.ts(386,23): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(390,18): error TS1109: Expression expected.
+src/services/performanceOptimizer.ts(400,3): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(400,30): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(400,32): error TS1434: Unexpected keyword or identifier.
+src/services/performanceOptimizer.ts(407,3): error TS1128: Declaration or statement expected.
+src/services/performanceOptimizer.ts(407,28): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(407,49): error TS1005: ';' expected.
+src/services/performanceOptimizer.ts(416,1): error TS1128: Declaration or statement expected.
+src/services/purchasesService.ts(569,112): error TS1005: ')' expected.
+src/services/purchasesService.ts(569,113): error TS1128: Declaration or statement expected.
+src/services/purchasesService.ts(569,119): error TS1005: ',' expected.
+src/services/purchasesService.ts(569,120): error TS1136: Property assignment expected.
+src/services/purchasesService.ts(570,7): error TS1128: Declaration or statement expected.
+src/services/purchasesService.ts(570,9): error TS1128: Declaration or statement expected.
+src/services/purchasesService.ts(573,5): error TS1128: Declaration or statement expected.
+src/services/purchasesService.ts(573,7): error TS1005: 'try' expected.
+src/services/purchasesService.ts(577,3): error TS1128: Declaration or statement expected.
+src/services/purchasesService.ts(577,4): error TS1128: Declaration or statement expected.
+src/services/purchasesService.ts(580,3): error TS1434: Unexpected keyword or identifier.
+src/services/purchasesService.ts(580,43): error TS1005: ',' expected.
+src/services/purchasesService.ts(580,54): error TS1005: ';' expected.
+src/services/purchasesService.ts(580,68): error TS1109: Expression expected.
+src/services/purchasesService.ts(581,9): error TS1005: ':' expected.
+src/services/purchasesService.ts(582,13): error TS1005: ':' expected.
+src/services/purchasesService.ts(582,44): error TS1005: ',' expected.
+src/services/purchasesService.ts(585,13): error TS1005: ':' expected.
+src/services/purchasesService.ts(585,58): error TS1005: ',' expected.
+src/services/purchasesService.ts(588,13): error TS1005: ':' expected.
+src/services/purchasesService.ts(592,8): error TS1005: ',' expected.
+src/services/purchasesService.ts(595,13): error TS1005: ':' expected.
+src/services/purchasesService.ts(595,78): error TS1005: ',' expected.
+src/services/purchasesService.ts(596,13): error TS1005: ':' expected.
+src/services/purchasesService.ts(596,83): error TS1005: ',' expected.
+src/services/purchasesService.ts(598,11): error TS1003: Identifier expected.
+src/services/purchasesService.ts(604,7): error TS1005: ',' expected.
+src/services/purchasesService.ts(604,13): error TS1005: ':' expected.
+src/services/purchasesService.ts(609,8): error TS1005: ',' expected.
+src/services/purchasesService.ts(612,13): error TS1005: ':' expected.
+src/services/purchasesService.ts(618,10): error TS1005: ',' expected.
+src/services/purchasesService.ts(621,13): error TS1005: ':' expected.
+src/services/purchasesService.ts(629,8): error TS1005: ',' expected.
+src/services/purchasesService.ts(631,13): error TS1005: ':' expected.
+src/services/purchasesService.ts(631,77): error TS1005: ',' expected.
+src/services/purchasesService.ts(633,11): error TS1003: Identifier expected.
+src/services/purchasesService.ts(633,18): error TS1005: ',' expected.
+src/services/purchasesService.ts(633,26): error TS1005: ',' expected.
+src/services/purchasesService.ts(633,28): error TS1136: Property assignment expected.
+src/services/purchasesService.ts(634,114): error TS1005: ')' expected.
+src/services/purchasesService.ts(634,115): error TS1128: Declaration or statement expected.
+src/services/purchasesService.ts(634,116): error TS1434: Unexpected keyword or identifier.
+src/services/purchasesService.ts(634,121): error TS1128: Declaration or statement expected.
+src/services/purchasesService.ts(635,9): error TS1128: Declaration or statement expected.
+src/services/purchasesService.ts(638,5): error TS1128: Declaration or statement expected.
+src/services/purchasesService.ts(638,7): error TS1005: 'try' expected.
+src/services/purchasesService.ts(642,3): error TS1128: Declaration or statement expected.
+src/services/purchasesService.ts(643,1): error TS1128: Declaration or statement expected.
+src/services/tenantService.ts(252,82): error TS1005: '}' expected.
+src/services/tenantService.ts(252,86): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
+src/services/tenantService.ts(252,89): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
+src/services/tenantService.ts(259,2): error TS1160: Unterminated template literal.
+src/utils/migrationChecker.ts(289,37): error TS1005: ')' expected.
+src/utils/migrationChecker.ts(289,38): error TS1128: Declaration or statement expected.
+src/utils/migrationChecker.ts(291,36): error TS1005: ')' expected.
+src/utils/migrationChecker.ts(291,37): error TS1128: Declaration or statement expected.

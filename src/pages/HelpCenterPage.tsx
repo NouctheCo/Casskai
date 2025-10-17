@@ -31,6 +31,7 @@ import { Input } from '@/components/ui/input';
 import { PageContainer } from '@/components/ui/PageContainer';
 import { useNavigate } from 'react-router-dom';
 import { generateDocPath } from '@/utils/slugUtils';
+import { logger } from '@/utils/logger';
 
 const HelpCenterPage = () => {
   const { t } = useTranslation();
@@ -205,7 +206,7 @@ const HelpCenterPage = () => {
   };
 
   const handleSupportOption = (optionName: string) => {
-    console.log(`Support option selected: ${optionName}`);
+    logger.info(`Support option selected: ${optionName}`);
     // TODO: Implement specific support actions
   };
 
@@ -215,7 +216,7 @@ const HelpCenterPage = () => {
 
   const handleDownloadGuides = () => {
     // TODO: Implement download functionality
-    console.log('Download guides clicked');
+    logger.info('Download guides clicked')
   };
 
   const handleJoinCommunity = () => {

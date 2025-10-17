@@ -10,6 +10,7 @@ import { Enterprise } from '@/types/enterprise.types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Building, MapPin, Landmark, Settings } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface EnterpriseFormProps {
   enterprise?: Enterprise;
@@ -116,7 +117,7 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
       
       onSuccess();
     } catch (error) {
-      console.error('Error saving enterprise:', error);
+      logger.error('Error saving enterprise:', error)
     } finally {
       setLoading(false);
     }

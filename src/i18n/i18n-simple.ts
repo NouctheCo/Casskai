@@ -1,6 +1,7 @@
 // Simple i18n configuration
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import { logger } from '@/utils/logger';
 
 const resources = {
   fr: {
@@ -48,14 +49,14 @@ if (!i18n.isInitialized) {
       saveMissing: false,
       missingKeyHandler: (lng: string[], ns: string, key: string) => {
         if (process.env.NODE_ENV === 'development') {
-          console.warn(`Missing translation: ${key}`);
+          logger.warn(`Missing translation: ${key}`)
         }
       }
     });
     
-    console.log('✅ i18n initialized successfully');
+    logger.info('✅ i18n initialized successfully')
   } catch (error) {
-    console.error('❌ Failed to initialize i18n:', error);
+    logger.error('❌ Failed to initialize i18n:', error);
     
     // Fallback initialization
     try {
@@ -68,9 +69,9 @@ if (!i18n.isInitialized) {
           react: { useSuspense: false },
           returnNull: false
         });
-      console.warn('⚠️ i18n initialized with minimal config');
+      logger.warn('⚠️ i18n initialized with minimal config')
     } catch (fallbackError) {
-      console.error('❌ Fallback i18n initialization failed:', fallbackError);
+      logger.error('❌ Fallback i18n initialization failed:', fallbackError)
     }
   }
 }

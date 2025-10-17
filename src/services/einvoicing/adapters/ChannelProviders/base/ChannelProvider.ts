@@ -9,6 +9,7 @@ import {
   EInvoiceChannel,
   EInvoicingError
 } from '@/types/einvoicing.types';
+import { logger } from '@/utils/logger';
 
 export abstract class ChannelProvider {
   protected channelName: EInvoiceChannel;
@@ -84,7 +85,7 @@ export abstract class ChannelProvider {
    * Handle API errors (common error handling logic)
    */
   protected handleApiError(error: any, context: string): never {
-    console.error(`${this.channelName} API error in ${context}:`, error);
+    logger.error(`${this.channelName} API error in ${context}:`, error);
     
     let errorMessage = `${this.channelName} API error: ${error.message || 'Unknown error'}`;
     let errorCode = 'API_ERROR';
@@ -148,7 +149,7 @@ export abstract class ChannelProvider {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        console.log(`${this.channelName}: ${context} attempt ${attempt}/${maxRetries}`);
+        logger.info(`${this.channelName}: ${context} attempt ${attempt}/${maxRetries}`);
         return await operation();
       } catch (error) {
         lastError = error as Error;
@@ -166,7 +167,7 @@ export abstract class ChannelProvider {
 
         // Exponential backoff: 1s, 2s, 4s, ...
         const delayMs = baseDelayMs * Math.pow(2, attempt - 1);
-        console.log(`${this.channelName}: Waiting ${delayMs}ms before retry...`);
+        logger.info(`${this.channelName}: Waiting ${delayMs}ms before retry...`);
         
         await new Promise(resolve => setTimeout(resolve, delayMs));
       }
@@ -180,7 +181,7 @@ export abstract class ChannelProvider {
    */
   protected logActivity(activity: string, details?: any): void {
     const timestamp = new Date().toISOString();
-    console.log(`[${timestamp}] ${this.channelName}: ${activity}`, details || '');
+    logger.info(`[${timestamp}] ${this.channelName}: ${activity}`, details || '')
   }
 
   /**

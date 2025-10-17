@@ -1,8 +1,9 @@
-// @ts-nocheck
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import type { Journal } from '@/types/database.types';
+import { logger } from '@/utils/logger';
+
+type Journal = any;
 
 export interface JournalFilters {
   type?: string;
@@ -35,7 +36,10 @@ export function useJournals(companyId: string) {
 
   // Fetch journals with optional filters
   const fetchJournals = useCallback(async (filters: JournalFilters = {}) => {
-    if (!user || !companyId) return;
+    if (!user || !companyId || companyId.trim() === '') {
+      logger.warn('[useJournals] Skipping fetch - missing user or companyId:', { user: !!user, companyId });
+      return;
+    }
 
     const { 
       type, 
@@ -83,7 +87,7 @@ export function useJournals(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch journals';
       setError(errorMessage);
-      console.error('Error fetching journals:', err);
+      logger.error('Error fetching journals:', err);
       return { data: [], count: 0, error: errorMessage };
     } finally {
       setLoading(false);
@@ -136,7 +140,7 @@ export function useJournals(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create journal';
       setError(errorMessage);
-      console.error('Error creating journal:', err);
+      logger.error('Error creating journal:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -195,7 +199,7 @@ export function useJournals(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update journal';
       setError(errorMessage);
-      console.error('Error updating journal:', err);
+      logger.error('Error updating journal:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -236,7 +240,7 @@ export function useJournals(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete journal';
       setError(errorMessage);
-      console.error('Error deleting journal:', err);
+      logger.error('Error deleting journal:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -258,7 +262,7 @@ export function useJournals(companyId: string) {
       if (fetchError) throw fetchError;
       return data;
     } catch (err) {
-      console.error('Error fetching journal by ID:', err);
+      logger.error('Error fetching journal by ID:', err);
       return null;
     }
   }, [user, companyId]);
@@ -278,7 +282,7 @@ export function useJournals(companyId: string) {
       if (fetchError) throw fetchError;
       return data;
     } catch (err) {
-      console.error('Error fetching journal by code:', err);
+      logger.error('Error fetching journal by code:', err);
       return null;
     }
   }, [user, companyId]);
@@ -327,7 +331,7 @@ export function useJournals(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create default journals';
       setError(errorMessage);
-      console.error('Error creating default journals:', err);
+      logger.error('Error creating default journals:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -358,7 +362,7 @@ export function useJournals(companyId: string) {
 
       return stats;
     } catch (err) {
-      console.error('Error calculating journal statistics:', err);
+      logger.error('Error calculating journal statistics:', err);
       return null;
     }
   }, [user, companyId]);

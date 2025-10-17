@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,6 +15,7 @@ import {
   CSVMapping, 
   FileParserOptions 
 } from '../types/accounting-import.types';
+import { logger } from '@/utils/logger';
 
 // Schéma de validation pour la configuration d'import
 const ImportConfigSchema = z.object({
@@ -74,7 +74,7 @@ export function useAccountingImport({
 
   // Gestion des erreurs
   const handleError = useCallback((error: string) => {
-    console.error('Import error:', error);
+    logger.error('Import error:', error);
     onError?.(error);
     setIsImporting(false);
     setImportSession(prev => prev ? { ...prev, status: 'failed' } : null);
@@ -90,14 +90,14 @@ export function useAccountingImport({
       setCsvMapping(analysis.suggestedMapping || []);
 
       // Mise à jour automatique du formulaire
-      form.setValue('file', file);
-      
+      (form.setValue as any)('file', file);
+
       if (analysis.format === 'Excel') {
         form.setValue('format', 'Excel');
       } else if (analysis.format === 'CSV') {
         form.setValue('format', 'CSV');
         if (analysis.delimiter) {
-          form.setValue('delimiter', analysis.delimiter);
+          (form.setValue as any)('delimiter', analysis.delimiter);
         }
       }
       
@@ -240,7 +240,7 @@ export function useAccountingImport({
 
     return {
       ...result,
-      entries: validation.valid,
+      entries: validation.valid as any,
       errors: [...result.errors, ...validation.invalid.flatMap(inv => inv.errors)],
       warnings: [...result.warnings, ...validation.warnings],
       validRows: validation.valid.length
@@ -263,7 +263,7 @@ export function useAccountingImport({
     try {
       await AutomaticLetterageService.performAutoLetterage(companyId);
     } catch (error) {
-      console.warn('Erreur lettrage automatique:', error);
+      logger.warn('Erreur lettrage automatique:', error);
       // N'interrompt pas l'import si le lettrage échoue
     }
   }, [companyId]);
@@ -367,7 +367,7 @@ export function useAccountingImport({
 
     // Actions principales
     analyzeFile,
-    performImport: form.handleSubmit(performImport),
+    performImport: form.handleSubmit(performImport as any),
     resetImport,
 
     // Utilitaires
@@ -378,7 +378,7 @@ export function useAccountingImport({
     checkDuplicates,
 
     // États dérivés
-    canImport: !isImporting && form.watch('file') !== undefined,
+    canImport: !isImporting && (form.watch as any)('file') !== undefined,
     hasPreview: previewData.length > 0,
     hasMapping: csvMapping.length > 0,
     isCompleted: importSession?.status === 'completed',

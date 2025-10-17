@@ -15,6 +15,7 @@ import {
   DocumentTypeCode,
   EInvoicingError
 } from '@/types/einvoicing.types';
+import { logger } from '@/utils/logger';
 
 interface CassKaiInvoice {
   id: string;
@@ -119,7 +120,7 @@ export class InvoiceToEN16931Mapper {
       return en16931Invoice;
 
     } catch (error) {
-      console.error('Error mapping invoice to EN16931:', error);
+      logger.error('Error mapping invoice to EN16931:', error);
       
       if (error instanceof EInvoicingError) {
         throw error;
@@ -262,7 +263,7 @@ export class InvoiceToEN16931Mapper {
     // Validate totals consistency
     const calculatedTotal = totals.invoice_total_without_vat + (totals.invoice_total_vat_amount || 0);
     if (Math.abs(totals.invoice_total_with_vat - calculatedTotal) > 0.01) {
-      console.warn(`Total mismatch in invoice ${invoice.invoice_number}: expected ${calculatedTotal}, got ${totals.invoice_total_with_vat}`);
+      logger.warn(`Total mismatch in invoice ${invoice.invoice_number}: expected ${calculatedTotal}, got ${totals.invoice_total_with_vat}`)
     }
 
     return totals;
@@ -308,7 +309,7 @@ export class InvoiceToEN16931Mapper {
       }
       return date.toISOString().split('T')[0]; // YYYY-MM-DD format
     } catch (error) {
-      console.warn(`Error formatting date ${dateString}:`, error);
+      logger.warn(`Error formatting date ${dateString}:`, error);
       return new Date().toISOString().split('T')[0]; // Fallback to today
     }
   }
@@ -327,7 +328,7 @@ export class InvoiceToEN16931Mapper {
     if (VALID_CURRENCIES.includes(normalizedCurrency as CurrencyCode)) {
       return normalizedCurrency as CurrencyCode;
     }
-    console.warn(`Unknown currency code: ${currency}, defaulting to EUR`);
+    logger.warn(`Unknown currency code: ${currency}, defaulting to EUR`);
     return 'EUR';
   }
 
@@ -345,7 +346,7 @@ export class InvoiceToEN16931Mapper {
       return COUNTRY_MAP[normalizedCountry];
     }
 
-    console.warn(`Unknown country: ${country}, defaulting to FR`);
+    logger.warn(`Unknown country: ${country}, defaulting to FR`);
     return 'FR';
   }
 

@@ -5,6 +5,7 @@ import ConfigService from '../services/configService';
 import { AppConfig } from '../types/config';
 import { APP_VERSION } from './constants';
 import { supabase } from '../lib/supabase';
+import { logger } from '@/utils/logger';
 
 export class ConfigMigration {
   private configService = ConfigService.getInstance();
@@ -22,7 +23,7 @@ export class ConfigMigration {
       // Récupérer les variables d'environnement existantes
       const existingConfig = this.extractEnvConfig();
       if (!existingConfig) {
-        console.warn('ℹ️  Aucune configuration existante trouvée, configuration manuelle requise');
+        logger.warn('ℹ️  Aucune configuration existante trouvée, configuration manuelle requise');
         return false;
       }
 
@@ -33,7 +34,7 @@ export class ConfigMigration {
       const isValid = await this.configService.validateSupabaseConfig();
 
       if (!isValid) {
-        console.error('❌ Configuration Supabase invalide');
+        logger.error('❌ Configuration Supabase invalide');
         return false;
       }
 
@@ -43,7 +44,7 @@ export class ConfigMigration {
       return true;
 
     } catch (error) {
-      console.error('❌ Erreur lors de la migration:', error);
+      logger.error('❌ Erreur lors de la migration:', error);
       return false;
     }
   }

@@ -8,6 +8,7 @@ import {
   mapSettingsToUpdate,
   DEFAULT_COMPANY_SETTINGS 
 } from '@/types/company-settings.types';
+import { logger } from '@/utils/logger';
 
 /**
  * Service dédié à la gestion des paramètres d'entreprise
@@ -36,7 +37,7 @@ export class CompanySettingsService {
 
       return mapRowToSettings(data as CompanyRow);
     } catch (error) {
-      console.error('Erreur lors de la récupération des paramètres:', error);
+      logger.error('Erreur lors de la récupération des paramètres:', error);
       throw error;
     }
   }
@@ -54,11 +55,12 @@ export class CompanySettingsService {
       
       // Ajout de la date de mise à jour
       updateData.updated_at = new Date().toISOString();
-      
+
       // Si on marque les settings comme complétés
-      if (settings.metadata?.settingsCompletedAt) {
-        updateData.settings_completed_at = settings.metadata.settingsCompletedAt.toISOString();
-      }
+      // Note: settings_completed_at column doesn't exist in companies table yet
+      // if (settings.metadata?.settingsCompletedAt) {
+      //   updateData.settings_completed_at = settings.metadata.settingsCompletedAt.toISOString();
+      // }
 
       const { data, error } = await supabase
         .from('companies')
@@ -77,7 +79,7 @@ export class CompanySettingsService {
 
       return mapRowToSettings(data as CompanyRow);
     } catch (error) {
-      console.error('Erreur lors de la mise à jour des paramètres:', error);
+      logger.error('Erreur lors de la mise à jour des paramètres:', error);
       throw error;
     }
   }
@@ -88,7 +90,7 @@ export class CompanySettingsService {
   static async updateSettingsSection(
     companyId: string,
     section: keyof CompanySettings,
-    sectionData: any
+    sectionData: Record<string, unknown>
   ): Promise<CompanySettings> {
     const partialSettings: Partial<CompanySettings> = {
       [section]: sectionData
@@ -242,26 +244,28 @@ export class CompanySettingsService {
     };
 
     // Fonction helper pour compter les champs complétés dans un objet
-    const countFields = (obj: any, prefix: string = ''): { total: number; completed: number } => {
+    const countFields = (obj: unknown, prefix: string = ''): { total: number; completed: number } => {
       let total = 0;
       let completed = 0;
 
-      Object.entries(obj).forEach(([key, value]) => {
-        if (value !== null && value !== undefined && value !== '') {
-          if (typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)) {
-            const nested = countFields(value, `${prefix}${key}.`);
-            total += nested.total;
-            completed += nested.completed;
+      if (obj && typeof obj === 'object' && !Array.isArray(obj) && !(obj instanceof Date)) {
+        Object.entries(obj as Record<string, unknown>).forEach(([key, value]) => {
+          if (value !== null && value !== undefined && value !== '') {
+            if (typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)) {
+              const nested = countFields(value, `${prefix}${key}.`);
+              total += nested.total;
+              completed += nested.completed;
+            } else {
+              total++;
+              if (value !== null && value !== undefined && value !== '') {
+                completed++;
+              }
+            }
           } else {
             total++;
-            if (value !== null && value !== undefined && value !== '') {
-              completed++;
-            }
           }
-        } else {
-          total++;
-        }
-      });
+        });
+      }
 
       return { total, completed };
     };
@@ -308,7 +312,7 @@ export class CompanySettingsService {
       const settings = JSON.parse(jsonData) as Partial<CompanySettings>;
       return await this.updateCompanySettings(companyId, settings);
     } catch (error) {
-      console.error('Erreur lors de l\'import des paramètres:', error);
+      logger.error('Erreur lors de l\'import des paramètres:', error);
       throw new Error('Format JSON invalide');
     }
   }
@@ -329,8 +333,8 @@ export const useCompanySettings = (companyId: string) => {
       setError(null);
       const data = await CompanySettingsService.getCompanySettings(companyId);
       setSettings(data);
-    } catch (err: any) {
-      setError(err.message || 'Erreur lors du chargement des paramètres');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des paramètres');
     } finally {
       setLoading(false);
     }
@@ -345,8 +349,8 @@ export const useCompanySettings = (companyId: string) => {
       const updated = await CompanySettingsService.updateCompanySettings(companyId, updates);
       setSettings(updated);
       return updated;
-    } catch (err: any) {
-      setError(err.message || 'Erreur lors de la sauvegarde');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde');
       throw err;
     }
   }, [companyId]);

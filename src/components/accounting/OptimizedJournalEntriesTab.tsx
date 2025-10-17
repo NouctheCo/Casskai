@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,270 +8,147 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
-import { 
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
+import { journalEntriesService } from '@/services/journalEntriesService';
+import JournalEntryForm from './JournalEntryForm';
+import type { JournalEntryFormInitialValues } from '@/types/journalEntries.types';
+import {
   Plus,
   Search,
-  Filter,
-  Download,
   Edit,
   Trash2,
   Eye,
-  Calendar,
   FileText,
   ChevronDown,
   ChevronRight,
   CheckCircle,
   AlertCircle,
-  Clock,
-  Zap
+  Zap,
+  RefreshCw,
+  Loader2
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
-// Entry Form Component
-const EntryFormDialog = ({ open, onClose, entry = null, onSave }) => {
-  const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0],
-    reference: '',
-    description: '',
-    lines: [
-      { account: '', description: '', debit: '', credit: '' },
-      { account: '', description: '', debit: '', credit: '' }
-    ]
-  });
+// Entry Preview Dialog Component
+const EntryPreviewDialog = ({ open, onClose, entry }) => {
+  if (!entry) return null;
 
-  useEffect(() => {
-    if (entry) {
-      setFormData({
-        date: entry.date,
-        reference: entry.reference,
-        description: entry.description,
-        lines: entry.lines || [{ account: '', description: '', debit: '', credit: '' }]
-      });
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'validated':
+        return <Badge className="bg-green-100 text-green-800 border-green-200">Validée</Badge>;
+      case 'draft':
+        return <Badge variant="secondary">Brouillon</Badge>;
+      case 'pending':
+        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">En attente</Badge>;
+      default:
+        return <Badge variant="outline">Inconnue</Badge>;
     }
-  }, [entry]);
-
-  const addLine = () => {
-    setFormData(prev => ({
-      ...prev,
-      lines: [...prev.lines, { account: '', description: '', debit: '', credit: '' }]
-    }));
-  };
-
-  const removeLine = (index) => {
-    if (formData.lines.length > 2) {
-      setFormData(prev => ({
-        ...prev,
-        lines: prev.lines.filter((_, i) => i !== index)
-      }));
-    }
-  };
-
-  const updateLine = (index, field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      lines: prev.lines.map((line, i) => 
-        i === index ? { ...line, [field]: value } : line
-      )
-    }));
-  };
-
-  const calculateTotals = () => {
-    const totalDebit = formData.lines.reduce((sum, line) => sum + (parseFloat(line.debit) || 0), 0);
-    const totalCredit = formData.lines.reduce((sum, line) => sum + (parseFloat(line.credit) || 0), 0);
-    return { totalDebit, totalCredit, isBalanced: totalDebit === totalCredit };
-  };
-
-  const totals = calculateTotals();
-
-  const handleSave = () => {
-    if (!totals.isBalanced) {
-      toast({
-        title: "Écriture non équilibrée",
-        description: "Le total des débits doit être égal au total des crédits.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    onSave({
-      ...formData,
-      id: entry?.id || Date.now(),
-      status: 'draft',
-      totalDebit: totals.totalDebit,
-      totalCredit: totals.totalCredit
-    });
-
-    toast({
-      title: entry ? "Écriture modifiée" : "Écriture créée",
-      description: "L'écriture a été enregistrée avec succès."
-    });
-
-    onClose();
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2">
+          <DialogTitle className="flex items-center space-x-3">
             <FileText className="w-5 h-5 text-blue-500" />
-            <span>{entry ? 'Modifier l\'écriture' : 'Nouvelle écriture'}</span>
+            <span>Détails de l'écriture - {entry.reference}</span>
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* Entry Header */}
-          <div className="grid md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="date">Date</Label>
-              <Input
-                id="date"
-                type="date"
-                value={formData.date}
-                onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
-              />
+          <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div>
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Référence</Label>
+              <p className="text-lg font-semibold">{entry.reference}</p>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="reference">Référence</Label>
-              <Input
-                id="reference"
-                placeholder="Ex: FAC-001"
-                value={formData.reference}
-                onChange={(e) => setFormData(prev => ({ ...prev, reference: e.target.value }))}
-              />
+            <div>
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Statut</Label>
+              <div className="mt-1">{getStatusBadge(entry.status)}</div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Input
-                id="description"
-                placeholder="Description de l'écriture"
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              />
+          </div>
+
+          {/* Entry Details */}
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Date</Label>
+                <p className="text-base">{new Date(entry.date).toLocaleDateString('fr-FR')}</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Description</Label>
+                <p className="text-base">{entry.description}</p>
+              </div>
             </div>
           </div>
 
           {/* Entry Lines */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Lignes d'écriture</CardTitle>
-                <Button onClick={addLine} size="sm">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Ajouter une ligne
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {formData.lines.map((line, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="grid md:grid-cols-5 gap-4 p-4 border rounded-lg"
-                  >
-                    <div className="space-y-2">
-                      <Label>Compte</Label>
-                      <Select
-                        value={line.account}
-                        onValueChange={(value) => updateLine(index, 'account', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="411000">411000 - Clients</SelectItem>
-                          <SelectItem value="701000">701000 - Ventes</SelectItem>
-                          <SelectItem value="445710">445710 - TVA collectée</SelectItem>
-                          <SelectItem value="512000">512000 - Banque</SelectItem>
-                          <SelectItem value="607000">607000 - Achats</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>Libellé</Label>
-                      <Input
-                        placeholder="Libellé de la ligne"
-                        value={line.description}
-                        onChange={(e) => updateLine(index, 'description', e.target.value)}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>Débit</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
-                        value={line.debit}
-                        onChange={(e) => updateLine(index, 'debit', e.target.value)}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>Crédit</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
-                        value={line.credit}
-                        onChange={(e) => updateLine(index, 'credit', e.target.value)}
-                      />
-                    </div>
-                    
-                    <div className="flex items-end">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeLine(index)}
-                        disabled={formData.lines.length <= 2}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Lignes d'écriture</h3>
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Compte</TableHead>
+                    <TableHead>Libellé</TableHead>
+                    <TableHead className="text-right">Débit</TableHead>
+                    <TableHead className="text-right">Crédit</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {entry.lines?.map((line, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-mono">{line.account}</TableCell>
+                      <TableCell>{line.description}</TableCell>
+                      <TableCell className="text-right font-mono">
+                        {line.debit ? `${parseFloat(line.debit).toFixed(2)} €` : ''}
+                      </TableCell>
+                      <TableCell className="text-right font-mono">
+                        {line.credit ? `${parseFloat(line.credit).toFixed(2)} €` : ''}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
 
-              {/* Totals */}
-              <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                <div className="grid md:grid-cols-3 gap-4 text-sm">
-                  <div className="flex justify-between">
-                    <span className="font-medium">Total Débit:</span>
-                    <span className="font-mono">{totals.totalDebit.toFixed(2)} €</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="font-medium">Total Crédit:</span>
-                    <span className="font-mono">{totals.totalCredit.toFixed(2)} €</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">Équilibre:</span>
-                    <div className="flex items-center space-x-2">
-                      {totals.isBalanced ? (
-                        <CheckCircle className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <AlertCircle className="w-4 h-4 text-red-500" />
-                      )}
-                      <span className={totals.isBalanced ? 'text-green-600' : 'text-red-600'}>
-                        {totals.isBalanced ? 'Équilibrée' : 'Non équilibrée'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+          {/* Totals */}
+          <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div className="text-center">
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Débit</Label>
+              <p className="text-xl font-bold text-red-600">{entry.totalDebit?.toFixed(2)} €</p>
+            </div>
+            <div className="text-center">
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Crédit</Label>
+              <p className="text-xl font-bold text-green-600">{entry.totalCredit?.toFixed(2)} €</p>
+            </div>
+          </div>
+
+          {/* Balance Status */}
+          <div className="text-center">
+            {entry.totalDebit === entry.totalCredit ? (
+              <div className="flex items-center justify-center space-x-2 text-green-600">
+                <CheckCircle className="w-5 h-5" />
+                <span className="font-medium">Écriture équilibrée</span>
               </div>
-            </CardContent>
-          </Card>
+            ) : (
+              <div className="flex items-center justify-center space-x-2 text-red-600">
+                <AlertCircle className="w-5 h-5" />
+                <span className="font-medium">Écriture non équilibrée</span>
+              </div>
+            )}
+          </div>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            Annuler
-          </Button>
-          <Button onClick={handleSave} disabled={!totals.isBalanced}>
-            <CheckCircle className="w-4 h-4 mr-2" />
-            {entry ? 'Modifier' : 'Enregistrer'}
+            Fermer
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -283,6 +159,11 @@ const EntryFormDialog = ({ open, onClose, entry = null, onSave }) => {
 // Entry Row Component
 const EntryRow = ({ entry, onEdit, onDelete, onView }) => {
   const [expanded, setExpanded] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  // Simuler un contrôle RBAC (à remplacer par vrai hook/context)
+  const userCanEdit = true; // TODO: remplacer par vrai contrôle
+  const userCanDelete = true;
+  const userCanView = true;
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -321,14 +202,20 @@ const EntryRow = ({ entry, onEdit, onDelete, onView }) => {
         <TableCell>{getStatusBadge(entry.status)}</TableCell>
         <TableCell>
           <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="sm" onClick={() => onView(entry)}>
+            <Button variant="ghost" size="sm" onClick={() => userCanView && onView(entry)} disabled={!userCanView}>
               <Eye className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => onEdit(entry)}>
+            <Button variant="ghost" size="sm" onClick={() => userCanEdit && onEdit(entry)} disabled={!userCanEdit}>
               <Edit className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => onDelete(entry)}>
-              <Trash2 className="w-4 h-4" />
+            <Button variant="ghost" size="sm" onClick={async () => {
+              if (!userCanDelete) return;
+              setIsDeleting(true);
+              await new Promise(r => setTimeout(r, 600)); // Simule async
+              onDelete(entry);
+              setIsDeleting(false);
+            }} disabled={!userCanDelete || isDeleting}>
+              {isDeleting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
             </Button>
           </div>
         </TableCell>
@@ -355,60 +242,114 @@ const EntryRow = ({ entry, onEdit, onDelete, onView }) => {
   );
 };
 
-export default function OptimizedJournalEntriesTab() {
+export default function OptimizedJournalEntriesTab({ shouldCreateNew = false, onCreateNewCompleted }) {
   const { toast } = useToast();
-  const [entries, setEntries] = useState([
-    {
-      id: 1,
-      reference: 'VTE-001',
-      date: '2024-01-15',
-      description: 'Facture client ABC Corp',
-      totalDebit: 1200.00,
-      totalCredit: 1200.00,
-      status: 'validated',
-      lines: [
-        { account: '411000', description: 'Client ABC Corp', debit: '1200.00', credit: '' },
-        { account: '701000', description: 'Vente produits', debit: '', credit: '1000.00' },
-        { account: '445710', description: 'TVA collectée 20%', debit: '', credit: '200.00' }
-      ]
-    },
-    {
-      id: 2,
-      reference: 'ACH-001',
-      date: '2024-01-16',
-      description: 'Achat matières premières',
-      totalDebit: 600.00,
-      totalCredit: 600.00,
-      status: 'draft',
-      lines: [
-        { account: '601000', description: 'Matières premières', debit: '500.00', credit: '' },
-        { account: '445660', description: 'TVA déductible', debit: '100.00', credit: '' },
-        { account: '401000', description: 'Fournisseur XYZ', debit: '', credit: '600.00' }
-      ]
-    }
-  ]);
+  const { currentCompany } = useAuth();
+  const [entries, setEntries] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  useEffect(() => {
+    const loadEntries = async () => {
+      if (!currentCompany?.id) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('journal_entries')
+          .select('*')
+          .eq('company_id', currentCompany.id)
+          .order('entry_date', { ascending: false });
+
+        if (error) throw error;
+        setEntries(data || []);
+      } catch (error) {
+        logger.error('Error loading journal entries:', error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les écritures comptables.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadEntries();
+  }, [currentCompany?.id, refreshTrigger, toast]);
+
+  const refreshEntries = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [showEntryForm, setShowEntryForm] = useState(false);
+  const [showEntryForm, setShowEntryForm] = useState(shouldCreateNew);
   const [editingEntry, setEditingEntry] = useState(null);
+  const [previewEntry, setPreviewEntry] = useState(null);
 
-  const filteredEntries = entries.filter(entry => {
-    const matchesSearch = entry.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         entry.reference.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || entry.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-
-  const handleSaveEntry = (entryData) => {
-    if (editingEntry) {
-      setEntries(prev => prev.map(entry => 
-        entry.id === editingEntry.id ? { ...entryData, id: editingEntry.id } : entry
-      ));
-    } else {
-      setEntries(prev => [...prev, { ...entryData, id: Date.now() }]);
+  // Handle shouldCreateNew changes
+  useEffect(() => {
+    if (shouldCreateNew) {
+      setShowEntryForm(true);
+      setEditingEntry(null);
     }
+  }, [shouldCreateNew]);
+
+  const handleSaveEntry = async (values: JournalEntryFormInitialValues) => {
+    if (!currentCompany?.id) {
+      toast({
+        title: "Erreur",
+        description: "Aucune entreprise sélectionnée.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const payload = {
+        companyId: currentCompany.id,
+        entryDate: typeof values.entryDate === 'string' ? new Date(values.entryDate).toISOString() : (values.entryDate as Date).toISOString(),
+        description: values.description,
+        referenceNumber: values.referenceNumber,
+        journalId: values.journalId,
+        status: values.status || 'draft',
+        lines: values.lines,
+        entryNumber: values.entryNumber
+      };
+
+      const result = values.id
+        ? await journalEntriesService.updateJournalEntry(values.id, payload)
+        : await journalEntriesService.createJournalEntry(payload);
+
+      if (!result.success) {
+        throw new Error('error' in result ? result.error : 'Unknown error');
+      }
+
+      refreshEntries();
+      setShowEntryForm(false);
+      setEditingEntry(null);
+
+      toast({
+        title: "Succès",
+        description: values.id ? "Écriture modifiée avec succès." : "Écriture créée avec succès."
+      });
+    } catch (error) {
+      logger.error('Error saving entry:', error);
+      toast({
+        title: "Erreur",
+        description: error instanceof Error ? error.message : "Impossible de sauvegarder l'écriture.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleNewEntry = () => {
     setEditingEntry(null);
+    setShowEntryForm(true);
   };
 
   const handleEditEntry = (entry) => {
@@ -425,12 +366,64 @@ export default function OptimizedJournalEntriesTab() {
   };
 
   const handleViewEntry = (entry) => {
-    // View entry details logic
-    toast({
-      title: "Détails de l'écriture",
-      description: `Consultation de l'écriture ${entry.reference}`
-    });
+    setPreviewEntry(entry);
   };
+
+  const filteredEntries = entries.filter(entry => {
+    const description = entry.description || '';
+    const reference = entry.reference || '';
+    const matchesSearch = description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         reference.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || entry.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+      </div>
+    );
+  }
+
+  if (entries.length === 0) {
+    return (
+      <>
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center h-96 text-center">
+            <FileText className="w-16 h-16 text-gray-400 mb-4" />
+            <h3 className="text-xl font-semibold mb-2">Aucune écriture comptable</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
+              Commencez par créer vos écritures comptables. Une écriture est composée de plusieurs lignes équilibrées (total débits = total crédits).
+            </p>
+            <Button onClick={() => setShowEntryForm(true)} size="lg">
+              <Plus className="w-5 h-5 mr-2" />
+              Créer une première écriture
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Entry Form Dialog */}
+        <Dialog open={showEntryForm} onOpenChange={(open) => {
+          if (!open) {
+            setShowEntryForm(false);
+            setEditingEntry(null);
+          }
+        }}>
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+            <JournalEntryForm
+              initialData={editingEntry || undefined}
+              onSubmit={handleSaveEntry}
+              onCancel={() => {
+                setShowEntryForm(false);
+                setEditingEntry(null);
+              }}
+            />
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
 
   const summary = {
     totalEntries: entries.length,
@@ -524,7 +517,7 @@ export default function OptimizedJournalEntriesTab() {
                 </SelectContent>
               </Select>
               
-              <Button onClick={() => setShowEntryForm(true)}>
+              <Button onClick={handleNewEntry}>
                 <Plus className="w-4 h-4 mr-2" />
                 Nouvelle écriture
               </Button>
@@ -564,14 +557,39 @@ export default function OptimizedJournalEntriesTab() {
       </Card>
 
       {/* Entry Form Dialog */}
-      <EntryFormDialog
-        open={showEntryForm}
-        onClose={() => {
+      <Dialog open={showEntryForm} onOpenChange={(open) => {
+        if (!open) {
           setShowEntryForm(false);
           setEditingEntry(null);
-        }}
-        entry={editingEntry}
-        onSave={handleSaveEntry}
+          if (shouldCreateNew && onCreateNewCompleted) {
+            onCreateNewCompleted();
+          }
+        }
+      }}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <JournalEntryForm
+            initialData={editingEntry || undefined}
+            onSubmit={async (values) => {
+              await handleSaveEntry(values);
+              if (shouldCreateNew && onCreateNewCompleted) {
+                onCreateNewCompleted();
+              }
+            }}
+            onCancel={() => {
+              setShowEntryForm(false);
+              setEditingEntry(null);
+              if (shouldCreateNew && onCreateNewCompleted) {
+                onCreateNewCompleted();
+              }
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <EntryPreviewDialog
+        open={!!previewEntry}
+        onClose={() => setPreviewEntry(null)}
+        entry={previewEntry}
       />
     </div>
   );

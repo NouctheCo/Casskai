@@ -1,4 +1,4 @@
-// @ts-nocheck
+import { logger } from '@/utils/logger';
 // Framework A/B Testing moderne et performant
 // Optimisé pour les Core Web Vitals et la performance
 
@@ -107,9 +107,9 @@ export class ABTestingFramework {
       this.startEventFlush();
 
       this.isInitialized = true;
-      console.log(`[ABTesting] Framework initialisé avec ${testsConfig.length} tests`);
+      logger.info(`[ABTesting] Framework initialisé avec ${testsConfig.length} tests`)
     } catch (error) {
-      console.error('[ABTesting] Erreur d\'initialisation:', error);
+      logger.error('[ABTesting] Erreur d\'initialisation:', error)
     }
   }
 
@@ -321,7 +321,7 @@ export class ABTestingFramework {
         });
       }
     } catch (error) {
-      console.warn('[ABTesting] Erreur de chargement des assignments:', error);
+      logger.warn('[ABTesting] Erreur de chargement des assignments:', error)
     }
   }
 
@@ -333,7 +333,7 @@ export class ABTestingFramework {
       });
       localStorage.setItem('casskai-ab-assignments', JSON.stringify(assignments));
     } catch (error) {
-      console.warn('[ABTesting] Erreur de sauvegarde des assignments:', error);
+      logger.warn('[ABTesting] Erreur de sauvegarde des assignments:', error)
     }
   }
 
@@ -356,7 +356,7 @@ export class ABTestingFramework {
       // Envoyer vers l'API analytics
       await this.sendEventsToAnalytics(eventsToFlush);
     } catch (error) {
-      console.error('[ABTesting] Erreur lors du flush des événements:', error);
+      logger.error('[ABTesting] Erreur lors du flush des événements:', error);
       // Remettre les événements en queue en cas d'erreur
       this.eventQueue.unshift(...eventsToFlush);
     }
@@ -436,7 +436,7 @@ export class ABTestingFramework {
         }
       }
     } catch (error) {
-      console.warn('[ABTesting] Erreur d\'accès au localStorage:', error);
+      logger.warn('[ABTesting] Erreur d\'accès au localStorage:', error)
     }
     return data;
   }

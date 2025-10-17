@@ -1,7 +1,7 @@
-// @ts-nocheck
 import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/utils/logger';
 
 export interface User {
   id: string;
@@ -133,14 +133,19 @@ export function useUserManagement(companyId: string) {
       if (usersError) throw usersError;
 
       // Transform data to match User interface
-      const transformedUsers: User[] = users
+      const transformedUsers = (users || [])
         .filter(uc => uc.users)
-        .map(uc => ({
-          id: uc.users.id,
-          email: uc.users.email,
-          firstName: uc.users.first_name || '',
-          lastName: uc.users.last_name || '',
-          avatar: uc.users.avatar_url,
+        .map(uc => {
+          // Supabase returns nested objects in array format, take first element
+          const user = Array.isArray(uc.users) ? uc.users[0] : uc.users;
+          if (!user) return null;
+
+          return {
+          id: user.id,
+          email: user.email,
+          firstName: user.first_name || '',
+          lastName: user.last_name || '',
+          avatar: user.avatar_url,
           role: {
             id: uc.role,
             name: getRoleName(uc.role),
@@ -153,17 +158,19 @@ export function useUserManagement(companyId: string) {
           permissions: getRolePermissions(uc.role),
           createdAt: uc.created_at,
           updatedAt: uc.updated_at,
-          lastLoginAt: uc.users.last_login_at,
+          lastLoginAt: user.last_login_at,
           companyId,
-          phoneNumber: uc.users.phone_number,
+          phoneNumber: user.phone_number,
           invitedBy: null
-        }));
+        } as User;
+        })
+        .filter((u: User | null): u is User => u !== null);
 
-      return transformedUsers;
+      return transformedUsers as User[];
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch users';
       setError(errorMessage);
-      console.error('Error fetching users:', err);
+      logger.error('Error fetching users:', err);
       return [];
     } finally {
       setLoading(false);
@@ -202,14 +209,18 @@ export function useUserManagement(companyId: string) {
         .single();
 
       if (userError) throw userError;
-      if (!userCompany.users) return null;
+      if (!userCompany?.users) return null;
+
+      // Supabase returns nested objects in array format, take first element
+      const userRecord = Array.isArray(userCompany.users) ? userCompany.users[0] : userCompany.users;
+      if (!userRecord) return null;
 
       const user: User = {
-        id: userCompany.users.id,
-        email: userCompany.users.email,
-        firstName: userCompany.users.first_name || '',
-        lastName: userCompany.users.last_name || '',
-        avatar: userCompany.users.avatar_url,
+        id: userRecord.id,
+        email: userRecord.email,
+        firstName: userRecord.first_name || '',
+        lastName: userRecord.last_name || '',
+        avatar: userRecord.avatar_url,
         role: {
           id: userCompany.role,
           name: getRoleName(userCompany.role),
@@ -222,9 +233,9 @@ export function useUserManagement(companyId: string) {
         permissions: getRolePermissions(userCompany.role),
         createdAt: userCompany.created_at,
         updatedAt: userCompany.updated_at,
-        lastLoginAt: userCompany.users.last_login_at,
+        lastLoginAt: userRecord.last_login_at,
         companyId,
-        phoneNumber: userCompany.users.phone_number,
+        phoneNumber: userRecord.phone_number,
         invitedBy: null
       };
 
@@ -232,7 +243,7 @@ export function useUserManagement(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch user';
       setError(errorMessage);
-      console.error('Error fetching user:', err);
+      logger.error('Error fetching user:', err);
       return null;
     } finally {
       setLoading(false);
@@ -292,7 +303,7 @@ export function useUserManagement(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create invitation';
       setError(errorMessage);
-      console.error('Error creating invitation:', err);
+      logger.error('Error creating invitation:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -348,7 +359,7 @@ export function useUserManagement(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update user';
       setError(errorMessage);
-      console.error('Error updating user:', err);
+      logger.error('Error updating user:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -398,7 +409,7 @@ export function useUserManagement(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to toggle user status';
       setError(errorMessage);
-      console.error('Error toggling user status:', err);
+      logger.error('Error toggling user status:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -441,7 +452,7 @@ export function useUserManagement(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch invitations';
       setError(errorMessage);
-      console.error('Error fetching invitations:', err);
+      logger.error('Error fetching invitations:', err);
       return [];
     } finally {
       setLoading(false);
@@ -494,7 +505,7 @@ export function useUserManagement(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to resend invitation';
       setError(errorMessage);
-      console.error('Error resending invitation:', err);
+      logger.error('Error resending invitation:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -522,7 +533,7 @@ export function useUserManagement(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to cancel invitation';
       setError(errorMessage);
-      console.error('Error canceling invitation:', err);
+      logger.error('Error canceling invitation:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -560,7 +571,7 @@ export function useUserManagement(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch activities';
       setError(errorMessage);
-      console.error('Error fetching activities:', err);
+      logger.error('Error fetching activities:', err);
       return [];
     } finally {
       setLoading(false);
@@ -616,7 +627,7 @@ export function useUserManagement(companyId: string) {
 
       return stats;
     } catch (err) {
-      console.error('Error calculating user stats:', err);
+      logger.error('Error calculating user stats:', err);
       return {
         total: 0,
         active: 0,
@@ -642,7 +653,7 @@ export function useUserManagement(companyId: string) {
         return searchableText.includes(query.toLowerCase());
       });
     } catch (err) {
-      console.error('Error searching users:', err);
+      logger.error('Error searching users:', err);
       return [];
     }
   }, [getUsers]);
@@ -705,7 +716,7 @@ async function logActivity(
         user_agent: navigator.userAgent
       });
   } catch (error) {
-    console.error('Failed to log activity:', error);
+    logger.error('Failed to log activity:', error)
   }
 }
 

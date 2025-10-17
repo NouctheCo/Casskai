@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -33,6 +32,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { PageContainer } from '@/components/ui/PageContainer';
 import { PublicNavigation } from '@/components/navigation/PublicNavigation';
+import { logger } from '@/utils/logger';
 
 const GDPRPage = () => {
   const { t, i18n } = useTranslation();
@@ -46,7 +46,7 @@ const GDPRPage = () => {
       if (currentLang.startsWith('es') && fallbackEs) return fallbackEs;
       return fallbackFr;
     } catch (error) {
-      console.warn('Translation error:', error);
+      logger.warn('Translation error:', error);
       return fallbackFr;
     }
   };
@@ -234,7 +234,7 @@ const GDPRPage = () => {
       await GDPRService.sendConfirmationEmail(gdprRequest);
       
       // Afficher la confirmation avec toast
-      toast({
+      (toast as any)({
         title: "Demande RGPD envoyée",
         description: `Votre demande de ${getRequestTypeLabel(requestForm.type)} a été enregistrée. Vous recevrez une réponse sous ${GDPRService.getLegalTimeframe(requestForm.type)}.`,
         duration: 6000
@@ -251,7 +251,7 @@ const GDPRPage = () => {
       });
       
     } catch (error) {
-      console.error('Error submitting GDPR request:', error);
+      logger.error('Error submitting GDPR request:', error);
       toast({
         variant: "destructive",
         title: "Erreur",

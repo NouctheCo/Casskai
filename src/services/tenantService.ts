@@ -1,12 +1,13 @@
-// @ts-nocheck
 // services/tenantService.ts - Version corrigée
 // import { supabase } from '../lib/supabase'; // Commenté pour la compatibilité de build
 import { TenantConfig, TenantFeatures, TenantBranding } from '../types/tenant'; // ✅ CORRECTION: Import ajouté
+import { logger } from '@/utils/logger';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export class TenantService {
   private static instance: TenantService;
   private currentTenant: TenantConfig | null = null;
-  private supabaseClient: any = null;
+  private supabaseClient: SupabaseClient | null = null;
 
   static getInstance(): TenantService {
     if (!TenantService.instance) {
@@ -30,8 +31,8 @@ export class TenantService {
       }
 
       // 3. Utiliser l'instance Supabase unique (CORRECTION CRITIQUE)
-      const { getSupabaseClient } = await import('@/lib/supabase');
-      this.supabaseClient = getSupabaseClient();
+      const supabaseModule = await import('@/lib/supabase');
+      this.supabaseClient = supabaseModule.supabase;
 
       // 4. Vérifier la connexion à la base de données
       const { error } = await this.supabaseClient.from('companies').select('count').single();
@@ -45,7 +46,7 @@ export class TenantService {
 
       return true;
     } catch (error) {
-      console.error('Erreur d\'initialisation du tenant:', error);
+      logger.error('Erreur d\'initialisation du tenant:', error);
       return false;
     }
   }
@@ -124,11 +125,9 @@ export class TenantService {
     currencyService.setDefaultCurrency(config.currency);
 
     // 2. Configurer le plan comptable
-    const accountingService = (await import('./accountingService')).AccountingService.getInstance();
-    if (config.accountingStandard === 'SYSCOHADA') {
-      const { SYSCOHADA_PLAN } = await import('../data/syscohada');
-      accountingService.setAccountPlan(SYSCOHADA_PLAN);
-    }
+    // NOTE: Chart of accounts is now initialized directly in database via
+    // initialize_company_chart_of_accounts() RPC function based on country_code
+    // No need for client-side plan configuration
 
     // 3. Configurer la localisation
     document.documentElement.lang = config.language;
@@ -157,7 +156,7 @@ export class TenantService {
     return this.currentTenant;
   }
 
-  getSupabaseClient(): any {
+  getSupabaseClient(): SupabaseClient | null {
     // return supabase; // Commenté pour la compatibilité de build
     return null;
   }
@@ -208,7 +207,7 @@ export class TenantService {
     // Dans un environnement de production, ceci utiliserait l'API Supabase
     // pour créer automatiquement un nouveau projet
     
-    console.log('Création du projet Supabase pour:', tenant.name);
+    logger.info('Création du projet Supabase pour:', tenant.name);
     
     // Simulation - en réalité, il faudrait :
     // 1. Appeler l'API Supabase Management
@@ -250,11 +249,11 @@ export class TenantService {
 
   private async executeMigration(tenant: TenantConfig, sql: string): Promise<void> {
     // Exécuter la migration SQL sur la base du tenant
-    console.log(`Exécution migration pour ${tenant.id}:`, `${sql.substring(0, 50)  }...`);
+    logger.info(`Exécution migration pour ${tenant.id}:`, `${sql.substring(0, 50)  }...`);
   }
 
   private async saveTenantConfig(tenant: TenantConfig): Promise<void> {
     // Sauvegarder dans un service central ou fichier local
-    console.log('Sauvegarde config tenant:', tenant.id);
+    logger.info('Sauvegarde config tenant:', tenant.id)
   }
 }

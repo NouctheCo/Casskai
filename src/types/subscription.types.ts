@@ -31,6 +31,7 @@ export interface UserSubscription {
   metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
+  plan?: SubscriptionPlan;
 }
 
 export interface PaymentMethod {
@@ -100,6 +101,7 @@ export interface SubscriptionResponse {
   subscription?: UserSubscription;
   error?: string;
   checkoutUrl?: string;
+  sessionId?: string;
 }
 
 export interface PaymentResponse {
@@ -116,14 +118,15 @@ export interface BillingResponse {
 
 // Plan configurations
 export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
+  // Plans mensuels
   {
-    id: 'starter',
+    id: 'starter_monthly',
     name: 'Starter',
-    description: 'Perfect pour débuter avec CassKai',
+    description: 'Parfait pour débuter avec CassKai',
     price: 29,
     currency: 'EUR',
     interval: 'month',
-    stripePriceId: import.meta.env.VITE_STRIPE_STARTER_MONTHLY_PRICE_ID || 'price_starter_monthly',
+    stripePriceId: import.meta.env.VITE_STRIPE_STARTER_MONTHLY_PRICE_ID || 'prod_T01lJIXIuYnCKS',
     stripeProductId: 'prod_starter',
     maxUsers: 2,
     maxClients: 100,
@@ -140,13 +143,37 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     ]
   },
   {
-    id: 'professional',
-    name: 'Professionnel',
+    id: 'starter_yearly',
+    name: 'Starter Annuel',
+    description: 'Parfait pour débuter avec CassKai - Économie 20%',
+    price: 290, // 29 * 12 * 0.8
+    currency: 'EUR',
+    interval: 'year',
+    stripePriceId: import.meta.env.VITE_STRIPE_STARTER_YEARLY_PRICE_ID || '',
+    stripeProductId: 'prod_starter',
+    maxUsers: 2,
+    maxClients: 100,
+    storageLimit: '5 GB',
+    supportLevel: 'basic',
+    features: [
+      'Facturation illimitée',
+      'Jusqu\'à 100 clients',
+      'Comptabilité de base',
+      'Rapports essentiels',
+      '2 utilisateurs inclus',
+      '5 GB de stockage',
+      'Support par email',
+      'Économie de 20% sur l\'année'
+    ]
+  },
+  {
+    id: 'pro_monthly',
+    name: 'Pro',
     description: 'Idéal pour les entreprises en croissance',
     price: 69,
     currency: 'EUR',
     interval: 'month',
-    stripePriceId: import.meta.env.VITE_STRIPE_PRO_MONTHLY_PRICE_ID || 'price_professional_monthly',
+    stripePriceId: import.meta.env.VITE_STRIPE_PRO_MONTHLY_PRICE_ID || 'prod_T01krkpN8GYLQ9',
     stripeProductId: 'prod_professional',
     maxUsers: 10,
     maxClients: 1000,
@@ -167,16 +194,43 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     ]
   },
   {
-    id: 'enterprise',
+    id: 'pro_yearly',
+    name: 'Pro Annuel',
+    description: 'Idéal pour les entreprises en croissance - Économie 20%',
+    price: 662, // 69 * 12 * 0.8
+    currency: 'EUR',
+    interval: 'year',
+    stripePriceId: import.meta.env.VITE_STRIPE_PRO_YEARLY_PRICE_ID || '',
+    stripeProductId: 'prod_professional',
+    maxUsers: 10,
+    maxClients: 1000,
+    storageLimit: '50 GB',
+    supportLevel: 'priority',
+    features: [
+      'Tout du plan Starter',
+      'Clients illimités',
+      'CRM complet',
+      'Gestion des stocks',
+      'Modules avancés',
+      '10 utilisateurs inclus',
+      '50 GB de stockage',
+      'Support prioritaire',
+      'Intégrations bancaires',
+      'Rapports avancés',
+      'Économie de 20% sur l\'année'
+    ]
+  },
+  {
+    id: 'enterprise_monthly',
     name: 'Entreprise',
     description: 'Solution complète pour grandes entreprises',
     price: 129,
     currency: 'EUR',
     interval: 'month',
-    stripePriceId: import.meta.env.VITE_STRIPE_ENTERPRISE_MONTHLY_PRICE_ID || 'price_enterprise_monthly',
+    stripePriceId: import.meta.env.VITE_STRIPE_ENTERPRISE_MONTHLY_PRICE_ID || 'prod_T01jMLYAdVd3be',
     stripeProductId: 'prod_enterprise',
-    maxUsers: null, // unlimited
-    maxClients: null, // unlimited
+    maxUsers: null,
+    maxClients: null,
     storageLimit: '500 GB',
     supportLevel: 'dedicated',
     features: [
@@ -190,6 +244,33 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
       'Support dédié',
       'Formation personnalisée',
       'SLA garanti'
+    ]
+  },
+  {
+    id: 'enterprise_yearly',
+    name: 'Entreprise Annuel',
+    description: 'Solution complète pour grandes entreprises - Économie 20%',
+    price: 1238, // 129 * 12 * 0.8
+    currency: 'EUR',
+    interval: 'year',
+    stripePriceId: import.meta.env.VITE_STRIPE_ENTERPRISE_YEARLY_PRICE_ID || '',
+    stripeProductId: 'prod_enterprise',
+    maxUsers: null,
+    maxClients: null,
+    storageLimit: '500 GB',
+    supportLevel: 'dedicated',
+    features: [
+      'Tout du plan Professionnel',
+      'Utilisateurs illimités',
+      'RH avancées',
+      'Connexions bancaires',
+      'Multi-entités',
+      'API complète',
+      'Stockage étendu',
+      'Support dédié',
+      'Formation personnalisée',
+      'SLA garanti',
+      'Économie de 20% sur l\'année'
     ]
   }
 ];
@@ -255,59 +336,104 @@ export interface PlanModules {
 // Définition centralisée de tous les modules disponibles
 export const AVAILABLE_MODULES = [
   // Core modules (toujours disponibles)
-  { key: 'dashboard', name: 'Tableau de bord', category: 'Core', required: true },
-  { key: 'settings', name: 'Paramètres', category: 'Core', required: true },
-  { key: 'users', name: 'Utilisateurs', category: 'Core', required: true },
-  { key: 'security', name: 'Sécurité', category: 'Core', required: true },
+  { key: 'dashboard', name: 'Tableau de bord', category: 'core', required: true },
+  { key: 'settings', name: 'Paramètres', category: 'core', required: true },
+  { key: 'users', name: 'Utilisateurs', category: 'core', required: true },
+  { key: 'security', name: 'Sécurité', category: 'core', required: true },
+  { key: 'onboarding', name: 'Onboarding', category: 'core', required: true },
 
   // Finance modules
-  { key: 'accounting', name: 'Comptabilité', category: 'Finance', required: false },
-  { key: 'invoicing', name: 'Facturation', category: 'Finance', required: false },
-  { key: 'banking', name: 'Banque', category: 'Finance', required: false },
-  { key: 'purchases', name: 'Achats', category: 'Finance', required: false },
-  { key: 'reports', name: 'Rapports', category: 'Finance', required: false },
+  { key: 'accounting', name: 'Comptabilité', category: 'finance', required: false },
+  { key: 'invoicing', name: 'Facturation', category: 'finance', required: false },
+  { key: 'banking', name: 'Banque', category: 'finance', required: false },
+  { key: 'purchases', name: 'Achats', category: 'finance', required: false },
+  { key: 'reports', name: 'Rapports', category: 'finance', required: false },
+  { key: 'budget', name: 'Budget & Prévisions', category: 'finance', required: false },
+  { key: 'tax', name: 'Fiscalité', category: 'finance', required: false },
 
   // Operations modules
-  { key: 'salesCrm', name: 'CRM Ventes', category: 'Opérations', required: false },
-  { key: 'inventory', name: 'Stock & Inventaire', category: 'Opérations', required: false },
-  { key: 'projects', name: 'Projets', category: 'Opérations', required: false },
-  { key: 'thirdParties', name: 'Tiers', category: 'Opérations', required: false },
+  { key: 'salesCrm', name: 'CRM Ventes', category: 'operations', required: false },
+  { key: 'inventory', name: 'Stock & Inventaire', category: 'operations', required: false },
+  { key: 'projects', name: 'Projets', category: 'operations', required: false },
+  { key: 'thirdParties', name: 'Tiers', category: 'operations', required: false },
+  { key: 'contracts', name: 'Contrats', category: 'operations', required: false },
 
   // Advanced modules
-  { key: 'humanResources', name: 'Ressources Humaines', category: 'Avancé', required: false },
-  { key: 'tax', name: 'Fiscalité', category: 'Avancé', required: false },
-  { key: 'forecasts', name: 'Prévisions', category: 'Avancé', required: false },
-  { key: 'contracts', name: 'Contrats', category: 'Avancé', required: false }
+  { key: 'humanResources', name: 'Ressources Humaines', category: 'analytics', required: false },
+  { key: 'automation', name: 'Automatisation', category: 'analytics', required: false }
 ];
 
 export const PLAN_MODULES: PlanModules[] = [
+  // Modules pour plans mensuels - SYNCHRONISÉS avec PostgreSQL
   {
-    planId: 'starter',
+    planId: 'starter_monthly',
     modules: [
+      // STARTER : modules de base
       'dashboard', 'settings', 'users', 'security',
-      'accounting', 'invoicing', 'banking', 'reports'
+      'accounting', 'invoicing', 'banking', 'purchases', 'thirdParties'
     ]
   },
   {
-    planId: 'professional',
+    planId: 'pro_monthly',
     modules: [
+      // PRO : Starter + modules avancés
       'dashboard', 'settings', 'users', 'security',
-      'accounting', 'invoicing', 'banking', 'purchases', 'reports',
-      'salesCrm', 'inventory', 'projects', 'thirdParties'
+      'accounting', 'invoicing', 'banking', 'purchases', 'thirdParties',
+      'reports', 'budget', 'humanResources', 'tax'
     ]
   },
   {
-    planId: 'enterprise',
+    planId: 'enterprise_monthly',
+    modules: [
+      // ENTERPRISE : Pro + modules entreprise
+      'dashboard', 'settings', 'users', 'security',
+      'accounting', 'invoicing', 'banking', 'purchases', 'thirdParties',
+      'reports', 'budget', 'humanResources', 'tax',
+      'salesCrm', 'inventory', 'projects', 'contracts', 'automation'
+    ]
+  },
+  // Modules pour plans annuels (identiques aux mensuels)
+  {
+    planId: 'starter_yearly',
     modules: [
       'dashboard', 'settings', 'users', 'security',
-      'accounting', 'invoicing', 'banking', 'purchases', 'reports',
-      'salesCrm', 'inventory', 'projects', 'thirdParties',
-      'humanResources', 'tax', 'forecasts', 'contracts'
+      'accounting', 'invoicing', 'banking', 'purchases', 'thirdParties'
     ]
   },
   {
-    planId: 'trial', // Période d'essai - tous les modules
-    modules: AVAILABLE_MODULES.map(m => m.key)
+    planId: 'pro_yearly',
+    modules: [
+      'dashboard', 'settings', 'users', 'security',
+      'accounting', 'invoicing', 'banking', 'purchases', 'thirdParties',
+      'reports', 'budget', 'humanResources', 'tax'
+    ]
+  },
+  {
+    planId: 'enterprise_yearly',
+    modules: [
+      'dashboard', 'settings', 'users', 'security',
+      'accounting', 'invoicing', 'banking', 'purchases', 'thirdParties',
+      'reports', 'budget', 'humanResources', 'tax',
+      'salesCrm', 'inventory', 'projects', 'contracts', 'automation'
+    ]
+  },
+  // Plans spéciaux
+  {
+    planId: 'trial',
+    modules: [
+      // Tous les modules pendant l'essai - SYNCHRONISÉ avec PostgreSQL
+      'dashboard', 'settings', 'users', 'security',
+      'accounting', 'invoicing', 'banking', 'purchases', 'thirdParties',
+      'reports', 'budget', 'humanResources', 'tax', 'contracts',
+      'salesCrm', 'inventory', 'projects', 'onboarding', 'automation'
+    ]
+  },
+  {
+    planId: 'free',
+    modules: [
+      'dashboard', 'settings', 'users', 'security',
+      'accounting', 'invoicing'
+    ]
   }
 ];
 

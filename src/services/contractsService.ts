@@ -213,12 +213,8 @@ export const contractsService = {
    * Archive un contrat
    */
   async archiveContract(id: string): Promise<ContractServiceResponse<boolean>> {
-    try {
-      // TODO: Implémentation Supabase
-      return { data: true, success: true };
-    } catch (error) {
-      return { error: handleSupabaseError(error, 'archiveContract'), success: false };
-    }
+    // TODO: Implémentation Supabase
+    return { data: true, success: true };
   },
 
   // ==================== CALCULS RFA ====================

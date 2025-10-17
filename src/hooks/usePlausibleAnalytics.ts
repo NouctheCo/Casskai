@@ -1,6 +1,6 @@
-// @ts-nocheck
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { logger } from '@/utils/logger';
 
 // Interface pour les événements personnalisés
 interface PlausibleEventProps {
@@ -65,7 +65,7 @@ class PlausibleService {
        window.location.hostname === '127.0.0.1' ||
        window.location.hostname === '0.0.0.0')
     ) {
-      console.log('[Plausible] Tracking désactivé en développement local');
+      logger.info('[Plausible] Tracking désactivé en développement local');
       return;
     }
 
@@ -100,11 +100,11 @@ class PlausibleService {
       script.onload = () => {
         this.isLoaded = true;
         this.processQueue();
-        console.log('[Plausible] Analytics chargé avec succès');
+        logger.info('[Plausible] Analytics chargé avec succès')
       };
 
       script.onerror = () => {
-        console.error('[Plausible] Échec du chargement du script analytics');
+        logger.error('[Plausible] Échec du chargement du script analytics')
       };
 
       // Ajouter le script au DOM
@@ -116,7 +116,7 @@ class PlausibleService {
       }
 
     } catch (error) {
-      console.error('[Plausible] Erreur lors de l\'initialisation:', error);
+      logger.error('[Plausible] Erreur lors de l\'initialisation:', error)
     }
   }
 
@@ -136,12 +136,12 @@ class PlausibleService {
                 window.plausible.apply(null, args);
               }
             } catch (error) {
-              console.warn('[Plausible] Erreur lors de l\'envoi des analytics:', error);
+              logger.warn('[Plausible] Erreur lors de l\'envoi des analytics:', error)
             }
           });
         }
       } catch (error) {
-        console.warn('[Plausible] Erreur lors de l\'envoi des analytics:', error);
+        logger.warn('[Plausible] Erreur lors de l\'envoi des analytics:', error)
       }
     };
   }
@@ -164,7 +164,7 @@ class PlausibleService {
         window.plausible('pageview', { u: pageUrl });
       }
     } catch (error) {
-      console.warn('[Plausible] Erreur lors du tracking de page vue:', error);
+      logger.warn('[Plausible] Erreur lors du tracking de page vue:', error)
     }
   }
 
@@ -181,7 +181,7 @@ class PlausibleService {
         }
       }
     } catch (error) {
-      console.warn('[Plausible] Erreur lors du tracking d\'événement:', error);
+      logger.warn('[Plausible] Erreur lors du tracking d\'événement:', error)
     }
   }
 
@@ -205,16 +205,16 @@ class PlausibleService {
         }
       }
     } catch (error) {
-      console.warn('[Plausible] Erreur lors du tracking de goal:', error);
+      logger.warn('[Plausible] Erreur lors du tracking de goal:', error)
     }
   }
 
   // Vérifier si on doit tracker
   private shouldTrack(): boolean {
     // Respecter Do Not Track
-    if (navigator.doNotTrack === '1' || 
-        (window as any).doNotTrack === '1' || 
-        navigator.msDoNotTrack === '1') {
+    if (navigator.doNotTrack === '1' ||
+        (window as any).doNotTrack === '1' ||
+        (navigator as any).msDoNotTrack === '1') {
       return false;
     }
 

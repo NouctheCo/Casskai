@@ -1,4 +1,3 @@
-// @ts-nocheck
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import type { InvoiceWithDetails } from '@/types/database/invoices.types';
@@ -6,7 +5,7 @@ import type { InvoiceWithDetails } from '@/types/database/invoices.types';
 // Extension for autoTable
 declare module 'jspdf' {
   interface jsPDF {
-    autoTable: (options: any) => jsPDF;
+    autoTable: (options: Record<string, unknown>) => jsPDF;
     lastAutoTable: {
       finalY: number;
     };
@@ -17,7 +16,7 @@ export class InvoicePdfService {
   /**
    * Génère un PDF pour une facture
    */
-  static generateInvoicePDF(invoice: InvoiceWithDetails, companyData?: any): jsPDF {
+  static generateInvoicePDF(invoice: InvoiceWithDetails, companyData?: Record<string, unknown>): jsPDF {
     const doc = new jsPDF();
     
     // Configuration des couleurs
@@ -49,7 +48,7 @@ export class InvoicePdfService {
   /**
    * Ajoute l'en-tête de l'entreprise
    */
-  private static addCompanyHeader(doc: jsPDF, companyData: any, primaryColor: number[]) {
+  private static addCompanyHeader(doc: jsPDF, companyData: Record<string, unknown>, primaryColor: number[]) {
     // Logo ou nom de l'entreprise
     doc.setFontSize(24);
     doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
@@ -112,7 +111,7 @@ export class InvoicePdfService {
     doc.setFont(undefined, 'bold');
     doc.text('Date:', invoiceInfoX, yPos);
     doc.setFont(undefined, 'normal');
-    doc.text(new Date(invoice.issue_date).toLocaleDateString('fr-FR'), invoiceInfoX + 30, yPos);
+    doc.text(new Date(invoice.invoice_date).toLocaleDateString('fr-FR'), invoiceInfoX + 30, yPos);
     yPos += 6;
     
     if (invoice.due_date) {
@@ -139,12 +138,12 @@ export class InvoicePdfService {
       doc.setFont(undefined, 'normal');
       doc.setFontSize(10);
       
-      if (invoice.client.address_street) {
-        doc.text(invoice.client.address_street, 20, yPos);
+      if (invoice.client.address_line1) {
+        doc.text(invoice.client.address_line1, 20, yPos);
         yPos += 5;
       }
-      if (invoice.client.address_city) {
-        const address = `${invoice.client.address_postal_code || ''} ${invoice.client.address_city}`.trim();
+      if (invoice.client.city) {
+        const address = `${invoice.client.postal_code || ''} ${invoice.client.city}`.trim();
         doc.text(address, 20, yPos);
         yPos += 5;
       }
@@ -254,32 +253,32 @@ export class InvoicePdfService {
   private static addNotesAndTerms(doc: jsPDF, invoice: InvoiceWithDetails) {
     let startY = doc.lastAutoTable.finalY + 50;
     
-    if (invoice.notes || invoice.terms) {
+    if (invoice.notes || invoice.internal_notes) {
       startY = Math.max(startY, 200);
-      
+
       if (invoice.notes) {
         doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
         doc.setTextColor(0);
         doc.text('Notes:', 20, startY);
-        
+
         doc.setFont(undefined, 'normal');
         doc.setFontSize(9);
         const notesLines = doc.splitTextToSize(invoice.notes, 170);
         doc.text(notesLines, 20, startY + 6);
         startY += 6 + (notesLines.length * 4);
       }
-      
-      if (invoice.terms) {
+
+      if (invoice.internal_notes) {
         startY += 5;
         doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
         doc.setTextColor(0);
-        doc.text('Conditions de paiement:', 20, startY);
-        
+        doc.text('Notes internes:', 20, startY);
+
         doc.setFont(undefined, 'normal');
         doc.setFontSize(9);
-        const termsLines = doc.splitTextToSize(invoice.terms, 170);
+        const termsLines = doc.splitTextToSize(invoice.internal_notes, 170);
         doc.text(termsLines, 20, startY + 6);
       }
     }
@@ -288,7 +287,7 @@ export class InvoicePdfService {
   /**
    * Ajoute le pied de page
    */
-  private static addFooter(doc: jsPDF, companyData: any) {
+  private static addFooter(doc: jsPDF, companyData: Record<string, unknown>) {
     const pageHeight = doc.internal.pageSize.height;
     const footerY = pageHeight - 20;
     
@@ -322,7 +321,7 @@ export class InvoicePdfService {
   /**
    * Télécharge le PDF
    */
-  static downloadInvoicePDF(invoice: InvoiceWithDetails, companyData?: any): void {
+  static downloadInvoicePDF(invoice: InvoiceWithDetails, companyData?: Record<string, unknown>): void {
     const doc = this.generateInvoicePDF(invoice, companyData);
     const fileName = `facture-${invoice.invoice_number}.pdf`;
     doc.save(fileName);
@@ -331,7 +330,7 @@ export class InvoicePdfService {
   /**
    * Génère un blob PDF pour envoi par email ou affichage
    */
-  static generateInvoicePDFBlob(invoice: InvoiceWithDetails, companyData?: any): Blob {
+  static generateInvoicePDFBlob(invoice: InvoiceWithDetails, companyData?: Record<string, unknown>): Blob {
     const doc = this.generateInvoicePDF(invoice, companyData);
     return doc.output('blob');
   }
@@ -339,7 +338,7 @@ export class InvoicePdfService {
   /**
    * Génère une URL de données PDF pour prévisualisation
    */
-  static generateInvoicePDFDataUrl(invoice: InvoiceWithDetails, companyData?: any): string {
+  static generateInvoicePDFDataUrl(invoice: InvoiceWithDetails, companyData?: Record<string, unknown>): string {
     const doc = this.generateInvoicePDF(invoice, companyData);
     return doc.output('datauristring');
   }

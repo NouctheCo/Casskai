@@ -1,6 +1,6 @@
-// @ts-nocheck
 // src/services/migrationService.ts
-// import { supabase } from '../lib/supabase'; // Commented out for build compatibility
+import { supabase } from '../lib/supabase';
+import { logger } from '@/utils/logger';
 
 export interface MigrationResult {
   success: boolean;
@@ -41,7 +41,7 @@ class MigrationService {
         .eq('table_name', 'companies');
 
       if (tablesError) {
-        console.error('Erreur lors de la vérification des tables:', tablesError);
+        logger.error('Erreur lors de la vérification des tables:', tablesError);
         return [
           { version: '001', name: 'initial_schema', applied: false },
           { version: '002', name: 'default_data', applied: false },
@@ -52,10 +52,14 @@ class MigrationService {
       const companiesTableExists = tablesData && tablesData.length > 0;
 
       // Vérifier si la fonction get_dashboard_stats existe
-      const { data: functionsData, error: functionsError } = await supabase
-        .rpc('get_dashboard_stats', { p_company_id: '00000000-0000-0000-0000-000000000000' })
-        .then(() => ({ data: true, error: null }))
-        .catch((error: any) => ({ data: false, error }));
+      let functionsData = false;
+      let functionsError = null;
+      try {
+        await supabase.rpc('get_dashboard_stats', { p_company_id: '00000000-0000-0000-0000-000000000000' });
+        functionsData = true;
+      } catch (error: unknown) {
+        functionsError = error;
+      }
 
       const functionsExist = !functionsError;
 
@@ -88,7 +92,7 @@ class MigrationService {
         },
       ];
     } catch (error) {
-      console.error('Erreur lors de la vérification des migrations:', error);
+      logger.error('Erreur lors de la vérification des migrations:', error);
       return [
         { version: '001', name: 'initial_schema', applied: false },
         { version: '002', name: 'default_data', applied: false },
@@ -102,7 +106,7 @@ class MigrationService {
    */
   async applyMigrations(): Promise<MigrationResult> {
     try {
-      console.log('🚀 Début de l\'application des migrations...');
+      logger.info('🚀 Début de l\'application des migrations...');
       
       const migrationsStatus = await this.checkMigrationsStatus();
       const pendingMigrations = migrationsStatus.filter(m => !m.applied);
@@ -119,7 +123,7 @@ class MigrationService {
 
       // Appliquer les migrations dans l'ordre
       for (const migration of pendingMigrations) {
-        console.log(`📋 Application de la migration ${migration.version}: ${migration.name}`);
+        logger.info(`📋 Application de la migration ${migration.version}: ${migration.name}`);
         
         try {
           switch (migration.version) {
@@ -133,15 +137,15 @@ class MigrationService {
               await this.applyFunctionsAndTriggersMigration();
               break;
             default:
-              console.warn(`Migration inconnue: ${migration.version}`);
+              logger.warn(`Migration inconnue: ${migration.version}`);
               continue;
           }
           
           appliedCount++;
-          console.log(`✅ Migration ${migration.version} appliquée avec succès`);
+          logger.info(`✅ Migration ${migration.version} appliquée avec succès`)
           
         } catch (migrationError) {
-          console.error(`❌ Erreur lors de l'application de la migration ${migration.version}:`, migrationError);
+          logger.error(`❌ Erreur lors de l'application de la migration ${migration.version}:`, migrationError);
           if (migrationError instanceof Error) {
             throw new Error(`Migration ${migration.version} échouée: ${migrationError.message}`);
           } else {
@@ -157,7 +161,7 @@ class MigrationService {
       };
 
     } catch (error) {
-      console.error('❌ Erreur lors de l\'application des migrations:', error);
+      logger.error('❌ Erreur lors de l\'application des migrations:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : JSON.stringify(error),
@@ -309,37 +313,52 @@ class MigrationService {
 
   /**
    * Crée une entreprise avec le plan comptable par défaut
-   */
-  /**
-   * Crée une entreprise avec le plan comptable par défaut
+   * Utilise la fonction RPC v2.0 create_company_with_defaults
    */
   async createCompanyWithDefaults(
     userId: string,
     companyName: string,
     country: string = 'FR',
     currency: string = 'EUR',
-    accountingStandard: string = 'PCG'
-  ): Promise<{ success: boolean; companyId?: string; error?: string }> {
+    additionalData?: Record<string, unknown>
+  ): Promise<{ success: boolean; companyId?: string; error?: string; data?: unknown }> {
     try {
-      // Utiliser la fonction RPC pour créer l'entreprise avec les données par défaut
+      logger.info('Creating company with RPC v2.0:', { userId, companyName, country, currency });
+
+      // Utiliser la fonction RPC v2.0 avec p_payload
       const { data, error } = await supabase.rpc('create_company_with_defaults', {
-        p_user_id: userId,
-        p_company_name: companyName,
-        p_country: country,
-        p_currency: currency,
-        p_accounting_standard: accountingStandard
+        p_payload: {
+          name: companyName,
+          owner_id: userId,
+          country,
+          default_currency: currency,
+          ...additionalData, // Champs additionnels (email, phone, siren, etc.)
+        }
       });
 
       if (error) {
+        logger.error('RPC error:', error);
         throw error;
       }
 
+      // Vérifier si la RPC a retourné une erreur métier
+      if (data && !data.success) {
+        logger.error('Business error from RPC:', data);
+        return {
+          success: false,
+          error: data.error || data.message || 'Unknown error from RPC',
+        };
+      }
+
+      // Succès
+      logger.info('Company created successfully:', data);
       return {
         success: true,
-        companyId: data
+        companyId: data.company_id,
+        data: data.data,
       };
     } catch (error) {
-      console.error('Erreur lors de la création de l\'entreprise:', error);
+      logger.error('Exception lors de la création de l\'entreprise:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : JSON.stringify(error)
@@ -362,7 +381,7 @@ class MigrationService {
 
       return { success: true };
     } catch (error) {
-      console.error('Erreur lors de la finalisation:', error);
+      logger.error('Erreur lors de la finalisation:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : JSON.stringify(error)
@@ -373,7 +392,7 @@ class MigrationService {
   /**
    * Valide les données comptables d'une entreprise
    */
-  async validateAccountingData(companyId: string): Promise<{ success: boolean; data?: any; error?: string }> {
+  async validateAccountingData(companyId: string): Promise<{ success: boolean; data?: Record<string, unknown>; error?: string }> {
     try {
       const { data, error } = await supabase.rpc('validate_accounting_data', {
         p_company_id: companyId
@@ -388,7 +407,7 @@ class MigrationService {
         data
       };
     } catch (error) {
-      console.error('Erreur lors de la validation:', error);
+      logger.error('Erreur lors de la validation:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : JSON.stringify(error)
@@ -414,7 +433,7 @@ class MigrationService {
         updatedCount: data
       };
     } catch (error) {
-      console.error('Erreur lors du recalcul:', error);
+      logger.error('Erreur lors du recalcul:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : JSON.stringify(error)

@@ -1,25 +1,24 @@
-// @ts-nocheck
 import * as tf from '@tensorflow/tfjs';
-import { regression } from 'ml-matrix';
-import { 
-  mean, 
-  standardDeviation, 
-  median, 
-  quantile, 
-  mode 
-} from 'simple-statistics';
 import {
-  Transaction,
-  AnomalyDetection,
-  CashFlowPrediction,
-  FinancialHealthScore,
-  CategoryPrediction,
-  ExpenseCategory,
-  FinancialTimeSeriesData,
-  AIServiceResponse,
-  TrainingData,
-  MLModelConfig
-} from '../../types/ai-types';
+  mean,
+  standardDeviation,
+  median,
+  quantile,
+  mode
+} from 'simple-statistics';
+import { logger } from '@/utils/logger';
+
+// Type definitions for missing types
+type Transaction = any;
+type AnomalyDetection = any;
+type CashFlowPrediction = any;
+type FinancialHealthScore = any;
+type CategoryPrediction = any;
+type ExpenseCategory = any;
+type FinancialTimeSeriesData = any;
+type AIServiceResponse<T> = any;
+type TrainingData = any;
+type MLModelConfig = any;
 
 // Service principal d'analyse prédictive avec TensorFlow.js
 class AIAnalyticsService {
@@ -35,7 +34,7 @@ class AIAnalyticsService {
   // Initialisation du service
   async initialize(): Promise<void> {
     try {
-      console.log('Initializing AI Analytics Service...');
+      logger.info('Initializing AI Analytics Service...');
       
       // Configuration de TensorFlow.js pour le browser
       await tf.ready();
@@ -45,9 +44,9 @@ class AIAnalyticsService {
       await this.initializeModels();
       
       this.isInitialized = true;
-      console.log('AI Analytics Service initialized successfully');
+      logger.info('AI Analytics Service initialized successfully')
     } catch (error) {
-      console.error('Failed to initialize AI Analytics Service:', error);
+      logger.error('Failed to initialize AI Analytics Service:', error);
       throw error;
     }
   }
@@ -66,7 +65,7 @@ class AIAnalyticsService {
         await this.createDefaultModels();
       }
     } catch (error) {
-      console.error('Error initializing models:', error);
+      logger.error('Error initializing models:', error);
       // Fallback vers des modèles par défaut
       await this.createDefaultModels();
     }
@@ -220,7 +219,7 @@ class AIAnalyticsService {
       };
 
     } catch (error) {
-      console.error('Error detecting anomalies:', error);
+      logger.error('Error detecting anomalies:', error);
       return {
         success: false,
         error: error.message,
@@ -239,10 +238,10 @@ class AIAnalyticsService {
       const isWeekend = dayOfWeek === 0 || dayOfWeek === 6 ? 1 : 0;
       
       // Encodage simple des catégories (à améliorer avec embedding)
-      const categoryHash = transaction.category ? 
-        Array.from(transaction.category).reduce((hash, char) => hash + char.charCodeAt(0), 0) % 100 : 0;
-      
-      const accountHash = Array.from(transaction.account).reduce((hash, char) => hash + char.charCodeAt(0), 0) % 100;
+      const categoryHash = transaction.category ?
+        Array.from(transaction.category as string).reduce((hash: number, char: string) => hash + char.charCodeAt(0), 0) % 100 : 0;
+
+      const accountHash = Array.from(transaction.account as string).reduce((hash: number, char: string) => hash + char.charCodeAt(0), 0) % 100;
 
       return [
         amount,
@@ -330,7 +329,7 @@ class AIAnalyticsService {
       };
 
     } catch (error) {
-      console.error('Error categorizing expense:', error);
+      logger.error('Error categorizing expense:', error);
       return this.ruleBasedCategorization(transaction, categories);
     }
   }
@@ -479,7 +478,7 @@ class AIAnalyticsService {
       };
 
     } catch (error) {
-      console.error('Error predicting cash flow:', error);
+      logger.error('Error predicting cash flow:', error);
       return this.statisticalCashFlowPrediction(historicalData, daysAhead);
     }
   }
@@ -566,7 +565,7 @@ class AIAnalyticsService {
   }
 
   // Génération des facteurs de prédiction
-  private generatePredictionFactors(historicalData: FinancialTimeSeriesData[], dayIndex: number): any[] {
+  private generatePredictionFactors(historicalData: FinancialTimeSeriesData[], dayIndex: number): Record<string, unknown>[] {
     return [
       {
         factor: 'Historique récent',
@@ -619,7 +618,7 @@ class AIAnalyticsService {
       };
 
     } catch (error) {
-      console.error('Error calculating health score:', error);
+      logger.error('Error calculating health score:', error);
       return {
         success: false,
         error: error.message
@@ -655,7 +654,7 @@ class AIAnalyticsService {
   }
 
   // Calcul du score pondéré
-  private calculateWeightedScore(metrics: any): number {
+  private calculateWeightedScore(metrics: Record<string, unknown>): number {
     const weights = {
       liquidity: 0.3,
       profitability: 0.25,
@@ -664,7 +663,7 @@ class AIAnalyticsService {
     };
 
     return Object.entries(weights).reduce((score, [metric, weight]) => {
-      return score + (metrics[metric] || 0) * weight;
+      return score + ((metrics[metric] as number) || 0) * weight;
     }, 0);
   }
 
@@ -686,41 +685,41 @@ class AIAnalyticsService {
   }
 
   // Génération des facteurs de santé
-  private generateHealthFactors(metrics: any): any[] {
+  private generateHealthFactors(metrics: Record<string, unknown>): Record<string, unknown>[] {
     return [
       {
         metric: 'Liquidité',
-        score: Math.round(metrics.liquidity * 100),
+        score: Math.round((metrics.liquidity as number) * 100),
         weight: 30,
         description: 'Capacité à couvrir les dépenses courantes',
-        recommendation: metrics.liquidity < 0.3 ? 'Augmenter les réserves de trésorerie' : undefined
+        recommendation: (metrics.liquidity as number) < 0.3 ? 'Augmenter les réserves de trésorerie' : undefined
       },
       {
         metric: 'Rentabilité',
-        score: Math.round(metrics.profitability * 100),
+        score: Math.round((metrics.profitability as number) * 100),
         weight: 25,
         description: 'Ratio revenus/dépenses',
-        recommendation: metrics.profitability < 0.2 ? 'Optimiser les revenus ou réduire les coûts' : undefined
+        recommendation: (metrics.profitability as number) < 0.2 ? 'Optimiser les revenus ou réduire les coûts' : undefined
       },
       {
         metric: 'Efficacité',
-        score: Math.round(metrics.efficiency * 100),
+        score: Math.round((metrics.efficiency as number) * 100),
         weight: 25,
         description: 'Stabilité des flux de trésorerie',
-        recommendation: metrics.efficiency < 0.5 ? 'Stabiliser les flux financiers' : undefined
+        recommendation: (metrics.efficiency as number) < 0.5 ? 'Stabiliser les flux financiers' : undefined
       },
       {
         metric: 'Solvabilité',
-        score: Math.round(metrics.solvency * 100),
+        score: Math.round((metrics.solvency as number) * 100),
         weight: 20,
         description: 'Capacité à faire face aux obligations',
-        recommendation: metrics.solvency < 0.8 ? 'Améliorer la position financière' : undefined
+        recommendation: (metrics.solvency as number) < 0.8 ? 'Améliorer la position financière' : undefined
       }
     ];
   }
 
   // Méthodes utilitaires
-  private async loadSavedModels(modelData: any): Promise<void> {
+  private async loadSavedModels(modelData: Record<string, unknown>): Promise<void> {
     // Implémentation pour charger les modèles sauvegardés
     // Pour l'instant, crée de nouveaux modèles
     await this.createDefaultModels();
@@ -740,9 +739,9 @@ class AIAnalyticsService {
       };
       
       localStorage.setItem('ai_models', JSON.stringify(modelMetadata));
-      console.log('Models metadata saved successfully');
+      logger.info('Models metadata saved successfully')
     } catch (error) {
-      console.error('Error saving models:', error);
+      logger.error('Error saving models:', error)
     }
   }
 

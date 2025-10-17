@@ -269,6 +269,7 @@ export interface WidgetLibraryItem {
 
 // Utilitaires et helpers
 export interface GridBreakpoints {
+  [key: string]: number;
   lg: number;
   md: number;
   sm: number;
@@ -277,6 +278,7 @@ export interface GridBreakpoints {
 }
 
 export interface GridCols {
+  [key: string]: number;
   lg: number;
   md: number;
   sm: number;

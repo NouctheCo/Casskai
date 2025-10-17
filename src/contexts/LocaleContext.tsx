@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useTranslation } from 'react-i18next';
 import i18n from '@/i18n/i18n';
+import { logger } from '@/utils/logger';
 
 interface LocaleContextType {
   locale: string;
@@ -37,13 +38,13 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
         // Attendre que i18n soit initialisé
         let attempts = 0;
         while ((!i18n.isInitialized || !i18n.hasResourceBundle) && attempts < 50) {
-          console.warn('i18n not ready, waiting... attempt', attempts + 1);
+          logger.warn('i18n not ready, waiting... attempt', attempts + 1);
           await new Promise(resolve => setTimeout(resolve, 100));
           attempts++;
         }
 
         if (!i18n.isInitialized) {
-          console.error('i18n failed to initialize after 5 seconds');
+          logger.error('i18n failed to initialize after 5 seconds');
           setLoadingLocale(false);
           return;
         }
@@ -53,9 +54,9 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
         }
         setLoadingLocale(false);
         document.documentElement.lang = locale;
-        console.log('✅ Langue initialisée:', locale);
+        logger.info('✅ Langue initialisée:', locale)
       } catch (error) {
-        console.error('Error initializing language:', error);
+        logger.error('Error initializing language:', error);
         setLoadingLocale(false);
       }
     };
@@ -88,13 +89,13 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
       if (translation && typeof translation === 'string') {
         // Détecter les messages d'erreur de i18next
         if (translation.includes("key '") && translation.includes("' return")) {
-          console.warn(`Translation key '${key}' not found, using fallback: ${currentDefaultValue}`);
+          logger.warn(`Translation key '${key}' not found, using fallback: ${currentDefaultValue}`);
           return currentDefaultValue;
         }
         
         // Détecter d'autres formats d'erreur possibles
         if (translation.startsWith('key ') && translation.includes(' return')) {
-          console.warn(`Translation key '${key}' not found, using fallback: ${currentDefaultValue}`);
+          logger.warn(`Translation key '${key}' not found, using fallback: ${currentDefaultValue}`);
           return currentDefaultValue;
         }
 
@@ -106,7 +107,7 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
 
       return translation || currentDefaultValue;
     } catch (error) {
-      console.error(`Error translating key '${key}':`, error);
+      logger.error(`Error translating key '${key}':`, error);
       return currentDefaultValue;
     }
   };

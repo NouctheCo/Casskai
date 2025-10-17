@@ -40,9 +40,13 @@ src/**/*.js.map
 .env.production
 .env.staging
 .env.hostinger
+.env.production-test
+.env.*.secret
+.secrets.env
 
 # Ne versionner que .env.example pour la doc
 !.env.example
+!.env.sample
 
 # Configuration Supabase locale
 supabase/.env
@@ -183,3 +187,8 @@ import-files/
 # - Les configurations locales qui varient selon l'environnement
 
 # Ne versionner que .env.example pour la doc
+
+# Rapports Playwright et résultats de tests
+playwright-report/
+test-results/
+_cleanup_backup/

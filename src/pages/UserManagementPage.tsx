@@ -25,6 +25,7 @@ import {
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { SYSTEM_ROLES, PERMISSION_MODULES } from '@/types/user.types';
+import { logger } from '@/utils/logger';
 
 const UserManagementPage = () => {
   const { user: currentUser } = useAuth();
@@ -75,14 +76,42 @@ const UserManagementPage = () => {
     message: ''
   });
 
-  // Mock data initialization
+  // Load real data from Supabase
   useEffect(() => {
-    initializeMockData();
+    loadRealData();
   }, []);
 
-  const initializeMockData = () => {
-    // Mock users
-    const mockUsers = [
+  const loadRealData = async () => {
+    try {
+      // TODO: Implémenter le chargement réel depuis Supabase
+      // Pour l'instant, initialiser avec des tableaux vides pour montrer l'état vide
+      const mockRoles = Object.entries(SYSTEM_ROLES).map(([key, role]) => ({
+        id: key.toLowerCase(),
+        name: role.name,
+        description: role.description,
+        permissions: role.permissions,
+        level: role.level,
+        isSystemRole: true,
+        companyId: 'comp-1',
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z'
+      }));
+
+      setUsers([]);
+      setRoles(mockRoles);
+      setInvitations([]);
+      setActivities([]);
+      setLoading(false);
+    } catch (error) {
+      logger.error('Error loading user management data:', error);
+      setLoading(false);
+    }
+  };
+
+  // Code supprimé - ancienne fonction initializeMockData avec 4 faux utilisateurs
+  // Les données réelles seront chargées depuis Supabase dans une future version
+  /*
+  const OLD_MOCK_DATA = [
       {
         id: '1',
         email: 'admin@casskai.com',
@@ -241,6 +270,7 @@ const UserManagementPage = () => {
     setActivities(mockActivities);
     setLoading(false);
   };
+  */
 
   // Filter functions
   const filteredUsers = users.filter(user => {
@@ -295,13 +325,13 @@ const UserManagementPage = () => {
   const handleInviteSubmit = (e) => {
     e.preventDefault();
     const newInvitation = {
-      id: 'inv-' + Date.now(),
+      id: `inv-${  Date.now()}`,
       ...inviteForm,
       role: roles.find(r => r.id === inviteForm.roleId),
       invitedBy: currentUser?.id,
       companyId: 'comp-1',
       status: 'pending',
-      token: 'token-' + Date.now(),
+      token: `token-${  Date.now()}`,
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       createdAt: new Date().toISOString()
     };

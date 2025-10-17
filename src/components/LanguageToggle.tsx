@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { Languages, Globe, Check } from 'lucide-react';
 import { useLocale } from '@/contexts/LocaleContext';
@@ -67,7 +66,7 @@ export function LanguageToggle({ variant = 'icon', showLabel = false, className 
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className={`flex items-center gap-2 ${className}`}>
             <Globe className="h-4 w-4" />
-            {currentLangData.flag && <span>{currentLangData.flag}</span>}
+            {(currentLangData as any).flag && <span>{(currentLangData as any).flag}</span>}
             <span className="hidden sm:inline">{currentLangInfo?.name || 'Language'}</span>
           </Button>
         </DropdownMenuTrigger>

@@ -5,6 +5,9 @@ import { supabase } from '../lib/supabase';
 import type { User, Session, AuthResponse, AuthError } from '@supabase/supabase-js';
 import { getCompanyDetails, getUserCompanies, getCompanyModules } from '../lib/company';
 import { trialService } from '../services/trialService';
+import { trialExpirationService } from '../services/trialExpirationService';
+import { STORAGE_KEYS, readUserScopedItem, writeUserScopedItem, removeUserScopedItem, purgeUserEnterpriseCache } from '@/utils/userStorage';
+import { logger } from '@/utils/logger';
 
 interface Company {
   id: string;
@@ -30,6 +33,7 @@ interface AuthContextType {
   loading: boolean;
   isAuthenticated: boolean;
   onboardingCompleted: boolean;
+  shouldShowExperience: boolean;
   currentCompany: Company | null;
   userCompanies: Company[];
   isCheckingOnboarding: boolean; // Nouveau état pour gérer la transition
@@ -55,35 +59,46 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return false;
   });
   const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(false);
+  const [shouldShowExperience, setShouldShowExperience] = useState<boolean>(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const signOut = useCallback(async (): Promise<{ error: AuthError | null }> => {
-    const { error } = await supabase.auth.signOut();
-    // State cleanup is handled by onAuthStateChange which triggers fetchUserSession(null)
-    return { error };
-  }, []);
+    trialExpirationService.stopPeriodicCheck();
 
-  // Fonction pour s'assurer qu'un utilisateur a un abonnement d'essai
+    const previousUserId = user?.id ?? null;
+    const { error } = await supabase.auth.signOut();
+
+    if (previousUserId) {
+      purgeUserEnterpriseCache(previousUserId);
+      removeUserScopedItem(STORAGE_KEYS.CURRENT_COMPANY_ID, previousUserId);
+    }
+
+    return { error };
+  }, [user]);
+
+  // Fonction pour s'assurer qu'un utilisateur a un abonnement d'essai.
+  // Dépendances vides pour conserver la référence stable et éviter de recréer l'écouteur Supabase en boucle.
   const ensureTrialSubscription = useCallback(async (userId: string, companyId: string) => {
     try {
       // Vérifier si l'utilisateur peut créer un essai
       const canCreate = await trialService.canCreateTrial(userId);
 
       if (canCreate) {
-        console.warn('🔄 Création automatique d\'un essai pour le nouvel utilisateur...');
+        logger.warn('🔄 Création automatique d\'un essai pour le nouvel utilisateur...');
 
         // Créer un abonnement d'essai automatiquement
         const result = await trialService.createTrialSubscription(userId, companyId);
 
         if (result.success) {
-          console.warn('✅ Essai créé automatiquement pour l\'utilisateur');
+          logger.warn('✅ Essai créé automatiquement pour l\'utilisateur')
         } else {
-          console.error('❌ Échec de la création de l\'essai:', result.error);
+          logger.error('❌ Échec de la création de l\'essai:', result.error)
         }
       } else {
-        console.warn('ℹ️ Utilisateur déjà éligible ou a déjà un abonnement');
+        logger.warn('ℹ️ Utilisateur déjà éligible ou a déjà un abonnement')
       }
     } catch (error) {
-      console.error('Erreur lors de la vérification/création de l\'abonnement:', error);
+      logger.error('Erreur lors de la vérification/création de l\'abonnement:', error)
     }
   }, []);
 
@@ -93,18 +108,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const companyDetails = await getCompanyDetails(companyId);
       if (companyDetails) {
         setCurrentCompany(companyDetails);
-        localStorage.setItem('casskai_current_company_id', companyId);
+        if (user?.id) {
+          writeUserScopedItem(STORAGE_KEYS.CURRENT_COMPANY_ID, user.id, companyId);
+        }
 
         const modules = await getCompanyModules(companyId);
         localStorage.setItem('casskai_modules', JSON.stringify(modules));
-        window.dispatchEvent(new CustomEvent('modulesUpdated', { detail: modules }));
+        window.dispatchEvent(new CustomEvent('module-states-reset'));
         
-        console.warn(`Entreprise changée: ${companyDetails.name}`);
+        logger.warn(`Entreprise changée: ${companyDetails.name}`)
       } else {
         throw new Error("Impossible de trouver les détails de l'entreprise.");
       }
     } catch (error) {
-      console.error("AuthContext | Erreur lors du changement d'entreprise:", error);
+      logger.error("AuthContext | Erreur lors du changement d'entreprise:", error);
       // Ne pas lancer une erreur fatale, juste logger
       setCurrentCompany(null);
     }
@@ -120,7 +137,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsAuthenticated(false);
       setOnboardingCompleted(false);
       setIsCheckingOnboarding(false);
-      localStorage.removeItem('casskai_current_company_id');
+      if (currentUserId) {
+        purgeUserEnterpriseCache(currentUserId);
+        removeUserScopedItem(STORAGE_KEYS.CURRENT_COMPANY_ID, currentUserId);
+      }
+      setCurrentUserId(null);
 
       // Clear onboarding progress on logout to ensure a fresh start
       localStorage.removeItem('onboarding_current_step');
@@ -133,11 +154,31 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     setUser(currentUser);
     setIsAuthenticated(true);
-    setIsCheckingOnboarding(true); // Indique qu'on vérifie l'état d'onboarding
+    setIsCheckingOnboarding(true);
+    setCurrentUserId(currentUser.id); // Indique qu'on vérifie l'état d'onboarding
 
     try {
       const companies = await getUserCompanies(currentUser.id);
       setUserCompanies(companies || []);
+
+      // Check user metadata for experience flag (fallback to localStorage)
+      try {
+        const { data: userMetaResponse, error: userMetaError } = await supabase.auth.getUser();
+        if (!userMetaError && userMetaResponse?.user) {
+          const seen = (userMetaResponse.user.user_metadata as any)?.seen_experience;
+          if (!seen) {
+            setShouldShowExperience(true);
+            if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('show-experience'));
+          } else {
+            setShouldShowExperience(false);
+          }
+        }
+      } catch (metaErr) {
+        // fallback to client localStorage when metadata read fails
+        const seenLocal = typeof window !== 'undefined' && localStorage.getItem('seen_experience') === 'true';
+  setShouldShowExperience(!seenLocal);
+  if (!seenLocal && typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('show-experience'));
+      }
 
       if (companies && companies.length > 0) {
         setOnboardingCompleted(true);
@@ -145,21 +186,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         
         // Vérifier et créer automatiquement un abonnement d'essai si nécessaire
         await ensureTrialSubscription(currentUser.id, companies[0].id);
+
+        // Démarrer la vérification de l'expiration des essais
+        trialExpirationService.startPeriodicCheck(60); // Vérifier toutes les heures
+
+        // Vérifier l'état de l'utilisateur au démarrage
+        await trialExpirationService.checkUserOnStartup(currentUser.id);
         
-        const lastCompanyId = localStorage.getItem('casskai_current_company_id');
+        const lastCompanyId = readUserScopedItem(STORAGE_KEYS.CURRENT_COMPANY_ID, currentUser.id);
         const companyToLoad = companies.find(c => c.id === lastCompanyId) || companies[0];
 
         if (companyToLoad) {
           try {
             await switchCompany(companyToLoad.id);
           } catch (switchError) {
-            console.error("AuthContext | Erreur lors du chargement de l'entreprise, tentative avec la première entreprise:", switchError);
+            logger.error("AuthContext | Erreur lors du chargement de l'entreprise, tentative avec la première entreprise:", switchError);
             // Essayer avec la première entreprise si celle sélectionnée échoue
             if (companies[0] && companies[0].id !== companyToLoad.id) {
               try {
                 await switchCompany(companies[0].id);
               } catch (fallbackError) {
-                console.error("AuthContext | Échec du fallback vers la première entreprise:", fallbackError);
+                logger.error("AuthContext | Échec du fallback vers la première entreprise:", fallbackError);
                 setCurrentCompany(null);
               }
             } else {
@@ -171,19 +218,32 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
       } else {
         setOnboardingCompleted(false);
+  // no companies means new user, also show experience
+  setShouldShowExperience(true);
+  if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('show-experience'));
         setCurrentCompany(null);
       }
     } catch (error) {
-      console.error("AuthContext | Erreur lors de la récupération des données utilisateur:", error);
+      logger.error("AuthContext | Erreur lors de la récupération des données utilisateur:", error);
+
+      // Gestion spéciale des erreurs RLS/500 - assumer que l'utilisateur doit faire l'onboarding
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('500') || errorMessage.includes('RLS') || errorMessage.includes('policy')) {
+        logger.warn('🔄 Erreur RLS détectée - redirection vers onboarding');
+        setOnboardingCompleted(false);
+      }
+
       // Ne pas déconnecter automatiquement, juste logger l'erreur
       setUserCompanies([]);
       setCurrentCompany(null);
       setOnboardingCompleted(false);
+  setShouldShowExperience(true);
+  if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('show-experience'));
     } finally {
       setIsCheckingOnboarding(false); // Fin de la vérification
       setLoading(false);
     }
-  }, [switchCompany, ensureTrialSubscription]);
+  }, [switchCompany, ensureTrialSubscription, currentUserId]);
 
   useEffect(() => {
     setLoading(true);
@@ -193,11 +253,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const accessToken = hashParams.get('access_token');
       const type = hashParams.get('type');
-      
+
       if (accessToken && type === 'email_confirmation') {
-        console.warn('📧 Email confirmation detected, cleaning URL...');
+        logger.warn('📧 Email confirmation detected, cleaning URL...');
         // Clean URL by removing hash parameters
-        window.history.replaceState(null, '', window.location.pathname);
+        window.history.replaceState(null, '', '/onboarding');
         return true;
       }
       return false;
@@ -208,7 +268,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Check for existing session on initial load
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (error) {
-        console.warn('Session recovery failed, clearing auth data:', error);
+        logger.warn('Session recovery failed, clearing auth data:', error);
         // Clear corrupted session data
         localStorage.removeItem('sb-smtdtgrymuzwvctattmx-auth-token');
         supabase.auth.signOut();
@@ -221,7 +281,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       // If this is an email confirmation, mark for onboarding redirect
       if (isEmailConfirmation && session?.user) {
-        console.warn('📧 Email confirmed, user will be redirected to onboarding');
+        logger.warn('📧 Email confirmed, user will be redirected to onboarding')
       }
       
       fetchUserSession(session?.user ?? null);
@@ -229,19 +289,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     // Listen for auth state changes
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      console.warn('🔐 Auth state change:', event);
-      
+      logger.warn('🔐 Auth state change:', event);
+
       setSession(session);
-      
+
       // Special handling for email confirmation
       if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         if (hashParams.get('type') === 'email_confirmation') {
-          console.warn('📧 Email confirmation event detected');
-          window.history.replaceState(null, '', window.location.pathname);
+          logger.warn('📧 Email confirmation event detected - redirecting to onboarding');
+          window.history.replaceState(null, '', '/onboarding');
         }
       }
-      
+
       fetchUserSession(session?.user ?? null);
     });
 
@@ -264,6 +324,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     loading,
     isAuthenticated,
     onboardingCompleted,
+    shouldShowExperience,
     currentCompany,
     userCompanies,
     isCheckingOnboarding,
@@ -283,4 +344,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
 

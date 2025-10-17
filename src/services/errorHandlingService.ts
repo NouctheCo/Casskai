@@ -1,6 +1,6 @@
-// @ts-nocheck
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 export interface ErrorContext {
   service?: string;
@@ -51,7 +51,7 @@ export class ErrorHandlingService {
         lastError = error as Error;
         
         // Log the attempt
-        console.warn(`[${context.service}/${context.method}] Attempt ${attempt + 1} failed:`, error);
+        logger.warn(`[${context.service}/${context.method}] Attempt ${attempt + 1} failed:`, error);
         
         // Don't retry if it's the last attempt or if error is not retryable
         if (attempt === maxRetries || !this.isRetryableError(error as Error)) {
@@ -133,16 +133,16 @@ export class ErrorHandlingService {
    * Gestion centralisée des erreurs
    */
   private handleError<T>(error: Error, context: ErrorContext): never {
-    const apiError = error instanceof ApiError ? error : this.createApiError(error, context);
-    
+    const apiError = (error as any).statusCode ? (error as any) : this.createApiError(error, context);
+
     // Log error for monitoring
-    this.logError(apiError, context);
-    
+    this.logError(apiError as any, context);
+
     // Show user notification
-    this.showErrorToUser(apiError);
-    
+    this.showErrorToUser(apiError as any);
+
     // Report to error tracking service
-    this.reportError(apiError, context);
+    this.reportError(apiError as any, context);
     
     throw apiError;
   }
@@ -340,7 +340,7 @@ export class ErrorHandlingService {
           duration: 10000,
           action: {
             label: 'Contacter le support',
-            onClick: () => window.open('mailto:support@casskai.app?subject=Erreur critique&body=' + encodeURIComponent(`ID d'erreur: ${error.code}\nMessage: ${error.technicalMessage}`)),
+            onClick: () => window.open(`mailto:support@casskai.app?subject=Erreur critique&body=${  encodeURIComponent(`ID d'erreur: ${error.code}\nMessage: ${error.technicalMessage}`)}`),
           },
         });
         break;
@@ -443,7 +443,7 @@ export class ErrorHandlingService {
       }).select().single();
       
     } catch (reportingError) {
-      console.error('[ErrorHandlingService] Failed to report error:', reportingError);
+      logger.error('[ErrorHandlingService] Failed to report error:', reportingError)
     }
   }
 

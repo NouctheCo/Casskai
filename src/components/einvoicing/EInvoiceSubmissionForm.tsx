@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * E-invoice Submission Form Component
  * Form to submit invoices for e-invoicing processing
@@ -28,6 +27,7 @@ import {
   EInvoiceFormat,
   EInvoiceChannel
 } from '../../types/einvoicing.types';
+import { logger } from '@/utils/logger';
 
 interface EInvoiceSubmissionFormProps {
   companyId: string;
@@ -81,7 +81,7 @@ export const EInvoiceSubmissionForm: React.FC<EInvoiceSubmissionFormProps> = ({
           setInvoiceOptions(data.data || []);
         }
       } catch (err) {
-        console.error('Error loading invoices:', err);
+        logger.error('Error loading invoices:', err)
       } finally {
         setIsLoadingInvoices(false);
       }
@@ -281,7 +281,7 @@ export const EInvoiceSubmissionForm: React.FC<EInvoiceSubmissionFormProps> = ({
                 <Checkbox
                   id="async"
                   checked={asyncMode}
-                  onCheckedChange={setAsyncMode}
+                  onCheckedChange={(checked) => setAsyncMode(!!checked)}
                 />
                 <Label htmlFor="async" className="text-sm">
                   Traitement asynchrone
@@ -295,7 +295,7 @@ export const EInvoiceSubmissionForm: React.FC<EInvoiceSubmissionFormProps> = ({
                 <Checkbox
                   id="validate"
                   checked={validate}
-                  onCheckedChange={setValidate}
+                  onCheckedChange={(checked) => setValidate(!!checked)}
                 />
                 <Label htmlFor="validate" className="text-sm">
                   Validation EN 16931
@@ -309,7 +309,7 @@ export const EInvoiceSubmissionForm: React.FC<EInvoiceSubmissionFormProps> = ({
                 <Checkbox
                   id="archive"
                   checked={archive}
-                  onCheckedChange={setArchive}
+                  onCheckedChange={(checked) => setArchive(!!checked)}
                 />
                 <Label htmlFor="archive" className="text-sm">
                   Archivage sécurisé

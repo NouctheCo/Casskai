@@ -430,7 +430,8 @@
       "description": "CassKai revolutionizes business management with a complete suite: accounting, invoicing, CRM, projects, HR and much more. All in one, simple and powerful.",
       "cta": {
         "start": "14-day free trial",
-        "demo": "Watch demo"
+        "demo": "Watch demo",
+        "beta": "Become a beta tester"
       },
       "stats": {
         "companies": "Companies",

@@ -25,6 +25,7 @@ import {
   Trash2,
   RefreshCw
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 // Types pour la gestion des modules
 interface ModuleInfo {
@@ -237,9 +238,9 @@ const ModuleManager: React.FC = () => {
       if (savedModules) {
         try {
           activeModulesFromStorage = JSON.parse(savedModules);
-          console.warn('[ModuleManager] Modules chargés depuis localStorage:', activeModulesFromStorage);
+          logger.warn('[ModuleManager] Modules chargés depuis localStorage:', activeModulesFromStorage)
         } catch (error) {
-          console.error('[ModuleManager] Erreur parsing localStorage modules:', error);
+          logger.error('[ModuleManager] Erreur parsing localStorage modules:', error)
         }
       }
 
@@ -254,11 +255,11 @@ const ModuleManager: React.FC = () => {
         };
       });
 
-      console.warn('[ModuleManager] Modules fusionnés:', updatedModules.map(m => ({ id: m.id, isActive: m.isActive })));
+      logger.warn('[ModuleManager] Modules fusionnés:', updatedModules.map(m => ({ id: m.id, isActive: m.isActive })));
       
       setModules(updatedModules);
     } catch (error) {
-      console.error('Erreur de chargement des modules:', error);
+      logger.error('Erreur de chargement des modules:', error)
     } finally {
       setIsLoading(false);
     }
@@ -326,7 +327,7 @@ const ModuleManager: React.FC = () => {
         try {
           activeModulesFromStorage = JSON.parse(savedModules);
         } catch (error) {
-          console.error('[ModuleManager] Erreur parsing localStorage modules:', error);
+          logger.error('[ModuleManager] Erreur parsing localStorage modules:', error)
         }
       }
 
@@ -334,7 +335,7 @@ const ModuleManager: React.FC = () => {
       // Mettre à jour l'état dans localStorage (utilise les vrais IDs maintenant)
       activeModulesFromStorage[moduleId] = activate;
       localStorage.setItem('casskai_modules', JSON.stringify(activeModulesFromStorage));
-      console.warn(`[ModuleManager] Module ${moduleId} sauvegardé dans localStorage:`, activate);
+      logger.warn(`[ModuleManager] Module ${moduleId} sauvegardé dans localStorage:`, activate);
 
       // Nettoyer le statut d'activation
       setActivationStatuses(prev => {
@@ -344,7 +345,7 @@ const ModuleManager: React.FC = () => {
       });
 
     } catch (error) {
-      console.error('Erreur lors de l\'activation:', error);
+      logger.error('Erreur lors de l\'activation:', error);
       
       setActivationStatuses(prev => new Map(prev.set(moduleId, {
         moduleId,

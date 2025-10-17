@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { usePlausibleAnalytics, usePrivacyCompliantTracking } from '@/hooks/usePlausibleAnalytics';
 import { PlausibleEventProps } from '@/types/ai-types';

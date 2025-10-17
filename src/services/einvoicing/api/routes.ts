@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * E-invoicing API Routes
  * Express.js routes for e-invoicing endpoints
@@ -12,6 +11,7 @@ import {
   EInvoiceChannel,
   EInvoicingError 
 } from '../../../types/einvoicing.types';
+import { logger } from '@/utils/logger';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -97,14 +97,14 @@ const validateSubmissionRequest = (req: Request, res: Response, next: NextFuncti
 };
 
 // Error handler middleware
-const handleAPIResponse = (apiCall: Promise<APIResponse>) => {
+const handleAPIResponse = (apiCall: (req: any, res: Response) => Promise<APIResponse<any>>) => {
   return async (req: Request, res: Response) => {
     try {
-      const result = await apiCall;
+      const result = await apiCall(req, res);
       const statusCode = result.success ? 200 : 400;
       res.status(statusCode).json(result);
     } catch (error) {
-      console.error('API route error:', error);
+      logger.error('API route error:', error);
       res.status(500).json({
         success: false,
         error: 'Internal server error',
@@ -313,7 +313,7 @@ router.get('/einvoicing/health', (req: Request, res: Response) => {
 
 // Error handling middleware
 router.use((error: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error('E-invoicing API error:', error);
+  logger.error('E-invoicing API error:', error);
 
   let statusCode = 500;
   let errorMessage = 'Internal server error';

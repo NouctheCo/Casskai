@@ -15,6 +15,7 @@ import {
   EInvoicingError,
   FeatureDisabledError
 } from '../index';
+import { logger } from '@/utils/logger';
 
 export interface EInvoicingAPIConfig {
   enabledCompanies?: string[];
@@ -77,7 +78,7 @@ export class EInvoicingAPI {
     requestId: string = this.generateRequestId()
   ): Promise<APIResponse<SubmissionResult>> {
     try {
-      console.log(`🚀 API: Submitting invoice ${invoiceId} for company ${companyId}`);
+      logger.info(`🚀 API: Submitting invoice ${invoiceId} for company ${companyId}`);
 
       // Rate limiting check
       await this.checkRateLimit(companyId);
@@ -108,7 +109,7 @@ export class EInvoicingAPI {
     requestId: string = this.generateRequestId()
   ): Promise<APIResponse<EInvDocument>> {
     try {
-      console.log(`📋 API: Getting status for document ${documentId}`);
+      logger.info(`📋 API: Getting status for document ${documentId}`);
 
       await this.checkRateLimit(companyId);
       await this.verifyCompanyAccess(companyId);
@@ -152,7 +153,7 @@ export class EInvoicingAPI {
     };
   }>> {
     try {
-      console.log(`📄 API: Listing documents for company ${companyId}`);
+      logger.info(`📄 API: Listing documents for company ${companyId}`);
 
       await this.checkRateLimit(companyId);
       await this.verifyCompanyAccess(companyId);
@@ -206,7 +207,7 @@ export class EInvoicingAPI {
     requestId: string = this.generateRequestId()
   ): Promise<APIResponse<{ updated: boolean }>> {
     try {
-      console.log(`🔄 API: Updating document status for message ${messageId} to ${status}`);
+      logger.info(`🔄 API: Updating document status for message ${messageId} to ${status}`);
 
       // Note: Webhook endpoints typically bypass rate limiting and company access checks
       // as they come from external systems
@@ -241,7 +242,7 @@ export class EInvoicingAPI {
     features: string[];
   }>> {
     try {
-      console.log(`🔧 API: Getting capabilities for company ${companyId}`);
+      logger.info(`🔧 API: Getting capabilities for company ${companyId}`);
 
       await this.checkRateLimit(companyId);
       await this.verifyCompanyAccess(companyId);
@@ -299,7 +300,7 @@ export class EInvoicingAPI {
     }>;
   }>> {
     try {
-      console.log(`📊 API: Getting statistics for company ${companyId}`);
+      logger.info(`📊 API: Getting statistics for company ${companyId}`);
 
       await this.checkRateLimit(companyId);
       await this.verifyCompanyAccess(companyId);
@@ -324,7 +325,7 @@ export class EInvoicingAPI {
     requestId: string = this.generateRequestId()
   ): Promise<APIResponse<{ enabled: boolean }>> {
     try {
-      console.log(`🟢 API: Enabling e-invoicing for company ${companyId}`);
+      logger.info(`🟢 API: Enabling e-invoicing for company ${companyId}`);
 
       await this.checkRateLimit(companyId);
       await this.verifyCompanyAccess(companyId);
@@ -358,7 +359,7 @@ export class EInvoicingAPI {
     requestId: string = this.generateRequestId()
   ): Promise<APIResponse<{ enabled: boolean }>> {
     try {
-      console.log(`🔴 API: Disabling e-invoicing for company ${companyId}`);
+      logger.info(`🔴 API: Disabling e-invoicing for company ${companyId}`);
 
       await this.checkRateLimit(companyId);
       await this.verifyCompanyAccess(companyId);
@@ -459,7 +460,7 @@ export class EInvoicingAPI {
     const { count, error } = await query;
 
     if (error) {
-      console.error('Error getting document count:', error);
+      logger.error('Error getting document count:', error);
       return 0;
     }
 
@@ -556,7 +557,7 @@ export class EInvoicingAPI {
         }
       });
     } catch (error) {
-      console.error('Error logging API usage:', error);
+      logger.error('Error logging API usage:', error)
     }
   }
 
@@ -575,7 +576,7 @@ export class EInvoicingAPI {
     endpoint: string,
     context: any
   ): APIResponse {
-    console.error(`API Error in ${endpoint}:`, error);
+    logger.error(`API Error in ${endpoint}:`, error);
 
     let errorMessage = 'Internal server error';
     let errorCode = 'INTERNAL_ERROR';

@@ -1,13 +1,14 @@
-// @ts-nocheck
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import type { 
-  JournalEntry, 
-  JournalEntryLine, 
-  Account,
-  Journal
+import { logger } from '@/utils/logger';
+import type {
+  JournalEntry,
+  JournalEntryLine,
+  Account
 } from '@/types/database.types';
+
+type Journal = any;
 
 export interface CreateJournalEntryData {
   date: string;
@@ -22,7 +23,6 @@ export interface CreateJournalEntryLineData {
   description?: string;
   debit_amount: number;
   credit_amount: number;
-  currency?: string;
 }
 
 export interface JournalEntryFilters {
@@ -105,16 +105,18 @@ export function useJournalEntries(companyId: string) {
       if (entryError) throw entryError;
 
       // 4. Create entry lines
-      const itemsWithEntryId = items.map(item => ({
-        ...item,
+      const linesWithEntryId = items.map((item, index) => ({
         journal_entry_id: entry.id,
-        company_id: companyId,
-        currency: item.currency || 'EUR'
+        account_id: item.account_id,
+        description: item.description || entryData.description,
+        debit_amount: item.debit_amount,
+        credit_amount: item.credit_amount,
+        line_order: index + 1
       }));
 
       const { data: lines, error: linesError } = await supabase
-        .from('journal_entry_items')
-        .insert(itemsWithEntryId)
+        .from('journal_entry_lines')
+        .insert(linesWithEntryId)
         .select();
 
       if (linesError) throw linesError;
@@ -125,7 +127,7 @@ export function useJournalEntries(companyId: string) {
           p_journal_entry_id: entry.id
         });
       } catch (err) {
-        console.warn('Balance update function not available:', err);
+        logger.warn('Balance update function not available:', err)
       }
 
       setJournalEntries(prev => [entry, ...prev]);
@@ -133,7 +135,7 @@ export function useJournalEntries(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create journal entry';
       setError(errorMessage);
-      console.error('Error creating journal entry:', err);
+      logger.error('Error creating journal entry:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -166,9 +168,9 @@ export function useJournalEntries(companyId: string) {
         .select(`
           *,
           journals (id, code, name),
-          journal_entry_items (
-            id, account_id, description, debit_amount, credit_amount, currency,
-            accounts (id, account_number, name, type, class)
+          journal_entry_lines (
+            id, account_id, description, debit_amount, credit_amount, line_order, account_number, account_name,
+            chart_of_accounts (id, account_number, account_name, account_type, account_class)
           )
         `, { count: 'exact' })
         .eq('company_id', companyId);
@@ -197,11 +199,11 @@ export function useJournalEntries(companyId: string) {
 
       // Filter by account (requires subquery)
       if (accountId) {
-        query = query.in('id', 
-          supabase.from('journal_entry_items')
-            .select('journal_entry_id')
-            .eq('account_id', accountId)
-        );
+        const linesQuery = await supabase.from('journal_entry_lines')
+          .select('journal_entry_id')
+          .eq('account_id', accountId);
+        const ids = (linesQuery.data || []).map((line: any) => line.journal_entry_id);
+        query = query.in('id', ids);
       }
 
       // Apply sorting
@@ -223,7 +225,7 @@ export function useJournalEntries(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch journal entries';
       setError(errorMessage);
-      console.error('Error fetching journal entries:', err);
+      logger.error('Error fetching journal entries:', err);
       return { data: [], count: 0, error: errorMessage };
     } finally {
       setLoading(false);
@@ -252,7 +254,7 @@ export function useJournalEntries(companyId: string) {
 
       // Delete entry lines first
       const { error: linesError } = await supabase
-        .from('journal_entry_items')
+        .from('journal_entry_lines')
         .delete()
         .eq('journal_entry_id', entryId);
 
@@ -271,7 +273,7 @@ export function useJournalEntries(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete journal entry';
       setError(errorMessage);
-      console.error('Error deleting journal entry:', err);
+      logger.error('Error deleting journal entry:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -306,7 +308,7 @@ export function useJournalEntries(companyId: string) {
           p_journal_entry_id: entryId
         });
       } catch (err) {
-        console.warn('Balance update function not available:', err);
+        logger.warn('Balance update function not available:', err)
       }
 
       setJournalEntries(prev => prev.map(entry => 
@@ -315,7 +317,7 @@ export function useJournalEntries(companyId: string) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to post journal entry';
       setError(errorMessage);
-      console.error('Error posting journal entry:', err);
+      logger.error('Error posting journal entry:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -328,16 +330,16 @@ export function useJournalEntries(companyId: string) {
 
     try {
       const { data, error } = await supabase
-        .from('accounts')
-        .select('id, account_number, name, type, class, balance')
+        .from('chart_of_accounts')
+        .select('id, account_number, account_name, account_type, account_class, balance')
         .eq('company_id', companyId)
         .eq('is_active', true)
         .order('account_number');
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as Account[];
     } catch (err) {
-      console.error('Error fetching accounts list:', err);
+      logger.error('Error fetching accounts list:', err);
       return [];
     }
   }, [user, companyId]);
@@ -357,7 +359,7 @@ export function useJournalEntries(companyId: string) {
       if (error) throw error;
       return data || [];
     } catch (err) {
-      console.error('Error fetching journals list:', err);
+      logger.error('Error fetching journals list:', err);
       return [];
     }
   }, [user, companyId]);
@@ -372,9 +374,9 @@ export function useJournalEntries(companyId: string) {
         .select(`
           *,
           journals (id, code, name),
-          journal_entry_items (
-            id, account_id, description, debit_amount, credit_amount, currency,
-            accounts (id, account_number, name, type, class)
+          journal_entry_lines (
+            id, account_id, description, debit_amount, credit_amount, line_order, account_number, account_name,
+            chart_of_accounts (id, account_number, account_name, account_type, account_class)
           )
         `)
         .eq('id', entryId)
@@ -384,7 +386,7 @@ export function useJournalEntries(companyId: string) {
       if (error) throw error;
       return data;
     } catch (err) {
-      console.error('Error fetching journal entry by ID:', err);
+      logger.error('Error fetching journal entry by ID:', err);
       return null;
     }
   }, [user, companyId]);

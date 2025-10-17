@@ -185,7 +185,10 @@ declare module 'react' {
   }
 }
 
-// Types pour les tables de base de données manquantes
+// DEPRECATED: Types pour les tables de base de données
+// Ces types sont déjà définis dans @/types/supabase.ts (fichier généré depuis la base)
+// Cette déclaration causait un conflit "Duplicate identifier 'Database'"
+/*
 declare module '@/types/supabase' {
   export interface Database {
     public: {
@@ -212,9 +215,9 @@ declare module '@/types/supabase' {
     };
   }
 }
+*/
 
 // Suppression d'erreurs TypeScript globales pour les composants complexes
-// @ts-nocheck directives seront ajoutées aux fichiers problématiques
 declare global {
   var __SUPPRESS_TYPESCRIPT_ERRORS__: boolean;
 }

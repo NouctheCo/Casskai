@@ -1,6 +1,6 @@
-// @ts-nocheck
 // src/services/configService.ts - Version mise à jour avec migrations
 import { SupabaseClient } from '@supabase/supabase-js';
+import { logger } from '@/utils/logger';
 // import { getSupabaseClient } from '@/lib/supabase'; // Commented out for build compatibility
 import MigrationService from './migrationService';
 
@@ -37,7 +37,7 @@ class ConfigService {
 
     // Initialiser la configuration par défaut si aucune configuration n'est trouvée
     if (!this.getConfig()) {
-      console.warn('Aucune configuration trouvée. Initialisation de la configuration par défaut.');
+      logger.warn('Aucune configuration trouvée. Initialisation de la configuration par défaut.');
       this.initializeDefaultConfig();
     }
   }
@@ -66,9 +66,9 @@ class ConfigService {
       }
     } catch (error) {
       if (error instanceof Error) {
-        console.error('Erreur lors de la lecture de la configuration:', error.message);
+        logger.error('Erreur lors de la lecture de la configuration:', error.message)
       } else {
-        console.error('Erreur inconnue lors de la lecture de la configuration:', error);
+        logger.error('Erreur inconnue lors de la lecture de la configuration:', error)
       }
     }
     return null;
@@ -86,7 +86,7 @@ class ConfigService {
       // Réinitialiser le client Supabase avec la nouvelle config
       await this.initializeSupabaseClient();
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde de la configuration:', error);
+      logger.error('Erreur lors de la sauvegarde de la configuration:', error);
       throw new Error('Impossible de sauvegarder la configuration');
     }
   }
@@ -100,7 +100,7 @@ class ConfigService {
 
     try {
       // CORRECTION CRITIQUE: Utiliser l'instance unique
-      this.supabaseClient = getSupabaseClient();
+      this.supabaseClient = this.getSupabaseClient();
 
       // Test de connexion
       const { error } = await this.supabaseClient.from('_test').select('*').limit(1);
@@ -110,7 +110,7 @@ class ConfigService {
 
       return this.supabaseClient;
     } catch (error) {
-      console.error('Erreur d\'initialisation Supabase:', error);
+      logger.error('Erreur d\'initialisation Supabase:', error);
       throw error;
     }
   }
@@ -127,13 +127,13 @@ class ConfigService {
   async validateSupabaseConfig(): Promise<boolean> {
     try {
       // CORRECTION CRITIQUE: Utiliser l'instance unique au lieu de créer une nouvelle
-      const tempClient = getSupabaseClient();
+      const tempClient = this.getSupabaseClient();
       const { error } = await tempClient.from('_test').select('*').limit(1);
       
       // Succès si pas d'erreur ou si l'erreur est "table not found"
       return !error || error.code === 'PGRST116';
     } catch (error) {
-      console.error('Validation échouée:', error);
+      logger.error('Validation échouée:', error);
       return false;
     }
   }
@@ -141,11 +141,11 @@ class ConfigService {
   // Initialiser la base de données avec les migrations
   async initializeDatabase(): Promise<{ success: boolean; details?: string; error?: string }> {
     try {
-      console.log('🚀 Initialisation de la base de données...');
+      logger.info('🚀 Initialisation de la base de données...');
       
       // Vérifier le statut des migrations
       const migrationsStatus = await this.migrationService.checkMigrationsStatus();
-      console.log('📋 Statut des migrations:', migrationsStatus);
+      logger.info('📋 Statut des migrations:', migrationsStatus);
 
       // Appliquer les migrations si nécessaire
       const migrationResult = await this.migrationService.applyMigrations();
@@ -154,14 +154,14 @@ class ConfigService {
         throw new Error(migrationResult.error || 'Erreur lors de l\'application des migrations');
       }
 
-      console.log('✅ Base de données initialisée avec succès');
+      logger.info('✅ Base de données initialisée avec succès');
       return {
         success: true,
         details: migrationResult.details
       };
 
     } catch (error) {
-      console.error('❌ Erreur d\'initialisation de la base de données:', error);
+      logger.error('❌ Erreur d\'initialisation de la base de données:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur inconnue'
@@ -189,12 +189,12 @@ class ConfigService {
       );
 
       if (result.success) {
-        console.log('✅ Entreprise créée avec succès:', result.companyId);
+        logger.info('✅ Entreprise créée avec succès:', result.companyId)
       }
 
       return result;
     } catch (error) {
-      console.error('❌ Erreur lors de la création de l\'entreprise:', error);
+      logger.error('❌ Erreur lors de la création de l\'entreprise:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur inconnue'
@@ -208,12 +208,12 @@ class ConfigService {
       const result = await this.migrationService.finalizeCompanySetup(companyId);
       
       if (result.success) {
-        console.log('✅ Configuration de l\'entreprise finalisée');
+        logger.info('✅ Configuration de l\'entreprise finalisée')
       }
 
       return result;
     } catch (error) {
-      console.error('❌ Erreur lors de la finalisation:', error);
+      logger.error('❌ Erreur lors de la finalisation:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur inconnue'
@@ -379,7 +379,7 @@ class ConfigService {
   // Obtenir les informations de santé de la base de données
   async getDatabaseHealth(): Promise<{
     status: 'healthy' | 'warning' | 'error';
-    details: any;
+    details: Record<string, unknown>;
   }> {
     try {
       const client = this.getSupabaseClient();
@@ -445,15 +445,15 @@ class ConfigService {
     };
 
     if (!defaultConfig.supabase.url || !defaultConfig.supabase.anonKey) {
-      console.error('Configuration Supabase par défaut manquante. Vérifiez les variables d\'environnement.');
+      logger.error('Configuration Supabase par défaut manquante. Vérifiez les variables d\'environnement.');
       return;
     }
 
     try {
       this.saveConfig(defaultConfig);
-      console.log('Configuration par défaut sauvegardée avec succès:', defaultConfig);
+      logger.info('Configuration par défaut sauvegardée avec succès:', defaultConfig)
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde de la configuration par défaut:', error);
+      logger.error('Erreur lors de la sauvegarde de la configuration par défaut:', error)
     }
   }
 }

@@ -48,7 +48,7 @@ async function executeSqlFile(filePath) {
       console.log(`⚡ Exécution commande ${i + 1}/${commands.length}`);
       console.log(`   ${command.substring(0, 80)}${command.length > 80 ? '...' : ''}`);
 
-      const { data, error } = await supabase.rpc('exec_sql', {
+      const { error } = await supabase.rpc('exec_sql', {
         sql_query: command
       });
 
@@ -77,7 +77,7 @@ async function executeSqlFile(filePath) {
 async function testConnection() {
   try {
     console.log('🔍 Test de connexion à Supabase...');
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('user_companies')
       .select('count', { count: 'exact', head: true });
 
@@ -98,7 +98,7 @@ async function verifyPolicies() {
   try {
     console.log('🔍 Vérification des policies après correction...');
     
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('user_companies')
       .select('*')
       .limit(1);

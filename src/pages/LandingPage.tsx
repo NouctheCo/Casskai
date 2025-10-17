@@ -1,7 +1,5 @@
-// @ts-nocheck
 import React, { useState, useEffect } from 'react';
-import { motion, useAnimation } from 'framer-motion';
-import { useInView } from 'framer-motion';
+import { motion, useAnimation, useInView } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -54,7 +52,7 @@ import {
 const AnimatedSection = ({ children, className = "" }) => {
   const controls = useAnimation();
   const ref = React.useRef(null);
-  const inView = useInView(ref, { once: true, threshold: 0.1 });
+  const inView = useInView(ref, { once: true } as any);
 
   useEffect(() => {
     if (inView) {
@@ -146,7 +144,7 @@ const HeroSection = () => {
                 <ArrowRight className="ml-3 w-6 h-6" />
               </Button>
             </motion.div>
-            
+
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 variant="outline"
@@ -984,7 +982,7 @@ const ContactSection = () => {
             {
               icon: Phone,
               title: t('landing.contact.phone.title', 'Téléphone'),
-              content: '+336 88 89 33 72 (Europe) / +229 01 69 18 76 03 (Afrique)',
+              content: '+33 7 52 02 71 98 (Europe) / +225 74 58 83 83 ou +229 01 69 18 76 03 (Afrique)',
               description: t('landing.contact.phone.description', 'Lun-Ven 9h-18h'),
               color: 'from-green-500 to-green-600'
             },

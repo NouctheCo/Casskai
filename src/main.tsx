@@ -4,14 +4,17 @@ import './i18n/i18n.ts';
 import App from './App.tsx';
 import './index.css';
 import { ConfigProvider } from '@/contexts/ConfigContext';
+import { logger } from '@/utils/logger';
 
-// Debug des variables d'environnement au démarrage
-console.warn('🔧 Variables d\'environnement au démarrage:');
-console.warn('VITE_SUPABASE_URL:', import.meta.env.VITE_SUPABASE_URL ? '✅ Configuré' : '❌ Non configuré');
-console.warn('VITE_SUPABASE_ANON_KEY:', import.meta.env.VITE_SUPABASE_ANON_KEY ? '✅ Configuré' : '❌ Non configuré');
-console.warn('VITE_NODE_ENV:', import.meta.env.VITE_NODE_ENV);
-console.warn('MODE:', import.meta.env.MODE);
-console.warn('Toutes les variables VITE_:', Object.keys(import.meta.env).filter(key => key.startsWith('VITE_')));
+// Debug des variables d'environnement au démarrage (uniquement en mode développement)
+if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_MODE === 'true') {
+  logger.warn('🔧 Variables d\'environnement au démarrage:');
+  logger.warn('VITE_SUPABASE_URL:', import.meta.env.VITE_SUPABASE_URL ? '✅ Configuré' : '❌ Non configuré');
+  logger.warn('VITE_SUPABASE_ANON_KEY:', import.meta.env.VITE_SUPABASE_ANON_KEY ? '✅ Configuré' : '❌ Non configuré');
+  logger.warn('VITE_NODE_ENV:', import.meta.env.VITE_NODE_ENV);
+  logger.warn('MODE:', import.meta.env.MODE);
+  logger.warn('Toutes les variables VITE_:', Object.keys(import.meta.env).filter(key => key.startsWith('VITE_')));
+}
 
 // Configuration globale de l'application
 const _config = {
@@ -40,21 +43,29 @@ initializeTheme();
 
 // Fonction pour gérer les erreurs des extensions tierces
 function handleExtensionErrors() {
-  // Gérer les erreurs des extensions Chrome (Dashlane, etc.)
   const originalErrorHandler = window.onerror;
-  window.onerror = function(message, source, lineno, colno, error) {
-    // Ignorer les erreurs des extensions Chrome
-    if (source && (
-      source.includes('chrome-extension://') ||
-      source.includes('kwift.CHROME.js') ||
-      message.toString().includes('kwift') ||
-      message.toString().includes('Cannot read properties of undefined (reading \'elementValues\')')
-    )) {
-      console.warn('🔧 Extension error ignored:', message);
-      return true; // Empêcher la propagation de l'erreur
+  const originalUnhandledRejection = window.onunhandledrejection;
+
+  const comesFromExtension = (value: unknown): boolean => {
+    if (!value) {
+      return false;
     }
 
-    // Pour les autres erreurs, utiliser le handler original
+    const serialized = typeof value === 'string'
+      ? value
+      : value instanceof Error
+        ? `${value.stack ?? value.message ?? ''}`
+        : String(value);
+
+    return serialized.includes('chrome-extension://');
+  };
+
+  window.onerror = function(message, source, lineno, colno, error) {
+    if (comesFromExtension(source) || comesFromExtension(error)) {
+      logger.warn('?? Extension error ignored:', message);
+      return true;
+    }
+
     if (originalErrorHandler) {
       return originalErrorHandler(message, source, lineno, colno, error);
     }
@@ -62,20 +73,13 @@ function handleExtensionErrors() {
     return false;
   };
 
-  // Gérer les erreurs non capturées des extensions
-  const originalUnhandledRejection = window.onunhandledrejection;
   window.onunhandledrejection = function(event) {
-    if (event.reason && (
-      event.reason.toString().includes('kwift') ||
-      event.reason.toString().includes('chrome-extension') ||
-      event.reason.toString().includes('Cannot read properties of undefined')
-    )) {
-      console.warn('🔧 Extension promise rejection ignored:', event.reason);
-      event.preventDefault(); // Empêcher la propagation
+    if (comesFromExtension(event.reason)) {
+      logger.warn('?? Extension promise rejection ignored:', event.reason);
+      event.preventDefault();
       return;
     }
 
-    // Pour les autres erreurs, utiliser le handler original
     if (originalUnhandledRejection) {
       originalUnhandledRejection.call(window, event);
     }
@@ -105,7 +109,7 @@ handleExtensionErrors();
       </React.StrictMode>
     );
   } catch (error) {
-    console.error('Failed to initialize React application:', error);
+    logger.error('Failed to initialize React application:', error);
     
     // Fallback: Retry after a short delay
     setTimeout(() => {
@@ -123,7 +127,7 @@ handleExtensionErrors();
           </React.StrictMode>
         );
       } catch (retryError) {
-        console.error('React initialization failed on retry:', retryError);
+        logger.error('React initialization failed on retry:', retryError);
         const rootElement = document.getElementById('root');
         if (rootElement) {
           rootElement.innerHTML = `
@@ -140,3 +144,4 @@ handleExtensionErrors();
       }
     }, 100);
   }
+

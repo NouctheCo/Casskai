@@ -36,6 +36,7 @@ import {
   EInvoiceFormat, 
   EInvoiceChannel 
 } from '../../types/einvoicing.types';
+import { logger } from '@/utils/logger';
 
 interface EInvoiceDocumentsListProps {
   companyId: string;
@@ -317,7 +318,7 @@ export const EInvoiceDocumentsList: React.FC<EInvoiceDocumentsListProps> = ({
                             size="sm"
                             onClick={() => {
                               // Open document details modal or navigate to details page
-                              console.log('View document details:', document.id);
+                              logger.info('View document details:', document.id)
                             }}
                             title="Voir les détails"
                           >

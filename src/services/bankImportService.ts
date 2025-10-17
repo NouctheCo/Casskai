@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 export interface BankTransaction {
   id?: string;
@@ -18,7 +19,7 @@ export interface BankTransaction {
   category?: string;
   reconciled: boolean;
   imported_from?: 'csv' | 'ofx' | 'qif' | 'api';
-  raw_data?: any;
+  raw_data?: Record<string, unknown>;
   created_at?: string;
   updated_at?: string;
 }
@@ -106,12 +107,12 @@ class BankImportService {
         imported_count: saveResult.imported_count,
         skipped_count: saveResult.skipped_count,
         error_count: errors.length,
-        transactions: transactions,
+        transactions,
         errors: errors.length > 0 ? errors : undefined
       };
 
     } catch (error) {
-      console.error('Erreur import CSV:', error);
+      logger.error('Erreur import CSV:', error);
       return {
         success: false,
         message: `Erreur lors de l'import: ${error.message}`,
@@ -153,11 +154,11 @@ class BankImportService {
         imported_count: saveResult.imported_count,
         skipped_count: saveResult.skipped_count,
         error_count: 0,
-        transactions: transactions
+        transactions
       };
 
     } catch (error) {
-      console.error('Erreur import OFX:', error);
+      logger.error('Erreur import OFX:', error);
       return {
         success: false,
         message: `Erreur lors de l'import OFX: ${error.message}`,
@@ -196,11 +197,11 @@ class BankImportService {
         imported_count: saveResult.imported_count,
         skipped_count: saveResult.skipped_count,
         error_count: 0,
-        transactions: transactions
+        transactions
       };
 
     } catch (error) {
-      console.error('Erreur import QIF:', error);
+      logger.error('Erreur import QIF:', error);
       return {
         success: false,
         message: `Erreur lors de l'import QIF: ${error.message}`,
@@ -249,7 +250,7 @@ class BankImportService {
           transactions.push(transaction);
         }
       } catch (error) {
-        console.warn('Erreur parsing transaction OFX:', error);
+        logger.warn('Erreur parsing transaction OFX:', error)
       }
     }
     
@@ -282,7 +283,7 @@ class BankImportService {
           break;
         case 'P': // Payee/Description
         case 'M': // Memo
-          currentTransaction.description = (currentTransaction.description || '') + ' ' + value;
+          currentTransaction.description = `${currentTransaction.description || ''  } ${  value}`;
           break;
         case 'N': // Number/Reference
           currentTransaction.reference = value;
@@ -339,14 +340,14 @@ class BankImportService {
           .insert(transaction);
           
         if (error) {
-          console.error('Erreur sauvegarde transaction:', error);
+          logger.error('Erreur sauvegarde transaction:', error);
           continue;
         }
         
         imported++;
         
       } catch (error) {
-        console.error('Erreur traitement transaction:', error);
+        logger.error('Erreur traitement transaction:', error)
       }
     }
     
@@ -428,10 +429,10 @@ class BankImportService {
         bank_account_id: accountId,
         company_id: companyId,
         transaction_date: date,
-        amount: amount,
+        amount,
         currency: 'EUR',
-        description: description,
-        reference: reference,
+        description,
+        reference,
         reconciled: false,
         imported_from: 'csv'
       };
@@ -484,17 +485,17 @@ class BankImportService {
     // QIF date format: MM/DD/YYYY ou DD/MM/YY
     const parts = qifDate.split('/');
     if (parts.length === 3) {
-      let [first, second, year] = parts;
-      
+      const [first, second, yearRaw] = parts;
+
       // Assume DD/MM format for European banks
       const day = first.padStart(2, '0');
       const month = second.padStart(2, '0');
-      
+
       // Handle 2-digit years
-      if (year.length === 2) {
-        year = parseInt(year) > 50 ? `19${year}` : `20${year}`;
-      }
-      
+      const year = yearRaw.length === 2
+        ? (parseInt(yearRaw) > 50 ? `19${yearRaw}` : `20${yearRaw}`)
+        : yearRaw;
+
       return `${year}-${month}-${day}`;
     }
     
@@ -523,7 +524,7 @@ class BankImportService {
       return data || [];
       
     } catch (error) {
-      console.error('Erreur récupération comptes bancaires:', error);
+      logger.error('Erreur récupération comptes bancaires:', error);
       return [];
     }
   }
@@ -543,7 +544,7 @@ class BankImportService {
       return data;
       
     } catch (error) {
-      console.error('Erreur création compte bancaire:', error);
+      logger.error('Erreur création compte bancaire:', error);
       return null;
     }
   }

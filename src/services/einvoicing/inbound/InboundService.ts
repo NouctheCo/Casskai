@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Inbound Service
  * Processes incoming supplier e-invoices
@@ -12,7 +11,9 @@ import {
   EInvoicingError
 } from '../../../types/einvoicing.types';
 import { ValidationService } from '../core/ValidationService';
-import { xml2js } from 'xml2js';
+import xml2js from 'xml2js';
+import crypto from 'crypto';
+import { logger } from '@/utils/logger';
 
 interface ParsedInvoiceResult {
   success: boolean;
@@ -53,7 +54,7 @@ export class InboundService {
     let queueId: string | null = null;
     
     try {
-      console.log(`📥 Processing inbound invoice for company ${companyId}`);
+      logger.info(`📥 Processing inbound invoice for company ${companyId}`);
 
       // Create queue entry
       queueId = await this.createQueueEntry(
@@ -124,7 +125,7 @@ export class InboundService {
         creationResult.invoice_id
       );
 
-      console.log(`✅ Inbound invoice processed successfully: ${creationResult.invoice_id}`);
+      logger.info(`✅ Inbound invoice processed successfully: ${creationResult.invoice_id}`);
 
       return {
         queue_id: queueId,
@@ -133,7 +134,7 @@ export class InboundService {
       };
 
     } catch (error) {
-      console.error('Error processing inbound invoice:', error);
+      logger.error('Error processing inbound invoice:', error);
       
       if (queueId) {
         await this.updateQueueStatus(
@@ -163,14 +164,14 @@ export class InboundService {
         .single();
 
       if (error) {
-        console.error('Error getting queue status:', error);
+        logger.error('Error getting queue status:', error);
         return null;
       }
 
       return data as EInvInboundQueue;
 
     } catch (error) {
-      console.error('Error getting queue status:', error);
+      logger.error('Error getting queue status:', error);
       return null;
     }
   }
@@ -210,7 +211,7 @@ export class InboundService {
       return data as EInvInboundQueue[] || [];
 
     } catch (error) {
-      console.error('Error listing inbound invoices:', error);
+      logger.error('Error listing inbound invoices:', error);
       
       if (error instanceof EInvoicingError) {
         throw error;
@@ -234,7 +235,7 @@ export class InboundService {
     errors?: string[];
   }> {
     try {
-      console.log(`🔄 Retrying processing for queue item ${queueId}`);
+      logger.info(`🔄 Retrying processing for queue item ${queueId}`);
 
       // Get queue item
       const queueItem = await this.getQueueStatus(queueId);
@@ -270,7 +271,7 @@ export class InboundService {
       };
 
     } catch (error) {
-      console.error('Error retrying processing:', error);
+      logger.error('Error retrying processing:', error);
       
       if (error instanceof EInvoicingError) {
         throw error;
@@ -341,7 +342,7 @@ export class InboundService {
       .eq('id', queueId);
 
     if (error) {
-      console.error('Error updating queue status:', error);
+      logger.error('Error updating queue status:', error)
     }
   }
 
@@ -351,7 +352,6 @@ export class InboundService {
   ): Promise<boolean> {
     try {
       // Generate payload hash for duplicate detection
-      const crypto = require('crypto');
       const payloadHash = crypto.createHash('sha256').update(payload).digest('hex');
 
       // Check if we've seen this payload hash before
@@ -363,14 +363,14 @@ export class InboundService {
         .limit(1);
 
       if (error) {
-        console.error('Error checking for duplicates:', error);
+        logger.error('Error checking for duplicates:', error);
         return false; // Don't block processing on duplicate check errors
       }
 
       return (data && data.length > 0);
 
     } catch (error) {
-      console.error('Error in duplicate check:', error);
+      logger.error('Error in duplicate check:', error);
       return false;
     }
   }
@@ -399,7 +399,7 @@ export class InboundService {
           return {
             success: false,
             errors: [`Unsupported or unrecognized invoice format`],
-            detected_format: detectedFormat
+            detected_format: detectedFormat as 'FACTURX' | 'UBL' | 'CII'
           };
       }
 

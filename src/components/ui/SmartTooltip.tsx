@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useFloating, autoUpdate, offset, flip, shift, arrow } from '@floating-ui/react';
@@ -429,7 +428,8 @@ export const ChartTooltip: React.FC<{
               style={{
                 backgroundColor: data.color,
                 height: `${Math.max(height, 5)}%`,
-                minHeight: '2px'
+                minHeight: '2px',
+                transformOrigin: "bottom"
               }}
               initial={{ scaleY: 0 }}
               animate={{ scaleY: 1 }}
@@ -438,7 +438,6 @@ export const ChartTooltip: React.FC<{
                 duration: 0.4,
                 ease: "easeOut"
               }}
-              transformOrigin="bottom"
             />
           );
         })}

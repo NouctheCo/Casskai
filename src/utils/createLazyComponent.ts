@@ -1,4 +1,5 @@
 import { lazy, ComponentType, LazyExoticComponent } from 'react';
+import { logger } from '@/utils/logger';
 
 // Configuration du préchargement intelligent
 interface LazyComponentConfig {
@@ -36,7 +37,7 @@ export function createLazyComponent<T extends ComponentType<unknown>>(
         }, delay);
       });
     } catch (error) {
-      console.error('Error in lazy component factory:', error);
+      logger.error('Error in lazy component factory:', error);
       throw error;
     }
   });

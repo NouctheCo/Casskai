@@ -11,22 +11,23 @@ import { Loader2, Lock, User, AlertCircle, CheckCircle } from 'lucide-react';
 
 export const AuthForm: React.FC = () => {
   const { signIn, signUp, isAuthenticated, onboardingCompleted } = useAuth();
+
+  // IMPORTANT: Tous les hooks doivent être appelés avant tout return conditionnel
   const [activeTab, setActiveTab] = useState('signin');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [signInForm, setSignInForm] = useState({ email: '', password: '' });
+  const [signUpForm, setSignUpForm] = useState({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
 
   // Redirect authenticated users appropriately
   if (isAuthenticated && onboardingCompleted) {
     return <Navigate to="/dashboard" replace />;
   }
-  
+
   if (isAuthenticated && !onboardingCompleted) {
     return <Navigate to="/onboarding" replace />;
   }
-
-  const [signInForm, setSignInForm] = useState({ email: '', password: '' });
-  const [signUpForm, setSignUpForm] = useState({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();

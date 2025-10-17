@@ -1,4 +1,3 @@
-// @ts-nocheck
 // components/CurrencySelector.tsx
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -11,7 +10,9 @@ interface CurrencySelectorProps {
 }
 
 export function CurrencySelector({ value, onValueChange, showAfricanOnly = false }: CurrencySelectorProps) {
-  const { currencies, africanCurrencies } = useCurrency();
+  const currencyHook = useCurrency();
+  const currencies = (currencyHook as any).currencies || currencyHook.currencyOptions;
+  const africanCurrencies = (currencyHook as any).africanCurrencies || [];
   const currenciesToShow = showAfricanOnly ? africanCurrencies : currencies;
 
   return (
@@ -37,10 +38,10 @@ export function CurrencySelector({ value, onValueChange, showAfricanOnly = false
 // Exemple d'utilisation dans un composant
 export function AmountDisplay({ amount, currency }: { amount: number; currency: string }) {
   const { formatAmount } = useCurrency();
-  
+
   return (
     <span className="font-mono text-lg">
-      {formatAmount(amount, currency)}
+      {formatAmount(amount)}
     </span>
   );
 }

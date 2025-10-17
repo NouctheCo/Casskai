@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 
 // Quote Row Component
-const QuoteRow = ({ quote, onEdit, onDelete, onView, onSend, onConvertToInvoice }) => {
+const QuoteRow = ({ quote, onEdit, onDelete, onView, onSend, onConvertToInvoice, onCopy }) => {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'accepted':
@@ -64,6 +64,9 @@ const QuoteRow = ({ quote, onEdit, onDelete, onView, onSend, onConvertToInvoice 
           <Button variant="ghost" size="sm" onClick={() => onEdit(quote)}>
             <Edit className="w-4 h-4" />
           </Button>
+          <Button variant="ghost" size="sm" onClick={() => onCopy(quote)}>
+            <Copy className="w-4 h-4" />
+          </Button>
           {quote.status === 'draft' && (
             <Button variant="ghost" size="sm" onClick={() => onSend(quote)}>
               <Send className="w-4 h-4" />
@@ -71,7 +74,7 @@ const QuoteRow = ({ quote, onEdit, onDelete, onView, onSend, onConvertToInvoice 
           )}
           {quote.status === 'accepted' && (
             <Button variant="ghost" size="sm" onClick={() => onConvertToInvoice(quote)}>
-              <Copy className="w-4 h-4" />
+              <FileText className="w-4 h-4" />
             </Button>
           )}
           <Button variant="ghost" size="sm" onClick={() => onDelete(quote)}>
@@ -83,18 +86,138 @@ const QuoteRow = ({ quote, onEdit, onDelete, onView, onSend, onConvertToInvoice 
   );
 };
 
+// Quote Preview Dialog Component
+function QuotePreviewDialog({ open, onClose, quote }) {
+  if (!quote) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center space-x-2">
+            <Eye className="w-5 h-5 text-blue-500" />
+            <span>Aperçu du devis {quote.quoteNumber}</span>
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          {/* En-tête du devis */}
+          <div className="border-b pb-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h3 className="font-semibold text-lg mb-2">Informations client</h3>
+                <p className="text-gray-600 dark:text-gray-400">{quote.clientName}</p>
+              </div>
+              <div className="text-right">
+                <h3 className="font-semibold text-lg mb-2">Informations devis</h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  <strong>Numéro:</strong> {quote.quoteNumber}
+                </p>
+                <p className="text-gray-600 dark:text-gray-400">
+                  <strong>Date:</strong> {new Date(quote.date).toLocaleDateString('fr-FR')}
+                </p>
+                <p className="text-gray-600 dark:text-gray-400">
+                  <strong>Valide jusqu'au:</strong> {new Date(quote.validUntil).toLocaleDateString('fr-FR')}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Articles du devis */}
+          <div>
+            <h3 className="font-semibold text-lg mb-4">Articles</h3>
+            <div className="border rounded-lg overflow-hidden">
+              <div className="p-4">
+                {quote.items?.length > 0 ? (
+                  quote.items.map((item, index) => (
+                    <div key={index} className="flex justify-between py-2 border-b last:border-b-0">
+                      <span>{item.description}</span>
+                      <span className="font-medium">{item.total.toFixed(2)} €</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500">Aucun article</p>
+                )}
+                <div className="mt-4 pt-4 border-t">
+                  <div className="flex justify-between font-bold">
+                    <span>Total:</span>
+                    <span>{quote.total.toFixed(2)} €</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Notes */}
+          <div>
+            <h3 className="font-semibold text-lg mb-2">Notes</h3>
+            <p className="text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+              {quote.notes || 'Aucune note'}
+            </p>
+          </div>
+
+          {/* Statut */}
+          <div className="flex items-center justify-between pt-4 border-t">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-600 dark:text-gray-400">Statut:</span>
+              <div>
+                {quote.status === 'accepted' && <Badge className="bg-green-100 text-green-800 border-green-200">Accepté</Badge>}
+                {quote.status === 'sent' && <Badge className="bg-blue-100 text-blue-800 border-blue-200">Envoyé</Badge>}
+                {quote.status === 'rejected' && <Badge className="bg-red-100 text-red-800 border-red-200">Refusé</Badge>}
+                {quote.status === 'expired' && <Badge className="bg-orange-100 text-orange-800 border-orange-200">Expiré</Badge>}
+                {quote.status === 'draft' && <Badge variant="secondary">Brouillon</Badge>}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Fermer
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // Quote Form Dialog Component
-const QuoteFormDialog = ({ open, onClose, onSave }) => {
+const QuoteFormDialog = ({ open, onClose, onSave, editingQuote = null }) => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
-    clientName: '',
-    quoteNumber: `D-${new Date().getFullYear()}-${String(Date.now()).slice(-3)}`,
-    date: new Date().toISOString().split('T')[0],
-    validUntil: '',
-    description: '',
-    amount: '',
-    notes: ''
+    clientName: editingQuote?.clientName || '',
+    quoteNumber: editingQuote?.quoteNumber || `D-${new Date().getFullYear()}-${String(Date.now()).slice(-3)}`,
+    date: editingQuote?.date || new Date().toISOString().split('T')[0],
+    validUntil: editingQuote?.validUntil || '',
+    description: editingQuote?.description || '',
+    amount: editingQuote?.total?.toString() || '',
+    notes: editingQuote?.notes || ''
   });
+
+  React.useEffect(() => {
+    if (editingQuote) {
+      setFormData({
+        clientName: editingQuote.clientName || '',
+        quoteNumber: editingQuote.quoteNumber || '',
+        date: editingQuote.date || new Date().toISOString().split('T')[0],
+        validUntil: editingQuote.validUntil || '',
+        description: editingQuote.description || '',
+        amount: editingQuote.total?.toString() || '',
+        notes: editingQuote.notes || ''
+      });
+    } else {
+      // Reset form for new quote
+      setFormData({
+        clientName: '',
+        quoteNumber: `D-${new Date().getFullYear()}-${String(Date.now()).slice(-3)}`,
+        date: new Date().toISOString().split('T')[0],
+        validUntil: '',
+        description: '',
+        amount: '',
+        notes: ''
+      });
+    }
+  }, [editingQuote]);
 
   const handleSave = () => {
     if (!formData.clientName || !formData.amount) {
@@ -106,44 +229,30 @@ const QuoteFormDialog = ({ open, onClose, onSave }) => {
       return;
     }
 
-    const newQuote = {
-      id: Date.now(),
-      quoteNumber: formData.quoteNumber,
-      clientName: formData.clientName,
-      date: formData.date,
-      validUntil: formData.validUntil,
+    const quoteData = {
+      ...formData,
       total: parseFloat(formData.amount),
-      status: 'draft',
-      description: formData.description,
-      notes: formData.notes
+      status: editingQuote?.status || 'draft',
+      items: editingQuote?.items || []
     };
 
-    onSave(newQuote);
+    onSave(quoteData);
     
     toast({
-      title: "Devis créé",
-      description: `Le devis ${formData.quoteNumber} a été créé avec succès.`
+      title: editingQuote ? "Devis modifié" : "Devis créé",
+      description: `Le devis ${formData.quoteNumber} a été ${editingQuote ? 'modifié' : 'créé'} avec succès.`
     });
 
     onClose();
-    
-    // Reset form
-    setFormData({
-      clientName: '',
-      quoteNumber: `D-${new Date().getFullYear()}-${String(Date.now()).slice(-3)}`,
-      date: new Date().toISOString().split('T')[0],
-      validUntil: '',
-      description: '',
-      amount: '',
-      notes: ''
-    });
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Nouveau devis</DialogTitle>
+          <DialogTitle>
+            {editingQuote ? 'Modifier le devis' : 'Nouveau devis'}
+          </DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">
@@ -221,7 +330,7 @@ const QuoteFormDialog = ({ open, onClose, onSave }) => {
       </DialogContent>
     </Dialog>
   );
-};
+}
 
 export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNewCompleted }) {
   const { toast } = useToast();
@@ -286,6 +395,8 @@ export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNe
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showQuoteForm, setShowQuoteForm] = useState(false);
+  const [editingQuote, setEditingQuote] = useState(null);
+  const [previewQuote, setPreviewQuote] = useState(null);
 
   // Ouvrir automatiquement le formulaire si shouldCreateNew est true
   React.useEffect(() => {
@@ -305,10 +416,7 @@ export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNe
   });
 
   const handleEditQuote = (quote) => {
-    toast({
-      title: "Édition du devis",
-      description: `Ouverture de l'éditeur pour le devis ${quote.quoteNumber}`
-    });
+    setEditingQuote(quote);
   };
 
   const handleDeleteQuote = (quote) => {
@@ -320,10 +428,7 @@ export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNe
   };
 
   const handleViewQuote = (quote) => {
-    toast({
-      title: "Aperçu du devis",
-      description: `Consultation du devis ${quote.quoteNumber}`
-    });
+    setPreviewQuote(quote);
   };
 
   const handleSendQuote = (quote) => {
@@ -337,9 +442,55 @@ export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNe
   };
 
   const handleConvertToInvoice = (quote) => {
+    // Générer un numéro de facture unique
+    const currentYear = new Date().getFullYear();
+    const existingInvoices = JSON.parse(localStorage.getItem('casskai_invoices') || '[]');
+    const nextInvoiceNumber = existingInvoices.length + 1;
+    const invoiceNumber = `F-${currentYear}-${String(nextInvoiceNumber).padStart(3, '0')}`;
+
+    // Créer la facture à partir du devis
+    const newInvoice = {
+      id: Date.now(),
+      invoiceNumber,
+      clientId: quote.clientId,
+      clientName: quote.clientName,
+      date: new Date().toISOString().split('T')[0], // Date d'aujourd'hui
+      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 jours
+      total: quote.total,
+      status: 'draft',
+      items: quote.items,
+      convertedFromQuote: quote.id,
+      quoteNumber: quote.quoteNumber
+    };
+
+    // Sauvegarder la facture dans localStorage
+    const updatedInvoices = [...existingInvoices, newInvoice];
+    localStorage.setItem('casskai_invoices', JSON.stringify(updatedInvoices));
+
+    // Mettre à jour le statut du devis
+    setQuotes(prev => prev.map(q =>
+      q.id === quote.id ? { ...q, status: 'converted' } : q
+    ));
+
     toast({
-      title: "Conversion en facture",
-      description: `Le devis ${quote.quoteNumber} va être converti en facture.`
+      title: "Conversion réussie",
+      description: `Le devis ${quote.quoteNumber} a été converti en facture ${invoiceNumber}.`
+    });
+  };
+
+  const handleCopyQuote = (quote) => {
+    const copiedQuote = {
+      ...quote,
+      id: Date.now(),
+      quoteNumber: `${quote.quoteNumber}-COPY`,
+      status: 'draft',
+      date: new Date().toISOString().split('T')[0],
+      validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // 30 days from now
+    };
+    setQuotes(prev => [...prev, copiedQuote]);
+    toast({
+      title: "Devis dupliqué",
+      description: `Le devis ${quote.quoteNumber} a été dupliqué avec succès.`
     });
   };
 
@@ -490,6 +641,7 @@ export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNe
                     onView={handleViewQuote}
                     onSend={handleSendQuote}
                     onConvertToInvoice={handleConvertToInvoice}
+                    onCopy={handleCopyQuote}
                   />
                 ))}
               </TableBody>
@@ -502,6 +654,24 @@ export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNe
         open={showQuoteForm}
         onClose={() => setShowQuoteForm(false)}
         onSave={handleSaveQuote}
+      />
+
+      <QuotePreviewDialog
+        open={!!previewQuote}
+        onClose={() => setPreviewQuote(null)}
+        quote={previewQuote}
+      />
+
+      <QuoteFormDialog
+        open={!!editingQuote}
+        onClose={() => setEditingQuote(null)}
+        onSave={(updatedQuote) => {
+          setQuotes(prev => prev.map(q => 
+            q.id === updatedQuote.id ? updatedQuote : q
+          ));
+          setEditingQuote(null);
+        }}
+        editingQuote={editingQuote}
       />
     </div>
   );

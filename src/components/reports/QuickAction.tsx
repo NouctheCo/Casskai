@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
@@ -6,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 interface QuickActionProps {
   title: string;
   description: string;
-  icon: React.ElementType;
+  icon: any;
   onClick: () => void;
   color?: string;
   badge?: string;

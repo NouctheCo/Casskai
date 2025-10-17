@@ -1,5 +1,4 @@
-import { z } from 'zod';
-import { JournalEntrySchema, JournalEntryType, ImportError, LetterageMatch } from '../types/accounting-import.types';
+import { JournalEntrySchema, JournalEntryType, ImportError } from '../types/accounting-import.types';
 import { supabase } from '../lib/supabase';
 
 /**
@@ -10,7 +9,7 @@ export class AccountingValidationService {
   /**
    * Valide une écriture comptable complète
    */
-  static async validateJournalEntry(entry: any, companyId: string): Promise<{
+  static async validateJournalEntry(entry: JournalEntryType, companyId: string): Promise<{
     isValid: boolean;
     errors: ImportError[];
     warnings: ImportError[];
@@ -141,8 +140,8 @@ export class AccountingValidationService {
     // Récupération des comptes utilisés
     const accountIds = entry.items.map(item => item.accountId);
     const accounts = await supabase
-      .from('accounts')
-      .select('id, number, type, class')
+      .from('chart_of_accounts')
+      .select('id, account_number, account_type')
       .in('id', accountIds);
 
     if (!accounts.data || accounts.data.length !== accountIds.length) {
@@ -160,12 +159,12 @@ export class AccountingValidationService {
     const journalRules = this.getJournalAccountRules(journal.data.type);
     
     accounts.data.forEach(account => {
-      const accountClass = account.number.charAt(0);
+      const accountClass = account.account_number.charAt(0);
       if (!journalRules.allowedClasses.includes(accountClass)) {
         warnings.push({
           row: 0,
           field: 'items',
-          message: `Compte ${account.number} inhabituel pour journal ${journal.data.code}`,
+          message: `Compte ${account.account_number} inhabituel pour journal ${journal.data.code}`,
           type: 'business',
           severity: 'warning'
         });
@@ -211,8 +210,8 @@ export class AccountingValidationService {
   ): Promise<void> {
     const accountIds = entry.items.map(item => item.accountId);
     const accounts = await supabase
-      .from('accounts')
-      .select('id, number, name, type, is_active')
+      .from('chart_of_accounts')
+      .select('id, account_number, account_name, account_type, is_active')
       .in('id', accountIds);
 
     if (!accounts.data) return;
@@ -223,7 +222,7 @@ export class AccountingValidationService {
         errors.push({
           row: 0,
           field: `items.${index}.accountId`,
-          message: `Compte ${account.number} inactif`,
+          message: `Compte ${account.account_number} inactif`,
           type: 'business',
           severity: 'error'
         });
@@ -239,12 +238,12 @@ export class AccountingValidationService {
    * Validation du sens normal des comptes
    */
   private static validateAccountNormalBalance(
-    account: any,
-    item: any,
+    account: Record<string, unknown>,
+    item: Record<string, unknown>,
     index: number,
     warnings: ImportError[]
   ): void {
-    const accountClass = account.number.charAt(0);
+    const accountClass = (account.account_number as string).charAt(0);
     const debitAccount = ['1', '2', '3', '6', '8'].includes(accountClass);
     const creditAccount = ['4', '7', '9'].includes(accountClass);
 
@@ -252,7 +251,7 @@ export class AccountingValidationService {
       warnings.push({
         row: 0,
         field: `items.${index}`,
-        message: `Compte ${account.number} mouvementé au crédit (inhabituel)`,
+        message: `Compte ${account.account_number as string} mouvementé au crédit (inhabituel)`,
         type: 'business',
         severity: 'warning'
       });
@@ -262,7 +261,7 @@ export class AccountingValidationService {
       warnings.push({
         row: 0,
         field: `items.${index}`,
-        message: `Compte ${account.number} mouvementé au débit (inhabituel)`,
+        message: `Compte ${account.account_number} mouvementé au débit (inhabituel)`,
         type: 'business',
         severity: 'warning'
       });
@@ -336,7 +335,12 @@ export class AccountingValidationService {
     }>;
     unique: JournalEntryType[];
   }> {
-    const duplicates: any[] = [];
+    const duplicates: Array<{
+      entry: JournalEntryType;
+      existingEntryId: string;
+      similarity: number;
+      matchCriteria: string[];
+    }> = [];
     const unique: JournalEntryType[] = [];
 
     for (const entry of entries) {
@@ -382,14 +386,11 @@ export class AccountingValidationService {
     startDate.setDate(startDate.getDate() - 7); // ±7 jours
     const endDate = new Date(dateRange);
     endDate.setDate(endDate.getDate() + 7);
-
-    const totalAmount = entry.items.reduce((sum, item) => sum + item.debitAmount + item.creditAmount, 0) / 2;
-
     const similarEntries = await supabase
       .from('journal_entries')
       .select(`
         id, entry_number, date, description,
-        journal_entry_items (
+        journal_entry_lines (
           account_id, debit_amount, credit_amount, description
         )
       `)
@@ -413,7 +414,7 @@ export class AccountingValidationService {
   /**
    * Calcul de similarité entre deux écritures
    */
-  private static calculateSimilarity(entry1: any, entry2: any): {
+  private static calculateSimilarity(entry1: JournalEntryType, entry2: JournalEntryType): {
     score: number;
     criteria: string[];
   } {
@@ -428,9 +429,9 @@ export class AccountingValidationService {
 
     // Similarité des montants
     const amount1 = entry1.items.reduce((sum, item) => sum + item.debitAmount, 0);
-    const amount2 = entry2.journal_entry_items.reduce((sum, item) => sum + item.debit_amount, 0);
+    const amount2 = entry2.items.reduce((sum, item) => sum + item.debitAmount, 0);
     const amountSimilarity = 1 - Math.abs(amount1 - amount2) / Math.max(amount1, amount2, 1);
-    
+
     if (amountSimilarity > 0.95) {
       score += weights.amount;
       criteria.push('montant identique');
@@ -441,7 +442,7 @@ export class AccountingValidationService {
 
     // Similarité des comptes
     const accounts1 = new Set(entry1.items.map(item => item.accountId));
-    const accounts2 = new Set(entry2.journal_entry_items.map(item => item.account_id));
+    const accounts2 = new Set(entry2.items.map(item => item.accountId));
     const commonAccounts = new Set([...accounts1].filter(x => accounts2.has(x)));
     const accountSimilarity = commonAccounts.size / Math.max(accounts1.size, accounts2.size);
     
@@ -503,15 +504,15 @@ export class AccountingValidationService {
    * Validation en lot d'écritures
    */
   static async validateBatch(
-    entries: any[],
+    entries: JournalEntryType[],
     companyId: string
   ): Promise<{
     valid: JournalEntryType[];
-    invalid: Array<{ entry: any; errors: ImportError[] }>;
+    invalid: Array<{ entry: JournalEntryType; errors: ImportError[] }>;
     warnings: ImportError[];
   }> {
     const valid: JournalEntryType[] = [];
-    const invalid: Array<{ entry: any; errors: ImportError[] }> = [];
+    const invalid: Array<{ entry: JournalEntryType; errors: ImportError[] }> = [];
     const allWarnings: ImportError[] = [];
 
     for (let i = 0; i < entries.length; i++) {
@@ -538,3 +539,4 @@ export class AccountingValidationService {
     };
   }
 }
+

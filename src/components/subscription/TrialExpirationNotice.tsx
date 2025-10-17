@@ -1,17 +1,19 @@
-import React, { useState, useEffect } from 'react';
+/* eslint-disable complexity, max-lines-per-function */
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Clock, 
-  AlertTriangle, 
-  Crown, 
+import {
+  Clock,
+  AlertTriangle,
+  Crown,
   X,
   Calendar,
   ArrowRight
 } from 'lucide-react';
+import { useTrial } from '@/hooks/trial.hooks';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -27,21 +29,50 @@ export const TrialExpirationNotice: React.FC<TrialExpirationNoticeProps> = ({
   className = ''
 }) => {
   const navigate = useNavigate();
+  const { trialInfo, daysRemaining: trialDaysRemaining, isExpired: _trialIsExpired, isActive: trialIsActive } = useTrial();
   const { subscription, plan, isTrialing, daysUntilRenewal } = useSubscription();
   const [isDismissed, setIsDismissed] = useState(false);
 
-  // Ne pas afficher si pas en période d'essai ou si dismissé
-  if (!isTrialing || !subscription || isDismissed) {
+  // Utiliser les données du useTrial si disponibles, sinon utiliser SubscriptionContext
+  // En développement, simuler 15 jours d'essai restants si aucune donnée
+  const isDevMode = import.meta.env.DEV;
+  const mockDaysRemaining = 15;
+
+  const daysRemaining = trialInfo
+    ? trialDaysRemaining
+    : (daysUntilRenewal ?? (isDevMode ? mockDaysRemaining : 0));
+  const isActive = trialInfo ? trialIsActive : (isTrialing || isDevMode);
+
+  // Ne pas afficher si dismissé ou si aucune donnée d'essai disponible
+  if (isDismissed) {
     return null;
   }
 
-  const trialProgress = subscription.trialEnd 
-    ? Math.max(0, Math.min(100, ((30 - daysUntilRenewal) / 30) * 100))
-    : 0;
+  // TEMPORAIRE: Forcer l'affichage en développement si aucun abonnement payant
+  const hasActiveSubscription = subscription?.status === 'active' && subscription?.planId !== 'free';
+
+  // Ne pas afficher si aucune source de données disponible ET pas en dev
+  if (!trialInfo && !subscription && !isDevMode) {
+    return null;
+  }
+
+  // Ne pas afficher si l'utilisateur a un abonnement payant actif
+  if (hasActiveSubscription && !isTrialing) {
+    return null;
+  }
+
+  // En développement, toujours afficher sauf si abonnement payant actif
+  const shouldShow = isDevMode ? !hasActiveSubscription : (isActive || isTrialing);
+
+  if (!shouldShow) {
+    return null;
+  }
+
+  const trialProgress = Math.max(0, ((30 - daysRemaining) / 30) * 100);
 
   const getUrgencyLevel = () => {
-    if (daysUntilRenewal <= 3) return 'critical';
-    if (daysUntilRenewal <= 7) return 'warning';
+    if (daysRemaining <= 3) return 'critical';
+    if (daysRemaining <= 7) return 'warning';
     return 'info';
   };
 
@@ -74,14 +105,15 @@ export const TrialExpirationNotice: React.FC<TrialExpirationNoticeProps> = ({
   const colors = urgencyColors[urgencyLevel];
 
   const handleUpgrade = () => {
-    navigate('/settings/billing?tab=plans');
+    navigate('/pricing');
   };
 
   const handleDismiss = () => {
     if (dismissible) {
       setIsDismissed(true);
       // Stocker le dismiss dans localStorage pour éviter de réafficher trop souvent
-      localStorage.setItem(`trial_notice_dismissed_${subscription.id}`, Date.now().toString());
+      const subscriptionId = trialInfo?.subscriptionId || subscription?.id || 'default';
+      localStorage.setItem(`trial_notice_dismissed_${subscriptionId}`, Date.now().toString());
     }
   };
 
@@ -104,7 +136,7 @@ export const TrialExpirationNotice: React.FC<TrialExpirationNoticeProps> = ({
               )}
               <div>
                 <p className={`text-xs font-medium ${colors.text}`}>
-                  Essai : {daysUntilRenewal} jour{daysUntilRenewal > 1 ? 's' : ''} restant{daysUntilRenewal > 1 ? 's' : ''}
+                  Essai : {daysRemaining} jour{daysRemaining > 1 ? 's' : ''} restant{daysRemaining > 1 ? 's' : ''}
                 </p>
               </div>
             </div>
@@ -144,14 +176,14 @@ export const TrialExpirationNotice: React.FC<TrialExpirationNoticeProps> = ({
                       {urgencyLevel === 'critical' ? 'Essai se termine bientôt !' : 'Période d\'essai active'}
                     </h3>
                     <Badge variant="secondary" className="text-xs">
-                      {plan?.name || 'Essai gratuit'}
+                      {trialInfo?.planId || plan?.name || 'Essai gratuit'}
                     </Badge>
                   </div>
                   
                   <p className={`text-sm ${colors.text} mb-4`}>
-                    {urgencyLevel === 'critical' 
-                      ? `Votre essai gratuit se termine dans ${daysUntilRenewal} jour${daysUntilRenewal > 1 ? 's' : ''}. Choisissez un plan pour continuer à utiliser toutes les fonctionnalités.`
-                      : `Il vous reste ${daysUntilRenewal} jour${daysUntilRenewal > 1 ? 's' : ''} d'essai gratuit. Découvrez nos plans pour profiter pleinement de CassKai.`
+                    {urgencyLevel === 'critical'
+                      ? `Votre essai gratuit se termine dans ${daysRemaining} jour${daysRemaining > 1 ? 's' : ''}. Choisissez un plan pour continuer à utiliser toutes les fonctionnalités.`
+                      : `Il vous reste ${daysRemaining} jour${daysRemaining > 1 ? 's' : ''} d'essai gratuit. Découvrez nos plans pour profiter pleinement de CassKai.`
                     }
                   </p>
                   
@@ -183,7 +215,7 @@ export const TrialExpirationNotice: React.FC<TrialExpirationNoticeProps> = ({
                     <div className="flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-400">
                       <Calendar className="w-3 h-3" />
                       <span>
-                        Expire le {subscription.trialEnd?.toLocaleDateString('fr-FR')}
+                        Expire le {trialInfo?.trialEnd?.toLocaleDateString('fr-FR') || subscription?.currentPeriodEnd?.toLocaleDateString('fr-FR')}
                       </span>
                     </div>
                   </div>

@@ -73,7 +73,7 @@ const ReportFiltersComponent: React.FC<{
             <SelectValue placeholder="Type de rapport" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Tous les types</SelectItem>
+            <SelectItem value="all_types">Tous les types</SelectItem>
             <SelectItem value="balance_sheet">Bilan</SelectItem>
             <SelectItem value="income_statement">Compte de résultat</SelectItem>
             <SelectItem value="cash_flow">Flux de trésorerie</SelectItem>
@@ -90,7 +90,7 @@ const ReportFiltersComponent: React.FC<{
             <SelectValue placeholder="Statut" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Tous les statuts</SelectItem>
+            <SelectItem value="all_statuses">Tous les statuts</SelectItem>
             <SelectItem value="draft">Brouillon</SelectItem>
             <SelectItem value="generating">En cours</SelectItem>
             <SelectItem value="ready">Prêt</SelectItem>

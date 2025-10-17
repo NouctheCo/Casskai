@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * PPF (Chorus Pro) Provider
  * Handles submission to French government's Chorus Pro platform
@@ -44,13 +43,13 @@ interface PPFStatusResponse {
 }
 
 export class PPFProvider extends ChannelProvider {
-  protected config: PPFConfig;
+  declare protected config: PPFConfig;
   private accessToken?: string;
   private tokenExpiresAt?: number;
 
   constructor(config?: Partial<PPFConfig>) {
     super('PPF', config);
-    
+
     // Default configuration
     this.config = {
       baseUrl: config?.sandbox 

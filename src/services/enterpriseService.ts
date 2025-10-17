@@ -1,6 +1,7 @@
 import { supabase, handleSupabaseError } from '../lib/supabase';
 
 import { Enterprise, TaxRegime, EnterpriseSettings } from '../types/enterprise.types';
+import { logger } from '@/utils/logger';
 
 /**
  * Service for managing enterprise-related operations
@@ -91,7 +92,7 @@ export const enterpriseService = {
 
       return { data: enterprises, error: null };
     } catch (error) {
-      console.error('Error fetching user enterprises:', error);
+      logger.error('Error fetching user enterprises:', error);
       return { 
         data: null, 
         error: new Error(handleSupabaseError(error))
@@ -175,7 +176,7 @@ export const enterpriseService = {
 
       return { data: newEnterprise, error: null };
     } catch (error) {
-      console.error('Error creating enterprise:', error);
+      logger.error('Error creating enterprise:', error);
       return { 
         data: null, 
         error: new Error(handleSupabaseError(error))
@@ -208,7 +209,7 @@ export const enterpriseService = {
 
       return { success: true, error: null };
     } catch (error) {
-      console.error('Error updating enterprise:', error);
+      logger.error('Error updating enterprise:', error);
       return { 
         success: false, 
         error: new Error(handleSupabaseError(error))
@@ -232,7 +233,7 @@ export const enterpriseService = {
 
       return { success: true, error: null };
     } catch (error) {
-      console.error('Error deleting enterprise:', error);
+      logger.error('Error deleting enterprise:', error);
       return { 
         success: false, 
         error: new Error(handleSupabaseError(error))
@@ -269,7 +270,7 @@ export const enterpriseService = {
 
       return { success: true, error: null };
     } catch (error) {
-      console.error('Error setting default enterprise:', error);
+      logger.error('Error setting default enterprise:', error);
       return { 
         success: false, 
         error: new Error(handleSupabaseError(error))

@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 export interface Quote {
   id: string;
@@ -130,7 +131,7 @@ class QuotesService {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Error fetching quotes:', error);
+        logger.error('Error fetching quotes:', error);
         throw new Error(`Failed to fetch quotes: ${error.message}`);
       }
 
@@ -169,7 +170,7 @@ class QuotesService {
 
       return quotes;
     } catch (error) {
-      console.error('Error in getQuotes:', error);
+      logger.error('Error in getQuotes:', error);
       throw error;
     }
   }
@@ -229,7 +230,7 @@ class QuotesService {
         })) || []
       } as QuoteWithDetails;
     } catch (error) {
-      console.error('Error in getQuoteById:', error);
+      logger.error('Error in getQuoteById:', error);
       throw error;
     }
   }
@@ -319,7 +320,7 @@ class QuotesService {
 
       return createdQuote;
     } catch (error) {
-      console.error('Error in createQuote:', error);
+      logger.error('Error in createQuote:', error);
       throw error;
     }
   }
@@ -346,7 +347,7 @@ class QuotesService {
 
       return updatedQuote;
     } catch (error) {
-      console.error('Error in updateQuoteStatus:', error);
+      logger.error('Error in updateQuoteStatus:', error);
       throw error;
     }
   }
@@ -420,7 +421,7 @@ class QuotesService {
 
       return invoice;
     } catch (error) {
-      console.error('Error converting quote to invoice:', error);
+      logger.error('Error converting quote to invoice:', error);
       throw error;
     }
   }
@@ -440,7 +441,7 @@ class QuotesService {
         throw new Error(`Failed to delete quote: ${error.message}`);
       }
     } catch (error) {
-      console.error('Error in deleteQuote:', error);
+      logger.error('Error in deleteQuote:', error);
       throw error;
     }
   }
@@ -472,7 +473,7 @@ class QuotesService {
       
       return `DEV-${year}-${paddedNumber}`;
     } catch (error) {
-      console.error('Error generating quote number:', error);
+      logger.error('Error generating quote number:', error);
       // Fallback
       return `DEV-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`;
     }

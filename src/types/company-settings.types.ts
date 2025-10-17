@@ -131,30 +131,22 @@ export interface CompanySettings {
 export function mapRowToSettings(row: CompanyRow): CompanySettings {
   return {
     generalInfo: {
-      name: row.name,
-      commercialName: row.commercial_name || undefined,
+      name: row.name || '',
+      commercialName: row.legal_name || undefined,
       legalForm: (row.legal_form as LegalForm) || undefined,
       siret: row.siret || undefined,
-      apeCode: row.ape_code || undefined,
+      apeCode: undefined, // Pas de colonne ape_code
       vatNumber: row.vat_number || undefined,
-      shareCapital: row.share_capital || undefined,
+      shareCapital: row.share_capital ? Number(row.share_capital) : undefined,
     },
     contact: {
       address: {
-        street: row.address_street || undefined,
-        postalCode: row.address_postal_code || undefined,
-        city: row.address_city || undefined,
-        country: row.address_country || undefined,
+        street: row.address || undefined,
+        postalCode: row.postal_code || undefined,
+        city: row.city || undefined,
+        country: row.country || undefined,
       },
-      correspondenceAddress: (row.correspondence_address_street || 
-                             row.correspondence_address_postal_code || 
-                             row.correspondence_address_city || 
-                             row.correspondence_address_country) ? {
-        street: row.correspondence_address_street || undefined,
-        postalCode: row.correspondence_address_postal_code || undefined,
-        city: row.correspondence_address_city || undefined,
-        country: row.correspondence_address_country || undefined,
-      } : undefined,
+      correspondenceAddress: undefined, // Pas de colonnes correspondence_address_*
       phone: row.phone || undefined,
       email: row.email || undefined,
       website: row.website || undefined,
@@ -162,65 +154,55 @@ export function mapRowToSettings(row: CompanyRow): CompanySettings {
     accounting: {
       fiscalYear: {
         startMonth: row.fiscal_year_start_month || 1,
-        endMonth: row.fiscal_year_end_month || 12,
+        endMonth: 12, // Calculé: (startMonth + 11) % 12 + 1 ou défaut 12
       },
-      taxRegime: (row.tax_regime as TaxRegime) || 'real_normal',
-      vatRegime: (row.vat_regime as VATRegime) || 'subject',
-      defaultVatRate: row.vat_rate || 20.0,
-      accountant: (row.accountant_firm_name || row.accountant_contact || 
-                   row.accountant_email || row.accountant_phone) ? {
-        firmName: row.accountant_firm_name || undefined,
-        contact: row.accountant_contact || undefined,
-        email: row.accountant_email || undefined,
-        phone: row.accountant_phone || undefined,
-      } : undefined,
-      mainBank: (row.main_bank_name || row.main_bank_iban || row.main_bank_bic) ? {
-        name: row.main_bank_name || undefined,
-        iban: row.main_bank_iban || undefined,
-        bic: row.main_bank_bic || undefined,
-      } : undefined,
+      taxRegime: 'real_normal', // Pas de colonne tax_regime
+      vatRegime: 'subject', // Pas de colonne vat_regime
+      defaultVatRate: 20.0, // Pas de colonne vat_rate
+      accountant: undefined, // Pas de colonnes accountant_*
+      mainBank: undefined, // Pas de colonnes main_bank_*
     },
     business: {
-      sector: (row.business_sector as BusinessSector) || undefined,
-      employeesCount: row.employees_count || 1,
-      annualRevenue: row.annual_revenue || undefined,
+      sector: (row.activity_sector as BusinessSector) || (row.sector as BusinessSector) || undefined,
+      employeesCount: row.employee_count ? parseInt(row.employee_count) : 1,
+      annualRevenue: undefined, // Pas de colonne annual_revenue
       currency: row.default_currency || 'EUR',
-      language: row.interface_language || row.default_locale || 'fr',
+      language: row.default_locale || 'fr',
       timezone: row.timezone || 'Europe/Paris',
     },
     branding: {
-      logoUrl: row.logo_url || undefined,
-      primaryColor: row.brand_primary_color || '#3B82F6',
-      secondaryColor: row.brand_secondary_color || '#1E40AF',
-      emailSignature: row.email_signature || undefined,
-      legalMentions: row.legal_mentions || undefined,
-      defaultTermsConditions: row.default_terms_conditions || undefined,
+      logoUrl: row.logo || undefined,
+      primaryColor: '#3B82F6', // Pas de colonnes brand_*
+      secondaryColor: '#1E40AF',
+      emailSignature: undefined,
+      legalMentions: undefined,
+      defaultTermsConditions: undefined,
     },
     documents: {
       templates: {
-        invoice: (row.invoice_template as DocumentTemplate) || 'default',
-        quote: (row.quote_template as DocumentTemplate) || 'default',
+        invoice: 'default', // Pas de colonnes template
+        quote: 'default',
       },
-      headers: row.document_header || undefined,
-      footers: row.document_footer || undefined,
+      headers: undefined,
+      footers: undefined,
       numbering: {
-        invoicePrefix: row.invoice_prefix || 'FAC',
-        quotePrefix: row.quote_prefix || 'DEV',
-        format: row.numbering_format || '{prefix}-{year}-{number:0000}',
+        invoicePrefix: 'FAC',
+        quotePrefix: 'DEV',
+        format: '{prefix}-{year}-{number:0000}',
         counters: {
-          invoice: row.invoice_counter || 1,
-          quote: row.quote_counter || 1,
+          invoice: 1,
+          quote: 1,
         },
       },
     },
-    ceo: (row.ceo_name || row.ceo_title || row.ceo_email) ? {
+    ceo: (row.ceo_name || row.ceo_title) ? {
       name: row.ceo_name || undefined,
       title: row.ceo_title || undefined,
-      email: row.ceo_email || undefined,
+      email: undefined, // Pas de colonne ceo_email
     } : undefined,
     metadata: {
-      settingsCompletedAt: row.settings_completed_at ? new Date(row.settings_completed_at) : undefined,
-      onboardingCompletedAt: row.onboarding_completed_at ? new Date(row.onboarding_completed_at) : undefined,
+      settingsCompletedAt: undefined, // Pas de colonne settings_completed_at
+      onboardingCompletedAt: undefined, // Pas de colonne onboarding_completed_at
     },
   };
 }
@@ -231,10 +213,10 @@ export function mapSettingsToUpdate(settings: Partial<CompanySettings>): Company
   if (settings.generalInfo) {
     const { generalInfo } = settings;
     if (generalInfo.name !== undefined) update.name = generalInfo.name;
-    if (generalInfo.commercialName !== undefined) update.commercial_name = generalInfo.commercialName;
+    if (generalInfo.commercialName !== undefined) update.legal_name = generalInfo.commercialName;
     if (generalInfo.legalForm !== undefined) update.legal_form = generalInfo.legalForm;
     if (generalInfo.siret !== undefined) update.siret = generalInfo.siret;
-    if (generalInfo.apeCode !== undefined) update.ape_code = generalInfo.apeCode;
+    // apeCode: pas de colonne
     if (generalInfo.vatNumber !== undefined) update.vat_number = generalInfo.vatNumber;
     if (generalInfo.shareCapital !== undefined) update.share_capital = generalInfo.shareCapital;
   }
@@ -242,17 +224,12 @@ export function mapSettingsToUpdate(settings: Partial<CompanySettings>): Company
   if (settings.contact) {
     const { contact } = settings;
     if (contact.address) {
-      if (contact.address.street !== undefined) update.address_street = contact.address.street;
-      if (contact.address.postalCode !== undefined) update.address_postal_code = contact.address.postalCode;
-      if (contact.address.city !== undefined) update.address_city = contact.address.city;
-      if (contact.address.country !== undefined) update.address_country = contact.address.country;
+      if (contact.address.street !== undefined) update.address = contact.address.street;
+      if (contact.address.postalCode !== undefined) update.postal_code = contact.address.postalCode;
+      if (contact.address.city !== undefined) update.city = contact.address.city;
+      if (contact.address.country !== undefined) update.country = contact.address.country;
     }
-    if (contact.correspondenceAddress) {
-      if (contact.correspondenceAddress.street !== undefined) update.correspondence_address_street = contact.correspondenceAddress.street;
-      if (contact.correspondenceAddress.postalCode !== undefined) update.correspondence_address_postal_code = contact.correspondenceAddress.postalCode;
-      if (contact.correspondenceAddress.city !== undefined) update.correspondence_address_city = contact.correspondenceAddress.city;
-      if (contact.correspondenceAddress.country !== undefined) update.correspondence_address_country = contact.correspondenceAddress.country;
-    }
+    // correspondenceAddress: pas de colonnes
     if (contact.phone !== undefined) update.phone = contact.phone;
     if (contact.email !== undefined) update.email = contact.email;
     if (contact.website !== undefined) update.website = contact.website;
@@ -261,60 +238,37 @@ export function mapSettingsToUpdate(settings: Partial<CompanySettings>): Company
   if (settings.accounting) {
     const { accounting } = settings;
     if (accounting.fiscalYear?.startMonth !== undefined) update.fiscal_year_start_month = accounting.fiscalYear.startMonth;
-    if (accounting.fiscalYear?.endMonth !== undefined) update.fiscal_year_end_month = accounting.fiscalYear.endMonth;
-    if (accounting.taxRegime !== undefined) update.tax_regime = accounting.taxRegime;
-    if (accounting.vatRegime !== undefined) update.vat_regime = accounting.vatRegime;
-    if (accounting.defaultVatRate !== undefined) update.vat_rate = accounting.defaultVatRate;
-    if (accounting.accountant?.firmName !== undefined) update.accountant_firm_name = accounting.accountant.firmName;
-    if (accounting.accountant?.contact !== undefined) update.accountant_contact = accounting.accountant.contact;
-    if (accounting.accountant?.email !== undefined) update.accountant_email = accounting.accountant.email;
-    if (accounting.accountant?.phone !== undefined) update.accountant_phone = accounting.accountant.phone;
-    if (accounting.mainBank?.name !== undefined) update.main_bank_name = accounting.mainBank.name;
-    if (accounting.mainBank?.iban !== undefined) update.main_bank_iban = accounting.mainBank.iban;
-    if (accounting.mainBank?.bic !== undefined) update.main_bank_bic = accounting.mainBank.bic;
+    // fiscal_year_end_month: pas de colonne
+    // taxRegime, vatRegime, defaultVatRate: pas de colonnes
+    // accountant, mainBank: pas de colonnes
   }
 
   if (settings.business) {
     const { business } = settings;
-    if (business.sector !== undefined) update.business_sector = business.sector;
-    if (business.employeesCount !== undefined) update.employees_count = business.employeesCount;
-    if (business.annualRevenue !== undefined) update.annual_revenue = business.annualRevenue;
-    if (business.currency !== undefined) update.default_currency = business.currency;
-    if (business.language !== undefined) {
-      update.interface_language = business.language;
-      update.default_locale = business.language;
+    if (business.sector !== undefined) {
+      update.activity_sector = business.sector;
+      update.sector = business.sector;
     }
+    if (business.employeesCount !== undefined) update.employee_count = String(business.employeesCount);
+    // annualRevenue: pas de colonne
+    if (business.currency !== undefined) update.default_currency = business.currency;
+    if (business.language !== undefined) update.default_locale = business.language;
     if (business.timezone !== undefined) update.timezone = business.timezone;
   }
 
   if (settings.branding) {
     const { branding } = settings;
-    if (branding.logoUrl !== undefined) update.logo_url = branding.logoUrl;
-    if (branding.primaryColor !== undefined) update.brand_primary_color = branding.primaryColor;
-    if (branding.secondaryColor !== undefined) update.brand_secondary_color = branding.secondaryColor;
-    if (branding.emailSignature !== undefined) update.email_signature = branding.emailSignature;
-    if (branding.legalMentions !== undefined) update.legal_mentions = branding.legalMentions;
-    if (branding.defaultTermsConditions !== undefined) update.default_terms_conditions = branding.defaultTermsConditions;
+    if (branding.logoUrl !== undefined) update.logo = branding.logoUrl;
+    // primaryColor, secondaryColor, emailSignature, legalMentions, defaultTermsConditions: pas de colonnes
   }
 
-  if (settings.documents) {
-    const { documents } = settings;
-    if (documents.templates?.invoice !== undefined) update.invoice_template = documents.templates.invoice;
-    if (documents.templates?.quote !== undefined) update.quote_template = documents.templates.quote;
-    if (documents.headers !== undefined) update.document_header = documents.headers;
-    if (documents.footers !== undefined) update.document_footer = documents.footers;
-    if (documents.numbering?.invoicePrefix !== undefined) update.invoice_prefix = documents.numbering.invoicePrefix;
-    if (documents.numbering?.quotePrefix !== undefined) update.quote_prefix = documents.numbering.quotePrefix;
-    if (documents.numbering?.format !== undefined) update.numbering_format = documents.numbering.format;
-    if (documents.numbering?.counters?.invoice !== undefined) update.invoice_counter = documents.numbering.counters.invoice;
-    if (documents.numbering?.counters?.quote !== undefined) update.quote_counter = documents.numbering.counters.quote;
-  }
+  // documents: pas de colonnes
 
   if (settings.ceo) {
     const { ceo } = settings;
     if (ceo.name !== undefined) update.ceo_name = ceo.name;
     if (ceo.title !== undefined) update.ceo_title = ceo.title;
-    if (ceo.email !== undefined) update.ceo_email = ceo.email;
+    // ceo.email: pas de colonne
   }
 
   return update;

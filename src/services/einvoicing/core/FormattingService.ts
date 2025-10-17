@@ -10,6 +10,7 @@ import {
   EInvoicingError
 } from '../../../types/einvoicing.types';
 import { createHash } from 'crypto';
+import { logger } from '@/utils/logger';
 
 export class FormattingService {
   /**
@@ -20,17 +21,18 @@ export class FormattingService {
     format: EInvoiceFormat
   ): Promise<FormattingResult> {
     try {
-      console.log(`🔄 Formatting invoice ${invoice.invoice_number} as ${format}`);
+      logger.info(`🔄 Formatting invoice ${invoice.invoice_number} as ${format}`);
 
       let xmlContent: string;
       let pdfContent: Buffer | undefined;
 
       switch (format) {
-        case 'FACTURX':
+        case 'FACTURX': {
           const facturXResult = await this.generateFacturX(invoice);
           xmlContent = facturXResult.xml;
           pdfContent = facturXResult.pdf;
           break;
+        }
 
         case 'UBL':
           xmlContent = await this.generateUBL(invoice);
@@ -64,7 +66,7 @@ export class FormattingService {
       };
 
     } catch (error) {
-      console.error('Error formatting document:', error);
+      logger.error('Error formatting document:', error);
       throw new EInvoicingError(
         `Failed to format document as ${format}: ${(error as Error).message}`,
         'FORMATTING_ERROR',

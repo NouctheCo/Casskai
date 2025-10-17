@@ -1,9 +1,9 @@
-// @ts-nocheck
 // src/services/currencyIntegration.ts - Version corrigée
 
 import ConfigService from './configService';
 import { CurrencyService } from './currencyService';
 import { SUPPORTED_CURRENCIES } from '../utils/constants';
+import { logger } from '@/utils/logger';
 // import { supabase } from '../lib/supabase'; // Commenté pour la compatibilité de build
 import { CompanyConfig } from '../types/config';
 
@@ -26,7 +26,7 @@ export class CurrencyIntegration {
    */
   async initializeCurrencySystem(): Promise<void> {
     try {
-      console.log('🏦 Initialisation du système de devises...');
+      logger.info('🏦 Initialisation du système de devises...');
 
       // 1. Créer les tables de devises
       await this.createCurrencyTables();
@@ -40,9 +40,9 @@ export class CurrencyIntegration {
       // 4. Mettre à jour les tables existantes
       await this.updateExistingTables();
 
-      console.log('✅ Système de devises initialisé avec succès');
+      logger.info('✅ Système de devises initialisé avec succès')
     } catch (error) {
-      console.error('❌ Erreur initialisation devises:', error);
+      logger.error('❌ Erreur initialisation devises:', error);
       throw error;
     }
   }
@@ -54,7 +54,7 @@ export class CurrencyIntegration {
     // ✅ CORRECTION: Vérification du client
     const supabase = null; // Commenté pour la compatibilité de build
     if (!supabase) {
-      console.warn('Supabase client non disponible, opération ignorée');
+      logger.warn('Supabase client non disponible, opération ignorée');
       return;
     }
 
@@ -116,7 +116,7 @@ export class CurrencyIntegration {
           throw error;
         }
       } catch (error) {
-        console.warn('SQL Query failed (may be normal):', `${query.substring(0, 50)  }...`);
+        logger.warn('SQL Query failed (may be normal);:', `${query.substring(0, 50)  }...`);
         // Continuer même si certaines requêtes échouent (tables peuvent déjà exister)
       }
     }
@@ -129,7 +129,7 @@ export class CurrencyIntegration {
     // ✅ CORRECTION: Vérification du client
     const supabase = null; // Commenté pour la compatibilité de build
     if (!supabase) {
-      console.warn('Supabase client non disponible, opération ignorée');
+      logger.warn('Supabase client non disponible, opération ignorée');
       return;
     }
 
@@ -151,10 +151,10 @@ export class CurrencyIntegration {
           });
 
         if (error) {
-          console.warn(`Erreur insertion devise ${currency.code}:`, error);
+          logger.warn(`Erreur insertion devise ${currency.code}:`, error)
         }
       } catch (error) {
-        console.warn(`Erreur devise ${currency.code}:`, error);
+        logger.warn(`Erreur devise ${currency.code}:`, error)
       }
     }
   }
@@ -166,7 +166,7 @@ export class CurrencyIntegration {
     // ✅ CORRECTION: Vérification du client
     const supabase = null; // Commenté pour la compatibilité de build
     if (!supabase) {
-      console.warn('Supabase client non disponible, opération ignorée');
+      logger.warn('Supabase client non disponible, opération ignorée');
       return;
     }
 
@@ -200,10 +200,10 @@ export class CurrencyIntegration {
           });
 
         if (error) {
-          console.warn(`Erreur taux ${rate.from_currency}/${rate.to_currency}:`, error);
+          logger.warn(`Erreur taux ${rate.from_currency}/${rate.to_currency}:`, error)
         }
       } catch (error) {
-        console.warn(`Erreur taux fixe:`, error);
+        logger.warn(`Erreur taux fixe:`, error)
       }
     }
   }
@@ -215,7 +215,7 @@ export class CurrencyIntegration {
     // ✅ CORRECTION: Vérification du client
     const supabase = null; // Commenté pour la compatibilité de build
     if (!supabase) {
-      console.warn('Supabase client non disponible, opération ignorée');
+      logger.warn('Supabase client non disponible, opération ignorée');
       return;
     }
 
@@ -244,10 +244,10 @@ export class CurrencyIntegration {
       try {
         const { error } = await supabase.rpc('execute_sql', { sql: query });
         if (error && !error.message.includes('already exists')) {
-          console.warn('Erreur mise à jour table:', error);
+          logger.warn('Erreur mise à jour table:', error)
         }
       } catch (error) {
-        console.warn('Erreur ALTER TABLE:', error);
+        logger.warn('Erreur ALTER TABLE:', error)
       }
     }
   }
@@ -259,20 +259,20 @@ export class CurrencyIntegration {
     // ✅ CORRECTION: Vérification du client et config
     const supabase = null; // Commenté pour la compatibilité de build
     if (!supabase) {
-      console.warn('Supabase client non disponible, migration ignorée');
+      logger.warn('Supabase client non disponible, migration ignorée');
       return;
     }
 
     const config = this.configService.getConfig();
     
     if (!config?.company?.currency) {
-      console.log('Aucune devise configurée, migration ignorée');
+      logger.info('Aucune devise configurée, migration ignorée');
       return;
     }
 
     // ✅ CORRECTION: Vérification que config.company.id existe
-    if (!config.company.id) {
-      console.log('ID entreprise manquant, migration ignorée');
+    if (!(config.company as any).id) {
+      logger.info('ID entreprise manquant, migration ignorée');
       return;
     }
 
@@ -283,37 +283,37 @@ export class CurrencyIntegration {
       const { error: companyError } = await supabase
         .from('companies')
         .update({ currency: companyCurrency })
-        .eq('id', config.company.id);
+        .eq('id', (config.company as any).id);
 
       if (companyError) {
-        console.warn('Erreur mise à jour devise entreprise:', companyError);
+        logger.warn('Erreur mise à jour devise entreprise:', companyError)
       }
 
       // Mettre à jour les comptes existants
       const { error: accountsError } = await supabase
         .from('accounts')
         .update({ currency: companyCurrency })
-        .eq('company_id', config.company.id)
+        .eq('company_id', (config.company as any).id)
         .is('currency', null);
 
       if (accountsError) {
-        console.warn('Erreur mise à jour devise comptes:', accountsError);
+        logger.warn('Erreur mise à jour devise comptes:', accountsError)
       }
 
       // Mettre à jour les transactions existantes
       const { error: transactionsError } = await supabase
         .from('transactions')
         .update({ currency: companyCurrency })
-        .eq('company_id', config.company.id)
+        .eq('company_id', (config.company as any).id)
         .is('currency', null);
 
       if (transactionsError) {
-        console.warn('Erreur mise à jour devise transactions:', transactionsError);
+        logger.warn('Erreur mise à jour devise transactions:', transactionsError)
       }
 
-      console.log('✅ Migration des devises terminée');
+      logger.info('✅ Migration des devises terminée')
     } catch (error) {
-      console.error('❌ Erreur migration devises:', error);
+      logger.error('❌ Erreur migration devises:', error);
       throw error;
     }
   }
@@ -391,7 +391,7 @@ export class CurrencyIntegration {
         warnings
       };
     } catch (error) {
-      console.error('❌ Erreur validation système de devises:', error);
+      logger.error('❌ Erreur validation système de devises:', error);
       throw error;
     }
   }

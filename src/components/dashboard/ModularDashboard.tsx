@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useCallback, useRef } from 'react';
 import { Responsive, WidthProvider, Layout } from 'react-grid-layout';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -36,6 +35,7 @@ import { WidgetConfig, WidgetLayout, WIDGET_SIZE_MAP, DEFAULT_BREAKPOINTS, DEFAU
 // Import CSS pour react-grid-layout
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
+import { logger } from '@/utils/logger';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -295,7 +295,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
   const renderWidget = (widget: WidgetConfig, layout: WidgetLayout) => {
     // Validation et sécurisation des données
     if (!widget || !widget.id || !widget.type) {
-      console.warn('Widget invalide:', widget);
+      logger.warn('Widget invalide:', widget);
       return null;
     }
 
@@ -530,7 +530,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
           onLayoutChange={handleLayoutChange}
           onDragStart={handleDragStart}
           onDragStop={handleDragStop}
-          onResizeStop={handleLayoutChange}
+          onResizeStop={handleLayoutChange as any}
         >
           {widgets.filter(widget => widget && widget.id).map(widget => {
             const layout = currentDashboard.layout.find(l => l.i && widget.id && String(l.i) === String(widget.id));

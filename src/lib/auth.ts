@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { logger } from '@/utils/logger';
 
 /**
  * Gère l'inscription d'un nouvel utilisateur.
@@ -23,7 +24,7 @@ export const signUp = async (email: string, password: string, userData: { firstN
   });
 
   if (authError) {
-    console.error("Erreur lors de l'inscription (Auth):", authError.message);
+    logger.error("Erreur lors de l'inscription (Auth);:", authError.message);
     throw new Error(`L'inscription a échoué: ${authError.message}`);
   }
 
@@ -35,7 +36,7 @@ export const signUp = async (email: string, password: string, userData: { firstN
   // Cette opération est maintenant gérée par un trigger SQL dans Supabase
   // pour plus de fiabilité et de sécurité. Voir la fonction `handle_new_user`.
 
-  console.log(`Inscription réussie pour ${email}. Un profil public a été créé automatiquement.`);
+  logger.info(`Inscription réussie pour ${email}. Un profil public a été créé automatiquement.`);
 
   return authData;
 };
@@ -54,7 +55,7 @@ export const signIn = async (email: string, password: string) => {
   });
 
   if (error) {
-    console.error('Erreur de connexion:', error.message);
+    logger.error('Erreur de connexion:', error.message);
     throw new Error(`La connexion a échoué: ${error.message}`);
   }
 
@@ -68,7 +69,7 @@ export const signOut = async () => {
   const { error } = await supabase.auth.signOut();
 
   if (error) {
-    console.error('Erreur de déconnexion:', error.message);
+    logger.error('Erreur de déconnexion:', error.message);
     throw new Error(`La déconnexion a échoué: ${error.message}`);
   }
 };

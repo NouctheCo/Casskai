@@ -2,6 +2,7 @@
 // Wrapper pour le lazy loading intelligent des composants lourds
 import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { useInView } from 'framer-motion';
+import { logger } from '@/utils/logger';
 
 interface LazyWrapperProps {
   children: React.ReactNode;
@@ -101,7 +102,7 @@ export const useLazyLoading = () => {
       await importFn();
       setLoadedModules(prev => new Set([...prev, moduleId]));
     } catch (error) {
-      console.warn(`Failed to preload module ${moduleId}:`, error);
+      logger.warn(`Failed to preload module ${moduleId}:`, error)
     } finally {
       setLoading(false);
     }

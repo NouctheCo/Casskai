@@ -15,6 +15,7 @@ import {
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
+import { logger } from '@/utils/logger';
 
 const features = [
   {
@@ -178,7 +179,7 @@ export default function WelcomeStep() {
           >
             <Button
               onClick={() => {
-                console.warn('[WelcomeStep] Button clicked - calling nextStep()');
+                logger.warn('[WelcomeStep] Button clicked - calling nextStep();');
                 goToNextStep();
               }}
               size="lg"

@@ -121,7 +121,7 @@ export function Chart({
             ))}
           </AreaChart>
         );
-      case "pie":
+      case "pie": {
         const pieData = categories.map((category) => ({
           name: category,
           value: data.reduce((sum, item) => sum + (typeof item?.[category] === "number" ? item[category] : 0), 0),
@@ -146,6 +146,7 @@ export function Chart({
             <Legend />
           </PieChart>
         );
+      }
       default:
         return null;
     }

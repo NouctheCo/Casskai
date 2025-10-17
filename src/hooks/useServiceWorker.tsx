@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { logger } from '@/utils/logger';
 
 interface ServiceWorkerState {
   isSupported: boolean;
@@ -30,7 +31,7 @@ export const useServiceWorker = (): [ServiceWorkerState, ServiceWorkerActions] =
   // Actions
   const register = async () => {
     if (!state.isSupported) {
-      console.warn('Service Worker non supporté');
+      logger.warn('Service Worker non supporté');
       return;
     }
 
@@ -55,9 +56,9 @@ export const useServiceWorker = (): [ServiceWorkerState, ServiceWorkerActions] =
         }
       });
 
-      console.log('✅ Service Worker enregistré');
+      logger.info('✅ Service Worker enregistré')
     } catch (error) {
-      console.error('❌ Erreur enregistrement Service Worker:', error);
+      logger.error('❌ Erreur enregistrement Service Worker:', error)
     }
   };
 
@@ -65,7 +66,7 @@ export const useServiceWorker = (): [ServiceWorkerState, ServiceWorkerActions] =
     if (registration) {
       await registration.unregister();
       setState(prev => ({ ...prev, isRegistered: false }));
-      console.log('🗑️ Service Worker désenregistré');
+      logger.info('🗑️ Service Worker désenregistré')
     }
   };
 
@@ -95,7 +96,7 @@ export const useServiceWorker = (): [ServiceWorkerState, ServiceWorkerActions] =
       // Mettre à jour la taille du cache
       updateCacheSize();
       
-      console.log(`🧹 Cache ${cacheName || 'tous'} vidé`);
+      logger.info(`🧹 Cache ${cacheName || 'tous'} vidé`)
     }
   };
 
@@ -106,7 +107,7 @@ export const useServiceWorker = (): [ServiceWorkerState, ServiceWorkerActions] =
         payload: { urls }
       });
       
-      console.log(`📦 Pré-chargement de ${urls.length} URLs`);
+      logger.info(`📦 Pré-chargement de ${urls.length} URLs`)
     }
   };
 
@@ -206,7 +207,7 @@ export const useOfflineStatus = () => {
 
   const syncWhenOnline = async () => {
     if (swState.isOnline && offlineActions.length > 0) {
-      console.log(`🔄 Synchronisation de ${offlineActions.length} actions`);
+      logger.info(`🔄 Synchronisation de ${offlineActions.length} actions`);
       
       // Ici vous pouvez implémenter la logique de sync
       // Par exemple, renvoyer les requêtes qui ont échoué

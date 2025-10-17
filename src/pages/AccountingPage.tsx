@@ -7,6 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { useSubscription } from '@/contexts/SubscriptionContext';
+import { supabase } from '@/lib/supabase';
 import { 
   Calculator,
   FileText, 
@@ -22,13 +23,16 @@ import {
   Eye,
   RefreshCw,
   Download,
-  CheckCircle,
+  AlertCircle,
   type LucideIcon
 } from 'lucide-react';
 import OptimizedJournalEntriesTab from '@/components/accounting/OptimizedJournalEntriesTab';
-import OptimizedChartOfAccountsTab from '@/components/accounting/OptimizedChartOfAccountsTab';
-import OptimizedJournalsTab from '@/components/accounting/OptimizedJournalsTab';
+import ChartOfAccountsEnhanced from '@/components/accounting/ChartOfAccountsEnhanced';
+import { JournalsList } from '@/components/accounting/JournalsList'; // Importer notre nouveau composant
 import OptimizedReportsTab from '@/components/accounting/OptimizedReportsTab';
+import JournalDistribution from '@/components/accounting/JournalDistribution';
+import { calculateTrend, getPreviousPeriodDates } from '@/utils/trendCalculations';
+import { logger } from '@/utils/logger';
 
 // Types
 interface AccountingKPICardProps {
@@ -54,6 +58,10 @@ interface AccountingData {
   entriesCount: number;
   accountsCount: number;
   journalsCount: number;
+  balanceTrend: number | null;
+  debitTrend: number | null;
+  creditTrend: number | null;
+  entriesTrend: number | null;
 }
 
 const AccountingKPICard: React.FC<AccountingKPICardProps> = ({ title, value, icon: Icon, trend, color = 'blue', description, onClick }) => {
@@ -159,12 +167,28 @@ const QuickActions: React.FC<QuickActionsProps> = ({ onNewEntry, onViewReports, 
 };
 
 const RecentAccountingActivities = () => {
-  const activities = [
-    { type: 'entry', description: 'Nouvelle écriture - Facture F-001', time: '2 min', icon: FileText, color: 'blue' },
-    { type: 'validation', description: 'Validation journal des ventes', time: '1h', icon: CheckCircle, color: 'green' },
-    { type: 'export', description: 'Export FEC généré', time: '3h', icon: Download, color: 'purple' },
-    { type: 'balance', description: 'Balance des comptes mise à jour', time: '1j', icon: BarChart3, color: 'orange' }
-  ];
+  const activities = [];
+
+  if (activities.length === 0) {
+    return (
+      <Card className="h-full">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center space-x-2">
+            <Activity className="w-5 h-5 text-blue-500" />
+            <span>Activité récente</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center h-32 text-center">
+            <Activity className="w-10 h-10 text-gray-400 mb-2" />
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Aucune activité récente
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="h-full">
@@ -220,22 +244,161 @@ export default function AccountingPageOptimized() {
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedPeriod, setSelectedPeriod] = useState('current-month');
   const [isLoading, setIsLoading] = useState(true);
-
-  const [accountingData] = useState<AccountingData>({
-    totalBalance: 45670.50,
-    totalDebit: 125430.75,
-    totalCredit: 79760.25,
-    entriesCount: 156,
-    accountsCount: 87,
-    journalsCount: 5
+  const [shouldCreateNew, setShouldCreateNew] = useState(null); // 'entry'
+  const [error, setError] = useState<string | null>(null);
+  const [accountingData, setAccountingData] = useState<AccountingData>({
+    totalBalance: 0,
+    totalDebit: 0,
+    totalCredit: 0,
+    entriesCount: 0,
+    accountsCount: 0,
+    journalsCount: 0,
+    balanceTrend: null,
+    debitTrend: null,
+    creditTrend: null,
+    entriesTrend: null
   });
+  const [isFirstTime, setIsFirstTime] = useState(false);
 
   useEffect(() => {
     const loadAccountingData = async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setIsLoading(false);
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Récupérer les données comptables réelles
+        const { data: user } = await supabase.auth.getUser();
+        if (!user?.user?.id) {
+          setError("Utilisateur non authentifié");
+          return;
+        }
+
+        // Récupérer la première entreprise de l'utilisateur
+        const { data: companies, error: companiesError } = await supabase
+          .from('companies')
+          .select('id')
+          .eq('owner_id', user.user.id)
+          .limit(1);
+
+        if (companiesError) {
+          logger.warn('Erreur récupération entreprises:', companiesError);
+          setError("Impossible de récupérer les informations de l'entreprise");
+          return;
+        }
+
+        if (!companies || companies.length === 0) {
+          setError("Aucune entreprise trouvée. Veuillez créer une entreprise d'abord.");
+          setIsLoading(false);
+          return;
+        }
+
+        const companyId = companies[0].id;
+
+        // Calculer les dates de la période actuelle et précédente
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+
+        const currentPeriodStart = new Date(currentYear, currentMonth, 1).toISOString().split('T')[0];
+        const currentPeriodEnd = new Date(currentYear, currentMonth + 1, 0).toISOString().split('T')[0];
+
+        const previousPeriodDates = getPreviousPeriodDates(selectedPeriod);
+
+        // Récupérer les écritures de la période actuelle avec leurs lignes
+        const { data: currentEntries, error: currentEntriesError } = await supabase
+          .from('journal_entries')
+          .select('id, journal_entry_lines!inner(debit_amount, credit_amount)')
+          .eq('company_id', companyId)
+          .gte('entry_date', currentPeriodStart)
+          .lte('entry_date', currentPeriodEnd);
+
+        if (currentEntriesError) {
+          logger.warn('Erreur récupération écritures actuelles:', currentEntriesError);
+          // Ne pas bloquer si les écritures n'existent pas encore
+        }
+
+        // Récupérer les écritures de la période précédente avec leurs lignes
+        const { data: previousEntries, error: previousEntriesError } = await supabase
+          .from('journal_entries')
+          .select('id, journal_entry_lines!inner(debit_amount, credit_amount)')
+          .eq('company_id', companyId)
+          .gte('entry_date', previousPeriodDates.start)
+          .lte('entry_date', previousPeriodDates.end);
+
+        if (previousEntriesError) {
+          logger.warn('Erreur récupération écritures précédentes:', previousEntriesError);
+          // Ne pas bloquer si les écritures n'existent pas encore
+        }
+
+        // Calculer totaux période actuelle à partir des lignes
+        const currentDebit = currentEntries?.reduce((sum, e) => {
+          return sum + (e.journal_entry_lines?.reduce((lineSum, line) => lineSum + (line.debit_amount || 0), 0) || 0);
+        }, 0) || 0;
+        const currentCredit = currentEntries?.reduce((sum, e) => {
+          return sum + (e.journal_entry_lines?.reduce((lineSum, line) => lineSum + (line.credit_amount || 0), 0) || 0);
+        }, 0) || 0;
+        const currentBalance = currentDebit - currentCredit;
+        const currentEntriesCount = currentEntries?.length || 0;
+
+        // Calculer totaux période précédente à partir des lignes
+        const previousDebit = previousEntries?.reduce((sum, e) => {
+          return sum + (e.journal_entry_lines?.reduce((lineSum, line) => lineSum + (line.debit_amount || 0), 0) || 0);
+        }, 0) || 0;
+        const previousCredit = previousEntries?.reduce((sum, e) => {
+          return sum + (e.journal_entry_lines?.reduce((lineSum, line) => lineSum + (line.credit_amount || 0), 0) || 0);
+        }, 0) || 0;
+        const previousBalance = previousDebit - previousCredit;
+        const previousEntriesCount = previousEntries?.length || 0;
+
+        // Compter les comptes et journaux
+        const [accountsResult, journalsResult] = await Promise.all([
+          supabase.from('accounts').select('*', { count: 'exact', head: true }).eq('company_id', companyId),
+          supabase.from('journals').select('*', { count: 'exact', head: true }).eq('company_id', companyId)
+        ]);
+
+        // Gérer les erreurs de comptage (ne pas bloquer si les tables sont vides)
+        const accountsCount = accountsResult.error ? 0 : (accountsResult.count || 0);
+        const journalsCount = journalsResult.error ? 0 : (journalsResult.count || 0);
+
+        if (accountsResult.error) {
+          logger.warn('Erreur comptage comptes:', accountsResult.error)
+        }
+        if (journalsResult.error) {
+          logger.warn('Erreur comptage journaux:', journalsResult.error)
+        }
+
+        // Déterminer si c'est une première utilisation (base vide)
+        const isFirstTimeSetup = accountsCount === 0 && journalsCount === 0 && currentEntriesCount === 0;
+        setIsFirstTime(isFirstTimeSetup);
+
+        setAccountingData({
+          totalBalance: currentBalance,
+          totalDebit: currentDebit,
+          totalCredit: currentCredit,
+          entriesCount: currentEntriesCount,
+          accountsCount,
+          journalsCount,
+          balanceTrend: calculateTrend(currentBalance, previousBalance),
+          debitTrend: calculateTrend(currentDebit, previousDebit),
+          creditTrend: calculateTrend(currentCredit, previousCredit),
+          entriesTrend: calculateTrend(currentEntriesCount, previousEntriesCount)
+        });
+
+      } catch (error) {
+        logger.error('Erreur chargement données comptables:', error);
+        // Pour les erreurs de connexion/réseau, afficher l'erreur
+        if (error.message?.includes('network') || error.message?.includes('fetch')) {
+          setError("Impossible de charger les données comptables. Vérifiez votre connexion internet.");
+        } else {
+          // Pour les autres erreurs, considérer comme première utilisation
+          setIsFirstTime(true);
+          setError(null);
+        }
+      } finally {
+        setIsLoading(false);
+      }
     };
-    
+
     loadAccountingData();
   }, [selectedPeriod]);
 
@@ -248,7 +411,25 @@ export default function AccountingPageOptimized() {
       });
       return;
     }
-    setActiveTab('entries');
+    
+    try {
+      // Quitter l'écran d'accueil et aller vers l'onglet entries
+      setIsFirstTime(false);
+      setShouldCreateNew('entry');
+      setActiveTab('entries');
+      
+      toast({
+        title: "Création d'une nouvelle écriture",
+        description: "Prêt à créer une nouvelle écriture comptable."
+      });
+    } catch (error) {
+      logger.error('Error preparing new entry:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de préparer la création d'écriture.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleViewReports = () => {
@@ -282,6 +463,76 @@ export default function AccountingPageOptimized() {
           </div>
         </div>
       </div>
+    );
+  }
+
+  if (error && !isFirstTime) {
+    return (
+      <div className="space-y-8 p-6">
+        <div className="text-center py-12">
+          <div className="max-w-md mx-auto">
+            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
+            </div>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              Erreur de chargement
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              {error}
+            </p>
+            <Button onClick={() => window.location.reload()} variant="outline">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Réessayer
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Message d'accueil pour première utilisation
+  if (isFirstTime) {
+    return (
+      <motion.div
+        className="space-y-8 p-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="text-center py-12">
+          <div className="max-w-2xl mx-auto">
+            <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Calculator className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              Bienvenue dans votre comptabilité !
+            </h1>
+            <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
+              Votre espace comptable est prêt. Commencez par créer votre premier plan comptable et vos journaux.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+              <Button onClick={handleNewEntry} size="lg" className="bg-blue-600 hover:bg-blue-700">
+                <Plus className="w-5 h-5 mr-2" />
+                Créer ma première écriture
+              </Button>
+              <Button onClick={() => { setIsFirstTime(false); setActiveTab('accounts'); }} variant="outline" size="lg">
+                <BookOpen className="w-5 h-5 mr-2" />
+                Configurer le plan comptable
+              </Button>
+            </div>
+            <div className="text-center">
+              <Button 
+                onClick={() => setIsFirstTime(false)} 
+                variant="ghost" 
+                size="sm"
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                Accéder à mon espace comptable →
+              </Button>
+            </div>
+          </div>
+        </div>
+      </motion.div>
     );
   }
 
@@ -340,34 +591,34 @@ export default function AccountingPageOptimized() {
           value={`${accountingData.totalBalance.toLocaleString('fr-FR')} €`}
           icon={DollarSign}
           color="blue"
-          trend={8.5}
+          trend={accountingData.balanceTrend ?? undefined}
           description="Balance générale"
         />
-        
+
         <AccountingKPICard
           title="Total débit"
           value={`${accountingData.totalDebit.toLocaleString('fr-FR')} €`}
           icon={ArrowUpRight}
           color="green"
-          trend={12.3}
+          trend={accountingData.debitTrend ?? undefined}
           description="Débits ce mois"
         />
-        
+
         <AccountingKPICard
           title="Total crédit"
           value={`${accountingData.totalCredit.toLocaleString('fr-FR')} €`}
           icon={ArrowDownRight}
           color="purple"
-          trend={-2.1}
+          trend={accountingData.creditTrend ?? undefined}
           description="Crédits ce mois"
         />
-        
+
         <AccountingKPICard
           title="Écritures"
           value={accountingData.entriesCount}
           icon={FileText}
           color="orange"
-          trend={15.7}
+          trend={accountingData.entriesTrend ?? undefined}
           description="Écritures saisies"
         />
       </div>
@@ -403,49 +654,22 @@ export default function AccountingPageOptimized() {
             onExportData={handleExportData}
           />
           
-          <div className="grid gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <PieChart className="w-5 h-5 text-purple-500" />
-                    <span>Répartition par journal</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {[
-                      { name: 'Journal des ventes', amount: 45670, percentage: 65, color: 'blue' },
-                      { name: 'Journal des achats', amount: 18440, percentage: 26, color: 'green' },
-                      { name: 'Journal de banque', amount: 6320, percentage: 9, color: 'purple' }
-                    ].map((journal, index) => (
-                      <div key={index} className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="font-medium">{journal.name}</span>
-                          <span>{journal.amount.toLocaleString('fr-FR')} € ({journal.percentage}%)</span>
-                        </div>
-                        <Progress value={journal.percentage} className="h-2" />
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-            
-            <RecentAccountingActivities />
-          </div>
+          <JournalDistribution />
         </TabsContent>
 
         <TabsContent value="entries">
-          <OptimizedJournalEntriesTab />
+          <OptimizedJournalEntriesTab 
+            shouldCreateNew={shouldCreateNew === 'entry'}
+            onCreateNewCompleted={() => setShouldCreateNew(null)}
+          />
         </TabsContent>
 
         <TabsContent value="accounts">
-          <OptimizedChartOfAccountsTab />
+          <ChartOfAccountsEnhanced />
         </TabsContent>
 
         <TabsContent value="journals">
-          <OptimizedJournalsTab />
+          <JournalsList />
         </TabsContent>
 
         <TabsContent value="reports">

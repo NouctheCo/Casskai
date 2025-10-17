@@ -12,6 +12,7 @@ import {
 } from '../types/onboarding.types';
 import { OnboardingProgressService } from '../services/onboarding/OnboardingProgressService';
 import { OnboardingStorageService } from '../services/onboarding/OnboardingStorageService';
+import { logger } from '@/utils/logger';
 
 export const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
 
@@ -77,7 +78,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         progress: data.progress
       });
     } catch (error) {
-      console.error('Failed to initialize onboarding:', error);
+      logger.error('Failed to initialize onboarding:', error);
       setState(prev => ({
         ...prev,
         isLoading: false,
@@ -351,7 +352,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
       return { success: true };
     } catch (error) {
-      console.error('Failed to finalize onboarding:', error);
+      logger.error('Failed to finalize onboarding:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }, [state.data, user?.id, storageService]);

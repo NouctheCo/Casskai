@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   BankConnection,
   BankAccount,
@@ -11,6 +10,7 @@ import {
   BankingProvider as OBProviderConfig,
 } from '../../../types/openBanking.types';
 import { BankingProvider, BankingProviderError, AuthenticationError, NetworkError } from '../base/BankingProvider';
+import { logger } from '@/utils/logger';
 
 // Provider spécialisé pour Budget Insight API
 export class BudgetInsightProvider extends BankingProvider {
@@ -157,7 +157,7 @@ export class BudgetInsightProvider extends BankingProvider {
   const _initUserId = ''; // À récupérer depuis la DB
   const biConnectionId = ''; // À récupérer depuis la DB
 
-  await this.makeRequest<unknown>('PUT', `/2.0/users/${userId}/connections/${biConnectionId}`, {
+  await this.makeRequest<unknown>('PUT', `/2.0/users/${_initUserId}/connections/${biConnectionId}`, {
         // Budget Insight specific updates
       });
 
@@ -546,7 +546,7 @@ export class BudgetInsightProvider extends BankingProvider {
           // Traiter la mise à jour du compte
           break;
         default:
-          console.warn(`Unhandled webhook event: ${event.type}`);
+          logger.warn(`Unhandled webhook event: ${event.type}`)
       }
 
       return this.createResponse(undefined);

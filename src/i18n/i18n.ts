@@ -1,7 +1,7 @@
-// @ts-nocheck
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import { logger } from '@/utils/logger';
 
 // Configuration des devises ouest-africaines pour le formatage
 export const WEST_AFRICAN_CURRENCIES = {
@@ -224,25 +224,11 @@ const initConfig = {
     excludeCacheFor: ['cimode']
   },
   
-  // Options d'interpolation avec formatage personnalisé
+  // Options d'interpolation avec formatage personnalisé (nouvelle approche)
   interpolation: {
     escapeValue: false,
-    formatSeparator: ',',
-    format(value, format, lng) {
-      // Formatage personnalisé pour les devises
-      if (format === 'currency') {
-        return formatCurrency(value, lng || 'fr');
-      }
-      // Formatage des nombres
-      if (format === 'number') {
-        return formatNumber(value, lng || 'fr');
-      }
-      // Formatage des dates
-      if (format === 'date') {
-        return formatDate(value, lng || 'fr');
-      }
-      return value;
-    }
+    // Nouvelle approche recommandée : utiliser des fonctions de formatage globales
+    // au lieu de la propriété 'format' obsolète
   },
   
   // Options de développement
@@ -250,7 +236,7 @@ const initConfig = {
   saveMissing: process.env.NODE_ENV === 'development',
   missingKeyHandler: (lng, ns, key) => {
     if (process.env.NODE_ENV === 'development') {
-      console.warn(`🌍 Missing translation: ${lng}.${ns}.${key}`);
+      logger.warn(`🌍 Missing translation: ${lng}.${ns}.${key}`)
     }
   },
   
@@ -263,7 +249,7 @@ const initConfig = {
   returnNull: false,
   returnEmptyString: false,
   returnObjects: false,
-  joinArrays: false,
+  joinArrays: '' as any,
   
   // Configuration pour éviter les conflits
   keySeparator: '.',
@@ -275,7 +261,7 @@ const initConfig = {
   postProcess: ['fallback'],
   parseMissingKeyHandler: (key) => {
     if (process.env.NODE_ENV === 'development') {
-      console.warn(`🌍 Parsing missing key: ${key}`);
+      logger.warn(`🌍 Parsing missing key: ${key}`)
     }
     return key;
   }
@@ -288,11 +274,43 @@ const initializeI18n = async () => {
       .use(LanguageDetector)
       .use(initReactI18next)
       .init(initConfig);
-    
-    console.warn('i18n initialisé avec succès');
+
+    // Ajouter les formateurs avec la nouvelle approche
+    if (i18n.services.formatter) {
+      i18n.services.formatter.add('currency', (value, lng, options) => {
+        // Utilisation directe des fonctions pour éviter les problèmes d'ordre
+        const detectedCurrency = options?.currency || getCurrencyForLocale(lng || 'fr');
+        const currencyConfig = WEST_AFRICAN_CURRENCIES[detectedCurrency as keyof typeof WEST_AFRICAN_CURRENCIES];
+
+        if (currencyConfig) {
+          const formatted = new Intl.NumberFormat(lng?.startsWith('fr') ? 'fr-FR' : 'en-US', {
+            style: 'decimal',
+            minimumFractionDigits: currencyConfig.format.decimal,
+            maximumFractionDigits: currencyConfig.format.decimal,
+            useGrouping: true
+          }).format(value);
+          return `${formatted} ${currencyConfig.symbol}`;
+        }
+
+        return new Intl.NumberFormat(lng || 'fr').format(value);
+      });
+
+      i18n.services.formatter.add('number', (value, lng) => {
+        return new Intl.NumberFormat(lng || 'fr').format(value);
+      });
+
+      i18n.services.formatter.add('date', (value, lng) => {
+        const date = typeof value === 'string' ? new Date(value) : value;
+        return date.toLocaleDateString(lng || 'fr');
+      });
+    }
+
+    if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_MODE === 'true') {
+      logger.warn('i18n initialisé avec succès')
+    }
     return true;
   } catch (err) {
-    console.error('Erreur d\'initialisation i18n:', err);
+    logger.error('Erreur d\'initialisation i18n:', err);
     // Fallback: initialiser avec une configuration minimale
     try {
       await i18n.init({
@@ -304,10 +322,10 @@ const initializeI18n = async () => {
         react: { useSuspense: false },
         fallbackLng: 'fr'
       });
-      console.warn('i18n initialisé avec configuration de secours');
+      logger.warn('i18n initialisé avec configuration de secours');
       return true;
     } catch (fallbackErr) {
-      console.error('Erreur d\'initialisation fallback i18n:', fallbackErr);
+      logger.error('Erreur d\'initialisation fallback i18n:', fallbackErr);
       return false;
     }
   }
@@ -406,7 +424,7 @@ export async function changeLanguageAndDetectCountry(lng: string) {
   try {
     // Vérifier que i18n est correctement initialisé
     if (!i18n || !i18n.changeLanguage) {
-      console.warn('i18n not properly initialized, waiting...');
+      logger.warn('i18n not properly initialized, waiting...');
       await new Promise(resolve => setTimeout(resolve, 100));
     }
     
@@ -420,11 +438,11 @@ export async function changeLanguageAndDetectCountry(lng: string) {
       await i18n.changeLanguage(lng);
       return true;
     } else {
-      console.error('i18n.changeLanguage is not available');
+      logger.error('i18n.changeLanguage is not available');
       return false;
     }
   } catch (error) {
-    console.error('Erreur lors du changement de langue:', error);
+    logger.error('Erreur lors du changement de langue:', error);
     return false;
   }
 }
@@ -458,7 +476,7 @@ export function createSafeTranslation(i18nInstance = i18n) {
       // En dernier recours, retourner la clé
       return key;
     } catch (error) {
-      console.warn(`🌍 Translation error for key '${key}':`, error);
+      logger.warn(`🌍 Translation error for key '${key}':`, error);
       return fallback || key;
     }
   };

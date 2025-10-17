@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface Props {
   children: ReactNode;
@@ -24,13 +25,13 @@ export class ComponentErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     const componentName = this.props.componentName || 'Unknown Component';
-    console.error(`ComponentErrorBoundary caught an error in ${componentName}:`, error, errorInfo);
+    logger.error(`ComponentErrorBoundary caught an error in ${componentName}:`, error, errorInfo);
     
     // Log error details for debugging
     if (process.env.NODE_ENV === 'development') {
-      console.warn(`🔴 Component Error: ${componentName}`);
-      console.error('Error:', error);
-      console.error('Error Info:', errorInfo);
+      logger.warn(`🔴 Component Error: ${componentName}`);
+      logger.error('Error:', error);
+      logger.error('Error Info:', errorInfo)
     }
   }
 

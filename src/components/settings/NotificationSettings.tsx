@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Mail, Smartphone, Clock, Bell, Loader2, Save } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 interface NotificationSettingsData {
   email: {
@@ -60,41 +62,99 @@ export function NotificationSettings() {
     }
   });
 
+  // Fonction pour charger les paramètres de notifications
+  const loadNotificationSettings = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.rpc('get_user_notifications');
+
+      if (error) {
+        logger.error('Erreur RPC get_user_notifications:', error);
+        // Si pas de données, utiliser les valeurs par défaut (déjà définies dans le state)
+        if (error.message?.includes('No rows found') || error.code === 'PGRST116') {
+          logger.warn('Aucun paramètre de notification trouvé, utilisation des valeurs par défaut')
+        } else {
+          throw error;
+        }
+      } else if (data && data.length > 0) {
+        // Mapper les données de la base vers le format du state
+        const notificationData = data[0];
+        setSettings({
+          email: {
+            newTransactions: notificationData.email_new_transactions ?? true,
+            weeklyReports: notificationData.email_weekly_reports ?? true,
+            systemUpdates: notificationData.email_system_updates ?? false,
+            marketing: notificationData.email_marketing ?? false,
+            invoices: notificationData.email_invoices ?? true,
+            payments: notificationData.email_payments ?? true,
+            reminders: notificationData.email_reminders ?? true
+          },
+          push: {
+            newTransactions: notificationData.push_new_transactions ?? false,
+            alerts: notificationData.push_alerts ?? true,
+            reminders: notificationData.push_reminders ?? true,
+            systemUpdates: notificationData.push_system_updates ?? false
+          },
+          frequency: notificationData.notification_frequency ?? 'daily',
+          quietHours: {
+            enabled: notificationData.quiet_hours_enabled ?? false,
+            start: notificationData.quiet_hours_start ?? '22:00',
+            end: notificationData.quiet_hours_end ?? '08:00'
+          }
+        });
+      }
+    } catch (error) {
+      logger.error('Erreur chargement paramètres notifications:', error);
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de charger les paramètres de notifications',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Charger les paramètres de notifications
   useEffect(() => {
-    const loadNotificationSettings = async () => {
-      setIsLoading(true);
-      try {
-        // TODO: Intégrer Supabase pour charger les paramètres de notifications
-        // Simulation des données
-        // Les valeurs par défaut sont déjà définies dans le state
-      } catch (error) {
-        console.error('Erreur chargement paramètres notifications:', error);
-        toast({
-          title: 'Erreur',
-          description: 'Impossible de charger les paramètres de notifications',
-          variant: 'destructive'
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadNotificationSettings();
   }, []);
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // TODO: Intégrer Supabase pour sauvegarder les paramètres de notifications
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { data: _data, error } = await supabase.rpc('save_user_notifications', {
+        p_email_new_transactions: settings.email.newTransactions,
+        p_email_weekly_reports: settings.email.weeklyReports,
+        p_email_system_updates: settings.email.systemUpdates,
+        p_email_marketing: settings.email.marketing,
+        p_email_invoices: settings.email.invoices,
+        p_email_payments: settings.email.payments,
+        p_email_reminders: settings.email.reminders,
+        p_push_new_transactions: settings.push.newTransactions,
+        p_push_alerts: settings.push.alerts,
+        p_push_reminders: settings.push.reminders,
+        p_push_system_updates: settings.push.systemUpdates,
+        p_notification_frequency: settings.frequency,
+        p_quiet_hours_enabled: settings.quietHours.enabled,
+        p_quiet_hours_start: settings.quietHours.start,
+        p_quiet_hours_end: settings.quietHours.end
+      });
+
+      if (error) {
+        logger.error('Erreur RPC save_user_notifications:', error);
+        throw error;
+      }
 
       toast({
         title: 'Paramètres sauvegardés',
         description: 'Vos préférences de notifications ont été mises à jour'
       });
+
+      // Recharger les données après sauvegarde pour s'assurer que l'interface est à jour
+      await loadNotificationSettings();
     } catch (error) {
-      console.error('Erreur sauvegarde paramètres notifications:', error);
+      logger.error('Erreur sauvegarde paramètres notifications:', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de sauvegarder les paramètres',

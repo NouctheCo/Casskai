@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import ModularSidebarEnhanced from '@/components/layout/ModularSidebarEnhanced';
 import { Header } from '@/components/layout/Header';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useModulesSafe, useModules } from '@/hooks/modules.hooks';

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { FECEntry, FECEntrySchema, ImportResult, ImportError, ImportWarning, FileParserOptions } from '../types/accounting-import.types';
 
 /**
@@ -67,19 +66,19 @@ export class FECParser {
    * Parse un fichier FEC complet
    */
   static async parseFEC(
-    file: File, 
+    file: File,
     options: FileParserOptions = {}
   ): Promise<ImportResult> {
     const encoding = options.encoding || await this.detectEncoding(file);
-    const delimiter = options.delimiter || this.detectDelimiter(file);
+    const delimiter = options.delimiter || await this.detectDelimiter(file);
     
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (event) => {
         try {
-          const content = event.target?.result as string;
-          const result = this.parseFECContent(content, { ...options, delimiter });
-          resolve(result);
+          const content = event.target?.result;
+          const result = this.parseFECContent(content as string, { ...options, delimiter });
+          resolve(result as any);
         } catch (error) {
           resolve({
             success: false,
@@ -87,7 +86,7 @@ export class FECParser {
             validRows: 0,
             errors: [{
               row: 0,
-              message: `Erreur de lecture du fichier: ${error.message}`,
+              message: `Erreur de lecture du fichier: ${(error as any).message}`,
               type: 'format',
               severity: 'error'
             }],
@@ -122,7 +121,7 @@ export class FECParser {
   /**
    * Détecte le délimiteur du fichier FEC
    */
-  private static detectDelimiter(file: File): string {
+  private static detectDelimiter(file: File): Promise<string> {
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (event) => {

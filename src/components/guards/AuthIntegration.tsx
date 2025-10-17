@@ -1,8 +1,7 @@
-// @ts-nocheck
 // src/components/guards/AuthIntegration.tsx
 
 import React, { useEffect } from 'react';
-import { useSupabase } from '../../hooks/useSupabase';
+import { useAuth } from '../../contexts/AuthContext';
 
 /**
  * Composant pour synchroniser notre système d'auth Supabase 
@@ -17,7 +16,8 @@ export const AuthIntegration: React.FC<AuthIntegrationProps> = ({
   children, 
   onAuthStateChange 
 }) => {
-  const { user, isAuthenticated, session } = useSupabase();
+  const { user, session } = useAuth();
+  const isAuthenticated = !!user;
 
   // Synchroniser avec votre AuthProvider
   useEffect(() => {
@@ -42,7 +42,9 @@ export const SimpleAuthGuard: React.FC<{
   requireAuth = true, 
   fallback 
 }) => {
-  const { isAuthenticated, isLoading } = useSupabase();
+  const { user } = useAuth();
+  const isAuthenticated = !!user;
+  const isLoading = false; // Auth state is synchronous from context
 
   // Si l'auth n'est pas requise, afficher le contenu
   if (!requireAuth) {

@@ -66,10 +66,11 @@ export default defineConfig(({ mode }) => ({
 		include: [
 			'react',
 			'react-dom',
+			'react/jsx-runtime',
 			'react-router-dom',
 			'@supabase/supabase-js',
 			'i18next',
-			'react-i18next', 
+			'react-i18next',
 			'i18next-browser-languagedetector',
 			'date-fns',
 			'lucide-react',
@@ -81,7 +82,11 @@ export default defineConfig(({ mode }) => ({
 			'class-variance-authority',
 		],
 		exclude: ['@tensorflow/tfjs'], // Heavy libs that should be loaded on-demand
-		force: true, // Force pre-bundling to avoid runtime issues
+		esbuildOptions: {
+			// Ensure React is properly resolved
+			mainFields: ['module', 'main'],
+			resolveExtensions: ['.mjs', '.js', '.ts', '.tsx', '.json'],
+		},
 	},
 	
 	build: {
@@ -103,36 +108,8 @@ export default defineConfig(({ mode }) => ({
 		rollupOptions: {
 			// Enhanced output configuration
 			output: {
-				// Conservative chunking strategy to avoid loading issues
-				manualChunks: (id: string) => {
-					// Keep critical libraries together in vendor
-					if (id.includes('node_modules/react') || 
-						id.includes('node_modules/react-dom') ||
-						id.includes('recharts') || 
-						id.includes('d3-') || 
-						id.includes('chart.js') ||
-						id.includes('framer-motion')) {
-						return 'vendor';
-					}
-					
-					// Large libraries that can be separate
-					if (id.includes('node_modules/@supabase/') || id.includes('node_modules/supabase')) {
-						return 'auth-db';
-					}
-					
-					if (id.includes('node_modules/@radix-ui/') || id.includes('node_modules/lucide-react')) {
-						return 'ui-framework';
-					}
-					
-					if (id.includes('jspdf') || id.includes('xlsx') || id.includes('exceljs')) {
-						return 'documents';
-					}
-					
-					// Everything else in vendor for safety
-					if (id.includes('node_modules/')) {
-						return 'vendor';
-					}
-				},
+				// DISABLED manual chunking - let Vite handle it automatically to avoid React splitting issues
+				// manualChunks: undefined,
 				
 				// Optimize chunk naming for caching
 				chunkFileNames: (chunkInfo) => {

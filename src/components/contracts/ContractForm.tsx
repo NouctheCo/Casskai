@@ -161,7 +161,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto">
-      <Form {...form}>
+      <Form form={form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
           {/* Informations générales */}
           <Card>

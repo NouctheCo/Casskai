@@ -7,6 +7,7 @@ import {
   ReconciliationAction,
   OpenBankingResponse
 } from '../../../types/openBanking.types';
+import { logger } from '@/utils/logger';
 
 // Moteur de réconciliation intelligent
 export class ReconciliationEngine {
@@ -19,7 +20,7 @@ export class ReconciliationEngine {
     try {
       this.rules = rules.sort((a, b) => a.priority - b.priority);
       this.isInitialized = true;
-      console.log(`Reconciliation engine initialized with ${rules.length} rules`);
+      logger.info(`Reconciliation engine initialized with ${rules.length} rules`)
     } catch (error) {
       throw new Error(`Failed to initialize reconciliation engine: ${error.message}`);
     }
@@ -416,7 +417,7 @@ export class ReconciliationEngine {
     for (const match of matches) {
       if (match.status === 'matched' && match.confidence > 0.8) {
         // En production, mettre à jour la base de données
-        console.log(`Auto-applied match: ${match.id}`);
+        logger.info(`Auto-applied match: ${match.id}`)
       }
     }
   }

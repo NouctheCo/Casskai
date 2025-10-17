@@ -2,8 +2,9 @@ import React, { Suspense, lazy, ComponentType, useEffect, useState } from 'react
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { logger } from '@/utils/logger';
 
-interface LazyComponentLoaderProps<T = {}> {
+interface LazyComponentLoaderProps<T = Record<string, never>> {
   loader: () => Promise<{ default: ComponentType<T> }>;
   fallback?: React.ReactNode;
   errorFallback?: React.ReactNode;
@@ -79,7 +80,12 @@ class LazyErrorBoundary extends React.Component<
   },
   ErrorBoundaryState
 > {
-  constructor(props: any) {
+  constructor(props: {
+    children: React.ReactNode;
+    fallback?: React.ReactNode;
+    onRetry?: () => void;
+    retryOnError?: boolean;
+  }) {
     super(props);
     this.state = { hasError: false, retryCount: 0 };
   }
@@ -89,7 +95,7 @@ class LazyErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('LazyComponentLoader Error:', error, errorInfo);
+    logger.error('LazyComponentLoader Error:', error, errorInfo)
   }
 
   handleRetry = () => {
@@ -162,9 +168,9 @@ export function useLazyPreload<T>(
     if (shouldPreload && !isPreloaded) {
       loader().then(() => {
         setIsPreloaded(true);
-        console.debug('Component preloaded successfully');
+        logger.debug('Component preloaded successfully')
       }).catch((error) => {
-        console.warn('Failed to preload component:', error);
+        logger.warn('Failed to preload component:', error)
       });
     }
   }, [shouldPreload, isPreloaded, loader]);
@@ -173,7 +179,7 @@ export function useLazyPreload<T>(
 }
 
 // Main lazy component loader
-export function LazyComponentLoader<T = {}>({
+export function LazyComponentLoader<T = Record<string, never>>({
   loader,
   fallback,
   errorFallback,
@@ -229,7 +235,7 @@ export function LazyComponentLoader<T = {}>({
 }
 
 // HOC for creating lazy components with default settings
-export function createLazyComponent<T = {}>(
+export function createLazyComponent<T = Record<string, never>>(
   loader: () => Promise<{ default: ComponentType<T> }>,
   options?: Partial<LazyComponentLoaderProps<T>>
 ) {
@@ -276,7 +282,7 @@ export function useIntersectionLazyLoad(
 }
 
 // Lazy section component that loads when in viewport
-export function LazySectionLoader<T = {}>({
+export function LazySectionLoader<T = Record<string, never>>({
   loader,
   fallback,
   height = 200,
@@ -326,12 +332,12 @@ export function useComponentPerformance(componentName: string) {
       const loadTime = endTime - startTime;
       
       if (loadTime > 100) {
-        console.warn(`${componentName} took ${loadTime.toFixed(2)}ms to mount`);
+        logger.warn(`${componentName} took ${loadTime.toFixed(2)}ms to mount`);
       }
 
       // Optional: Send to analytics
-      if (typeof window !== 'undefined' && (window as any).gtag) {
-        (window as any).gtag('event', 'component_performance', {
+      if (typeof window !== 'undefined' && (window as { gtag?: (...args: unknown[]) => void }).gtag) {
+        (window as { gtag: (...args: unknown[]) => void }).gtag('event', 'component_performance', {
           component_name: componentName,
           load_time: Math.round(loadTime),
         });

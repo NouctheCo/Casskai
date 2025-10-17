@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import type { Database } from '@/types/database.types';
+import { logger } from '@/utils/logger';
+import type { Database } from '@/types/supabase';
 
 // Generic Supabase hook for CRUD operations with multi-tenancy
 export function useSupabase<T extends keyof Database['public']['Tables']>(
@@ -27,7 +28,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
     setError(null);
 
     try {
-      let query = supabase.from(tableName).select('*');
+      let query = supabase.from(tableName as string).select('*');
 
       // Add company_id filter for multi-tenant tables
       if (companyId && tableName !== 'companies' && tableName !== 'user_companies') {
@@ -50,7 +51,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
       setData(result || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch data');
-      console.error(`Error fetching ${tableName}:`, err);
+      logger.error(`Error fetching ${String(tableName)}:`, err);
     } finally {
       setLoading(false);
     }
@@ -64,15 +65,53 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
     setError(null);
 
     try {
-      // Add company_id and created_by if applicable
-      const recordWithMeta = {
-        ...record,
-        ...(companyId && tableName !== 'companies' && tableName !== 'user_companies' ? { company_id: companyId } : {}),
-        ...(record && 'created_by' in record ? { created_by: user.id } : {}),
-      };
+      // Add company_id and created_by if applicable (excluding system tables)
+      const tableNameString = tableName as string;
+      const excludedCompanyTables = new Set([
+        'companies',
+        'subscriptions',
+        'subscription_plans'
+      ]);
+
+      // Tables that don't have created_by column
+      const excludedCreatedByTables = new Set([
+        'companies',
+        'user_companies',
+        'subscriptions',
+        'subscription_plans'
+      ]);
+
+      // Type-safe record manipulation
+      const recordWithMeta = { ...record } as any;
+
+      console.log(`🔧 [useSupabase] Creating record for table: ${tableNameString}`, {
+        companyId,
+        isExcluded: excludedCompanyTables.has(tableNameString),
+        originalRecord: record
+      });
+
+      // FORCE REMOVE company_id from excluded tables
+      if (excludedCompanyTables.has(tableNameString)) {
+        delete recordWithMeta.company_id;
+        logger.info(`🚫 [useSupabase] REMOVED company_id from excluded table: ${tableNameString}`)
+      }
+
+      // Only add company_id if not excluded AND companyId exists
+      if (companyId && !excludedCompanyTables.has(tableNameString)) {
+        recordWithMeta.company_id = companyId;
+        logger.info(`✅ [useSupabase] Added company_id: ${companyId}`)
+      }
+
+      // Only add created_by if not in excluded list
+      if (!excludedCreatedByTables.has(tableNameString)) {
+        recordWithMeta.created_by = user.id;
+        logger.info(`✅ [useSupabase] Added created_by: ${user.id}`)
+      }
+
+      logger.info(`📤 [useSupabase] Final record to insert:`, recordWithMeta);
 
       const { data: result, error: insertError } = await supabase
-        .from(tableName)
+        .from(tableName as string)
         .insert(recordWithMeta)
         .select()
         .single();
@@ -86,7 +125,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create record';
       setError(errorMessage);
-      console.error(`Error creating ${tableName}:`, err);
+      logger.error(`Error creating ${String(tableName)}:`, err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -102,7 +141,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
 
     try {
       const { data: result, error: updateError } = await supabase
-        .from(tableName)
+        .from(tableName as string)
         .update(updates)
         .eq('id', id)
         .select()
@@ -119,7 +158,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update record';
       setError(errorMessage);
-      console.error(`Error updating ${tableName}:`, err);
+      logger.error(`Error updating ${String(tableName)}:`, err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -135,7 +174,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
 
     try {
       const { error: deleteError } = await supabase
-        .from(tableName)
+        .from(tableName as string)
         .delete()
         .eq('id', id);
 
@@ -146,7 +185,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete record';
       setError(errorMessage);
-      console.error(`Error deleting ${tableName}:`, err);
+      logger.error(`Error deleting ${String(tableName)}:`, err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -161,7 +200,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
     setError(null);
 
     try {
-      let query = supabase.from(tableName).select('*').eq('id', id);
+      let query = supabase.from(tableName as string).select('*').eq('id', id);
 
       // Add company_id filter for multi-tenant tables
       if (companyId && tableName !== 'companies' && tableName !== 'user_companies') {
@@ -176,7 +215,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch record';
       setError(errorMessage);
-      console.error(`Error fetching ${tableName} by ID:`, err);
+      logger.error(`Error fetching ${String(tableName)} by ID:`, err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);

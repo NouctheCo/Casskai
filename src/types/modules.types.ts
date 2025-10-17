@@ -6,7 +6,7 @@ export interface ModuleDefinition {
   name: string;
   description: string;
   version: string;
-  category: 'core' | 'business' | 'hr' | 'project' | 'integration' | 'marketplace';
+  category: 'core' | 'business' | 'hr' | 'project' | 'integration' | 'marketplace' | 'starter' | 'pro' | 'enterprise';
   icon: string;
   
   // Navigation properties
@@ -140,15 +140,15 @@ export interface Module {
   getAPIEndpoints?(): Array<{
     method: string;
     path: string;
-    handler: Function;
+    handler: (...args: any[]) => any;
     permissions?: string[];
   }>;
-  
+
   // Tâches automatisées
   getScheduledTasks?(): Array<{
     name: string;
     schedule: string; // Cron expression
-    handler: Function;
+    handler: (...args: any[]) => any;
   }>;
 }
 

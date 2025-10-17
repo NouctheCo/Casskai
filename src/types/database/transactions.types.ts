@@ -1,11 +1,12 @@
-// @ts-nocheck
 // Types liés aux transactions et paiements
-import type { Database } from '../database-types-fix'
+import type { Database } from '../supabase'
 
-// Types pour les transactions
-export type Transaction = Database['public']['Tables']['transactions']['Row']
-export type TransactionInsert = Database['public']['Tables']['transactions']['Insert']
-export type TransactionUpdate = Database['public']['Tables']['transactions']['Update']
+// REMARQUE: La table 'transactions' n'existe pas dans la base actuelle
+// Les transactions bancaires sont dans 'bank_transactions'
+// Pour l'instant, on utilise 'any' en attendant de clarifier la structure
+export type Transaction = any // Database['public']['Tables']['bank_transactions']['Row']
+export type TransactionInsert = any // Database['public']['Tables']['bank_transactions']['Insert']
+export type TransactionUpdate = any // Database['public']['Tables']['bank_transactions']['Update']
 
 // Types pour les paiements
 export type Payment = Database['public']['Tables']['payments']['Row']

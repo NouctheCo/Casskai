@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import ABTestingFramework from '@/utils/abTestingFramework';
 import { useAnalytics } from '@/components/analytics/AnalyticsProvider';
+import { logger } from '@/utils/logger';
 
 // Types pour les hooks A/B Testing
 interface ABTestHookResult {
@@ -250,7 +251,7 @@ export const useABTest = (config: ABTestConfig): ABTestHookResult => {
         }
 
       } catch (error) {
-        console.error('[ABTest] Erreur d\'initialisation:', error);
+        logger.error('[ABTest] Erreur d\'initialisation:', error);
         setResult({
           variant: config.defaultVariant || 'control',
           isInTest: false,

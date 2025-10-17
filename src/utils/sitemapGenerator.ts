@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 // Générateur automatique de sitemap XML
 // Optimise le SEO et facilite l'indexation par les moteurs de recherche
 
@@ -293,7 +294,7 @@ export class ServerSitemapService {
       
       await this.saveSitemap();
     } catch (error) {
-      console.error('Erreur lors de la mise à jour du sitemap:', error);
+      logger.error('Erreur lors de la mise à jour du sitemap:', error)
     }
   }
 }
@@ -306,9 +307,9 @@ export const generateBuildSitemap = async () => {
     try {
       await service.saveSitemap();
       await service.saveRobotsTxt();
-      console.warn('✅ Sitemap et robots.txt générés avec succès');
+      logger.warn('✅ Sitemap et robots.txt générés avec succès')
     } catch (error) {
-      console.error('❌ Erreur lors de la génération du sitemap:', error);
+      logger.error('❌ Erreur lors de la génération du sitemap:', error)
     }
   }
 };

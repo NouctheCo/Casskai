@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 // Types pour l'inventaire
 export interface InventoryItem {
@@ -127,7 +128,7 @@ export class InventoryService {
         avg_cost: undefined
       }));
     } catch (error) {
-      console.error('Error fetching inventory items:', error);
+      logger.error('Error fetching inventory items:', error);
       // Retourner des données mock en cas d'erreur pour l'instant
       return this.getMockInventoryItems();
     }
@@ -164,7 +165,7 @@ export class InventoryService {
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error('Error creating inventory item:', error);
+      logger.error('Error creating inventory item:', error);
       throw error;
     }
   }
@@ -210,7 +211,7 @@ export class InventoryService {
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error('Error updating inventory item:', error);
+      logger.error('Error updating inventory item:', error);
       throw error;
     }
   }
@@ -224,7 +225,7 @@ export class InventoryService {
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error deleting inventory item:', error);
+      logger.error('Error deleting inventory item:', error);
       throw error;
     }
   }
@@ -253,7 +254,7 @@ export class InventoryService {
         item_name: movement.inventory_items?.name
       }));
     } catch (error) {
-      console.error('Error fetching stock movements:', error);
+      logger.error('Error fetching stock movements:', error);
       return this.getMockStockMovements();
     }
   }
@@ -279,7 +280,7 @@ export class InventoryService {
       
       return data;
     } catch (error) {
-      console.error('Error creating stock movement:', error);
+      logger.error('Error creating stock movement:', error);
       throw error;
     }
   }
@@ -298,7 +299,7 @@ export class InventoryService {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Error fetching suppliers:', error);
+      logger.error('Error fetching suppliers:', error);
       return this.getMockSuppliers();
     }
   }
@@ -319,7 +320,7 @@ export class InventoryService {
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error('Error creating supplier:', error);
+      logger.error('Error creating supplier:', error);
       throw error;
     }
   }
@@ -372,7 +373,7 @@ export class InventoryService {
         avgStockRotation: 0 // À calculer plus tard
       };
     } catch (error) {
-      console.error('Error fetching inventory metrics:', error);
+      logger.error('Error fetching inventory metrics:', error);
       return this.getMockInventoryMetrics();
     }
   }
@@ -416,7 +417,7 @@ export class InventoryService {
 
       if (updateError) throw updateError;
     } catch (error) {
-      console.error('Error updating item stock:', error);
+      logger.error('Error updating item stock:', error);
       throw error;
     }
   }
@@ -429,7 +430,7 @@ export class InventoryService {
       // Pour l'instant, utiliser un UUID de test valide
       return '550e8400-e29b-41d4-a716-446655440000';
     } catch (error) {
-      console.error('Error getting current company ID:', error);
+      logger.error('Error getting current company ID:', error);
       return '550e8400-e29b-41d4-a716-446655440000';
     }
   }

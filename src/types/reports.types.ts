@@ -3,7 +3,7 @@ export interface FinancialReport {
   id: string;
   company_id: string;
   name: string;
-  type: 'balance_sheet' | 'income_statement' | 'cash_flow' | 'trial_balance';
+  type: 'balance_sheet' | 'income_statement' | 'cash_flow' | 'trial_balance' | 'profit_loss' | 'general_ledger' | 'aged_receivables' | 'aged_payables' | 'budget_variance' | 'financial_ratios' | 'tax_summary' | 'vat_report' | 'inventory_valuation' | 'cost_center_analysis' | 'revenue_analysis' | 'expense_analysis' | 'comparative_analysis' | 'kpi_dashboard';
   format: 'detailed' | 'summary';
   period_start: string;
   period_end: string;
@@ -148,7 +148,7 @@ export interface ReportTemplate {
   id: string;
   name: string;
   description?: string;
-  type: 'balance_sheet' | 'income_statement' | 'cash_flow' | 'trial_balance' | 'custom';
+  type: 'balance_sheet' | 'income_statement' | 'cash_flow' | 'trial_balance' | 'aged_receivables' | 'aged_payables' | 'financial_ratios' | 'vat_report' | 'custom';
   
   // Structure definition
   sections: {
@@ -273,7 +273,7 @@ export interface ReportAnalytics {
 // Form data types
 export interface ReportFormData {
   name: string;
-  type: 'balance_sheet' | 'income_statement' | 'cash_flow' | 'trial_balance';
+  type: 'balance_sheet' | 'income_statement' | 'cash_flow' | 'trial_balance' | 'profit_loss' | 'general_ledger' | 'aged_receivables' | 'aged_payables' | 'budget_variance' | 'financial_ratios' | 'tax_summary' | 'vat_report' | 'inventory_valuation' | 'cost_center_analysis' | 'revenue_analysis' | 'expense_analysis' | 'comparative_analysis' | 'kpi_dashboard';
   format: 'detailed' | 'summary';
   period_start: string;
   period_end: string;
@@ -284,7 +284,7 @@ export interface ReportFormData {
 export interface ReportTemplateFormData {
   name: string;
   description?: string;
-  type: 'balance_sheet' | 'income_statement' | 'cash_flow' | 'trial_balance' | 'custom';
+  type: 'balance_sheet' | 'income_statement' | 'cash_flow' | 'trial_balance' | 'aged_receivables' | 'aged_payables' | 'financial_ratios' | 'vat_report' | 'custom';
   sections: {
     name: string;
     items: {
@@ -402,6 +402,209 @@ export interface ReportServiceResponse<T> {
     message: string;
     code?: string;
   };
+}
+
+// Advanced financial reports data structures
+export interface AgedReceivablesData {
+  customers: {
+    customer_id: string;
+    customer_name: string;
+    total_outstanding: number;
+    current: number;
+    days_1_30: number;
+    days_31_60: number;
+    days_61_90: number;
+    days_over_90: number;
+    credit_limit: number;
+    last_payment_date?: string;
+  }[];
+  aging_summary: {
+    total_outstanding: number;
+    current_total: number;
+    days_1_30_total: number;
+    days_31_60_total: number;
+    days_61_90_total: number;
+    days_over_90_total: number;
+  };
+}
+
+export interface AgedPayablesData {
+  vendors: {
+    vendor_id: string;
+    vendor_name: string;
+    total_outstanding: number;
+    current: number;
+    days_1_30: number;
+    days_31_60: number;
+    days_61_90: number;
+    days_over_90: number;
+    credit_terms: string;
+    next_payment_date?: string;
+  }[];
+  aging_summary: {
+    total_outstanding: number;
+    current_total: number;
+    days_1_30_total: number;
+    days_31_60_total: number;
+    days_61_90_total: number;
+    days_over_90_total: number;
+  };
+}
+
+export interface FinancialRatiosData {
+  liquidity_ratios: {
+    current_ratio: number;
+    quick_ratio: number;
+    cash_ratio: number;
+    working_capital: number;
+    working_capital_ratio: number;
+  };
+  profitability_ratios: {
+    gross_profit_margin: number;
+    operating_profit_margin: number;
+    net_profit_margin: number;
+    return_on_assets: number;
+    return_on_equity: number;
+    return_on_investment: number;
+  };
+  efficiency_ratios: {
+    asset_turnover: number;
+    inventory_turnover: number;
+    receivables_turnover: number;
+    payables_turnover: number;
+    inventory_days: number;
+    collection_period: number;
+    payment_period: number;
+  };
+  leverage_ratios: {
+    debt_to_equity: number;
+    debt_to_assets: number;
+    equity_multiplier: number;
+    interest_coverage: number;
+    debt_service_coverage: number;
+    times_interest_earned: number;
+  };
+  market_ratios: {
+    price_to_earnings?: number;
+    market_to_book?: number;
+    dividend_yield?: number;
+    earnings_per_share?: number;
+  };
+}
+
+export interface BudgetVarianceData {
+  revenue_variance: {
+    budgeted: number;
+    actual: number;
+    variance: number;
+    variance_percentage: number;
+    favorable: boolean;
+  };
+  expense_variance: {
+    budgeted: number;
+    actual: number;
+    variance: number;
+    variance_percentage: number;
+    favorable: boolean;
+  };
+  profit_variance: {
+    budgeted: number;
+    actual: number;
+    variance: number;
+    variance_percentage: number;
+    favorable: boolean;
+  };
+  department_variances: {
+    department: string;
+    budget_categories: {
+      category: string;
+      budgeted: number;
+      actual: number;
+      variance: number;
+      variance_percentage: number;
+      favorable: boolean;
+    }[];
+  }[];
+}
+
+export interface VATReportData {
+  period_start: string;
+  period_end: string;
+  output_vat: {
+    standard_rate_sales: number;
+    reduced_rate_sales: number;
+    zero_rate_sales: number;
+    exempt_sales: number;
+    total_output_vat: number;
+  };
+  input_vat: {
+    standard_rate_purchases: number;
+    reduced_rate_purchases: number;
+    capital_goods: number;
+    other_deductible: number;
+    total_input_vat: number;
+  };
+  vat_summary: {
+    net_vat_due: number;
+    vat_reclaim: number;
+    payment_due_date: string;
+    return_period: string;
+  };
+}
+
+export interface GeneralLedgerData {
+  accounts: {
+    account_code: string;
+    account_name: string;
+    account_type: string;
+    opening_balance: number;
+    transactions: {
+      date: string;
+      reference: string;
+      description: string;
+      debit: number;
+      credit: number;
+      running_balance: number;
+    }[];
+    closing_balance: number;
+  }[];
+  period_start: string;
+  period_end: string;
+  total_debits: number;
+  total_credits: number;
+}
+
+export interface KPIDashboardData {
+  financial_kpis: {
+    revenue_growth: number;
+    profit_margin: number;
+    current_ratio: number;
+    debt_to_equity: number;
+    return_on_assets: number;
+    cash_burn_rate: number;
+    days_sales_outstanding: number;
+    inventory_turnover: number;
+  };
+  operational_kpis: {
+    employee_productivity: number;
+    customer_satisfaction: number;
+    order_fulfillment_rate: number;
+    inventory_accuracy: number;
+    on_time_delivery: number;
+  };
+  strategic_kpis: {
+    market_share: number;
+    customer_retention: number;
+    employee_turnover: number;
+    innovation_index: number;
+  };
+  trends: {
+    period: string;
+    revenue: number;
+    profit: number;
+    costs: number;
+    cash_flow: number;
+  }[];
 }
 
 // Chart data for reports

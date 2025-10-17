@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useEnterprise } from '@/contexts/EnterpriseContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { validateOnboardingImprovements } from '@/utils/onboardingValidation';
+import { STORAGE_KEYS, readUserScopedItem, purgeUserEnterpriseCache, removeUserScopedItem } from '@/utils/userStorage';
 import { 
   TestTube, 
   CheckCircle, 
@@ -17,6 +17,7 @@ import {
   Zap,
   Eye
 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface TestResult {
   test: string;
@@ -30,8 +31,11 @@ const OnboardingDebugPanel: React.FC = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [summary, setSummary] = useState<string>('');
   
-  const { currentEnterprise, enterprises, synchronizeAfterOnboarding } = useEnterprise();
+  const { currentEnterprise, enterprises } = useEnterprise();
+  const synchronizeAfterOnboarding = (useEnterprise() as any).synchronizeAfterOnboarding;
   const { user } = useAuth();
+  const userScopedEnterprises = user?.id ? readUserScopedItem(STORAGE_KEYS.ENTERPRISES, user.id) : null;
+  const userScopedCurrentEnterprise = user?.id ? readUserScopedItem(STORAGE_KEYS.CURRENT_ENTERPRISE, user.id) : null;
 
   const runTests = useCallback(async () => {
     setIsRunning(true);
@@ -40,7 +44,7 @@ const OnboardingDebugPanel: React.FC = () => {
       setTestResults(results.results);
       setSummary(results.summary);
     } catch (error) {
-      console.error('Erreur lors des tests:', error);
+      logger.error('Erreur lors des tests:', error)
     } finally {
       setIsRunning(false);
     }
@@ -51,11 +55,13 @@ const OnboardingDebugPanel: React.FC = () => {
   }, [synchronizeAfterOnboarding]);
 
   const clearLocalStorage = useCallback(() => {
-    localStorage.removeItem('casskai_enterprises');
-    localStorage.removeItem('casskai_current_enterprise');
+    if (user?.id) {
+      purgeUserEnterpriseCache(user.id);
+      removeUserScopedItem(STORAGE_KEYS.CURRENT_COMPANY_ID, user.id);
+    }
     localStorage.removeItem('casskai_modules');
     window.location.reload();
-  }, []);
+  }, [user]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -200,15 +206,15 @@ const OnboardingDebugPanel: React.FC = () => {
           <h4 className="font-medium">État localStorage:</h4>
           <div className="grid grid-cols-1 gap-2 text-xs">
             <div className="flex justify-between">
-              <span>casskai_enterprises:</span>
+              <span>casskai_enterprises (scoped):</span>
               <Badge variant="outline" className="text-xs">
-                {localStorage.getItem('casskai_enterprises') ? 'Présent' : 'Absent'}
+                {user ? (userScopedEnterprises ? 'Présent' : 'Absent') : 'Utilisateur inconnu'}
               </Badge>
             </div>
             <div className="flex justify-between">
-              <span>casskai_current_enterprise:</span>
+              <span>casskai_current_enterprise (scoped):</span>
               <Badge variant="outline" className="text-xs">
-                {localStorage.getItem('casskai_current_enterprise') || 'Absent'}
+                {user ? (userScopedCurrentEnterprise || 'Absent') : 'Utilisateur inconnu'}
               </Badge>
             </div>
             <div className="flex justify-between">
@@ -234,3 +240,4 @@ const OnboardingDebugPanel: React.FC = () => {
 };
 
 export default OnboardingDebugPanel;
+

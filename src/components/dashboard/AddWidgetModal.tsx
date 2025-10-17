@@ -6,15 +6,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { DashboardWidget } from '@/types/dashboard-widget.types';
+import { calculateNextPosition } from '@/utils/dashboardLayout';
 
 export function AddWidgetModal() {
-  const { addWidget } = useDashboardWidget();
+  const { addWidget, currentLayout } = useDashboardWidget();
 
   const handleAddWidget = (widget: Omit<DashboardWidget, 'id' | 'position'>) => {
+    const widgets = currentLayout?.widgets ?? [];
+    const position = calculateNextPosition(widgets, widget.size);
+
     const newWidget = {
       ...widget,
-      position: { x: 0, y: 0, w: 6, h: 4 }, // Default position
+      position,
     };
+
     addWidget(newWidget);
   };
 

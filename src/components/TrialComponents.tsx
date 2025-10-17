@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { CalendarDays, Clock, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
+import { logger } from '@/utils/logger';
 
 export const TrialStatusCard: React.FC = () => {
   const {
@@ -22,7 +24,7 @@ export const TrialStatusCard: React.FC = () => {
   const handleCreateTrial = async () => {
     const result = await createTrial();
     if (!result.success) {
-      console.error('Erreur lors de la création de l\'essai:', result.error);
+      logger.error('Erreur lors de la création de l\'essai:', result.error)
     }
   };
 
@@ -115,7 +117,7 @@ export const TrialStatusCard: React.FC = () => {
           <Clock className="h-5 w-5" />
           Votre période d'essai
           <Badge variant={isExpired ? "destructive" : isActive ? "default" : "secondary"}>
-            {isExpired ? "Expiré" : isActive ? "Actif" : "Inactif"}
+            {isExpired ? "Expiré" : "Actif"}
           </Badge>
         </CardTitle>
         <CardDescription>
@@ -180,16 +182,47 @@ export const TrialActionsCard: React.FC = () => {
 
   const handleConvertToPaid = async () => {
     // TODO: Ouvrir un modal de sélection de plan
-    const result = await convertTrialToPaid('starter');
+    const result = await convertTrialToPaid('starter_monthly');
     if (!result.success) {
-      console.error('Erreur lors de la conversion:', result.error);
+      logger.error('Erreur lors de la conversion:', result.error);
+      toast({
+        title: "Erreur",
+        description: result.error || 'Erreur lors de la conversion vers un abonnement payant',
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Succès",
+        description: "Conversion vers un abonnement payant réussie",
+        variant: "default"
+      });
     }
   };
 
   const handleCancelTrial = async () => {
     const result = await cancelTrial('Annulé par l\'utilisateur');
     if (!result.success) {
-      console.error('Erreur lors de l\'annulation:', result.error);
+      logger.error('Erreur lors de l\'annulation:', result.error);
+      // Afficher un message d'erreur plus user-friendly
+      if (result.error?.includes('check constraint')) {
+        toast({
+          title: "Erreur technique",
+          description: "Erreur technique lors de l'annulation. Veuillez contacter le support.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Erreur",
+          description: result.error || 'Erreur lors de l\'annulation de l\'essai',
+          variant: "destructive"
+        });
+      }
+    } else {
+      toast({
+        title: "Succès",
+        description: "Essai annulé avec succès",
+        variant: "default"
+      });
     }
   };
 

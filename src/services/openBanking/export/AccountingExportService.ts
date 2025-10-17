@@ -8,6 +8,8 @@ import {
   ReconciliationMatch,
   OpenBankingResponse
 } from '../../../types/openBanking.types';
+import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 // Service d'export vers logiciels comptables
 export class AccountingExportService {
@@ -25,6 +27,24 @@ export class AccountingExportService {
     return this.instance;
   }
 
+  private async getCurrentCompanyId(): Promise<string> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    const { data: userCompanies, error } = await supabase
+      .from('user_companies')
+      .select('company_id')
+      .eq('user_id', user.id)
+      .eq('is_default', true)
+      .single();
+
+    if (error || !userCompanies) {
+      throw new Error('No active company found');
+    }
+
+    return userCompanies.company_id;
+  }
+
   async initialize(formats: ExportFormat[]): Promise<void> {
     try {
       // Charger les formats d'export
@@ -33,7 +53,7 @@ export class AccountingExportService {
       }
 
       this.isInitialized = true;
-      console.log(`Accounting export service initialized with ${formats.length} formats`);
+      logger.info(`Accounting export service initialized with ${formats.length} formats`)
     } catch (error) {
       throw new Error(`Failed to initialize accounting export service: ${error.message}`);
     }
@@ -111,10 +131,12 @@ export class AccountingExportService {
       }
 
       // Récupérer les données à exporter
+       
       job.progress = 10;
       const data = await this.fetchExportData(job.parameters);
 
       // Valider les données
+      // eslint-disable-next-line require-atomic-updates
       job.progress = 30;
       const validationResult = await this.validateExportData(data, format);
       if (!validationResult.valid) {
@@ -122,31 +144,42 @@ export class AccountingExportService {
       }
 
       // Transformer les données selon le format
+      // eslint-disable-next-line require-atomic-updates
       job.progress = 50;
       const transformedData = await this.transformData(data, format);
 
       // Générer le fichier d'export
+      // eslint-disable-next-line require-atomic-updates
       job.progress = 80;
       const exportedFile = await this.generateExportFile(transformedData, format);
 
       // Sauvegarder le fichier et générer l'URL
+      // eslint-disable-next-line require-atomic-updates
       job.progress = 90;
       const fileUrl = await this.saveExportFile(exportedFile, job.id, format);
 
       // Finaliser le job
+      // eslint-disable-next-line require-atomic-updates
       job.status = 'completed';
+      // eslint-disable-next-line require-atomic-updates
       job.progress = 100;
+      // eslint-disable-next-line require-atomic-updates
       job.resultUrl = fileUrl;
+      // eslint-disable-next-line require-atomic-updates
       job.completedAt = new Date();
+      // eslint-disable-next-line require-atomic-updates
       job.updatedAt = new Date();
 
-      console.log(`Export job ${job.id} completed successfully`);
+      logger.info(`Export job ${job.id} completed successfully`)
     } catch (error) {
+      // eslint-disable-next-line require-atomic-updates
       job.status = 'failed';
+      // eslint-disable-next-line require-atomic-updates
       job.errorMessage = error.message;
+      // eslint-disable-next-line require-atomic-updates
       job.updatedAt = new Date();
 
-      console.error(`Export job ${job.id} failed:`, error);
+      logger.error(`Export job ${job.id} failed:`, error)
     }
   }
 
@@ -156,14 +189,141 @@ export class AccountingExportService {
     entries: AccountingEntry[];
     matches: ReconciliationMatch[];
   }> {
-    // En production, récupérer depuis la base de données
-    const mockData = {
-      transactions: [] as BankTransaction[],
-      entries: [] as AccountingEntry[],
-      matches: [] as ReconciliationMatch[]
-    };
+    try {
+      const companyId = await this.getCurrentCompanyId();
 
-    return mockData;
+      // Récupérer les transactions bancaires
+      const { data: bankTransactions, error: transactionsError } = await supabase
+        .from('bank_transactions')
+        .select(`
+          id,
+          bank_account_id,
+          transaction_date,
+          value_date,
+          amount,
+          currency,
+          description,
+          reference,
+          category,
+          reconciled,
+          created_at,
+          updated_at
+        `)
+        .eq('company_id', companyId)
+        .order('transaction_date', { ascending: false });
+
+      if (transactionsError) {
+        throw new Error(`Failed to fetch bank transactions: ${transactionsError.message}`);
+      }
+
+      // Transformer les transactions bancaires
+      const transactions: BankTransaction[] = (bankTransactions || []).map(tx => ({
+        id: tx.id,
+        accountId: tx.bank_account_id,
+        transactionId: tx.id, // Use ID as transaction ID since we don't have a separate field
+        date: new Date(tx.transaction_date),
+        valueDate: tx.value_date ? new Date(tx.value_date) : new Date(tx.transaction_date),
+        amount: tx.amount,
+        currency: tx.currency || 'EUR',
+        description: tx.description,
+        originalDescription: tx.description, // Use description as originalDescription
+        reference: tx.reference,
+        category: tx.category,
+        type: tx.amount >= 0 ? 'credit' : 'debit' as 'debit' | 'credit',
+        status: 'posted' as 'posted' | 'pending' | 'canceled',
+        isReconciled: tx.reconciled || false,
+        createdAt: new Date(tx.created_at),
+        updatedAt: new Date(tx.updated_at)
+      }));
+
+      // Récupérer les écritures comptables
+      const { data: accountingEntries, error: entriesError } = await supabase
+        .from('accounting_entries')
+        .select(`
+          id,
+          account_id,
+          date,
+          debit,
+          credit,
+          description,
+          reference,
+          reconciled,
+          bank_transaction_id,
+          created_at,
+          updated_at
+        `)
+        .eq('company_id', companyId)
+        .order('date', { ascending: false });
+
+      if (entriesError) {
+        throw new Error(`Failed to fetch accounting entries: ${entriesError.message}`);
+      }
+
+      // Transformer les écritures comptables
+      const entries: AccountingEntry[] = (accountingEntries || []).map(entry => ({
+        id: entry.id,
+        entryNumber: entry.id.substring(0, 8).toUpperCase(), // Générer un numéro d'écriture simple
+        date: new Date(entry.date),
+        description: entry.description,
+        amount: entry.debit > 0 ? entry.debit : entry.credit,
+        debitAccount: entry.account_id, // Pour simplifier, utiliser l'account_id comme numéro de compte
+        creditAccount: entry.account_id,
+        reference: entry.reference,
+        category: 'general', // Catégorie par défaut
+        isReconciled: entry.reconciled || false,
+        reconciledWith: entry.bank_transaction_id ? [entry.bank_transaction_id] : [],
+        createdAt: new Date(entry.created_at),
+        updatedAt: new Date(entry.updated_at)
+      }));
+
+      // Récupérer les correspondances de réconciliation
+      const { data: reconciliationMatches, error: matchesError } = await supabase
+        .from('bank_reconciliation_matches')
+        .select(`
+          id,
+          bank_transaction_id,
+          suggested_accounting_entry_id,
+          match_type,
+          confidence_score,
+          status,
+          reviewed_by,
+          reviewed_at,
+          review_notes,
+          created_at,
+          updated_at
+        `)
+        .eq('company_id', companyId)
+        .order('created_at', { ascending: false });
+
+      if (matchesError) {
+        throw new Error(`Failed to fetch reconciliation matches: ${matchesError.message}`);
+      }
+
+      // Transformer les correspondances de réconciliation
+      const matches: ReconciliationMatch[] = (reconciliationMatches || []).map(match => ({
+        id: match.id,
+        transactionId: match.bank_transaction_id,
+        accountingEntryId: match.suggested_accounting_entry_id,
+        matchType: match.match_type as 'automatic' | 'manual' | 'rule_based',
+        confidence: match.confidence_score,
+        status: match.status as 'matched' | 'partial' | 'disputed' | 'resolved',
+        reviewedBy: match.reviewed_by,
+        reviewedAt: match.reviewed_at ? new Date(match.reviewed_at) : undefined,
+        notes: match.review_notes,
+        createdAt: new Date(match.created_at),
+        updatedAt: new Date(match.updated_at)
+      }));
+
+      return {
+        transactions,
+        entries,
+        matches
+      };
+
+    } catch (error) {
+      logger.error('Error fetching export data:', error);
+      throw error;
+    }
   }
 
   // Valider les données avant export
@@ -193,7 +353,7 @@ export class AccountingExportService {
   ): Promise<{ valid: boolean; error: string }> {
     try {
       switch (rule.type) {
-        case 'required':
+        case 'required': {
           if (!this.getFieldValue(data, rule.field)) {
             return {
               valid: false,
@@ -201,8 +361,9 @@ export class AccountingExportService {
             };
           }
           break;
+        }
 
-        case 'format':
+        case 'format': {
           const value = this.getFieldValue(data, rule.field);
           if (value && rule.parameters.pattern) {
             const regex = new RegExp(rule.parameters.pattern);
@@ -214,8 +375,9 @@ export class AccountingExportService {
             }
           }
           break;
+        }
 
-        case 'range':
+        case 'range': {
           const numValue = parseFloat(this.getFieldValue(data, rule.field));
           if (!isNaN(numValue)) {
             const min = rule.parameters.min;
@@ -228,14 +390,16 @@ export class AccountingExportService {
             }
           }
           break;
+        }
 
-        case 'custom':
+        case 'custom': {
           // Validation personnalisée
           const customResult = await this.applyCustomValidation(data, rule);
           if (!customResult.valid) {
             return customResult;
           }
           break;
+        }
       }
 
       return { valid: true, error: '' };
@@ -349,9 +513,10 @@ export class AccountingExportService {
           }
           break;
 
-        case 'lookup':
+        case 'lookup': {
           const lookupTable = transformation.parameters.table || {};
           return lookupTable[value] || transformation.parameters.defaultValue || value;
+        }
 
         default:
           return value;
@@ -359,7 +524,7 @@ export class AccountingExportService {
 
       return value;
     } catch (error) {
-      console.error('Transformation error:', error);
+      logger.error('Transformation error:', error);
       return value;
     }
   }
@@ -483,7 +648,7 @@ export class AccountingExportService {
       const url = URL.createObjectURL(blob);
 
       // Simuler la sauvegarde
-      console.log(`Export file saved: ${exportedFile.filename}`);
+      logger.info(`Export file saved: ${exportedFile.filename}`);
 
       return url;
     } catch (error) {

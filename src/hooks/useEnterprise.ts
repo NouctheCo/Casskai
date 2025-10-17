@@ -1,8 +1,40 @@
-// @ts-nocheck
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import type { Enterprise, TaxRegime, EnterpriseSettings } from '@/types/enterprise.types';
+import { logger } from '@/utils/logger';
+import type { Enterprise as BaseEnterprise, TaxRegime, EnterpriseSettings } from '@/types/enterprise.types';
+
+// Simplified Enterprise type for this hook (database representation)
+export interface Enterprise {
+  id: string;
+  name: string;
+  country?: string;
+  countryCode?: string;
+  currency?: string;
+  locale?: string;
+  timezone?: string;
+  isActive: boolean;
+  address?: any;
+  city?: string;
+  postalCode?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  taxNumber?: string;
+  registrationNumber?: string;
+  legalForm?: string;
+  createdAt?: string | Date | number;
+  updatedAt?: string | Date | number;
+  userRole?: string;
+  isDefault?: boolean;
+  // Optional fields from BaseEnterprise
+  vatNumber?: string;
+  taxRegime?: TaxRegime;
+  fiscalYearStart?: number;
+  fiscalYearEnd?: number;
+  logo?: string;
+  settings?: EnterpriseSettings;
+}
 
 export interface CreateEnterpriseData {
   name: string;
@@ -109,7 +141,7 @@ export function useEnterprise() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch enterprises';
       setError(errorMessage);
-      console.error('Error fetching user enterprises:', err);
+      logger.error('Error fetching user enterprises:', err);
       return { data: [], error: errorMessage };
     } finally {
       setLoading(false);
@@ -196,7 +228,7 @@ export function useEnterprise() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create enterprise';
       setError(errorMessage);
-      console.error('Error creating enterprise:', err);
+      logger.error('Error creating enterprise:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -275,7 +307,7 @@ export function useEnterprise() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update enterprise';
       setError(errorMessage);
-      console.error('Error updating enterprise:', err);
+      logger.error('Error updating enterprise:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -318,7 +350,7 @@ export function useEnterprise() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to set default enterprise';
       setError(errorMessage);
-      console.error('Error setting default enterprise:', err);
+      logger.error('Error setting default enterprise:', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);

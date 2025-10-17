@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { PlanCode, PlanCapability, PLAN_CAPABILITIES } from '@/config/moduleCapabilities';
+import { logger } from '@/utils/logger';
 
 export interface EnterprisePlan {
   planCode: PlanCode | null;
@@ -56,7 +57,7 @@ async function loadQuotasData(enterpriseId: string) {
     .rpc('get_enterprise_quotas', { p_enterprise_id: enterpriseId });
 
   if (quotaError) {
-    console.warn('Erreur chargement quotas:', quotaError);
+    logger.warn('Erreur chargement quotas:', quotaError)
   }
 
   return quotas as QuotaData[] | null;
@@ -157,7 +158,7 @@ export function useEnterprisePlan(enterpriseId?: string): EnterprisePlan {
         });
 
       } catch (err) {
-        console.error('Erreur chargement plan entreprise:', err);
+        logger.error('Erreur chargement plan entreprise:', err);
         setError(err instanceof Error ? err.message : 'Erreur inconnue');
       } finally {
         setIsLoading(false);

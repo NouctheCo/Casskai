@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 // Configuration WhatsApp pour CassKai
 
 export const WHATSAPP_CONFIG = {
@@ -125,7 +126,7 @@ export async function sendToN8nWebhook(data: {
 
     return response.ok;
   } catch (error) {
-    console.warn('Failed to send to N8n webhook:', error);
+    logger.warn('Failed to send to N8n webhook:', error);
     return false;
   }
 }

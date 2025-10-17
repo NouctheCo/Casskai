@@ -1,15 +1,35 @@
-import { 
-  SecuritySettings, 
-  PrivacySettings, 
-  SecurityIncident, 
-  AuditLog, 
+import {
+  SecuritySettings,
+  PrivacySettings,
+  SecurityIncident,
+  AuditLog,
   GDPRRequest,
   CookieConsent,
   ComplianceReport,
-  DataProcessingActivity,
   DATA_RETENTION_PERIODS,
-  GDPR_RESPONSE_TIMES 
+  GDPR_RESPONSE_TIMES,
 } from '@/types/security.types';
+
+type UserDataExport = {
+  personalData: {
+    userId: string;
+    exportDate: string;
+    dataSubject: {
+      id: string;
+      email: string;
+      name: string;
+      registrationDate: string;
+    };
+  };
+  accountingData: {
+    invoices: unknown[];
+    transactions: unknown[];
+    reports: unknown[];
+  };
+  auditLogs: AuditLog[];
+  privacySettings: Partial<PrivacySettings>;
+  consentHistory: PrivacySettings['consentHistory'];
+};
 
 class SecurityService {
   constructor() {
@@ -214,7 +234,7 @@ class SecurityService {
     });
   }
 
-  async processGDPRRequest(requestId: string, processedBy: string, responseData?: any): Promise<void> {
+  async processGDPRRequest(requestId: string, processedBy: string, responseData?: Record<string, unknown>): Promise<void> {
     return new Promise((resolve) => {
       setTimeout(() => {
         const requests = JSON.parse(localStorage.getItem('casskai_gdpr_requests') || '[]');
@@ -238,7 +258,7 @@ class SecurityService {
   async logSecurityEvent(
     action: string,
     resource: string,
-    details: Record<string, any>,
+    details: Record<string, unknown>,
     userId: string = 'system',
     riskLevel: 'low' | 'medium' | 'high' = 'low'
   ): Promise<void> {
@@ -252,7 +272,7 @@ class SecurityService {
           companyId: 'comp-1',
           action,
           resource,
-          resourceId: details.id || details.requestId,
+          resourceId: (details as Record<string, unknown>).id || (details as Record<string, unknown>).requestId,
           details,
           ipAddress: '192.168.1.100', // Mock IP
           userAgent: navigator.userAgent,
@@ -357,11 +377,22 @@ class SecurityService {
   }
 
   // Data Export (GDPR Article 20)
-  async exportUserData(userId: string): Promise<any> {
+  async exportUserData(userId: string): Promise<UserDataExport> {
     return new Promise((resolve) => {
       setTimeout(() => {
         // Mock data export - in real implementation, this would collect data from all systems
-        const userData = {
+        const auditLogs = (JSON.parse(localStorage.getItem('casskai_audit_logs') || '[]') as AuditLog[]).filter(
+          (log) => log.userId === userId
+        );
+        const privacySettingsRaw = localStorage.getItem('casskai_privacy_settings');
+        const privacySettings = privacySettingsRaw
+          ? (JSON.parse(privacySettingsRaw) as Partial<PrivacySettings>)
+          : {};
+        const consentHistory = Array.isArray(privacySettings.consentHistory)
+          ? privacySettings.consentHistory
+          : [];
+
+        const userData: UserDataExport = {
           personalData: {
             userId,
             exportDate: new Date().toISOString(),
@@ -375,12 +406,11 @@ class SecurityService {
           accountingData: {
             invoices: [],
             transactions: [],
-            reports: []
+              reports: []
           },
-          auditLogs: JSON.parse(localStorage.getItem('casskai_audit_logs') || '[]')
-            .filter((log: AuditLog) => log.userId === userId),
-          privacySettings: JSON.parse(localStorage.getItem('casskai_privacy_settings') || '{}'),
-          consentHistory: JSON.parse(localStorage.getItem('casskai_privacy_settings') || '{}').consentHistory || []
+          auditLogs,
+          privacySettings,
+          consentHistory
         };
 
         this.logSecurityEvent('data_export_completed', 'user_data', { userId }, userId);
@@ -445,8 +475,6 @@ class SecurityService {
       setTimeout(() => {
         const settings = JSON.parse(localStorage.getItem('casskai_security_settings') || '{}');
         const incidents = JSON.parse(localStorage.getItem('casskai_security_incidents') || '[]');
-        const gdprRequests = JSON.parse(localStorage.getItem('casskai_gdpr_requests') || '[]');
-
         const findings = [];
         let score = 100;
 

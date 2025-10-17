@@ -1,6 +1,7 @@
-// @ts-nocheck
 // hooks/useLicense.ts
 import { useState, useEffect } from 'react';
+import { LicenseService } from '../services/licenseService';
+import type { LicenseFeatures, LicenseLimits, LicenseType } from '../types/licensing';
 
 export function useLicense() {
   const [licenseService] = useState(() => LicenseService.getInstance());

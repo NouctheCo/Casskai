@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as React from "react";
 import {
   useFormContext,
@@ -9,14 +8,26 @@ import {
   type Control
 } from "react-hook-form";
 import { cn } from "@/lib/utils";
-import type {
-  FormProps,
-  FormItemProps,
-  FormLabelProps,
-  FormControlProps,
-  FormMessageProps,
-  FormFieldProps,
-} from "./form.d";
+
+// Type definitions
+type FormProps<TFieldValues extends FieldValues = FieldValues> = {
+  form: UseFormReturn<TFieldValues>;
+  onSubmit?: (data: TFieldValues) => void | Promise<void>;
+  children: React.ReactNode;
+  className?: string;
+};
+type FormItemProps = React.HTMLAttributes<HTMLDivElement>;
+type FormLabelProps = React.LabelHTMLAttributes<HTMLLabelElement>;
+type FormControlProps = React.HTMLAttributes<HTMLDivElement>;
+type FormMessageProps = React.HTMLAttributes<HTMLParagraphElement>;
+type FormFieldProps<
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends Path<TFieldValues> = Path<TFieldValues>
+> = {
+  name: TName;
+  control?: Control<TFieldValues>;
+  render: (props: { field: any }) => React.ReactElement;
+};
 
 interface FormItemContextValue {
   id: string;

@@ -24,6 +24,7 @@ import { Badge } from '../../ui/badge';
 import { cn } from '../../../lib/utils';
 import { aiAssistantService } from '../../../services/aiAssistantService';
 import { Transaction, AIAssistantQuery } from '../../../types/ai-types';
+import { logger } from '@/utils/logger';
 
 interface AIAssistantChatProps {
   transactions: Transaction[];
@@ -155,7 +156,7 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
         );
       }
     } catch (error) {
-      console.error('Error processing message:', error);
+      logger.error('Error processing message:', error);
       
       const errorMessage: ChatMessage = {
         id: crypto.randomUUID(),
@@ -187,7 +188,7 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
   };
 
   const handleFeedback = (messageId: string, positive: boolean) => {
-    console.warn('Feedback:', messageId, positive);
+    logger.warn('Feedback:', messageId, positive);
     // Ici on pourrait envoyer le feedback au service
   };
 

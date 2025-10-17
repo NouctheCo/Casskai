@@ -1,57 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { BarChart3, FileText, CheckCircle, Clock, AlertCircle, Eye } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import { BarChart3, FileText, CheckCircle, AlertCircle, Eye, RefreshCw, Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/utils/logger';
 
 export default function OptimizedJournalsTab() {
-  const [journals] = useState([
-    {
-      id: 1,
-      code: 'VTE',
-      name: 'Journal des ventes',
-      type: 'sale',
-      entries: 45,
-      totalDebit: 125430.00,
-      totalCredit: 125430.00,
-      status: 'active',
-      lastEntry: '2024-01-20'
-    },
-    {
-      id: 2,
-      code: 'ACH',
-      name: 'Journal des achats',
-      type: 'purchase',
-      entries: 32,
-      totalDebit: 67890.00,
-      totalCredit: 67890.00,
-      status: 'active',
-      lastEntry: '2024-01-19'
-    },
-    {
-      id: 3,
-      code: 'BQ1',
-      name: 'Journal de banque',
-      type: 'bank',
-      entries: 78,
-      totalDebit: 234567.00,
-      totalCredit: 234567.00,
-      status: 'active',
-      lastEntry: '2024-01-21'
-    },
-    {
-      id: 4,
-      code: 'OD',
-      name: 'Opérations diverses',
-      type: 'misc',
-      entries: 12,
-      totalDebit: 15430.00,
-      totalCredit: 15430.00,
-      status: 'active',
-      lastEntry: '2024-01-18'
-    }
-  ]);
+  const { toast } = useToast();
+  const { currentCompany } = useAuth();
+  const [journals, setJournals] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [viewingJournal, setViewingJournal] = useState(null);
+
+  // Charger les journaux depuis Supabase
+  useEffect(() => {
+    const loadJournals = async () => {
+      if (!currentCompany?.id) {
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('journals')
+          .select('*')
+          .eq('company_id', currentCompany.id)
+          .order('code', { ascending: true });
+
+        if (error) {
+          logger.error('Error loading journals:', error);
+          toast({
+            title: "Erreur",
+            description: "Impossible de charger les journaux",
+            variant: "destructive"
+          });
+          setJournals([]);
+        } else {
+          setJournals(data || []);
+        }
+      } catch (err) {
+        logger.error('Unexpected error loading journals:', err);
+        setJournals([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadJournals();
+  }, [currentCompany?.id, toast]);
+
+  // RBAC simulation (à remplacer par vrai hook/context)
+  const userCanView = true; // TODO: remplacer par vrai contrôle
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -77,10 +81,47 @@ export default function OptimizedJournalsTab() {
 
   const summary = {
     totalJournals: journals.length,
-    totalEntries: journals.reduce((sum, j) => sum + j.entries, 0),
-    totalDebit: journals.reduce((sum, j) => sum + j.totalDebit, 0),
+    totalEntries: journals.reduce((sum, j) => sum + (j.entry_count || 0), 0),
+    totalDebit: journals.reduce((sum, j) => sum + (j.total_debit || 0), 0),
     activeJournals: journals.filter(j => j.status === 'active').length
   };
+
+  const handleViewJournal = async (journal) => {
+    if (!userCanView) return;
+    
+    setViewingJournal(journal.id);
+    // Simuler un délai de chargement
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    toast({
+      title: "Journal consulté",
+      description: `Le journal "${journal.name}" (${journal.code}) a été ouvert avec succès.`
+    });
+    
+    setViewingJournal(null);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+      </div>
+    );
+  }
+
+  if (journals.length === 0) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center h-64 text-center">
+          <FileText className="w-12 h-12 text-gray-400 mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Aucun journal comptable</h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            Commencez par créer vos premiers journaux comptables.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -171,19 +212,28 @@ export default function OptimizedJournalsTab() {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Badge variant="secondary">{journal.entries}</Badge>
+                      <Badge variant="secondary">{journal.entry_count || 0}</Badge>
                     </TableCell>
                     <TableCell className="text-right font-mono">
-                      {journal.totalDebit.toFixed(2)} €
+                      {(journal.total_debit || 0).toFixed(2)} €
                     </TableCell>
                     <TableCell className="text-right font-mono">
-                      {journal.totalCredit.toFixed(2)} €
+                      {(journal.total_credit || 0).toFixed(2)} €
                     </TableCell>
                     <TableCell>{getStatusBadge(journal.status)}</TableCell>
-                    <TableCell>{new Date(journal.lastEntry).toLocaleDateString('fr-FR')}</TableCell>
+                    <TableCell>{journal.last_entry ? new Date(journal.last_entry).toLocaleDateString('fr-FR') : '-'}</TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="sm">
-                        <Eye className="w-4 h-4" />
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleViewJournal(journal)}
+                        disabled={!userCanView || viewingJournal === journal.id}
+                      >
+                        {viewingJournal === journal.id ? (
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
                       </Button>
                     </TableCell>
                   </TableRow>

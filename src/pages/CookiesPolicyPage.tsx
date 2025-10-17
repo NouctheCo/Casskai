@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -24,6 +23,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { PageContainer } from '@/components/ui/PageContainer';
 import { PublicNavigation } from '@/components/navigation/PublicNavigation';
+import { logger } from '@/utils/logger';
 
 const CookiesPolicyPage = () => {
   const { t } = useTranslation();
@@ -54,7 +54,7 @@ const CookiesPolicyPage = () => {
           });
         }
       } catch (error) {
-        console.error('Error loading cookie preferences:', error);
+        logger.error('Error loading cookie preferences:', error);
         toast({
           variant: "destructive",
           title: "Erreur",
@@ -163,11 +163,10 @@ const CookiesPolicyPage = () => {
       
       toast({
         title: "Préférences sauvegardées",
-        description: "Vos préférences de cookies ont été mises à jour avec succès",
-        duration: 4000
-      });
+        description: "Vos préférences de cookies ont été mises à jour avec succès"
+      } as any);
     } catch (error) {
-      console.error('Error saving cookie preferences:', error);
+      logger.error('Error saving cookie preferences:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -193,11 +192,10 @@ const CookiesPolicyPage = () => {
       
       toast({
         title: "Tous les cookies acceptés",
-        description: "Toutes les catégories de cookies ont été activées",
-        duration: 4000
-      });
+        description: "Toutes les catégories de cookies ont été activées"
+      } as any);
     } catch (error) {
-      console.error('Error accepting all cookies:', error);
+      logger.error('Error accepting all cookies:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -228,11 +226,10 @@ const CookiesPolicyPage = () => {
       
       toast({
         title: "Cookies optionnels refusés",
-        description: "Seuls les cookies essentiels sont activés",
-        duration: 4000
-      });
+        description: "Seuls les cookies essentiels sont activés"
+      } as any);
     } catch (error) {
-      console.error('Error rejecting optional cookies:', error);
+      logger.error('Error rejecting optional cookies:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -307,10 +304,10 @@ const CookiesPolicyPage = () => {
                       )}
                     </div>
                   </div>
-                  <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">
+                  <p className="text-xs text-gray-700 dark:text-gray-200 mb-2 font-medium">
                     {type.description}
                   </p>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-gray-600 dark:text-gray-300 font-medium">
                     Durée: {type.duration}
                   </div>
                 </div>
@@ -408,8 +405,8 @@ const CookiesPolicyPage = () => {
                     <div className="flex items-center mb-4">
                       <type.icon className={`w-8 h-8 ${type.color} mr-3`} />
                       <div>
-                        <h3 className="text-lg font-semibold">{type.title}</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">{type.description}</p>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{type.title}</h3>
+                        <p className="text-sm text-gray-700 dark:text-gray-200 font-medium">{type.description}</p>
                       </div>
                       <div className="ml-auto">
                         {type.required ? (
@@ -426,8 +423,8 @@ const CookiesPolicyPage = () => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <h4 className="font-semibold mb-2 text-sm">Exemples d'utilisation :</h4>
-                        <ul className="text-sm space-y-1">
+                        <h4 className="font-semibold mb-2 text-sm text-gray-900 dark:text-white">Exemples d'utilisation :</h4>
+                        <ul className="text-sm space-y-1 text-gray-700 dark:text-gray-200">
                           {type.examples.map((example, idx) => (
                             <li key={idx} className="flex items-center">
                               <CheckCircle className="w-3 h-3 text-green-500 mr-2 flex-shrink-0" />
@@ -437,8 +434,8 @@ const CookiesPolicyPage = () => {
                         </ul>
                       </div>
                       <div>
-                        <h4 className="font-semibold mb-2 text-sm">Informations :</h4>
-                        <div className="text-sm space-y-1">
+                        <h4 className="font-semibold mb-2 text-sm text-gray-900 dark:text-white">Informations :</h4>
+                        <div className="text-sm space-y-1 text-gray-700 dark:text-gray-200">
                           <p><strong>Durée de conservation :</strong> {type.duration}</p>
                           <p><strong>Finalité :</strong> {type.description}</p>
                           <p><strong>Base légale :</strong> {type.required ? 'Nécessité technique' : 'Consentement'}</p>
@@ -471,12 +468,12 @@ const CookiesPolicyPage = () => {
                     <h4 className="font-semibold">Google Analytics</h4>
                     <Badge variant="outline">Analytique</Badge>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                  <p className="text-sm text-gray-700 dark:text-gray-200 mb-2 font-medium">
                     Mesure d'audience et analyse d'utilisation anonymisée
                   </p>
-                  <div className="text-xs text-gray-500">
-                    Cookies: _ga, _ga_*, _gid • Durée: 2 ans • 
-                    <a href="https://policies.google.com/privacy" className="text-blue-600 hover:underline ml-1">
+                  <div className="text-xs text-gray-600 dark:text-gray-300 font-medium">
+                    Cookies: _ga, _ga_*, _gid • Durée: 2 ans •
+                    <a href="https://policies.google.com/privacy" className="text-blue-600 dark:text-blue-400 hover:underline ml-1">
                       Politique de confidentialité
                     </a>
                   </div>
@@ -487,28 +484,28 @@ const CookiesPolicyPage = () => {
                     <h4 className="font-semibold">Stripe</h4>
                     <Badge variant="outline">Paiement</Badge>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                  <p className="text-sm text-gray-700 dark:text-gray-200 mb-2 font-medium">
                     Traitement sécurisé des paiements
                   </p>
-                  <div className="text-xs text-gray-500">
-                    Cookies: __stripe_* • Durée: Session • 
-                    <a href="https://stripe.com/privacy" className="text-blue-600 hover:underline ml-1">
+                  <div className="text-xs text-gray-600 dark:text-gray-300 font-medium">
+                    Cookies: __stripe_* • Durée: Session •
+                    <a href="https://stripe.com/privacy" className="text-blue-600 dark:text-blue-400 hover:underline ml-1">
                       Politique de confidentialité
                     </a>
                   </div>
                 </div>
-                
+
                 <div className="p-4 border rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-semibold">Intercom</h4>
                     <Badge variant="outline">Support</Badge>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                  <p className="text-sm text-gray-700 dark:text-gray-200 mb-2 font-medium">
                     Chat de support client intégré
                   </p>
-                  <div className="text-xs text-gray-500">
-                    Cookies: intercom-* • Durée: 1 an • 
-                    <a href="https://www.intercom.com/legal/privacy" className="text-blue-600 hover:underline ml-1">
+                  <div className="text-xs text-gray-600 dark:text-gray-300 font-medium">
+                    Cookies: intercom-* • Durée: 1 an •
+                    <a href="https://www.intercom.com/legal/privacy" className="text-blue-600 dark:text-blue-400 hover:underline ml-1">
                       Politique de confidentialité
                     </a>
                   </div>

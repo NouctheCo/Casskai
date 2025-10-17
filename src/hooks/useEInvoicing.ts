@@ -11,6 +11,7 @@ import {
   EInvoiceFormat,
   EInvoiceChannel
 } from '../types/einvoicing.types';
+import { logger } from '@/utils/logger';
 
 interface EInvoicingCapabilities {
   enabled: boolean;
@@ -86,7 +87,7 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
       setCapabilities(data);
       setIsEnabled(data.enabled);
     } catch (err) {
-      console.error('Error loading capabilities:', err);
+      logger.error('Error loading capabilities:', err);
       setError(err instanceof Error ? err.message : 'Failed to load capabilities');
       setIsEnabled(false);
       setCapabilities(null);
@@ -100,7 +101,7 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
       const data = await apiCall(`/companies/${companyId}/einvoicing/statistics`);
       setStatistics(data);
     } catch (err) {
-      console.error('Error loading statistics:', err);
+      logger.error('Error loading statistics:', err)
     }
   }, [companyId, isEnabled, apiCall]);
 
@@ -111,7 +112,7 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
       const data = await apiCall(`/companies/${companyId}/einvoicing/documents?limit=20`);
       setDocuments(data.documents || []);
     } catch (err) {
-      console.error('Error loading documents:', err);
+      logger.error('Error loading documents:', err)
     }
   }, [companyId, isEnabled, apiCall]);
 
@@ -206,7 +207,7 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
       
       return document;
     } catch (err) {
-      console.error('Error getting document status:', err);
+      logger.error('Error getting document status:', err);
       return null;
     }
   }, [companyId, apiCall]);
@@ -234,7 +235,7 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
             pendingDocuments.map(doc => getDocumentStatus(doc.id))
           );
         } catch (err) {
-          console.error('Error polling document status:', err);
+          logger.error('Error polling document status:', err)
         }
       }
     }, 30000); // Poll every 30 seconds

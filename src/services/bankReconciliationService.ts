@@ -5,6 +5,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { BankTransaction } from './bankImportService';
+import { logger } from '@/utils/logger';
 
 export interface AccountingEntry {
   id: string;
@@ -117,7 +118,7 @@ class BankReconciliationService {
       return matches;
 
     } catch (error) {
-      console.error('Erreur réconciliation automatique:', error);
+      logger.error('Erreur réconciliation automatique:', error);
       throw error;
     }
   }
@@ -228,8 +229,8 @@ class BankReconciliationService {
     entry: AccountingEntry,
     condition: ReconciliationCondition
   ): boolean {
-    let bankValue: any;
-    let entryValue: any;
+    let bankValue: unknown;
+    let entryValue: unknown;
 
     // Récupérer les valeurs à comparer
     switch (condition.field) {
@@ -262,7 +263,7 @@ class BankReconciliationService {
       case 'equals':
         if (condition.field === 'amount') {
           const tolerance = condition.tolerance || 0.01;
-          return Math.abs(bankValue - entryValue) <= tolerance;
+          return Math.abs((bankValue as number) - (entryValue as number)) <= tolerance + Number.EPSILON;
         }
         return bankValue === entryValue;
       
@@ -287,7 +288,7 @@ class BankReconciliationService {
       case 'range':
         if (condition.field === 'amount') {
           const range = condition.tolerance || 0.05; // 5% par défaut
-          const diff = Math.abs(bankValue - entryValue) / entryValue;
+          const diff = Math.abs((bankValue as number) - (entryValue as number)) / (entryValue as number);
           return diff <= range;
         }
         return false;
@@ -351,7 +352,7 @@ class BankReconciliationService {
       return true;
 
     } catch (error) {
-      console.error('Erreur validation réconciliation:', error);
+      logger.error('Erreur validation réconciliation:', error);
       return false;
     }
   }
@@ -390,7 +391,7 @@ class BankReconciliationService {
       return true;
 
     } catch (error) {
-      console.error('Erreur annulation réconciliation:', error);
+      logger.error('Erreur annulation réconciliation:', error);
       return false;
     }
   }
@@ -452,7 +453,7 @@ class BankReconciliationService {
       };
 
     } catch (error) {
-      console.error('Erreur calcul résumé réconciliation:', error);
+      logger.error('Erreur calcul résumé réconciliation:', error);
       throw error;
     }
   }
@@ -561,12 +562,12 @@ class BankReconciliationService {
         .insert({
           bank_transaction_id: bankTransactionId,
           accounting_entry_id: accountingEntryId,
-          action: action,
+          action,
           timestamp: new Date().toISOString(),
           user_id: (await supabase.auth.getUser()).data.user?.id
         });
     } catch (error) {
-      console.warn('Erreur logging réconciliation:', error);
+      logger.warn('Erreur logging réconciliation:', error)
     }
   }
 
@@ -585,7 +586,7 @@ class BankReconciliationService {
       return data;
 
     } catch (error) {
-      console.error('Erreur création règle réconciliation:', error);
+      logger.error('Erreur création règle réconciliation:', error);
       return null;
     }
   }
@@ -600,7 +601,7 @@ class BankReconciliationService {
       return !error;
 
     } catch (error) {
-      console.error('Erreur mise à jour règle réconciliation:', error);
+      logger.error('Erreur mise à jour règle réconciliation:', error);
       return false;
     }
   }
@@ -615,7 +616,7 @@ class BankReconciliationService {
       return !error;
 
     } catch (error) {
-      console.error('Erreur suppression règle réconciliation:', error);
+      logger.error('Erreur suppression règle réconciliation:', error);
       return false;
     }
   }
@@ -623,3 +624,5 @@ class BankReconciliationService {
 
 export const bankReconciliationService = new BankReconciliationService();
 export default bankReconciliationService;
+
+
