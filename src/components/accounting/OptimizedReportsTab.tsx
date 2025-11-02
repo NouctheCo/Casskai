@@ -3,22 +3,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/useToast';
 import {
   TrendingUp,
   Download,
   FileText,
   BarChart3,
-  PieChart,
   Calculator,
   Eye,
-  Printer,
   Plus,
   RefreshCw,
   Settings,
   Calendar,
-  ChevronRight,
   AlertCircle,
   CheckCircle,
   Clock,
@@ -29,7 +25,6 @@ import {
   Zap
 } from 'lucide-react';
 import { reportGenerationService } from '@/services/reportGenerationService';
-import { DEFAULT_REPORT_TEMPLATES } from '@/data/reportTemplates';
 import type { FinancialReport, ReportFormData } from '@/types/reports.types';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -286,7 +281,7 @@ export default function OptimizedReportsTab() {
       // Actualiser la liste des rapports récents
       loadRecentReports();
 
-    } catch (error) {
+      } catch (_error) {
       showToast("Impossible de générer le rapport. Veuillez réessayer.", 'error');
     } finally {
       setIsGenerating(null);
