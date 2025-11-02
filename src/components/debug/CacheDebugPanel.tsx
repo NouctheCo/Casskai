@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertTriangle, RefreshCw, Trash2, Info, CheckCircle, XCircle } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Trash2, Info, CheckCircle} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -61,7 +61,7 @@ export const CacheDebugPanel: React.FC = () => {
               size="sm"
               className="h-6 w-6 p-0"
             >
-              <XCircle className="h-4 w-4" />
+              <Info className="h-4 w-4" />
             </Button>
           </div>
         </CardHeader>
@@ -93,7 +93,7 @@ export const CacheDebugPanel: React.FC = () => {
               {validation.isValid ? (
                 <CheckCircle className="h-4 w-4 text-green-500" />
               ) : (
-                <XCircle className="h-4 w-4 text-red-500" />
+                <AlertTriangle className="h-4 w-4 text-red-500" />
               )}
               <span className="text-xs">
                 {validation.isValid ? 'Cache valide' : `${validation.issues.length} problème(s)`}

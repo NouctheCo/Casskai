@@ -4,12 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { stripeService } from '@/services/stripeService';
 import { useAuth } from '@/contexts/AuthContext';
-import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, Loader2, XCircle } from 'lucide-react';
 
 interface TestResult {
   success: boolean;
   message: string;
-  data?: any;
+  data?: unknown;
 }
 
 export function StripeIntegrationTest() {

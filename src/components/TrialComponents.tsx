@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
-import { CalendarDays, Clock, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { CalendarDays, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { logger } from '@/utils/logger';
 
@@ -155,7 +155,7 @@ export const TrialStatusCard: React.FC = () => {
 
         {isExpired && (
           <Alert>
-            <XCircle className="h-4 w-4" />
+            <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
               Votre essai a expiré le {trialInfo.trialEnd.toLocaleDateString('fr-FR')}.
               Certaines fonctionnalités peuvent être limitées.

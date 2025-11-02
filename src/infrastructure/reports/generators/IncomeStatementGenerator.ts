@@ -1,5 +1,5 @@
 import { BaseReportGenerator } from '../../../domain/reports/services/IReportGeneratorService';
-import { Report, ReportParameters, ReportResult } from '../../../domain/reports/entities/Report';
+import { Report, ReportParameters} from '../../../domain/reports/entities/Report';
 import { IncomeStatementData } from '../../../domain/reports/entities/FinancialReport';
 import { IReportRepository } from '../../../domain/reports/repositories/IReportRepository';
 
@@ -8,7 +8,7 @@ export class IncomeStatementGenerator extends BaseReportGenerator {
     super();
   }
 
-  async generateReport(report: Report, parameters: ReportParameters): Promise<ReportResult> {
+  async generateReport(report: Report, _parameters: ReportParameters): Promise<> {
     const { result: incomeStatementData, duration } = await this.measureExecutionTime(async () => {
       return await this.generateIncomeStatementData(parameters);
     });
@@ -27,7 +27,7 @@ export class IncomeStatementGenerator extends BaseReportGenerator {
     };
   }
 
-  private async generateIncomeStatementData(parameters: ReportParameters): Promise<IncomeStatementData> {
+  private async generateIncomeStatementData(_parameters: ReportParameters): Promise<IncomeStatementData> {
     // Use Supabase RPC function for professional calculations
     const { supabase } = await import('../../../lib/supabase');
 
@@ -43,9 +43,9 @@ export class IncomeStatementGenerator extends BaseReportGenerator {
 
     // Map the SQL result to our domain model
     return {
-      revenue: data.revenue || {},
-      expenses: data.expenses || {},
-      margins: data.margins || {},
+      revenue: data.revenue || 0,
+      expenses: data.expenses || 0,
+      margins: data.margins || 0,
       net_income: data.net_income || 0
     };
   }

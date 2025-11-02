@@ -1,5 +1,5 @@
 import { BaseReportGenerator } from '../../../domain/reports/services/IReportGeneratorService';
-import { Report, ReportParameters, ReportResult } from '../../../domain/reports/entities/Report';
+import { Report, ReportParameters} from '../../../domain/reports/entities/Report';
 import { FinancialStatementData, AssetCategory, LiabilityCategory } from '../../../domain/reports/entities/FinancialReport';
 import { IReportRepository } from '../../../domain/reports/repositories/IReportRepository';
 
@@ -8,7 +8,7 @@ export class BalanceSheetGenerator extends BaseReportGenerator {
     super();
   }
 
-  async generateReport(report: Report, parameters: ReportParameters): Promise<ReportResult> {
+  async generateReport(report: Report, _parameters: ReportParameters): Promise<> {
     const { result: balanceSheetData, duration } = await this.measureExecutionTime(async () => {
       return await this.generateBalanceSheetData(parameters);
     });
@@ -27,7 +27,7 @@ export class BalanceSheetGenerator extends BaseReportGenerator {
     };
   }
 
-  private async generateBalanceSheetData(parameters: ReportParameters): Promise<FinancialStatementData> {
+  private async generateBalanceSheetData(_parameters: ReportParameters): Promise<FinancialStatementData> {
     // Use Supabase RPC function for professional calculations
     const { supabase } = await import('../../../lib/supabase');
 
@@ -44,13 +44,13 @@ export class BalanceSheetGenerator extends BaseReportGenerator {
     // Map the SQL result to our domain model
     return {
       assets: {
-        current: data.assets.current || {},
-        nonCurrent: data.assets.nonCurrent || {},
+        current: data.assets.current || 0,
+        nonCurrent: data.assets.nonCurrent || 0,
         total: data.assets.total || 0
       },
       liabilities: {
-        current: data.liabilities.current || {},
-        nonCurrent: data.liabilities.nonCurrent || {},
+        current: data.liabilities.current || 0,
+        nonCurrent: data.liabilities.nonCurrent || 0,
         total: data.liabilities.total || 0
       },
       equity: {

@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Calendar, Download, FileText, Table, BarChart3, Loader2 } from 'lucide-react';
+import { Calendar, FileText, Table, BarChart3, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { reportGenerationService } from '@/services/reportGenerationService';
 import { reportExportService } from '@/services/ReportExportService';
@@ -50,7 +50,7 @@ const REPORT_TYPES = [
 const EXPORT_FORMATS = [
   { value: 'pdf', label: 'PDF', icon: FileText },
   { value: 'excel', label: 'Excel', icon: Table },
-  { value: 'csv', label: 'CSV', icon: Download }
+  { value: 'csv', label: 'CSV', icon: Table }
 ];
 
 export function ReportViewer() {
@@ -341,7 +341,7 @@ export function ReportViewer() {
               {isGenerating ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : (
-                <Download className="h-4 w-4 mr-2" />
+                <BarChart3 className="h-4 w-4 mr-2" />
               )}
               {isGenerating ? 'Génération en cours...' : 'Générer le rapport'}
             </Button>

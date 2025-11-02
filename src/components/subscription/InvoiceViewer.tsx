@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Download, Eye, Calendar, CreditCard, AlertCircle } from 'lucide-react';
+import { Eye, Calendar, CreditCard, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/useToast';
@@ -230,7 +230,7 @@ export function InvoiceViewer() {
                           onClick={() => handleDownloadInvoice(invoice)}
                           disabled={!invoice.pdf_url || invoice.pdf_url === '#'}
                         >
-                          <Download className="h-4 w-4 mr-1" />
+                          <Eye className="h-4 w-4 mr-1" />
                           PDF
                         </Button>
                       </div>

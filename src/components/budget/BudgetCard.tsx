@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Edit, Copy, Download, Trash2, Play, Send, TrendingUp } from 'lucide-react';
+import { Edit, Copy, Trash2, Play, Send, TrendingUp } from 'lucide-react';
 import { BudgetStatusBadge } from './BudgetStatusBadge';
 import type { Budget } from '@/types/budget.types';
 
@@ -85,7 +85,7 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
               size="sm"
               title="Télécharger"
             >
-              <Download className="w-4 h-4" />
+              <Send className="w-4 h-4" />
             </Button>
 
             {budget.status === 'draft' && (

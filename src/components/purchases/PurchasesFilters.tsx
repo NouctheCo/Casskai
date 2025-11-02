@@ -5,7 +5,7 @@ import { Card, CardContent } from '../ui/card';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Calendar, Download, Filter, Search, X } from 'lucide-react';
+import { Calendar, Filter, Search, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface PurchasesFiltersProps {
@@ -27,7 +27,7 @@ const PurchasesFilters: React.FC<PurchasesFiltersProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const handleFilterChange = (key: keyof PurchaseFilters, value: string) => {
+  const handleFilterChange = (key: keyof PurchaseFilters, _value: string) => {
     onFiltersChange({
       ...filters,
       [key]: value || undefined
@@ -52,7 +52,7 @@ const PurchasesFilters: React.FC<PurchasesFiltersProps> = ({
             disabled={exportLoading}
             className="flex items-center gap-2"
           >
-            <Download className="w-4 h-4" />
+            <Filter className="w-4 h-4" />
             {exportLoading ? t('common.exporting') : t('purchases.actions.export')}
           </Button>
           {hasActiveFilters && (

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import { CheckCircle, XCircle, AlertCircle, Info, Loader2 } from 'lucide-react';
+import { CheckCircle, AlertCircle, Info, Loader2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 interface FeedbackProps {
@@ -16,7 +16,7 @@ interface FeedbackProps {
 
 const iconMap = {
   success: CheckCircle,
-  error: XCircle,
+  error: AlertCircle,
   warning: AlertCircle,
   info: Info,
   loading: Loader2
@@ -188,7 +188,7 @@ export const FeedbackToast: React.FC<FeedbackProps> = ({
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                 >
-                  <XCircle className="w-4 h-4" />
+                  <Info className="w-4 h-4" />
                 </motion.button>
               )}
             </div>
@@ -280,8 +280,8 @@ export const AnimatedButton: React.FC<{
       onClick={onClick}
       disabled={disabled || isLoading}
       animate={controls}
-      whileHover={!disabled && !isLoading ? { scale: 1.02 } : {}}
-      whileTap={!disabled && !isLoading ? { scale: 0.98 } : {}}
+      whileHover={!disabled && !isLoading ? { scale: 1.02 } : undefined}
+      whileTap={!disabled && !isLoading ? { scale: 0.98 } : undefined}
       {...props}
     >
       <AnimatePresence mode="wait">
