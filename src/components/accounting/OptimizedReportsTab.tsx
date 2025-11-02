@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/useToast';
 import {
   TrendingUp,
@@ -26,8 +27,24 @@ import {
   Zap
 } from 'lucide-react';
 import { reportGenerationService } from '@/services/reportGenerationService';
+import { DEFAULT_REPORT_TEMPLATES } from '@/data/reportTemplates';
 import type { FinancialReport, ReportFormData } from '@/types/reports.types';
 import { useAuth } from '@/contexts/AuthContext';
+
+// Type union strict pour les types de rapports
+type ReportType = 
+  | 'balance_sheet' 
+  | 'income_statement' 
+  | 'cash_flow' 
+  | 'trial_balance' 
+  | 'general_ledger' 
+  | 'aged_receivables' 
+  | 'aged_payables' 
+  | 'financial_ratios' 
+  | 'vat_report' 
+  | 'budget_variance' 
+  | 'kpi_dashboard' 
+  | 'tax_summary';
 
 export default function OptimizedReportsTab() {
   const { showToast } = useToast();
@@ -41,6 +58,9 @@ export default function OptimizedReportsTab() {
   // États pour les actions view/download
   const [viewingReport, setViewingReport] = useState<string | null>(null);
   const [downloadingReport, setDownloadingReport] = useState<string | null>(null);
+  
+  // État pour le modal des modèles
+  const [showTemplatesModal, setShowTemplatesModal] = useState(false);
   
   // Impression simple de la page/section
   const handlePrint = () => {
@@ -225,7 +245,7 @@ export default function OptimizedReportsTab() {
 
       const reportData: ReportFormData = {
         name: `${reportName} - ${selectedPeriod}`,
-        type: reportType as any,
+        type: reportType as ReportType,
         format: 'detailed',
         period_start: periodDates.start,
         period_end: periodDates.end,
@@ -306,18 +326,19 @@ export default function OptimizedReportsTab() {
           start: new Date(currentYear, currentMonth, 1).toISOString().split('T')[0],
           end: new Date(currentYear, currentMonth + 1, 0).toISOString().split('T')[0]
         };
-      case 'current-quarter':
+      case 'current-quarter': {
         const quarterStart = Math.floor(currentMonth / 3) * 3;
         return {
           start: new Date(currentYear, quarterStart, 1).toISOString().split('T')[0],
           end: new Date(currentYear, quarterStart + 3, 0).toISOString().split('T')[0]
         };
+      }
       case 'current-year':
         return {
           start: new Date(currentYear, 0, 1).toISOString().split('T')[0],
           end: new Date(currentYear, 11, 31).toISOString().split('T')[0]
         };
-      case 'last-month':
+      case 'last-month': {
         const lastMonth = currentMonth - 1;
         const year = lastMonth < 0 ? currentYear - 1 : currentYear;
         const month = lastMonth < 0 ? 11 : lastMonth;
@@ -325,6 +346,7 @@ export default function OptimizedReportsTab() {
           start: new Date(year, month, 1).toISOString().split('T')[0],
           end: new Date(year, month + 1, 0).toISOString().split('T')[0]
         };
+      }
       default:
         return {
           start: new Date(currentYear, currentMonth, 1).toISOString().split('T')[0],
@@ -533,7 +555,12 @@ export default function OptimizedReportsTab() {
                 Actions rapides
               </label>
               <div className="flex space-x-2">
-                <Button variant="outline" size="sm" className="flex-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => setShowTemplatesModal(true)}
+                >
                   <Settings className="w-4 h-4 mr-1" />
                   Modèles
                 </Button>
@@ -617,7 +644,7 @@ export default function OptimizedReportsTab() {
                       id: report.type,
                       company_id: currentCompany?.id || 'comp-1',
                       name: report.name,
-                      type: report.type as any,
+                      type: report.type as ReportType,
                       format: 'detailed',
                       period_start: '',
                       period_end: '',
@@ -637,7 +664,7 @@ export default function OptimizedReportsTab() {
                       id: report.type,
                       company_id: currentCompany?.id || 'comp-1',
                       name: report.name,
-                      type: report.type as any,
+                      type: report.type as ReportType,
                       format: 'detailed',
                       period_start: '',
                       period_end: '',
@@ -745,6 +772,54 @@ export default function OptimizedReportsTab() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Modal des modèles de rapports */}
+      <Dialog open={showTemplatesModal} onOpenChange={setShowTemplatesModal}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-blue-500" />
+              Modèles de rapports disponibles
+            </DialogTitle>
+            <DialogDescription>
+              {DEFAULT_REPORT_TEMPLATES.length} templates professionnels conformes PCG et IFRS
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 md:grid-cols-2 mt-4">
+            {DEFAULT_REPORT_TEMPLATES.map((template, index) => (
+              <Card key={index} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="space-y-2">
+                    <div className="flex items-start justify-between">
+                      <h4 className="font-semibold text-gray-900 dark:text-white">
+                        {template.name}
+                      </h4>
+                      {template.is_default && (
+                        <Badge variant="secondary" className="text-xs">Par défaut</Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {template.description}
+                    </p>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <Badge variant="outline">{template.type}</Badge>
+                      <span>•</span>
+                      <span>{template.sections.length} sections</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          
+          <div className="mt-4 flex justify-end">
+            <Button variant="outline" onClick={() => setShowTemplatesModal(false)}>
+              Fermer
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
