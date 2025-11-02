@@ -17,7 +17,7 @@ interface ErrorBoundaryState {
 interface ErrorBoundaryProps {
   children: ReactNode;
   fallback?: React.ComponentType<ErrorFallbackProps>;
-  onError?: (error: Error, errorInfo: ErrorInfo, errorId: string) => void;
+  onError?: (error: Error, errorInfo: ErrorInfo, errorId: string) => void; // eslint-disable-line no-unused-vars
   enableReporting?: boolean;
   showReportButton?: boolean;
   isolate?: boolean; // Si true, isole l'erreur sans faire planter toute l'app
@@ -52,10 +52,10 @@ class ErrorReportingService {
   }
 
   async reportError(
-    _error: Error,
-    _errorInfo: ErrorInfo,
-    _errorId: string,
-    _additionalContext?: Record<string, unknown>
+    error: Error, // eslint-disable-line @typescript-eslint/no-unused-vars, no-unused-vars
+    errorInfo: ErrorInfo, // eslint-disable-line @typescript-eslint/no-unused-vars, no-unused-vars
+    errorId: string, // eslint-disable-line @typescript-eslint/no-unused-vars, no-unused-vars
+    additionalContext?: Record<string, unknown> // eslint-disable-line @typescript-eslint/no-unused-vars, no-unused-vars
   ): Promise<void> {
     // Désactivé pour éviter les erreurs 405 - endpoint /api/errors n'existe pas
     logger.warn('[ErrorBoundary] Error reporting disabled to avoid 405 errors');
@@ -101,7 +101,7 @@ class ErrorReportingService {
 }
 
 // Composants de fallback séparés pour réduire la taille de la fonction
-const ErrorHeader: React.FC<{ _errorId: string }> = ({ _errorId }) => (
+const ErrorHeader: React.FC = () => (
   <CardHeader className="text-center">
     <div className="mx-auto mb-4 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
       <AlertTriangle className="w-6 h-6 text-red-600" />
@@ -207,7 +207,7 @@ const DefaultErrorFallback: React.FC<ErrorFallbackProps> = ({
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <Card className="w-full max-w-md">
-        <ErrorHeader _errorId={errorId} />
+        <ErrorHeader />
 
         <CardContent className="space-y-4">
           <Alert>
@@ -333,7 +333,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 }
 
 // HOC pour wrapper des composants avec une Error Boundary
-function _withErrorBoundary<P extends object>(
+export function withErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
   errorBoundaryConfig?: Omit<ErrorBoundaryProps, 'children'>
 ) {
@@ -349,7 +349,7 @@ function _withErrorBoundary<P extends object>(
 }
 
 // Hook pour capturer les erreurs asynchrones
-const _useErrorHandler = () => {
+export const useErrorHandler = () => {
   const reportingService = ErrorReportingService.getInstance();
 
   const handleError = (error: Error, context?: Record<string, unknown>) => {
