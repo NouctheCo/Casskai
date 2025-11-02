@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 // Service fiscal multi-pays pour CassKai
 import { frenchTaxComplianceService } from './FrenchTaxComplianceService';
 
@@ -38,7 +39,7 @@ export interface TaxDeclaration {
   amount?: number;
   validationErrors?: string[];
   warnings?: string[];
-  data?: any;
+  data?: Record<string, unknown>;
 }
 
 export interface ComplianceValidation {
@@ -548,6 +549,37 @@ export const COUNTRY_TAX_CONFIGS: Record<string, CountryTaxConfig> = {
   }
 };
 
+type VATCalculation = {
+  period: string;
+  countryCode: string;
+  vatRate: number;
+  totalVAT: number;
+  deductibleVAT: number;
+  netVAT: number;
+  calculations: Array<Record<string, unknown>>;
+};
+
+type CorporateTaxCalculation = {
+  period: string;
+  countryCode: string;
+  corporateTaxRate: number;
+  taxableIncome: number;
+  corporateTax: number;
+};
+
+type ExportResult = { content: string; filename: string; mimeType: string };
+
+type AutoObligationsResult = {
+  countryCode: string;
+  obligations: TaxDeclarationType[];
+  configured: boolean;
+  message: string;
+};
+
+type ComplianceResult = { errors: string[]; warnings: string[]; score: number; maxScore: number };
+
+// Note: Raw declaration helper type removed after switching to unknown-based coercion.
+
 export class MultiCountryTaxService {
   private static instance: MultiCountryTaxService;
 
@@ -616,7 +648,7 @@ export class MultiCountryTaxService {
   /**
    * Calcule la TVA pour une période donnée
    */
-  async calculateVAT(_companyId: string, countryCode: string, period: string): Promise<any> {
+  async calculateVAT(_companyId: string, countryCode: string, period: string): Promise<VATCalculation> {
     const config = this.getTaxConfig(countryCode);
     return {
       period,
@@ -632,7 +664,7 @@ export class MultiCountryTaxService {
   /**
    * Calcule l'impôt sur les sociétés
    */
-  async calculateCorporateTax(_companyId: string, countryCode: string, period: string): Promise<any> {
+  async calculateCorporateTax(_companyId: string, countryCode: string, period: string): Promise<CorporateTaxCalculation> {
     const config = this.getTaxConfig(countryCode);
     return {
       period,
@@ -651,7 +683,7 @@ export class MultiCountryTaxService {
     countryCode: string,
     period: string,
     format: 'pdf' | 'excel' | 'csv' = 'pdf'
-  ): Promise<{ content: string; filename: string; mimeType: string }> {
+  ): Promise<ExportResult> {
     const config = this.getTaxConfig(countryCode);
 
     // Pour la France, utiliser le générateur FEC existant
@@ -677,7 +709,7 @@ export class MultiCountryTaxService {
   /**
    * Configuration automatique des obligations fiscales
    */
-  async autoConfigureObligations(_companyId: string, countryCode: string): Promise<any> {
+  async autoConfigureObligations(_companyId: string, countryCode: string): Promise<AutoObligationsResult> {
     const config = this.getTaxConfig(countryCode);
     const mandatoryDeclarations = config.declarations.filter(d => d.mandatory);
 
@@ -696,8 +728,8 @@ export class MultiCountryTaxService {
     companyId: string,
     countryCode: string,
     period: string
-  ): Promise<{ errors: string[]; warnings: string[]; score: number; maxScore: number; }> {
-    const config = this.getTaxConfig(countryCode);
+  ): Promise<ComplianceResult> {
+    // const config = this.getTaxConfig(countryCode); // non requis ici
 
     // Pour la France, utiliser la validation française
     if (countryCode === 'FR') {
@@ -749,21 +781,35 @@ export class MultiCountryTaxService {
     };
   }
 
-  private convertToStandardDeclaration(declaration: any): TaxDeclaration {
+  private convertToStandardDeclaration(declaration: unknown): TaxDeclaration {
+    const rec: Record<string, unknown> =
+      typeof declaration === 'object' && declaration !== null ? (declaration as Record<string, unknown>) : {};
+
+    const id = (rec.id as string) || `declaration-${Date.now()}`;
+    const type = (rec.type as string) || 'UNKNOWN';
+    const period = (rec.period as string) || '';
+    const allowedStatuses: ReadonlyArray<TaxDeclaration['status']> = ['draft', 'ready', 'filed', 'accepted', 'rejected'];
+    const statusRaw = rec.status as string | undefined;
+    const status: TaxDeclaration['status'] = (allowedStatuses.find(s => s === statusRaw) ?? 'draft');
+    const dueDate = (rec.dueDate as Date) || new Date();
+    const amount = (rec.amount as number) ?? 0;
+    const validationErrors = (rec.validationErrors as string[]) || [];
+    const warnings = (rec.warnings as string[]) || [];
+
     return {
-      id: declaration.id || `declaration-${Date.now()}`,
-      type: declaration.type || 'UNKNOWN',
-      period: declaration.period || '',
-      status: declaration.status || 'draft',
-      dueDate: declaration.dueDate || new Date(),
-      amount: declaration.amount || 0,
-      validationErrors: declaration.validationErrors || [],
-      warnings: declaration.warnings || [],
-      data: declaration
+      id,
+      type,
+      period,
+      status,
+      dueDate,
+      amount,
+      validationErrors,
+      warnings,
+      data: rec
     };
   }
 
-  private async validateInternationalCompliance(countryCode: string, _companyId: string, _period: string) {
+  private async validateInternationalCompliance(countryCode: string, _companyId: string, _period: string): Promise<ComplianceResult> {
     const config = this.getTaxConfig(countryCode);
 
     const checks = [

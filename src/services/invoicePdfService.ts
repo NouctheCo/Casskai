@@ -5,25 +5,38 @@ import type { InvoiceWithDetails } from '@/types/database/invoices.types';
 // Extension for autoTable
 declare module 'jspdf' {
   interface jsPDF {
-    autoTable: (options: any) => jsPDF;
+    autoTable: (options: unknown) => jsPDF;
     lastAutoTable: {
       finalY: number;
     };
   }
 }
 
+export interface CompanyInfo {
+  name?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  siret?: string;
+  vatNumber?: string;
+  logo?: string;
+}
+
 export class InvoicePdfService {
   /**
    * Génère un PDF pour une facture
    */
-  static generateInvoicePDF(invoice: InvoiceWithDetails, companyData?: any): jsPDF {
+  static generateInvoicePDF(invoice: InvoiceWithDetails, companyData?: CompanyInfo): jsPDF {
     const doc = new jsPDF();
     
     // Configuration des couleurs
   const primaryColor = [41, 98, 255]; // Bleu
     
     // 1. En-tête de l'entreprise
-    this.addCompanyHeader(doc, companyData, primaryColor);
+  this.addCompanyHeader(doc, companyData, primaryColor);
     
     // 2. Informations facture et client
     this.addInvoiceAndClientInfo(doc, invoice);
@@ -38,7 +51,7 @@ export class InvoicePdfService {
     this.addNotesAndTerms(doc, invoice);
     
     // 6. Pied de page
-    this.addFooter(doc, companyData);
+  this.addFooter(doc, companyData);
     
     return doc;
   }
@@ -46,7 +59,7 @@ export class InvoicePdfService {
   /**
    * Ajoute l'en-tête de l'entreprise
    */
-  private static addCompanyHeader(doc: jsPDF, companyData: any, primaryColor: number[]) {
+  private static addCompanyHeader(doc: jsPDF, companyData: CompanyInfo | undefined, primaryColor: number[]) {
     // Logo ou nom de l'entreprise
     doc.setFontSize(24);
     doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
@@ -285,7 +298,7 @@ export class InvoicePdfService {
   /**
    * Ajoute le pied de page
    */
-  private static addFooter(doc: jsPDF, companyData: any) {
+  private static addFooter(doc: jsPDF, companyData: CompanyInfo | undefined) {
     const pageHeight = doc.internal.pageSize.height;
     const footerY = pageHeight - 20;
     
@@ -319,7 +332,7 @@ export class InvoicePdfService {
   /**
    * Télécharge le PDF
    */
-  static downloadInvoicePDF(invoice: InvoiceWithDetails, companyData?: any): void {
+  static downloadInvoicePDF(invoice: InvoiceWithDetails, companyData?: CompanyInfo): void {
     const doc = this.generateInvoicePDF(invoice, companyData);
     const fileName = `facture-${invoice.invoice_number}.pdf`;
     doc.save(fileName);
@@ -328,7 +341,7 @@ export class InvoicePdfService {
   /**
    * Génère un blob PDF pour envoi par email ou affichage
    */
-  static generateInvoicePDFBlob(invoice: InvoiceWithDetails, companyData?: any): Blob {
+  static generateInvoicePDFBlob(invoice: InvoiceWithDetails, companyData?: CompanyInfo): Blob {
     const doc = this.generateInvoicePDF(invoice, companyData);
     return doc.output('blob');
   }
@@ -336,7 +349,7 @@ export class InvoicePdfService {
   /**
    * Génère une URL de données PDF pour prévisualisation
    */
-  static generateInvoicePDFDataUrl(invoice: InvoiceWithDetails, companyData?: any): string {
+  static generateInvoicePDFDataUrl(invoice: InvoiceWithDetails, companyData?: CompanyInfo): string {
     const doc = this.generateInvoicePDF(invoice, companyData);
     return doc.output('datauristring');
   }

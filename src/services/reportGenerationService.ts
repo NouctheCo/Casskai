@@ -1,7 +1,7 @@
 // Service de génération de rapports financiers avec calculs avancés
 import { supabase } from '@/lib/supabase';
 import { reportExportService, TableData, ExportOptions } from './ReportExportService';
-import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subDays } from 'date-fns';
+import { format, startOfYear, endOfYear } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 export interface FinancialData {
@@ -19,6 +19,17 @@ export interface ReportFilters {
   companyId: string;
   includeClosedAccounts?: boolean;
   accountType?: string;
+}
+
+export interface JournalEntry {
+  account_number: string;
+  account_name?: string;
+  label?: string;
+  debit: number;
+  credit: number;
+  date: string;
+  description?: string;
+  reference?: string;
 }
 
 export class ReportGenerationService {
@@ -320,10 +331,11 @@ export class ReportGenerationService {
           return await reportExportService.exportToPDF(tables, defaultOptions);
         case 'excel':
           return await reportExportService.exportToExcel(tables, defaultOptions);
-        case 'csv':
+        case 'csv': {
           // Pour CSV, on combine tout en une seule table
           const combinedTable = this.combineTables(tables, 'Grand Livre Complet');
           return reportExportService.exportToCSV(combinedTable, defaultOptions);
+        }
         default:
           return await reportExportService.exportToPDF(tables, defaultOptions);
       }
@@ -334,7 +346,7 @@ export class ReportGenerationService {
   }
 
   // Helpers privés
-  private calculateAccountBalances(journalEntries: any[]): FinancialData[] {
+  private calculateAccountBalances(journalEntries: ReadonlyArray<JournalEntry>): FinancialData[] {
     const balances: Record<string, FinancialData> = {};
 
     journalEntries.forEach(entry => {
@@ -382,7 +394,7 @@ export class ReportGenerationService {
     }
   }
 
-  private groupEntriesByAccount(entries: any[]): Record<string, any[]> {
+  private groupEntriesByAccount(entries: ReadonlyArray<JournalEntry>): Record<string, JournalEntry[]> {
     return entries.reduce((groups, entry) => {
       const accountNumber = entry.account_number;
       if (!groups[accountNumber]) {
@@ -390,11 +402,11 @@ export class ReportGenerationService {
       }
       groups[accountNumber].push(entry);
       return groups;
-    }, {} as Record<string, any[]>);
+    }, {} as Record<string, JournalEntry[]>);
   }
 
   private combineTables(tables: TableData[], title: string): TableData {
-    const combinedRows: any[][] = [];
+    const combinedRows: (string | number)[][] = [];
 
     tables.forEach(table => {
       combinedRows.push(['', '', '', '', '', '']); // Ligne vide

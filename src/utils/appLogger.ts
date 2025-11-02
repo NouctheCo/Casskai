@@ -54,7 +54,11 @@ export const logger = {
   api(method: string, url: string, status: number, duration?: number) {
     const context: LogContext = { method, url, status, duration: duration ? `${duration}ms` : undefined };
     const message = `${method} ${url} - ${status}`;
-    status >= 400 ? logger.warn(message, context) : logger.debug(message, context);
+    if (status >= 400) {
+      logger.warn(message, context);
+    } else {
+      logger.debug(message, context);
+    }
   },
   db(operation: string, table: string, context?: LogContext) {
     logger.debug(`DB ${operation} on ${table}`, context);
@@ -93,7 +97,9 @@ export function createLogger(baseContext: LogContext) {
     action: (action: string, context?: LogContext) => logger.action(action, { ...baseContext, ...context }),
     api: (method: string, url: string, status: number, duration?: number) => logger.api(method, url, status, duration),
     db: (operation: string, table: string, context?: LogContext) => logger.db(operation, table, { ...baseContext, ...context }),
-    performance: (label: string, duration: number) => logger.performance(`${baseContext.module || ''} ${label}`.trim(), duration),
+    performance: (label: string, duration: number) => {
+      return logger.performance(`${baseContext.module || ''} ${label}`.trim(), duration);
+    },
   };
 }
 
