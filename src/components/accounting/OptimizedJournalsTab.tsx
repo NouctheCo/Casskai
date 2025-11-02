@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/components/ui/use-toast';
-import { BarChart3, FileText, CheckCircle, Clock, AlertCircle, Eye, RefreshCw } from 'lucide-react';
+import { BarChart3, FileText, CheckCircle, AlertCircle, Eye, RefreshCw } from 'lucide-react';
 
 export default function OptimizedJournalsTab() {
   const { toast } = useToast();

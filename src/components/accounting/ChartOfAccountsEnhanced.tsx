@@ -1,5 +1,5 @@
 // Composant amélioré du Plan Comptable avec gestion des mappings budgétaires
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -13,17 +13,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLocale } from '@/contexts/LocaleContext';
 import { supabase } from '@/lib/supabase';
 import {
-  PlusCircle,
   Search,
   Filter,
   AlertTriangle,
   ListTree,
   Download,
-  CheckCircle,
   Link,
   Unlink
 } from 'lucide-react';
-import type { Account } from '@/types/database.types';
 
 interface BudgetCategory {
   id: string;
@@ -32,23 +29,18 @@ interface BudgetCategory {
   category_type: 'revenue' | 'expense' | 'capex';
 }
 
-interface AccountMapping {
-  accountNumber: string;
-  categoryId: string | null;
-}
-
 export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { currentEnterpriseId?: string }) {
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const { toast } = useToast();
-  const { t } = useLocale();
+  const { t: _t } = useLocale();
 
   const companyId = currentEnterpriseId;
 
   const {
     accounts,
     loading,
-    error,
-    fetchAccounts,
+    error: _error,
+    fetchAccounts: _fetchAccounts,
     refresh
   } = useAccounting(companyId);
 
