@@ -36,12 +36,12 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
   const [selectedPeriod, setSelectedPeriod] = useState('month');
   const [isReconciling, setIsReconciling] = useState(false);
   const [_reconciliationData, _setReconciliationData] = useState(null);
-  const [_pendingMatches, _setPendingMatches] = useState([]);
+  const [pendingMatches, setPendingMatches] = useState([]);
   const [autoMatches, setAutoMatches] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [_showDetails, _setShowDetails] = useState(false);
-  const [_reconciliationSummary, setReconciliationSummary] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);
+  const [reconciliationSummary, setReconciliationSummary] = useState(null);
 
   // Données simulées pour les transactions bancaires et écritures comptables
   const [bankTransactions] = useState([
@@ -497,6 +497,14 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                 </Button>
                 <Button
                   variant="outline"
+                  onClick={() => setShowDetails(!showDetails)}
+                  title="Afficher/masquer les détails"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  {showDetails ? 'Masquer' : 'Détails'}
+                </Button>
+                <Button
+                  variant="outline"
                   onClick={fetchReconciliationSummary}
                   disabled={!selectedAccount}
                 >
@@ -508,6 +516,62 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Panneau de détails conditionnel */}
+      {showDetails && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+            <CardContent className="p-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <div className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
+                    Correspondances en attente
+                  </div>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {pendingMatches.length}
+                  </div>
+                  <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                    Nécessitent validation manuelle
+                  </p>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
+                    Résumé de réconciliation
+                  </div>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {reconciliationSummary ? 'Disponible' : 'Non calculé'}
+                  </div>
+                  <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                    {reconciliationSummary ? 'Données à jour' : 'Cliquez sur Actualiser'}
+                  </p>
+                </div>
+                <div className="flex items-center justify-center">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      setPendingMatches(autoMatches.slice(0, 3));
+                      toast({
+                        title: "Détails mis à jour",
+                        description: `${autoMatches.length} correspondances disponibles`,
+                      });
+                    }}
+                    className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Recharger détails
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
 
       {/* Onglets principaux */}
       <Tabs defaultValue="matches" className="space-y-4">
