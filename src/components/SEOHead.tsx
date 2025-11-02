@@ -12,7 +12,7 @@ interface SEOHeadProps {
   modifiedTime?: string;
   canonical?: string;
   robots?: string;
-  structuredData?: Record<string, any>;
+  structuredData?: Record<string, unknown>;
 }
 
 export const SEOHead: React.FC<SEOHeadProps> = (props) => {
@@ -127,6 +127,7 @@ export const ProductSEOHead: React.FC<{
 };
 
 // Helpers pour créer des configurations SEO dynamiques (pas un hook React)
+// eslint-disable-next-line react-refresh/only-export-components
 export const createEnterpriseSEO = (enterprise: {
   name: string;
   description?: string;
@@ -156,6 +157,7 @@ export const createEnterpriseSEO = (enterprise: {
   }
 });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const createReportSEO = (report: {
   title: string;
   description: string;
@@ -182,6 +184,7 @@ export const createReportSEO = (report: {
   }
 });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const createHelpSEO = (help: {
   title: string;
   description: string;
