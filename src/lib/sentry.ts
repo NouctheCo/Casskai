@@ -10,7 +10,7 @@ export function initializeSentry() {
 
   // Only initialize if DSN is provided and not in development
   if (!SENTRY_DSN || ENV === 'development') {
-    console.log('📊 Sentry: Skipped (development mode)');
+  console.warn('📊 Sentry: Skipped (development mode)');
     return;
   }
 
@@ -92,7 +92,7 @@ export function initializeSentry() {
     Sentry.setTag('environment_type', 'staging');
   }
 
-  console.log('📊 Sentry: Initialized (' + ENV + (isBeta ? ' - BETA MODE' : '') + ')');
+  console.warn(`📊 Sentry: Initialized (${ENV}${isBeta ? ' - BETA MODE' : ''})`);
 }
 
 /**
@@ -116,14 +116,14 @@ export function clearSentryUser() {
 /**
  * Add custom context to errors
  */
-export function setSentryContext(key: string, context: Record<string, any>) {
+export function setSentryContext(key: string, context: Record<string, unknown>) {
   Sentry.setContext(key, context);
 }
 
 /**
  * Manually capture an exception
  */
-export function captureException(error: Error, context?: Record<string, any>) {
+export function captureException(error: Error, context?: Record<string, unknown>) {
   if (context) {
     Sentry.captureException(error, {
       extra: context,
@@ -143,7 +143,7 @@ export function captureMessage(message: string, level: 'info' | 'warning' | 'err
 /**
  * Add breadcrumb for debugging
  */
-export function addBreadcrumb(message: string, category: string = 'custom', data?: Record<string, any>) {
+export function addBreadcrumb(message: string, category: string = 'custom', data?: Record<string, unknown>) {
   Sentry.addBreadcrumb({
     message,
     category,
@@ -157,10 +157,26 @@ export function addBreadcrumb(message: string, category: string = 'custom', data
  * Start a performance transaction
  */
 export function startTransaction(name: string, op: string = 'custom') {
-  return Sentry.startTransaction({
-    name,
-    op,
-  });
+  // Sentry v8+: startTransaction may not be available on @sentry/react.
+  // Prefer startInactiveSpan if available to get a span handle that can be ended manually.
+  type SentryCompat = {
+    startInactiveSpan?: (options: { name: string; op?: string }) => { end?: () => void };
+    startSpan?: (options: { name: string; op?: string }, cb: () => void) => void;
+  };
+  const anySentry = Sentry as unknown as SentryCompat;
+  if (typeof anySentry.startInactiveSpan === 'function') {
+    return anySentry.startInactiveSpan({ name, op });
+  }
+  if (typeof anySentry.startSpan === 'function') {
+    // startSpan executes a callback; return a minimal span-like shim
+    const span = { end: () => void 0 } as const;
+    anySentry.startSpan({ name, op }, () => {
+      // we cannot return span from here; provide a no-op shim
+    });
+    return span;
+  }
+  // As a last resort, return a no-op span shim to avoid breaking callers
+  return { end: () => void 0 } as { end: () => void };
 }
 
 /**

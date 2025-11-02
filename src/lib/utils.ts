@@ -20,11 +20,11 @@ export function formatCurrency(
   try {
     return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency: currency,
+      currency,
       minimumFractionDigits: currency === 'XOF' ? 0 : 2,
       maximumFractionDigits: currency === 'XOF' ? 0 : 2,
     }).format(amount);
-  } catch (error) {
+  } catch (_error) {
     // Fallback if currency is not supported
     return `${amount.toLocaleString(locale)} ${currency}`;
   }
@@ -48,12 +48,14 @@ export function formatDate(
     return 'Invalid Date';
   }
 
-  const options: Intl.DateTimeFormatOptions = {
+  const formatOptions = {
     short: { year: 'numeric', month: '2-digit', day: '2-digit' },
     medium: { year: 'numeric', month: 'short', day: 'numeric' },
     long: { year: 'numeric', month: 'long', day: 'numeric' },
     full: { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' },
-  }[format];
+  } as const satisfies Record<'short' | 'medium' | 'long' | 'full', Intl.DateTimeFormatOptions>;
+
+  const options: Intl.DateTimeFormatOptions = formatOptions[format];
 
   return dateObj.toLocaleDateString(locale, options);
 }
@@ -132,7 +134,7 @@ export function formatFileSize(bytes: number, decimals: number = 2): string {
  * @param wait - Wait time in milliseconds
  * @returns Debounced function
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {

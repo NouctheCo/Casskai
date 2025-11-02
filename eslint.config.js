@@ -164,6 +164,16 @@ export default [
 
       // General code quality rules
       'no-console': 'off', // Allow console in config files
+      'no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          ignoreRestSiblings: true,
+          caughtErrors: 'all',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
       'no-debugger': 'error',
       'no-alert': 'error',
       'prefer-const': 'error',
@@ -246,7 +256,7 @@ export default [
 
   // E2E (Playwright) tests: disable type-aware parsing to avoid tsconfig project issues
   {
-    files: ['tests/e2e/**/*.{ts,tsx,js,jsx}'],
+    files: ['tests/e2e/**/*.{ts,tsx,js,jsx}', 'e2e/**/*.{ts,tsx,js,jsx}'],
     languageOptions: {
       parser: tsparser,
       parserOptions: {
@@ -273,6 +283,10 @@ export default [
   {
     files: ['**/*.config.{js,ts}', '**/*.setup.{js,ts}'],
     languageOptions: {
+      parser: tsparser,
+      parserOptions: {
+        project: null,
+      },
       globals: {
         ...globals.node,
       },

@@ -4,7 +4,7 @@ import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ErrorFallbackProps {
-  error: Error;
+  error: unknown;
   resetError: () => void;
 }
 
@@ -38,7 +38,7 @@ function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
         {import.meta.env.MODE === 'development' && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
             <p className="text-sm font-mono text-red-800 break-all">
-              {error.message}
+              {error instanceof Error ? error.message : String(error)}
             </p>
           </div>
         )}
@@ -96,7 +96,9 @@ export function ErrorBoundary({ children, fallback }: ErrorBoundaryProps) {
     <SentryErrorBoundary
       fallback={({ error, resetError }) => {
         const FallbackComponent = fallback || ErrorFallback;
-        return <FallbackComponent error={error} resetError={resetError} />;
+        return (
+          <FallbackComponent error={error} resetError={resetError} />
+        );
       }}
       onError={(error, errorInfo) => {
         console.error('ErrorBoundary caught an error:', error, errorInfo);
@@ -128,7 +130,7 @@ export function PageErrorBoundary({ children }: { children: React.ReactNode }) {
                 </p>
                 {import.meta.env.MODE === 'development' && (
                   <pre className="text-xs bg-red-100 p-3 rounded overflow-auto mb-4">
-                    {error.message}
+                    {error instanceof Error ? error.message : String(error)}
                   </pre>
                 )}
                 <Button onClick={resetError} size="sm" variant="outline">

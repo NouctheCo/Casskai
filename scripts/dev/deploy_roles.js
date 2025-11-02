@@ -22,7 +22,7 @@ async function deployRolesTable() {
 
     // Vérifier que la table existe
     console.log('🔍 Vérification de la table roles...');
-    const { data, error: checkError } = await supabase
+  const { data: _data, error: checkError } = await supabase
       .from('roles')
       .select('name')
       .limit(1);

@@ -11,7 +11,7 @@ async function diagnoseDeployment() {
   try {
     // Test 1: Vérifier les permissions de base
     console.log('📋 Test 1: Permissions de base');
-    const { data: testData, error: testError } = await supabase
+    const { data: _testData, error: testError } = await supabase
       .from('companies')
       .select('count')
       .limit(1);
@@ -43,7 +43,7 @@ async function diagnoseDeployment() {
         } else if (!error.message.includes('function') && !error.message.includes('does not exist')) {
           console.log(`⚠️  Fonction existe mais erreur:`, error.message);
         }
-      } catch (e) {
+      } catch (_e) {
         // Ignorer les erreurs de signature
       }
     }
@@ -64,7 +64,7 @@ async function diagnoseDeployment() {
 
     // Essayer via RPC si disponible
     try {
-      const { data, error } = await supabase.rpc('exec_sql', {
+      const { data: _data, error } = await supabase.rpc('exec_sql', {
         sql: simpleFunctionSQL
       });
 

@@ -188,3 +188,6 @@ import-files/
 playwright-report/
 test-results/
 _cleanup_backup/
+
+nul
+src/services/nul

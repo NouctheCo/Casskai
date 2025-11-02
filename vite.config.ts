@@ -24,42 +24,30 @@ export default defineConfig(({ mode }) => ({
 			},
 		}),
 		// Bundle compression for production
-		mode === 'production' && compression({
-			algorithm: 'gzip',
-			exclude: [/\.(br)$/, /\.(gz)$/],
-		}),
-		mode === 'production' && compression({
-			algorithm: 'brotliCompress',
-			exclude: [/\.(br)$/, /\.(gz)$/],
-		}),
+		...(mode === 'production'
+			? [
+				compression({
+					algorithms: ['gzip'],
+					exclude: [/\.(br)$/, /\.(gz)$/],
+				}),
+				compression({
+					algorithms: ['brotliCompress'],
+					exclude: [/\.(br)$/, /\.(gz)$/],
+				}),
+			]
+			: []),
 		// Bundle analysis tool (optional)
-		mode === 'production' && process.env.ANALYZE && visualizer({
-			filename: 'dist/stats.html',
-			open: true,
-			gzipSize: true,
-			brotliSize: true,
-		}),
-	].filter(Boolean),
-	
-	css: {
-		postcss: './postcss.config.js',
-		devSourcemap: true,
-	},
-	
-	server: {
-		cors: true,
-		headers: {
-			'Cross-Origin-Embedder-Policy': 'credentialless',
-		},
-		allowedHosts: true,
-	},
-	
-	resolve: {
-		extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
-		alias: {
-			'@': path.resolve(__dirname, 'src'),
-		},
-	},
+		...(mode === 'production' && process.env.ANALYZE
+			? [
+				visualizer({
+					filename: 'dist/stats.html',
+					open: true,
+					gzipSize: true,
+					brotliSize: true,
+				}),
+			]
+			: []),
+	],
 	
 	// Enhanced dependency optimization
 	optimizeDeps: {
@@ -104,7 +92,7 @@ export default defineConfig(({ mode }) => ({
 			// Enhanced output configuration
 			output: {
 				// Conservative chunking strategy to avoid loading issues
-				manualChunks: (id: string) => {
+				manualChunks(id) {
 					// Keep critical libraries together in vendor
 					if (id.includes('node_modules/react') || 
 						id.includes('node_modules/react-dom') ||
@@ -135,20 +123,20 @@ export default defineConfig(({ mode }) => ({
 				},
 				
 				// Optimize chunk naming for caching
-				chunkFileNames: (chunkInfo) => {
-					const facadeModuleId = chunkInfo.facadeModuleId ? path.basename(chunkInfo.facadeModuleId, path.extname(chunkInfo.facadeModuleId)) : 'chunk';
+				chunkFileNames: () => {
 					return `assets/[name]-[hash].js`;
 				},
 				assetFileNames: (assetInfo) => {
-					const info = assetInfo.name.split('.');
+					const name = assetInfo.name ?? '';
+					const info = name.split('.');
 					let extType = info[info.length - 1];
 					
 					// Group assets by type
-					if (/\.(png|jpe?g|gif|svg|webp|ico)$/i.test(assetInfo.name)) {
+					if (/\.(png|jpe?g|gif|svg|webp|ico)$/i.test(name)) {
 						extType = 'images';
-					} else if (/\.(woff2?|eot|ttf|otf)$/i.test(assetInfo.name)) {
+					} else if (/\.(woff2?|eot|ttf|otf)$/i.test(name)) {
 						extType = 'fonts';
-					} else if (/\.(css)$/i.test(assetInfo.name)) {
+					} else if (/\.(css)$/i.test(name)) {
 						extType = 'css';
 					}
 					
