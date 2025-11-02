@@ -11,6 +11,7 @@ import {
   BarChart3,
   Calculator,
   Eye,
+  Printer,
   Plus,
   RefreshCw,
   Settings,
@@ -40,6 +41,11 @@ export default function OptimizedReportsTab() {
   // États pour les actions view/download
   const [viewingReport, setViewingReport] = useState<string | null>(null);
   const [downloadingReport, setDownloadingReport] = useState<string | null>(null);
+  
+  // Impression simple de la page/section
+  const handlePrint = () => {
+    window.print();
+  };
   
   // RBAC simulation (à remplacer par vrai hook/context)
   const userCanGenerate = true; // TODO: remplacer par vrai contrôle
@@ -440,6 +446,10 @@ export default function OptimizedReportsTab() {
           <Button variant="outline" onClick={loadRecentReports} disabled={isLoading}>
             <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
             Actualiser
+          </Button>
+          <Button variant="outline" onClick={handlePrint} title="Imprimer la vue">
+            <Printer className="w-4 h-4 mr-2" />
+            Imprimer
           </Button>
           <Button>
             <Plus className="w-4 h-4 mr-2" />

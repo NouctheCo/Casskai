@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,48 +8,40 @@ import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
-import { bankReconciliationService } from '@/services/bankReconciliationService';
 import { 
   Shuffle, 
   CheckCircle, 
   XCircle, 
   AlertCircle, 
   Search, 
-  Filter,
   Calendar,
-  TrendingUp,
-  TrendingDown,
   Loader2,
   BarChart3,
   Target,
-  Euro,
   Eye,
   Edit3,
   RefreshCw,
-  ArrowRight,
   Link,
-  Unlink,
   Clock,
-  Percent,
   FileText,
   Database,
   Zap
 } from 'lucide-react';
 
-const BankReconciliation = ({ currentEnterprise, bankAccounts, onReconciliationComplete }) => {
+const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccounts, onReconciliationComplete }) => {
   const { toast } = useToast();
 
   // États
   const [selectedAccount, setSelectedAccount] = useState('');
   const [selectedPeriod, setSelectedPeriod] = useState('month');
   const [isReconciling, setIsReconciling] = useState(false);
-  const [reconciliationData, setReconciliationData] = useState(null);
-  const [pendingMatches, setPendingMatches] = useState([]);
+  const [_reconciliationData, _setReconciliationData] = useState(null);
+  const [_pendingMatches, _setPendingMatches] = useState([]);
   const [autoMatches, setAutoMatches] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [showDetails, setShowDetails] = useState(false);
-  const [reconciliationSummary, setReconciliationSummary] = useState(null);
+  const [_showDetails, _setShowDetails] = useState(false);
+  const [_reconciliationSummary, setReconciliationSummary] = useState(null);
 
   // Données simulées pour les transactions bancaires et écritures comptables
   const [bankTransactions] = useState([

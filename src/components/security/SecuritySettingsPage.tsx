@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -32,11 +32,7 @@ const SecuritySettingsPage: React.FC = () => {
   const companyId = 'comp-1'; // Mock company ID
   const userId = 'user-1'; // Mock user ID
 
-  useEffect(() => {
-    loadSecurityData();
-  }, []);
-
-  const loadSecurityData = async () => {
+  const loadSecurityData = useCallback(async () => {
     try {
       setLoading(true);
       const [security, privacy, incidents, requests] = await Promise.all([
@@ -60,7 +56,11 @@ const SecuritySettingsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [companyId, userId, toast]);
+
+  useEffect(() => {
+    void loadSecurityData();
+  }, [loadSecurityData]);
 
   const handleSecuritySettingsUpdate = async (updates: Partial<SecuritySettings>) => {
     if (!securitySettings) return;
