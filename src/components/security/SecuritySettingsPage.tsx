@@ -7,13 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
 import {
-  Shield, Lock, Key, Eye, AlertTriangle, CheckCircle, Settings,
-  FileText, Download, Trash2, Clock, Globe, Database, UserCheck
+  Shield, Lock, Key, Eye, AlertTriangle, CheckCircle,
+  FileText, Download, Trash2, Database
 } from 'lucide-react';
 import { SecuritySettings, PrivacySettings, SecurityIncident, GDPRRequest, ComplianceReport } from '@/types/security.types';
 import { securityService } from '@/services/securityService';
@@ -74,7 +73,7 @@ const SecuritySettingsPage: React.FC = () => {
         description: "Your security settings have been saved successfully.",
         action: <CheckCircle className="text-green-500" />
       });
-    } catch (error) {
+      } catch (_error) {
       toast({
         variant: "destructive",
         title: "Update Failed",
@@ -94,7 +93,7 @@ const SecuritySettingsPage: React.FC = () => {
         description: "Your privacy preferences have been saved.",
         action: <CheckCircle className="text-green-500" />
       });
-    } catch (error) {
+      } catch (_error) {
       toast({
         variant: "destructive",
         title: "Update Failed",
@@ -121,7 +120,7 @@ const SecuritySettingsPage: React.FC = () => {
         description: "Your personal data has been exported successfully.",
         action: <Download className="text-blue-500" />
       });
-    } catch (error) {
+      } catch (_error) {
       toast({
         variant: "destructive",
         title: "Export Failed",
@@ -144,7 +143,7 @@ const SecuritySettingsPage: React.FC = () => {
       // Reload GDPR requests to show the new request
       const requests = await securityService.getGDPRRequests(companyId);
       setGDPRRequests(requests);
-    } catch (error) {
+      } catch (_error) {
       toast({
         variant: "destructive",
         title: "Request Failed",
@@ -162,7 +161,7 @@ const SecuritySettingsPage: React.FC = () => {
         description: "Your security compliance report is ready.",
         action: <FileText className="text-blue-500" />
       });
-    } catch (error) {
+      } catch (_error) {
       toast({
         variant: "destructive",
         title: "Report Generation Failed",
