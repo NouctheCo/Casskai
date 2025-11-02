@@ -15,6 +15,7 @@ interface State {
   error?: Error;
 }
 
+// eslint-disable-next-line no-unused-vars
 class RouteErrorBoundaryClass extends Component<Props & { navigate: (path: string) => void }, State> {
   public state: State = {
     hasError: false,
@@ -25,7 +26,9 @@ class RouteErrorBoundaryClass extends Component<Props & { navigate: (path: strin
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    logger.error(`RouteErrorBoundary caught an error in ${this.props.routeName || 'unknown route'}:`, error, errorInfo);
+    logger.error(`RouteErrorBoundary caught an error in ${this.props.routeName || 'unknown route'}:`, error, {
+      componentStack: errorInfo.componentStack
+    });
     
     // Log error to external service in production
     if (process.env.NODE_ENV === 'production') {
