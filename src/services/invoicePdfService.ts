@@ -20,9 +20,7 @@ export class InvoicePdfService {
     const doc = new jsPDF();
     
     // Configuration des couleurs
-    const primaryColor = [41, 98, 255]; // Bleu
-    const darkGray = [55, 65, 81];
-    const lightGray = [156, 163, 175];
+  const primaryColor = [41, 98, 255]; // Bleu
     
     // 1. En-tête de l'entreprise
     this.addCompanyHeader(doc, companyData, primaryColor);

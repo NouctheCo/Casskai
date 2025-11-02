@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
-import { logger } from '@/utils/logger';
+import { logger } from '@/utils/appLogger';
 
 interface Props {
   children: ReactNode;
@@ -25,7 +25,6 @@ class RouteErrorBoundaryClass extends Component<Props & { navigate: (path: strin
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Centralise error logging
     logger.error(
       `RouteErrorBoundary caught an error in ${this.props.routeName || 'unknown route'}`,
       error,

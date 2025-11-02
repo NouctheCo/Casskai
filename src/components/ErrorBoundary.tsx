@@ -3,7 +3,7 @@ import { AlertTriangle, RefreshCw, Home, Bug, ChevronDown, ChevronUp } from 'luc
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { logger } from '@/utils/logger';
+import { logger } from '@/utils/appLogger';
 
 // Types pour l'Error Boundary
 interface ErrorBoundaryState {

@@ -1,6 +1,5 @@
 // src/services/journalsService.ts
 import { supabase } from '../lib/supabase';
-import type { Database } from '../types/supabase';
 
 type Journal = {
   id: string;

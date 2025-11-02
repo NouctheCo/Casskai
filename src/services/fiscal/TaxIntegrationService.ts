@@ -314,14 +314,14 @@ export class TaxIntegrationService {
   // Méthodes privées
   private async updateTaxDeclarationsFromAccounting(companyId: string, journalEntries: any[]) {
     // Traiter les écritures pour mettre à jour les déclarations
-    const tvaData = this.extractTVAFromEntries(journalEntries);
+  const _tvaData = this.extractTVAFromEntries(journalEntries);
 
     // Mettre à jour ou créer les déclarations TVA
     const currentMonth = new Date().toISOString().slice(0, 7);
     try {
       await frenchTaxComplianceService.generateCA3Declaration(companyId, currentMonth);
     } catch (error) {
-      console.log('CA3 déjà générée ou erreur:', error);
+      console.warn('CA3 déjà générée ou erreur:', error);
     }
   }
 
@@ -351,7 +351,7 @@ export class TaxIntegrationService {
     }, 0);
   }
 
-  private async integrateSocialChargesInTax(companyId: string, period: string, charges: number) {
+  private async integrateSocialChargesInTax(_companyId: string, _period: string, _charges: number) {
     // Intégrer les charges sociales dans les déclarations fiscales
     // Les charges sociales sont déductibles de l'IS
   }
@@ -369,7 +369,7 @@ export class TaxIntegrationService {
     return null;
   }
 
-  private async generateRecommendations(companyId: string, period: string) {
+  private async generateRecommendations(companyId: string, _period: string) {
     const recommendations = [];
 
     // Analyser la situation fiscale
@@ -400,7 +400,7 @@ export class TaxIntegrationService {
         });
       }
     } catch (error) {
-      console.log('Erreur génération recommandations:', error);
+      console.warn('Erreur génération recommandations:', error);
     }
 
     return recommendations;
@@ -440,7 +440,7 @@ export class TaxIntegrationService {
     }
   }
 
-  private extractTVAFromEntries(entries: any[]) {
+  private extractTVAFromEntries(_entries: any[]) {
     // Extraire les données TVA des écritures comptables
     return {
       collectee: 0,

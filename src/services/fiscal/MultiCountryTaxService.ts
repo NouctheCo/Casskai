@@ -616,7 +616,7 @@ export class MultiCountryTaxService {
   /**
    * Calcule la TVA pour une période donnée
    */
-  async calculateVAT(companyId: string, countryCode: string, period: string): Promise<any> {
+  async calculateVAT(_companyId: string, countryCode: string, period: string): Promise<any> {
     const config = this.getTaxConfig(countryCode);
     return {
       period,
@@ -632,7 +632,7 @@ export class MultiCountryTaxService {
   /**
    * Calcule l'impôt sur les sociétés
    */
-  async calculateCorporateTax(companyId: string, countryCode: string, period: string): Promise<any> {
+  async calculateCorporateTax(_companyId: string, countryCode: string, period: string): Promise<any> {
     const config = this.getTaxConfig(countryCode);
     return {
       period,
@@ -677,7 +677,7 @@ export class MultiCountryTaxService {
   /**
    * Configuration automatique des obligations fiscales
    */
-  async autoConfigureObligations(companyId: string, countryCode: string): Promise<any> {
+  async autoConfigureObligations(_companyId: string, countryCode: string): Promise<any> {
     const config = this.getTaxConfig(countryCode);
     const mandatoryDeclarations = config.declarations.filter(d => d.mandatory);
 
@@ -763,7 +763,7 @@ export class MultiCountryTaxService {
     };
   }
 
-  private async validateInternationalCompliance(countryCode: string, companyId: string, period: string) {
+  private async validateInternationalCompliance(countryCode: string, _companyId: string, _period: string) {
     const config = this.getTaxConfig(countryCode);
 
     const checks = [
