@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface Props {
   children: ReactNode;
@@ -24,18 +25,12 @@ class RouteErrorBoundaryClass extends Component<Props & { navigate: (path: strin
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error(`RouteErrorBoundary caught an error in ${this.props.routeName || 'unknown route'}:`, error, errorInfo);
-    
-    // Log error to external service in production
-    if (process.env.NODE_ENV === 'production') {
-      // TODO: Send error to monitoring service
-      console.error('Production error:', {
-        route: this.props.routeName,
-        error: error.message,
-        stack: error.stack,
-        timestamp: new Date().toISOString(),
-      });
-    }
+    // Centralise error logging
+    logger.error(
+      `RouteErrorBoundary caught an error in ${this.props.routeName || 'unknown route'}`,
+      error,
+      { route: this.props.routeName, errorInfo }
+    );
   }
 
   private handleGoHome = () => {
@@ -96,7 +91,7 @@ class RouteErrorBoundaryClass extends Component<Props & { navigate: (path: strin
                 Recharger l'application
               </Button>
               
-              {process.env.NODE_ENV === 'development' && this.state.error && (
+              {import.meta.env.DEV && this.state.error && (
                 <details className="mt-4 rounded-lg bg-gray-100 p-4">
                   <summary className="cursor-pointer text-sm font-medium text-gray-700">
                     Détails techniques (Développement uniquement)

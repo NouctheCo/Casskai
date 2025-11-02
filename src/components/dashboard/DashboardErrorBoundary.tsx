@@ -1,7 +1,8 @@
-import React, { Component, ReactNode } from 'react';
+import React, { Component, ReactNode, ErrorInfo } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { logger } from '@/utils/logger';
 
 interface Props {
   children: ReactNode;
@@ -11,7 +12,7 @@ interface Props {
 interface State {
   hasError: boolean;
   error: Error | null;
-  errorInfo: any;
+  errorInfo: ErrorInfo | null;
 }
 
 export class DashboardErrorBoundary extends Component<Props, State> {
@@ -32,9 +33,8 @@ export class DashboardErrorBoundary extends Component<Props, State> {
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: any) {
-    console.error('Dashboard Error Boundary caught an error:', error);
-    console.error('Error Info:', errorInfo);
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    logger.error('Dashboard Error Boundary caught an error', error, { errorInfo });
     
     this.setState({
       error,
@@ -89,7 +89,7 @@ export class DashboardErrorBoundary extends Component<Props, State> {
               </Button>
             </div>
 
-            {process.env.NODE_ENV === 'development' && this.state.errorInfo && (
+            {import.meta.env.DEV && this.state.errorInfo && (
               <details className="mt-4">
                 <summary className="cursor-pointer text-sm font-medium text-gray-600">
                   Détails de l'erreur (Développement)
