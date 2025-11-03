@@ -1594,7 +1594,8 @@ const articlesDatabase = {
       '  try {',
       '    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_ENDPOINT_SECRET);',
       '  } catch (error) {',
-      '    return res.status(400).send(`Webhook Error: ${err.message}`);',
+      '    const errorMsg = error instanceof Error ? error.message : String(error);',
+      '    return res.status(400).send(`Webhook Error: ${errorMsg}`);',
       '  }',
       '',
       '  switch (event.type) {',
@@ -1911,6 +1912,7 @@ const DocumentationArticlePage = () => {
           url: window.location.href
         });
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.log('Partage annulé');
       }
     } else {
@@ -1929,6 +1931,7 @@ const DocumentationArticlePage = () => {
         description: "Le lien de l'article a été copié dans le presse-papiers"
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       toast({
         variant: "destructive",
         title: "Erreur",

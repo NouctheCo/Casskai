@@ -374,6 +374,7 @@ export class InternationalTaxService {
 
       return { success: true };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur configuration fiscale:', error);
       return {
         success: false,

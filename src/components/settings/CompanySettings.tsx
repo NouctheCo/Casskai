@@ -159,6 +159,7 @@ export function CompanySettings() {
         console.warn('⚠️ [DEBUG] Aucune donnée retournée par Supabase');
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('💥 [DEBUG] Erreur dans catch chargement:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',
@@ -260,6 +261,7 @@ export function CompanySettings() {
       await loadCompanySettings();
       console.log('✅ [DEBUG] Données rechargées après sauvegarde');
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('💥 [DEBUG] Erreur dans catch:', error instanceof Error ? error.message : String(error));
       console.error('💥 [DEBUG] Type d\'erreur:', typeof error instanceof Error ? error.message : String(error));
       console.error('💥 [DEBUG] Erreur complète:', JSON.stringify(error instanceof Error ? error.message : String(error), null, 2));

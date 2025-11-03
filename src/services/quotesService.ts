@@ -169,6 +169,7 @@ class QuotesService {
 
       return quotes;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getQuotes:', error);
       throw error;
     }
@@ -229,6 +230,7 @@ class QuotesService {
         })) || []
       } as QuoteWithDetails;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getQuoteById:', error);
       throw error;
     }
@@ -319,6 +321,7 @@ class QuotesService {
 
       return createdQuote;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in createQuote:', error);
       throw error;
     }
@@ -346,6 +349,7 @@ class QuotesService {
 
       return updatedQuote;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in updateQuoteStatus:', error);
       throw error;
     }
@@ -420,6 +424,7 @@ class QuotesService {
 
       return invoice;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error converting quote to invoice:', error);
       throw error;
     }
@@ -440,6 +445,7 @@ class QuotesService {
         throw new Error(`Failed to delete quote: ${error.message}`);
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in deleteQuote:', error);
       throw error;
     }
@@ -472,6 +478,7 @@ class QuotesService {
       
       return `DEV-${year}-${paddedNumber}`;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error generating quote number:', error);
       // Fallback
       return `DEV-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`;

@@ -64,7 +64,8 @@ export const BudgetForecastView: React.FC<BudgetForecastViewProps> = ({
         setForecastData(data);
       }
     } catch (error) {
-      console.error('Error loading forecast:', err);
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error('Error loading forecast:', errorMsg);
       toast({
         title: 'Erreur',
         description: 'Une erreur inattendue s\'est produite',

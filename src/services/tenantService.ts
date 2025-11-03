@@ -44,6 +44,7 @@ export class TenantService {
 
       return true;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur d\'initialisation du tenant:', error instanceof Error ? error.message : String(error));
       return false;
     }
@@ -58,6 +59,7 @@ export class TenantService {
       
       return await response.json();
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       // Fallback : configuration locale pour le développement
       return this.getLocalTenantConfig(tenantId);
     }

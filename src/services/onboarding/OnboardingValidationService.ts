@@ -142,6 +142,7 @@ export class OnboardingValidationService {
           return { isValid: true, errors: [] };
       }
   } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         isValid: false,
         errors: [{

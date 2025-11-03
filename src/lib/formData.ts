@@ -606,6 +606,7 @@ export class FormValidator<T extends FieldValues = FieldValues> {
         };
 
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         if (error instanceof ZodError) {
           const zodErrors = this.convertZodErrors(error);
           return {
@@ -685,6 +686,7 @@ export class FormValidator<T extends FieldValues = FieldValues> {
       try {
         config.schema.parse(transformedValue);
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         if (error instanceof ZodError) {
           errors.push(...this.convertZodErrors(error, String(field)));
         }
@@ -702,6 +704,7 @@ export class FormValidator<T extends FieldValues = FieldValues> {
           warnings.push(...asyncResult.warnings);
         }
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         errors.push({
           field: String(field),
           message: this.t('validation.asyncError', { defaultValue: 'Erreur de validation' }),

@@ -51,6 +51,7 @@ export class DispatchService {
       return response;
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error(`❌ Error submitting document ${documentId} via ${channel}:`, error);
       
       if (error instanceof SubmissionError) {
@@ -89,6 +90,7 @@ export class DispatchService {
       return status;
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error(`❌ Error getting delivery status for ${messageId}:`, error);
       
       throw new EInvoicingError(
@@ -126,6 +128,7 @@ export class DispatchService {
       return result;
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error(`❌ Error cancelling document ${messageId}:`, error);
       
       throw new EInvoicingError(
@@ -168,6 +171,7 @@ export class DispatchService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error(`❌ Error testing channel ${channel}:`, error);
       
       return {
@@ -222,6 +226,7 @@ export class DispatchService {
         Array.from(this.providers.keys()).join(', '));
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error initializing providers:', error);
       throw new EInvoicingError(
         `Failed to initialize channel providers: ${(error as Error).message}`,
@@ -300,6 +305,7 @@ export class DispatchService {
         console.warn(`🔄 Submission attempt ${attempt}/${maxRetries}`);
         return await operation();
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         lastError = error as Error;
         
         if (attempt === maxRetries) {

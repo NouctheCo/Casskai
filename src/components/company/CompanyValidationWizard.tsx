@@ -84,6 +84,7 @@ export const CompanyValidationWizard: React.FC<CompanyValidationWizardProps> = (
       setValidation(result);
       setHasValidated(true);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur validation:', error instanceof Error ? error.message : String(error));
     } finally {
       setIsValidating(false);

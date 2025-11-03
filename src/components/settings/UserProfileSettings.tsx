@@ -106,6 +106,7 @@ export function UserProfileSettings() {
         });
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur chargement profil:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',
@@ -183,6 +184,7 @@ export function UserProfileSettings() {
         description: 'Vos informations ont été sauvegardées avec succès'
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur sauvegarde profil:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',
@@ -248,6 +250,7 @@ export function UserProfileSettings() {
         description: 'Votre photo de profil a été changée'
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur upload avatar:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',

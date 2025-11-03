@@ -21,6 +21,7 @@ const LanguageSwitcher = ({ className = "" }) => {
     try {
       await changeLanguageAndDetectCountry(langCode);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur changement de langue:', error instanceof Error ? error.message : String(error));
     }
   };
@@ -193,6 +194,7 @@ const UniversalSetupWizard = () => {
       setDetectedMarket(detected);
       setConfig(prev => ({ ...prev, market: detected }));
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       setDetectedMarket('france');
       setConfig(prev => ({ ...prev, market: 'france' }));
     }
@@ -215,6 +217,7 @@ const UniversalSetupWizard = () => {
       await new Promise(resolve => setTimeout(resolve, 2000));
       setConnectionStatus('success');
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       setConnectionStatus('error');
     }
   };
@@ -643,6 +646,7 @@ const UniversalSetupWizard = () => {
       console.log('Configuration finale:', config);
       alert(t('setup.installation.completed'));
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de l\'installation:', error instanceof Error ? error.message : String(error));
       alert(t('setup.installation.error'));
     }

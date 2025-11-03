@@ -25,9 +25,9 @@ export function useCountries() {
         setError(null);
         const data = await referentialsService.getCountries();
         setCountries(data);
-      } catch (err) {
+      } catch (errorMsg) {
         setError('Erreur lors du chargement des pays');
-        console.error(err);
+        console.error(errorMsg);
       } finally {
         setLoading(false);
       }
@@ -59,9 +59,9 @@ export function useSectors() {
         setError(null);
         const data = await referentialsService.getSectors();
         setSectors(data);
-      } catch (err) {
+      } catch (errorMsg) {
         setError('Erreur lors du chargement des secteurs');
-        console.error(err);
+        console.error(errorMsg);
       } finally {
         setLoading(false);
       }
@@ -74,8 +74,8 @@ export function useSectors() {
     try {
       const data = await referentialsService.searchSectors(searchTerm);
       return data;
-    } catch (err) {
-      console.error('Erreur recherche secteurs:', err);
+    } catch (errorMsg) {
+      console.error('Erreur recherche secteurs:', errorMsg);
       return sectors;
     }
   }, [sectors]);
@@ -103,9 +103,9 @@ export function useCompanySizes() {
         setError(null);
         const data = await referentialsService.getCompanySizes();
         setCompanySizes(data);
-      } catch (err) {
+      } catch (errorMsg) {
         setError('Erreur lors du chargement des tailles d\'entreprise');
-        console.error(err);
+        console.error(errorMsg);
       } finally {
         setLoading(false);
       }
@@ -139,9 +139,9 @@ export function useTimezones(popularOnly = false) {
           ? await referentialsService.getPopularTimezones()
           : await referentialsService.getTimezones();
         setTimezones(data);
-      } catch (err) {
+      } catch (errorMsg) {
         setError('Erreur lors du chargement des fuseaux horaires');
-        console.error(err);
+        console.error(errorMsg);
       } finally {
         setLoading(false);
       }
@@ -173,9 +173,9 @@ export function useCurrencies() {
         setError(null);
         const data = await referentialsService.getCurrencies();
         setCurrencies(data);
-      } catch (err) {
+      } catch (errorMsg) {
         setError('Erreur lors du chargement des devises');
-        console.error(err);
+        console.error(errorMsg);
       } finally {
         setLoading(false);
       }
@@ -213,9 +213,9 @@ export function useTaxRates(countryCode?: string) {
         setError(null);
         const data = await referentialsService.getTaxRates(countryCode);
         setTaxRates(data);
-      } catch (err) {
+      } catch (errorMsg) {
         setError('Erreur lors du chargement des taux de taxes');
-        console.error(err);
+        console.error(errorMsg);
       } finally {
         setLoading(false);
       }
@@ -250,6 +250,7 @@ export function useOnboardingReferentials() {
       const config = await referentialsService.getCountryConfig(countryCode);
       return config;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur configuration pays:', error);
       return null;
     }
@@ -281,6 +282,7 @@ export function useCountryAutoConfig() {
       const data = await referentialsService.getCountryConfig(countryCode);
       setConfig(data);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur auto-config pays:', error);
       setConfig(null);
     } finally {

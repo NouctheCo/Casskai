@@ -185,6 +185,7 @@ export const useWebVitals = (options?: {
   // Mark as ready once listeners are registered
   setIsLoading(false);
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.warn('[WebVitals] Erreur lors du chargement de web-vitals:', error);
         setIsLoading(false);
       }

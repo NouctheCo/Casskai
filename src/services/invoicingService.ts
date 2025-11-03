@@ -157,6 +157,7 @@ class InvoicingService {
 
       return enrichedInvoices;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getInvoices:', error);
       throw error;
     }
@@ -190,6 +191,7 @@ class InvoicingService {
         invoice_lines: data.invoice_lines || []
       } as InvoiceWithDetails;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getInvoiceById:', error);
       throw error;
     }
@@ -281,6 +283,7 @@ class InvoicingService {
 
       return createdInvoice;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in createInvoice:', error);
       throw error;
     }
@@ -307,6 +310,7 @@ class InvoicingService {
 
       return updatedInvoice;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in updateInvoiceStatus:', error);
       throw error;
     }
@@ -326,6 +330,7 @@ class InvoicingService {
         throw new Error(`Failed to delete invoice: ${error.message}`);
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in deleteInvoice:', error);
       throw error;
     }
@@ -357,6 +362,7 @@ class InvoicingService {
       
       return `FAC-${year}-${paddedNumber}`;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error generating invoice number:', error);
       // Fallback
       return `FAC-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`;
@@ -390,6 +396,7 @@ class InvoicingService {
 
       return await this.createInvoice(newInvoiceData, newLines);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error duplicating invoice:', error);
       throw error;
     }
@@ -423,6 +430,7 @@ class InvoicingService {
 
       return await this.createInvoice(creditNoteData, creditLines);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error creating credit note:', error);
       throw error;
     }
@@ -501,6 +509,7 @@ class InvoicingService {
         averageInvoiceValue
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error getting invoicing stats:', error);
       // Return default stats on error
       return {

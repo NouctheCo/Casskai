@@ -54,6 +54,7 @@ class TrialService {
 
       return { success: true, subscriptionId: data };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in createTrialSubscription:', error);
       return { success: false, error: 'Erreur inattendue' };
     }
@@ -75,6 +76,7 @@ class TrialService {
 
       return data || false;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in canCreateTrial:', error);
       return false;
     }
@@ -109,6 +111,7 @@ class TrialService {
         isExpired: trial.is_expired
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getUserTrialInfo:', error);
       return null;
     }
@@ -150,6 +153,7 @@ class TrialService {
 
       return { success: false, error: 'Erreur lors de la conversion' };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in convertTrialToPaid:', error);
       return { success: false, error: 'Erreur inattendue' };
     }
@@ -188,6 +192,7 @@ class TrialService {
 
       return { success: true };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in cancelTrial:', error);
       return { success: false, error: 'Erreur lors de l\'annulation de l\'essai' };
     }
@@ -207,6 +212,7 @@ class TrialService {
 
       return data || [];
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getTrialStatistics:', error);
       return [];
     }
@@ -245,6 +251,7 @@ class TrialService {
 
       return (data || []) as ExpiringTrial[];
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getExpiringTrials:', error);
       return [];
     }
@@ -264,6 +271,7 @@ class TrialService {
 
       return { expiredCount: data || 0 };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in checkAndExpireTrials:', error);
       return { expiredCount: 0, error: 'Erreur inattendue' };
     }

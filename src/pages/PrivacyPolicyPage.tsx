@@ -32,6 +32,7 @@ const PrivacyPolicyPage = () => {
       // Fallback français par défaut
       return fallbackFr;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('Translation error:', error);
       return fallbackFr;
     }

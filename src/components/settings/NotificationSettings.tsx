@@ -103,6 +103,7 @@ export function NotificationSettings() {
         });
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur chargement paramètres notifications:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',
@@ -153,6 +154,7 @@ export function NotificationSettings() {
       // Recharger les données après sauvegarde pour s'assurer que l'interface est à jour
       await loadNotificationSettings();
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur sauvegarde paramètres notifications:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',

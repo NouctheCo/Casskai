@@ -52,6 +52,7 @@ export const fecImportService = {
       return await this.importParsedData(parseResult, enterpriseId);
       
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors du parsing et import FEC:', error);
       return {
         success: false,
@@ -109,6 +110,7 @@ export const fecImportService = {
         }
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de l\'import FEC:', error);
       return {
         success: false,
@@ -125,6 +127,7 @@ export const fecImportService = {
       const company = await getCurrentCompany();
       return company ? (company as any).id : null;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de la récupération de l\'entreprise:', error);
       return null;
     }
@@ -158,6 +161,7 @@ export const fecImportService = {
         }
       } as any;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de l\'import FEC:', error);
       return {
         success: false,
@@ -297,6 +301,7 @@ export const fecImportService = {
         journals: []
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de la création des journaux:', error);
       throw error;
     }
@@ -361,6 +366,7 @@ export const fecImportService = {
         accounts: []
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de la création des comptes:', error);
       throw error;
     }
@@ -510,6 +516,7 @@ export const fecImportService = {
         errors
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de la création des écritures:', error);
       throw error;
     }

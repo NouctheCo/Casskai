@@ -64,6 +64,7 @@ class ConfigService {
         return this.config;
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       if (error instanceof Error) {
         console.error('Erreur lors de la lecture de la configuration:', error.message);
       } else {
@@ -85,6 +86,7 @@ class ConfigService {
       // Réinitialiser le client Supabase avec la nouvelle config
       await this.initializeSupabaseClient();
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de la sauvegarde de la configuration:', error);
       throw new Error('Impossible de sauvegarder la configuration');
     }
@@ -109,6 +111,7 @@ class ConfigService {
 
       return this.supabaseClient;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur d\'initialisation Supabase:', error);
       throw error;
     }
@@ -132,6 +135,7 @@ class ConfigService {
       // Succès si pas d'erreur ou si l'erreur est "table not found"
       return !error || error.code === 'PGRST116';
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Validation échouée:', error);
       return false;
     }
@@ -160,6 +164,7 @@ class ConfigService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur d\'initialisation de la base de données:', error);
       return {
         success: false,
@@ -193,6 +198,7 @@ class ConfigService {
 
       return result;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur lors de la création de l\'entreprise:', error);
       return {
         success: false,
@@ -212,6 +218,7 @@ class ConfigService {
 
       return result;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur lors de la finalisation:', error);
       return {
         success: false,
@@ -414,6 +421,7 @@ class ConfigService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         status: 'error',
         details: {
@@ -452,6 +460,7 @@ class ConfigService {
       this.saveConfig(defaultConfig);
       console.warn('Configuration par défaut sauvegardée avec succès:', defaultConfig);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de la sauvegarde de la configuration par défaut:', error);
     }
   }

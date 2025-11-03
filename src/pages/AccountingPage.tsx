@@ -273,6 +273,7 @@ export default function AccountingPageOptimized() {
         });
 
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.error('Erreur chargement données comptables:', error instanceof Error ? error.message : String(error));
       } finally {
         setIsLoading(false);

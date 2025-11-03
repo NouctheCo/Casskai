@@ -47,6 +47,7 @@ export class ErrorHandlingService {
       try {
         return await operation();
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         lastError = error as Error;
 
         // Log the attempt
@@ -150,7 +151,7 @@ export class ErrorHandlingService {
    * Création d'une erreur API structurée
    */
   private createApiError(error: unknown, context: ErrorContext): ApiError {
-    const err = error as Record<string, unknown>;
+    const errorMsg = error as Record<string, unknown>;
 
     // Map des erreurs Supabase communes
     const supabaseErrorMap: Record<string, Partial<ApiError>> = {
@@ -235,19 +236,19 @@ export class ErrorHandlingService {
       },
     };
 
-    const errorCode = String(err.code || (err.status ? String(err.status) : 'UNKNOWN'));
-    const errorStatus = typeof err.status === 'number' ? err.status : undefined;
+    const errorCode = String(errorMsg.code || (errorMsg.status ? String(errorMsg.status) : 'UNKNOWN'));
+    const errorStatus = typeof errorMsg.status === 'number' ? errorMsg.status : undefined;
     const errorMapping = supabaseErrorMap[errorCode] || (errorStatus ? httpErrorMap[errorStatus] : undefined) || {};
 
     const severity = this.determineSeverity(error, context);
 
     return {
       code: errorCode,
-      message: String(err.message || 'Une erreur inconnue s\'est produite'),
-      details: err.details || error,
+      message: String(errorMsg.message || 'Une erreur inconnue s\'est produite'),
+      details: errorMsg.details || error,
       severity,
       userMessage: errorMapping.userMessage || this.getDefaultUserMessage(severity),
-      technicalMessage: `[${context.service}/${context.method}] ${String(err.message)}`,
+      technicalMessage: `[${context.service}/${context.method}] ${String(errorMsg.message)}`,
       retryable: errorMapping.retryable ?? this.isRetryableError(error),
       ...errorMapping,
     };
@@ -257,7 +258,7 @@ export class ErrorHandlingService {
    * Détermine la sévérité d'une erreur selon le contexte
    */
   private determineSeverity(error: unknown, context: ErrorContext): ApiError['severity'] {
-    const err = error as Record<string, unknown>;
+    const errorMsg = error as Record<string, unknown>;
 
     // Erreurs critiques dans les services financiers
     if (context.service && ['invoicingService', 'accountingService', 'subscriptionService'].includes(context.service)) {
@@ -265,17 +266,17 @@ export class ErrorHandlingService {
     }
 
     // Erreurs de connexion/auth
-    if (err.status === 401 || err.code === 'PGRST301') {
+    if (errorMsg.status === 401 || errorMsg.code === 'PGRST301') {
       return 'high';
     }
 
     // Erreurs serveur
-    if (typeof err.status === 'number' && err.status >= 500) {
+    if (typeof errorMsg.status === 'number' && errorMsg.status >= 500) {
       return 'high';
     }
 
     // Erreurs client
-    if (typeof err.status === 'number' && err.status >= 400 && err.status < 500) {
+    if (typeof errorMsg.status === 'number' && errorMsg.status >= 400 && errorMsg.status < 500) {
       return 'medium';
     }
 
@@ -302,25 +303,25 @@ export class ErrorHandlingService {
    * Détermine si une erreur peut être retentée
    */
   private isRetryableError(error: unknown): boolean {
-    const err = error as Record<string, unknown>;
+    const errorMsg = error as Record<string, unknown>;
 
     // Erreurs réseau temporaires
-    if (err.name === 'NetworkError' || (typeof err.message === 'string' && err.message.includes('fetch'))) {
+    if (errorMsg.name === 'NetworkError' || (typeof errorMsg.message === 'string' && errorMsg.message.includes('fetch'))) {
       return true;
     }
 
     // Erreurs serveur temporaires
-    if (typeof err.status === 'number' && err.status >= 500 && err.status <= 504) {
+    if (typeof errorMsg.status === 'number' && errorMsg.status >= 500 && errorMsg.status <= 504) {
       return true;
     }
 
     // Rate limiting
-    if (err.status === 429) {
+    if (errorMsg.status === 429) {
       return true;
     }
 
     // Timeout
-    if (err.name === 'TimeoutError') {
+    if (errorMsg.name === 'TimeoutError') {
       return true;
     }
 

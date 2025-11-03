@@ -308,8 +308,8 @@ const initializeI18n = async () => {
       console.warn('i18n initialisé avec succès');
     }
     return true;
-  } catch (err) {
-    console.error('Erreur d\'initialisation i18n:', err);
+  } catch (errorMsg) {
+    console.error('Erreur d\'initialisation i18n:', errorMsg);
     // Fallback: initialiser avec une configuration minimale
     try {
       await i18n.init({
@@ -356,6 +356,7 @@ export function formatCurrency(amount: number, locale: string, currency?: string
       currency: detectedCurrency || 'EUR'
     }).format(amount);
   } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
     return `${amount} ${detectedCurrency || 'EUR'}`;
   }
 }
@@ -365,6 +366,7 @@ export function formatNumber(value: number, locale: string): string {
   try {
     return new Intl.NumberFormat(locale.startsWith('fr') ? 'fr-FR' : 'en-US').format(value);
   } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
     return value.toString();
   }
 }
@@ -375,6 +377,7 @@ export function formatDate(value: string | Date, locale: string): string {
     const date = typeof value === 'string' ? new Date(value) : value;
     return new Intl.DateTimeFormat(locale.startsWith('fr') ? 'fr-FR' : 'en-US').format(date);
   } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
     return value.toString();
   }
 }
@@ -441,6 +444,7 @@ export async function changeLanguageAndDetectCountry(lng: string) {
       return false;
     }
   } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
     console.error('Erreur lors du changement de langue:', error);
     return false;
   }
@@ -475,6 +479,7 @@ export function createSafeTranslation(i18nInstance = i18n) {
       // En dernier recours, retourner la clé
       return key;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn(`🌍 Translation error for key '${key}':`, error);
       return fallback || key;
     }

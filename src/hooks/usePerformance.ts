@@ -67,6 +67,7 @@ export const usePerformance = (modules?: ModuleDefinition[]) => {
         });
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de l\'analyse des performances:', error);
       setState(prev => ({ ...prev, isLoading: false }));
     }
@@ -170,8 +171,8 @@ export const useLazyLoading = <T>(
             .then(result => {
               setData(result);
             })
-            .catch(err => {
-              setError(err);
+            .catch(errorMsg => {
+              setError(errorMsg);
             })
             .finally(() => {
               setIsLoading(false);

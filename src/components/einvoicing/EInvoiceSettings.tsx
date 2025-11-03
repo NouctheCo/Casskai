@@ -54,6 +54,7 @@ export const EInvoiceSettings: React.FC<EInvoiceSettingsProps> = ({
       setShowDisableConfirm(false);
       await onRefresh();
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error disabling e-invoicing:', error instanceof Error ? error.message : String(error));
     } finally {
       setIsDisabling(false);

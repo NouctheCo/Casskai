@@ -106,6 +106,7 @@ export function useAccountingImport({
 
       return analysis;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       handleError(`Erreur analyse fichier: ${error.message}`);
       throw error;
     }
@@ -193,6 +194,7 @@ export function useAccountingImport({
       return finalResult;
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       handleError(`Erreur import: ${error.message}`);
       throw error;
     } finally {
@@ -262,6 +264,7 @@ export function useAccountingImport({
     try {
       await AutomaticLetterageService.performAutoLetterage(companyId);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('Erreur lettrage automatique:', error);
       // N'interrompt pas l'import si le lettrage échoue
     }
@@ -298,6 +301,7 @@ export function useAccountingImport({
     try {
       return await AccountingValidationService.validateJournalEntry(entry, companyId);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       handleError(`Erreur validation: ${error.message}`);
       throw error;
     }
@@ -313,6 +317,7 @@ export function useAccountingImport({
     try {
       return VATCalculationService.calculateVAT(params);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       handleError(`Erreur calcul TVA: ${error.message}`);
       throw error;
     }
@@ -335,6 +340,7 @@ export function useAccountingImport({
         companyId
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       handleError(`Erreur génération TVA: ${error.message}`);
       throw error;
     }
@@ -345,6 +351,7 @@ export function useAccountingImport({
     try {
       return await AccountingValidationService.detectDuplicates(entries, companyId);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       handleError(`Erreur détection doublons: ${error.message}`);
       throw error;
     }

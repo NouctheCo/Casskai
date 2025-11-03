@@ -657,6 +657,7 @@ export function ValidatedForm<T extends FieldValues = FieldValues>({
       
       await onValidSubmit(data);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de la soumission:', error);
       showValidationErrors([{
         field: 'form',

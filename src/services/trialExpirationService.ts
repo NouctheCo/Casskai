@@ -65,6 +65,7 @@ class TrialExpirationService {
         }));
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('[TrialExpirationService] Erreur inattendue:', error instanceof Error ? error.message : String(error));
     }
   }
@@ -109,6 +110,7 @@ class TrialExpirationService {
         daysRemaining: status.days_remaining
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('[TrialExpirationService] Erreur vérification statut utilisateur:', error instanceof Error ? error.message : String(error));
       return {
         isExpired: true,
@@ -154,6 +156,7 @@ class TrialExpirationService {
         }));
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('[TrialExpirationService] Erreur application restrictions:', error instanceof Error ? error.message : String(error));
     }
   }
@@ -183,6 +186,7 @@ class TrialExpirationService {
         await this.applyPlanRestrictions(userId, status.planId);
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('[TrialExpirationService] Erreur gestion expiration essai:', error instanceof Error ? error.message : String(error));
     }
   }

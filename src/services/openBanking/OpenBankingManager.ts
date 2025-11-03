@@ -68,6 +68,7 @@ export class OpenBankingManager {
       this.isInitialized = true;
       console.warn('Open Banking Manager initialized');
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = (error as { message?: string })?.message || 'unknown';
       throw new Error(`Failed to initialize Open Banking Manager: ${message}`);
     }
@@ -153,6 +154,7 @@ export class OpenBankingManager {
         this.providers.set(providerConfig.id, provider);
         console.warn(`Provider ${providerConfig.id} initialized`);
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.error(`Failed to initialize provider ${providerConfig.id}:`, error instanceof Error ? error.message : String(error));
       }
     }));
@@ -177,6 +179,7 @@ export class OpenBankingManager {
 
       console.warn('Auxiliary services initialized');
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = (error as { message?: string })?.message || 'unknown';
       throw new Error(`Failed to initialize services: ${message}`);
     }
@@ -222,6 +225,7 @@ export class OpenBankingManager {
 
       return result;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = (error as { message?: string })?.message || 'unknown';
       return this.createErrorResponse('CONNECTION_CREATION_ERROR', message);
     }
@@ -241,6 +245,7 @@ export class OpenBankingManager {
 
       return this.createErrorResponse('CONNECTION_NOT_FOUND', 'Connection not found');
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = (error as { message?: string })?.message || 'unknown';
       return this.createErrorResponse('CONNECTION_RETRIEVAL_ERROR', message);
     }
@@ -270,6 +275,7 @@ export class OpenBankingManager {
         data: updatedConnections
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = (error as { message?: string })?.message || 'unknown';
       return this.createErrorResponse('USER_CONNECTIONS_ERROR', message);
     }
@@ -290,6 +296,7 @@ export class OpenBankingManager {
 
       return await provider.refreshConnection(connectionId);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
   const message = (error as { message?: string })?.message || 'unknown';
   return this.createErrorResponse('CONNECTION_REFRESH_ERROR', message);
     }
@@ -322,6 +329,7 @@ export class OpenBankingManager {
 
       return result;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
   const message = (error as { message?: string })?.message || 'unknown';
   return this.createErrorResponse('CONNECTION_DELETION_ERROR', message);
     }
@@ -344,6 +352,7 @@ export class OpenBankingManager {
 
       return await provider.getAccounts(connectionId);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
   const message = (error as { message?: string })?.message || 'unknown';
   return this.createErrorResponse('ACCOUNTS_RETRIEVAL_ERROR', message);
     }
@@ -375,6 +384,7 @@ export class OpenBankingManager {
 
       return await provider.getTransactions(connectionId, accountId, options);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
   const message = (error as { message?: string })?.message || 'unknown';
   return this.createErrorResponse('TRANSACTIONS_RETRIEVAL_ERROR', message);
     }
@@ -403,6 +413,7 @@ export class OpenBankingManager {
 
       return result;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = (error as { message?: string })?.message || 'unknown';
       return this.createErrorResponse('SYNC_ERROR', message);
     }
@@ -435,6 +446,7 @@ export class OpenBankingManager {
 
       return await this.reconciliationService.reconcileTransaction(mockTransaction, accountingEntries);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = (error as { message?: string })?.message || 'unknown';
       return this.createErrorResponse('RECONCILIATION_ERROR', message);
     }
@@ -452,6 +464,7 @@ export class OpenBankingManager {
     try {
       return await this.webhookManager.receiveWebhook(providerId, payload, signature, headers);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = (error as { message?: string })?.message || 'unknown';
       return this.createErrorResponse('WEBHOOK_PROCESSING_ERROR', message);
     }
@@ -468,6 +481,7 @@ export class OpenBankingManager {
     try {
       return await this.exportService.createExportJob(userId, formatId, parameters);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = (error as { message?: string })?.message || 'unknown';
       return this.createErrorResponse('EXPORT_CREATION_ERROR', message);
     }
@@ -478,6 +492,7 @@ export class OpenBankingManager {
     try {
       return await this.exportService.getExportJob(jobId);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = (error as { message?: string })?.message || 'unknown';
       return this.createErrorResponse('EXPORT_STATUS_ERROR', message);
     }
@@ -531,6 +546,7 @@ export class OpenBankingManager {
         providerHealth[providerId] = isHealthy;
         if (isHealthy) healthyProviders++;
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         providerHealth[providerId] = false;
       }
     }

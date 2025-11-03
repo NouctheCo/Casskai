@@ -36,6 +36,7 @@ export class CompanySettingsService {
 
       return mapRowToSettings(data as CompanyRow);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de la récupération des paramètres:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -77,6 +78,7 @@ export class CompanySettingsService {
 
       return mapRowToSettings(data as CompanyRow);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de la mise à jour des paramètres:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -308,6 +310,7 @@ export class CompanySettingsService {
       const settings = JSON.parse(jsonData) as Partial<CompanySettings>;
       return await this.updateCompanySettings(companyId, settings);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de l\'import des paramètres:', error instanceof Error ? error.message : String(error));
       throw new Error('Format JSON invalide');
     }
@@ -329,8 +332,8 @@ export const useCompanySettings = (companyId: string) => {
       setError(null);
       const data = await CompanySettingsService.getCompanySettings(companyId);
       setSettings(data);
-    } catch (err: any) {
-      setError(err.message || 'Erreur lors du chargement des paramètres');
+    } catch (errorMsg: any) {
+      setError(errorMsg.message || 'Erreur lors du chargement des paramètres');
     } finally {
       setLoading(false);
     }
@@ -345,9 +348,9 @@ export const useCompanySettings = (companyId: string) => {
       const updated = await CompanySettingsService.updateCompanySettings(companyId, updates);
       setSettings(updated);
       return updated;
-    } catch (err: any) {
-      setError(err.message || 'Erreur lors de la sauvegarde');
-      throw err;
+    } catch (errorMsg: any) {
+      setError(errorMsg.message || 'Erreur lors de la sauvegarde');
+      throw errorMsg;
     }
   }, [companyId]);
 

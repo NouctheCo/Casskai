@@ -250,6 +250,7 @@ export const useABTest = (config: ABTestConfig): ABTestHookResult => {
         }
 
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.error('[ABTest] Erreur d\'initialisation:', error);
         setResult({
           variant: config.defaultVariant || 'control',

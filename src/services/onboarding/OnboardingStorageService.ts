@@ -98,6 +98,7 @@ export class OnboardingStorageService {
     try {
       return window.localStorage.getItem(this.getSessionTokenKey(userId));
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('Unable to read onboarding session token from localStorage:', error);
       return null;
     }
@@ -111,6 +112,7 @@ export class OnboardingStorageService {
     try {
       window.localStorage.setItem(this.getSessionTokenKey(userId), token);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('Unable to persist onboarding session token:', error);
     }
   }
@@ -123,6 +125,7 @@ export class OnboardingStorageService {
     try {
       window.localStorage.removeItem(this.getSessionTokenKey(userId));
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('Unable to clear onboarding session token:', error);
     }
   }
@@ -197,6 +200,7 @@ export class OnboardingStorageService {
     try {
       window.localStorage.setItem(this.getLocalKey(userId), JSON.stringify(data));
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('Unable to save onboarding draft to localStorage:', error);
     }
   }
@@ -213,6 +217,7 @@ export class OnboardingStorageService {
       const stored = window.localStorage.getItem(this.getLocalKey(userId));
       return stored ? (JSON.parse(stored) as OnboardingData) : null;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('Unable to read onboarding draft from localStorage:', error);
       return null;
     }
@@ -229,6 +234,7 @@ export class OnboardingStorageService {
     try {
       window.localStorage.removeItem(this.getLocalKey(userId));
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('Unable to clear onboarding draft from localStorage:', error);
     }
   }
@@ -430,6 +436,7 @@ export class OnboardingStorageService {
         data: null
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error while retrieving onboarding session:', error);
       return {
         success: false,
@@ -455,6 +462,7 @@ export class OnboardingStorageService {
         data: normalized
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error while saving onboarding data:', error);
       return {
         success: false,
@@ -501,6 +509,7 @@ export class OnboardingStorageService {
         success: true
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error while clearing onboarding data:', error);
       return {
         success: false,
@@ -549,6 +558,7 @@ export class OnboardingStorageService {
         data: null
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error while fetching onboarding data:', error);
       return {
         success: false,

@@ -91,6 +91,7 @@ class BankImportService {
             transactions.push(transaction);
           }
         } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
           errors.push(`Ligne ${i + 2}: ${error.message}`);
         }
       }
@@ -111,6 +112,7 @@ class BankImportService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur import CSV:', error);
       return {
         success: false,
@@ -157,6 +159,7 @@ class BankImportService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur import OFX:', error);
       return {
         success: false,
@@ -200,6 +203,7 @@ class BankImportService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur import QIF:', error);
       return {
         success: false,
@@ -249,6 +253,7 @@ class BankImportService {
           transactions.push(transaction);
         }
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.warn('Erreur parsing transaction OFX:', error);
       }
     }
@@ -346,6 +351,7 @@ class BankImportService {
         imported++;
         
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.error('Erreur traitement transaction:', error);
       }
     }
@@ -437,6 +443,7 @@ class BankImportService {
       };
       
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       throw new Error(`Erreur parsing transaction: ${error.message}`);
     }
   }
@@ -523,6 +530,7 @@ class BankImportService {
       return data || [];
       
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur récupération comptes bancaires:', error);
       return [];
     }
@@ -543,6 +551,7 @@ class BankImportService {
       return data;
       
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur création compte bancaire:', error);
       return null;
     }

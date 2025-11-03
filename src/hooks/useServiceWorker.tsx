@@ -57,6 +57,7 @@ export const useServiceWorker = (): [ServiceWorkerState, ServiceWorkerActions] =
 
       console.log('✅ Service Worker enregistré');
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur enregistrement Service Worker:', error);
     }
   };

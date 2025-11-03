@@ -113,6 +113,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
         setRecentModules(prefs.recent || []);
         setExpandedCategories(new Set(prefs.expanded || ['finances']));
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.error('Error loading sidebar preferences:', error instanceof Error ? error.message : String(error));
       }
     }

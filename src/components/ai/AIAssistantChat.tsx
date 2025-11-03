@@ -199,6 +199,7 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
         throw new Error(response.error || 'Erreur lors de la communication avec l\'IA');
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const errorMessage: AIAssistantMessage = {
         id: Date.now().toString(),
         role: 'assistant',

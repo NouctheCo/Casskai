@@ -28,6 +28,7 @@ class AIVisualizationService {
       this.isInitialized = true;
       console.warn('AI Visualization Service initialized successfully');
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Failed to initialize AI Visualization Service:', error);
       throw error;
     }
@@ -91,6 +92,7 @@ class AIVisualizationService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error generating heatmap data:', error);
       return {
         success: false,
@@ -236,6 +238,7 @@ class AIVisualizationService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error generating Sankey data:', error);
       return {
         success: false,
@@ -327,6 +330,7 @@ class AIVisualizationService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error generating treemap data:', error);
       return {
         success: false,
@@ -499,6 +503,7 @@ class AIVisualizationService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error generating time series data:', error);
       return {
         success: false,

@@ -118,11 +118,13 @@ export default function PricingPage() {
           window.location.href = data.url;
         }
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.error('🛒 [PricingPage] Stripe redirect failed or timed out:', error);
         console.warn('🛒 [PricingPage] Using manual redirect to URL:', data.url);
         window.location.href = data.url;
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors du choix du plan:', error);
       if (error.name === 'TypeError') {
         showToast('⚠️ Problème de connexion réseau. Vérifiez votre connexion Internet et réessayez.', 'warning');

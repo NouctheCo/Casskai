@@ -133,6 +133,7 @@ export function ReportViewer() {
 
       toast.success(`Rapport ${REPORT_TYPES.find(t => t.value === reportType)?.label} généré avec succès!`);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de la génération du rapport:', error);
       toast.error(`Erreur lors de la génération du rapport: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     } finally {

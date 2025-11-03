@@ -61,6 +61,7 @@ export class BudgetService {
 
       return { data, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching budgets:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
@@ -85,6 +86,7 @@ export class BudgetService {
 
       return { data, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching budget:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
@@ -116,6 +118,7 @@ export class BudgetService {
 
       return { data, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching active budget:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
@@ -211,6 +214,7 @@ export class BudgetService {
       return this.getBudgetById(budget.id);
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error creating budget:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
@@ -319,6 +323,7 @@ export class BudgetService {
       return this.getBudgetById(budgetId);
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error updating budget:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
@@ -353,6 +358,7 @@ export class BudgetService {
       return this.getBudgetById(budgetId);
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error updating budget status:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
@@ -372,6 +378,7 @@ export class BudgetService {
 
       return { error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error deleting budget:', error instanceof Error ? error.message : String(error));
       return { error };
     }
@@ -402,6 +409,7 @@ export class BudgetService {
 
       return { data: data || [], error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error analyzing budget variances:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
@@ -424,6 +432,7 @@ export class BudgetService {
 
       return { data, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error comparing budgets:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
@@ -448,6 +457,7 @@ export class BudgetService {
 
       return { data: data || [], error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching budget templates:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
@@ -498,6 +508,7 @@ export class BudgetService {
       return this.createBudget(companyId, budgetData);
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error creating budget from template:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
@@ -552,6 +563,7 @@ export class BudgetService {
       return this.createBudget(sourceBudget.company_id, budgetData);
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error duplicating budget:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }

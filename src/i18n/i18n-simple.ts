@@ -55,6 +55,7 @@ if (!i18n.isInitialized) {
     
     console.log('✅ i18n initialized successfully');
   } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
     console.error('❌ Failed to initialize i18n:', error);
     
     // Fallback initialization

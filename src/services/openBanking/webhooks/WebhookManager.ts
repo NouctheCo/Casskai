@@ -40,6 +40,7 @@ export class WebhookManager {
   this.isInitialized = true;
   console.warn(`Webhook manager initialized with ${configs.length} providers`);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
   const message = (error as { message?: string })?.message || 'unknown';
   throw new Error(`Failed to initialize webhook manager: ${message}`);
     }
@@ -114,6 +115,7 @@ export class WebhookManager {
         data: undefined
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Webhook processing error:', error instanceof Error ? error.message : String(error));
       const message = (error as { message?: string })?.message || 'unknown';
       return {
@@ -228,6 +230,7 @@ export class WebhookManager {
         transaction: normalizedTransaction
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error handling transaction created:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -250,6 +253,7 @@ export class WebhookManager {
         transaction: normalizedTransaction
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error handling transaction updated:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -266,6 +270,7 @@ export class WebhookManager {
         account: accountData
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error handling account updated:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -288,6 +293,7 @@ export class WebhookManager {
         status
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error handling connection status change:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -306,6 +312,7 @@ export class WebhookManager {
         error: errorInfo
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error handling connection error:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -321,6 +328,7 @@ export class WebhookManager {
         connectionId: event.connectionId
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error handling connection expired:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -353,6 +361,7 @@ export class WebhookManager {
         }
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error handling connection issue:', error instanceof Error ? error.message : String(error));
     }
   }
@@ -467,6 +476,7 @@ export class WebhookManager {
       // const reconciliationService = new ReconciliationService();
       // await reconciliationService.reconcileTransaction(transaction, accountingEntries);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Auto-reconciliation failed:', error instanceof Error ? error.message : String(error));
     }
   }
@@ -484,6 +494,7 @@ export class WebhookManager {
       //   payload: data
       // });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Failed to notify clients:', error instanceof Error ? error.message : String(error));
     }
   }
@@ -498,6 +509,7 @@ export class WebhookManager {
       //   this.renewConnection(connectionId);
       // }, 5 * 60 * 1000); // 5 minutes
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Failed to schedule connection renewal:', error instanceof Error ? error.message : String(error));
     }
   }
@@ -512,6 +524,7 @@ export class WebhookManager {
         message: 'Please re-authenticate your bank connection'
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Failed to request re-authentication:', error instanceof Error ? error.message : String(error));
     }
   }
@@ -531,6 +544,7 @@ export class WebhookManager {
         'SHA-256'
       );
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Signature validation error:', error instanceof Error ? error.message : String(error));
       return false;
     }
@@ -568,6 +582,7 @@ export class WebhookManager {
       // En production, sauvegarder en base de données pour analyse
   console.warn('Saving failed event for analysis:', event.id);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Failed to save failed event:', error instanceof Error ? error.message : String(error));
     }
   }
@@ -676,6 +691,7 @@ export class WebhookMiddleware {
           });
         }
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.error('Webhook middleware error');
         res.status(500).json({
           error: 'Internal server error'
@@ -708,6 +724,7 @@ export class WebhookMiddleware {
 
         next();
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         res.status(500).json({
           error: 'Validation failed'
         });

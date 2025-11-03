@@ -211,6 +211,7 @@ function useSubscriptionLogic(enterpriseId?: string) {
         cancelUrl: `${window.location.origin}/settings/subscription?canceled=true`
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error creating subscription:', error instanceof Error ? error.message : String(error));
       // TODO: Afficher une notification d'erreur
     } finally {
@@ -227,6 +228,7 @@ function useSubscriptionLogic(enterpriseId?: string) {
         `${window.location.origin}/settings/subscription`
       );
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error accessing customer portal:', error instanceof Error ? error.message : String(error));
       // TODO: Afficher une notification d'erreur
     }

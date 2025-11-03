@@ -67,6 +67,7 @@ export function StripeIntegrationTest() {
       });
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       addTestResult({
         success: false,
         message: `Erreur inattendue: ${error instanceof Error ? error.message : 'Erreur inconnue'}`

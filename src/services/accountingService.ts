@@ -224,6 +224,7 @@ export class AccountingService {
       
       return { success: false, accountsCreated: 0, error: 'Standard comptable non supporté' };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur création plan comptable:', error);
       return { success: false, accountsCreated: 0, error: error.message };
     }
@@ -256,6 +257,7 @@ export class AccountingService {
 
       return { success: true, accountsCreated: data?.length || 0 };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur création comptes PCG:', error);
       return { success: false, accountsCreated: 0, error: error.message };
     }
@@ -315,6 +317,7 @@ export class AccountingService {
 
       return { success: true, accountsCreated: data?.length || 0 };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur création comptes SYSCOHADA:', error);
       return { success: false, accountsCreated: 0, error: error.message };
     }

@@ -118,6 +118,7 @@ export class PPFProvider extends ChannelProvider {
       }
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       this.logActivity('PPF submission failed', { documentId, error: (error as Error).message });
       this.handleApiError(error, 'submitDocument');
     }
@@ -164,6 +165,7 @@ export class PPFProvider extends ChannelProvider {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       this.logActivity('PPF status check failed', { messageId, error: (error as Error).message });
       this.handleApiError(error, 'getDeliveryStatus');
     }
@@ -192,6 +194,7 @@ export class PPFProvider extends ChannelProvider {
       return isAvailable;
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       this.logActivity('PPF availability check failed', { error: (error as Error).message });
       return false;
     }
@@ -320,6 +323,7 @@ export class PPFProvider extends ChannelProvider {
       });
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       this.logActivity('PPF token refresh failed', { error: (error as Error).message });
       throw new EInvoicingError(
         `Failed to obtain PPF access token: ${(error as Error).message}`,

@@ -309,6 +309,7 @@ export class EntryTemplatesService {
       const result = this.evaluateMathExpression(processedFormula);
       return Math.round(result * 100) / 100; // Arrondi à 2 décimales
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       throw new Error(`Erreur dans la formule "${formula}": ${error.message}`);
     }
   }
@@ -329,6 +330,7 @@ export class EntryTemplatesService {
       // Utilisation de Function pour éviter eval() direct
       return new Function(`"use strict"; return (${cleanExpression})`)();
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       throw new Error(`Expression invalide: ${cleanExpression}`);
     }
   }
@@ -557,6 +559,7 @@ export class EntryTemplatesService {
           }
         }
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         errors.push(`Template ${template.name}: ${error.message}`);
       }
     }

@@ -71,6 +71,23 @@ interface AlertData {
 
 type WidgetData = MetricData | TableData | ChartData | AlertData | Record<string, unknown>;
 
+// Type guards
+function isMetricData(data: WidgetData): data is MetricData {
+  return 'value' in data || Object.keys(data).length === 0;
+}
+
+function isTableData(data: WidgetData): data is TableData {
+  return 'invoices' in data || Object.keys(data).length === 0;
+}
+
+function isChartData(data: WidgetData): data is ChartData {
+  return 'chartData' in data || Object.keys(data).length === 0;
+}
+
+function isAlertData(data: WidgetData): data is AlertData {
+  return 'alerts' in data || Object.keys(data).length === 0;
+}
+
 interface DashboardWidgetRendererProps {
   widget: DashboardWidget;
   data?: WidgetData;
@@ -151,15 +168,15 @@ export function DashboardWidgetRenderer({ widget, data = {}, isLoading = false, 
 
     switch (widget.type) {
       case 'metric':
-        return <MetricWidget widget={widget} data={data} />;
+        return isMetricData(data) ? <MetricWidget widget={widget} data={data} /> : null;
       case 'table':
-        return <TableWidget widget={widget} data={data} />;
+        return isTableData(data) ? <TableWidget widget={widget} data={data} /> : null;
       case 'chart':
-        return <ChartWidget widget={widget} data={data} />;
+        return isChartData(data) ? <ChartWidget widget={widget} data={data} /> : null;
       case 'quick-action':
         return <QuickActionWidget actions={quickActions || []} />;
       case 'alert':
-        return <AlertWidget widget={widget} data={data} />;
+        return isAlertData(data) ? <AlertWidget widget={widget} data={data} /> : null;
       default:
         return (
           <div className="flex items-center justify-center h-32 text-muted-foreground">

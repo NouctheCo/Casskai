@@ -114,6 +114,7 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
       const loadedTemplates = await EntryTemplatesService.getAllTemplates(companyId);
       setTemplates(loadedTemplates);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       if (error instanceof Error) {
         onError?.(`Erreur chargement templates: ${error.message}`);
       } else {
@@ -152,6 +153,7 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
       setCsvMapping(analysis.suggestedMapping || []);
       
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       if (error instanceof Error) {
         onError?.(`Erreur analyse fichier: ${error.message}`);
       } else {
@@ -247,6 +249,7 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
       onImportComplete?.(result);
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       setImportSession(prev => prev ? { ...prev, status: 'failed' } : null);
       if (error instanceof Error) {
         onError?.(`Erreur import: ${error.message}`);
@@ -274,6 +277,7 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
       }
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       if (error instanceof Error) {
         onError?.(`Erreur application template: ${error.message}`);
       } else {
@@ -288,6 +292,7 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
       const result = await AutomaticLetterageService.performAutoLetterage(companyId);
       console.warn('Résultat lettrage:', result);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       if (error instanceof Error) {
         onError?.(`Erreur lettrage: ${error.message}`);
       } else {

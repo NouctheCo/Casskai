@@ -139,6 +139,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
         });
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue lors de l\'enregistrement';
       console.error('Erreur lors de l\'enregistrement du contrat:', errorMessage);
       toast({

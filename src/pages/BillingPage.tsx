@@ -112,6 +112,7 @@ const BillingPage: React.FC = () => {
         });
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Subscription error:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur inattendue",
@@ -146,6 +147,7 @@ const BillingPage: React.FC = () => {
         });
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Plan change error:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur inattendue",
@@ -180,6 +182,7 @@ const BillingPage: React.FC = () => {
       }
       // If successful, the portal will open in a new tab
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error opening billing portal:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur inattendue",
@@ -217,6 +220,7 @@ const BillingPage: React.FC = () => {
       }
       // Si succès, le portail s'ouvrira dans un nouvel onglet
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error managing payment method:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur inattendue",
@@ -238,6 +242,7 @@ const BillingPage: React.FC = () => {
       // Recharger les données d'abonnement pour réfléter les changements
       await refreshSubscription();
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error setting default payment method:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur",
@@ -276,6 +281,7 @@ const BillingPage: React.FC = () => {
         });
       }, 2000);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error downloading PDF:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur de téléchargement",
@@ -314,6 +320,7 @@ const BillingPage: React.FC = () => {
         });
       }, 2000);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error viewing invoice:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur d'affichage",

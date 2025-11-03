@@ -129,6 +129,7 @@ export function useWidgetData(widgets: DashboardWidget[]) {
       }));
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error(`Error fetching data for widget ${widget.id}:`, error);
 
       // Messages d'erreur professionnels selon le type de widget et l'erreur

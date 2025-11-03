@@ -88,6 +88,7 @@ export const BudgetFormModern: React.FC<BudgetFormModernProps> = ({
         })) || []
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       toast({
         title: "Erreur",
         description: "Une erreur s'est produite lors du chargement",
@@ -165,6 +166,7 @@ export const BudgetFormModern: React.FC<BudgetFormModernProps> = ({
         onSave(result.data);
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       toast({
         title: "Erreur",
         description: "Une erreur inattendue s'est produite",

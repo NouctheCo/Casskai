@@ -208,6 +208,7 @@ export default function FECImportTab() {
       });
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       toast({
         variant: "destructive",
         title: "Erreur d'analyse",
@@ -254,6 +255,7 @@ export default function FECImportTab() {
       });
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       toast({
         variant: "destructive",
         title: "Erreur d'import",

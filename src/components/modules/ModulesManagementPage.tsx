@@ -495,6 +495,7 @@ export default function ModulesManagementPage() {
 
       console.log(`Module ${key} ${active ? 'activé' : 'désactivé'} avec succès`);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors du toggle du module:', error instanceof Error ? error.message : String(error));
     }
   };

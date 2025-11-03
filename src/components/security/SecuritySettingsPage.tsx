@@ -47,6 +47,7 @@ const SecuritySettingsPage: React.FC = () => {
       setSecurityIncidents(incidents);
       setGDPRRequests(requests);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Failed to load security data:', error instanceof Error ? error.message : String(error));
       toast({
         variant: "destructive",
@@ -74,6 +75,7 @@ const SecuritySettingsPage: React.FC = () => {
         action: <CheckCircle className="text-green-500" />
       });
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       toast({
         variant: "destructive",
         title: "Update Failed",
@@ -94,6 +96,7 @@ const SecuritySettingsPage: React.FC = () => {
         action: <CheckCircle className="text-green-500" />
       });
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       toast({
         variant: "destructive",
         title: "Update Failed",
@@ -121,6 +124,7 @@ const SecuritySettingsPage: React.FC = () => {
         action: <Download className="text-blue-500" />
       });
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       toast({
         variant: "destructive",
         title: "Export Failed",
@@ -144,6 +148,7 @@ const SecuritySettingsPage: React.FC = () => {
       const requests = await securityService.getGDPRRequests(companyId);
       setGDPRRequests(requests);
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       toast({
         variant: "destructive",
         title: "Request Failed",
@@ -162,6 +167,7 @@ const SecuritySettingsPage: React.FC = () => {
         action: <FileText className="text-blue-500" />
       });
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       toast({
         variant: "destructive",
         title: "Report Generation Failed",

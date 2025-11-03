@@ -50,7 +50,7 @@ export interface Opportunity {
   client_name?: string;
   contact_id?: string;
   contact_name?: string;
-  stage: 'prospecting' | 'qualification' | 'proposal' | 'negotiation' | 'closing' | 'won' | 'lost';
+  stage: OpportunityStatus;
   value: number;
   probability: number;
   expected_close_date: string;

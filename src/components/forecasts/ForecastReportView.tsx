@@ -61,6 +61,7 @@ const ForecastReportView: React.FC<ForecastReportViewProps> = ({
 
       await forecastsService.generatePDFReport(forecast as any);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de la génération du PDF:', error instanceof Error ? error.message : String(error));
     }
   };

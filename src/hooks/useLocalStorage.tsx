@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
           const item = window.localStorage.getItem(key);
           return item ? JSON.parse(item) : initialValue;
         } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
           console.error(error);
           return initialValue;
         }
@@ -18,6 +19,7 @@ import React, { useState, useEffect } from 'react';
           setStoredValue(valueToStore);
           window.localStorage.setItem(key, JSON.stringify(valueToStore));
         } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
           console.error(error);
         }
       };

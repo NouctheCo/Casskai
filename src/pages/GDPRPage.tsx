@@ -45,6 +45,7 @@ const GDPRPage = () => {
       if (currentLang.startsWith('es') && fallbackEs) return fallbackEs;
       return fallbackFr;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('Translation error:', error);
       return fallbackFr;
     }
@@ -250,6 +251,7 @@ const GDPRPage = () => {
       });
       
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error submitting GDPR request:', error instanceof Error ? error.message : String(error));
       toast({
         variant: "destructive",

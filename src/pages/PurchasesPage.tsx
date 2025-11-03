@@ -76,6 +76,7 @@ export default function PurchasesPage() {
       setPurchases(purchasesResult.data);
       setStats(statsResult.data);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error loading purchases:', error);
       toast({
         title: t('common.error'),
@@ -95,6 +96,7 @@ export default function PurchasesPage() {
       }
       setSuppliers(result.data);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error loading suppliers:', error);
     }
   };
@@ -118,6 +120,7 @@ export default function PurchasesPage() {
         description: t('purchases.notifications.exportSuccess')
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error exporting:', error);
       toast({
         title: t('common.error'),
@@ -138,6 +141,7 @@ export default function PurchasesPage() {
         description: 'Rapport PDF généré avec succès'
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error generating PDF:', error);
       toast({
         title: t('common.error'),
@@ -184,6 +188,7 @@ export default function PurchasesPage() {
       setIsFormOpen(false);
       setEditingPurchase(null);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error saving purchase:', error);
       toast({
         title: t('common.error'),
@@ -218,6 +223,7 @@ export default function PurchasesPage() {
         
         loadPurchasesData();
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.error('Error deleting purchase:', error);
         toast({
           title: t('common.error'),
@@ -242,6 +248,7 @@ export default function PurchasesPage() {
       
       loadPurchasesData();
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error marking as paid:', error);
       toast({
         title: t('common.error'),

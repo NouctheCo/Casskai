@@ -91,6 +91,7 @@ export const enterpriseService = {
 
       return { data: enterprises, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching user enterprises:', error instanceof Error ? error.message : String(error));
       return { 
         data: null, 
@@ -175,6 +176,7 @@ export const enterpriseService = {
 
       return { data: newEnterprise, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error creating enterprise:', error instanceof Error ? error.message : String(error));
       return { 
         data: null, 
@@ -208,6 +210,7 @@ export const enterpriseService = {
 
       return { success: true, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error updating enterprise:', error instanceof Error ? error.message : String(error));
       return { 
         success: false, 
@@ -232,6 +235,7 @@ export const enterpriseService = {
 
       return { success: true, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error deleting enterprise:', error instanceof Error ? error.message : String(error));
       return { 
         success: false, 
@@ -269,6 +273,7 @@ export const enterpriseService = {
 
       return { success: true, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error setting default enterprise:', error instanceof Error ? error.message : String(error));
       return { 
         success: false, 

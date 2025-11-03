@@ -70,6 +70,7 @@ export class StripeSubscriptionService {
         throw result.error;
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in createCheckoutSession:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -93,6 +94,7 @@ export class StripeSubscriptionService {
 
       return data;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error updating subscription:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -116,6 +118,7 @@ export class StripeSubscriptionService {
 
       return data;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error canceling subscription:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -138,6 +141,7 @@ export class StripeSubscriptionService {
 
       return data;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error reactivating subscription:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -161,6 +165,7 @@ export class StripeSubscriptionService {
 
       return data;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error creating portal session:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -181,6 +186,7 @@ export class StripeSubscriptionService {
       // Rediriger vers le portail
       window.location.href = portalSession.url;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error redirecting to customer portal:', error instanceof Error ? error.message : String(error));
       throw error;
     }

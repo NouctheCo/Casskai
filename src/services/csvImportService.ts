@@ -3,6 +3,7 @@ let ExcelJS: typeof import('exceljs') | null = null;
 try {
   ExcelJS = require('exceljs');
 } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
   console.warn('ExcelJS not available in browser environment');
 }
 import { CSVMapping, ImportResult, ImportError, ImportWarning, FileParserOptions, ImportSession, FECEntry } from '../types/accounting-import.types';
@@ -130,6 +131,7 @@ export class CSVImportService {
         suggestedMapping
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       throw new Error(`Erreur lors de l'analyse Excel: ${error.message}`);
     }
   }
@@ -178,6 +180,7 @@ export class CSVImportService {
             suggestedMapping
           });
         } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
           reject(new Error(`Erreur lors de l'analyse CSV: ${error.message}`));
         }
       };
@@ -334,6 +337,7 @@ export class CSVImportService {
       const result = this.processDataWithMapping(jsonData, mapping, options);
       return result;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.createErrorResult(error.message);
     }
   }
@@ -360,6 +364,7 @@ export class CSVImportService {
           const result = this.processDataWithMapping(data, mapping, options);
           resolve(result);
         } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
           resolve(this.createErrorResult(error.message));
         }
       };
@@ -402,6 +407,7 @@ export class CSVImportService {
         }
 
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         errors.push({
           row: rowNumber,
           message: `Erreur de mapping: ${error.message}`,
@@ -440,6 +446,7 @@ export class CSVImportService {
         
         entry[map.fieldName] = processedValue;
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         throw new Error(`Colonne ${map.columnName}: ${error.message}`);
       }
     });

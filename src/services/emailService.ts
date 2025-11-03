@@ -253,6 +253,7 @@ export class EmailService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur EmailService:', error instanceof Error ? error.message : String(error));
 
       // En cas d'erreur, on peut fallback sur un faux envoi pour le développement
@@ -295,6 +296,7 @@ export class EmailService {
           sent_at: new Date().toISOString()
         });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('Impossible de logger l\'email:', error);
     }
   }

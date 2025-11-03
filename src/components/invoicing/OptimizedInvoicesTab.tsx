@@ -105,6 +105,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
       const settings = await CompanySettingsService.getCompanySettings(currentCompany.id);
       return settings;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('Could not load company settings:', error);
       // Return default settings if failed
       return {
@@ -160,6 +161,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
       setClients(clientsData);
       setCompanySettings(settingsData);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error loading data:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur",
@@ -206,6 +208,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
           description: "Facture supprimée avec succès"
         });
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         toast({
           title: "Erreur",
           description: "Impossible de supprimer la facture",
@@ -264,6 +267,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         description: `Aperçu de la facture ${invoice.invoice_number} dans un nouvel onglet`
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error viewing PDF:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur",
@@ -296,6 +300,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         description: `Facture ${invoice.invoice_number} téléchargée avec succès`
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error generating PDF:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur",
@@ -334,6 +339,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         description: `${filteredInvoices.length} facture(s) en cours d'exportation...`
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error during bulk export:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur",
@@ -359,6 +365,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         description: `Nouvelle facture créée: ${duplicatedInvoice.invoice_number}`
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error duplicating invoice:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur",
@@ -378,6 +385,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
           description: `Avoir créé: ${creditNote.invoice_number}`
         });
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.error('Error creating credit note:', error instanceof Error ? error.message : String(error));
         toast({
           title: "Erreur",
@@ -738,6 +746,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
       const number = await invoicingService.generateInvoiceNumber();
       setFormData(prev => ({ ...prev, invoiceNumber: number }));
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error generating invoice number:', error instanceof Error ? error.message : String(error));
     }
   };
@@ -837,6 +846,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
         description: `${newClient.name} a été ajouté avec succès.`
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error creating client:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur",
@@ -907,6 +917,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
       onSuccess();
       onClose();
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error saving invoice:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur",

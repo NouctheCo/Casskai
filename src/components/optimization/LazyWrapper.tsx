@@ -101,6 +101,7 @@ export const useLazyLoading = () => {
       await importFn();
       setLoadedModules(prev => new Set([...prev, moduleId]));
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn(`Failed to preload module ${moduleId}:`, error);
     } finally {
       setLoading(false);

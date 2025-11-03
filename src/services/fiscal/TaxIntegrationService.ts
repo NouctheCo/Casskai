@@ -48,6 +48,7 @@ export class TaxIntegrationService {
         message: 'Synchronisation comptabilité réussie'
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur sync comptabilité:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
@@ -96,6 +97,7 @@ export class TaxIntegrationService {
         message: `${processedCount} facture(s) synchronisée(s)`
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur sync facturation:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
@@ -134,6 +136,7 @@ export class TaxIntegrationService {
         message: 'Charges sociales intégrées'
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur sync RH:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
@@ -184,6 +187,7 @@ export class TaxIntegrationService {
         message: `${reconciledCount} paiement(s) de taxes identifié(s)`
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur sync banque:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
@@ -235,6 +239,7 @@ export class TaxIntegrationService {
         message: 'Rapport fiscal intégré généré avec succès'
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur génération rapport intégré:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
@@ -303,6 +308,7 @@ export class TaxIntegrationService {
         message: `${obligations.length} obligation(s) fiscale(s) configurée(s)`
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur configuration obligations:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
@@ -321,6 +327,7 @@ export class TaxIntegrationService {
     try {
       await frenchTaxComplianceService.generateCA3Declaration(companyId, currentMonth);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('CA3 déjà générée ou erreur:', error);
     }
   }
@@ -400,6 +407,7 @@ export class TaxIntegrationService {
         });
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('Erreur génération recommandations:', error);
     }
 

@@ -40,6 +40,7 @@ export class FeatureFlagService {
       return enabled;
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error checking e-invoicing feature flag:', error);
       // Default to disabled on error for safety
       return false;
@@ -54,6 +55,7 @@ export class FeatureFlagService {
       const flags = await this.getFeatureFlags(companyId);
       return flags.einvoicing_v1_enabled && flags.formats_enabled.includes(format);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error checking format feature flag:', error);
       return false;
     }
@@ -67,6 +69,7 @@ export class FeatureFlagService {
       const flags = await this.getFeatureFlags(companyId);
       return flags.einvoicing_v1_enabled && flags.channels_enabled.includes(channel);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error checking channel feature flag:', error);
       return false;
     }
@@ -80,6 +83,7 @@ export class FeatureFlagService {
       const flags = await this.getFeatureFlags(companyId);
       return flags.einvoicing_v1_enabled && flags.inbound_processing_enabled;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error checking inbound processing feature flag:', error);
       return false;
     }
@@ -93,6 +97,7 @@ export class FeatureFlagService {
       const flags = await this.getFeatureFlags(companyId);
       return flags.einvoicing_v1_enabled && flags.archive_enabled;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error checking archive feature flag:', error);
       return false;
     }
@@ -158,6 +163,7 @@ export class FeatureFlagService {
       return flags;
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error getting feature flags:', error);
       
       if (error instanceof EInvoicingError) {
@@ -204,6 +210,7 @@ export class FeatureFlagService {
       console.warn(`✅ E-invoicing enabled for company ${companyId}`);
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error enabling e-invoicing:', error);
       
       if (error instanceof EInvoicingError) {
@@ -250,6 +257,7 @@ export class FeatureFlagService {
       console.warn(`✅ E-invoicing disabled for company ${companyId}`);
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error disabling e-invoicing:', error);
       
       if (error instanceof EInvoicingError) {
@@ -304,6 +312,7 @@ export class FeatureFlagService {
       return stats;
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error getting feature flag statistics:', error);
       
       if (error instanceof EInvoicingError) {
@@ -396,6 +405,7 @@ export class FeatureFlagService {
         }
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error logging feature flag change:', error);
     }
   }

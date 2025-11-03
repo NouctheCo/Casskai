@@ -65,7 +65,8 @@ const SupabaseSetupWizard = () => {
         throw new Error('Impossible de se connecter à Supabase. Vérifiez vos credentials.');
       }
     } catch (error) {
-      setError(err instanceof Error ? err.message : 'Erreur de validation');
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      setError(errorMsg instanceof Error ? errorMsg.message : 'Erreur de validation');
       setSupabaseConfig(prev => ({ ...prev, validated: false }));
     } finally {
       setLoading(false);
@@ -97,7 +98,8 @@ const SupabaseSetupWizard = () => {
       }, 2000);
       
     } catch (error) {
-      setError(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde');
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      setError(errorMsg instanceof Error ? errorMsg.message : 'Erreur lors de la sauvegarde');
     } finally {
       setLoading(false);
     }

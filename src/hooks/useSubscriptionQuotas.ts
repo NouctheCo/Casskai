@@ -29,6 +29,7 @@ export const useSubscriptionQuotas = () => {
       const limits = await subscriptionService.getUserUsageLimits(user.id);
       setUsageLimits(limits);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error loading usage limits:', error);
     } finally {
       setIsLoading(false);
@@ -49,6 +50,7 @@ export const useSubscriptionQuotas = () => {
     try {
       return await subscriptionService.canAccessFeature(user.id, featureName);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error checking feature access:', error);
       return { canAccess: false, reason: 'Erreur de vérification' };
     }
@@ -114,6 +116,7 @@ export const useSubscriptionQuotas = () => {
 
       return success;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error incrementing usage:', error);
       return false;
     }

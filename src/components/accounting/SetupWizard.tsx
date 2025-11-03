@@ -76,6 +76,7 @@ const SetupWizard = ({ currentEnterpriseId: propCurrentEnterpriseId, onFinish })
         setCompleted(prev => ({ ...prev, fiscalYear: false }));
         
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.error('Error checking setup status:', error);
       } finally {
         setLoading(false);
@@ -116,6 +117,7 @@ const SetupWizard = ({ currentEnterpriseId: propCurrentEnterpriseId, onFinish })
       setCompleted(prev => ({ ...prev, chartOfAccounts: true }));
       setShowChartOfAccountsDialog(false);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error setting up chart of accounts:', error);
       toast({
         variant: 'destructive',
@@ -146,6 +148,7 @@ const SetupWizard = ({ currentEnterpriseId: propCurrentEnterpriseId, onFinish })
       setCompleted(prev => ({ ...prev, fiscalYear: true }));
       setShowFiscalYearDialog(false);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error setting up fiscal year:', error);
       toast({
         variant: 'destructive',
@@ -174,6 +177,7 @@ const SetupWizard = ({ currentEnterpriseId: propCurrentEnterpriseId, onFinish })
       setCompleted(prev => ({ ...prev, journals: true }));
       setShowJournalsDialog(false);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error setting up journals:', error);
       toast({
         variant: 'destructive',

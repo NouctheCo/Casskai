@@ -128,6 +128,7 @@ const ModuleDiagnostics: React.FC = () => {
       
       setTests([...testSuite]);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       testSuite[0].status = 'failed';
       testSuite[0].message = 'Erreur lors du test d\'intégrité';
     }
@@ -148,6 +149,7 @@ const ModuleDiagnostics: React.FC = () => {
       
       setTests([...testSuite]);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       testSuite[1].status = 'failed';
       testSuite[1].message = 'Erreur lors de la vérification des dépendances';
     }
@@ -168,6 +170,7 @@ const ModuleDiagnostics: React.FC = () => {
       
       setTests([...testSuite]);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       testSuite[2].status = 'failed';
       testSuite[2].message = 'Erreur lors de la détection des conflits';
     }
@@ -194,6 +197,7 @@ const ModuleDiagnostics: React.FC = () => {
       
       setTests([...testSuite]);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       testSuite[3].status = 'failed';
       testSuite[3].message = 'Erreur lors du test d\'activation';
     }
@@ -225,6 +229,7 @@ const ModuleDiagnostics: React.FC = () => {
       setPerformanceMetrics(metrics);
       setTests([...testSuite]);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       testSuite[4].status = 'failed';
       testSuite[4].message = 'Erreur lors du test de performance';
     }

@@ -25,6 +25,7 @@ export function formatCurrency(
       maximumFractionDigits: currency === 'XOF' ? 0 : 2,
     }).format(amount);
   } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
     // Fallback if currency is not supported
     return `${amount.toLocaleString(locale)} ${currency}`;
   }

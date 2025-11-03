@@ -79,6 +79,7 @@ export class EnterpriseDashboardService {
       return { data: dashboardData, error: null };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getDashboardData:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
@@ -97,6 +98,7 @@ export class EnterpriseDashboardService {
 
       return { data: this.formatMetrics(data || []), error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching real-time metrics:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
@@ -125,6 +127,7 @@ export class EnterpriseDashboardService {
 
       return { data, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching budget data:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
@@ -143,6 +146,7 @@ export class EnterpriseDashboardService {
 
       return { data: this.formatFinancialHealth(data), error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error calculating financial health:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
@@ -165,6 +169,7 @@ export class EnterpriseDashboardService {
 
       return { data: data || [], error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error generating cash flow forecast:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
@@ -187,6 +192,7 @@ export class EnterpriseDashboardService {
 
       return { data, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching performance comparison:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
@@ -264,6 +270,7 @@ export class EnterpriseDashboardService {
 
       return { data, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error saving budget data:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
@@ -286,6 +293,7 @@ export class EnterpriseDashboardService {
 
       return { data, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error analyzing budget variances:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }

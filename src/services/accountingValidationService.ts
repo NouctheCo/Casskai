@@ -24,11 +24,11 @@ export class AccountingValidationService {
       const zodValidation = JournalEntrySchema.safeParse({ ...entry, companyId });
       
       if (!zodValidation.success) {
-        zodValidation.error.errors.forEach(err => {
+        zodValidation.error.errors.forEach(errorMsg => {
           errors.push({
             row: 0,
-            field: err.path.join('.'),
-            message: err.message,
+            field: errorMsg.path.join('.'),
+            message: errorMsg.message,
             type: 'validation',
             severity: 'error'
           });
@@ -58,6 +58,7 @@ export class AccountingValidationService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       errors.push({
         row: 0,
         message: `Erreur de validation: ${error.message}`,
@@ -522,7 +523,7 @@ export class AccountingValidationService {
       } else {
         invalid.push({
           entry: entries[i],
-          errors: validation.errors.map(err => ({ ...err, row: i + 1 }))
+          errors: validation.errors.map(errorMsg => ({ ...errorMsg, row: i + 1 }))
         });
       }
       

@@ -117,6 +117,7 @@ class BankReconciliationService {
       return matches;
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur réconciliation automatique:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -351,6 +352,7 @@ class BankReconciliationService {
       return true;
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur validation réconciliation:', error instanceof Error ? error.message : String(error));
       return false;
     }
@@ -390,6 +392,7 @@ class BankReconciliationService {
       return true;
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur annulation réconciliation:', error instanceof Error ? error.message : String(error));
       return false;
     }
@@ -452,6 +455,7 @@ class BankReconciliationService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur calcul résumé réconciliation:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -566,6 +570,7 @@ class BankReconciliationService {
           user_id: (await supabase.auth.getUser()).data.user?.id
         });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('Erreur logging réconciliation:', error);
     }
   }
@@ -585,6 +590,7 @@ class BankReconciliationService {
       return data;
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur création règle réconciliation:', error instanceof Error ? error.message : String(error));
       return null;
     }
@@ -600,6 +606,7 @@ class BankReconciliationService {
       return !error;
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur mise à jour règle réconciliation:', error instanceof Error ? error.message : String(error));
       return false;
     }
@@ -615,6 +622,7 @@ class BankReconciliationService {
       return !error;
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur suppression règle réconciliation:', error instanceof Error ? error.message : String(error));
       return false;
     }

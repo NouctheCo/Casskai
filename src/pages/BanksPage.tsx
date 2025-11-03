@@ -87,6 +87,7 @@ const processImportedFile = async (file, extension) => {
         return generateFallbackTransactions(file, extension);
     }
   } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
     console.error('Error processing file:', error instanceof Error ? error.message : String(error));
     return generateFallbackTransactions(file, extension);
   }
@@ -130,6 +131,7 @@ const parseXMLBankFile = (content, file) => {
       }));
     });
   } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
     console.warn('XML parsing failed, using heuristic analysis', error);
     return analyzeFileHeuristically(content, file, '.xml');
   }
@@ -205,6 +207,7 @@ const parseOFXBankFile = (content, file) => {
       }
     });
   } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
     console.warn('OFX parsing failed, using heuristic analysis', error);
     return analyzeFileHeuristically(content, file, '.ofx');
   }
@@ -343,6 +346,7 @@ const formatDate = (dateString) => {
     
     return isNaN(date.getTime()) ? generateDateInRange(0) : date.toISOString().split('T')[0];
   } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
     return generateDateInRange(0);
   }
 };
@@ -949,6 +953,7 @@ export default function BanksPage() {
       await loadReconciliationMetrics();
       
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Failed to load imported data:', error instanceof Error ? error.message : String(error));
       toast({
         variant: "destructive",
@@ -979,6 +984,7 @@ export default function BanksPage() {
 
       setReconciliationMetrics(metrics);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Failed to calculate reconciliation metrics:', error instanceof Error ? error.message : String(error));
     } finally {
       setIsLoadingMetrics(false);
@@ -993,6 +999,7 @@ export default function BanksPage() {
       // Ici on pourrait filtrer par compte spécifique si nécessaire
       await loadReconciliationMetrics();
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Failed to load transactions:', error instanceof Error ? error.message : String(error));
       toast({
         variant: "destructive",
@@ -1051,6 +1058,7 @@ export default function BanksPage() {
       // Recalculer les métriques
       await loadReconciliationMetrics();
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('File import failed:', error instanceof Error ? error.message : String(error));
       toast({
         variant: "destructive",
@@ -1082,6 +1090,7 @@ export default function BanksPage() {
       // Recalculer les métriques
       await loadReconciliationMetrics();
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Transaction reconciliation failed:', error instanceof Error ? error.message : String(error));
       toast({
         variant: "destructive",

@@ -103,6 +103,7 @@ export class MigrationChecker {
 
       return status;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       console.error('❌ Erreur lors de la vérification des migrations:', errorMessage);
       status.message = `Erreur de vérification: ${errorMessage}`;
@@ -128,6 +129,7 @@ export class MigrationChecker {
       
       return { success: true };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return { success: false, error: error instanceof Error ? error.message : String(error) };
     }
   }
@@ -171,6 +173,7 @@ export class MigrationChecker {
         }
         return null;
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         if (error instanceof Error && error.message?.includes(`function "${functionName}" does not exist`)) {
           return functionName;
         }

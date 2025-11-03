@@ -30,6 +30,7 @@ export class BudgetInsightProvider extends BankingProvider {
       await this.authenticateClient();
       this.isInitialized = true;
   } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       throw new BankingProviderError(
         'INIT_ERROR',
     `Failed to initialize Budget Insight provider: ${(_error as { message?: string })?.message}`,
@@ -43,6 +44,7 @@ export class BudgetInsightProvider extends BankingProvider {
   const response = await this.makeRequest<{ status: string }>('GET', '/2.0/status');
       return response.status === 'OK';
   } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return false;
     }
   }
@@ -61,6 +63,7 @@ export class BudgetInsightProvider extends BankingProvider {
       this.accessToken = response.access_token;
       this.tokenExpiresAt = new Date(Date.now() + response.expires_in * 1000);
   } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       throw new AuthenticationError('Failed to authenticate with Budget Insight API');
     }
   }
@@ -101,6 +104,7 @@ export class BudgetInsightProvider extends BankingProvider {
 
       return this.createResponse(connection);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -145,6 +149,7 @@ export class BudgetInsightProvider extends BankingProvider {
 
       return this.createResponse(connection);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -162,6 +167,7 @@ export class BudgetInsightProvider extends BankingProvider {
 
       return await this.getConnection(connectionId);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -177,6 +183,7 @@ export class BudgetInsightProvider extends BankingProvider {
       
       return this.createResponse(undefined);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -192,6 +199,7 @@ export class BudgetInsightProvider extends BankingProvider {
 
       return await this.getConnection(connectionId);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -217,6 +225,7 @@ export class BudgetInsightProvider extends BankingProvider {
 
       return this.createResponse(authFlow);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -229,6 +238,7 @@ export class BudgetInsightProvider extends BankingProvider {
       const connectionId = ''; // À récupérer depuis _authFlowId
       return await this.getConnection(connectionId);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -254,6 +264,7 @@ export class BudgetInsightProvider extends BankingProvider {
 
       return this.createResponse(authFlow);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -307,6 +318,7 @@ export class BudgetInsightProvider extends BankingProvider {
 
       return this.createResponse(accounts);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -351,6 +363,7 @@ export class BudgetInsightProvider extends BankingProvider {
 
       return this.createResponse(account);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -360,6 +373,7 @@ export class BudgetInsightProvider extends BankingProvider {
       // Budget Insight synchronise automatiquement lors de la requête
       return await this.getAccount(connectionId, accountId);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -452,6 +466,7 @@ export class BudgetInsightProvider extends BankingProvider {
         nextCursor
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -487,6 +502,7 @@ export class BudgetInsightProvider extends BankingProvider {
 
       return this.createResponse(syncResult);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -510,6 +526,7 @@ export class BudgetInsightProvider extends BankingProvider {
 
       return this.createResponse(syncResults);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -521,6 +538,7 @@ export class BudgetInsightProvider extends BankingProvider {
       // Cette configuration se fait généralement via le dashboard
       return this.createResponse(undefined);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -530,6 +548,7 @@ export class BudgetInsightProvider extends BankingProvider {
       // Budget Insight webhook removal
       return this.createResponse(undefined);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -550,6 +569,7 @@ export class BudgetInsightProvider extends BankingProvider {
 
       return this.createResponse(undefined);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -584,6 +604,7 @@ export class BudgetInsightProvider extends BankingProvider {
 
       return this.createResponse(enrichedTransaction);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -646,6 +667,7 @@ export class BudgetInsightProvider extends BankingProvider {
 
       return result;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       if (error instanceof BankingProviderError) {
         throw error;
       }

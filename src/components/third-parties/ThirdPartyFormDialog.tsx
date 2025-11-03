@@ -106,6 +106,7 @@ export function ThirdPartyFormDialog({
       onSuccess();
       onClose();
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error creating third party:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',

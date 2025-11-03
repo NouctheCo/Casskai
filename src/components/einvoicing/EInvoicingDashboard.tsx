@@ -69,6 +69,7 @@ export const EInvoicingDashboard: React.FC<EInvoicingDashboardProps> = ({
       await enableFeature();
       await refreshData();
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error enabling e-invoicing:', error instanceof Error ? error.message : String(error));
     }
   };
@@ -78,6 +79,7 @@ export const EInvoicingDashboard: React.FC<EInvoicingDashboardProps> = ({
       await disableFeature();
       await refreshData();
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error disabling e-invoicing:', error instanceof Error ? error.message : String(error));
     }
   };

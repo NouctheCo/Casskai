@@ -362,6 +362,7 @@ export class AccountingEngine {
         notifications: [...integrityCheck.notifications, 'Period closing not implemented']
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       const errorNotificationId = await this.notificationService.sendValidationError(
         companyId,

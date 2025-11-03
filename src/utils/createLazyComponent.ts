@@ -36,6 +36,7 @@ export function createLazyComponent<T extends ComponentType<unknown>>(
         }, delay);
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in lazy component factory:', error instanceof Error ? error.message : String(error));
       throw error;
     }

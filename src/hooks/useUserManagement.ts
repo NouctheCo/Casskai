@@ -166,10 +166,10 @@ export function useUserManagement(companyId: string) {
         .filter((u: User | null): u is User => u !== null);
 
       return transformedUsers as User[];
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch users';
+    } catch (errorMsg) {
+      const errorMessage = errorMsg instanceof Error ? errorMsg.message : 'Failed to fetch users';
       setError(errorMessage);
-      console.error('Error fetching users:', err);
+      console.error('Error fetching users:', errorMsg);
       return [];
     } finally {
       setLoading(false);
@@ -239,10 +239,10 @@ export function useUserManagement(companyId: string) {
       };
 
       return user;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch user';
+    } catch (errorMsg) {
+      const errorMessage = errorMsg instanceof Error ? errorMsg.message : 'Failed to fetch user';
       setError(errorMessage);
-      console.error('Error fetching user:', err);
+      console.error('Error fetching user:', errorMsg);
       return null;
     } finally {
       setLoading(false);
@@ -299,10 +299,10 @@ export function useUserManagement(companyId: string) {
         createdAt: invitation.created_at,
         message: invitation.message
       };
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create invitation';
+    } catch (errorMsg) {
+      const errorMessage = errorMsg instanceof Error ? errorMsg.message : 'Failed to create invitation';
       setError(errorMessage);
-      console.error('Error creating invitation:', err);
+      console.error('Error creating invitation:', errorMsg);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -355,10 +355,10 @@ export function useUserManagement(companyId: string) {
 
       // Return updated user
       return await getUserById(userId);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update user';
+    } catch (errorMsg) {
+      const errorMessage = errorMsg instanceof Error ? errorMsg.message : 'Failed to update user';
       setError(errorMessage);
-      console.error('Error updating user:', err);
+      console.error('Error updating user:', errorMsg);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -405,10 +405,10 @@ export function useUserManagement(companyId: string) {
 
       // Return updated user
       return await getUserById(userId);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to toggle user status';
+    } catch (errorMsg) {
+      const errorMessage = errorMsg instanceof Error ? errorMsg.message : 'Failed to toggle user status';
       setError(errorMessage);
-      console.error('Error toggling user status:', err);
+      console.error('Error toggling user status:', errorMsg);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -448,10 +448,10 @@ export function useUserManagement(companyId: string) {
         createdAt: inv.created_at,
         message: inv.message
       }));
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch invitations';
+    } catch (errorMsg) {
+      const errorMessage = errorMsg instanceof Error ? errorMsg.message : 'Failed to fetch invitations';
       setError(errorMessage);
-      console.error('Error fetching invitations:', err);
+      console.error('Error fetching invitations:', errorMsg);
       return [];
     } finally {
       setLoading(false);
@@ -501,10 +501,10 @@ export function useUserManagement(companyId: string) {
         createdAt: invitation.created_at,
         message: invitation.message
       };
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to resend invitation';
+    } catch (errorMsg) {
+      const errorMessage = errorMsg instanceof Error ? errorMsg.message : 'Failed to resend invitation';
       setError(errorMessage);
-      console.error('Error resending invitation:', err);
+      console.error('Error resending invitation:', errorMsg);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -529,10 +529,10 @@ export function useUserManagement(companyId: string) {
 
       // Log activity
       await logActivity(currentUser.id, 'invitation.cancel', 'invitations', invitationId);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to cancel invitation';
+    } catch (errorMsg) {
+      const errorMessage = errorMsg instanceof Error ? errorMsg.message : 'Failed to cancel invitation';
       setError(errorMessage);
-      console.error('Error canceling invitation:', err);
+      console.error('Error canceling invitation:', errorMsg);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -567,10 +567,10 @@ export function useUserManagement(companyId: string) {
         userAgent: activity.user_agent || '',
         timestamp: activity.created_at
       }));
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch activities';
+    } catch (errorMsg) {
+      const errorMessage = errorMsg instanceof Error ? errorMsg.message : 'Failed to fetch activities';
       setError(errorMessage);
-      console.error('Error fetching activities:', err);
+      console.error('Error fetching activities:', errorMsg);
       return [];
     } finally {
       setLoading(false);
@@ -625,8 +625,8 @@ export function useUserManagement(companyId: string) {
       });
 
       return stats;
-    } catch (err) {
-      console.error('Error calculating user stats:', err);
+    } catch (errorMsg) {
+      console.error('Error calculating user stats:', errorMsg);
       return {
         total: 0,
         active: 0,
@@ -651,8 +651,8 @@ export function useUserManagement(companyId: string) {
         const searchableText = `${user.firstName} ${user.lastName} ${user.email} ${user.department} ${user.position}`.toLowerCase();
         return searchableText.includes(query.toLowerCase());
       });
-    } catch (err) {
-      console.error('Error searching users:', err);
+    } catch (errorMsg) {
+      console.error('Error searching users:', errorMsg);
       return [];
     }
   }, [getUsers]);
@@ -715,6 +715,7 @@ async function logActivity(
         user_agent: navigator.userAgent
       });
   } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
     console.error('Failed to log activity:', error);
   }
 }

@@ -79,6 +79,7 @@ class RealStripeService {
       const result = await response.json();
       return { success: true, ...result };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error creating Stripe products:', error);
       return { success: false, error: 'Impossible de créer les produits Stripe' };
     }
@@ -109,6 +110,7 @@ class RealStripeService {
 
       return true;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error syncing Stripe prices:', error);
       return false;
     }
@@ -177,6 +179,7 @@ class RealStripeService {
         checkoutUrl: sessionData.sessionId ? `https://checkout.stripe.com/pay/${sessionData.sessionId}` : undefined
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error creating checkout session:', error);
       return {
         success: false,
@@ -284,6 +287,7 @@ class RealStripeService {
       return { success: true, subscription: userSubscription };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('[StripeService] Unexpected error:', error);
       return {
         success: false,
@@ -315,6 +319,7 @@ class RealStripeService {
 
       return { success: true };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in cancelSubscription:', error);
       return {
         success: false,
@@ -372,6 +377,7 @@ class RealStripeService {
 
       return { success: true };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error updating subscription:', error);
       return {
         success: false,
@@ -413,6 +419,7 @@ class RealStripeService {
         createdAt: new Date(method.created_at)
       }));
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching payment methods:', error);
       return [];
     }
@@ -477,6 +484,7 @@ class RealStripeService {
         }
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error adding payment method:', error);
       return {
         success: false,
@@ -515,6 +523,7 @@ class RealStripeService {
 
       return { success: true };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error removing payment method:', error);
       return {
         success: false,
@@ -556,6 +565,7 @@ class RealStripeService {
         portalUrl: session.url
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error creating billing portal session:', error);
       return {
         success: false,
@@ -600,6 +610,7 @@ class RealStripeService {
         createdAt: new Date(inv.created_at)
       }));
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching invoices:', error);
       return [];
     }
@@ -626,6 +637,7 @@ class RealStripeService {
 
       return { error };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error redirecting to checkout:', error);
       return { error };
     }
@@ -639,6 +651,7 @@ class RealStripeService {
       const response = await fetch(`${API_BASE_URL}/stripe/health`);
       return response.ok;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Stripe service health check failed:', error);
       return false;
     }

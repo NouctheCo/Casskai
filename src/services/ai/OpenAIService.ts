@@ -81,6 +81,7 @@ export class OpenAIService {
         processingTime
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('OpenAI Chat Error:', error);
       return {
         success: false,
@@ -122,6 +123,7 @@ export class OpenAIService {
         confidence: 0.85
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Financial Health Analysis Error:', error);
       return {
         success: false,
@@ -157,6 +159,7 @@ export class OpenAIService {
         confidence: 0.75
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Cash Flow Prediction Error:', error);
       return {
         success: false,
@@ -190,6 +193,7 @@ export class OpenAIService {
         confidence: 0.80
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Anomaly Detection Error:', error);
       return {
         success: false,
@@ -229,6 +233,7 @@ export class OpenAIService {
         confidence: 0.70
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Tax Optimization Error:', error);
       return {
         success: false,
@@ -313,6 +318,7 @@ export class OpenAIService {
         confidence: 0.85
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Smart Alerts Generation Error:', error);
       return {
         success: false,

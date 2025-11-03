@@ -71,6 +71,7 @@ export class ReportService {
       this.generateReportAsync(execution.id, report, generator, parameters);
       return execution;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       await this.repository.updateExecution(execution.id, {
         status: 'failed',
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -113,6 +114,7 @@ export class ReportService {
         progress: 100
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       await this.repository.updateExecution(executionId, {
         status: 'failed',
         error: error instanceof Error ? error.message : 'Unknown error',

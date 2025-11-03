@@ -155,6 +155,7 @@ export class ReportExportService {
 
       return url;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de la génération PDF:', error instanceof Error ? error.message : String(error));
       throw new Error('Impossible de générer le rapport PDF');
     }
@@ -258,6 +259,7 @@ export class ReportExportService {
       const url = URL.createObjectURL(excelBlob);
       return url;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de la génération Excel:', error instanceof Error ? error.message : String(error));
       throw new Error('Impossible de générer le rapport Excel');
     }
@@ -287,6 +289,7 @@ export class ReportExportService {
       const url = URL.createObjectURL(csvBlob);
       return url;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de la génération CSV:', error instanceof Error ? error.message : String(error));
       throw new Error('Impossible de générer le rapport CSV');
     }
@@ -312,6 +315,7 @@ export class ReportExportService {
       try {
         pdf.addImage(companyInfo.logo, 'PNG', 20, 10, 30, 20);
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         const errorMsg = error instanceof Error ? error.message : String(error);
         console.warn('Impossible de charger le logo:', errorMsg);
       }

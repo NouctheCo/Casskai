@@ -167,6 +167,7 @@ export class OnboardingProgressService {
         data: progress
       };
   } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
     return {
         success: false,
         error: 'Erreur lors du calcul de la progression'
@@ -240,6 +241,7 @@ export class OnboardingProgressService {
         data: metrics
       };
   } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
     return {
         success: false,
         error: 'Erreur lors de la récupération des métriques'

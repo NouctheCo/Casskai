@@ -123,6 +123,7 @@ export class EInvoicingService {
             xmlUrl = (archiveResult as any).xml_url;
           }
         } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
           // Archiving is optional; continue without URLs if it fails
           const errorMsg = error instanceof Error ? error.message : String(error);
           console.warn('Archiving documents failed:', errorMsg);
@@ -182,6 +183,7 @@ export class EInvoicingService {
       }
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error submitting e-invoice:', error);
       
       if (error instanceof EInvoicingError) {
@@ -216,6 +218,7 @@ export class EInvoicingService {
 
       return data as EInvDocument;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error getting document status:', error);
       return null;
     }
@@ -255,6 +258,7 @@ export class EInvoicingService {
 
       return true;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error updating document status:', error);
       return false;
     }
@@ -307,6 +311,7 @@ export class EInvoicingService {
 
       return data as EInvDocument[];
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error getting company documents:', error);
       return [];
     }
@@ -439,6 +444,7 @@ export class EInvoicingService {
         }
 
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.error('Async submission failed:', error);
         
         await this.updateDocument(documentId, {
@@ -466,6 +472,7 @@ export class EInvoicingService {
         p_meta_json: metadata
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error logging audit:', error);
     }
   }

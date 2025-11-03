@@ -41,6 +41,7 @@ export class CurrencyIntegration {
 
       console.warn('✅ Système de devises initialisé avec succès');
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur initialisation devises:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -115,6 +116,7 @@ export class CurrencyIntegration {
           throw error;
         }
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.warn('SQL Query failed (may be normal):', `${query.substring(0, 50)}...`);
         // Continuer même si certaines requêtes échouent (tables peuvent déjà exister)
       }
@@ -155,6 +157,7 @@ export class CurrencyIntegration {
           console.warn(`Erreur insertion devise ${currency.code}:`, error);
         }
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.warn(`Erreur devise ${currency.code}:`, error);
       }
     });
@@ -206,6 +209,7 @@ export class CurrencyIntegration {
           console.warn(`Erreur taux ${rate.from_currency}/${rate.to_currency}:`, error);
         }
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.warn(`Erreur taux fixe:`, error);
       }
     });
@@ -252,6 +256,7 @@ export class CurrencyIntegration {
           console.warn('Erreur mise à jour table:', error);
         }
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.warn('Erreur ALTER TABLE:', error);
       }
     });
@@ -320,6 +325,7 @@ export class CurrencyIntegration {
 
       console.warn('✅ Migration des devises terminée');
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur migration devises:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -353,6 +359,7 @@ export class CurrencyIntegration {
         try {
           await supabase.from(table).select('*').limit(1);
         } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
           errors.push(`Table ${table} manquante ou inaccessible`);
         }
       });
@@ -400,6 +407,7 @@ export class CurrencyIntegration {
         warnings
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur validation système de devises:', error instanceof Error ? error.message : String(error));
       throw error;
     }

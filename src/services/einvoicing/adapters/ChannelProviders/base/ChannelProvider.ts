@@ -151,6 +151,7 @@ export abstract class ChannelProvider {
         console.warn(`${this.channelName}: ${context} attempt ${attempt}/${maxRetries}`);
         return await operation();
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         lastError = error as Error;
         
         if (attempt === maxRetries) {

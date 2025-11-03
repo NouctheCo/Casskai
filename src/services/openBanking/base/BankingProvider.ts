@@ -133,6 +133,7 @@ export abstract class BankingProvider {
   // eslint-disable-next-line no-await-in-loop
   return await operation();
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         lastError = error;
         
         if (attempt === maxRetries) break;

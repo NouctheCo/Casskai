@@ -203,6 +203,7 @@ export class IntegratedAccountingService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = (error as { message?: string })?.message || 'inconnu';
       throw new Error(`Erreur import: ${message}`);
     }
@@ -447,6 +448,7 @@ export class IntegratedAccountingService {
 
         return { ...entry, id: journalEntry.id } as JournalEntryType;
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.error(`Erreur sauvegarde écriture ${entry.entryNumber}:`, error instanceof Error ? error.message : String(error));
         return entry; // fallback
       }
@@ -546,6 +548,7 @@ export class IntegratedAccountingService {
   return savedEntries[0];
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = (error as { message?: string })?.message || 'inconnu';
       throw new Error(`Erreur génération template: ${message}`);
     }
@@ -593,6 +596,7 @@ export class IntegratedAccountingService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = (error as { message?: string })?.message || 'inconnu';
       throw new Error(`Erreur déclaration TVA: ${message}`);
     }

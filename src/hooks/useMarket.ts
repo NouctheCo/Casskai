@@ -227,6 +227,7 @@ export function useMarket() {
         setCurrentMarket(detected);
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur détection marché:', error);
       // Fallback sur France
       const fallback = getMarketByID('france');
@@ -254,6 +255,7 @@ export function useMarket() {
       
       return market || getMarketByID('france');
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return getMarketByID('france');
     }
   };

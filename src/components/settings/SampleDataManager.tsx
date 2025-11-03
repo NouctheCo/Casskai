@@ -67,6 +67,7 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
 
       setShowSampleDataConfig(false);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       setLastOperation({
         type: 'generate',
         success: false,
@@ -93,6 +94,7 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
 
       setShowConfirmReset(false);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       setLastOperation({
         type: 'reset',
         success: false,

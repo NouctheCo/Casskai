@@ -421,11 +421,13 @@ export class CurrencyService {
       try {
         await this.saveExchangeRateToDB(newRate);
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.warn('Impossible de sauvegarder en DB:', error);
       }
       
       return newRate.rate;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error(`❌ Impossible de récupérer le taux ${fromCurrency}/${toCurrency}:`, error instanceof Error ? error.message : String(error));
       throw new Error(`Taux de change indisponible pour ${fromCurrency}/${toCurrency}`);
     }
@@ -441,6 +443,7 @@ export class CurrencyService {
           await this.updateFromProvider(provider);
           break; // Succès avec ce provider, pas besoin des autres
         } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
           console.warn(`Erreur avec ${provider.name}:`, error);
           continue;
         }
@@ -449,6 +452,7 @@ export class CurrencyService {
       this.lastUpdate = new Date();
       console.warn('✅ Taux de change mis à jour');
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur lors de la mise à jour des taux:', error instanceof Error ? error.message : String(error));
     }
   }
@@ -572,6 +576,7 @@ export class CurrencyService {
       
       console.warn('✅ Taux critiques mis à jour avec succès');
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur mise à jour taux critiques:', error instanceof Error ? error.message : String(error));
     }
   }
@@ -584,6 +589,7 @@ export class CurrencyService {
         source: `${rate.source}_CRITICAL`
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn(`Impossible de récupérer ${from}/${to}:`, error);
     }
   }
@@ -642,6 +648,7 @@ export class CurrencyService {
       }
       
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('Erreur calcul taux croisés USD:', error);
     }
   }
@@ -670,6 +677,7 @@ export class CurrencyService {
         console.warn('Erreur sauvegarde taux:', error);
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       // Ignorer les erreurs de DB si pas de configuration
     }
   }

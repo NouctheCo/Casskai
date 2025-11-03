@@ -190,6 +190,7 @@ export class HRPayrollService {
         entryId: journalEntry.id
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error creating payroll journal entry:', error);
       return {
         success: false,
@@ -238,6 +239,7 @@ export class HRPayrollService {
             errors.push(`${employee.first_name} ${employee.last_name}: ${result.error}`);
           }
         } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
           errors.push(`${employee.first_name} ${employee.last_name}: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
         }
       }
@@ -248,6 +250,7 @@ export class HRPayrollService {
         errors
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         processed,
@@ -314,6 +317,7 @@ export class HRPayrollService {
         pdf: blob
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur génération fiche de paie'

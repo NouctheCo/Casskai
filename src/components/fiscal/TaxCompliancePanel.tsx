@@ -82,6 +82,7 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
         description: `${declarationType} pour ${period} créée avec succès`,
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       // Error is already handled by the hook
     }
   };
@@ -96,6 +97,7 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
         });
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       // Error is already handled by the hook
     }
   };
@@ -121,6 +123,7 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
         });
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       // Error is already handled by the hook
     }
   };

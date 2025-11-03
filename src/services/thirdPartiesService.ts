@@ -106,6 +106,7 @@ class ThirdPartiesService {
 
       return transformedData;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching third parties:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -127,6 +128,7 @@ class ThirdPartiesService {
 
       return data;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching third party:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -152,6 +154,7 @@ class ThirdPartiesService {
       if (error) throw error;
       return data;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error creating third party:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -174,6 +177,7 @@ class ThirdPartiesService {
 
       return data;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error updating third party:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -204,6 +208,7 @@ class ThirdPartiesService {
 
       if (error) throw error;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error deleting third party:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -258,6 +263,7 @@ class ThirdPartiesService {
         top_customers: topCustomers
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching third party stats:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -287,6 +293,7 @@ class ThirdPartiesService {
       if (error) throw error;
       return data || [];
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error searching third parties:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -336,6 +343,7 @@ class ThirdPartiesService {
 
       return { data: dashboardData };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching dashboard data:', error instanceof Error ? error.message : String(error));
       return { 
         data: {} as ThirdPartyDashboardData,
@@ -352,6 +360,7 @@ class ThirdPartiesService {
       
       return { data: mockData };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching aging report:', error instanceof Error ? error.message : String(error));
       return { 
         data: [],

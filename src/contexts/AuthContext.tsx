@@ -87,6 +87,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         console.warn('ℹ️ Utilisateur déjà éligible ou a déjà un abonnement');
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de la vérification/création de l\'abonnement:', error);
     }
   }, []);
@@ -108,6 +109,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         throw new Error("Impossible de trouver les détails de l'entreprise.");
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error("AuthContext | Erreur lors du changement d'entreprise:", error);
       // Ne pas lancer une erreur fatale, juste logger
       setCurrentCompany(null);
@@ -184,6 +186,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setCurrentCompany(null);
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error("AuthContext | Erreur lors de la récupération des données utilisateur:", error);
 
       // Gestion spéciale des erreurs RLS/500 - assumer que l'utilisateur doit faire l'onboarding

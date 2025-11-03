@@ -177,6 +177,7 @@ export class ProjectsService {
         data: enrichedProjects as Project[]
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getProjects:', error);
       return {
         success: false,
@@ -213,6 +214,7 @@ export class ProjectsService {
         data: data as Project
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in createProject:', error);
       return {
         success: false,
@@ -248,6 +250,7 @@ export class ProjectsService {
         data: data as Project
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in updateProject:', error);
       return {
         success: false,
@@ -278,6 +281,7 @@ export class ProjectsService {
         data: true
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in deleteProject:', error);
       return {
         success: false,
@@ -327,6 +331,7 @@ export class ProjectsService {
         data: data as ProjectTask[]
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getProjectTasks:', error);
       return {
         success: false,
@@ -363,6 +368,7 @@ export class ProjectsService {
         data: data as ProjectTask
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in createTask:', error);
       return {
         success: false,
@@ -426,6 +432,7 @@ export class ProjectsService {
         data: enrichedEntries as ProjectTimeEntry[]
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getTimeEntries:', error);
       return {
         success: false,
@@ -465,6 +472,7 @@ export class ProjectsService {
         data: data as ProjectTimeEntry
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in createTimeEntry:', error);
       return {
         success: false,
@@ -579,6 +587,7 @@ export class ProjectsService {
         data: metrics
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getProjectMetrics:', error);
       return {
         success: false,
@@ -614,6 +623,7 @@ export class ProjectsService {
         data: categories
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getCategories:', error);
       return {
         success: false,
@@ -647,6 +657,7 @@ export class ProjectsService {
         data: managers
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getManagers:', error);
       return {
         success: false,

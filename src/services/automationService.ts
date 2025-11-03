@@ -126,6 +126,7 @@ export class AutomationService {
         data: data || []
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to fetch workflows'
@@ -159,6 +160,7 @@ export class AutomationService {
         data
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to create workflow'
@@ -182,6 +184,7 @@ export class AutomationService {
         data
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to update workflow'
@@ -203,6 +206,7 @@ export class AutomationService {
         data: true
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to delete workflow'
@@ -226,6 +230,7 @@ export class AutomationService {
         data
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to toggle workflow'
@@ -315,6 +320,7 @@ export class AutomationService {
         data: updatedExecution
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to execute workflow'
@@ -603,6 +609,7 @@ export class AutomationService {
         data
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to trigger scheduled workflows'
@@ -627,6 +634,7 @@ export class AutomationService {
         data
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to execute workflow via scheduler'
@@ -651,6 +659,7 @@ export class AutomationService {
         data: data || []
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to fetch executions'

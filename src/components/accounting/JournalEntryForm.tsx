@@ -198,6 +198,7 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
       setLocalAccounts(accounts ?? []);
       setFetchError(null);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = error instanceof Error ? error.message : String(error);
       setFetchError(
         message ||
@@ -296,6 +297,7 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
           replace(resetValues.items);
         }
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         const message = error instanceof Error ? error.message : String(error);
         toast({
           variant: 'destructive',

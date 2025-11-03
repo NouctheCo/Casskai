@@ -53,6 +53,7 @@ const authenticate = async (req: AuthenticatedRequest, res: Response, next: Next
 
     next();
   } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
     res.status(401).json({
       success: false,
       error: 'Invalid authentication',
@@ -103,6 +104,7 @@ const handleAPIResponse = (apiCall: (req: any, res: Response) => Promise<APIResp
       const statusCode = result.success ? 200 : 400;
       res.status(statusCode).json(result);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('API route error:', error instanceof Error ? error.message : String(error));
       res.status(500).json({
         success: false,

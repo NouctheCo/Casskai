@@ -125,6 +125,7 @@ export async function sendToN8nWebhook(data: {
 
     return response.ok;
   } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
     console.warn('Failed to send to N8n webhook:', error);
     return false;
   }

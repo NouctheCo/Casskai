@@ -664,6 +664,7 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
           );
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error(`Error rendering widget ${widget.id}:`, error);
       return (
         <div className="flex items-center justify-center h-full text-center">

@@ -59,6 +59,7 @@ export class ModuleManager {
       this.isInitialized = true;
       console.warn('[ModuleManager] Initialisé avec succès');
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('[ModuleManager] Erreur d\'initialisation:', error);
       throw error;
     }
@@ -137,6 +138,7 @@ export class ModuleManager {
 
   console.warn(`[ModuleManager] Module ${moduleId} activé avec succès`);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error(`[ModuleManager] Erreur lors de l'activation de ${moduleId}:`, error);
       throw new ModuleError(`Failed to activate module: ${error.message}`, moduleId, 'ACTIVATION_FAILED', error);
     }
@@ -185,6 +187,7 @@ export class ModuleManager {
 
   console.warn(`[ModuleManager] Module ${moduleId} désactivé avec succès`);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error(`[ModuleManager] Erreur lors de la désactivation de ${moduleId}:`, error);
       throw new ModuleError(`Failed to deactivate module: ${error.message}`, moduleId, 'DEACTIVATION_FAILED', error);
     }
@@ -483,6 +486,7 @@ export class ModuleManager {
         localStorage.setItem('casskai_modules', JSON.stringify(defaultModules));
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('[ModuleManager] Error loading activations:', error);
 
       // En cas d'erreur, utiliser les modules par défaut
@@ -566,6 +570,7 @@ export class ModuleManager {
         }
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('[ModuleManager] Erreur sauvegarde activation:', error);
     }
   }

@@ -172,6 +172,7 @@ const OpportunitiesKanban: React.FC<OpportunitiesKanbanProps> = ({
       setIsFormOpen(false);
       setEditingOpportunity(null);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error submitting opportunity form:', error instanceof Error ? error.message : String(error));
     }
   };
@@ -180,6 +181,7 @@ const OpportunitiesKanban: React.FC<OpportunitiesKanbanProps> = ({
     try {
       await onUpdateOpportunity(opportunityId, { stage: newStage as any });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error updating opportunity stage:', error instanceof Error ? error.message : String(error));
     }
   };

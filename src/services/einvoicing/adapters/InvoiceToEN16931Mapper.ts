@@ -119,6 +119,7 @@ export class InvoiceToEN16931Mapper {
       return en16931Invoice;
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error mapping invoice to EN16931:', error);
       
       if (error instanceof EInvoicingError) {
@@ -308,6 +309,7 @@ export class InvoiceToEN16931Mapper {
       }
       return date.toISOString().split('T')[0]; // YYYY-MM-DD format
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn(`Error formatting date ${dateString}:`, error);
       return new Date().toISOString().split('T')[0]; // Fallback to today
     }

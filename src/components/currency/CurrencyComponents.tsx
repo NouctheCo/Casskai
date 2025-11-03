@@ -125,7 +125,8 @@ export const CurrencyConverter = () => {
       setResult(convertedAmount.toString());
       setRate(1);
     } catch (error) {
-      console.error('Erreur de conversion:', err);
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error('Erreur de conversion:', errorMsg);
       setResult('Erreur');
       setRate(null);
     } finally {
@@ -145,7 +146,8 @@ export const CurrencyConverter = () => {
       await refreshRates();
       await handleConvert();
     } catch (error) {
-      console.error('Erreur actualisation:', err);
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error('Erreur actualisation:', errorMsg);
     }
   };
 
@@ -288,6 +290,7 @@ export const ExchangeRateWidget = ({
           const rate = await getExchangeRate(pair.from, pair.to);
           newRates[`${pair.from}_${pair.to}`] = rate;
         } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
           console.error(`Erreur taux ${pair.from}/${pair.to}:`, error instanceof Error ? error.message : String(error));
         }
       }

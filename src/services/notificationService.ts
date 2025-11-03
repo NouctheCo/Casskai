@@ -91,6 +91,7 @@ export class NotificationService {
         data
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur lors de la création de la notification'
@@ -122,6 +123,7 @@ export class NotificationService {
         data
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur lors de l\'archivage de la notification'
@@ -188,6 +190,7 @@ export class NotificationService {
         data: count || 0
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur lors de l\'envoi des notifications'
@@ -251,6 +254,7 @@ export class NotificationService {
         data: data || []
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur lors de la récupération des notifications'
@@ -282,6 +286,7 @@ export class NotificationService {
         data
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur lors de la mise à jour de la notification'
@@ -313,6 +318,7 @@ export class NotificationService {
         data: count || 0
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur lors de la mise à jour des notifications'
@@ -339,6 +345,7 @@ export class NotificationService {
         data: true
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur lors de la suppression de la notification'
@@ -365,6 +372,7 @@ export class NotificationService {
         data: count || 0
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur lors du comptage des notifications'
@@ -390,6 +398,7 @@ export class NotificationService {
         data: count || 0
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur lors du nettoyage des notifications'

@@ -116,6 +116,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
         setNotifications(result.data);
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur chargement notifications:', error instanceof Error ? error.message : String(error));
     } finally {
       setLoading(false);
@@ -135,6 +136,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
         setUnreadCount(result.data);
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur comptage notifications:', error instanceof Error ? error.message : String(error));
     }
   };
@@ -163,6 +165,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
         setUnreadCount(prev => Math.max(0, prev - 1));
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur marquage lu:', error instanceof Error ? error.message : String(error));
     }
   };
@@ -183,6 +186,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
         setUnreadCount(0);
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur marquage global:', error instanceof Error ? error.message : String(error));
     }
   };
@@ -195,6 +199,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
         setNotifications(prev => prev.filter(n => n.id !== notificationId));
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur suppression notification:', error instanceof Error ? error.message : String(error));
     }
   };
@@ -425,6 +430,7 @@ export function useNotificationCenter() {
         setUnreadCount(result.data);
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur comptage notifications:', error instanceof Error ? error.message : String(error));
     }
   };

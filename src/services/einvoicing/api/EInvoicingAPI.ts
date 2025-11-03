@@ -94,6 +94,7 @@ export class EInvoicingAPI {
       return this.createSuccessResponse(result, requestId);
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleAPIError(error, requestId, 'submit_invoice', { invoiceId, companyId });
     }
   }
@@ -129,6 +130,7 @@ export class EInvoicingAPI {
       return this.createSuccessResponse(document, requestId);
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleAPIError(error, requestId, 'get_document_status', { documentId, companyId });
     }
   }
@@ -191,6 +193,7 @@ export class EInvoicingAPI {
       return this.createSuccessResponse(result, requestId);
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleAPIError(error, requestId, 'list_documents', { companyId, pagination, filters });
     }
   }
@@ -223,6 +226,7 @@ export class EInvoicingAPI {
       return this.createSuccessResponse(result, requestId);
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleAPIError(error, requestId, 'webhook_status_update', { messageId, status, reason });
     }
   }
@@ -274,6 +278,7 @@ export class EInvoicingAPI {
       return this.createSuccessResponse(result, requestId);
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleAPIError(error, requestId, 'get_capabilities', { companyId });
     }
   }
@@ -311,6 +316,7 @@ export class EInvoicingAPI {
       return this.createSuccessResponse(stats, requestId);
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleAPIError(error, requestId, 'get_statistics', { companyId, dateFrom, dateTo });
     }
   }
@@ -345,6 +351,7 @@ export class EInvoicingAPI {
       return this.createSuccessResponse(result, requestId);
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleAPIError(error, requestId, 'enable_einvoicing', { companyId });
     }
   }
@@ -379,6 +386,7 @@ export class EInvoicingAPI {
       return this.createSuccessResponse(result, requestId);
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleAPIError(error, requestId, 'disable_einvoicing', { companyId });
     }
   }
@@ -556,6 +564,7 @@ export class EInvoicingAPI {
         }
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error logging API usage:', error instanceof Error ? error.message : String(error));
     }
   }

@@ -557,6 +557,7 @@ export default function ProjectsPage() {
         setShowProjectForm(false);
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error creating project:', error instanceof Error ? error.message : String(error));
       toast({
         variant: "destructive",
@@ -574,6 +575,7 @@ export default function ProjectsPage() {
         description: "Fonction de mise à jour des tâches à implémenter"
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -593,6 +595,7 @@ export default function ProjectsPage() {
         });
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       toast({
         variant: "destructive",
         title: "Erreur",

@@ -120,6 +120,7 @@ export function useFormValidation<T extends FieldValues = FieldValues>(
       
       return result;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       toast({
         variant: 'destructive',
         title: t('validation.unexpectedError', { defaultValue: 'Erreur inattendue' }),
@@ -462,6 +463,7 @@ export function useFormPersistence<T extends FieldValues = FieldValues>(
         });
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('Erreur lors de la restauration des données du formulaire:', error);
     }
   }, [form, key, storage, exclude]);
@@ -486,6 +488,7 @@ export function useFormPersistence<T extends FieldValues = FieldValues>(
           const transformedData = transformForApi(filteredData);
           storage.setItem(key, JSON.stringify(transformedData));
         } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
           console.warn('Erreur lors de la sauvegarde des données du formulaire:', error);
         }
       }, debounceMs);
@@ -504,6 +507,7 @@ export function useFormPersistence<T extends FieldValues = FieldValues>(
     try {
       storage.removeItem(key);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('Erreur lors de la suppression des données persistées:', error);
     }
   }, [storage, key]);

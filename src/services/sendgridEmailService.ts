@@ -94,6 +94,7 @@ export async function sendEmail(template: EmailTemplate): Promise<boolean> {
     console.warn(`📧 Email sent to ${template.to}`);
     return true;
   } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
     console.error('❌ Email sending failed:', error instanceof Error ? error.message : String(error));
     return false;
   }

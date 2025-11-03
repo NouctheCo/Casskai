@@ -164,6 +164,7 @@ export class FrenchTaxComplianceService {
 
       return declaration;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur génération CA3:', error instanceof Error ? error.message : String(error));
       throw new Error('Impossible de générer la déclaration CA3');
     }
@@ -273,6 +274,7 @@ export class FrenchTaxComplianceService {
         updatedAt: new Date()
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur génération CVAE:', error instanceof Error ? error.message : String(error));
       throw new Error('Impossible de générer la déclaration CVAE');
     }
@@ -350,6 +352,7 @@ export class FrenchTaxComplianceService {
 
       return fecLines.join('\n');
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur génération FEC:', error instanceof Error ? error.message : String(error));
       throw new Error('Impossible de générer le FEC');
     }
@@ -405,6 +408,7 @@ export class FrenchTaxComplianceService {
 
       return { errors, warnings, checks };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur validation cohérence:', error instanceof Error ? error.message : String(error));
       return {
         errors: ['Erreur lors de la validation de cohérence'],

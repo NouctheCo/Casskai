@@ -18,6 +18,7 @@ export const dashboardService = {
 
       return { data, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching dashboard stats:', error instanceof Error ? error.message : String(error));
       
       // Fallback : calculer manuellement si la fonction RPC n'est pas disponible
@@ -99,6 +100,7 @@ export const dashboardService = {
 
       return { data: stats, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error calculating dashboard stats manually:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
@@ -122,6 +124,7 @@ export const dashboardService = {
 
       return { data, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching balance sheet:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
@@ -147,6 +150,7 @@ export const dashboardService = {
 
       return { data, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching income statement:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
@@ -168,6 +172,7 @@ export const dashboardService = {
 
       return { data: data || [], error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching cash flow data:', error instanceof Error ? error.message : String(error));
       
       // Fallback : simuler des données de cash-flow
@@ -206,6 +211,7 @@ export const dashboardService = {
 
       return { data: cashFlowData, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error simulating cash flow data:', error instanceof Error ? error.message : String(error));
       return { data: [], error };
     }
@@ -242,6 +248,7 @@ export const dashboardService = {
 
       return { data: entriesWithAmount, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching recent journal entries:', error instanceof Error ? error.message : String(error));
       return { data: [], error };
     }
@@ -295,6 +302,7 @@ export const dashboardService = {
 
       return { data: topAccounts, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching top accounts by activity:', error instanceof Error ? error.message : String(error));
       return { data: [], error };
     }
@@ -396,6 +404,7 @@ export const dashboardService = {
 
       return { data: alerts, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching dashboard alerts:', error instanceof Error ? error.message : String(error));
       return { data: [], error };
     }
@@ -472,6 +481,7 @@ export const dashboardService = {
 
       return { data: metrics, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching performance metrics:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }

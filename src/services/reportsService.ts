@@ -74,6 +74,7 @@ class ReportsService {
 
       return { data: data || [] };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Exception in getReports:', error instanceof Error ? error.message : String(error));
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la récupération des rapports';
       return {
@@ -111,6 +112,7 @@ class ReportsService {
 
       return { data };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Exception in createReport:', error instanceof Error ? error.message : String(error));
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la création du rapport';
       return {
@@ -136,6 +138,7 @@ class ReportsService {
 
       return { data };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Exception in updateReport:', error instanceof Error ? error.message : String(error));
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la mise à jour du rapport';
       return {
@@ -159,6 +162,7 @@ class ReportsService {
 
       return { data: true };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Exception in deleteReport:', error instanceof Error ? error.message : String(error));
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la suppression du rapport';
       return {
@@ -183,6 +187,7 @@ class ReportsService {
 
       return { data: data as BalanceSheetData };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Exception in generateBalanceSheet:', error instanceof Error ? error.message : String(error));
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la génération du bilan';
       return {
@@ -207,6 +212,7 @@ class ReportsService {
 
       return { data: data as IncomeStatementData };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Exception in generateIncomeStatement:', error instanceof Error ? error.message : String(error));
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la génération du compte de résultat';
       return {
@@ -231,6 +237,7 @@ class ReportsService {
 
       return { data: data as CashFlowData };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Exception in generateCashFlowStatement:', error instanceof Error ? error.message : String(error));
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la génération du tableau de flux de trésorerie';
       return {
@@ -254,6 +261,7 @@ class ReportsService {
 
       return { data: data as TrialBalanceData };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Exception in generateTrialBalance:', error instanceof Error ? error.message : String(error));
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la génération de la balance générale';
       return {
@@ -282,6 +290,7 @@ class ReportsService {
 
       return { data: data || [] };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         data: [],
         error: { message: 'Erreur lors de la récupération des modèles' }
@@ -333,6 +342,7 @@ class ReportsService {
 
       return { data: data || newTemplate };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         data: {} as ReportTemplate,
         error: { message: 'Erreur lors de la création du modèle' }
@@ -359,6 +369,7 @@ class ReportsService {
 
       return { data: data || [] };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         data: [],
         error: { message: 'Erreur lors de la récupération des planifications' }
@@ -399,6 +410,7 @@ class ReportsService {
 
       return { data: data || newSchedule };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         data: {} as ReportSchedule,
         error: { message: 'Erreur lors de la création de la planification' }
@@ -467,6 +479,7 @@ class ReportsService {
       
       return { data: analytics };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         data: {} as ReportAnalytics,
         error: { message: 'Erreur lors du calcul des analytiques' }
@@ -525,6 +538,7 @@ class ReportsService {
 
       return { data: dashboardData };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         data: {} as ReportsDashboardData,
         error: { message: 'Erreur lors de la récupération des données du tableau de bord' }
@@ -606,6 +620,7 @@ class ReportsService {
 
       return { data: exportUrl };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         data: '',
         error: { message: 'Erreur lors de l\'export du rapport' }
@@ -707,6 +722,7 @@ class ReportsService {
       
       return { data: charts };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         data: [],
         error: { message: 'Erreur lors de la génération des graphiques' }
@@ -729,6 +745,7 @@ class ReportsService {
 
       return { data: data as FinancialReport };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return { data: null, error: { message: 'Erreur lors de la récupération du rapport' } };
     }
   }
@@ -756,6 +773,7 @@ class ReportsService {
       if (exportRes.error) return { data: '', error: exportRes.error };
       return { data: exportRes.data };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return { data: '', error: { message: 'Erreur lors de la génération du lien de téléchargement' } };
     }
   }

@@ -52,6 +52,7 @@ export class GDPRService {
       if (error) throw error;
       return data;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error creating GDPR request:', error instanceof Error ? error.message : String(error));
       // Fallback: retourner un objet mock si la base de données n'est pas disponible
       return {
@@ -88,6 +89,7 @@ export class GDPRService {
       if (error) throw error;
       return data || [];
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching GDPR requests:', error instanceof Error ? error.message : String(error));
       // Retourner des données mock en cas d'erreur
       return this.getMockGDPRRequests();
@@ -106,6 +108,7 @@ export class GDPRService {
       if (error) throw error;
       return data || [];
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching GDPR requests by email:', error instanceof Error ? error.message : String(error));
       return [];
     }
@@ -140,6 +143,7 @@ export class GDPRService {
       if (error) throw error;
       return data;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error updating GDPR request status:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -155,6 +159,7 @@ export class GDPRService {
       // Ici on pourrait intégrer avec Supabase Edge Functions ou un service tiers
       
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error sending confirmation email:', error instanceof Error ? error.message : String(error));
       // Ne pas faire échouer la création de la demande si l'email échoue
     }

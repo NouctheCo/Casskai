@@ -160,6 +160,7 @@ export class HRService {
         data: enrichedEmployees as Employee[]
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getEmployees:', error);
       return {
         success: false,
@@ -199,6 +200,7 @@ export class HRService {
         } as Employee
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in createEmployee:', error);
       return {
         success: false,
@@ -237,6 +239,7 @@ export class HRService {
         } as Employee
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in updateEmployee:', error);
       return {
         success: false,
@@ -267,6 +270,7 @@ export class HRService {
         data: true
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in deleteEmployee:', error);
       return {
         success: false,
@@ -331,6 +335,7 @@ export class HRService {
         data: enrichedLeaves as Leave[]
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getLeaves:', error);
       return {
         success: false,
@@ -367,6 +372,7 @@ export class HRService {
         data: data as Leave
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in createLeave:', error);
       return {
         success: false,
@@ -402,6 +408,7 @@ export class HRService {
         data: data as Leave
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in updateLeave:', error);
       return {
         success: false,
@@ -468,6 +475,7 @@ export class HRService {
         data: enrichedExpenses as Expense[]
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getExpenses:', error);
       return {
         success: false,
@@ -504,6 +512,7 @@ export class HRService {
         data: data as Expense
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in createExpense:', error);
       return {
         success: false,
@@ -569,6 +578,7 @@ export class HRService {
         data: enrichedEntries as TimeEntry[]
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getTimeEntries:', error);
       return {
         success: false,
@@ -605,6 +615,7 @@ export class HRService {
         data: data as TimeEntry
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in createTimeEntry:', error);
       return {
         success: false,
@@ -677,6 +688,7 @@ export class HRService {
         data: metrics
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getHRMetrics:', error);
       return {
         success: false,

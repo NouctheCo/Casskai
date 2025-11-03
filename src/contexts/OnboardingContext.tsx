@@ -77,6 +77,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         progress: data.progress
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Failed to initialize onboarding:', error);
       setState(prev => ({
         ...prev,
@@ -351,6 +352,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
       return { success: true };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Failed to finalize onboarding:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }

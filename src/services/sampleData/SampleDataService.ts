@@ -434,6 +434,7 @@ export class SampleDataService {
 
       return { success: true, results };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur génération données d\'exemple:', error);
       return { success: false, error: error.message };
     }
@@ -462,6 +463,7 @@ export class SampleDataService {
 
       return { success: true };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur suppression données d\'exemple:', error);
       return { success: false, error: error.message };
     }

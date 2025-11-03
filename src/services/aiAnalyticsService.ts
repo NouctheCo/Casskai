@@ -43,6 +43,7 @@ class AIAnalyticsService {
       this.isInitialized = true;
       console.warn('AI Analytics Service initialized successfully');
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Failed to initialize AI Analytics Service:', error);
       throw error;
     }
@@ -62,6 +63,7 @@ class AIAnalyticsService {
         await this.createDefaultModels();
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error initializing models:', error);
       // Fallback vers des modèles par défaut
       await this.createDefaultModels();
@@ -216,6 +218,7 @@ class AIAnalyticsService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error detecting anomalies:', error);
       return {
         success: false,
@@ -326,6 +329,7 @@ class AIAnalyticsService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error categorizing expense:', error);
       return this.ruleBasedCategorization(transaction, categories);
     }
@@ -475,6 +479,7 @@ class AIAnalyticsService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error predicting cash flow:', error);
       return this.statisticalCashFlowPrediction(historicalData, daysAhead);
     }
@@ -615,6 +620,7 @@ class AIAnalyticsService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error calculating health score:', error);
       return {
         success: false,
@@ -738,6 +744,7 @@ class AIAnalyticsService {
       localStorage.setItem('ai_models', JSON.stringify(modelMetadata));
       console.warn('Models metadata saved successfully');
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error saving models:', error);
     }
   }

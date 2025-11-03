@@ -53,6 +53,7 @@ export const taxService = {
 
       return { data: taxRates, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching tax rates:', error);
       const errorInfo = handleSupabaseError(error, 'Fetching tax rates');
       return { 
@@ -111,6 +112,7 @@ export const taxService = {
 
       return { data: newRate, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error creating tax rate:', error);
       const errorInfo = handleSupabaseError(error, 'Creating tax rate');
       return { 
@@ -145,6 +147,7 @@ export const taxService = {
 
       return { success: true, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error updating tax rate:', error);
       const errorInfo = handleSupabaseError(error, 'Updating tax rate');
       return { 
@@ -168,6 +171,7 @@ export const taxService = {
 
       return { success: true, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error deleting tax rate:', error);
       const errorInfo = handleSupabaseError(error, 'Deleting tax rate');
       return { 
@@ -237,6 +241,7 @@ export const taxService = {
 
       return { data: declarations, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching tax declarations:', error);
       const errorInfo = handleSupabaseError(error, 'Fetching tax declarations');
       return { 
@@ -293,6 +298,7 @@ export const taxService = {
 
       return { data: newDeclaration, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error creating tax declaration:', error);
       const errorInfo = handleSupabaseError(error, 'Creating tax declaration');
       return { 
@@ -333,6 +339,7 @@ export const taxService = {
 
       return { success: true, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error updating tax declaration:', error);
       const errorInfo = handleSupabaseError(error, 'Updating tax declaration');
       return { 
@@ -366,6 +373,7 @@ export const taxService = {
 
       return { success: true, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error marking declaration as submitted:', error);
       const errorInfo = handleSupabaseError(error, 'Marking declaration as submitted');
       return { 
@@ -423,6 +431,7 @@ export const taxService = {
 
       return { data: newPayment, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error creating tax payment:', error);
       const errorInfo = handleSupabaseError(error, 'Creating tax payment');
       return { 
@@ -459,6 +468,7 @@ export const taxService = {
       // For now, we'll just return success
       return { success: true, error: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error exporting to PDF:', error);
       return { 
         success: false, 
@@ -490,6 +500,7 @@ export const taxService = {
       
       return { data: mockData };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching tax dashboard data:', error);
       return { 
         data: {} as TaxDashboardData,
@@ -508,6 +519,7 @@ export const taxService = {
       
       return { data: mockData };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching tax declarations:', error);
       return { 
         data: [],
@@ -526,6 +538,7 @@ export const taxService = {
       
       return { data: mockData };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching calendar events:', error);
       return { 
         data: [],
@@ -544,6 +557,7 @@ export const taxService = {
       
       return { data: mockData };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching tax alerts:', error);
       return { 
         data: [],
@@ -562,6 +576,7 @@ export const taxService = {
       
       return { data: mockData };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching tax obligations:', error);
       return { 
         data: [],

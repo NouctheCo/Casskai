@@ -423,6 +423,7 @@ export default function OptimizedClientsTab() {
 
       setClients(transformed);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error loading clients:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',
@@ -484,6 +485,7 @@ export default function OptimizedClientsTab() {
       await loadClients();
       setEditingClient(null);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error saving client:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',
@@ -511,6 +513,7 @@ export default function OptimizedClientsTab() {
         description: "Le client a été supprimé avec succès."
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error deleting client:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',

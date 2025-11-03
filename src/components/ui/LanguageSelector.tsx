@@ -32,6 +32,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       setLocale(languageCode);
       await changeLanguageAndDetectCountry(languageCode);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Failed to change language:', error instanceof Error ? error.message : String(error));
     }
   };
@@ -140,6 +141,7 @@ export const useCurrentLocale = () => {
       setLocale(languageCode);
       await changeLanguageAndDetectCountry(languageCode);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Failed to change language:', error instanceof Error ? error.message : String(error));
     }
   };
@@ -186,6 +188,7 @@ export const RegionalLanguageSelector: React.FC<LanguageSelectorProps> = ({
       setLocale(languageCode);
       await changeLanguageAndDetectCountry(languageCode);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Failed to change language:', error instanceof Error ? error.message : String(error));
     }
   };

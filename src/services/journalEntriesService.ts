@@ -92,6 +92,7 @@ class JournalEntriesService {
         },
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = error instanceof Error ? error.message : 'Failed to create journal entry';
       return { success: false, error: message };
     }
@@ -164,6 +165,7 @@ class JournalEntriesService {
         },
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = error instanceof Error ? error.message : 'Failed to update journal entry';
       return { success: false, error: message };
     }
@@ -193,6 +195,7 @@ class JournalEntriesService {
 
       return { success: true, data: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = error instanceof Error ? error.message : 'Failed to delete journal entry';
       return { success: false, error: message };
     }
@@ -230,6 +233,7 @@ class JournalEntriesService {
 
       return { success: true, data: null };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = error instanceof Error ? error.message : 'Failed to delete journal entries';
       return { success: false, error: message };
     }
@@ -332,6 +336,7 @@ class JournalEntriesService {
         },
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = error instanceof Error ? error.message : 'Failed to fetch journal entries';
       return { success: false, error: message };
     }
@@ -364,6 +369,7 @@ class JournalEntriesService {
 
       return { success: true, data };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = error instanceof Error ? error.message : 'Failed to update journal entry status';
       return { success: false, error: message };
     }
@@ -416,6 +422,7 @@ class JournalEntriesService {
 
       return { success: true, data: stats };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = error instanceof Error ? error.message : 'Failed to compute journal entry stats';
       return { success: false, error: message };
     }
@@ -476,6 +483,7 @@ class JournalEntriesService {
 
       return { success: true, data };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = error instanceof Error ? error.message : 'Failed to fetch journal entry';
       return { success: false, error: message };
     }
@@ -551,6 +559,7 @@ class JournalEntriesService {
 
       return `${sanitizedPrefix}-${year}-${String(nextSequence).padStart(4, '0')}`;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('Failed to generate entry number, falling back to timestamp-based value:', error);
       return `JR-${Date.now()}`;
     }

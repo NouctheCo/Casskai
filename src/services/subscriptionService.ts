@@ -42,6 +42,7 @@ class SubscriptionService {
 
       return { canAccess: data };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in canAccessFeature:', error);
       return { canAccess: false, reason: 'Erreur inattendue' };
     }
@@ -70,6 +71,7 @@ class SubscriptionService {
 
       return data;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in incrementFeatureUsage:', error);
       return false;
     }
@@ -92,6 +94,7 @@ class SubscriptionService {
 
       return data || [];
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getUserUsageLimits:', error);
       return [];
     }
@@ -192,6 +195,7 @@ class SubscriptionService {
       return userSubscription;
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error getting current subscription:', error);
       return null;
     }
@@ -222,6 +226,7 @@ class SubscriptionService {
 
       return true;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in updateSubscriptionStatus:', error);
       return false;
     }
@@ -255,6 +260,7 @@ class SubscriptionService {
 
       return { success: true, subscriptionId: data };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in createTrialSubscription:', error);
       return { success: false, error: 'Erreur inattendue' };
     }
@@ -274,6 +280,7 @@ class SubscriptionService {
 
       return { expiredCount: data || 0 };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in expireTrials:', error);
       return { expiredCount: 0, error: 'Erreur inattendue' };
     }
@@ -312,6 +319,7 @@ class SubscriptionService {
         supportLevel: plan.support_level as 'basic' | 'priority' | 'dedicated'
       }));
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getAvailablePlans:', error);
       return [];
     }
@@ -386,6 +394,7 @@ class SubscriptionService {
 
       return { allowed: true, usage: featureLimit };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error checking quota:', error);
       return { allowed: false, message: 'Erreur de vérification des quotas' };
     }
@@ -416,6 +425,7 @@ class SubscriptionService {
       // Vérifier si c'est un nouvel utilisateur (période d'essai)
       return await this.checkTrialStatus(userId);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('[SubscriptionService] Erreur récupération plan:', error);
       return await this.checkTrialStatus(userId);
     }
@@ -517,6 +527,7 @@ class SubscriptionService {
 
       return true;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('[SubscriptionService] Erreur changement plan:', error);
       return false;
     }
@@ -601,6 +612,7 @@ class SubscriptionService {
 
       return data && data.length > 0 ? data[0] : null;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getUserSubscriptionStatus:', error);
       return null;
     }
@@ -623,6 +635,7 @@ class SubscriptionService {
 
       return data || [];
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getAllowedModulesForPlan:', error);
       return [];
     }

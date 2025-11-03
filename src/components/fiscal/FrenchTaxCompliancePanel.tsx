@@ -71,6 +71,7 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
         description: `Déclaration TVA pour ${currentMonth} créée avec succès`,
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       // Error is already handled by the hook
     }
   };
@@ -83,6 +84,7 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
         description: `Déclarations 2050-2059 pour ${selectedPeriod} créées`,
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       // Error is already handled by the hook
     }
   };
@@ -95,6 +97,7 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
         description: `Déclaration CVAE pour ${selectedPeriod} créée`,
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       // Error is already handled by the hook
     }
   };
@@ -120,6 +123,7 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
         });
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       // Error is already handled by the hook
     }
   };

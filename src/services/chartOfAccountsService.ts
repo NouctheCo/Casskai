@@ -72,6 +72,7 @@ export class ChartOfAccountsService {
       if (error) throw error;
       return data || [];
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur récupération comptes:', error);
       return [];
     }
@@ -115,6 +116,7 @@ export class ChartOfAccountsService {
 
       return { success: true, data };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur création compte:', error);
       return { success: false, error: error.message };
     }
@@ -166,6 +168,7 @@ export class ChartOfAccountsService {
 
       return { success: true, data };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur modification compte:', error);
       return { success: false, error: error.message };
     }
@@ -194,6 +197,7 @@ export class ChartOfAccountsService {
 
       return { success: true };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur suppression compte:', error);
       return { success: false, error: error.message };
     }
@@ -235,6 +239,7 @@ export class ChartOfAccountsService {
 
       return stats;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur stats comptes:', error);
       return {
         totalAccounts: 0,
@@ -281,6 +286,7 @@ export class ChartOfAccountsService {
 
       return { success: true, data: csvContent };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur export CSV:', error);
       return { success: false, error: error.message };
     }
@@ -343,6 +349,7 @@ export class ChartOfAccountsService {
             errors.push(`Ligne ${i + 2}: ${result.error}`);
           }
         } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
           errors.push(`Ligne ${i + 2}: Erreur de traitement - ${error.message}`);
         }
       }
@@ -353,6 +360,7 @@ export class ChartOfAccountsService {
         errors 
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur import CSV:', error);
       return { 
         success: false, 
@@ -420,6 +428,7 @@ export class ChartOfAccountsService {
 
       return balance;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur calcul solde:', error);
       return 0;
     }

@@ -138,6 +138,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         }
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Error loading enterprises from Supabase:', error instanceof Error ? error.message : String(error));
     }
 
@@ -152,6 +153,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         enterpriseList = JSON.parse(savedEnterprises);
         console.log('📦 Enterprises loaded from localStorage:', enterpriseList);
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.error('❌ Error parsing enterprises from localStorage:', error instanceof Error ? error.message : String(error));
       }
     }

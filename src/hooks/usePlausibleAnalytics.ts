@@ -115,6 +115,7 @@ class PlausibleService {
       }
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('[Plausible] Erreur lors de l\'initialisation:', error);
     }
   }
@@ -135,11 +136,13 @@ class PlausibleService {
                 window.plausible.apply(null, args);
               }
             } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
               console.warn('[Plausible] Erreur lors de l\'envoi des analytics:', error);
             }
           });
         }
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.warn('[Plausible] Erreur lors de l\'envoi des analytics:', error);
       }
     };
@@ -163,6 +166,7 @@ class PlausibleService {
         window.plausible('pageview', { u: pageUrl });
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('[Plausible] Erreur lors du tracking de page vue:', error);
     }
   }
@@ -180,6 +184,7 @@ class PlausibleService {
         }
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('[Plausible] Erreur lors du tracking d\'événement:', error);
     }
   }
@@ -204,6 +209,7 @@ class PlausibleService {
         }
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('[Plausible] Erreur lors du tracking de goal:', error);
     }
   }

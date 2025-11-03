@@ -20,6 +20,11 @@ interface ImportMetaEnv {
   readonly VITE_APP_NAME: string;
   readonly VITE_APP_VERSION: string;
   readonly VITE_USE_MOCK_SERVICES: string;
+  readonly VITE_BETA_FEEDBACK_ENABLED?: string;
+  readonly VITE_E2E_BYPASS_AUTH?: string;
+  readonly VITE_DEBUG_MODE?: string;
+  readonly DEV?: boolean;
+  readonly MODE?: string;
 }
 
 interface ImportMeta {

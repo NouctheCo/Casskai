@@ -52,6 +52,7 @@ export class EncryptionService {
       this.isInitialized = true;
       console.warn('Encryption service initialized successfully');
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to initialize encryption service: ${error.message}`);
     }
   }
@@ -93,6 +94,7 @@ export class EncryptionService {
       this.keyCache.set(cacheKey, derivedKey);
       return derivedKey;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to generate derived key: ${error.message}`);
     }
   }
@@ -157,6 +159,7 @@ export class EncryptionService {
 
       return encryptedCredentials;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       await this.auditLog('CREDENTIALS_ENCRYPTION_FAILED', userId, {
         providerId,
         error: error.message
@@ -214,6 +217,7 @@ export class EncryptionService {
 
       return credentials;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       await this.auditLog('CREDENTIALS_DECRYPTION_FAILED', encryptedCredentials.userId, {
         providerId: encryptedCredentials.providerId,
         keyId: encryptedCredentials.keyId,
@@ -251,6 +255,7 @@ export class EncryptionService {
       
       return `${keyId}:${ivBase64}:${encryptedBase64}`;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to encrypt string: ${error.message}`);
     }
   }
@@ -288,6 +293,7 @@ export class EncryptionService {
 
       return new TextDecoder().decode(decryptedBuffer);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to decrypt string: ${error.message}`);
     }
   }
@@ -301,6 +307,7 @@ export class EncryptionService {
       const hashArray = new Uint8Array(hashBuffer);
       return btoa(String.fromCharCode(...hashArray));
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to hash token: ${error.message}`);
     }
   }
@@ -346,6 +353,7 @@ export class EncryptionService {
         encoder.encode(payload)
       );
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('HMAC verification failed:', error);
       return false;
     }
@@ -380,6 +388,7 @@ export class EncryptionService {
       
       return `${algorithm.toLowerCase().replace('-', '')}=${signatureBase64}`;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to generate HMAC signature: ${error.message}`);
     }
   }
@@ -436,6 +445,7 @@ export class EncryptionService {
       // En production, sauvegarder en base de données
       console.warn('Audit log:', auditEntry);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Failed to create audit log:', error);
     }
   }
@@ -471,6 +481,7 @@ export class TokenRotationService {
         await callback();
         console.warn('Token rotation completed successfully');
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.error('Token rotation failed:', error);
       }
     }, this.rotationInterval);
@@ -490,6 +501,7 @@ export class TokenRotationService {
       await callback();
       console.warn('Forced token rotation completed successfully');
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Forced token rotation failed:', error);
       throw error;
     }

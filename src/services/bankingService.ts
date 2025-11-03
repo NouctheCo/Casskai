@@ -67,6 +67,7 @@ export class BankingService {
       this.isInitialized = true;
       console.warn('Banking Service initialized successfully');
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Failed to initialize Banking Service:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -101,6 +102,7 @@ export class BankingService {
       }
       return res;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       // Ne pas lancer l'erreur, renvoyer une réponse d'erreur conforme
       return {
         success: false,

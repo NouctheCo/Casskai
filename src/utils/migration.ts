@@ -43,6 +43,7 @@ export class ConfigMigration {
       return true;
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur lors de la migration:', error instanceof Error ? error.message : String(error));
       return false;
     }
@@ -144,6 +145,7 @@ export class ConfigMigration {
             }
             return null; // La table existe
           } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
             return table; // La table est manquante
           }
         })
@@ -168,6 +170,7 @@ export class ConfigMigration {
         suggestedActions,
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         isCompatible: false,
         missingTables: [],
@@ -234,7 +237,8 @@ export const useMigration = () => {
       }
       return success;
     } catch (error) {
-      setError(err instanceof Error ? err.message : 'Erreur de migration');
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      setError(errorMsg instanceof Error ? errorMsg.message : 'Erreur de migration');
       return false;
     } finally {
       setIsLoading(false);

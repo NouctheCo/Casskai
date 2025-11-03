@@ -138,6 +138,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       });
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Unexpected error in fetchSubscription:', error);
       // En cas d'erreur, utiliser plan gratuit par défaut
       setSubscriptionPlanState('free');
@@ -267,6 +268,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         }
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in setSubscriptionPlan:', error);
     } finally {
       setIsLoading(false);
@@ -289,6 +291,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       console.warn('Open billing portal - not implemented yet');
       return { success: true };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Failed to open billing portal:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }

@@ -132,6 +132,7 @@ export class InboundService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error processing inbound invoice:', error);
       
       if (queueId) {
@@ -169,6 +170,7 @@ export class InboundService {
       return data as EInvInboundQueue;
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error getting queue status:', error);
       return null;
     }
@@ -209,6 +211,7 @@ export class InboundService {
       return data as EInvInboundQueue[] || [];
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error listing inbound invoices:', error);
       
       if (error instanceof EInvoicingError) {
@@ -269,6 +272,7 @@ export class InboundService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error retrying processing:', error);
       
       if (error instanceof EInvoicingError) {
@@ -369,6 +373,7 @@ export class InboundService {
       return (data && data.length > 0);
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in duplicate check:', error);
       return false;
     }
@@ -420,6 +425,7 @@ export class InboundService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         errors: [`Parsing error: ${(error as Error).message}`]
@@ -633,6 +639,7 @@ export class InboundService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         errors: [`Invoice creation error: ${(error as Error).message}`]

@@ -111,6 +111,7 @@ const LegacyReportsPage: React.FC = () => {
         setDashboardData(response.data);
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error loading dashboard data:', error);
     }
   }, [currentEnterprise?.id]);
@@ -123,6 +124,7 @@ const LegacyReportsPage: React.FC = () => {
         setReports(response.data);
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error loading reports:', error);
     }
   }, [currentEnterprise?.id]);
@@ -135,6 +137,7 @@ const LegacyReportsPage: React.FC = () => {
         setTemplates(response.data);
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error loading templates:', error);
     }
   }, [currentEnterprise?.id]);
@@ -147,6 +150,7 @@ const LegacyReportsPage: React.FC = () => {
         setSchedules(response.data);
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error loading schedules:', error);
     }
   }, [currentEnterprise?.id]);
@@ -156,6 +160,7 @@ const LegacyReportsPage: React.FC = () => {
     try {
       setLoading(false);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error loading financial data:', error);
       setLoading(false);
     }
@@ -461,6 +466,7 @@ const LegacyReportsPage: React.FC = () => {
       });
       
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de la création du rapport:', error);
       toast({
         title: 'Erreur',

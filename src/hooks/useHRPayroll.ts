@@ -61,6 +61,7 @@ export function useHRPayroll({
     try {
       return await hrPayrollService.calculatePayroll(employee, periodStart, periodEnd);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error calculating payroll:', error);
       return null;
     }
@@ -84,6 +85,7 @@ export function useHRPayroll({
     try {
       return await hrPayrollService.processMonthlyPayroll(currentCompany.id, year, month);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         processed: 0,
@@ -114,6 +116,7 @@ export function useHRPayroll({
         throw new Error(result.error || 'Failed to generate payslip');
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in generatePayslip:', error);
       throw error;
     }
@@ -138,6 +141,7 @@ export function useHRPayroll({
         payroll
       );
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'

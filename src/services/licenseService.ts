@@ -29,6 +29,7 @@ export class LicenseService {
       }
       return false;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur validation licence:', error instanceof Error ? error.message : String(error));
       return false;
     }

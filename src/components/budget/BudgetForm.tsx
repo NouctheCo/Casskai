@@ -89,6 +89,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
       });
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error loading budget:', error instanceof Error ? error.message : String(error));
     } finally {
       setLoading(false);
@@ -341,6 +342,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
       }
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error saving budget:', error instanceof Error ? error.message : String(error));
     } finally {
       setSaving(false);

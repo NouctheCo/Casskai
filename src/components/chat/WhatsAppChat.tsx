@@ -179,6 +179,7 @@ export function WhatsAppFloatingButton({
       setTimeout(() => setIsVisible(true), 5000);
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('WhatsApp error:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur",

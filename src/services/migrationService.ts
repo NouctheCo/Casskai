@@ -91,6 +91,7 @@ class MigrationService {
         },
       ];
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de la vérification des migrations:', error);
       return [
         { version: '001', name: 'initial_schema', applied: false },
@@ -160,6 +161,7 @@ class MigrationService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur lors de l\'application des migrations:', error);
       return {
         success: false,
@@ -294,6 +296,7 @@ class MigrationService {
         p_company_id: '00000000-0000-0000-0000-000000000000' 
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       if (error instanceof Error && error.message?.includes('function get_dashboard_stats')) {
         throw new Error('Fonction get_dashboard_stats non trouvée. Appliquez la migration 003 via Supabase CLI.');
       }
@@ -342,6 +345,7 @@ class MigrationService {
         companyId: data
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de la création de l\'entreprise:', error);
       return {
         success: false,
@@ -365,6 +369,7 @@ class MigrationService {
 
       return { success: true };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de la finalisation:', error);
       return {
         success: false,
@@ -391,6 +396,7 @@ class MigrationService {
         data
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de la validation:', error);
       return {
         success: false,
@@ -417,6 +423,7 @@ class MigrationService {
         updatedCount: data
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors du recalcul:', error);
       return {
         success: false,

@@ -64,6 +64,7 @@ export class FormattingService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error formatting document:', error instanceof Error ? error.message : String(error));
       throw new EInvoicingError(
         `Failed to format document as ${format}: ${(error as Error).message}`,

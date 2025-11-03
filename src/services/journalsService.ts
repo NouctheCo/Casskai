@@ -37,6 +37,7 @@ export class JournalsService {
       if (error) throw error;
       return data || [];
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur récupération journaux:', error);
       return [];
     }
@@ -67,6 +68,7 @@ export class JournalsService {
 
       return { success: true, data };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur création journal:', error);
       return { success: false, error: error.message };
     }
@@ -86,6 +88,7 @@ export class JournalsService {
 
       return { success: true, data };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur modification journal:', error);
       return { success: false, error: error.message };
     }
@@ -114,6 +117,7 @@ export class JournalsService {
 
       return { success: true };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur suppression journal:', error);
       return { success: false, error: error.message };
     }
@@ -144,6 +148,7 @@ export class JournalsService {
 
       return { success: true, data };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur changement statut journal:', error);
       return { success: false, error: error.message };
     }
@@ -169,6 +174,7 @@ export class JournalsService {
         lastEntryDate: data?.[0]?.date || null
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur stats journal:', error);
       return { entriesCount: 0, lastEntryDate: null };
     }
@@ -229,6 +235,7 @@ export class JournalsService {
 
       return { success: true, journalsCreated: data?.length || 0 };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur création journaux par défaut:', error);
       return { success: false, journalsCreated: 0, error: error.message };
     }

@@ -74,6 +74,7 @@ export class ArchiveService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error archiving documents:', error);
       
       if (error instanceof EInvoicingError) {
@@ -157,6 +158,7 @@ export class ArchiveService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error retrieving document:', error);
       
       if (error instanceof EInvoicingError) {
@@ -259,6 +261,7 @@ export class ArchiveService {
       return versions;
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error listing document versions:', error);
       
       if (error instanceof EInvoicingError) {
@@ -334,6 +337,7 @@ export class ArchiveService {
             });
           }
         } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
           errors.push(`Error deleting ${documentPath}: ${(error as Error).message}`);
         }
       }
@@ -346,6 +350,7 @@ export class ArchiveService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error during cleanup:', error);
       
       throw new EInvoicingError(
@@ -410,6 +415,7 @@ export class ArchiveService {
       return stats;
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error calculating archive statistics:', error);
       
       if (error instanceof EInvoicingError) {
@@ -446,6 +452,7 @@ export class ArchiveService {
       return { success: true };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return { success: false, error: (error as Error).message };
     }
   }
@@ -519,6 +526,7 @@ export class ArchiveService {
         p_meta_json: metadata
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error logging archival event:', error);
     }
   }
@@ -534,6 +542,7 @@ export class ArchiveService {
         p_meta_json: metadata
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error logging access event:', error);
     }
   }
@@ -549,6 +558,7 @@ export class ArchiveService {
         p_meta_json: metadata
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error logging deletion event:', error);
     }
   }

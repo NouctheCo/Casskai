@@ -87,6 +87,7 @@ export class DataGovernanceService {
       return data || [];
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur recherche intelligente:', error);
       throw error;
     }
@@ -117,6 +118,7 @@ export class DataGovernanceService {
       return data || [];
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur récupération doublons:', error);
       throw error;
     }
@@ -142,6 +144,7 @@ export class DataGovernanceService {
       return data;
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur marquage doublon:', error);
       return {
         success: false,
@@ -171,6 +174,7 @@ export class DataGovernanceService {
       return data;
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur fusion entreprises:', error);
       return {
         success: false,
@@ -199,6 +203,7 @@ export class DataGovernanceService {
       return { success: true };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur marquage faux positif:', error);
       return { success: false };
     }
@@ -214,6 +219,7 @@ export class DataGovernanceService {
       return data || [];
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur analyse qualité:', error);
       throw error;
     }
@@ -265,6 +271,7 @@ export class DataGovernanceService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur statistiques gouvernance:', error);
       throw error;
     }
@@ -344,6 +351,7 @@ export class DataGovernanceService {
       return data || [];
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur audit trail:', error);
       throw error;
     }
@@ -381,6 +389,7 @@ export class DataGovernanceService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur nettoyage données:', error);
       throw error;
     }
@@ -414,6 +423,7 @@ export class DataGovernanceService {
       return { updated: updatedCount };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur recalcul scores:', error);
       throw error;
     }

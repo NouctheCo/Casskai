@@ -120,6 +120,7 @@ export class FECExportService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur génération FEC:', error);
       return {
         success: false,
@@ -322,6 +323,7 @@ export class FECExportService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur téléchargement'

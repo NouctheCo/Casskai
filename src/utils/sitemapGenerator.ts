@@ -293,6 +293,7 @@ export class ServerSitemapService {
       
       await this.saveSitemap();
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur lors de la mise à jour du sitemap:', error instanceof Error ? error.message : String(error));
     }
   }
@@ -308,6 +309,7 @@ export const generateBuildSitemap = async () => {
       await service.saveRobotsTxt();
       console.warn('✅ Sitemap et robots.txt générés avec succès');
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur lors de la génération du sitemap:', error instanceof Error ? error.message : String(error));
     }
   }

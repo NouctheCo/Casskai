@@ -54,6 +54,7 @@ class AIAssistantService {
 
       this.isInitialized = true;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Failed to initialize AI Assistant Service:', error instanceof Error ? error.message : String(error));
       this.isInitialized = true; // Continue en mode mock
     }
@@ -122,6 +123,7 @@ class AIAssistantService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error processing AI assistant query:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
@@ -192,6 +194,7 @@ class AIAssistantService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('OpenAI API error:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -333,6 +336,7 @@ class AIAssistantService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error generating tax optimizations:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
@@ -465,6 +469,7 @@ class AIAssistantService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error generating narrative report:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
@@ -514,6 +519,7 @@ class AIAssistantService {
         keyInsights = response.keyInsights || this.generateDefaultInsights(transactions, metrics);
         recommendations = response.recommendations || this.generateDefaultRecommendations(balance, metrics);
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         // Fallback vers génération par défaut
         summary = this.generateDefaultSummary(balance, income, expenses);
         keyInsights = this.generateDefaultInsights(transactions, metrics);

@@ -82,6 +82,7 @@ export async function measurePerformance<T>(label: string, fn: () => Promise<T> 
     logger.performance(label, performance.now() - start);
     return result;
   } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
     const duration = performance.now() - start;
     logger.error(`${label} failed after ${duration.toFixed(2)}ms`, error);
     throw error;

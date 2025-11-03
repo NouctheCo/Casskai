@@ -75,6 +75,7 @@ export class AccountDeletionService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur analyse suppression:', error);
       throw error;
     }
@@ -114,6 +115,7 @@ export class AccountDeletionService {
       }));
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur récupération utilisateurs éligibles:', error);
       throw error;
     }
@@ -170,6 +172,7 @@ export class AccountDeletionService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur demande suppression:', error);
       return {
         success: false,
@@ -202,6 +205,7 @@ export class AccountDeletionService {
         }
 
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.error(`❌ Erreur transfert propriété ${plan.company_name}:`, error);
       }
     }
@@ -255,6 +259,7 @@ export class AccountDeletionService {
       console.warn('✅ Exports générés pour suppression compte');
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur génération exports:', error);
     }
   }
@@ -319,6 +324,7 @@ export class AccountDeletionService {
       return { success: true };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur annulation suppression:', error);
       return {
         success: false,
@@ -365,6 +371,7 @@ export class AccountDeletionService {
       };
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur récupération statut suppression:', error);
       throw error;
     }
@@ -404,6 +411,7 @@ export class AccountDeletionService {
         console.warn(`✅ Compte ${deletion.user_id} supprimé avec succès`);
 
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.error(`❌ Erreur suppression compte ${deletion.user_id}:`, error);
       }
     }

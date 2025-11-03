@@ -21,6 +21,7 @@ export class ReconciliationEngine {
       this.isInitialized = true;
       console.warn(`Reconciliation engine initialized with ${rules.length} rules`);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to initialize reconciliation engine: ${error.message}`);
     }
   }
@@ -73,6 +74,7 @@ export class ReconciliationEngine {
         data: matches
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: {
@@ -129,6 +131,7 @@ export class ReconciliationEngine {
         }
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: {

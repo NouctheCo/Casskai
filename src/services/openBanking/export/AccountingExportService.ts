@@ -45,6 +45,7 @@ export class AccountingExportService {
       this.isInitialized = true;
   console.warn(`Accounting export service initialized with ${formats.length} formats`);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to initialize accounting export service: ${error.message}`);
     }
   }
@@ -98,6 +99,7 @@ export class AccountingExportService {
         data: job
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: {
@@ -152,6 +154,7 @@ export class AccountingExportService {
 
   console.warn(`Export job ${job.id} completed successfully`);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       this.updateJob(job.id, { status: 'failed', errorMessage: error.message });
 
       console.error(`Export job ${job.id} failed:`, error);
@@ -249,6 +252,7 @@ export class AccountingExportService {
 
       return { valid: true, error: '' };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         valid: false,
         error: `Validation error: ${error.message}`
@@ -301,6 +305,7 @@ export class AccountingExportService {
                 : String(value);
               return [mapping.targetField, normalized] as const;
             } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
               if (mapping.required) {
                 throw new Error(`Failed to map required field ${mapping.sourceField}: ${error.message}`);
               }
@@ -380,6 +385,7 @@ export class AccountingExportService {
 
       return value as string | number | boolean | null | undefined;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Transformation error:', error);
       return value as string | number | boolean | null | undefined;
     }
@@ -510,6 +516,7 @@ export class AccountingExportService {
 
       return url;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to save export file: ${error.message}`);
     }
   }

@@ -55,6 +55,7 @@ class OnboardingValidator {
       this.addResult('localStorage sync', 'PASS', 'Synchronisation localStorage fonctionnelle');
       return { test: 'localStorage sync', status: 'PASS', message: 'Synchronisation localStorage fonctionnelle' };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = error instanceof Error ? error.message : 'Erreur inconnue';
       this.addResult('localStorage sync', 'FAIL', message);
       return { test: 'localStorage sync', status: 'FAIL', message };
@@ -85,6 +86,7 @@ class OnboardingValidator {
             // eslint-disable-next-line no-await-in-loop
             return await operation();
           } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
             if (attempt === maxRetries) {
               throw error;
             }
@@ -105,6 +107,7 @@ class OnboardingValidator {
       this.addResult('retry logic', 'PASS', message);
       return { test: 'retry logic', status: 'PASS', message };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = error instanceof Error ? error.message : 'Erreur inconnue';
       this.addResult('retry logic', 'FAIL', message);
       return { test: 'retry logic', status: 'FAIL', message };
@@ -142,6 +145,7 @@ class OnboardingValidator {
       this.addResult('company validation', 'PASS', 'Validation des données d\'entreprise fonctionnelle');
       return { test: 'company validation', status: 'PASS', message: 'Validation des données d\'entreprise fonctionnelle' };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = error instanceof Error ? error.message : 'Erreur inconnue';
       this.addResult('company validation', 'FAIL', message);
       return { test: 'company validation', status: 'FAIL', message };
@@ -178,6 +182,7 @@ class OnboardingValidator {
       this.addResult('event sync', 'PASS', message);
       return { test: 'event sync', status: 'PASS', message };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const message = error instanceof Error ? error.message : 'Erreur inconnue';
       this.addResult('event sync', 'FAIL', message);
       return { test: 'event sync', status: 'FAIL', message };

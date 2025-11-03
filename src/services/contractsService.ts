@@ -136,6 +136,7 @@ export const contractsService = {
 
       return { data: filteredContracts, success: true };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return { error: handleSupabaseError(error, 'getContracts'), success: false };
     }
   },
@@ -155,6 +156,7 @@ export const contractsService = {
 
       return { data: contract, success: true };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return { error: handleSupabaseError(error, 'getContract'), success: false };
     }
   },
@@ -182,6 +184,7 @@ export const contractsService = {
 
       return { data: newContract, success: true };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return { error: handleSupabaseError(error, 'createContract'), success: false };
     }
   },
@@ -205,6 +208,7 @@ export const contractsService = {
 
       return { data: updatedContract, success: true };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return { error: handleSupabaseError(error, 'updateContract'), success: false };
     }
   },
@@ -217,6 +221,7 @@ export const contractsService = {
       // TODO: Implémentation Supabase
       return { data: true, success: true };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return { error: handleSupabaseError(error, 'archiveContract'), success: false };
     }
   },
@@ -334,6 +339,7 @@ export const contractsService = {
 
       return { data: mockCalculations, success: true };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return { error: handleSupabaseError(error, 'getRFACalculations'), success: false };
     }
   },
@@ -372,6 +378,7 @@ export const contractsService = {
 
       return { data: newCalculation, success: true };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return { error: handleSupabaseError(error, 'createRFACalculation'), success: false };
     }
   },
@@ -405,6 +412,7 @@ export const contractsService = {
 
       return { data: results, success: true };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return { error: handleSupabaseError(error, 'simulateRFA'), success: false };
     }
   },
@@ -469,6 +477,7 @@ export const contractsService = {
 
       return { data: dashboardData, success: true };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return { error: handleSupabaseError(error, 'getDashboardData'), success: false };
     }
   },

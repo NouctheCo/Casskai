@@ -69,6 +69,7 @@ class DataMigrationService {
 
       return { success: true, companyId };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur migration données entreprise:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Erreur inconnue' };
     }
@@ -120,6 +121,7 @@ class DataMigrationService {
         }
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur migration modules:', error);
     }
   }
@@ -173,6 +175,7 @@ class DataMigrationService {
 
       return { success: true, companies: companies || [] };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur sync données utilisateur:', error);
       return {
         success: false,
@@ -197,6 +200,7 @@ class DataMigrationService {
       // Si l'utilisateur n'a pas d'entreprises en DB, il a besoin de migration
       return !companies || companies.length === 0;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur vérification migration:', error);
       return true; // En cas d'erreur, forcer la migration
     }
@@ -226,6 +230,7 @@ class DataMigrationService {
 
       console.warn('localStorage nettoyé après migration:', toRemove.length, 'entrées supprimées');
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('Erreur nettoyage localStorage:', error);
     }
   }
@@ -276,6 +281,7 @@ class DataMigrationService {
         console.warn('Plan comptable de base créé');
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur création plan comptable:', error);
     }
   }
@@ -334,6 +340,7 @@ class DataMigrationService {
       }
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Erreur synchronisation complète:', error);
       return {
         success: false,

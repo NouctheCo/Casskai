@@ -107,6 +107,7 @@ handleExtensionErrors();
       </React.StrictMode>
     );
   } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
     console.error('Failed to initialize React application:', error);
     
     // Fallback: Retry after a short delay

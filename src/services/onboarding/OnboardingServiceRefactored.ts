@@ -76,6 +76,7 @@ class OnboardingService {
         data: initialData
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error initializing onboarding:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
@@ -156,6 +157,7 @@ class OnboardingService {
         data: updatedData
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error updating company profile:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
@@ -207,6 +209,7 @@ class OnboardingService {
         data: updatedData
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error updating preferences:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
@@ -267,6 +270,7 @@ class OnboardingService {
         data: updatedData
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error completing step:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
@@ -319,6 +323,7 @@ class OnboardingService {
         }
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error completing onboarding:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
@@ -360,6 +365,7 @@ class OnboardingService {
       // Réinitialiser l'onboarding
       return this.initializeOnboarding(userId);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error resetting onboarding:', error instanceof Error ? error.message : String(error));
       return {
         success: false,

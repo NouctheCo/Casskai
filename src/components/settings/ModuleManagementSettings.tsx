@@ -104,6 +104,7 @@ export function ModuleManagementSettings() {
             }
             return { moduleKey, success: true };
           } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
             console.error(`❌ Erreur module ${moduleKey}:`, error instanceof Error ? error.message : String(error));
             return { moduleKey, success: false, error };
           }
@@ -163,6 +164,7 @@ export function ModuleManagementSettings() {
       });
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur globale sauvegarde modules:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',

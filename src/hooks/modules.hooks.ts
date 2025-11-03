@@ -104,6 +104,7 @@ export const useModuleComponents = (moduleId: string) => {
               const loaded = await (importFn as () => Promise<{ default: ComponentType<unknown> } | ComponentType<unknown>>)();
               return { name, component: 'default' in loaded ? loaded.default : loaded };
             } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
               console.error(`[useModuleComponents] Erreur chargement composant ${name}:`, error);
               return null;
             }
@@ -119,6 +120,7 @@ export const useModuleComponents = (moduleId: string) => {
           setComponents(resolvedComponents);
         }
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.error(`[useModuleComponents] Erreur chargement composants ${moduleId}:`, error);
       } finally {
         setIsLoading(false);

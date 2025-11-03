@@ -53,6 +53,7 @@ const CookiesPolicyPage = () => {
           });
         }
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.error('Error loading cookie preferences:', error instanceof Error ? error.message : String(error));
         toast({
           variant: "destructive",
@@ -165,6 +166,7 @@ const CookiesPolicyPage = () => {
         description: "Vos préférences de cookies ont été mises à jour avec succès"
       } as any);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error saving cookie preferences:', error instanceof Error ? error.message : String(error));
       toast({
         variant: "destructive",
@@ -194,6 +196,7 @@ const CookiesPolicyPage = () => {
         description: "Toutes les catégories de cookies ont été activées"
       } as any);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error accepting all cookies:', error instanceof Error ? error.message : String(error));
       toast({
         variant: "destructive",
@@ -228,6 +231,7 @@ const CookiesPolicyPage = () => {
         description: "Seuls les cookies essentiels sont activés"
       } as any);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error rejecting optional cookies:', error instanceof Error ? error.message : String(error));
       toast({
         variant: "destructive",

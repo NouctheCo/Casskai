@@ -10,6 +10,11 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import FECImportDropzone from './FECImportDropzone';
 import FECImportSummary from './FECImportSummary';
+import { 
+  transformParsedDataForUI, 
+  createErrorData,
+  createProgressSimulator 
+} from './fecImportHelpers';
 
 const FECImport = ({ currentEnterpriseId }) => {
   const { t } = useLocale();
@@ -30,38 +35,8 @@ const FECImport = ({ currentEnterpriseId }) => {
     
     try {
       const result = await FECParser.parseFEC(selectedFile);
-      
-      if (result.success) {
-        // Transform to old format for compatibility with UI
-        const transformedData = {
-          entries: result.entries,
-          accounts: new Map(),
-          journals: [...new Set(result.entries.map(e => e.journalCode))],
-          summary: {
-            errors: result.errors,
-            warnings: result.warnings,
-            numEntries: result.validRows,
-            numAccounts: [...new Set(result.entries.map(e => e.accountNumber))].length,
-            numJournals: [...new Set(result.entries.map(e => e.journalCode))].length,
-            totalDebit: result.entries.reduce((sum, e) => sum + e.debit, 0).toLocaleString(),
-            totalCredit: result.entries.reduce((sum, e) => sum + e.credit, 0).toLocaleString(),
-            balance: (result.entries.reduce((sum, e) => sum + e.debit, 0) - result.entries.reduce((sum, e) => sum + e.credit, 0)).toFixed(2),
-            unbalancedEntries: []
-          }
-        };
-        
-        setParsedData(transformedData);
-      } else {
-        setParsedData({
-          entries: [],
-          accounts: new Map(),
-          journals: [],
-          summary: {
-            errors: result.errors,
-            numEntries: 0
-          }
-        });
-      }
+      const transformedData = transformParsedDataForUI(result);
+      setParsedData(transformedData);
     } catch (error) {
       console.error('Error parsing FEC file:', error);
       toast({
@@ -69,15 +44,7 @@ const FECImport = ({ currentEnterpriseId }) => {
         title: t('error'),
         description: error.message || t('fecImport.error.parsingFailed', { defaultValue: 'Failed to parse the FEC file' })
       });
-      setParsedData({
-        entries: [],
-        accounts: new Map(),
-        journals: [],
-        summary: {
-          errors: [{ message: error.message || 'Unknown parsing error' }],
-          numEntries: 0
-        }
-      });
+      setParsedData(createErrorData(error));
     } finally {
       setParsing(false);
     }
@@ -93,7 +60,7 @@ const FECImport = ({ currentEnterpriseId }) => {
       return;
     }
     
-    if (parsedData.summary.errors && parsedData.summary.errors.length > 0 && parsedData.summary.numEntries === 0) {
+    if (parsedData.summary.errors?.length > 0 && parsedData.summary.numEntries === 0) {
       toast({
         variant: 'destructive',
         title: t('error'),
@@ -106,21 +73,14 @@ const FECImport = ({ currentEnterpriseId }) => {
     setImportProgress(10);
     
     try {
-      // Simuler une progression
-      const progressInterval = setInterval(() => {
-        setImportProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 10;
-        });
-      }, 500);
+      // Start progress simulation
+      const stopProgress = createProgressSimulator(setImportProgress);
       
-      // Importer les données en utilisant la nouvelle méthode
+      // Import data
       const result = await fecImportService.parseAndImportFEC(file, currentEnterpriseId);
       
-      clearInterval(progressInterval);
+      // Stop progress and complete
+      stopProgress();
       setImportProgress(100);
       
       if (result.success) {

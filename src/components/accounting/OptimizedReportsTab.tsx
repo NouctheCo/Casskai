@@ -308,6 +308,7 @@ export default function OptimizedReportsTab() {
       loadRecentReports();
 
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       showToast("Impossible de générer le rapport. Veuillez réessayer.", 'error');
     } finally {
       setIsGenerating(null);
@@ -410,6 +411,7 @@ export default function OptimizedReportsTab() {
       await new Promise(resolve => setTimeout(resolve, 800));
       showToast(`Rapport "${report.name}" ouvert avec succès.`, 'success');
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       showToast("Impossible d'ouvrir le rapport. Veuillez réessayer.", 'error');
     } finally {
       setViewingReport(null);
@@ -433,6 +435,7 @@ export default function OptimizedReportsTab() {
       
       showToast(`Rapport "${report.name}" téléchargé avec succès.`, 'success');
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       showToast("Impossible de télécharger le rapport. Veuillez réessayer.", 'error');
     } finally {
       setDownloadingReport(null);

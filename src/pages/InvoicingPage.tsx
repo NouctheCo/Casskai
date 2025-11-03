@@ -265,6 +265,7 @@ export default function InvoicingPageOptimized() {
           averageInvoiceValue: stats.averageInvoiceValue
         });
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.error('Error loading invoicing data:', error);
         setError(error.message);
         toast({
@@ -341,6 +342,7 @@ export default function InvoicingPageOptimized() {
         description: "Prêt à créer une nouvelle facture."
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error preparing new invoice:', error);
       toast({
         title: "Erreur",

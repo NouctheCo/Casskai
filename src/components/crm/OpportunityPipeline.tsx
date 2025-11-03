@@ -19,7 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { crmService } from '@/services/crmService';
-import type { Opportunity, OpportunityStage } from '@/types/crm.types';
+import type { Opportunity, OpportunityStatus } from '@/types/crm.types';
 import {
   Euro,
   Calendar,
@@ -38,18 +38,18 @@ interface OpportunityPipelineProps {
 }
 
 const PIPELINE_STAGES: {
-  id: OpportunityStage;
+  id: OpportunityStatus;
   label: string;
   color: string;
   bgColor: string;
 }[] = [
-  { id: 'prospecting' as OpportunityStage, label: 'Prospection', color: 'text-gray-600', bgColor: 'bg-gray-100' },
-  { id: 'qualification' as OpportunityStage, label: 'Qualification', color: 'text-blue-600', bgColor: 'bg-blue-100' },
-  { id: 'proposal' as OpportunityStage, label: 'Proposition', color: 'text-yellow-600', bgColor: 'bg-yellow-100' },
-  { id: 'negotiation' as OpportunityStage, label: 'Négociation', color: 'text-orange-600', bgColor: 'bg-orange-100' },
-  { id: 'closing' as OpportunityStage, label: 'Finalisation', color: 'text-purple-600', bgColor: 'bg-purple-100' },
-  { id: 'won' as OpportunityStage, label: 'Gagné', color: 'text-green-600', bgColor: 'bg-green-100' },
-  { id: 'lost' as OpportunityStage, label: 'Perdu', color: 'text-red-600', bgColor: 'bg-red-100' },
+  { id: 'prospecting', label: 'Prospection', color: 'text-gray-600', bgColor: 'bg-gray-100' },
+  { id: 'qualification', label: 'Qualification', color: 'text-blue-600', bgColor: 'bg-blue-100' },
+  { id: 'proposal', label: 'Proposition', color: 'text-yellow-600', bgColor: 'bg-yellow-100' },
+  { id: 'negotiation', label: 'Négociation', color: 'text-orange-600', bgColor: 'bg-orange-100' },
+  { id: 'closing', label: 'Finalisation', color: 'text-purple-600', bgColor: 'bg-purple-100' },
+  { id: 'won', label: 'Gagné', color: 'text-green-600', bgColor: 'bg-green-100' },
+  { id: 'lost', label: 'Perdu', color: 'text-red-600', bgColor: 'bg-red-100' },
 ];
 
 export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
@@ -84,6 +84,7 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
       }
       setOpportunities(response.data);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error loading opportunities:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur",
@@ -99,10 +100,10 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
   const opportunitiesByStage = PIPELINE_STAGES.reduce((acc, stage) => {
     acc[stage.id] = opportunities.filter(opp => opp.stage === stage.id);
     return acc;
-  }, {} as Record<OpportunityStage, Opportunity[]>);
+  }, {} as Record<OpportunityStatus, Opportunity[]>);
 
   // Calculer les statistiques pour chaque étape
-  const getStageStats = (stageId: OpportunityStage) => {
+  const getStageStats = (stageId: OpportunityStatus) => {
     const stageOpportunities = opportunitiesByStage[stageId] || [];
     const totalValue = stageOpportunities.reduce((sum: number, opp: Opportunity) => sum + (opp.value || 0), 0);
     const count = stageOpportunities.length;
@@ -123,7 +124,7 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
     if (!over) return;
 
     const opportunityId = active.id as string;
-    const newStage = over.id as OpportunityStage;
+    const newStage = over.id as OpportunityStatus;
 
     const opportunity = opportunities.find(opp => opp.id === opportunityId);
     if (!opportunity || opportunity.stage === newStage) return;
@@ -151,6 +152,7 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
       });
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error updating opportunity:', error instanceof Error ? error.message : String(error));
       // Revert optimistic update
       await loadOpportunities();
@@ -231,7 +233,7 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
                 </p>
                 <p className="text-xl font-bold">
                   {opportunities.length > 0
-                    ? Math.round((getStageStats('won' as OpportunityStage).count / opportunities.length) * 100)
+                    ? Math.round((getStageStats('won' as OpportunityStatus).count / opportunities.length) * 100)
                     : 0}%
                 </p>
               </div>

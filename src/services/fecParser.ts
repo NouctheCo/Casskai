@@ -80,6 +80,7 @@ export class FECParser {
           const result = this.parseFECContent(content as string, { ...options, delimiter });
           resolve(result as any);
         } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
           resolve({
             success: false,
             totalRows: 0,
@@ -197,11 +198,11 @@ export class FECParser {
         // Validation avec Zod
         const validation = FECEntrySchema.safeParse(entry);
         if (!validation.success) {
-          validation.error.errors.forEach(err => {
+          validation.error.errors.forEach(errorMsg => {
             errors.push({
               row: rowNumber,
-              field: err.path.join('.'),
-              message: err.message,
+              field: errorMsg.path.join('.'),
+              message: errorMsg.message,
               type: 'validation',
               severity: 'error'
             });
@@ -227,6 +228,7 @@ export class FECParser {
         this.validateBusinessRules(entry, rowNumber, warnings);
 
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         errors.push({
           row: rowNumber,
           message: `Erreur de parsing: ${error.message}`,

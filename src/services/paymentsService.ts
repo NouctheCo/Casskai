@@ -118,6 +118,7 @@ class PaymentsService {
 
       return (data || []) as PaymentWithDetails[];
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getPayments:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -147,6 +148,7 @@ class PaymentsService {
 
       return data as PaymentWithDetails;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getPaymentById:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -198,6 +200,7 @@ class PaymentsService {
 
       return createdPayment;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in createPayment:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -227,6 +230,7 @@ class PaymentsService {
 
       return updatedPayment;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in updatePayment:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -254,6 +258,7 @@ class PaymentsService {
         await this.updateInvoicePaidAmount(payment.invoice_id);
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in deletePayment:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -311,6 +316,7 @@ class PaymentsService {
         methodDistribution
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error in getPaymentStats:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -340,6 +346,7 @@ class PaymentsService {
         .eq('id', invoiceId);
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error updating invoice paid amount:', error instanceof Error ? error.message : String(error));
     }
   }
@@ -370,6 +377,7 @@ class PaymentsService {
       
       return `PAY-${year}-${paddedNumber}`;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error generating payment reference:', error instanceof Error ? error.message : String(error));
       // Fallback
       return `PAY-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`;

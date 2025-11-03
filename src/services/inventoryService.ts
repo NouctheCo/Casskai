@@ -127,6 +127,7 @@ export class InventoryService {
         avg_cost: undefined
       }));
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching inventory items:', error instanceof Error ? error.message : String(error));
       // Retourner des données mock en cas d'erreur pour l'instant
       return this.getMockInventoryItems();
@@ -164,6 +165,7 @@ export class InventoryService {
       if (error) throw error;
       return data;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error creating inventory item:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -210,6 +212,7 @@ export class InventoryService {
       if (error) throw error;
       return data;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error updating inventory item:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -224,6 +227,7 @@ export class InventoryService {
 
       if (error) throw error;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error deleting inventory item:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -253,6 +257,7 @@ export class InventoryService {
         item_name: movement.inventory_items?.name
       }));
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching stock movements:', error instanceof Error ? error.message : String(error));
       return this.getMockStockMovements();
     }
@@ -279,6 +284,7 @@ export class InventoryService {
       
       return data;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error creating stock movement:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -298,6 +304,7 @@ export class InventoryService {
       if (error) throw error;
       return data || [];
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching suppliers:', error instanceof Error ? error.message : String(error));
       return this.getMockSuppliers();
     }
@@ -319,6 +326,7 @@ export class InventoryService {
       if (error) throw error;
       return data;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error creating supplier:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -372,6 +380,7 @@ export class InventoryService {
         avgStockRotation: 0 // À calculer plus tard
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error fetching inventory metrics:', error instanceof Error ? error.message : String(error));
       return this.getMockInventoryMetrics();
     }
@@ -416,6 +425,7 @@ export class InventoryService {
 
       if (updateError) throw updateError;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error updating item stock:', error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -429,6 +439,7 @@ export class InventoryService {
       // Pour l'instant, utiliser un UUID de test valide
       return '550e8400-e29b-41d4-a716-446655440000';
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error getting current company ID:', error instanceof Error ? error.message : String(error));
       return '550e8400-e29b-41d4-a716-446655440000';
     }

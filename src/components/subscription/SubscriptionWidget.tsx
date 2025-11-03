@@ -97,6 +97,7 @@ const SubscriptionWidget: React.FC = () => {
         const usersData = await getUsageLimit('users');
         setUsageData({ users: usersData });
       } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
         console.error('Failed to fetch usage data:', error instanceof Error ? error.message : String(error));
       }
     };

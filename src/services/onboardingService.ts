@@ -116,6 +116,7 @@ class OnboardingService {
         data: initialData
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('Error initializing onboarding:', errorMessage);
       return {
@@ -157,6 +158,7 @@ class OnboardingService {
         error: 'Aucune session d\'onboarding trouvée'
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error getting onboarding data:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
@@ -225,6 +227,7 @@ class OnboardingService {
         data: updatedData
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error updating company profile:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
@@ -278,6 +281,7 @@ class OnboardingService {
         data: updatedData
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error updating preferences:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
@@ -342,6 +346,7 @@ class OnboardingService {
         data: updatedData
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error completing step:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
@@ -408,6 +413,7 @@ class OnboardingService {
         }
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Error completing onboarding:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
@@ -885,6 +891,7 @@ class OnboardingService {
       const key = `casskai_onboarding_${userId}`;
       localStorage.setItem(key, JSON.stringify(data));
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('Erreur lors de la sauvegarde localStorage:', error);
     }
   }
@@ -898,6 +905,7 @@ class OnboardingService {
       const stored = localStorage.getItem(key);
       return stored ? JSON.parse(stored) : null;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('Erreur lors du chargement localStorage:', error);
       return null;
     }
@@ -911,6 +919,7 @@ class OnboardingService {
       const key = `casskai_onboarding_${userId}`;
       localStorage.removeItem(key);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn('Erreur lors du nettoyage localStorage:', error);
     }
   }
@@ -970,6 +979,7 @@ class OnboardingService {
         data: { companyId }
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: this.formatError(error, 'Création d\'entreprise')
@@ -1004,6 +1014,7 @@ class OnboardingService {
         data: metrics
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: this.formatError(error, 'Récupération des métriques')
@@ -1040,6 +1051,7 @@ class OnboardingService {
         data: progress
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: this.formatError(error, 'Calcul du progrès')
@@ -1066,6 +1078,7 @@ class OnboardingService {
       // Reinitialiser
       return await this.initializeOnboarding(userId);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         error: this.formatError(error, 'Réinitialisation de l\'onboarding')

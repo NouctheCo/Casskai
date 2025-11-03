@@ -55,6 +55,7 @@ export const useFrenchTaxCompliance = (companyId: string) => {
 
       return declaration;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       setState(prev => ({ ...prev, loading: false, error: errorMessage }));
       throw error;
@@ -81,6 +82,7 @@ export const useFrenchTaxCompliance = (companyId: string) => {
 
       return liasseDeclarations;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       setState(prev => ({ ...prev, loading: false, error: errorMessage }));
       throw error;
@@ -104,6 +106,7 @@ export const useFrenchTaxCompliance = (companyId: string) => {
 
       return declaration;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       setState(prev => ({ ...prev, loading: false, error: errorMessage }));
       throw error;
@@ -121,6 +124,7 @@ export const useFrenchTaxCompliance = (companyId: string) => {
       setState(prev => ({ ...prev, loading: false }));
       return fec;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       setState(prev => ({ ...prev, loading: false, error: errorMessage }));
       throw error;
@@ -151,6 +155,7 @@ export const useFrenchTaxCompliance = (companyId: string) => {
 
       return validation;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       setState(prev => ({ ...prev, loading: false, error: errorMessage }));
       throw error;
@@ -183,6 +188,7 @@ export const useFrenchTaxCompliance = (companyId: string) => {
 
       return syncResults;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       setState(prev => ({ ...prev, loading: false, error: errorMessage }));
       throw error;
@@ -200,6 +206,7 @@ export const useFrenchTaxCompliance = (companyId: string) => {
       setState(prev => ({ ...prev, loading: false }));
       return result;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       setState(prev => ({ ...prev, loading: false, error: errorMessage }));
       throw error;
@@ -217,6 +224,7 @@ export const useFrenchTaxCompliance = (companyId: string) => {
       setState(prev => ({ ...prev, loading: false }));
       return report;
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       setState(prev => ({ ...prev, loading: false, error: errorMessage }));
       throw error;

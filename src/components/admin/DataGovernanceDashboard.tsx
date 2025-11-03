@@ -65,6 +65,7 @@ export const DataGovernanceDashboard: React.FC = () => {
       setDuplicates(duplicatesData);
       setQualityMetrics(metricsData);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur chargement dashboard:', error);
       showToast("Impossible de charger les données de gouvernance", "error");
     } finally {
@@ -80,6 +81,7 @@ export const DataGovernanceDashboard: React.FC = () => {
       const results = await dataGovernanceService.searchCompaniesIntelligent(searchTerm);
       setSearchResults(results);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('❌ Erreur recherche:', error);
       showToast("Erreur lors de la recherche", "error");
     } finally {
@@ -95,6 +97,7 @@ export const DataGovernanceDashboard: React.FC = () => {
         loadDashboardData();
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       showToast("Impossible de marquer comme faux positif", "error");
     }
   };
@@ -113,6 +116,7 @@ export const DataGovernanceDashboard: React.FC = () => {
         throw new Error(result.message);
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       showToast(
         error instanceof Error ? error.message : "Erreur de fusion inconnue",
         "error"
@@ -127,6 +131,7 @@ export const DataGovernanceDashboard: React.FC = () => {
       showToast(`Recalcul terminé - ${result.updated} entreprises mises à jour`, "success");
       loadDashboardData();
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       showToast("Erreur lors du recalcul des scores", "error");
     } finally {
       setLoading(false);
