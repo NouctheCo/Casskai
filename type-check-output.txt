@@ -1,0 +1,127 @@
+
+> casskai@1.0.0 type-check
+> tsc --noEmit -p tsconfig.app.json
+
+src/components/accounting/fecImportHelpers.ts(2,54): error TS2307: Cannot find module './types' or its corresponding type declarations.
+src/components/accounting/fecImportHelpers.ts(46,55): error TS2345: Argument of type '"journalCode"' is not assignable to parameter of type 'never'.
+src/components/accounting/fecImportHelpers.ts(47,55): error TS2345: Argument of type '"accountNumber"' is not assignable to parameter of type 'never'.
+src/components/accounting/fecImportHelpers.ts(93,17): error TS2345: Argument of type '(prev: any) => any' is not assignable to parameter of type 'number'.
+src/components/crm/OpportunityPipeline.tsx(143,76): error TS2322: Type 'OpportunityStatus' is not assignable to type '"prospecting" | "qualification" | "proposal" | "negotiation" | "closing"'.
+  Type '"won"' is not assignable to type '"prospecting" | "qualification" | "proposal" | "negotiation" | "closing"'.
+src/components/dashboard/EnterpriseDashboard.tsx(635,31): error TS2339: Property 'message' does not exist on type 'unknown'.
+src/components/dashboard/ModularDashboard.tsx(516,11): error TS2322: Type 'MutableRefObject<ComponentClass<ResponsiveProps & WidthProviderProps, any>>' is not assignable to type 'LegacyRef<Component<ResponsiveProps & WidthProviderProps, any, any>>'.
+  Type 'MutableRefObject<ComponentClass<ResponsiveProps & WidthProviderProps, any>>' is not assignable to type 'RefObject<Component<ResponsiveProps & WidthProviderProps, any, any>>'.
+    Types of property 'current' are incompatible.
+      Type 'ComponentClass<ResponsiveProps & WidthProviderProps, any>' is missing the following properties from type 'Component<ResponsiveProps & WidthProviderProps, any, any>': context, setState, forceUpdate, render, and 3 more.
+src/components/dashboard/ModularDashboard.tsx(532,11): error TS2322: Type '(currentLayout: Layout[], allLayouts: { [key: string]: Layout[]; }) => void' is not assignable to type 'ItemCallback'.
+  Types of parameters 'allLayouts' and 'oldItem' are incompatible.
+    Type 'Layout' is not assignable to type '{ [key: string]: Layout[]; }'.
+      Index signature for type 'string' is missing in type 'Layout'.
+src/components/einvoicing/EInvoiceSubmissionForm.tsx(125,16): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+src/components/settings/CompanySettings.tsx(266,51): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+src/components/setup/SupabaseSetupWizard.tsx(69,16): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+src/components/setup/SupabaseSetupWizard.tsx(102,16): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+src/components/widgets/WidgetRenderer.tsx(573,31): error TS2559: Type 'WidgetSpecificConfig' has no properties in common with type 'GaugeWidgetConfig'.
+src/components/widgets/WidgetRenderer.tsx(576,35): error TS2559: Type 'WidgetSpecificConfig' has no properties in common with type 'ProgressTrackerConfig'.
+src/components/widgets/WidgetRenderer.tsx(579,32): error TS2559: Type 'WidgetSpecificConfig' has no properties in common with type 'QuickActionsConfig'.
+src/components/widgets/WidgetRenderer.tsx(582,36): error TS2559: Type 'WidgetSpecificConfig' has no properties in common with type 'RecentActivitiesConfig'.
+src/components/widgets/WidgetRenderer.tsx(585,38): error TS2559: Type 'WidgetSpecificConfig' has no properties in common with type 'NotificationCenterConfig'.
+src/components/widgets/WidgetRenderer.tsx(588,33): error TS2559: Type 'WidgetSpecificConfig' has no properties in common with type 'WeatherConfig'.
+src/components/widgets/WidgetRenderer.tsx(607,17): error TS2322: Type '"area" | "line" | "bar" | "pie"' is not assignable to type '"line" | "bar" | "pie" | "doughnut"'.
+  Type '"area"' is not assignable to type '"line" | "bar" | "pie" | "doughnut"'.
+src/components/widgets/WidgetRenderer.tsx(627,17): error TS2322: Type 'unknown[]' is not assignable to type 'Column[]'.
+  Type '{}' is missing the following properties from type 'Column': key, title
+src/components/widgets/WidgetRenderer.tsx(640,29): error TS2322: Type 'unknown[]' is not assignable to type 'Event[]'.
+  Type '{}' is missing the following properties from type 'Event': id, title, date
+src/contexts/DashboardContext.tsx(608,47): error TS2322: Type '{ userId: string; userName: string; avatar: string; }[]' is not assignable to type 'string | boolean | DashboardConfig | WidgetLayout[] | WidgetConfig | RealtimeEvent | WidgetConfig[] | ... 5 more ... | Partial<...>'.
+  Type '{ userId: string; userName: string; avatar: string; }[]' is not assignable to type 'WidgetLayout[]'.
+    Type '{ userId: string; userName: string; avatar: string; }' is missing the following properties from type 'WidgetLayout': i, x, y, w, h
+src/hooks/useEnterpriseTaxData.ts(159,63): error TS2345: Argument of type 'Enterprise' is not assignable to parameter of type 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type 'Enterprise'.
+src/infrastructure/reports/generators/BalanceSheetGenerator.ts(19,7): error TS2322: Type 'FinancialStatementData' is not assignable to type 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type 'FinancialStatementData'.
+src/infrastructure/reports/generators/CashFlowGenerator.ts(45,7): error TS2322: Type 'CashFlowData' is not assignable to type 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type 'CashFlowData'.
+src/infrastructure/reports/generators/IncomeStatementGenerator.ts(19,7): error TS2322: Type 'IncomeStatementData' is not assignable to type 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type 'IncomeStatementData'.
+src/infrastructure/reports/SupabaseReportRepository.ts(294,7): error TS2322: Type 'unknown' is not assignable to type 'string'.
+src/infrastructure/reports/SupabaseReportRepository.ts(295,7): error TS2322: Type 'unknown' is not assignable to type 'string'.
+src/infrastructure/reports/SupabaseReportRepository.ts(296,7): error TS2322: Type 'unknown' is not assignable to type 'ReportStatus'.
+src/infrastructure/reports/SupabaseReportRepository.ts(297,27): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'string | number'.
+src/infrastructure/reports/SupabaseReportRepository.ts(298,49): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'string | number'.
+src/infrastructure/reports/SupabaseReportRepository.ts(299,7): error TS2739: Type '{}' is missing the following properties from type 'ReportParameters': dateFrom, dateTo, companyId
+src/infrastructure/reports/SupabaseReportRepository.ts(300,7): error TS2739: Type '{}' is missing the following properties from type 'ReportResult': data, metadata, summary
+src/infrastructure/reports/SupabaseReportRepository.ts(301,7): error TS2322: Type 'unknown' is not assignable to type 'string'.
+src/infrastructure/reports/SupabaseReportRepository.ts(302,7): error TS2322: Type 'unknown' is not assignable to type 'number'.
+src/lib/formHelpers.ts(240,58): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+src/lib/formHelpers.ts(246,30): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'PathValueImpl<T, K>'.
+src/lib/formHelpers.ts(318,44): error TS2536: Type 'keyof T' cannot be used to index type 'DeepPartial<T>'.
+src/lib/formHelpers.ts(323,40): error TS2536: Type 'keyof T' cannot be used to index type 'DeepPartial<T>'.
+src/services/ai/OpenAIService.ts(432,11): error TS2741: Property 'factor' is missing in type '{ id: string; name: string; impact: number; }' but required in type 'PredictionFactor'.
+src/services/ai/OpenAIService.ts(433,11): error TS2741: Property 'factor' is missing in type '{ id: string; name: string; impact: number; }' but required in type 'PredictionFactor'.
+src/services/ai/OpenAIService.ts(434,11): error TS2741: Property 'factor' is missing in type '{ id: string; name: string; impact: number; }' but required in type 'PredictionFactor'.
+src/services/aiAnalyticsService.ts(197,26): error TS2345: Argument of type '{ transaction: Transaction; score: any; reasons: string[]; severity: "medium" | "low" | "high" | "critical"; timestamp: Date; resolved: false; }' is not assignable to parameter of type 'AnomalyDetection'.
+  Type '{ transaction: Transaction; score: any; reasons: string[]; severity: "medium" | "low" | "high" | "critical"; timestamp: Date; resolved: false; }' is missing the following properties from type 'AnomalyDetection': id, type, description, affectedData, and 2 more.
+src/services/aiAnalyticsService.ts(462,13): error TS2322: Type '{ factor: string; impact: number; description: string; }[]' is not assignable to type 'PredictionFactor[]'.
+  Type '{ factor: string; impact: number; description: string; }' is missing the following properties from type 'PredictionFactor': id, name
+src/services/aiAnalyticsService.ts(536,11): error TS2739: Type '{ factor: string; impact: number; description: string; }' is missing the following properties from type 'PredictionFactor': id, name
+src/services/aiAnalyticsService.ts(541,11): error TS2739: Type '{ factor: string; impact: number; description: string; }' is missing the following properties from type 'PredictionFactor': id, name
+src/services/aiAssistantService.ts(367,26): error TS2345: Argument of type '{ id: `${string}-${string}-${string}-${string}-${string}`; type: "deduction"; title: string; description: string; potentialSavings: number; effort: "medium"; requirements: string[]; status: "suggested"; }' is not assignable to parameter of type 'TaxOptimization'.
+  Type '{ id: `${string}-${string}-${string}-${string}-${string}`; type: "deduction"; title: string; description: string; potentialSavings: number; effort: "medium"; requirements: string[]; status: "suggested"; }' is missing the following properties from type 'TaxOptimization': complexity, category
+src/services/aiAssistantService.ts(409,11): error TS2322: Type 'Date' is not assignable to type 'string'.
+src/services/aiAssistantService.ts(433,26): error TS2345: Argument of type '{ id: `${string}-${string}-${string}-${string}-${string}`; type: "structure"; title: string; description: string; potentialSavings: number; effort: "high"; requirements: string[]; status: "suggested"; }' is not assignable to parameter of type 'TaxOptimization'.
+  Type '{ id: `${string}-${string}-${string}-${string}-${string}`; type: "structure"; title: string; description: string; potentialSavings: number; effort: "high"; requirements: string[]; status: "suggested"; }' is missing the following properties from type 'TaxOptimization': complexity, category
+src/services/budgetService.ts(145,49): error TS2345: Argument of type 'BudgetCategoryFormData[]' is not assignable to parameter of type 'BudgetCategory[]'.
+  Type 'BudgetCategoryFormData' is missing the following properties from type 'BudgetCategory': id, budget_id, approval_status, created_at
+src/services/budgetService.ts(235,51): error TS2345: Argument of type 'BudgetCategoryFormData[]' is not assignable to parameter of type 'BudgetCategory[]'.
+  Type 'BudgetCategoryFormData' is missing the following properties from type 'BudgetCategory': id, budget_id, approval_status, created_at
+src/services/csvImportService.ts(406,24): error TS2345: Argument of type 'Partial<FECEntry>' is not assignable to parameter of type 'FECEntry'.
+  Property 'journalCode' is optional in type 'Partial<FECEntry>' but required in type 'FECEntry'.
+src/services/csvImportService.ts(444,11): error TS2322: Type 'unknown' is not assignable to type 'string | number | Date'.
+src/services/csvImportService.ts(444,42): error TS2345: Argument of type 'string | number | Date' is not assignable to parameter of type 'string'.
+  Type 'number' is not assignable to type 'string'.
+src/services/einvoicing/EInvoicingService.ts(126,13): error TS2451: Cannot redeclare block-scoped variable 'errorMsg'.
+src/services/einvoicing/EInvoicingService.ts(128,17): error TS2451: Cannot redeclare block-scoped variable 'errorMsg'.
+src/services/enterpriseDashboardService.ts(69,9): error TS2322: Type '{ comparison_enabled: boolean; drill_down_available: boolean; }[]' is not assignable to type 'DashboardChart[]'.
+  Type '{ comparison_enabled: boolean; drill_down_available: boolean; }' is missing the following properties from type 'DashboardChart': id, title, type, data, and 2 more.
+src/services/enterpriseDashboardService.ts(74,9): error TS2322: Type '{ affected_metrics: string[]; estimated_impact: string; }[]' is not assignable to type 'DashboardAlert[]'.
+  Type '{ affected_metrics: string[]; estimated_impact: string; }' is missing the following properties from type 'DashboardAlert': id, type, category, title, and 3 more.
+src/services/enterpriseDashboardService.ts(304,5): error TS2322: Type '{ id: string; title: string; current_value: number; target_value: number; previous_period_value: number; budget_value: number; unit: string; trend_percentage: number; vs_budget_percentage: number; vs_previous_year_percentage: number; color: string; category: "inventory" | ... 3 more ... | "customers"; icon: string; ...' is not assignable to type 'DashboardMetric[]'.
+  Type '{ id: string; title: string; current_value: number; target_value: number | undefined; previous_period_value: number | undefined; budget_value: number | undefined; unit: string; trend_percentage: number; ... 4 more ...; icon: string; }' is not assignable to type 'DashboardMetric'.
+    Types of property 'unit' are incompatible.
+      Type 'string' is not assignable to type '"number" | "currency" | "days" | "percentage"'.
+src/services/enterpriseDashboardService.ts(346,12): error TS2352: Conversion of type '{ recommendations: string[]; critical_alerts: string[]; last_updated: string; }' to type 'FinancialHealthScore' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ recommendations: string[]; critical_alerts: string[]; last_updated: string; }' is missing the following properties from type 'FinancialHealthScore': overall_score, liquidity_score, profitability_score, efficiency_score, and 3 more.
+src/services/errorHandlingService.ts(444,11): error TS2698: Spread types may only be created from object types.
+src/services/errorHandlingService.ts(469,43): error TS2352: Conversion of type 'Window & typeof globalThis' to type 'Record<string, unknown>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'Window & typeof globalThis'.
+src/services/errorHandlingService.ts(470,23): error TS2352: Conversion of type 'Window & typeof globalThis' to type 'Record<string, unknown>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'Window & typeof globalThis'.
+src/services/invoicePdfService.ts(119,14): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string | string[]'.
+src/services/invoicePdfService.ts(125,23): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'string | number'.
+src/services/invoicePdfService.ts(132,25): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'string | number'.
+src/services/invoicePdfService.ts(146,16): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string | string[]'.
+src/services/invoicePdfService.ts(153,18): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string | string[]'.
+src/services/invoicePdfService.ts(278,48): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+src/services/invoicePdfService.ts(292,48): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+src/services/moduleManager.ts(315,7): error TS2322: Type 'ModuleServices' is not assignable to type 'import("C:/Users/noutc/Casskai/src/types/modules.types").ModuleServices'.
+  Types of property 'database' are incompatible.
+    Type 'object' is not assignable to type 'DatabaseService'.
+      Index signature for type 'string' is missing in type '{}'.
+src/utils/migration.ts(241,16): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.

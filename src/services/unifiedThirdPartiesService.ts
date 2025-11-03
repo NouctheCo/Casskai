@@ -131,7 +131,7 @@ class UnifiedThirdPartiesService {
   /**
    * CUSTOMERS - Créer un nouveau client
    */
-  async createCustomer(data: Customer): Promise<{ data: Customer | null; error: any }> {
+  async createCustomer(data: Customer): Promise<{ data: Customer | null; error: Error | null }> {
     try {
       const companyId = data.company_id || await this.getCurrentCompanyId();
 
@@ -189,7 +189,7 @@ class UnifiedThirdPartiesService {
   /**
    * CUSTOMERS - Récupérer un client par ID
    */
-  async getCustomerById(id: string): Promise<{ data: Customer | null; error: any }> {
+  async getCustomerById(id: string): Promise<{ data: Customer | null; error: Error | null }> {
     try {
       const { data, error } = await supabase
         .from('customers')
@@ -212,7 +212,7 @@ class UnifiedThirdPartiesService {
   async updateCustomer(
     id: string,
     data: Partial<Customer>
-  ): Promise<{ data: Customer | null; error: any }> {
+  ): Promise<{ data: Customer | null; error: Error | null }> {
     try {
       const { data: updated, error } = await supabase
         .from('customers')
@@ -233,7 +233,7 @@ class UnifiedThirdPartiesService {
   /**
    * CUSTOMERS - Supprimer (soft delete) un client
    */
-  async deleteCustomer(id: string): Promise<{ success: boolean; error: any }> {
+  async deleteCustomer(id: string): Promise<{ success: boolean; error: Error | null }> {
     try {
       const { error } = await supabase
         .from('customers')
@@ -252,7 +252,7 @@ class UnifiedThirdPartiesService {
   /**
    * SUPPLIERS - Créer un nouveau fournisseur
    */
-  async createSupplier(data: Supplier): Promise<{ data: Supplier | null; error: any }> {
+  async createSupplier(data: Supplier): Promise<{ data: Supplier | null; error: Error | null }> {
     try {
       const companyId = data.company_id || await this.getCurrentCompanyId();
 
@@ -310,7 +310,7 @@ class UnifiedThirdPartiesService {
   /**
    * SUPPLIERS - Récupérer un fournisseur par ID
    */
-  async getSupplierById(id: string): Promise<{ data: Supplier | null; error: any }> {
+  async getSupplierById(id: string): Promise<{ data: Supplier | null; error: Error | null }> {
     try {
       const { data, error } = await supabase
         .from('suppliers')
@@ -333,7 +333,7 @@ class UnifiedThirdPartiesService {
   async updateSupplier(
     id: string,
     data: Partial<Supplier>
-  ): Promise<{ data: Supplier | null; error: any }> {
+  ): Promise<{ data: Supplier | null; error: Error | null }> {
     try {
       const { data: updated, error } = await supabase
         .from('suppliers')
@@ -354,7 +354,7 @@ class UnifiedThirdPartiesService {
   /**
    * SUPPLIERS - Supprimer (soft delete) un fournisseur
    */
-  async deleteSupplier(id: string): Promise<{ success: boolean; error: any }> {
+  async deleteSupplier(id: string): Promise<{ success: boolean; error: Error | null }> {
     try {
       const { error } = await supabase
         .from('suppliers')

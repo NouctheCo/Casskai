@@ -10,7 +10,7 @@ export class AccountingValidationService {
   /**
    * Valide une écriture comptable complète
    */
-  static async validateJournalEntry(entry: any, companyId: string): Promise<{
+  static async validateJournalEntry(entry: Partial<JournalEntryType>, companyId: string): Promise<{
     isValid: boolean;
     errors: ImportError[];
     warnings: ImportError[];
@@ -240,8 +240,8 @@ export class AccountingValidationService {
    * Validation du sens normal des comptes
    */
   private static validateAccountNormalBalance(
-    account: any,
-    item: any,
+    account: { id: string; number: string; name: string; type: string; is_active: boolean },
+    item: { accountId?: string; debitAmount?: number; creditAmount?: number; description?: string },
     index: number,
     warnings: ImportError[]
   ): void {
@@ -249,7 +249,10 @@ export class AccountingValidationService {
     const debitAccount = ['1', '2', '3', '6', '8'].includes(accountClass);
     const creditAccount = ['4', '7', '9'].includes(accountClass);
 
-    if (debitAccount && item.creditAmount > item.debitAmount) {
+    const debitAmt = item.debitAmount ?? 0;
+    const creditAmt = item.creditAmount ?? 0;
+
+    if (debitAccount && creditAmt > debitAmt) {
       warnings.push({
         row: 0,
         field: `items.${index}`,
@@ -259,7 +262,7 @@ export class AccountingValidationService {
       });
     }
 
-    if (creditAccount && item.debitAmount > item.creditAmount) {
+    if (creditAccount && debitAmt > creditAmt) {
       warnings.push({
         row: 0,
         field: `items.${index}`,
@@ -337,7 +340,12 @@ export class AccountingValidationService {
     }>;
     unique: JournalEntryType[];
   }> {
-    const duplicates: any[] = [];
+    const duplicates: Array<{
+      entry: JournalEntryType;
+      existingEntryId: string;
+      similarity: number;
+      matchCriteria: string[];
+    }> = [];
     const unique: JournalEntryType[] = [];
 
     for (const entry of entries) {
@@ -414,7 +422,21 @@ export class AccountingValidationService {
   /**
    * Calcul de similarité entre deux écritures
    */
-  private static calculateSimilarity(entry1: any, entry2: any): {
+  private static calculateSimilarity(
+    entry1: JournalEntryType,
+    entry2: {
+      id: string;
+      entry_number: string;
+      date: string;
+      description: string;
+      journal_entry_items: Array<{
+        account_id: string;
+        debit_amount: number;
+        credit_amount: number;
+        description?: string;
+      }>;
+    }
+  ): {
     score: number;
     criteria: string[];
   } {
@@ -504,15 +526,15 @@ export class AccountingValidationService {
    * Validation en lot d'écritures
    */
   static async validateBatch(
-    entries: any[],
+    entries: Array<Partial<JournalEntryType>>,
     companyId: string
   ): Promise<{
     valid: JournalEntryType[];
-    invalid: Array<{ entry: any; errors: ImportError[] }>;
+    invalid: Array<{ entry: Partial<JournalEntryType>; errors: ImportError[] }>;
     warnings: ImportError[];
   }> {
     const valid: JournalEntryType[] = [];
-    const invalid: Array<{ entry: any; errors: ImportError[] }> = [];
+    const invalid: Array<{ entry: Partial<JournalEntryType>; errors: ImportError[] }> = [];
     const allWarnings: ImportError[] = [];
 
     for (let i = 0; i < entries.length; i++) {

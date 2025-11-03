@@ -23,15 +23,15 @@ export interface ExportOptions {
 
 export interface TableData {
   headers: string[];
-  rows: any[][];
+  rows: (string | number | boolean | null)[][];
   title?: string;
-  summary?: Record<string, any>;
+  summary?: Record<string, string | number | boolean>;
 }
 
 export interface ChartData {
   type: 'bar' | 'line' | 'pie';
   title: string;
-  data: any[];
+  data: (string | number)[];
   labels: string[];
 }
 
@@ -309,9 +309,9 @@ export class ReportExportService {
   }
 
   // Helpers privés
-  private async addPDFHeader(pdf: any, companyInfo: any, title?: string, subtitle?: string) {
+  private async addPDFHeader(pdf: jsPDF, companyInfo: ExportOptions['companyInfo'], title?: string, subtitle?: string) {
     // Logo si disponible
-    if (companyInfo.logo) {
+    if (companyInfo?.logo) {
       try {
         pdf.addImage(companyInfo.logo, 'PNG', 20, 10, 30, 20);
       } catch (error) {
@@ -321,6 +321,8 @@ export class ReportExportService {
     }
 
     // Informations entreprise
+    if (!companyInfo) return;
+
     pdf.setFontSize(16);
     pdf.setFont('helvetica', 'bold');
     pdf.text(companyInfo.name, 60, 20);
@@ -357,8 +359,8 @@ export class ReportExportService {
     }
   }
 
-  private getColumnStyles(headers: string[]): any {
-    const styles: any = {};
+  private getColumnStyles(headers: string[]): Record<number, { halign: 'left' | 'right' | 'center' }> {
+    const styles: Record<number, { halign: 'left' | 'right' | 'center' }> = {};
 
     headers.forEach((header, index) => {
       if (header.toLowerCase().includes('montant') || header.toLowerCase().includes('prix') || header.toLowerCase().includes('total')) {
@@ -371,7 +373,7 @@ export class ReportExportService {
     return styles;
   }
 
-  private addPDFSummary(pdf: any, summary: Record<string, any>, startY: number) {
+  private addPDFSummary(pdf: jsPDF, summary: Record<string, string | number | boolean>, startY: number) {
     pdf.setFontSize(12);
     pdf.setFont('helvetica', 'bold');
     pdf.text('Résumé:', 20, startY);
@@ -386,7 +388,7 @@ export class ReportExportService {
     });
   }
 
-  private addPDFWatermark(pdf: any, text: string) {
+  private addPDFWatermark(pdf: jsPDF, text: string) {
     const pageCount = pdf.internal.getNumberOfPages();
 
     for (let i = 1; i <= pageCount; i++) {
@@ -405,7 +407,7 @@ export class ReportExportService {
     }
   }
 
-  private addExcelSummarySheet(workbook: any, summary: Record<string, any>, sheetName: string) {
+  private addExcelSummarySheet(workbook: XLSX.WorkBook, summary: Record<string, string | number | boolean>, sheetName: string) {
     const summaryData = [
       ['Élément', 'Valeur'],
       ...Object.entries(summary)

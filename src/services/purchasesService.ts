@@ -1,5 +1,12 @@
 import { Purchase, PurchaseFormData, PurchaseFilters, PurchaseStats, Supplier } from '../types/purchase.types';
 
+// Service error interface
+interface ServiceError {
+  message: string;
+  code?: string;
+  details?: unknown;
+}
+
 // Mock data for development
 const mockPurchases: Purchase[] = [
   {
@@ -88,7 +95,7 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const purchasesService = {
   // Get all purchases with filters
-  async getPurchases(companyId: string, filters: PurchaseFilters = {}): Promise<{ data: Purchase[]; error?: any }> {
+  async getPurchases(companyId: string, filters: PurchaseFilters = {}): Promise<{ data: Purchase[]; error?: ServiceError }> {
     await delay(500); // Simulate API call
     
     let filteredPurchases = mockPurchases.filter(p => p.company_id === companyId);
@@ -123,14 +130,14 @@ export const purchasesService = {
   },
 
   // Get purchase by ID
-  async getPurchaseById(id: string): Promise<{ data: Purchase | null; error?: any }> {
+  async getPurchaseById(id: string): Promise<{ data: Purchase | null; error?: ServiceError }> {
     await delay(300);
     const purchase = mockPurchases.find(p => p.id === id);
     return { data: purchase || null };
   },
 
   // Create new purchase
-  async createPurchase(companyId: string, purchaseData: PurchaseFormData): Promise<{ data: Purchase | null; error?: any }> {
+  async createPurchase(companyId: string, purchaseData: PurchaseFormData): Promise<{ data: Purchase | null; error?: ServiceError }> {
     await delay(800);
     
     // Check for duplicate invoice number
@@ -168,7 +175,7 @@ export const purchasesService = {
   },
 
   // Update purchase
-  async updatePurchase(id: string, purchaseData: Partial<PurchaseFormData>): Promise<{ data: Purchase | null; error?: any }> {
+  async updatePurchase(id: string, purchaseData: Partial<PurchaseFormData>): Promise<{ data: Purchase | null; error?: ServiceError }> {
     await delay(600);
     
     const purchaseIndex = mockPurchases.findIndex(p => p.id === id);
@@ -196,21 +203,27 @@ export const purchasesService = {
     
     const updatedPurchase: Purchase = {
       ...existingPurchase,
-      ...purchaseData,
+      invoice_number: purchaseData.invoice_number ?? existingPurchase.invoice_number,
+      purchase_date: purchaseData.purchase_date ?? existingPurchase.purchase_date,
+      supplier_id: purchaseData.supplier_id ?? existingPurchase.supplier_id,
+      description: purchaseData.description ?? existingPurchase.description,
+      amount_ht: purchaseData.amount_ht ?? existingPurchase.amount_ht,
+      tva_rate: purchaseData.tva_rate ?? existingPurchase.tva_rate,
+      due_date: purchaseData.due_date ?? existingPurchase.due_date,
       tva_amount: purchaseData.amount_ht ? purchaseData.amount_ht * ((purchaseData.tva_rate || existingPurchase.tva_rate) / 100) : existingPurchase.tva_amount,
       amount_ttc: purchaseData.amount_ht ? purchaseData.amount_ht * (1 + (purchaseData.tva_rate || existingPurchase.tva_rate) / 100) : existingPurchase.amount_ttc,
       supplier_name: purchaseData.supplier_id ?
         mockSuppliers.find(s => s.id === purchaseData.supplier_id)?.name || existingPurchase.supplier_name :
         existingPurchase.supplier_name,
       updated_at: new Date().toISOString()
-    } as any;
+    };
     
     mockPurchases[purchaseIndex] = updatedPurchase;
     return { data: updatedPurchase };
   },
 
   // Delete purchase
-  async deletePurchase(id: string): Promise<{ data: boolean; error?: any }> {
+  async deletePurchase(id: string): Promise<{ data: boolean; error?: ServiceError }> {
     await delay(400);
     
     const purchaseIndex = mockPurchases.findIndex(p => p.id === id);
@@ -223,7 +236,7 @@ export const purchasesService = {
   },
 
   // Mark purchase as paid
-  async markAsPaid(id: string, paymentDate?: string): Promise<{ data: Purchase | null; error?: any }> {
+  async markAsPaid(id: string, paymentDate?: string): Promise<{ data: Purchase | null; error?: ServiceError }> {
     await delay(300);
     
     const purchaseIndex = mockPurchases.findIndex(p => p.id === id);
@@ -242,7 +255,7 @@ export const purchasesService = {
   },
 
   // Get purchase statistics
-  async getPurchaseStats(companyId: string): Promise<{ data: PurchaseStats; error?: any }> {
+  async getPurchaseStats(companyId: string): Promise<{ data: PurchaseStats; error?: ServiceError }> {
     await delay(200);
     
     const companyPurchases = mockPurchases.filter(p => p.company_id === companyId);
@@ -258,7 +271,7 @@ export const purchasesService = {
   },
 
   // Get suppliers
-  async getSuppliers(companyId: string): Promise<{ data: Supplier[]; error?: any }> {
+  async getSuppliers(companyId: string): Promise<{ data: Supplier[]; error?: ServiceError }> {
     await delay(300);
     
     const companySuppliers = mockSuppliers.filter(s => s.company_id === companyId);
@@ -266,7 +279,7 @@ export const purchasesService = {
   },
 
   // Export purchases to CSV
-  async exportToCsv(companyId: string, filters: PurchaseFilters = {}): Promise<{ data: string; error?: any }> {
+  async exportToCsv(companyId: string, filters: PurchaseFilters = {}): Promise<{ data: string; error?: ServiceError }> {
     await delay(1000);
     
     const { data: purchases } = await this.getPurchases(companyId, filters);
