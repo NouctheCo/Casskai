@@ -34,7 +34,7 @@ import {
   CashFlowPrediction,
   // CategoryPrediction,
   TaxOptimization
-} from '../../types/ai-types';
+} from '../../types/ai.types';
 import { AnomalyDetectionWidget } from './widgets/AnomalyDetectionWidget';
 import { HealthScoreWidget } from './widgets/HealthScoreWidget';
 import { CashFlowPredictionWidget } from './widgets/CashFlowPredictionWidget';
@@ -96,7 +96,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
       aiVisualizationService.initialize();
       
       console.warn('AI services initialized successfully');
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to initialize AI services:', error);
     } finally {
       setIsLoading(false);
@@ -149,7 +149,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
       
       setLastAnalysis(new Date());
 
-    } catch (error) {
+    } catch (_error) {
       console.error('Error running AI analysis:', error);
     } finally {
       setIsLoading(false);

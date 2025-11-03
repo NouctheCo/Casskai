@@ -18,27 +18,44 @@ export interface Transaction {
 }
 
 export interface AnomalyDetection {
+  id: string;
   transaction: Transaction;
   score: number;
   reasons: string[];
+  type: 'outlier' | 'pattern' | 'trend';
+  description: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
+  affectedData: string;
+  detectedAt: string;
+  confidence: number;
   timestamp: Date;
   resolved: boolean;
+  possibleCauses?: string[];
+  suggestedActions?: string[];
 }
 
 export interface CashFlowPrediction {
+  id: string;
+  month: string;
   date: Date;
+  actualValue?: number;
+  predictedValue: number;
   predictedIncome: number;
   predictedExpenses: number;
   predictedBalance: number;
   confidence: number;
-  factors: PredictionFactor[];
+  factors?: PredictionFactor[];
+  trend?: 'up' | 'down' | 'stable';
+  variance?: number;
 }
 
 export interface PredictionFactor {
+  id: string;
+  name: string;
   factor: string;
   impact: number;
-  description: string;
+  description?: string;
+  weight?: number;
 }
 
 export interface FinancialHealthScore {
@@ -90,16 +107,22 @@ export interface AIAssistantQuery {
   suggestions?: string[];
 }
 
+export type TaxOptimizationStatus = 'suggested' | 'in_progress' | 'completed' | 'dismissed' | 'implemented';
+
 export interface TaxOptimization {
   id: string;
   type: 'deduction' | 'credit' | 'timing' | 'structure';
   title: string;
   description: string;
   potentialSavings: number;
+  complexity: 'low' | 'medium' | 'high' | 'critical';
   effort: 'low' | 'medium' | 'high';
-  deadline?: Date;
-  requirements: string[];
-  status: 'suggested' | 'in_progress' | 'completed' | 'dismissed';
+  deadline?: string;
+  requirements?: string[];
+  status: TaxOptimizationStatus;
+  category: string;
+  implementationSteps?: string[];
+  estimatedTime?: string;
 }
 
 export interface SmartAlert {
@@ -121,6 +144,45 @@ export interface AlertAction {
   action: string;
   params?: Record<string, unknown>;
   style?: 'primary' | 'secondary' | 'danger';
+}
+
+// Types pour Analytics
+export interface PlausibleEventProps {
+  [key: string]: string | number | boolean | undefined;
+}
+
+// Types pour les modules de service
+export interface ServiceResponse<T = any> {
+  data?: T;
+  error?: string;
+  success: boolean;
+  message?: string;
+}
+
+// Types pour les widgets AI
+export interface AIInsight {
+  id: string;
+  type: 'recommendation' | 'alert' | 'prediction' | 'analysis';
+  title: string;
+  description: string;
+  confidence: number;
+  category: string;
+  priority: 'low' | 'medium' | 'high';
+  createdAt: string;
+  actions?: Array<{
+    label: string;
+    action: string;
+    data?: any;
+  }>;
+}
+
+export interface AIAssistantMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+  isLoading?: boolean;
+  error?: string;
 }
 
 export interface ReportNarrative {

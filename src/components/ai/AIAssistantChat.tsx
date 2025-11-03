@@ -17,7 +17,7 @@ import {
   MicOff
 } from 'lucide-react';
 import { openAIService } from '@/services/ai/OpenAIService';
-import { AIAssistantMessage } from '@/types/ai-types';
+import { AIAssistantMessage } from '@/types/ai.types';
 
 type SpeechRecognitionEventData = {
   results: ArrayLike<{

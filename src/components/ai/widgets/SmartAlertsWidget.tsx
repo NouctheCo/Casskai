@@ -22,7 +22,7 @@ import { Badge } from '../../ui/badge';
 import { Button } from '../../ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { cn } from '../../../lib/utils';
-import { SmartAlert } from '../../../types/ai-types';
+import { SmartAlert } from '../../../types/ai.types';
 
 interface SmartAlertsWidgetProps {
   alerts: SmartAlert[];

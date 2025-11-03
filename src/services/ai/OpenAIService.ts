@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { AIAssistantMessage, AIInsight, SmartAlert, CashFlowPrediction, TaxOptimization, AnomalyDetection } from '@/types/ai-types';
+import { AIAssistantMessage, AIInsight, SmartAlert, CashFlowPrediction, TaxOptimization, AnomalyDetection } from '@/types/ai.types';
 
 interface AIServiceResponse<T = any> {
   data?: T;

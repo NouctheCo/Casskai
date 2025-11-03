@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { usePlausibleAnalytics, usePrivacyCompliantTracking } from '@/hooks/usePlausibleAnalytics';
-import { PlausibleEventProps } from '@/types/ai-types';
+import { PlausibleEventProps } from '@/types/ai.types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';

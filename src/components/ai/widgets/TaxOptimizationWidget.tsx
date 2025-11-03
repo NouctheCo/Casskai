@@ -26,7 +26,7 @@ import { Button } from '../../ui/button';
 import { Progress } from '../../ui/progress';
 import { Tabs, /* TabsContent, */ TabsList, TabsTrigger } from '../../ui/tabs';
 import { cn } from '../../../lib/utils';
-import { TaxOptimization } from '../../../types/ai-types';
+import { TaxOptimization } from '../../../types/ai.types';
 
 interface TaxOptimizationWidgetProps {
   optimizations: TaxOptimization[];
@@ -53,9 +53,10 @@ export const TaxOptimizationWidget: React.FC<TaxOptimizationWidgetProps> = ({
       switch (sortBy) {
         case 'saving':
           return b.potentialSavings - a.potentialSavings;
-        case 'effort':
+        case 'effort': {
           const effortOrder = { low: 1, medium: 2, high: 3 };
           return effortOrder[a.effort] - effortOrder[b.effort];
+        }
         case 'deadline':
           if (!a.deadline && !b.deadline) return 0;
           if (!a.deadline) return 1;
