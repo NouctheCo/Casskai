@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useAnimation, useInView } from 'framer-motion';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, ArcElement, ChartOptions, ChartData as ChartJSData, TooltipItem } from 'chart.js';
 import { Bar, Line, Doughnut, Pie } from 'react-chartjs-2';
 import { cn } from '../../lib/utils';
 
@@ -16,10 +16,31 @@ ChartJS.register(
   ArcElement
 );
 
+// Types pour les données de graphique
+interface ChartDataset {
+  label: string;
+  data: number[];
+  backgroundColor?: string | string[];
+  borderColor?: string | string[];
+  borderWidth?: number;
+}
+
+interface ChartData {
+  labels: string[];
+  datasets: ChartDataset[];
+}
+
+// Type pour le contexte d'animation Chart.js
+interface AnimationContext {
+  currentStep: number;
+  numSteps: number;
+  dataIndex: number;
+}
+
 interface AnimatedChartProps {
   type: 'bar' | 'line' | 'doughnut' | 'pie';
-  data: any;
-  options?: any;
+  data: ChartData;
+  options?: Partial<ChartOptions>;
   className?: string;
   animateOnView?: boolean;
   animationDelay?: number;
@@ -27,7 +48,7 @@ interface AnimatedChartProps {
 }
 
 // Configuration d'animation personnalisée pour Chart.js
-const createAnimatedOptions = (delay: number = 0, stagger: number = 100) => ({
+const createAnimatedOptions = (delay: number = 0, stagger: number = 100): Partial<ChartOptions> => ({
   animation: {
     delay,
     duration: 1500,
@@ -35,7 +56,7 @@ const createAnimatedOptions = (delay: number = 0, stagger: number = 100) => ({
     onComplete: () => {
       // Animation terminée
     },
-    onProgress: (context: any) => {
+    onProgress: (context: AnimationContext) => {
       // Progression de l'animation
       const progress = context.currentStep / context.numSteps;
       return progress;
@@ -45,12 +66,12 @@ const createAnimatedOptions = (delay: number = 0, stagger: number = 100) => ({
     y: {
       from: 500,
       duration: 1000,
-      delay: (context: any) => context.dataIndex * stagger + delay
+      delay: (context: AnimationContext) => context.dataIndex * stagger + delay
     },
     x: {
       from: -100,
       duration: 800,
-      delay: (context: any) => context.dataIndex * stagger + delay
+      delay: (context: AnimationContext) => context.dataIndex * stagger + delay
     }
   },
   responsive: true,
@@ -156,16 +177,7 @@ export const AnimatedChart: React.FC<AnimatedChartProps> = ({
 
 // Chart avec overlay d'animation personnalisé
 export const AnimatedBarChart: React.FC<{
-  data: {
-    labels: string[];
-    datasets: Array<{
-      label: string;
-      data: number[];
-      backgroundColor?: string | string[];
-      borderColor?: string | string[];
-      borderWidth?: number;
-    }>;
-  };
+  data: ChartData;
   className?: string;
   showAnimation?: boolean;
 }> = ({ data, className, showAnimation = true }) => {
@@ -229,11 +241,11 @@ export const AnimatedBarChart: React.FC<{
 
 // Chart avec animations de valeurs en temps réel
 export const LiveChart: React.FC<{
-  initialData: any;
+  initialData: ChartData;
   updateInterval?: number;
   maxDataPoints?: number;
   className?: string;
-  onDataUpdate?: (data: any) => any;
+  onDataUpdate?: (data: ChartData) => ChartData;
 }> = ({
   initialData,
   updateInterval = 2000,
@@ -254,13 +266,13 @@ export const LiveChart: React.FC<{
     if (!isLive || !onDataUpdate) return;
 
     const interval = setInterval(() => {
-      setChartData((prev: any) => {
+      setChartData((prev: ChartData) => {
         const newData = onDataUpdate(prev);
-        
+
         // Limiter le nombre de points de données
         if (newData.labels.length > maxDataPoints) {
           newData.labels = newData.labels.slice(-maxDataPoints);
-          newData.datasets = newData.datasets.map((dataset: any) => ({
+          newData.datasets = newData.datasets.map((dataset: ChartDataset) => ({
             ...dataset,
             data: dataset.data.slice(-maxDataPoints)
           }));
@@ -328,14 +340,14 @@ export const LiveChart: React.FC<{
 // Wrapper pour Chart.js avec animations personnalisées
 export const EnhancedChart: React.FC<{
   type: 'bar' | 'line' | 'doughnut' | 'pie';
-  data: any;
+  data: ChartData;
   title?: string;
   subtitle?: string;
   showLegend?: boolean;
   showTooltips?: boolean;
   theme?: 'light' | 'dark';
   className?: string;
-  onChartClick?: (event: any, elements: any[]) => void;
+  onChartClick?: (event: React.MouseEvent<HTMLCanvasElement>, elements: unknown[]) => void;
 }> = ({
   type,
   data,
