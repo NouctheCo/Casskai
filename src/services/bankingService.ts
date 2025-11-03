@@ -65,9 +65,9 @@ export class BankingService {
 
       await openBankingManager.initialize(config);
       this.isInitialized = true;
-      console.log('Banking Service initialized successfully');
+      console.warn('Banking Service initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize Banking Service:', error);
+      console.error('Failed to initialize Banking Service:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }

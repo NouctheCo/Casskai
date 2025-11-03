@@ -37,7 +37,7 @@ export interface ModuleDefinition {
 
 export interface ModuleConfig {
   settings: Record<string, ModuleSetting>;
-  defaultValues: Record<string, any>;
+  defaultValues: Record<string, unknown>;
   validation?: Record<string, ValidationRule>;
 }
 
@@ -46,7 +46,7 @@ export interface ModuleSetting {
   label: string;
   description?: string;
   required?: boolean;
-  options?: Array<{ value: any; label: string }>;
+  options?: Array<{ value: string | number | boolean; label: string }>;
   min?: number;
   max?: number;
   validation?: ValidationRule;
@@ -57,7 +57,7 @@ export interface ValidationRule {
   min?: number;
   max?: number;
   required?: boolean;
-  custom?: (value: any) => boolean | string;
+  custom?: (value: unknown) => boolean | string;
 }
 
 export interface ModulePricing {
@@ -82,7 +82,7 @@ export interface ModuleActivation {
   isActive: boolean;
   activatedAt?: Date;
   activatedBy: string;
-  configuration: Record<string, any>;
+  configuration: Record<string, unknown>;
   licenseInfo?: ModuleLicense;
 }
 
@@ -100,18 +100,26 @@ export interface ModuleContext {
   userId: string;
   tenantId: string;
   permissions: string[];
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   services: ModuleServices;
 }
 
 export interface ModuleServices {
-  database: any; // Service de base de données
-  storage: any; // Service de stockage fichiers
-  notifications: any; // Service de notifications
-  integrations: any; // Service d'intégrations
-  analytics: any; // Service d'analytics
-  ai: any; // Service IA
+  database: DatabaseService;
+  storage: StorageService;
+  notifications: NotificationService;
+  integrations: IntegrationService;
+  analytics: AnalyticsService;
+  ai: AIService;
 }
+
+// Service types - can be extended based on actual implementations
+export type DatabaseService = Record<string, unknown>;
+export type StorageService = Record<string, unknown>;
+export type NotificationService = Record<string, unknown>;
+export type IntegrationService = Record<string, unknown>;
+export type AnalyticsService = Record<string, unknown>;
+export type AIService = Record<string, unknown>;
 
 // Interface que doit implémenter chaque module
 export interface Module {
@@ -125,8 +133,8 @@ export interface Module {
   onUpgrade?(context: ModuleContext, fromVersion: string): Promise<void>;
   
   // Configuration
-  validateConfig?(config: Record<string, any>): boolean | string;
-  getDefaultConfig?(): Record<string, any>;
+  validateConfig?(config: Record<string, unknown>): boolean | string;
+  getDefaultConfig?(): Record<string, unknown>;
   
   // Composants React
   getComponents?(): Record<string, React.ComponentType>;
@@ -165,7 +173,7 @@ export interface CRMContact {
   phone?: string;
   address?: Address;
   tags: string[];
-  customFields: Record<string, any>;
+  customFields: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
   assignedTo?: string;
@@ -205,7 +213,7 @@ export interface CRMDeal {
   actualCloseDate?: Date;
   assignedTo: string;
   tags: string[];
-  customFields: Record<string, any>;
+  customFields: Record<string, unknown>;
   activities: CRMActivity[];
   documents: string[];
   createdAt: Date;
@@ -349,7 +357,7 @@ export interface ProjectDefinition {
   
   // Metadata
   tags: string[];
-  customFields: Record<string, any>;
+  customFields: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -460,8 +468,8 @@ export interface MarketplaceItem {
   
   // Content
   content?: {
-    templates?: any[];
-    configurations?: any[];
+    templates?: Array<Record<string, unknown>>;
+    configurations?: Array<Record<string, unknown>>;
     scripts?: string[];
     assets?: string[];
   };
@@ -502,7 +510,7 @@ export class ModuleError extends Error {
     message: string,
     public moduleId: string,
     public code: string,
-    public details?: any
+    public details?: unknown
   ) {
     super(message);
     this.name = 'ModuleError';

@@ -141,7 +141,8 @@ export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
 
       return currencyService.formatAmount(amount, targetCurrency);
     } catch (err) {
-      console.warn('Erreur formatage montant:', err);
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      console.warn('Erreur formatage montant:', errorMessage);
       return amount.toString();
     }
   }, [currencyService, currentCurrency, getCurrency, validateAmount]);
@@ -157,7 +158,8 @@ export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
         await currencyService.updateExchangeRates();
         setLastUpdate(currencyService.getLastUpdate());
       } catch (err) {
-        console.warn('Impossible de mettre à jour les taux:', err);
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        console.warn('Impossible de mettre à jour les taux:', errorMessage);
         // Ne pas bloquer l'application si les taux ne peuvent pas être mis à jour
       } finally {
         setIsLoading(false);

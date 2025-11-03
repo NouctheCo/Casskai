@@ -2,22 +2,20 @@ import * as tf from '@tensorflow/tfjs';
 import {
   mean,
   standardDeviation,
-  median,
-  quantile,
-  mode
+  quantile
 } from 'simple-statistics';
-
-// Type definitions for missing types
-type Transaction = any;
-type AnomalyDetection = any;
-type CashFlowPrediction = any;
-type FinancialHealthScore = any;
-type CategoryPrediction = any;
-type ExpenseCategory = any;
-type FinancialTimeSeriesData = any;
-type AIServiceResponse<T> = any;
-type TrainingData = any;
-type MLModelConfig = any;
+import type {
+  Transaction,
+  AnomalyDetection,
+  CashFlowPrediction,
+  FinancialHealthScore,
+  CategoryPrediction,
+  ExpenseCategory,
+  FinancialTimeSeriesData,
+  AIServiceResponse,
+  TrainingData,
+  MLModelConfig
+} from '../types/ai.types';
 
 // Service principal d'analyse prédictive avec TensorFlow.js
 class AIAnalyticsService {
@@ -33,7 +31,7 @@ class AIAnalyticsService {
   // Initialisation du service
   async initialize(): Promise<void> {
     try {
-      console.log('Initializing AI Analytics Service...');
+      console.warn('Initializing AI Analytics Service...');
       
       // Configuration de TensorFlow.js pour le browser
       await tf.ready();
@@ -43,7 +41,7 @@ class AIAnalyticsService {
       await this.initializeModels();
       
       this.isInitialized = true;
-      console.log('AI Analytics Service initialized successfully');
+      console.warn('AI Analytics Service initialized successfully');
     } catch (error) {
       console.error('Failed to initialize AI Analytics Service:', error);
       throw error;
@@ -238,9 +236,9 @@ class AIAnalyticsService {
       
       // Encodage simple des catégories (à améliorer avec embedding)
       const categoryHash = transaction.category ?
-        Array.from(transaction.category as string).reduce((hash: number, char: any) => hash + char.charCodeAt(0), 0) % 100 : 0;
+        Array.from(transaction.category as string).reduce((hash: number, char: string) => hash + char.charCodeAt(0), 0) % 100 : 0;
 
-      const accountHash = Array.from(transaction.account as string).reduce((hash: number, char: any) => hash + char.charCodeAt(0), 0) % 100;
+      const accountHash = Array.from(transaction.account as string).reduce((hash: number, char: string) => hash + char.charCodeAt(0), 0) % 100;
 
       return [
         amount,
@@ -564,7 +562,7 @@ class AIAnalyticsService {
   }
 
   // Génération des facteurs de prédiction
-  private generatePredictionFactors(historicalData: FinancialTimeSeriesData[], dayIndex: number): any[] {
+  private generatePredictionFactors(historicalData: FinancialTimeSeriesData[], dayIndex: number): { factor: string; impact: number; description: string }[] {
     return [
       {
         factor: 'Historique récent',
@@ -653,7 +651,7 @@ class AIAnalyticsService {
   }
 
   // Calcul du score pondéré
-  private calculateWeightedScore(metrics: any): number {
+  private calculateWeightedScore(metrics: Record<string, number>): number {
     const weights = {
       liquidity: 0.3,
       profitability: 0.25,
@@ -684,7 +682,7 @@ class AIAnalyticsService {
   }
 
   // Génération des facteurs de santé
-  private generateHealthFactors(metrics: any): any[] {
+  private generateHealthFactors(metrics: Record<string, number>): { metric: string; score: number; weight: number; description: string; recommendation?: string }[] {
     return [
       {
         metric: 'Liquidité',
@@ -718,7 +716,7 @@ class AIAnalyticsService {
   }
 
   // Méthodes utilitaires
-  private async loadSavedModels(modelData: any): Promise<void> {
+  private async loadSavedModels(_modelData: Record<string, unknown>): Promise<void> {
     // Implémentation pour charger les modèles sauvegardés
     // Pour l'instant, crée de nouveaux modèles
     await this.createDefaultModels();
@@ -738,7 +736,7 @@ class AIAnalyticsService {
       };
       
       localStorage.setItem('ai_models', JSON.stringify(modelMetadata));
-      console.log('Models metadata saved successfully');
+      console.warn('Models metadata saved successfully');
     } catch (error) {
       console.error('Error saving models:', error);
     }

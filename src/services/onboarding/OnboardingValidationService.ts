@@ -141,7 +141,7 @@ export class OnboardingValidationService {
         default:
           return { isValid: true, errors: [] };
       }
-  } catch (_error) {
+  } catch (error) {
       return {
         isValid: false,
         errors: [{

@@ -23,7 +23,7 @@ export const useBudgetManager = (companyId: string, initialFilter: BudgetFilter 
       } else {
         setBudgets(data || []);
       }
-    } catch (_err) {
+    } catch (error) {
       toast({
         title: "Erreur",
         description: "Une erreur inattendue s'est produite",
@@ -60,7 +60,7 @@ export const useBudgetManager = (companyId: string, initialFilter: BudgetFilter 
         });
         await loadBudgets();
       }
-    } catch (_err) {
+    } catch (error) {
       toast({
         title: "Erreur",
         description: "Une erreur inattendue s'est produite",
@@ -91,7 +91,7 @@ export const useBudgetManager = (companyId: string, initialFilter: BudgetFilter 
         });
         await loadBudgets();
       }
-    } catch (_err) {
+    } catch (error) {
       toast({
         title: "Erreur",
         description: "Une erreur inattendue s'est produite",
@@ -117,7 +117,7 @@ export const useBudgetManager = (companyId: string, initialFilter: BudgetFilter 
         });
         await loadBudgets();
       }
-    } catch (_err) {
+    } catch (error) {
       toast({
         title: "Erreur",
         description: "Une erreur inattendue s'est produite",

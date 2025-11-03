@@ -51,7 +51,7 @@ export class PerformanceOptimizer {
       const lcpObserver = new PerformanceObserver((entryList) => {
         const entries = entryList.getEntries();
         const lcp = entries[entries.length - 1] as PerformanceEntry;
-        console.log('LCP:', lcp.startTime);
+        console.warn('LCP:', lcp.startTime);
       });
       lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
       this.observers.push(lcpObserver);
@@ -59,7 +59,7 @@ export class PerformanceOptimizer {
       // First Input Delay
       const fidObserver = new PerformanceObserver((entryList) => {
         for (const entry of entryList.getEntries()) {
-          console.log('FID:', (entry as any).processingStart - entry.startTime);
+          console.warn('FID:', (entry as any).processingStart - entry.startTime);
         }
       });
       fidObserver.observe({ entryTypes: ['first-input'] });
@@ -73,7 +73,7 @@ export class PerformanceOptimizer {
             clsValue += (entry as any).value;
           }
         }
-        console.log('CLS:', clsValue);
+        console.warn('CLS:', clsValue);
       });
       clsObserver.observe({ entryTypes: ['layout-shift'] });
       this.observers.push(clsObserver);
@@ -279,7 +279,7 @@ export class PerformanceOptimizer {
   }
 
   private enableComponentMemoization(): void {
-    console.log('Memoization hints enabled for React components');
+    console.warn('Memoization hints enabled for React components');
     // En production, ceci serait intégré avec React DevTools ou des outils de build
   }
 
@@ -287,10 +287,10 @@ export class PerformanceOptimizer {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js')
         .then(registration => {
-          console.log('Service Worker registered for caching optimization');
+          console.warn('Service Worker registered for caching optimization');
         })
         .catch(error => {
-          console.log('Service Worker registration failed:', error);
+          console.warn('Service Worker registration failed:', error);
         });
     }
   }

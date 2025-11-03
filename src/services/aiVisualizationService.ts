@@ -1,15 +1,16 @@
 import * as d3 from 'd3';
 import { sankey, sankeyLinkHorizontal } from 'd3-sankey';
 import { hierarchy, treemap, treemapResquarify } from 'd3-hierarchy';
-// Local type definitions
-type Transaction = any;
-type HeatmapData = any;
-type SankeyData = any;
-type SankeyNode = any;
-type SankeyLink = any;
-type TreemapNode = any;
-type FinancialTimeSeriesData = any;
-type AIServiceResponse<T = any> = { success: boolean; data?: T; error?: string; processingTime?: number; modelUsed?: string };
+import type {
+  Transaction,
+  HeatmapData,
+  SankeyData,
+  SankeyNode,
+  SankeyLink,
+  TreemapNode,
+  FinancialTimeSeriesData,
+  AIServiceResponse
+} from '../types/ai.types';
 
 // Service de visualisations avancées avec D3.js
 class AIVisualizationService {
@@ -19,13 +20,13 @@ class AIVisualizationService {
   // Initialisation du service
   initialize(): void {
     try {
-      console.log('Initializing AI Visualization Service...');
+      console.warn('Initializing AI Visualization Service...');
       
       // Configuration des échelles de couleurs
       this.setupColorSchemes();
       
       this.isInitialized = true;
-      console.log('AI Visualization Service initialized successfully');
+      console.warn('AI Visualization Service initialized successfully');
     } catch (error) {
       console.error('Failed to initialize AI Visualization Service:', error);
       throw error;
@@ -105,10 +106,11 @@ class AIVisualizationService {
       let key: string;
       
       switch (timeUnit) {
-        case 'week':
+        case 'week': {
           const weekStart = d3.timeWeek.floor(date);
           key = weekStart.toISOString().split('T')[0];
           break;
+        }
         case 'month':
           key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
           break;
@@ -147,9 +149,10 @@ class AIVisualizationService {
       case 'week':
       case 'day':
         return new Date(key);
-      case 'month':
+      case 'month': {
         const [year, month] = key.split('-').map(Number);
         return new Date(year, month - 1, 1);
+      }
       default:
         return new Date(key);
     }
@@ -187,7 +190,7 @@ class AIVisualizationService {
       });
 
       // Création des nœuds
-      const nodes: SankeyNode[] = Array.from(nodeSet).map((name, index) => ({
+      const nodes: SankeyNode[] = Array.from(nodeSet).map((name, _index) => ({
         id: name,
         name,
         category: this.inferNodeCategory(name, sourceField, targetField),
@@ -256,7 +259,7 @@ class AIVisualizationService {
   }
 
   // Inférence de catégorie de nœud
-  private inferNodeCategory(name: string, sourceField: string, targetField: string): string {
+  private inferNodeCategory(name: string, _sourceField: string, _targetField: string): string {
     const lowerName = name.toLowerCase();
     
     if (lowerName.includes('banque') || lowerName.includes('compte')) {
@@ -291,7 +294,7 @@ class AIVisualizationService {
   }
 
   // Couleur des liens
-  private getLinkColor(source: string, target: string): string {
+  private getLinkColor(source: string, _target: string): string {
     // Utilise la couleur du nœud source avec transparence
     const sourceColor = this.getNodeColor(source, 'category', 'account');
     return `${sourceColor  }80`; // Ajoute transparence 50%
@@ -426,7 +429,7 @@ class AIVisualizationService {
   async generateTimeSeriesData(
     transactions: Transaction[],
     interval: 'daily' | 'weekly' | 'monthly' = 'daily',
-    fillGaps: boolean = true
+    _fillGaps: boolean = true
   ): Promise<AIServiceResponse<FinancialTimeSeriesData[]>> {
     try {
       const startTime = Date.now();
@@ -564,7 +567,7 @@ class AIVisualizationService {
   }
 
   // Calcul de tendance simple
-  private calculateTrend(existingData: FinancialTimeSeriesData[], currentValue: number): number {
+  private calculateTrend(existingData: FinancialTimeSeriesData[], _currentValue: number): number {
     if (existingData.length < 2) return 0;
     
     const recentValues = existingData.slice(-5).map(d => d.value);
@@ -626,17 +629,17 @@ class AIVisualizationService {
   }
 
   // Configuration D3 pour Sankey
-  configureSankey(data: SankeyData, width: number = 800, height: number = 600): any {
+  configureSankey(data: SankeyData, width: number = 800, height: number = 600): { graph: unknown; linkGenerator: unknown } {
     const sankeyGenerator = sankey<SankeyNode, SankeyLink>()
       .nodeWidth(15)
       .nodePadding(10)
       .extent([[1, 1], [width - 1, height - 6]]);
-    
+
     const graph = sankeyGenerator({
       nodes: data.nodes.map(d => ({ ...d })),
       links: data.links.map(d => ({ ...d }))
     });
-    
+
     return {
       graph,
       linkGenerator: sankeyLinkHorizontal()
@@ -644,7 +647,7 @@ class AIVisualizationService {
   }
 
   // Configuration D3 pour Treemap
-  configureTreemap(data: TreemapNode, width: number = 800, height: number = 600): any {
+  configureTreemap(data: TreemapNode, width: number = 800, height: number = 600): unknown {
     const root = hierarchy(data)
       .sum(d => d.value)
       .sort((a, b) => b.value! - a.value!);

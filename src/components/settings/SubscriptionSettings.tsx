@@ -42,7 +42,7 @@ const SubscriptionSettings: React.FC = () => {
           const planInfo = await subscriptionService.getCurrentPlanInfo(user.id);
           setCurrentPlanInfo(planInfo);
         } catch (error) {
-          console.error('Erreur chargement plan:', error);
+          console.error('Erreur chargement plan:', error instanceof Error ? error.message : String(error));
         }
       }
     };

@@ -76,7 +76,7 @@ class OnboardingService {
         data: initialData
       };
     } catch (error) {
-      console.error('Error initializing onboarding:', error);
+      console.error('Error initializing onboarding:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: this.formatError(error, 'Initialisation de l\'onboarding')
@@ -156,7 +156,7 @@ class OnboardingService {
         data: updatedData
       };
     } catch (error) {
-      console.error('Error updating company profile:', error);
+      console.error('Error updating company profile:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: this.formatError(error, 'Mise à jour du profil entreprise')
@@ -207,7 +207,7 @@ class OnboardingService {
         data: updatedData
       };
     } catch (error) {
-      console.error('Error updating preferences:', error);
+      console.error('Error updating preferences:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: this.formatError(error, 'Mise à jour des préférences')
@@ -267,7 +267,7 @@ class OnboardingService {
         data: updatedData
       };
     } catch (error) {
-      console.error('Error completing step:', error);
+      console.error('Error completing step:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: this.formatError(error, 'Finalisation de l\'étape')
@@ -319,7 +319,7 @@ class OnboardingService {
         }
       };
     } catch (error) {
-      console.error('Error completing onboarding:', error);
+      console.error('Error completing onboarding:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: this.formatError(error, 'Finalisation de l\'onboarding')
@@ -360,7 +360,7 @@ class OnboardingService {
       // Réinitialiser l'onboarding
       return this.initializeOnboarding(userId);
     } catch (error) {
-      console.error('Error resetting onboarding:', error);
+      console.error('Error resetting onboarding:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: this.formatError(error, 'Remise à zéro de l\'onboarding')

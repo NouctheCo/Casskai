@@ -160,7 +160,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
       setIsClientFormOpen(false);
       setEditingClient(null);
     } catch (error) {
-      console.error('Error submitting client form:', error);
+      console.error('Error submitting client form:', error instanceof Error ? error.message : String(error));
     }
   };
 
@@ -183,7 +183,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
       await onCreateContact(contactFormData);
       setIsContactFormOpen(false);
     } catch (error) {
-      console.error('Error submitting contact form:', error);
+      console.error('Error submitting contact form:', error instanceof Error ? error.message : String(error));
     }
   };
 

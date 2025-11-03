@@ -171,7 +171,7 @@ export function DashboardWidgetProvider({ children }: { children: React.ReactNod
         console.error('Error saving layout:', error);
       }
     } catch (error) {
-      console.error('Error saving layout:', error);
+      console.error('Error saving layout:', error instanceof Error ? error.message : String(error));
     }
   }, [currentLayout, user]);
 

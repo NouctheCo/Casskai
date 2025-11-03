@@ -25,7 +25,7 @@ export class CurrencyIntegration {
    */
   async initializeCurrencySystem(): Promise<void> {
     try {
-      console.log('🏦 Initialisation du système de devises...');
+      console.warn('🏦 Initialisation du système de devises...');
 
       // 1. Créer les tables de devises
       await this.createCurrencyTables();
@@ -39,9 +39,9 @@ export class CurrencyIntegration {
       // 4. Mettre à jour les tables existantes
       await this.updateExistingTables();
 
-      console.log('✅ Système de devises initialisé avec succès');
+      console.warn('✅ Système de devises initialisé avec succès');
     } catch (error) {
-      console.error('❌ Erreur initialisation devises:', error);
+      console.error('❌ Erreur initialisation devises:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
@@ -108,17 +108,19 @@ export class CurrencyIntegration {
       );`
     ];
 
-    for (const query of sqlQueries) {
+    const queryPromises = sqlQueries.map(async query => {
       try {
         const { error } = await supabase.rpc('execute_sql', { sql: query });
         if (error && !error.message.includes('already exists')) {
           throw error;
         }
       } catch (error) {
-        console.warn('SQL Query failed (may be normal):', `${query.substring(0, 50)  }...`);
+        console.warn('SQL Query failed (may be normal):', `${query.substring(0, 50)}...`);
         // Continuer même si certaines requêtes échouent (tables peuvent déjà exister)
       }
-    }
+    });
+    
+    await Promise.all(queryPromises);
   }
 
   /**
@@ -132,7 +134,7 @@ export class CurrencyIntegration {
       return;
     }
 
-    for (const currency of SUPPORTED_CURRENCIES) {
+    const currencyPromises = SUPPORTED_CURRENCIES.map(async currency => {
       try {
         const { error } = await supabase
           .from('currencies')
@@ -155,7 +157,9 @@ export class CurrencyIntegration {
       } catch (error) {
         console.warn(`Erreur devise ${currency.code}:`, error);
       }
-    }
+    });
+    
+    await Promise.all(currencyPromises);
   }
 
   /**
@@ -184,7 +188,7 @@ export class CurrencyIntegration {
       }
     ];
 
-    for (const rate of fixedRates) {
+    const ratePromises = fixedRates.map(async rate => {
       try {
         const { error } = await supabase
           .from('exchange_rates')
@@ -204,7 +208,9 @@ export class CurrencyIntegration {
       } catch (error) {
         console.warn(`Erreur taux fixe:`, error);
       }
-    }
+    });
+    
+    await Promise.all(ratePromises);
   }
 
   /**
@@ -239,7 +245,7 @@ export class CurrencyIntegration {
        ADD COLUMN IF NOT EXISTS base_currency_credit DECIMAL(15,2) DEFAULT 0;`
     ];
 
-    for (const query of updateQueries) {
+    const updatePromises = updateQueries.map(async query => {
       try {
         const { error } = await supabase.rpc('execute_sql', { sql: query });
         if (error && !error.message.includes('already exists')) {
@@ -248,7 +254,9 @@ export class CurrencyIntegration {
       } catch (error) {
         console.warn('Erreur ALTER TABLE:', error);
       }
-    }
+    });
+    
+    await Promise.all(updatePromises);
   }
 
   /**
@@ -265,13 +273,13 @@ export class CurrencyIntegration {
     const config = this.configService.getConfig();
     
     if (!config?.company?.currency) {
-      console.log('Aucune devise configurée, migration ignorée');
+      console.warn('Aucune devise configurée, migration ignorée');
       return;
     }
 
     // ✅ CORRECTION: Vérification que config.company.id existe
     if (!(config.company as any).id) {
-      console.log('ID entreprise manquant, migration ignorée');
+      console.warn('ID entreprise manquant, migration ignorée');
       return;
     }
 
@@ -310,9 +318,9 @@ export class CurrencyIntegration {
         console.warn('Erreur mise à jour devise transactions:', transactionsError);
       }
 
-      console.log('✅ Migration des devises terminée');
+      console.warn('✅ Migration des devises terminée');
     } catch (error) {
-      console.error('❌ Erreur migration devises:', error);
+      console.error('❌ Erreur migration devises:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
@@ -341,13 +349,15 @@ export class CurrencyIntegration {
     try {
       // Vérifier que les tables existent
       const tables = ['currencies', 'exchange_rates', 'currency_conversions'];
-      for (const table of tables) {
+      const tableChecks = tables.map(async table => {
         try {
           await supabase.from(table).select('*').limit(1);
         } catch (error) {
           errors.push(`Table ${table} manquante ou inaccessible`);
         }
-      }
+      });
+      
+      await Promise.all(tableChecks);
 
       // Vérifier les devises supportées
       const { data: currencies } = await supabase
@@ -390,7 +400,7 @@ export class CurrencyIntegration {
         warnings
       };
     } catch (error) {
-      console.error('❌ Erreur validation système de devises:', error);
+      console.error('❌ Erreur validation système de devises:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }

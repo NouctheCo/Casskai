@@ -166,7 +166,7 @@ export class OnboardingProgressService {
         success: true,
         data: progress
       };
-  } catch (_error) {
+  } catch (error) {
     return {
         success: false,
         error: 'Erreur lors du calcul de la progression'
@@ -239,7 +239,7 @@ export class OnboardingProgressService {
         success: true,
         data: metrics
       };
-  } catch (_error) {
+  } catch (error) {
     return {
         success: false,
         error: 'Erreur lors de la récupération des métriques'

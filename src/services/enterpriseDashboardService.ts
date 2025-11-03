@@ -12,7 +12,7 @@ import type {
 
 export class EnterpriseDashboardService {
   private static instance: EnterpriseDashboardService;
-  private subscriptions: Map<string, any> = new Map();
+  private subscriptions: Map<string, { unsubscribe: () => void }> = new Map();
 
   static getInstance(): EnterpriseDashboardService {
     if (!EnterpriseDashboardService.instance) {
@@ -27,7 +27,7 @@ export class EnterpriseDashboardService {
   async getDashboardData(
     companyId: string,
     filter: DashboardFilter
-  ): Promise<{ data: EnterpriseDashboardData | null; error: any }> {
+  ): Promise<{ data: EnterpriseDashboardData | null; error: unknown | null }> {
     try {
       // Appel de la fonction RPC qui agrège toutes les données
       const { data, error } = await supabase.rpc('get_enterprise_dashboard_data', {
@@ -79,7 +79,7 @@ export class EnterpriseDashboardService {
       return { data: dashboardData, error: null };
 
     } catch (error) {
-      console.error('Error in getDashboardData:', error);
+      console.error('Error in getDashboardData:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
@@ -87,7 +87,7 @@ export class EnterpriseDashboardService {
   /**
    * Récupère les métriques en temps réel
    */
-  async getRealTimeMetrics(companyId: string): Promise<{ data: DashboardMetric[] | null; error: any }> {
+  async getRealTimeMetrics(companyId: string): Promise<{ data: DashboardMetric[] | null; error: unknown | null }> {
     try {
       const { data, error } = await supabase.rpc('get_realtime_metrics', {
         p_company_id: companyId
@@ -97,7 +97,7 @@ export class EnterpriseDashboardService {
 
       return { data: this.formatMetrics(data || []), error: null };
     } catch (error) {
-      console.error('Error fetching real-time metrics:', error);
+      console.error('Error fetching real-time metrics:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
@@ -105,7 +105,7 @@ export class EnterpriseDashboardService {
   /**
    * Récupère les données budgétaires
    */
-  async getBudgetData(companyId: string, year: number): Promise<{ data: BudgetData | null; error: any }> {
+  async getBudgetData(companyId: string, year: number): Promise<{ data: BudgetData | null; error: unknown | null }> {
     try {
       const { data, error } = await supabase
         .from('budgets')
@@ -125,7 +125,7 @@ export class EnterpriseDashboardService {
 
       return { data, error: null };
     } catch (error) {
-      console.error('Error fetching budget data:', error);
+      console.error('Error fetching budget data:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
@@ -133,7 +133,7 @@ export class EnterpriseDashboardService {
   /**
    * Calcule le score de santé financière
    */
-  async calculateFinancialHealth(companyId: string): Promise<{ data: FinancialHealthScore | null; error: any }> {
+  async calculateFinancialHealth(companyId: string): Promise<{ data: FinancialHealthScore | null; error: unknown | null }> {
     try {
       const { data, error } = await supabase.rpc('calculate_financial_health_score', {
         p_company_id: companyId
@@ -143,7 +143,7 @@ export class EnterpriseDashboardService {
 
       return { data: this.formatFinancialHealth(data), error: null };
     } catch (error) {
-      console.error('Error calculating financial health:', error);
+      console.error('Error calculating financial health:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
@@ -154,7 +154,7 @@ export class EnterpriseDashboardService {
   async generateCashFlowForecast(
     companyId: string,
     months: number = 12
-  ): Promise<{ data: CashFlowForecast[] | null; error: any }> {
+  ): Promise<{ data: CashFlowForecast[] | null; error: unknown | null }> {
     try {
       const { data, error } = await supabase.rpc('generate_cash_flow_forecast', {
         p_company_id: companyId,
@@ -165,7 +165,7 @@ export class EnterpriseDashboardService {
 
       return { data: data || [], error: null };
     } catch (error) {
-      console.error('Error generating cash flow forecast:', error);
+      console.error('Error generating cash flow forecast:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
@@ -176,7 +176,7 @@ export class EnterpriseDashboardService {
   async getPerformanceComparison(
     companyId: string,
     period: string
-  ): Promise<{ data: any | null; error: any }> {
+  ): Promise<{ data: Record<string, unknown> | null; error: unknown | null }> {
     try {
       const { data, error } = await supabase.rpc('get_performance_comparison', {
         p_company_id: companyId,
@@ -187,7 +187,7 @@ export class EnterpriseDashboardService {
 
       return { data, error: null };
     } catch (error) {
-      console.error('Error fetching performance comparison:', error);
+      console.error('Error fetching performance comparison:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
@@ -252,7 +252,7 @@ export class EnterpriseDashboardService {
   /**
    * Crée ou met à jour un budget
    */
-  async saveBudgetData(budgetData: Partial<BudgetData>): Promise<{ data: BudgetData | null; error: any }> {
+  async saveBudgetData(budgetData: Partial<BudgetData>): Promise<{ data: BudgetData | null; error: unknown | null }> {
     try {
       const { data, error } = await supabase
         .from('budgets')
@@ -264,7 +264,7 @@ export class EnterpriseDashboardService {
 
       return { data, error: null };
     } catch (error) {
-      console.error('Error saving budget data:', error);
+      console.error('Error saving budget data:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
@@ -275,7 +275,7 @@ export class EnterpriseDashboardService {
   async analyzeBudgetVariances(
     companyId: string,
     budgetId: string
-  ): Promise<{ data: any | null; error: any }> {
+  ): Promise<{ data: Record<string, unknown> | null; error: unknown | null }> {
     try {
       const { data, error } = await supabase.rpc('analyze_budget_variances', {
         p_company_id: companyId,
@@ -286,39 +286,39 @@ export class EnterpriseDashboardService {
 
       return { data, error: null };
     } catch (error) {
-      console.error('Error analyzing budget variances:', error);
+      console.error('Error analyzing budget variances:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
 
   // Méthodes utilitaires privées
-  private formatMetrics(rawMetrics: any[]): DashboardMetric[] {
+  private formatMetrics(rawMetrics: Array<Record<string, unknown>>): DashboardMetric[] {
     return rawMetrics.map(metric => ({
-      id: metric.id || `metric_${Date.now()}`,
-      title: metric.title,
-      current_value: metric.current_value,
-      target_value: metric.target_value,
-      previous_period_value: metric.previous_period_value,
-      budget_value: metric.budget_value,
-      unit: metric.unit || 'number',
-      trend_percentage: metric.trend_percentage || 0,
-      vs_budget_percentage: metric.vs_budget_percentage,
-      vs_previous_year_percentage: metric.vs_previous_year_percentage,
-      color: metric.color || 'blue',
-      category: metric.category || 'financial',
-      icon: metric.icon || 'TrendingUp'
+      id: (metric.id as string) || `metric_${Date.now()}`,
+      title: metric.title as string,
+      current_value: metric.current_value as number,
+      target_value: metric.target_value as number | undefined,
+      previous_period_value: metric.previous_period_value as number | undefined,
+      budget_value: metric.budget_value as number | undefined,
+      unit: (metric.unit as string) || 'number',
+      trend_percentage: (metric.trend_percentage as number) || 0,
+      vs_budget_percentage: metric.vs_budget_percentage as number | undefined,
+      vs_previous_year_percentage: metric.vs_previous_year_percentage as number | undefined,
+      color: (metric.color as string) || 'blue',
+      category: (metric.category as DashboardMetric['category']) || 'financial',
+      icon: (metric.icon as string) || 'TrendingUp'
     }));
   }
 
-  private formatCharts(rawCharts: any[]) {
+  private formatCharts(rawCharts: Array<Record<string, unknown>>) {
     return rawCharts.map(chart => ({
       ...chart,
-      comparison_enabled: chart.comparison_enabled || true,
-      drill_down_available: chart.drill_down_available || false
+      comparison_enabled: (chart.comparison_enabled as boolean) ?? true,
+      drill_down_available: (chart.drill_down_available as boolean) ?? false
     }));
   }
 
-  private formatFinancialHealth(rawHealth: any): FinancialHealthScore {
+  private formatFinancialHealth(rawHealth: unknown): FinancialHealthScore {
     if (!rawHealth) {
       return {
         overall_score: 0,
@@ -334,19 +334,20 @@ export class EnterpriseDashboardService {
       };
     }
 
+    const health = rawHealth as Record<string, unknown>;
     return {
-      ...rawHealth,
-      recommendations: rawHealth.recommendations || [],
-      critical_alerts: rawHealth.critical_alerts || [],
+      ...health,
+      recommendations: (health.recommendations as string[]) || [],
+      critical_alerts: (health.critical_alerts as string[]) || [],
       last_updated: new Date().toISOString()
-    };
+    } as FinancialHealthScore;
   }
 
-  private formatAlerts(rawAlerts: any[]) {
+  private formatAlerts(rawAlerts: Array<Record<string, unknown>>) {
     return rawAlerts.map(alert => ({
       ...alert,
-      affected_metrics: alert.affected_metrics || [],
-      estimated_impact: alert.estimated_impact || 'medium'
+      affected_metrics: (alert.affected_metrics as string[]) || [],
+      estimated_impact: (alert.estimated_impact as string) || 'medium'
     }));
   }
 }

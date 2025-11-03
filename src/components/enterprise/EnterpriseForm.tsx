@@ -116,7 +116,7 @@ export default function EnterpriseForm({ enterprise, onSuccess, onCancel }: Ente
       
       onSuccess();
     } catch (error) {
-      console.error('Error saving enterprise:', error);
+      console.error('Error saving enterprise:', error instanceof Error ? error.message : String(error));
     } finally {
       setLoading(false);
     }

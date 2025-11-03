@@ -250,7 +250,7 @@ const GDPRPage = () => {
       });
       
     } catch (error) {
-      console.error('Error submitting GDPR request:', error);
+      console.error('Error submitting GDPR request:', error instanceof Error ? error.message : String(error));
       toast({
         variant: "destructive",
         title: "Erreur",

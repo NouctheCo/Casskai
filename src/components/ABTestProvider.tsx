@@ -285,8 +285,9 @@ export const ABTestProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   try {
     const analytics = useAnalytics();
     trackEvent = analytics.trackEvent;
-  } catch {
+  } catch (error) {
     // AnalyticsProvider n'est pas disponible, créer un fallback
+    console.warn('[ABTest] Analytics non disponible:', error instanceof Error ? error.message : String(error));
     trackEvent = () => {
       console.warn('[ABTest] Analytics non disponible, événement ignoré');
     };
@@ -299,7 +300,7 @@ export const ABTestProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setIsInitialized(true);
         console.warn('[ABTest] Framework A/B Testing initialisé');
       } catch (error) {
-        console.error('[ABTest] Erreur d\'initialisation:', error);
+        console.error('[ABTest] Erreur d\'initialisation:', error instanceof Error ? error.message : String(error));
       }
     };
 

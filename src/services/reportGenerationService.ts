@@ -117,7 +117,7 @@ export class ReportGenerationService {
           return await reportExportService.exportToPDF(tables, defaultOptions);
       }
     } catch (error) {
-      console.error('Erreur génération bilan:', error);
+      console.error('Erreur génération bilan:', error instanceof Error ? error.message : String(error));
       throw new Error('Impossible de générer le bilan');
     }
   }
@@ -203,7 +203,7 @@ export class ReportGenerationService {
           return await reportExportService.exportToPDF(tables, defaultOptions);
       }
     } catch (error) {
-      console.error('Erreur génération compte de résultat:', error);
+      console.error('Erreur génération compte de résultat:', error instanceof Error ? error.message : String(error));
       throw new Error('Impossible de générer le compte de résultat');
     }
   }
@@ -261,7 +261,7 @@ export class ReportGenerationService {
           return await reportExportService.exportToPDF(balanceTable, defaultOptions);
       }
     } catch (error) {
-      console.error('Erreur génération balance:', error);
+      console.error('Erreur génération balance:', error instanceof Error ? error.message : String(error));
       throw new Error('Impossible de générer la balance');
     }
   }
@@ -340,7 +340,7 @@ export class ReportGenerationService {
           return await reportExportService.exportToPDF(tables, defaultOptions);
       }
     } catch (error) {
-      console.error('Erreur génération grand livre:', error);
+      console.error('Erreur génération grand livre:', error instanceof Error ? error.message : String(error));
       throw new Error('Impossible de générer le grand livre');
     }
   }

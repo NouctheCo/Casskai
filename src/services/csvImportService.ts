@@ -1,11 +1,11 @@
 // ExcelJS import conditionnel pour éviter les problèmes de build
-let ExcelJS: any = null;
+let ExcelJS: typeof import('exceljs') | null = null;
 try {
   ExcelJS = require('exceljs');
 } catch (error) {
   console.warn('ExcelJS not available in browser environment');
 }
-import { CSVMapping, ImportResult, ImportError, ImportWarning, FileParserOptions, ImportSession } from '../types/accounting-import.types';
+import { CSVMapping, ImportResult, ImportError, ImportWarning, FileParserOptions, ImportSession, FECEntry } from '../types/accounting-import.types';
 
 /**
  * Service d'import CSV/Excel avec mapping intelligent des colonnes
@@ -52,7 +52,7 @@ export class CSVImportService {
     encoding: string;
     delimiter?: string;
     sheets?: string[];
-    preview: any[];
+    preview: Array<Record<string, unknown>>;
     suggestedMapping: CSVMapping[];
   }> {
     const format = this.detectFileFormat(file);
@@ -76,7 +76,14 @@ export class CSVImportService {
   /**
    * Analyse un fichier Excel
    */
-  private static async analyzeExcelFile(file: File): Promise<any> {
+  private static async analyzeExcelFile(file: File): Promise<{
+    format: 'CSV' | 'Excel';
+    encoding: string;
+    delimiter?: string;
+    sheets?: string[];
+    preview: Array<Record<string, unknown>>;
+    suggestedMapping: CSVMapping[];
+  }> {
     if (!ExcelJS) {
       throw new Error('ExcelJS n\'est pas disponible dans cet environnement. Veuillez utiliser des fichiers CSV.');
     }
@@ -91,9 +98,9 @@ export class CSVImportService {
         throw new Error('Aucune feuille trouvée dans le fichier Excel');
       }
 
-      const jsonData: any[][] = [];
+      const jsonData: string[][] = [];
       worksheet.eachRow((row, rowNumber) => {
-        const rowData: any[] = [];
+        const rowData: string[] = [];
         row.eachCell({ includeEmpty: true }, (cell) => {
           rowData.push(cell.value?.toString() || '');
         });
@@ -105,11 +112,11 @@ export class CSVImportService {
       }
 
       const headers = jsonData[0] as string[];
-      const preview = jsonData.slice(0, 6).map((row: any[], index) => 
+      const preview = jsonData.slice(0, 6).map((row: string[]) =>
         headers.reduce((obj, header, colIndex) => {
           obj[header || `Column${colIndex + 1}`] = row[colIndex] || '';
           return obj;
-        }, {} as any)
+        }, {} as Record<string, string>)
       );
 
       const suggestedMapping = this.generateSmartMapping(headers);
@@ -130,7 +137,14 @@ export class CSVImportService {
   /**
    * Analyse un fichier CSV
    */
-  private static async analyzeCSVFile(file: File): Promise<any> {
+  private static async analyzeCSVFile(file: File): Promise<{
+    format: 'CSV' | 'Excel';
+    encoding: string;
+    delimiter?: string;
+    sheets?: string[];
+    preview: Array<Record<string, unknown>>;
+    suggestedMapping: CSVMapping[];
+  }> {
     const encoding = await this.detectCSVEncoding(file);
     const delimiter = await this.detectCSVDelimiter(file, encoding);
 
@@ -151,7 +165,7 @@ export class CSVImportService {
             return headers.reduce((obj, header, index) => {
               obj[header || `Column${index + 1}`] = values[index] || '';
               return obj;
-            }, {} as any);
+            }, {} as Record<string, string>);
           });
 
           const suggestedMapping = this.generateSmartMapping(headers);
@@ -308,9 +322,9 @@ export class CSVImportService {
         return this.createErrorResult('Aucune feuille trouvée dans le fichier Excel');
       }
 
-      const jsonData: any[][] = [];
+      const jsonData: string[][] = [];
       worksheet.eachRow((row) => {
-        const rowData: any[] = [];
+        const rowData: string[] = [];
         row.eachCell({ includeEmpty: true }, (cell) => {
           rowData.push(cell.value?.toString() || '');
         });
@@ -358,13 +372,13 @@ export class CSVImportService {
    * Traite les données avec le mapping fourni
    */
   private static processDataWithMapping(
-    data: any[][],
+    data: string[][],
     mapping: CSVMapping[],
     options: FileParserOptions
   ): ImportResult {
     const errors: ImportError[] = [];
     const warnings: ImportWarning[] = [];
-    const entries: any[] = [];
+    const entries: FECEntry[] = [];
     
     const startRow = options.skipFirstRow !== false ? 1 : 0;
     const dataRows = data.slice(startRow);
@@ -411,8 +425,8 @@ export class CSVImportService {
   /**
    * Mappe une ligne vers un objet entry
    */
-  private static mapRowToEntry(row: any[], mapping: CSVMapping[], rowNumber: number): any {
-    const entry: any = {};
+  private static mapRowToEntry(row: string[], mapping: CSVMapping[], rowNumber: number): Partial<FECEntry> {
+    const entry: Record<string, unknown> = {};
 
     mapping.forEach(map => {
       const rawValue = row[map.columnIndex] || map.defaultValue || '';
@@ -430,13 +444,13 @@ export class CSVImportService {
       }
     });
 
-    return entry;
+    return entry as Partial<FECEntry>;
   }
 
   /**
    * Traite une valeur selon son type
    */
-  private static processFieldValue(value: any, dataType: string): any {
+  private static processFieldValue(value: unknown, dataType: string): string | number | Date {
     if (value === null || value === undefined || value === '') {
       return dataType === 'number' || dataType === 'amount' ? 0 : '';
     }
@@ -573,11 +587,11 @@ export class CSVImportService {
     return typeMap[fieldName] || 'string';
   }
 
-  private static isEmptyRow(row: any[]): boolean {
+  private static isEmptyRow(row: string[]): boolean {
     return row.every(cell => !cell || String(cell).trim() === '');
   }
 
-  private static validateMappedEntry(entry: any, rowNumber: number): ImportError[] {
+  private static validateMappedEntry(entry: Partial<FECEntry>, rowNumber: number): ImportError[] {
     const errors: ImportError[] = [];
     
     // Validations de base

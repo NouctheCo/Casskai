@@ -447,7 +447,7 @@ export class IntegratedAccountingService {
 
         return { ...entry, id: journalEntry.id } as JournalEntryType;
       } catch (error) {
-        console.error(`Erreur sauvegarde écriture ${entry.entryNumber}:`, error);
+        console.error(`Erreur sauvegarde écriture ${entry.entryNumber}:`, error instanceof Error ? error.message : String(error));
         return entry; // fallback
       }
     });

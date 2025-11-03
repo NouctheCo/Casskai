@@ -159,7 +159,7 @@ export function CompanySettings() {
         console.warn('⚠️ [DEBUG] Aucune donnée retournée par Supabase');
       }
     } catch (error) {
-      console.error('💥 [DEBUG] Erreur dans catch chargement:', error);
+      console.error('💥 [DEBUG] Erreur dans catch chargement:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',
         description: 'Impossible de charger les paramètres entreprise',
@@ -260,9 +260,9 @@ export function CompanySettings() {
       await loadCompanySettings();
       console.log('✅ [DEBUG] Données rechargées après sauvegarde');
     } catch (error) {
-      console.error('💥 [DEBUG] Erreur dans catch:', error);
-      console.error('💥 [DEBUG] Type d\'erreur:', typeof error);
-      console.error('💥 [DEBUG] Erreur complète:', JSON.stringify(error, null, 2));
+      console.error('💥 [DEBUG] Erreur dans catch:', error instanceof Error ? error.message : String(error));
+      console.error('💥 [DEBUG] Type d\'erreur:', typeof error instanceof Error ? error.message : String(error));
+      console.error('💥 [DEBUG] Erreur complète:', JSON.stringify(error instanceof Error ? error.message : String(error), null, 2));
 
       toast({
         title: 'Erreur',

@@ -138,7 +138,7 @@ const TaxPage: React.FC = () => {
         });
       }
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      console.error('Error loading dashboard data:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur de chargement',
         description: 'Impossible de charger les données du tableau de bord',
@@ -161,7 +161,7 @@ const TaxPage: React.FC = () => {
         });
       }
     } catch (error) {
-      console.error('Error loading declarations:', error);
+      console.error('Error loading declarations:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur de chargement',
         description: 'Impossible de charger les déclarations',
@@ -184,7 +184,7 @@ const TaxPage: React.FC = () => {
         setCalendarEvents(response.data);
       }
     } catch (error) {
-      console.error('Error loading calendar events:', error);
+      console.error('Error loading calendar events:', error instanceof Error ? error.message : String(error));
     }
   };
 
@@ -195,7 +195,7 @@ const TaxPage: React.FC = () => {
         setAlerts(response.data);
       }
     } catch (error) {
-      console.error('Error loading alerts:', error);
+      console.error('Error loading alerts:', error instanceof Error ? error.message : String(error));
     }
   };
 
@@ -207,7 +207,7 @@ const TaxPage: React.FC = () => {
       }
       setLoading(false);
     } catch (error) {
-      console.error('Error loading obligations:', error);
+      console.error('Error loading obligations:', error instanceof Error ? error.message : String(error));
       setLoading(false);
     }
   };
@@ -318,7 +318,7 @@ const TaxPage: React.FC = () => {
         description: 'La déclaration a été supprimée avec succès',
       });
     } catch (error) {
-      console.error('Error deleting declaration:', error);
+      console.error('Error deleting declaration:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur de suppression',
         description: 'Impossible de supprimer la déclaration',
@@ -349,7 +349,7 @@ const TaxPage: React.FC = () => {
         description: 'L\'obligation a été supprimée avec succès',
       });
     } catch (error) {
-      console.error('Error deleting obligation:', error);
+      console.error('Error deleting obligation:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur de suppression',
         description: 'Impossible de supprimer l\'obligation',

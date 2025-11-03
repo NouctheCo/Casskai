@@ -307,7 +307,7 @@ export default function OptimizedReportsTab() {
       // Actualiser la liste des rapports récents
       loadRecentReports();
 
-      } catch (_error) {
+      } catch (error) {
       showToast("Impossible de générer le rapport. Veuillez réessayer.", 'error');
     } finally {
       setIsGenerating(null);
@@ -409,7 +409,7 @@ export default function OptimizedReportsTab() {
       // Simulation d'ouverture du rapport
       await new Promise(resolve => setTimeout(resolve, 800));
       showToast(`Rapport "${report.name}" ouvert avec succès.`, 'success');
-    } catch (_error) {
+    } catch (error) {
       showToast("Impossible d'ouvrir le rapport. Veuillez réessayer.", 'error');
     } finally {
       setViewingReport(null);
@@ -432,7 +432,7 @@ export default function OptimizedReportsTab() {
       link.click();
       
       showToast(`Rapport "${report.name}" téléchargé avec succès.`, 'success');
-    } catch (_error) {
+    } catch (error) {
       showToast("Impossible de télécharger le rapport. Veuillez réessayer.", 'error');
     } finally {
       setDownloadingReport(null);

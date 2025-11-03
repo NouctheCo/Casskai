@@ -168,7 +168,7 @@ class BudgetForecastService {
 
       return { data: forecastData, error: null };
     } catch (error) {
-      console.error('Error in getForecast:', error);
+      console.error('Error in getForecast:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }

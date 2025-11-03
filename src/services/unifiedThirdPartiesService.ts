@@ -157,7 +157,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return { data: created, error: null };
     } catch (error) {
-      console.error('Error creating customer:', error);
+      console.error('Error creating customer:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
@@ -179,7 +179,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Error fetching customers:', error);
+      console.error('Error fetching customers:', error instanceof Error ? error.message : String(error));
       return [];
     }
   }
@@ -198,7 +198,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return { data, error: null };
     } catch (error) {
-      console.error('Error fetching customer:', error);
+      console.error('Error fetching customer:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
@@ -221,7 +221,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return { data: updated, error: null };
     } catch (error) {
-      console.error('Error updating customer:', error);
+      console.error('Error updating customer:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
@@ -239,7 +239,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return { success: true, error: null };
     } catch (error) {
-      console.error('Error deleting customer:', error);
+      console.error('Error deleting customer:', error instanceof Error ? error.message : String(error));
       return { success: false, error };
     }
   }
@@ -273,7 +273,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return { data: created, error: null };
     } catch (error) {
-      console.error('Error creating supplier:', error);
+      console.error('Error creating supplier:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
@@ -295,7 +295,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Error fetching suppliers:', error);
+      console.error('Error fetching suppliers:', error instanceof Error ? error.message : String(error));
       return [];
     }
   }
@@ -314,7 +314,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return { data, error: null };
     } catch (error) {
-      console.error('Error fetching supplier:', error);
+      console.error('Error fetching supplier:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
@@ -337,7 +337,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return { data: updated, error: null };
     } catch (error) {
-      console.error('Error updating supplier:', error);
+      console.error('Error updating supplier:', error instanceof Error ? error.message : String(error));
       return { data: null, error };
     }
   }
@@ -355,7 +355,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return { success: true, error: null };
     } catch (error) {
-      console.error('Error deleting supplier:', error);
+      console.error('Error deleting supplier:', error instanceof Error ? error.message : String(error));
       return { success: false, error };
     }
   }
@@ -386,7 +386,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Error fetching unified third parties:', error);
+      console.error('Error fetching unified third parties:', error instanceof Error ? error.message : String(error));
       return [];
     }
   }
@@ -422,7 +422,7 @@ class UnifiedThirdPartiesService {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Error searching third parties:', error);
+      console.error('Error searching third parties:', error instanceof Error ? error.message : String(error));
       return [];
     }
   }
@@ -476,7 +476,7 @@ class UnifiedThirdPartiesService {
 
       return stats;
     } catch (error) {
-      console.error('Error fetching dashboard stats:', error);
+      console.error('Error fetching dashboard stats:', error instanceof Error ? error.message : String(error));
       return {
         total_customers: 0,
         total_suppliers: 0,

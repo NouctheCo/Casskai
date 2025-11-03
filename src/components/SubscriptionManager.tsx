@@ -211,7 +211,7 @@ function useSubscriptionLogic(enterpriseId?: string) {
         cancelUrl: `${window.location.origin}/settings/subscription?canceled=true`
       });
     } catch (error) {
-      console.error('Error creating subscription:', error);
+      console.error('Error creating subscription:', error instanceof Error ? error.message : String(error));
       // TODO: Afficher une notification d'erreur
     } finally {
       setIsLoading(null);
@@ -227,7 +227,7 @@ function useSubscriptionLogic(enterpriseId?: string) {
         `${window.location.origin}/settings/subscription`
       );
     } catch (error) {
-      console.error('Error accessing customer portal:', error);
+      console.error('Error accessing customer portal:', error instanceof Error ? error.message : String(error));
       // TODO: Afficher une notification d'erreur
     }
   };

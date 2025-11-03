@@ -40,7 +40,7 @@ const OnboardingDebugPanel: React.FC = () => {
       setTestResults(results.results);
       setSummary(results.summary);
     } catch (error) {
-      console.error('Erreur lors des tests:', error);
+      console.error('Erreur lors des tests:', error instanceof Error ? error.message : String(error));
     } finally {
       setIsRunning(false);
     }

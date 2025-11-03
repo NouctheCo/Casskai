@@ -20,6 +20,8 @@ export default [
       'supabase/functions/**/*',
       'tests/e2e/test-results/**/*',
       'playwright-report/**/*',
+      // Fichier UI orphelin avec imports manquants
+      'src/components/accounting/CreateAccountDialog.tsx',
     ]
   },
 
@@ -206,7 +208,8 @@ export default [
       parser: tsparser,
       parserOptions: {
         ecmaFeatures: { jsx: true },
-        project: './tsconfig.app.json',
+        // Use a dedicated TS config that includes test files to avoid parserOptions.project errors
+        project: './tsconfig.test.json',
       },
       globals: {
         ...globals.jest,

@@ -116,7 +116,7 @@ class DataMigrationService {
         if (error) {
           console.error('Erreur migration modules:', error);
         } else {
-          console.log('Modules migrés avec succès:', modulesToInsert.length);
+          console.warn('Modules migrés avec succès:', modulesToInsert.length);
         }
       }
     } catch (error) {
@@ -224,7 +224,7 @@ class DataMigrationService {
 
       toRemove.forEach(key => localStorage.removeItem(key));
 
-      console.log('localStorage nettoyé après migration:', toRemove.length, 'entrées supprimées');
+      console.warn('localStorage nettoyé après migration:', toRemove.length, 'entrées supprimées');
     } catch (error) {
       console.warn('Erreur nettoyage localStorage:', error);
     }
@@ -273,7 +273,7 @@ class DataMigrationService {
       if (error) {
         console.error('Erreur création plan comptable:', error);
       } else {
-        console.log('Plan comptable de base créé');
+        console.warn('Plan comptable de base créé');
       }
     } catch (error) {
       console.error('Erreur création plan comptable:', error);
@@ -285,7 +285,7 @@ class DataMigrationService {
    */
   async fullSync(userId: string): Promise<{ success: boolean; message: string }> {
     try {
-      console.log('Début synchronisation complète...');
+      console.warn('Début synchronisation complète...');
 
       // 1. Vérifier si migration nécessaire
       const needsMigration = await this.needsMigration(userId);

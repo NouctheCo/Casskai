@@ -89,8 +89,9 @@ export class CacheManager {
       try {
         const enterprises = JSON.parse(enterprisesRaw);
         enterprisesCount = Array.isArray(enterprises) ? enterprises.length : 0;
-      } catch (e) {
-        console.warn('Erreur parsing enterprises cache:', e);
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.warn('Erreur parsing enterprises cache:', errorMsg);
       }
     }
 
@@ -129,8 +130,9 @@ export class CacheManager {
           }
         }
 
-      } catch (e) {
-        issues.push('Cache enterprises corrompu (JSON invalide)');
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        issues.push(`Cache enterprises corrompu (JSON invalide): ${errorMsg}`);
       }
     }
 

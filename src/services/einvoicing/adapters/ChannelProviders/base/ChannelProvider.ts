@@ -148,7 +148,7 @@ export abstract class ChannelProvider {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        console.log(`${this.channelName}: ${context} attempt ${attempt}/${maxRetries}`);
+        console.warn(`${this.channelName}: ${context} attempt ${attempt}/${maxRetries}`);
         return await operation();
       } catch (error) {
         lastError = error as Error;
@@ -166,7 +166,7 @@ export abstract class ChannelProvider {
 
         // Exponential backoff: 1s, 2s, 4s, ...
         const delayMs = baseDelayMs * Math.pow(2, attempt - 1);
-        console.log(`${this.channelName}: Waiting ${delayMs}ms before retry...`);
+        console.warn(`${this.channelName}: Waiting ${delayMs}ms before retry...`);
         
         await new Promise(resolve => setTimeout(resolve, delayMs));
       }
@@ -180,7 +180,7 @@ export abstract class ChannelProvider {
    */
   protected logActivity(activity: string, details?: any): void {
     const timestamp = new Date().toISOString();
-    console.log(`[${timestamp}] ${this.channelName}: ${activity}`, details || '');
+    console.warn(`[${timestamp}] ${this.channelName}: ${activity}`, details || '');
   }
 
   /**

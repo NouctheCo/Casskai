@@ -8,10 +8,6 @@ import {
   ForecastServiceResponse,
   ForecastDashboardData,
   WhatIfAnalysis,
-  ForecastComparison,
-  ForecastChart,
-  ForecastReport,
-  ChartDataPoint,
   RevenueLineItem,
   ExpenseLineItem,
   CashFlowItem
@@ -599,7 +595,7 @@ class ForecastsService {
 
   generatePDFReport(forecast: ForecastData): void {
     // Mock PDF generation
-    console.log(`Génération du rapport PDF pour: ${forecast.name}`);
+    console.warn(`Génération du rapport PDF pour: ${forecast.name}`);
     // In a real implementation, you would use a library like jsPDF or call a backend service
   }
 }

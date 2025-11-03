@@ -426,7 +426,7 @@ export class CurrencyService {
       
       return newRate.rate;
     } catch (error) {
-      console.error(`❌ Impossible de récupérer le taux ${fromCurrency}/${toCurrency}:`, error);
+      console.error(`❌ Impossible de récupérer le taux ${fromCurrency}/${toCurrency}:`, error instanceof Error ? error.message : String(error));
       throw new Error(`Taux de change indisponible pour ${fromCurrency}/${toCurrency}`);
     }
   }
@@ -434,7 +434,7 @@ export class CurrencyService {
   // Votre méthode updateExchangeRates existante (améliorée)
   async updateExchangeRates(): Promise<void> {
     try {
-      console.log('🔄 Mise à jour des taux de change...');
+      console.warn('🔄 Mise à jour des taux de change...');
       
       for (const provider of this.exchangeProviders.filter(p => p.isActive)) {
         try {
@@ -447,9 +447,9 @@ export class CurrencyService {
       }
       
       this.lastUpdate = new Date();
-      console.log('✅ Taux de change mis à jour');
+      console.warn('✅ Taux de change mis à jour');
     } catch (error) {
-      console.error('❌ Erreur lors de la mise à jour des taux:', error);
+      console.error('❌ Erreur lors de la mise à jour des taux:', error instanceof Error ? error.message : String(error));
     }
   }
 
@@ -560,7 +560,7 @@ export class CurrencyService {
 
   // Mise à jour spécifique des taux critiques
   async updateCriticalRates(): Promise<void> {
-    console.log('🔄 Mise à jour des taux critiques (EUR/USD/XOF/XAF)...');
+    console.warn('🔄 Mise à jour des taux critiques (EUR/USD/XOF/XAF)...');
     
     try {
       // Récupérer EUR/USD en priorité
@@ -570,9 +570,9 @@ export class CurrencyService {
       // Calculer USD vers devises africaines via EUR (utilise les taux fixes)
       await this.calculateCrossRates();
       
-      console.log('✅ Taux critiques mis à jour avec succès');
+      console.warn('✅ Taux critiques mis à jour avec succès');
     } catch (error) {
-      console.error('❌ Erreur mise à jour taux critiques:', error);
+      console.error('❌ Erreur mise à jour taux critiques:', error instanceof Error ? error.message : String(error));
     }
   }
 
@@ -738,7 +738,7 @@ export class CurrencyService {
 
   // Force la mise à jour des taux critiques (pour les tests/debug)
   async forceCriticalRatesUpdate(): Promise<void> {
-    console.log('🔄 FORCE: Mise à jour des taux critiques...');
+    console.warn('🔄 FORCE: Mise à jour des taux critiques...');
     await this.updateCriticalRates();
   }
 

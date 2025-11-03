@@ -59,7 +59,7 @@ export class CookiesService {
         return this.saveToLocalStorage(preferences);
       }
     } catch (error) {
-      console.error('Error saving cookie preferences to database:', error);
+      console.error('Error saving cookie preferences to database:', error instanceof Error ? error.message : String(error));
       // Fallback vers le stockage local en cas d'erreur
       return this.saveToLocalStorage(preferences);
     }
@@ -88,7 +88,7 @@ export class CookiesService {
       // Fallback vers le stockage local
       return this.getFromLocalStorage();
     } catch (error) {
-      console.error('Error fetching cookie preferences:', error);
+      console.error('Error fetching cookie preferences:', error instanceof Error ? error.message : String(error));
       return this.getFromLocalStorage();
     }
   }
@@ -196,7 +196,7 @@ export class CookiesService {
       const stored = localStorage.getItem(this.STORAGE_KEY);
       return stored ? JSON.parse(stored) : null;
     } catch (error) {
-      console.error('Error reading cookie preferences from localStorage:', error);
+      console.error('Error reading cookie preferences from localStorage:', error instanceof Error ? error.message : String(error));
       return null;
     }
   }
@@ -327,7 +327,7 @@ export class CookiesService {
 
       return stats;
     } catch (error) {
-      console.error('Error fetching consent statistics:', error);
+      console.error('Error fetching consent statistics:', error instanceof Error ? error.message : String(error));
       return {
         total: 0,
         essential: 0,

@@ -153,7 +153,7 @@ export class OpenBankingManager {
         this.providers.set(providerConfig.id, provider);
         console.warn(`Provider ${providerConfig.id} initialized`);
       } catch (error) {
-        console.error(`Failed to initialize provider ${providerConfig.id}:`, error);
+        console.error(`Failed to initialize provider ${providerConfig.id}:`, error instanceof Error ? error.message : String(error));
       }
     }));
   }
@@ -530,7 +530,7 @@ export class OpenBankingManager {
         const isHealthy = await provider.isHealthy();
         providerHealth[providerId] = isHealthy;
         if (isHealthy) healthyProviders++;
-      } catch (_error) {
+      } catch (error) {
         providerHealth[providerId] = false;
       }
     }

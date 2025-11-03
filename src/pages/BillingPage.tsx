@@ -112,7 +112,7 @@ const BillingPage: React.FC = () => {
         });
       }
     } catch (error) {
-      console.error('Subscription error:', error);
+      console.error('Subscription error:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur inattendue",
         description: "Une erreur inattendue est survenue.",
@@ -146,7 +146,7 @@ const BillingPage: React.FC = () => {
         });
       }
     } catch (error) {
-      console.error('Plan change error:', error);
+      console.error('Plan change error:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur inattendue",
         description: "Une erreur inattendue est survenue.",
@@ -180,7 +180,7 @@ const BillingPage: React.FC = () => {
       }
       // If successful, the portal will open in a new tab
     } catch (error) {
-      console.error('Error opening billing portal:', error);
+      console.error('Error opening billing portal:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur inattendue",
         description: "Une erreur inattendue est survenue.",
@@ -217,7 +217,7 @@ const BillingPage: React.FC = () => {
       }
       // Si succès, le portail s'ouvrira dans un nouvel onglet
     } catch (error) {
-      console.error('Error managing payment method:', error);
+      console.error('Error managing payment method:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur inattendue",
         description: "Impossible d'accéder à la gestion des méthodes de paiement.",
@@ -238,7 +238,7 @@ const BillingPage: React.FC = () => {
       // Recharger les données d'abonnement pour réfléter les changements
       await refreshSubscription();
     } catch (error) {
-      console.error('Error setting default payment method:', error);
+      console.error('Error setting default payment method:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur",
         description: "Impossible de définir cette méthode comme défaut",
@@ -276,7 +276,7 @@ const BillingPage: React.FC = () => {
         });
       }, 2000);
     } catch (error) {
-      console.error('Error downloading PDF:', error);
+      console.error('Error downloading PDF:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur de téléchargement",
         description: "Impossible de télécharger le PDF de cette facture.",
@@ -314,7 +314,7 @@ const BillingPage: React.FC = () => {
         });
       }, 2000);
     } catch (error) {
-      console.error('Error viewing invoice:', error);
+      console.error('Error viewing invoice:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur d'affichage",
         description: "Impossible d'ouvrir cette facture.",

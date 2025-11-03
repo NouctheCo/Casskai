@@ -50,7 +50,7 @@ export class EncryptionService {
       );
 
       this.isInitialized = true;
-      console.log('Encryption service initialized successfully');
+      console.warn('Encryption service initialized successfully');
     } catch (error) {
       throw new Error(`Failed to initialize encryption service: ${error.message}`);
     }
@@ -434,7 +434,7 @@ export class EncryptionService {
       };
 
       // En production, sauvegarder en base de données
-      console.log('Audit log:', auditEntry);
+      console.warn('Audit log:', auditEntry);
     } catch (error) {
       console.error('Failed to create audit log:', error);
     }
@@ -469,7 +469,7 @@ export class TokenRotationService {
     this.rotationTimer = setInterval(async () => {
       try {
         await callback();
-        console.log('Token rotation completed successfully');
+        console.warn('Token rotation completed successfully');
       } catch (error) {
         console.error('Token rotation failed:', error);
       }
@@ -488,7 +488,7 @@ export class TokenRotationService {
   async forceRotation(callback: () => Promise<void>): Promise<void> {
     try {
       await callback();
-      console.log('Forced token rotation completed successfully');
+      console.warn('Forced token rotation completed successfully');
     } catch (error) {
       console.error('Forced token rotation failed:', error);
       throw error;

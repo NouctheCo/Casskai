@@ -1,5 +1,60 @@
-import { VATRule } from '../types/accounting-import.types';
+/* eslint-disable max-lines */
 import { supabase } from '../lib/supabase';
+
+// Types utilitaires pour éviter les `any`
+// —
+
+export type VATEntryItem = {
+  accountId: string;
+  accountNumber: string;
+  accountName: string;
+  debitAmount: number;
+  creditAmount: number;
+  description: string;
+  vatRate: number;
+};
+
+type RawVATEntry = {
+  debit_amount: number | null;
+  credit_amount: number | null;
+  description: string | null;
+  journal_entries: { date: string; reference: string; description?: string | null } | null;
+  accounts: { number: string; name: string; type?: string | null } | null;
+};
+
+type VATDeclarationEntry = {
+  date: string;
+  reference: string;
+  accountNumber: string;
+  accountName: string;
+  debit: number;
+  credit: number;
+  vatRate?: number;
+};
+
+type CollectedTotals = { standard: number; reduced: number; superReduced: number; special: number; total: number };
+type DeductibleTotals = { goods: number; services: number; immobilizations: number; total: number };
+
+export type VATDeclarationSummary = {
+  period: { start: string; end: string };
+  regime: string;
+  collected: CollectedTotals;
+  deductible: DeductibleTotals;
+  balance: { tvadue: number; credit: number; toPay: number };
+  entries: VATDeclarationEntry[];
+};
+
+type JournalPostItem = { accountId: string; debitAmount: number; creditAmount: number; description: string };
+export type VATJournalPost = {
+  companyId: string;
+  journalId: string;
+  entryNumber: string;
+  date: string;
+  description: string;
+  reference: string;
+  status: 'draft' | 'posted' | 'void';
+  items: JournalPostItem[];
+};
 
 /**
  * Service de calcul TVA multi-taux avec régimes spéciaux
@@ -112,20 +167,24 @@ export class VATCalculationService {
         return { effectiveRate: 0, regime: 'Franchise en base de TVA' };
 
       case 'mini':
-        // Seuils 2024 pour micro-entreprises
-        const microThreshold = activityCode?.startsWith('62') ? 77700 : 188700; // Services vs Ventes
-        return { 
-          effectiveRate: amount > microThreshold ? baseRate : 0, 
-          regime: amount > microThreshold ? 'Régime normal (dépassement seuil micro)' : 'Régime micro-entrepreneur'
-        };
+        {
+          // Seuils 2024 pour micro-entreprises
+          const microThreshold = activityCode?.startsWith('62') ? 77700 : 188700; // Services vs Ventes
+          return { 
+            effectiveRate: amount > microThreshold ? baseRate : 0, 
+            regime: amount > microThreshold ? 'Régime normal (dépassement seuil micro)' : 'Régime micro-entrepreneur'
+          };
+        }
 
       case 'simplified':
         return { effectiveRate: baseRate, regime: 'Régime réel simplifié' };
 
       case 'agriculture':
-        // Régime forfaitaire agricole
-        const agricultureRate = this.getAgricultureVATRate(baseRate);
-        return { effectiveRate: agricultureRate, regime: 'Régime agricole forfaitaire' };
+        {
+          // Régime forfaitaire agricole
+          const agricultureRate = this.getAgricultureVATRate(baseRate);
+          return { effectiveRate: agricultureRate, regime: 'Régime agricole forfaitaire' };
+        }
 
       case 'normal':
       default:
@@ -265,8 +324,6 @@ export class VATCalculationService {
     vatRate: number;
   }>> {
     const { companyId, invoiceLines, regime = 'normal', territory = 'metropole' } = params;
-    const vatEntries: any[] = [];
-
     // Regroupement par taux de TVA
     const vatGroups = new Map<number, { totalHT: number; isDeductible: boolean }>();
 
@@ -277,39 +334,43 @@ export class VATCalculationService {
       vatGroups.set(key, existing);
     });
 
-    // Génération des écritures par groupe
-    for (const [vatRate, group] of vatGroups) {
-      if (vatRate === 0) continue; // Pas d'écriture pour taux zéro
+    // Génération des écritures par groupe sans `await` dans la boucle
+    const entries = await Promise.all(
+      Array.from(vatGroups.entries()).map(async ([vatRate, group]) => {
+        if (vatRate === 0) return null; // Pas d'écriture pour taux zéro
 
-      const vatCalc = this.calculateVAT({
-        amountHT: group.totalHT,
-        vatRate,
-        regime,
-        territory,
-        isDeductible: group.isDeductible
-      });
-
-      if (vatCalc.vatAmount > 0) {
-        // Récupération du compte TVA
-        const vatAccount = await this.getOrCreateVATAccount(
-          companyId, 
-          vatCalc.accounts.vatAccount, 
-          vatCalc.accounts.vatAccountName
-        );
-
-        vatEntries.push({
-          accountId: vatAccount.id,
-          accountNumber: vatAccount.number,
-          accountName: vatAccount.name,
-          debitAmount: group.isDeductible ? vatCalc.vatAmount : 0,
-          creditAmount: group.isDeductible ? 0 : vatCalc.vatAmount,
-          description: `${vatCalc.accounts.vatAccountName} (${(vatCalc.effectiveRate * 100).toFixed(1)}%)`,
-          vatRate: vatCalc.effectiveRate
+        const vatCalc = this.calculateVAT({
+          amountHT: group.totalHT,
+          vatRate,
+          regime,
+          territory,
+          isDeductible: group.isDeductible
         });
-      }
-    }
 
-    return vatEntries;
+        if (vatCalc.vatAmount > 0) {
+          // Récupération du compte TVA
+          const vatAccount = await this.getOrCreateVATAccount(
+            companyId,
+            vatCalc.accounts.vatAccount,
+            vatCalc.accounts.vatAccountName
+          );
+
+          const item: VATEntryItem = {
+            accountId: vatAccount.id,
+            accountNumber: vatAccount.number,
+            accountName: vatAccount.name,
+            debitAmount: group.isDeductible ? vatCalc.vatAmount : 0,
+            creditAmount: group.isDeductible ? 0 : vatCalc.vatAmount,
+            description: `${vatCalc.accounts.vatAccountName} (${(vatCalc.effectiveRate * 100).toFixed(1)}%)`,
+            vatRate: vatCalc.effectiveRate
+          };
+          return item;
+        }
+        return null;
+      })
+    );
+
+    return entries.filter((e): e is VATEntryItem => e !== null);
   }
 
   /**
@@ -361,98 +422,11 @@ export class VATCalculationService {
     startDate: string;
     endDate: string;
     regime?: string;
-  }): Promise<{
-    period: { start: string; end: string };
-    regime: string;
-    collected: {
-      standard: number;
-      reduced: number;
-      superReduced: number;
-      special: number;
-      total: number;
-    };
-    deductible: {
-      goods: number;
-      services: number;
-      immobilizations: number;
-      total: number;
-    };
-    balance: {
-      tvadue: number;
-      credit: number;
-      toPay: number;
-    };
-    entries: Array<{
-      date: string;
-      reference: string;
-      accountNumber: string;
-      accountName: string;
-      debit: number;
-      credit: number;
-      vatRate?: number;
-    }>;
-  }> {
+  }): Promise<VATDeclarationSummary> {
     const { companyId, startDate, endDate, regime = 'normal' } = params;
+    const data = await this.fetchPeriodVATEntries(companyId, startDate, endDate);
+    const { collected, deductible, entries } = this.classifyVATEntries(data);
 
-    // Récupération des écritures TVA de la période
-    const vatEntries = await supabase
-      .from('journal_entry_items')
-      .select(`
-        debit_amount,
-        credit_amount,
-        description,
-        journal_entries (date, reference, description),
-        accounts (number, name, type)
-      `)
-      .eq('journal_entries.company_id', companyId)
-      .gte('journal_entries.date', startDate)
-      .lte('journal_entries.date', endDate)
-      .like('accounts.number', '445%') // Comptes de TVA
-      .order('journal_entries.date');
-
-    if (!vatEntries.data) {
-      throw new Error('Erreur lors de la récupération des écritures TVA');
-    }
-
-    // Classification des montants
-    const collected = { standard: 0, reduced: 0, superReduced: 0, special: 0, total: 0 };
-    const deductible = { goods: 0, services: 0, immobilizations: 0, total: 0 };
-    const entries: any[] = [];
-
-    vatEntries.data.forEach((entry: any) => {
-      const accountNumber = entry.accounts.number;
-      const debit = entry.debit_amount || 0;
-      const credit = entry.credit_amount || 0;
-
-      entries.push({
-        date: entry.journal_entries.date,
-        reference: entry.journal_entries.reference,
-        accountNumber,
-        accountName: entry.accounts.name,
-        debit,
-        credit,
-        vatRate: this.extractVATRateFromDescription(entry.description)
-      });
-
-      // Classification TVA collectée
-      if (accountNumber.startsWith('44571')) {
-        if (accountNumber === '445711') collected.standard += credit;
-        else if (accountNumber === '445712') collected.reduced += credit;
-        else if (accountNumber === '445713') collected.superReduced += credit;
-        else if (accountNumber === '445714') collected.special += credit;
-        collected.total += credit;
-      }
-
-      // Classification TVA déductible
-      else if (accountNumber.startsWith('44562')) {
-        if (accountNumber === '445621') deductible.goods += debit;
-        else if (accountNumber === '445626') deductible.services += debit;
-        else if (accountNumber === '445641') deductible.immobilizations += debit;
-        deductible.total += debit;
-      }
-    });
-
-    // Calcul du solde
     const tvadue = collected.total;
     const credit = deductible.total;
     const toPay = Math.max(0, tvadue - credit);
@@ -472,11 +446,108 @@ export class VATCalculationService {
     };
   }
 
+  // Récupération des écritures TVA pour la période
+  private static async fetchPeriodVATEntries(companyId: string, startDate: string, endDate: string): Promise<RawVATEntry[]> {
+    const vatEntries = await supabase
+      .from('journal_entry_items')
+      .select(`
+        debit_amount,
+        credit_amount,
+        description,
+        journal_entries (date, reference, description),
+        accounts (number, name, type)
+      `)
+      .eq('journal_entries.company_id', companyId)
+      .gte('journal_entries.date', startDate)
+      .lte('journal_entries.date', endDate)
+      .like('accounts.number', '445%')
+      .order('journal_entries.date');
+
+    if (!vatEntries.data) {
+      throw new Error('Erreur lors de la récupération des écritures TVA');
+    }
+    const raw = vatEntries.data as unknown as Array<{
+      debit_amount: number | null;
+      credit_amount: number | null;
+      description: string | null;
+      journal_entries: unknown;
+      accounts: unknown;
+    }>;
+    const normalized: RawVATEntry[] = raw.map((e) => {
+      const je = this.asSingle<{ date: string; reference: string; description?: string | null }>(e.journal_entries);
+      const acc = this.asSingle<{ number: string; name: string; type?: string | null }>(e.accounts);
+      return {
+        debit_amount: e.debit_amount ?? 0,
+        credit_amount: e.credit_amount ?? 0,
+        description: e.description ?? null,
+        journal_entries: je ?? null,
+        accounts: acc ?? null,
+      };
+    });
+    return normalized;
+  }
+
+  // Normalise un champ potentiellement tableau -> premier élément
+  private static asSingle<T>(value: unknown): T | null {
+    if (Array.isArray(value)) {
+      return (value[0] as T) ?? null;
+    }
+    return (value as T) ?? null;
+  }
+
+  // Classe et synthétise les écritures TVA
+  private static classifyVATEntries(data: RawVATEntry[]): { collected: CollectedTotals; deductible: DeductibleTotals; entries: VATDeclarationEntry[] } {
+    const collected: CollectedTotals = { standard: 0, reduced: 0, superReduced: 0, special: 0, total: 0 };
+    const deductible: DeductibleTotals = { goods: 0, services: 0, immobilizations: 0, total: 0 };
+    const entries: VATDeclarationEntry[] = [];
+
+    data.forEach((entry) => {
+      const accountNumber = entry.accounts?.number ?? '';
+      const debit = entry.debit_amount || 0;
+      const credit = entry.credit_amount || 0;
+
+      if (entry.journal_entries && entry.accounts) {
+        entries.push({
+          date: entry.journal_entries.date,
+          reference: entry.journal_entries.reference,
+          accountNumber,
+          accountName: entry.accounts.name,
+          debit,
+          credit,
+          vatRate: this.extractVATRateFromDescription(entry.description || '')
+        });
+      }
+
+      // Classification TVA
+      this.updateCollectedTotals(collected, accountNumber, credit);
+      this.updateDeductibleTotals(deductible, accountNumber, debit);
+    });
+
+    return { collected, deductible, entries };
+  }
+
+  private static updateCollectedTotals(collected: CollectedTotals, accountNumber: string, credit: number): void {
+    if (!accountNumber.startsWith('44571')) return;
+    if (accountNumber === '445711') collected.standard += credit;
+    else if (accountNumber === '445712') collected.reduced += credit;
+    else if (accountNumber === '445713') collected.superReduced += credit;
+    else if (accountNumber === '445714') collected.special += credit;
+    collected.total += credit;
+  }
+
+  private static updateDeductibleTotals(deductible: DeductibleTotals, accountNumber: string, debit: number): void {
+    if (!accountNumber.startsWith('44562')) return;
+    if (accountNumber === '445621') deductible.goods += debit;
+    else if (accountNumber === '445626') deductible.services += debit;
+    else if (accountNumber === '445641') deductible.immobilizations += debit;
+    deductible.total += debit;
+  }
+
   /**
    * Extraction du taux de TVA depuis la description
    */
   private static extractVATRateFromDescription(description: string): number | undefined {
-    const match = description.match(/(\d+(?:[\.,]\d+)?)%/);
+  const match = description.match(/(\d+(?:[.,]\d+)?)%/);
     if (match) {
       return parseFloat(match[1].replace(',', '.')) / 100;
     }
@@ -489,10 +560,10 @@ export class VATCalculationService {
   static async generateVATDeclarationEntry(
     companyId: string,
     journalId: string,
-    declaration: any,
+    declaration: VATDeclarationSummary,
     paymentDate?: string
-  ): Promise<any> {
-    const entries: any[] = [];
+  ): Promise<VATJournalPost> {
+    const entries: JournalPostItem[] = [];
 
     if (declaration.balance.toPay > 0) {
       // TVA à payer

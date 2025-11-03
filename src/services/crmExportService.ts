@@ -286,7 +286,7 @@ class CRMExportService {
 
     closedOpps.forEach(opp => {
       const created = new Date(opp.created_at);
-      const closed = new Date(opp.actual_close_date!);
+      const closed = opp.actual_close_date ? new Date(opp.actual_close_date) : new Date();
       const daysToClose = Math.floor((closed.getTime() - created.getTime()) / (1000 * 60 * 60 * 24));
       content += `"${opp.title}","${opp.client_name || ''}",${opp.stage},€${opp.value},${daysToClose},${created.toISOString().substring(0, 10)},${closed.toISOString().substring(0, 10)}\n`;
     });

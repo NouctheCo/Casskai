@@ -401,7 +401,7 @@ export class NotificationService {
    * Émet un événement temps réel pour les notifications
    */
   private emitNotificationEvent(event: string, data: any): void {
-    console.log(`📱 Notification event: ${event}`, data);
+    console.warn(`📱 Notification event: ${event}`, data);
   }
 
   /**

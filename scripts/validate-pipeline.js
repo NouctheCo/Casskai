@@ -6,7 +6,6 @@
  */
 
 import fs from 'fs';
-import path from 'path';
 import { execSync } from 'child_process';
 
 console.log('🔍 Validation de la pipeline de qualité CassKai\n');

@@ -36,7 +36,7 @@ export class CompanySettingsService {
 
       return mapRowToSettings(data as CompanyRow);
     } catch (error) {
-      console.error('Erreur lors de la récupération des paramètres:', error);
+      console.error('Erreur lors de la récupération des paramètres:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
@@ -77,7 +77,7 @@ export class CompanySettingsService {
 
       return mapRowToSettings(data as CompanyRow);
     } catch (error) {
-      console.error('Erreur lors de la mise à jour des paramètres:', error);
+      console.error('Erreur lors de la mise à jour des paramètres:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
@@ -308,7 +308,7 @@ export class CompanySettingsService {
       const settings = JSON.parse(jsonData) as Partial<CompanySettings>;
       return await this.updateCompanySettings(companyId, settings);
     } catch (error) {
-      console.error('Erreur lors de l\'import des paramètres:', error);
+      console.error('Erreur lors de l\'import des paramètres:', error instanceof Error ? error.message : String(error));
       throw new Error('Format JSON invalide');
     }
   }

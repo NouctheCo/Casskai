@@ -140,11 +140,11 @@ class ConfigService {
   // Initialiser la base de données avec les migrations
   async initializeDatabase(): Promise<{ success: boolean; details?: string; error?: string }> {
     try {
-      console.log('🚀 Initialisation de la base de données...');
+      console.warn('🚀 Initialisation de la base de données...');
       
       // Vérifier le statut des migrations
       const migrationsStatus = await this.migrationService.checkMigrationsStatus();
-      console.log('📋 Statut des migrations:', migrationsStatus);
+      console.warn('📋 Statut des migrations:', migrationsStatus);
 
       // Appliquer les migrations si nécessaire
       const migrationResult = await this.migrationService.applyMigrations();
@@ -153,7 +153,7 @@ class ConfigService {
         throw new Error(migrationResult.error || 'Erreur lors de l\'application des migrations');
       }
 
-      console.log('✅ Base de données initialisée avec succès');
+      console.warn('✅ Base de données initialisée avec succès');
       return {
         success: true,
         details: migrationResult.details
@@ -188,7 +188,7 @@ class ConfigService {
       );
 
       if (result.success) {
-        console.log('✅ Entreprise créée avec succès:', result.companyId);
+        console.warn('✅ Entreprise créée avec succès:', result.companyId);
       }
 
       return result;
@@ -207,7 +207,7 @@ class ConfigService {
       const result = await this.migrationService.finalizeCompanySetup(companyId);
       
       if (result.success) {
-        console.log('✅ Configuration de l\'entreprise finalisée');
+        console.warn('✅ Configuration de l\'entreprise finalisée');
       }
 
       return result;
@@ -450,7 +450,7 @@ class ConfigService {
 
     try {
       this.saveConfig(defaultConfig);
-      console.log('Configuration par défaut sauvegardée avec succès:', defaultConfig);
+      console.warn('Configuration par défaut sauvegardée avec succès:', defaultConfig);
     } catch (error) {
       console.error('Erreur lors de la sauvegarde de la configuration par défaut:', error);
     }

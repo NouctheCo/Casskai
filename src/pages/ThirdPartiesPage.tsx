@@ -119,7 +119,7 @@ const ThirdPartiesPage: React.FC = () => {
         top_customers: [] // TODO: Implémenter si nécessaire
       } as unknown as ThirdPartyDashboardData);
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      console.error('Error loading dashboard data:', error instanceof Error ? error.message : String(error));
     }
   };
 
@@ -156,7 +156,7 @@ const ThirdPartiesPage: React.FC = () => {
       }));
       setThirdParties(transformed as unknown as ThirdParty[]);
     } catch (error) {
-      console.error('Error loading third parties:', error);
+      console.error('Error loading third parties:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur de chargement',
         description: 'Impossible de charger les tiers',
@@ -171,7 +171,7 @@ const ThirdPartiesPage: React.FC = () => {
       setAgingReport([]);
       setLoading(false);
     } catch (error) {
-      console.error('Error loading aging report:', error);
+      console.error('Error loading aging report:', error instanceof Error ? error.message : String(error));
       setLoading(false);
     }
   };
@@ -273,7 +273,7 @@ const ThirdPartiesPage: React.FC = () => {
         description: 'Le tiers a été supprimé avec succès',
       });
     } catch (error) {
-      console.error('Error deleting third party:', error);
+      console.error('Error deleting third party:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur de suppression',
         description: 'Impossible de supprimer le tiers',

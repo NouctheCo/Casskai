@@ -76,8 +76,9 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({
       // Calculer les métriques globales
       calculateMetrics(insightsResult.data, predictionsResult.data, alertsResult.data);
 
-    } catch (_error) {
-      console.error('Error loading AI data:', error);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Error loading AI data:', errorMessage);
     } finally {
       setIsLoading(false);
     }

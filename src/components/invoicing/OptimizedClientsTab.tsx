@@ -423,7 +423,7 @@ export default function OptimizedClientsTab() {
 
       setClients(transformed);
     } catch (error) {
-      console.error('Error loading clients:', error);
+      console.error('Error loading clients:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',
         description: 'Impossible de charger les clients',
@@ -484,7 +484,7 @@ export default function OptimizedClientsTab() {
       await loadClients();
       setEditingClient(null);
     } catch (error) {
-      console.error('Error saving client:', error);
+      console.error('Error saving client:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',
         description: 'Impossible de sauvegarder le client',
@@ -511,7 +511,7 @@ export default function OptimizedClientsTab() {
         description: "Le client a été supprimé avec succès."
       });
     } catch (error) {
-      console.error('Error deleting client:', error);
+      console.error('Error deleting client:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',
         description: 'Impossible de supprimer le client',

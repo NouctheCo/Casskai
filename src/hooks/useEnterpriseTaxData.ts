@@ -243,7 +243,7 @@ export function useEnterpriseTaxData() {
         id: data.id,
         name: data.name,
         rate: data.rate,
-        type: data.type as any,
+        type: data.type as TaxRate['type'],
         description: data.description,
         countryCode: currentEnterprise?.countryCode || 'FR',
         isActive: data.is_active,
@@ -272,10 +272,10 @@ export function useEnterpriseTaxData() {
     if (!currentEnterpriseId) {
       throw new Error('Entreprise non disponible');
     }
-    
+
     try {
       // Préparer les données pour Supabase
-      const updateData: any = {};
+      const updateData: Record<string, unknown> = {};
       
       if (updates.name !== undefined) updateData.name = updates.name;
       if (updates.rate !== undefined) updateData.rate = updates.rate;
@@ -380,10 +380,10 @@ export function useEnterpriseTaxData() {
       // Convertir en modèle TaxDeclaration
       const newDeclaration: TaxDeclaration = {
         id: data.id,
-        type: data.type as any,
+        type: data.type as TaxDeclaration['type'],
         name: data.name,
         dueDate: new Date(data.due_date),
-        status: data.status as any,
+        status: data.status as TaxDeclaration['status'],
         amount: data.amount,
         description: data.description,
         companyId: data.company_id,
@@ -414,10 +414,10 @@ export function useEnterpriseTaxData() {
     if (!currentEnterpriseId) {
       throw new Error('Entreprise non disponible');
     }
-    
+
     try {
       // Préparer les données pour Supabase
-      const updateData: any = {};
+      const updateData: Record<string, unknown> = {};
       
       if (updates.name !== undefined) updateData.name = updates.name;
       if (updates.type !== undefined) updateData.type = updates.type;
@@ -543,9 +543,9 @@ export function useEnterpriseTaxData() {
         amount: data.amount,
         currency: data.currency,
         paymentDate: new Date(data.payment_date),
-        paymentMethod: data.payment_method as any,
+        paymentMethod: data.payment_method as TaxPayment['paymentMethod'],
         reference: data.reference,
-        status: data.status as any,
+        status: data.status as TaxPayment['status'],
         receiptUrl: data.receipt_url
       };
       
@@ -590,53 +590,53 @@ export function useEnterpriseTaxData() {
   };
 
   // Fonctions utilitaires pour mapper les données de la DB vers les modèles
-  function mapTaxRatesFromDB(dbRates: any[]): TaxRate[] {
+  function mapTaxRatesFromDB(dbRates: Array<Record<string, unknown>>): TaxRate[] {
     return dbRates.map(rate => ({
-      id: rate.id,
-      name: rate.name,
-      rate: rate.rate,
-      type: rate.type,
-      description: rate.description,
+      id: rate.id as string,
+      name: rate.name as string,
+      rate: rate.rate as number,
+      type: rate.type as TaxRate['type'],
+      description: rate.description as string,
       countryCode: currentEnterprise?.countryCode || 'FR',
-      isActive: rate.is_active,
-      isDefault: rate.is_default,
-      createdAt: new Date(rate.created_at),
-      updatedAt: new Date(rate.updated_at),
-      createdBy: rate.created_by
+      isActive: rate.is_active as boolean,
+      isDefault: rate.is_default as boolean,
+      createdAt: new Date(rate.created_at as string),
+      updatedAt: new Date(rate.updated_at as string),
+      createdBy: rate.created_by as string | undefined
     }));
   }
 
-  function mapDeclarationsFromDB(dbDeclarations: any[]): TaxDeclaration[] {
+  function mapDeclarationsFromDB(dbDeclarations: Array<Record<string, unknown>>): TaxDeclaration[] {
     return dbDeclarations.map(decl => ({
-      id: decl.id,
-      type: decl.type as any,
-      name: decl.name,
-      dueDate: new Date(decl.due_date),
-      status: decl.status as any,
-      amount: decl.amount,
-      description: decl.description,
-      companyId: decl.company_id,
+      id: decl.id as string,
+      type: decl.type as TaxDeclaration['type'],
+      name: decl.name as string,
+      dueDate: new Date(decl.due_date as string),
+      status: decl.status as TaxDeclaration['status'],
+      amount: decl.amount as number,
+      description: decl.description as string,
+      companyId: decl.company_id as string,
       countryCode: currentEnterprise?.countryCode || 'FR',
       period: decl.period_start && decl.period_end ? {
-        start: new Date(decl.period_start),
-        end: new Date(decl.period_end)
+        start: new Date(decl.period_start as string),
+        end: new Date(decl.period_end as string)
       } : undefined,
-      submittedDate: decl.submitted_date ? new Date(decl.submitted_date) : undefined,
-      submittedBy: decl.submitted_by
+      submittedDate: decl.submitted_date ? new Date(decl.submitted_date as string) : undefined,
+      submittedBy: decl.submitted_by as string | undefined
     }));
   }
 
-  function mapPaymentsFromDB(dbPayments: any[]): TaxPayment[] {
+  function mapPaymentsFromDB(dbPayments: Array<Record<string, unknown>>): TaxPayment[] {
     return dbPayments.map(payment => ({
-      id: payment.id,
-      declarationId: payment.declaration_id,
-      amount: payment.amount,
-      currency: payment.currency,
-      paymentDate: new Date(payment.payment_date),
-      paymentMethod: payment.payment_method as any,
-      reference: payment.reference,
-      status: payment.status as any,
-      receiptUrl: payment.receipt_url
+      id: payment.id as string,
+      declarationId: payment.declaration_id as string,
+      amount: payment.amount as number,
+      currency: payment.currency as string,
+      paymentDate: new Date(payment.payment_date as string),
+      paymentMethod: payment.payment_method as TaxPayment['paymentMethod'],
+      reference: payment.reference as string,
+      status: payment.status as TaxPayment['status'],
+      receiptUrl: payment.receipt_url as string | undefined
     }));
   }
 
@@ -792,12 +792,17 @@ function getDefaultTaxRatesForCountry(countryCode: string): TaxRate[] {
   return rates[countryCode] || rates.FR;
 }
 
-function generateDefaultDeclarations(enterprise: any): TaxDeclaration[] {
+function generateDefaultDeclarations(enterprise: Record<string, unknown>): TaxDeclaration[] {
   const declarations: TaxDeclaration[] = [];
   const now = new Date();
-  
+  const taxRegime = enterprise.taxRegime as { vatPeriod?: string; type?: string };
+  const enterpriseId = enterprise.id as string;
+  const enterpriseCountryCode = enterprise.countryCode as string;
+  const fiscalYearEnd = enterprise.fiscalYearEnd as number;
+  const fiscalYearStart = enterprise.fiscalYearStart as number;
+
   // Générer les déclarations TVA selon la périodicité
-  if (enterprise.taxRegime.vatPeriod === 'monthly') {
+  if (taxRegime?.vatPeriod === 'monthly') {
     for (let i = 0; i < 6; i++) {
       const periodStart = new Date(now.getFullYear(), now.getMonth() + i, 1);
       const periodEnd = new Date(now.getFullYear(), now.getMonth() + i + 1, 0);
@@ -810,15 +815,15 @@ function generateDefaultDeclarations(enterprise: any): TaxDeclaration[] {
         dueDate,
         status: 'pending',
         amount: Math.floor(Math.random() * 5000) + 1000, // Montant aléatoire pour la démo
-        companyId: enterprise.id,
-        countryCode: enterprise.countryCode,
+        companyId: enterpriseId,
+        countryCode: enterpriseCountryCode,
         period: {
           start: periodStart,
           end: periodEnd
         }
       });
     }
-  } else if (enterprise.taxRegime.vatPeriod === 'quarterly') {
+  } else if (taxRegime?.vatPeriod === 'quarterly') {
     for (let i = 0; i < 2; i++) {
       const periodStart = new Date(now.getFullYear(), now.getMonth() + i * 3, 1);
       const periodEnd = new Date(now.getFullYear(), now.getMonth() + (i + 1) * 3, 0);
@@ -831,8 +836,8 @@ function generateDefaultDeclarations(enterprise: any): TaxDeclaration[] {
         dueDate,
         status: 'pending',
         amount: Math.floor(Math.random() * 10000) + 2000, // Montant aléatoire pour la démo
-        companyId: enterprise.id,
-        countryCode: enterprise.countryCode,
+        companyId: enterpriseId,
+        countryCode: enterpriseCountryCode,
         period: {
           start: periodStart,
           end: periodEnd
@@ -840,12 +845,13 @@ function generateDefaultDeclarations(enterprise: any): TaxDeclaration[] {
       });
     }
   }
-  
+
+
   // Ajouter une déclaration d'impôt sur les sociétés
-  if (enterprise.taxRegime.type !== 'microEnterprise') {
-    const fiscalYearEnd = new Date(now.getFullYear(), enterprise.fiscalYearEnd - 1, 0);
-    const isDeadlinePassed = isBefore(fiscalYearEnd, now);
-    
+  if (taxRegime?.type !== 'microEnterprise') {
+    const fiscalYearEndDate = new Date(now.getFullYear(), fiscalYearEnd - 1, 0);
+    const isDeadlinePassed = isBefore(fiscalYearEndDate, now);
+
     declarations.push({
       id: `is_${now.getFullYear()}`,
       type: 'IS',
@@ -853,11 +859,11 @@ function generateDefaultDeclarations(enterprise: any): TaxDeclaration[] {
       dueDate: new Date(now.getFullYear(), 4, 15), // 15 mai
       status: isDeadlinePassed ? 'overdue' : 'pending',
       amount: Math.floor(Math.random() * 20000) + 5000, // Montant aléatoire pour la démo
-      companyId: enterprise.id,
-      countryCode: enterprise.countryCode,
+      companyId: enterpriseId,
+      countryCode: enterpriseCountryCode,
       period: {
-        start: new Date(now.getFullYear() - 1, enterprise.fiscalYearStart - 1, 1),
-        end: fiscalYearEnd
+        start: new Date(now.getFullYear() - 1, fiscalYearStart - 1, 1),
+        end: fiscalYearEndDate
       }
     });
   }

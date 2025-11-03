@@ -47,7 +47,7 @@ const SecuritySettingsPage: React.FC = () => {
       setSecurityIncidents(incidents);
       setGDPRRequests(requests);
     } catch (error) {
-      console.error('Failed to load security data:', error);
+      console.error('Failed to load security data:', error instanceof Error ? error.message : String(error));
       toast({
         variant: "destructive",
         title: "Error",
@@ -73,7 +73,7 @@ const SecuritySettingsPage: React.FC = () => {
         description: "Your security settings have been saved successfully.",
         action: <CheckCircle className="text-green-500" />
       });
-      } catch (_error) {
+      } catch (error) {
       toast({
         variant: "destructive",
         title: "Update Failed",
@@ -93,7 +93,7 @@ const SecuritySettingsPage: React.FC = () => {
         description: "Your privacy preferences have been saved.",
         action: <CheckCircle className="text-green-500" />
       });
-      } catch (_error) {
+      } catch (error) {
       toast({
         variant: "destructive",
         title: "Update Failed",
@@ -120,7 +120,7 @@ const SecuritySettingsPage: React.FC = () => {
         description: "Your personal data has been exported successfully.",
         action: <Download className="text-blue-500" />
       });
-      } catch (_error) {
+      } catch (error) {
       toast({
         variant: "destructive",
         title: "Export Failed",
@@ -143,7 +143,7 @@ const SecuritySettingsPage: React.FC = () => {
       // Reload GDPR requests to show the new request
       const requests = await securityService.getGDPRRequests(companyId);
       setGDPRRequests(requests);
-      } catch (_error) {
+      } catch (error) {
       toast({
         variant: "destructive",
         title: "Request Failed",
@@ -161,7 +161,7 @@ const SecuritySettingsPage: React.FC = () => {
         description: "Your security compliance report is ready.",
         action: <FileText className="text-blue-500" />
       });
-      } catch (_error) {
+      } catch (error) {
       toast({
         variant: "destructive",
         title: "Report Generation Failed",

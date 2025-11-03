@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence as _AnimatePresence } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription as _CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Badge as _Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
@@ -15,30 +15,30 @@ import {
   FileText,
   Receipt,
   CreditCard,
-  Calendar,
+  Calendar as _Calendar,
   Euro,
-  TrendingUp,
+  TrendingUp as _TrendingUp,
   Users,
   CheckCircle,
   Clock,
   AlertTriangle,
   Plus,
   Eye,
-  Edit,
+  Edit as _Edit,
   Send,
-  Download,
+  Download as _Download,
   RefreshCw,
-  Search,
-  Filter,
+  Search as _Search,
+  Filter as _Filter,
   ArrowUpRight,
   ArrowDownRight,
   Target,
   PieChart,
   Activity,
-  Zap,
-  DollarSign,
-  BarChart3,
-  Settings
+  Zap as _Zap,
+  DollarSign as _DollarSign,
+  BarChart3 as _BarChart3,
+  Settings as _Settings
 } from 'lucide-react';
 
 // Import optimized tab components
@@ -218,7 +218,7 @@ const RecentInvoicingActivities = () => {
 
 export default function InvoicingPageOptimized() {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const { canAccessFeature } = useSubscription();
   
   const [activeTab, setActiveTab] = useState('overview');
@@ -285,9 +285,10 @@ export default function InvoicingPageOptimized() {
     switch (period) {
       case 'current-month':
         return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-      case 'current-quarter':
+      case 'current-quarter': {
         const quarterMonth = Math.floor(now.getMonth() / 3) * 3;
         return new Date(now.getFullYear(), quarterMonth, 1).toISOString().split('T')[0];
+      }
       case 'current-year':
         return new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
       case 'last-month':
@@ -304,9 +305,10 @@ export default function InvoicingPageOptimized() {
     switch (period) {
       case 'current-month':
         return new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
-      case 'current-quarter':
+      case 'current-quarter': {
         const quarterMonth = Math.floor(now.getMonth() / 3) * 3;
         return new Date(now.getFullYear(), quarterMonth + 3, 0).toISOString().split('T')[0];
+      }
       case 'current-year':
         return new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0];
       case 'last-month':

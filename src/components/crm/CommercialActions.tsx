@@ -199,7 +199,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
       setIsFormOpen(false);
       setEditingAction(null);
     } catch (error) {
-      console.error('Error submitting action form:', error);
+      console.error('Error submitting action form:', error instanceof Error ? error.message : String(error));
     }
   };
 
@@ -210,7 +210,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
         completed_date: new Date().toISOString()
       } as any);
     } catch (error) {
-      console.error('Error marking action as completed:', error);
+      console.error('Error marking action as completed:', error instanceof Error ? error.message : String(error));
     }
   };
 

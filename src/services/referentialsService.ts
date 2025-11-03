@@ -95,7 +95,7 @@ class ReferentialsService {
 
       return data || [];
     } catch (error) {
-      console.error('Erreur service pays:', error);
+      console.error('Erreur service pays:', error instanceof Error ? error.message : String(error));
       return this.getFallbackCountries();
     }
   }
@@ -112,7 +112,7 @@ class ReferentialsService {
 
       return data;
     } catch (error) {
-      console.error('Erreur service config pays:', error);
+      console.error('Erreur service config pays:', error instanceof Error ? error.message : String(error));
       return null;
     }
   }
@@ -133,7 +133,7 @@ class ReferentialsService {
 
       return data || [];
     } catch (error) {
-      console.error('Erreur service secteurs:', error);
+      console.error('Erreur service secteurs:', error instanceof Error ? error.message : String(error));
       return this.getFallbackSectors();
     }
   }
@@ -153,7 +153,7 @@ class ReferentialsService {
 
       return data || [];
     } catch (error) {
-      console.error('Erreur service recherche secteurs:', error);
+      console.error('Erreur service recherche secteurs:', error instanceof Error ? error.message : String(error));
       return this.getFallbackSectors();
     }
   }
@@ -174,7 +174,7 @@ class ReferentialsService {
 
       return data || [];
     } catch (error) {
-      console.error('Erreur service tailles:', error);
+      console.error('Erreur service tailles:', error instanceof Error ? error.message : String(error));
       return this.getFallbackCompanySizes();
     }
   }
@@ -196,7 +196,7 @@ class ReferentialsService {
 
       return data || [];
     } catch (error) {
-      console.error('Erreur service fuseaux:', error);
+      console.error('Erreur service fuseaux:', error instanceof Error ? error.message : String(error));
       return this.getFallbackTimezones();
     }
   }
@@ -217,7 +217,7 @@ class ReferentialsService {
 
       return data || [];
     } catch (error) {
-      console.error('Erreur service fuseaux populaires:', error);
+      console.error('Erreur service fuseaux populaires:', error instanceof Error ? error.message : String(error));
       return this.getFallbackTimezones();
     }
   }
@@ -239,7 +239,7 @@ class ReferentialsService {
 
       return data || [];
     } catch (error) {
-      console.error('Erreur service devises:', error);
+      console.error('Erreur service devises:', error instanceof Error ? error.message : String(error));
       return this.getFallbackCurrencies();
     }
   }
@@ -262,7 +262,7 @@ class ReferentialsService {
 
       return data || [];
     } catch (error) {
-      console.error('Erreur service taxes:', error);
+      console.error('Erreur service taxes:', error instanceof Error ? error.message : String(error));
       return [];
     }
   }

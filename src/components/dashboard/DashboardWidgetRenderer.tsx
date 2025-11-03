@@ -36,9 +36,44 @@ const WIDGET_ICONS = {
   alert: AlertTriangle,
 };
 
+interface MetricData {
+  value: string | number;
+  trend?: string;
+}
+
+interface Invoice {
+  invoice_number: string;
+  total_amount?: number;
+  status: 'Payée' | 'En retard' | 'En cours' | string;
+}
+
+interface TableData {
+  invoices?: Invoice[];
+}
+
+interface ChartDataPoint {
+  name: string;
+  value: number;
+}
+
+interface ChartData {
+  chartData?: ChartDataPoint[];
+}
+
+interface Alert {
+  type: 'error' | 'warning' | 'info';
+  message: string;
+}
+
+interface AlertData {
+  alerts?: Alert[];
+}
+
+type WidgetData = MetricData | TableData | ChartData | AlertData | Record<string, unknown>;
+
 interface DashboardWidgetRendererProps {
   widget: DashboardWidget;
-  data?: any;
+  data?: WidgetData;
   isLoading?: boolean;
   error?: string;
   onRefresh?: () => void;
@@ -308,7 +343,7 @@ export function DashboardWidgetRenderer({ widget, data = {}, isLoading = false, 
 }
 
 // Widget content components
-export function MetricWidget({ widget, data }: { widget: DashboardWidget; data: any }) {
+export function MetricWidget({ widget, data }: { widget: DashboardWidget; data: MetricData }) {
   const value = data.value || 'N/A';
   const trend = data.trend;
   const Icon = widget.title.includes('Revenus') ? DollarSign : TrendingUp;
@@ -370,7 +405,7 @@ export function QuickActionWidget({ actions }: { actions: Array<{ label: string;
   );
 }
 
-export function TableWidget({ widget, data }: { widget: DashboardWidget; data: any }) {
+export function TableWidget({ widget, data }: { widget: DashboardWidget; data: TableData }) {
   const invoices = data.invoices || [];
 
   if (invoices.length === 0) {
@@ -389,7 +424,7 @@ export function TableWidget({ widget, data }: { widget: DashboardWidget; data: a
 
   return (
     <div className="space-y-3 max-h-64 overflow-y-auto">
-      {invoices.map((facture: any, index: number) => (
+      {invoices.map((facture, index: number) => (
         <div key={index} className="flex justify-between items-center p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
           <div className="flex-grow min-w-0">
             <p className="font-medium text-sm truncate">{facture.invoice_number || 'N/A'}</p>
@@ -410,7 +445,7 @@ export function TableWidget({ widget, data }: { widget: DashboardWidget; data: a
   );
 }
 
-export function ChartWidget({ widget, data }: { widget: DashboardWidget; data: any }) {
+export function ChartWidget({ widget, data }: { widget: DashboardWidget; data: ChartData }) {
   const chartData = data.chartData || [];
 
   if (chartData.length === 0) {
@@ -447,7 +482,7 @@ export function ChartWidget({ widget, data }: { widget: DashboardWidget; data: a
               border: '1px solid hsl(var(--border))',
               borderRadius: '6px'
             }}
-            formatter={(value: any) => [`€${value.toLocaleString()}`, 'Revenus']}
+            formatter={(value: string | number) => [`€${Number(value).toLocaleString()}`, 'Revenus']}
           />
           <Line
             type="monotone"
@@ -463,7 +498,7 @@ export function ChartWidget({ widget, data }: { widget: DashboardWidget; data: a
   );
 }
 
-export function AlertWidget({ widget, data }: { widget: DashboardWidget; data: any }) {
+export function AlertWidget({ widget, data }: { widget: DashboardWidget; data: AlertData }) {
   const alerts = data.alerts || [];
 
   if (alerts.length === 0) {
@@ -482,7 +517,7 @@ export function AlertWidget({ widget, data }: { widget: DashboardWidget; data: a
 
   return (
     <div className="space-y-2">
-      {alerts.map((alert: any, index: number) => (
+      {alerts.map((alert, index: number) => (
         <div
           key={index}
           className={cn(

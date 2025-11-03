@@ -58,7 +58,7 @@ export class CleanupService {
       };
 
     } catch (error) {
-      console.error('Erreur lors du nettoyage des données d\'exemple:', error);
+      console.error('Erreur lors du nettoyage des données d\'exemple:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         message: 'Erreur lors du nettoyage des données d\'exemple. Veuillez réessayer.'
@@ -79,7 +79,7 @@ export class CleanupService {
 
       return (count || 0) > 0;
     } catch (error) {
-      console.error('Erreur lors de la vérification des données d\'exemple:', error);
+      console.error('Erreur lors de la vérification des données d\'exemple:', error instanceof Error ? error.message : String(error));
       return false;
     }
   }

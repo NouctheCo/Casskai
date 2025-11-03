@@ -32,7 +32,7 @@ interface DeletionRequest {
   scheduledDate?: Date;
 }
 
-interface DeletionProgress {
+interface _DeletionProgress {
   step: 'analysis' | 'transfer' | 'export' | 'archiving' | 'deletion' | 'completed';
   message: string;
   progress: number; // 0-100
@@ -187,7 +187,7 @@ export class AccountDeletionService {
   ): Promise<void> {
     for (const plan of transferPlans) {
       try {
-        const { data, error } = await supabase
+        const { data: _data, error } = await supabase
           .rpc('transfer_company_ownership', {
             p_company_id: plan.company_id,
             p_from_user_id: fromUserId,
@@ -198,7 +198,7 @@ export class AccountDeletionService {
           console.error(`❌ Erreur transfert propriété ${plan.company_name}:`, error);
           // Continuer avec les autres transferts même en cas d'erreur
         } else {
-          console.log(`✅ Propriété transférée pour ${plan.company_name}`);
+          console.warn(`✅ Propriété transférée pour ${plan.company_name}`);
         }
 
       } catch (error) {
@@ -252,7 +252,7 @@ export class AccountDeletionService {
         })
         .eq('id', requestId);
 
-      console.log('✅ Exports générés pour suppression compte');
+      console.warn('✅ Exports générés pour suppression compte');
 
     } catch (error) {
       console.error('❌ Erreur génération exports:', error);
@@ -264,7 +264,7 @@ export class AccountDeletionService {
    */
   private async notifyTeamMembers(userId: string, scheduledDate: Date): Promise<void> {
     // En production, implémenter l'envoi d'emails via service de mail
-    console.log(`📧 Notification programmée pour suppression le ${scheduledDate.toLocaleDateString()}`);
+    console.warn(`📧 Notification programmée pour suppression le ${scheduledDate.toLocaleDateString()}`);
 
     // Récupérer les collègues à notifier
     // D'abord obtenir les company_ids de l'utilisateur
@@ -289,7 +289,7 @@ export class AccountDeletionService {
       .neq('user_id', userId);
 
     // En production, envoyer les emails de notification
-    console.log(`📧 ${teammates?.length || 0} personnes à notifier de la suppression`);
+    console.warn(`📧 ${teammates?.length || 0} personnes à notifier de la suppression`);
   }
 
   /**
@@ -315,7 +315,7 @@ export class AccountDeletionService {
 
       if (error) throw error;
 
-      console.log('✅ Demande de suppression annulée');
+      console.warn('✅ Demande de suppression annulée');
       return { success: true };
 
     } catch (error) {
@@ -401,7 +401,7 @@ export class AccountDeletionService {
           })
           .eq('id', deletion.id);
 
-        console.log(`✅ Compte ${deletion.user_id} supprimé avec succès`);
+        console.warn(`✅ Compte ${deletion.user_id} supprimé avec succès`);
 
       } catch (error) {
         console.error(`❌ Erreur suppression compte ${deletion.user_id}:`, error);
@@ -428,7 +428,7 @@ export class AccountDeletionService {
         is_encrypted: true
       });
 
-    console.log(`📚 Données utilisateur ${userId} archivées légalement`);
+    console.warn(`📚 Données utilisateur ${userId} archivées légalement`);
   }
 
   /**
@@ -461,7 +461,7 @@ export class AccountDeletionService {
    */
   private async deleteUserAccount(userId: string): Promise<void> {
     // En production, utiliser l'API admin de Supabase pour supprimer l'utilisateur
-    console.log(`🗑️ Suppression définitive compte ${userId}`);
+    console.warn(`🗑️ Suppression définitive compte ${userId}`);
   }
 }
 

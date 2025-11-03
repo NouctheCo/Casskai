@@ -410,7 +410,7 @@ export class AutomationService {
     return `Updated ${data?.length || count || 0} records in ${config.table}`;
   }
 
-  private async executeNotificationAction(config: NonNullable<WorkflowAction['config']['notification']>, companyId: string): Promise<string> {
+  private async executeNotificationAction(config: NonNullable<WorkflowAction['config']['notification']>, _companyId: string): Promise<string> {
     // Utiliser le vrai service de notifications
     const { notificationService } = await import('@/services/notificationService');
 
@@ -429,9 +429,9 @@ export class AutomationService {
     return `Notification créée: ${config.title}`;
   }
 
-  private async executeInvoiceAction(config: NonNullable<WorkflowAction['config']['invoice']>, companyId: string): Promise<string> {
+  private async executeInvoiceAction(config: NonNullable<WorkflowAction['config']['invoice']>, _companyId: string): Promise<string> {
     // Import invoice service
-    const { invoicingService } = await import('@/services/invoicingService');
+    const { invoicingService: _invoicingService } = await import('@/services/invoicingService');
 
     // This would create an invoice - simplified for automation
     return `Invoice creation initiated for client: ${config.client_id}`;
@@ -461,20 +461,22 @@ export class AutomationService {
         }
         break;
 
-      case 'weekly':
+      case 'weekly': {
         const targetDay = schedule.dayOfWeek || 1; // Monday by default
         while (nextRun.getDay() !== targetDay || nextRun <= now) {
           nextRun.setDate(nextRun.getDate() + 1);
         }
         break;
+      }
 
-      case 'monthly':
+      case 'monthly': {
         const targetDate = schedule.dayOfMonth || 1;
         nextRun.setDate(targetDate);
         if (nextRun <= now) {
           nextRun.setMonth(nextRun.getMonth() + 1);
         }
         break;
+      }
 
       case 'yearly':
         nextRun.setFullYear(nextRun.getFullYear() + 1);

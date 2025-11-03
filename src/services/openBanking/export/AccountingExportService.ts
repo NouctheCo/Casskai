@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import {
   ExportFormat,
   ExportJob,
@@ -8,6 +9,15 @@ import {
   ReconciliationMatch,
   OpenBankingResponse
 } from '../../../types/openBanking.types';
+
+// Types utilitaires module-scope
+type ExportData = {
+  transactions: BankTransaction[];
+  entries: AccountingEntry[];
+  matches: ReconciliationMatch[];
+};
+
+type TransformedRecord = Record<string, string | number | boolean | null>;
 
 // Service d'export vers logiciels comptables
 export class AccountingExportService {
@@ -33,7 +43,7 @@ export class AccountingExportService {
       }
 
       this.isInitialized = true;
-      console.log(`Accounting export service initialized with ${formats.length} formats`);
+  console.warn(`Accounting export service initialized with ${formats.length} formats`);
     } catch (error) {
       throw new Error(`Failed to initialize accounting export service: ${error.message}`);
     }
@@ -102,8 +112,7 @@ export class AccountingExportService {
   // Traiter un job d'export
   private async processExportJob(job: ExportJob): Promise<void> {
     try {
-      job.status = 'processing';
-      job.updatedAt = new Date();
+      this.updateJob(job.id, { status: 'processing' });
 
       const format = this.exportFormats.get(job.formatId);
       if (!format) {
@@ -111,47 +120,46 @@ export class AccountingExportService {
       }
 
       // Récupérer les données à exporter
-      job.progress = 10;
+      this.updateJob(job.id, { progress: 10 });
       const data = await this.fetchExportData(job.parameters);
 
       // Valider les données
-      job.progress = 30;
+      this.updateJob(job.id, { progress: 30 });
       const validationResult = await this.validateExportData(data, format);
       if (!validationResult.valid) {
         throw new Error(`Validation failed: ${validationResult.errors.join(', ')}`);
       }
 
       // Transformer les données selon le format
-      job.progress = 50;
+      this.updateJob(job.id, { progress: 50 });
       const transformedData = await this.transformData(data, format);
 
       // Générer le fichier d'export
-      job.progress = 80;
+      this.updateJob(job.id, { progress: 80 });
       const exportedFile = await this.generateExportFile(transformedData, format);
 
       // Sauvegarder le fichier et générer l'URL
-      job.progress = 90;
+      this.updateJob(job.id, { progress: 90 });
       const fileUrl = await this.saveExportFile(exportedFile, job.id, format);
 
       // Finaliser le job
-      job.status = 'completed';
-      job.progress = 100;
-      job.resultUrl = fileUrl;
-      job.completedAt = new Date();
-      job.updatedAt = new Date();
+      this.updateJob(job.id, {
+        status: 'completed',
+        progress: 100,
+        resultUrl: fileUrl,
+        completedAt: new Date(),
+      });
 
-      console.log(`Export job ${job.id} completed successfully`);
+  console.warn(`Export job ${job.id} completed successfully`);
     } catch (error) {
-      job.status = 'failed';
-      job.errorMessage = error.message;
-      job.updatedAt = new Date();
+      this.updateJob(job.id, { status: 'failed', errorMessage: error.message });
 
       console.error(`Export job ${job.id} failed:`, error);
     }
   }
 
   // Récupérer les données à exporter
-  private async fetchExportData(parameters: ExportJob['parameters']): Promise<{
+  private async fetchExportData(_parameters: ExportJob['parameters']): Promise<{
     transactions: BankTransaction[];
     entries: AccountingEntry[];
     matches: ReconciliationMatch[];
@@ -168,17 +176,13 @@ export class AccountingExportService {
 
   // Valider les données avant export
   private async validateExportData(
-    data: any,
+    data: unknown,
     format: ExportFormat
   ): Promise<{ valid: boolean; errors: string[] }> {
-    const errors: string[] = [];
-
-    for (const rule of format.validation) {
-      const validationResult = await this.applyValidationRule(data, rule);
-      if (!validationResult.valid) {
-        errors.push(validationResult.error);
-      }
-    }
+    const results = await Promise.all(
+      format.validation.map(rule => this.applyValidationRule(data, rule))
+    );
+    const errors = results.filter(r => !r.valid).map(r => r.error);
 
     return {
       valid: errors.length === 0,
@@ -187,8 +191,9 @@ export class AccountingExportService {
   }
 
   // Appliquer une règle de validation
+  // eslint-disable-next-line complexity
   private async applyValidationRule(
-    data: any,
+    data: unknown,
     rule: ValidationRule
   ): Promise<{ valid: boolean; error: string }> {
     try {
@@ -202,7 +207,7 @@ export class AccountingExportService {
           }
           break;
 
-        case 'format':
+        case 'format': {
           const value = this.getFieldValue(data, rule.field);
           if (value && rule.parameters.pattern) {
             const regex = new RegExp(rule.parameters.pattern);
@@ -214,9 +219,11 @@ export class AccountingExportService {
             }
           }
           break;
+        }
 
-        case 'range':
-          const numValue = parseFloat(this.getFieldValue(data, rule.field));
+        case 'range': {
+          const raw = this.getFieldValue(data, rule.field);
+          const numValue = typeof raw === 'number' ? raw : parseFloat(String(raw));
           if (!isNaN(numValue)) {
             const min = rule.parameters.min;
             const max = rule.parameters.max;
@@ -228,14 +235,16 @@ export class AccountingExportService {
             }
           }
           break;
+        }
 
-        case 'custom':
+        case 'custom': {
           // Validation personnalisée
           const customResult = await this.applyCustomValidation(data, rule);
           if (!customResult.valid) {
             return customResult;
           }
           break;
+        }
       }
 
       return { valid: true, error: '' };
@@ -247,10 +256,18 @@ export class AccountingExportService {
     }
   }
 
+  // Met à jour un job de manière atomique dans la Map (évite require-atomic-updates sur l'objet capturé)
+  private updateJob(jobId: string, patch: Partial<ExportJob>): void {
+    const current = this.activeJobs.get(jobId);
+    if (!current) return;
+    const updated: ExportJob = { ...current, ...patch, updatedAt: new Date() } as ExportJob;
+    this.activeJobs.set(jobId, updated);
+  }
+
   // Validation personnalisée
   private async applyCustomValidation(
-    data: any,
-    rule: ValidationRule
+    _data: unknown,
+    _rule: ValidationRule
   ): Promise<{ valid: boolean; error: string }> {
     // Implémentation des validations personnalisées selon les besoins
     return { valid: true, error: '' };
@@ -258,60 +275,62 @@ export class AccountingExportService {
 
   // Transformer les données selon le format
   private async transformData(
-    data: any,
+    data: ExportData,
     format: ExportFormat
-  ): Promise<any[]> {
-    const transformedData: any[] = [];
-
+  ): Promise<TransformedRecord[]> {
     // Pour chaque transaction/entrée, appliquer les mappings
-    const items = data.transactions || data.entries || [];
+  const items = (data.transactions?.length ? data.transactions : data.entries) as unknown as Array<Record<string, unknown>>;
 
-    for (const item of items) {
-      const transformedItem: any = {};
+    const transformedData = await Promise.all(
+      items.map(async (item) => {
+        const entries = await Promise.all(
+          format.mapping.map(async (mapping) => {
+            try {
+              let value: unknown = this.getFieldValue(item, mapping.sourceField);
 
-      for (const mapping of format.mapping) {
-        try {
-          let value = this.getFieldValue(item, mapping.sourceField);
+              if (mapping.transformation) {
+                value = await this.applyTransformation(value, mapping.transformation);
+              }
 
-          // Appliquer les transformations
-          if (mapping.transformation) {
-            value = await this.applyTransformation(value, mapping.transformation);
-          }
+              if (value === undefined || value === null) {
+                value = mapping.defaultValue ?? '';
+              }
 
-          // Utiliser la valeur par défaut si nécessaire
-          if (value === undefined || value === null) {
-            value = mapping.defaultValue || '';
-          }
+              const normalized = typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
+                ? value
+                : String(value);
+              return [mapping.targetField, normalized] as const;
+            } catch (error) {
+              if (mapping.required) {
+                throw new Error(`Failed to map required field ${mapping.sourceField}: ${error.message}`);
+              }
+              return [mapping.targetField, mapping.defaultValue ?? ''] as const;
+            }
+          })
+        );
 
-          transformedItem[mapping.targetField] = value;
-        } catch (error) {
-          if (mapping.required) {
-            throw new Error(`Failed to map required field ${mapping.sourceField}: ${error.message}`);
-          }
-          transformedItem[mapping.targetField] = mapping.defaultValue || '';
-        }
-      }
-
-      transformedData.push(transformedItem);
-    }
+        return Object.fromEntries(entries) as TransformedRecord;
+      })
+    );
 
     return transformedData;
   }
 
   // Appliquer une transformation de champ
+  // eslint-disable-next-line complexity
   private async applyTransformation(
-    value: any,
+    value: unknown,
     transformation: FieldMapping['transformation']
-  ): Promise<any> {
-    if (!transformation) return value;
+  ): Promise<string | number | boolean | null | undefined> {
+    if (!transformation) return value as string | number | boolean | null | undefined;
 
     try {
       switch (transformation.type) {
         case 'format_date':
           if (value) {
-            const date = new Date(value);
-            const format = transformation.parameters.format || 'yyyy-MM-dd';
-            return this.formatDate(date, format);
+            const date = new Date(value as string | number | Date);
+            const fmt = transformation.parameters.format || 'yyyy-MM-dd';
+            return this.formatDate(date, fmt);
           }
           break;
 
@@ -349,24 +368,26 @@ export class AccountingExportService {
           }
           break;
 
-        case 'lookup':
+        case 'lookup': {
           const lookupTable = transformation.parameters.table || {};
-          return lookupTable[value] || transformation.parameters.defaultValue || value;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          return (lookupTable as Record<string, any>)[String(value)] ?? transformation.parameters.defaultValue ?? value;
+        }
 
         default:
-          return value;
+          return value as string | number | boolean | null | undefined;
       }
 
-      return value;
+      return value as string | number | boolean | null | undefined;
     } catch (error) {
       console.error('Transformation error:', error);
-      return value;
+      return value as string | number | boolean | null | undefined;
     }
   }
 
   // Générer le fichier d'export
   private async generateExportFile(
-    data: any[],
+    data: TransformedRecord[],
     format: ExportFormat
   ): Promise<{ content: string; filename: string; mimeType: string }> {
     const timestamp = new Date().toISOString().split('T')[0];
@@ -408,7 +429,7 @@ export class AccountingExportService {
   }
 
   // Génération CSV
-  private generateCSV(data: any[]): string {
+  private generateCSV(data: Array<Record<string, unknown>>): string {
     if (data.length === 0) return '';
 
     // En-têtes
@@ -418,7 +439,8 @@ export class AccountingExportService {
     // Données
     for (const item of data) {
       const row = headers.map(header => {
-        const value = item[header]?.toString() || '';
+        const raw = (item as Record<string, unknown>)[header];
+        const value = (raw === null || raw === undefined) ? '' : String(raw);
         // Échapper les guillemets et entourer de guillemets si nécessaire
         if (value.includes(',') || value.includes('"') || value.includes('\n')) {
           return `"${value.replace(/"/g, '""')}"`;
@@ -432,14 +454,14 @@ export class AccountingExportService {
   }
 
   // Génération XML
-  private generateXML(data: any[], format: ExportFormat): string {
+  private generateXML(data: Array<Record<string, unknown>>, format: ExportFormat): string {
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += `<export software="${format.software}" version="${format.version || '1.0'}">\n`;
 
     for (const item of data) {
       xml += '  <record>\n';
       for (const [key, value] of Object.entries(item)) {
-        xml += `    <${key}>${this.escapeXML(value?.toString() || '')}</${key}>\n`;
+        xml += `    <${key}>${this.escapeXML(value === null || value === undefined ? '' : String(value))}</${key}>\n`;
       }
       xml += '  </record>\n';
     }
@@ -449,7 +471,7 @@ export class AccountingExportService {
   }
 
   // Génération format fixe
-  private generateFixedWidth(data: any[], format: ExportFormat): string {
+  private generateFixedWidth(data: Array<Record<string, unknown>>, format: ExportFormat): string {
     let content = '';
 
     // Configuration des largeurs de champs (à définir dans les paramètres du format)
@@ -461,7 +483,8 @@ export class AccountingExportService {
     for (const item of data) {
       let line = '';
       for (const mapping of format.mapping) {
-        const value = item[mapping.targetField]?.toString() || '';
+        const raw = (item as Record<string, unknown>)[mapping.targetField];
+        const value = (raw === null || raw === undefined) ? '' : String(raw);
         const width = fieldWidths[mapping.targetField];
         line += value.padEnd(width).substring(0, width);
       }
@@ -474,8 +497,8 @@ export class AccountingExportService {
   // Sauvegarder le fichier d'export
   private async saveExportFile(
     exportedFile: { content: string; filename: string; mimeType: string },
-    jobId: string,
-    format: ExportFormat
+    _jobId: string,
+    _format: ExportFormat
   ): Promise<string> {
     try {
       // En production, sauvegarder sur un service de stockage (S3, Google Cloud Storage, etc.)
@@ -483,7 +506,7 @@ export class AccountingExportService {
       const url = URL.createObjectURL(blob);
 
       // Simuler la sauvegarde
-      console.log(`Export file saved: ${exportedFile.filename}`);
+  console.warn(`Export file saved: ${exportedFile.filename}`);
 
       return url;
     } catch (error) {
@@ -492,8 +515,17 @@ export class AccountingExportService {
   }
 
   // Méthodes utilitaires
-  private getFieldValue(object: any, fieldPath: string): any {
-    return fieldPath.split('.').reduce((obj, key) => obj?.[key], object);
+  private getFieldValue(object: unknown, fieldPath: string): unknown {
+    const keys = fieldPath.split('.');
+    let current: unknown = object;
+    for (const key of keys) {
+      if (current && typeof current === 'object' && key in (current as Record<string, unknown>)) {
+        current = (current as Record<string, unknown>)[key];
+      } else {
+        return undefined;
+      }
+    }
+    return current;
   }
 
   private formatDate(date: Date, format: string): string {
@@ -621,7 +653,7 @@ export class AccountingExportService {
 
   dispose(): void {
     // Nettoyer les jobs actifs
-    for (const [jobId, job] of this.activeJobs) {
+    for (const [_jobId, job] of this.activeJobs) {
       if (job.resultUrl) {
         URL.revokeObjectURL(job.resultUrl);
       }

@@ -29,7 +29,7 @@ export class BudgetInsightProvider extends BankingProvider {
     try {
       await this.authenticateClient();
       this.isInitialized = true;
-  } catch (_error) {
+  } catch (error) {
       throw new BankingProviderError(
         'INIT_ERROR',
     `Failed to initialize Budget Insight provider: ${(_error as { message?: string })?.message}`,
@@ -42,7 +42,7 @@ export class BudgetInsightProvider extends BankingProvider {
     try {
   const response = await this.makeRequest<{ status: string }>('GET', '/2.0/status');
       return response.status === 'OK';
-  } catch (_error) {
+  } catch (error) {
       return false;
     }
   }
@@ -60,7 +60,7 @@ export class BudgetInsightProvider extends BankingProvider {
 
       this.accessToken = response.access_token;
       this.tokenExpiresAt = new Date(Date.now() + response.expires_in * 1000);
-  } catch (_error) {
+  } catch (error) {
       throw new AuthenticationError('Failed to authenticate with Budget Insight API');
     }
   }

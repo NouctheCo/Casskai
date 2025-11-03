@@ -96,8 +96,9 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
       aiVisualizationService.initialize();
       
       console.warn('AI services initialized successfully');
-    } catch (_error) {
-      console.error('Failed to initialize AI services:', error);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Failed to initialize AI services:', errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -149,8 +150,9 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
       
       setLastAnalysis(new Date());
 
-    } catch (_error) {
-      console.error('Error running AI analysis:', error);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Error running AI analysis:', errorMessage);
     } finally {
       setIsLoading(false);
     }

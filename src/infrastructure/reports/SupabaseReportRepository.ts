@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabase';
 import { IReportRepository } from '../../domain/reports/repositories/IReportRepository';
-import { Report, ReportExecution, ReportParameters, ReportMetadata } from '../../domain/reports/entities/Report';
+import { Report, ReportExecution, ReportParameters, ReportMetadata, ReportCategory, ReportFrequency } from '../../domain/reports/entities/Report';
 
 export class SupabaseReportRepository implements IReportRepository {
   async findReportById(id: string): Promise<Report | null> {
@@ -20,11 +20,11 @@ export class SupabaseReportRepository implements IReportRepository {
       id: data.id,
       name: data.name,
       description: data.description || '',
-      category: data.category as any,
-      frequency: data.frequency as any,
+      category: data.category as ReportCategory,
+      frequency: data.frequency as ReportFrequency,
       requiredPeriods: 1, // Default value
       estimatedDuration: data.estimated_duration,
-      complexity: data.complexity as any,
+      complexity: data.complexity as 'simple' | 'medium' | 'complex',
       tags: data.tags || []
     };
 
@@ -49,11 +49,11 @@ export class SupabaseReportRepository implements IReportRepository {
         id: template.id,
         name: template.name,
         description: template.description || '',
-        category: template.category as any,
-        frequency: template.frequency as any,
+        category: template.category as ReportCategory,
+        frequency: template.frequency as ReportFrequency,
         requiredPeriods: 1,
         estimatedDuration: template.estimated_duration,
-        complexity: template.complexity as any,
+        complexity: template.complexity as 'simple' | 'medium' | 'complex',
         tags: template.tags || []
       };
       return new Report(metadata);
@@ -78,11 +78,11 @@ export class SupabaseReportRepository implements IReportRepository {
         id: template.id,
         name: template.name,
         description: template.description || '',
-        category: template.category as any,
-        frequency: template.frequency as any,
+        category: template.category as ReportCategory,
+        frequency: template.frequency as ReportFrequency,
         requiredPeriods: 1,
         estimatedDuration: template.estimated_duration,
-        complexity: template.complexity as any,
+        complexity: template.complexity as 'simple' | 'medium' | 'complex',
         tags: template.tags || []
       };
       return new Report(metadata);
@@ -177,7 +177,7 @@ export class SupabaseReportRepository implements IReportRepository {
     return data.map(this.mapExecutionFromDB);
   }
 
-  async getFinancialData(companyId: string, dateFrom: Date, dateTo: Date): Promise<any> {
+  async getFinancialData(companyId: string, dateFrom: Date, dateTo: Date): Promise<Record<string, unknown>> {
     // Use the balance sheet function for complete financial data
     const { data, error } = await supabase
       .rpc('get_balance_sheet_data', {
@@ -194,7 +194,7 @@ export class SupabaseReportRepository implements IReportRepository {
     return data;
   }
 
-  async getAccountingEntries(companyId: string, dateFrom: Date, dateTo: Date): Promise<any[]> {
+  async getAccountingEntries(companyId: string, dateFrom: Date, dateTo: Date): Promise<Array<Record<string, unknown>>> {
     const { data, error } = await supabase
       .from('journal_entries')
       .select(`
@@ -221,7 +221,7 @@ export class SupabaseReportRepository implements IReportRepository {
     return data || [];
   }
 
-  async getInvoices(companyId: string, dateFrom: Date, dateTo: Date): Promise<any[]> {
+  async getInvoices(companyId: string, dateFrom: Date, dateTo: Date): Promise<Array<Record<string, unknown>>> {
     const { data, error } = await supabase
       .from('invoices')
       .select('*')
@@ -237,7 +237,7 @@ export class SupabaseReportRepository implements IReportRepository {
     return data || [];
   }
 
-  async getExpenses(companyId: string, dateFrom: Date, dateTo: Date): Promise<any[]> {
+  async getExpenses(companyId: string, dateFrom: Date, dateTo: Date): Promise<Array<Record<string, unknown>>> {
     const { data, error } = await supabase
       .from('expenses')
       .select('*')
@@ -253,7 +253,7 @@ export class SupabaseReportRepository implements IReportRepository {
     return data || [];
   }
 
-  async getCachedReportResult(reportId: string, parameters: ReportParameters): Promise<any | null> {
+  async getCachedReportResult(reportId: string, parameters: ReportParameters): Promise<Record<string, unknown> | null> {
     const cacheKey = this.generateCacheKey(reportId, parameters);
 
     const { data, error } = await supabase
@@ -270,7 +270,7 @@ export class SupabaseReportRepository implements IReportRepository {
     return data.result;
   }
 
-  async setCachedReportResult(reportId: string, parameters: ReportParameters, result: any, ttl: number): Promise<void> {
+  async setCachedReportResult(reportId: string, parameters: ReportParameters, result: Record<string, unknown>, ttl: number): Promise<void> {
     const cacheKey = this.generateCacheKey(reportId, parameters);
     const expiresAt = new Date(Date.now() + ttl * 1000);
 
@@ -289,7 +289,7 @@ export class SupabaseReportRepository implements IReportRepository {
     }
   }
 
-  private mapExecutionFromDB(data: any): ReportExecution {
+  private mapExecutionFromDB(data: Record<string, unknown>): ReportExecution {
     return {
       id: data.id,
       reportId: data.report_id,

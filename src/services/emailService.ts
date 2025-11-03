@@ -253,11 +253,11 @@ export class EmailService {
       };
 
     } catch (error) {
-      console.error('Erreur EmailService:', error);
+      console.error('Erreur EmailService:', error instanceof Error ? error.message : String(error));
 
       // En cas d'erreur, on peut fallback sur un faux envoi pour le développement
       if (process.env.NODE_ENV === 'development') {
-        console.log('📧 [DEV MODE] Email simulé:', {
+        console.warn('📧 [DEV MODE] Email simulé:', {
           to: config.to,
           subject: config.subject,
           template: config.template

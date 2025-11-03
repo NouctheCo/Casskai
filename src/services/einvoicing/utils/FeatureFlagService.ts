@@ -31,12 +31,12 @@ export class FeatureFlagService {
    */
   async isEInvoicingEnabled(companyId: string): Promise<boolean> {
     try {
-      console.log(`🔍 Checking e-invoicing feature flag for company ${companyId}`);
+      console.warn(`🔍 Checking e-invoicing feature flag for company ${companyId}`);
 
       const flags = await this.getFeatureFlags(companyId);
       const enabled = flags.einvoicing_v1_enabled;
 
-      console.log(`🏁 E-invoicing ${enabled ? 'enabled' : 'disabled'} for company ${companyId}`);
+      console.warn(`🏁 E-invoicing ${enabled ? 'enabled' : 'disabled'} for company ${companyId}`);
       return enabled;
 
     } catch (error) {
@@ -109,7 +109,7 @@ export class FeatureFlagService {
         return cached;
       }
 
-      console.log(`📥 Loading feature flags for company ${companyId}`);
+      console.warn(`📥 Loading feature flags for company ${companyId}`);
 
       // Load from database
       const { data, error } = await supabase
@@ -149,7 +149,7 @@ export class FeatureFlagService {
       // Cache the flags
       this.cacheFlags(companyId, flags);
 
-      console.log(`✅ Feature flags loaded for company ${companyId}:`, {
+      console.warn(`✅ Feature flags loaded for company ${companyId}:`, {
         einvoicing_enabled: flags.einvoicing_v1_enabled,
         formats: flags.formats_enabled,
         channels: flags.channels_enabled
@@ -177,7 +177,7 @@ export class FeatureFlagService {
    */
   async enableEInvoicing(companyId: string): Promise<void> {
     try {
-      console.log(`🟢 Enabling e-invoicing for company ${companyId}`);
+      console.warn(`🟢 Enabling e-invoicing for company ${companyId}`);
 
       const { error } = await supabase
         .from('companies')
@@ -201,7 +201,7 @@ export class FeatureFlagService {
       // Log audit event
       await this.logFeatureFlagChange(companyId, 'enabled', 'einvoicing_v1');
 
-      console.log(`✅ E-invoicing enabled for company ${companyId}`);
+      console.warn(`✅ E-invoicing enabled for company ${companyId}`);
 
     } catch (error) {
       console.error('Error enabling e-invoicing:', error);
@@ -223,7 +223,7 @@ export class FeatureFlagService {
    */
   async disableEInvoicing(companyId: string): Promise<void> {
     try {
-      console.log(`🔴 Disabling e-invoicing for company ${companyId}`);
+      console.warn(`🔴 Disabling e-invoicing for company ${companyId}`);
 
       const { error } = await supabase
         .from('companies')
@@ -247,7 +247,7 @@ export class FeatureFlagService {
       // Log audit event
       await this.logFeatureFlagChange(companyId, 'disabled', 'einvoicing_v1');
 
-      console.log(`✅ E-invoicing disabled for company ${companyId}`);
+      console.warn(`✅ E-invoicing disabled for company ${companyId}`);
 
     } catch (error) {
       console.error('Error disabling e-invoicing:', error);
@@ -274,7 +274,7 @@ export class FeatureFlagService {
     adoption_rate: number;
   }> {
     try {
-      console.log('📊 Getting feature flag statistics');
+      console.warn('📊 Getting feature flag statistics');
 
       const { data, error } = await supabase
         .from('companies')
@@ -300,7 +300,7 @@ export class FeatureFlagService {
         adoption_rate: Math.round(adoptionRate * 100) / 100 // Round to 2 decimal places
       };
 
-      console.log('📊 Feature flag statistics:', stats);
+      console.warn('📊 Feature flag statistics:', stats);
       return stats;
 
     } catch (error) {
@@ -324,11 +324,11 @@ export class FeatureFlagService {
     if (companyId) {
       this.cache.delete(companyId);
       this.cacheExpiry.delete(companyId);
-      console.log(`🗑️ Cleared feature flag cache for company ${companyId}`);
+      console.warn(`🗑️ Cleared feature flag cache for company ${companyId}`);
     } else {
       this.cache.clear();
       this.cacheExpiry.clear();
-      console.log('🗑️ Cleared all feature flag cache');
+      console.warn('🗑️ Cleared all feature flag cache');
     }
   }
 
@@ -339,7 +339,7 @@ export class FeatureFlagService {
     const expiry = this.cacheExpiry.get(companyId);
 
     if (cached && expiry && Date.now() < expiry) {
-      console.log(`📋 Using cached feature flags for company ${companyId}`);
+      console.warn(`📋 Using cached feature flags for company ${companyId}`);
       return cached;
     }
 

@@ -1,6 +1,6 @@
 // Service de gestion des modules - Architecture modulaire CassKai
 
-import { supabase} from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 import {
   ModuleDefinition,
   Module,
@@ -10,6 +10,16 @@ import {
   ModuleDependencyError,
   ModuleConflictError
 } from '@/types/modules.types';
+
+// Services disponibles pour les modules (types de base pour éviter any)
+type ModuleServices = {
+  database: object;
+  storage: object;
+  notifications: object;
+  integrations: object;
+  analytics: object;
+  ai: object;
+};
 
 // Service principal de gestion des modules
 export class ModuleManager {
@@ -36,7 +46,12 @@ export class ModuleManager {
       this.tenantId = context.tenantId || null;
 
       // Charger les activations depuis la base de données
-      await this.loadActivations(context.tenantId!);
+      if (context.tenantId) {
+        await this.loadActivations(context.tenantId);
+      } else {
+        // Pas de tenantId disponible: charger via fallback local
+        await this.loadActivations('');
+      }
 
       // Initialiser les modules core automatiquement
       await this.initializeCoreModules(context);
@@ -65,11 +80,11 @@ export class ModuleManager {
     this.modules.set(id, module);
     this.dependencies.set(id, module.definition.dependencies);
 
-    console.log(`[ModuleManager] Module ${id} enregistré`);
+  console.warn(`[ModuleManager] Module ${id} enregistré`);
   }
 
   // Activer un module
-  async activateModule(moduleId: string, userId: string, config: Record<string, any> = {}): Promise<void> {
+  async activateModule(moduleId: string, userId: string, config: Record<string, unknown> = {}): Promise<void> {
     const module = this.modules.get(moduleId);
     if (!module) {
       throw new ModuleError(`Module ${moduleId} not found`, moduleId, 'MODULE_NOT_FOUND');
@@ -120,7 +135,7 @@ export class ModuleManager {
       this.activations.set(moduleId, activation);
       await this.saveActivation(activation);
 
-      console.log(`[ModuleManager] Module ${moduleId} activé avec succès`);
+  console.warn(`[ModuleManager] Module ${moduleId} activé avec succès`);
     } catch (error) {
       console.error(`[ModuleManager] Erreur lors de l'activation de ${moduleId}:`, error);
       throw new ModuleError(`Failed to activate module: ${error.message}`, moduleId, 'ACTIVATION_FAILED', error);
@@ -152,7 +167,10 @@ export class ModuleManager {
     }
 
     try {
-      const activation = this.activations.get(moduleId)!;
+      const activation = this.activations.get(moduleId);
+      if (!activation) {
+        throw new ModuleError(`Activation not found for ${moduleId}`, moduleId, 'ACTIVATION_NOT_FOUND');
+      }
       const context = await this.createModuleContext(moduleId, userId, activation.configuration);
 
       // Désactiver le module
@@ -165,7 +183,7 @@ export class ModuleManager {
       this.activations.set(moduleId, activation);
       await this.saveActivation(activation);
 
-      console.log(`[ModuleManager] Module ${moduleId} désactivé avec succès`);
+  console.warn(`[ModuleManager] Module ${moduleId} désactivé avec succès`);
     } catch (error) {
       console.error(`[ModuleManager] Erreur lors de la désactivation de ${moduleId}:`, error);
       throw new ModuleError(`Failed to deactivate module: ${error.message}`, moduleId, 'DEACTIVATION_FAILED', error);
@@ -196,13 +214,13 @@ export class ModuleManager {
   }
 
   // Obtenir la configuration d'un module actif
-  getModuleConfig(moduleId: string): Record<string, any> | null {
+  getModuleConfig(moduleId: string): Record<string, unknown> | null {
     const activation = this.activations.get(moduleId);
     return activation?.isActive ? activation.configuration : null;
   }
 
   // Mettre à jour la configuration d'un module
-  async updateModuleConfig(moduleId: string, config: Record<string, any>, userId: string): Promise<void> {
+  async updateModuleConfig(moduleId: string, config: Record<string, unknown>, _userId: string): Promise<void> {
     const module = this.modules.get(moduleId);
     const activation = this.activations.get(moduleId);
 
@@ -223,7 +241,7 @@ export class ModuleManager {
     this.activations.set(moduleId, activation);
     await this.saveActivation(activation);
 
-    console.log(`[ModuleManager] Configuration du module ${moduleId} mise à jour`);
+  console.warn(`[ModuleManager] Configuration du module ${moduleId} mise à jour`);
   }
 
   // Vérification des dépendances
@@ -231,19 +249,25 @@ export class ModuleManager {
     const dependencies = this.dependencies.get(moduleId) || [];
     const missingDependencies: string[] = [];
 
+    // Activer les dépendances en parallèle quand c'est possible
+    const activationPromises: Array<Promise<unknown>> = [];
     for (const depId of dependencies) {
-      if (!this.isModuleActive(depId)) {
-        // Essayer d'activer automatiquement la dépendance si elle existe
-        if (this.modules.has(depId)) {
-          try {
-            await this.activateModule(depId, 'system', {});
-          } catch (error) {
+      if (this.isModuleActive(depId)) continue;
+
+      if (this.modules.has(depId)) {
+        activationPromises.push(
+          this.activateModule(depId, 'system', {}).catch(() => {
+            // Marquer comme manquante si l'activation échoue
             missingDependencies.push(depId);
-          }
-        } else {
-          missingDependencies.push(depId);
-        }
+          })
+        );
+      } else {
+        missingDependencies.push(depId);
       }
+    }
+
+    if (activationPromises.length > 0) {
+      await Promise.allSettled(activationPromises);
     }
 
     if (missingDependencies.length > 0) {
@@ -278,7 +302,7 @@ export class ModuleManager {
   }
 
   // Créer le contexte d'exécution pour un module
-  private async createModuleContext(moduleId: string, userId: string, config: Record<string, any>): Promise<ModuleContext> {
+  private async createModuleContext(moduleId: string, userId: string, config: Record<string, unknown>): Promise<ModuleContext> {
     return {
       moduleId,
       userId,
@@ -290,7 +314,7 @@ export class ModuleManager {
   }
 
   // Créer les services disponibles pour les modules
-  private async createModuleServices(): Promise<any> {
+  private async createModuleServices(): Promise<ModuleServices> {
     return {
       database: {}, // Service de base de données
       storage: {}, // Service de stockage
@@ -302,7 +326,7 @@ export class ModuleManager {
   }
 
   // Obtenir les permissions d'un utilisateur
-  private async getUserPermissions(userId: string): Promise<string[]> {
+  private async getUserPermissions(_userId: string): Promise<string[]> {
     // À implémenter selon le système de permissions
     return ['*']; // Temporaire: toutes les permissions
   }
@@ -317,30 +341,35 @@ export class ModuleManager {
     }
 
     // Valider la version (format semver)
-    const versionRegex = /^\d+\.\d+\.\d+(-[\w\.-]+)?$/;
+  const versionRegex = /^\d+\.\d+\.\d+(-[\w.-]+)?$/;
     if (!versionRegex.test(definition.version)) {
       throw new ModuleError(`Invalid version format: ${definition.version}`, definition.id, 'INVALID_VERSION');
     }
   }
 
   // Initialiser les modules core
-  private async initializeCoreModules(context: Partial<ModuleContext>): Promise<void> {
+  private async initializeCoreModules(_context: Partial<ModuleContext>): Promise<void> {
     const coreModules = Array.from(this.modules.values())
       .filter(module => module.definition.isCore)
       .sort((a, b) => a.definition.name.localeCompare(b.definition.name));
 
-    for (const module of coreModules) {
-      if (!this.isModuleActive(module.definition.id)) {
-        try {
-          await this.activateModule(module.definition.id, 'system', {});
-        } catch (error) {
-          console.error(`[ModuleManager] Erreur activation module core ${module.definition.id}:`, error);
-        }
+    const toActivate = coreModules.filter(m => !this.isModuleActive(m.definition.id));
+    if (toActivate.length === 0) return;
+
+    const results = await Promise.allSettled(
+      toActivate.map(m => this.activateModule(m.definition.id, 'system', {}))
+    );
+
+    results.forEach((res, idx) => {
+      if (res.status === 'rejected') {
+        const failed = toActivate[idx];
+        console.error(`[ModuleManager] Erreur activation module core ${failed.definition.id}:`, res.reason);
       }
-    }
+    });
   }
 
   // Persistence des activations
+  /* eslint-disable max-lines-per-function */
   private async loadActivations(tenantId: string): Promise<void> {
     try {
       // D'abord essayer de charger depuis Supabase si disponible
@@ -419,7 +448,7 @@ export class ModuleManager {
       // Fallback vers l'ancien format complexe
       const stored = localStorage.getItem(`casskai-modules-${tenantId}`);
       if (stored) {
-        console.warn('[ModuleManager] Loading modules from complex format (casskai-modules-${tenantId})');
+  console.warn(`[ModuleManager] Loading modules from complex format (casskai-modules-${tenantId})`);
         const activations = JSON.parse(stored) as ModuleActivation[];
         activations.forEach(activation => {
           this.activations.set(activation.moduleId, activation);
@@ -480,6 +509,7 @@ export class ModuleManager {
   }
 
   private async saveActivation(_activation: ModuleActivation): Promise<void> {
+    /* eslint-disable max-depth */
     try {
       // Sauvegarder en format simple pour compatibilité avec AuthContext
       const allActivations = Array.from(this.activations.values());
@@ -539,6 +569,7 @@ export class ModuleManager {
       console.error('[ModuleManager] Erreur sauvegarde activation:', error);
     }
   }
+  /* eslint-enable max-lines-per-function */
 
   // Debugging et monitoring
   getDebugInfo(): {

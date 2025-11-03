@@ -20,7 +20,7 @@ export class FormattingService {
     format: EInvoiceFormat
   ): Promise<FormattingResult> {
     try {
-      console.log(`🔄 Formatting invoice ${invoice.invoice_number} as ${format}`);
+      console.warn(`🔄 Formatting invoice ${invoice.invoice_number} as ${format}`);
 
       let xmlContent: string;
       let pdfContent: Buffer | undefined;
@@ -64,7 +64,7 @@ export class FormattingService {
       };
 
     } catch (error) {
-      console.error('Error formatting document:', error);
+      console.error('Error formatting document:', error instanceof Error ? error.message : String(error));
       throw new EInvoicingError(
         `Failed to format document as ${format}: ${(error as Error).message}`,
         'FORMATTING_ERROR',

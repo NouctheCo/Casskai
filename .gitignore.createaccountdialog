@@ -1,0 +1,4 @@
+# Ce fichier est un fichier fantôme dans le cache VS Code/TypeScript
+# Il n'existe pas physiquement mais génère des erreurs
+# Ignoré jusqu'au redémarrage complet de VS Code
+src/components/accounting/CreateAccountDialog.tsx

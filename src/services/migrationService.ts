@@ -105,7 +105,7 @@ class MigrationService {
    */
   async applyMigrations(): Promise<MigrationResult> {
     try {
-      console.log('🚀 Début de l\'application des migrations...');
+      console.warn('🚀 Début de l\'application des migrations...');
       
       const migrationsStatus = await this.checkMigrationsStatus();
       const pendingMigrations = migrationsStatus.filter(m => !m.applied);
@@ -122,7 +122,7 @@ class MigrationService {
 
       // Appliquer les migrations dans l'ordre
       for (const migration of pendingMigrations) {
-        console.log(`📋 Application de la migration ${migration.version}: ${migration.name}`);
+        console.warn(`📋 Application de la migration ${migration.version}: ${migration.name}`);
         
         try {
           switch (migration.version) {
@@ -141,7 +141,7 @@ class MigrationService {
           }
           
           appliedCount++;
-          console.log(`✅ Migration ${migration.version} appliquée avec succès`);
+          console.warn(`✅ Migration ${migration.version} appliquée avec succès`);
           
         } catch (migrationError) {
           console.error(`❌ Erreur lors de l'application de la migration ${migration.version}:`, migrationError);

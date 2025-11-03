@@ -17,7 +17,7 @@ import { TFunction } from 'i18next';
 /**
  * Résultat de validation générique
  */
-export interface ValidationResult<T = any> {
+export interface ValidationResult<T = unknown> {
   isValid: boolean;
   data?: T;
   errors: ValidationError[];
@@ -31,8 +31,8 @@ export interface ValidationError {
   field: string;
   message: string;
   code: string;
-  value?: any;
-  context?: Record<string, any>;
+  value?: unknown;
+  context?: Record<string, unknown>;
 }
 
 /**
@@ -48,7 +48,7 @@ export interface ValidationWarning {
 /**
  * Configuration de validation pour un champ
  */
-export interface FieldValidationConfig<T = any> {
+export interface FieldValidationConfig<T = unknown> {
   required?: boolean;
   schema?: ZodSchema<T>;
   asyncValidator?: (value: T) => Promise<ValidationResult<T>>;
@@ -56,7 +56,7 @@ export interface FieldValidationConfig<T = any> {
   debounceMs?: number;
   validateOnChange?: boolean;
   validateOnBlur?: boolean;
-  transform?: (value: any) => T;
+  transform?: (value: unknown) => T;
   format?: (value: T) => string;
 }
 
@@ -90,14 +90,14 @@ export interface ValidationContext<T extends FieldValues = FieldValues> {
 /**
  * Types pour les formatters
  */
-export type FormatterFunction<T = any> = (value: T, locale?: string) => string;
-export type ParserFunction<T = any> = (value: string, locale?: string) => T;
-export type TransformerFunction<T = any, U = any> = (value: T) => U;
+export type FormatterFunction<T = unknown> = (value: T, locale?: string) => string;
+export type ParserFunction<T = unknown> = (value: string, locale?: string) => T;
+export type TransformerFunction<T = unknown, U = unknown> = (value: T) => U;
 
 /**
  * Types pour les helpers d'inputs
  */
-export interface InputHelpers<T = any> {
+export interface InputHelpers<T = unknown> {
   value: T;
   onChange: (value: T) => void;
   onBlur: () => void;
@@ -426,8 +426,8 @@ export const Transformers = {
   /**
    * Transforme les données pour l'API
    */
-  toApi: <T extends Record<string, any>>(data: T): T => {
-    const transformed: any = { ...data };
+  toApi: <T extends Record<string, unknown>>(data: T): T => {
+    const transformed: Record<string, unknown> = { ...data };
 
     // Convertit les dates en ISO strings
     Object.keys(transformed).forEach(key => {
@@ -442,8 +442,8 @@ export const Transformers = {
   /**
    * Transforme les données depuis l'API
    */
-  fromApi: <T extends Record<string, any>>(data: T): T => {
-    const transformed: any = { ...data };
+  fromApi: <T extends Record<string, unknown>>(data: T): T => {
+    const transformed: Record<string, unknown> = { ...data };
 
     // Convertit les ISO strings en dates
     Object.keys(transformed).forEach(key => {
@@ -458,8 +458,8 @@ export const Transformers = {
   /**
    * Normalise les données utilisateur
    */
-  sanitize: <T extends Record<string, any>>(data: T): T => {
-    const sanitized: any = { ...data };
+  sanitize: <T extends Record<string, unknown>>(data: T): T => {
+    const sanitized: Record<string, unknown> = { ...data };
 
     Object.keys(sanitized).forEach(key => {
       const value = sanitized[key];
@@ -482,7 +482,7 @@ export const Transformers = {
   /**
    * Applique les transformations par défaut
    */
-  default: <T extends Record<string, any>>(data: T): T => {
+  default: <T extends Record<string, unknown>>(data: T): T => {
     return Transformers.sanitize(Transformers.fromApi(data));
   }
 } as const;
@@ -518,7 +518,7 @@ class ValidationCache {
     this.cache.clear();
   }
 
-  private generateKey(field: string, value: any, schema?: any): string {
+  private generateKey(field: string, value: unknown, schema?: unknown): string {
     return `${field}:${JSON.stringify(value)}:${schema?.toString() || ''}`;
   }
 }
@@ -540,7 +540,7 @@ export class FormValidator<T extends FieldValues = FieldValues> {
   /**
    * Valide un champ spécifique
    */
-  async validateField(field: keyof T, value: any): Promise<ValidationResult> {
+  async validateField(field: keyof T, value: unknown): Promise<ValidationResult> {
     const fieldConfig = this.config.fields[field];
     if (!fieldConfig) {
       return { isValid: true, errors: [] };
@@ -630,8 +630,8 @@ export class FormValidator<T extends FieldValues = FieldValues> {
    */
   createDebouncedValidator(field: keyof T) {
     let timeoutId: NodeJS.Timeout;
-    
-    return (value: any, callback: (result: ValidationResult) => void) => {
+
+    return (value: unknown, callback: (result: ValidationResult) => void) => {
       clearTimeout(timeoutId);
       
       const delay = this.config.fields[field]?.debounceMs || this.config.debounceMs || 300;
@@ -660,8 +660,8 @@ export class FormValidator<T extends FieldValues = FieldValues> {
 
   // Méthodes privées
   private async performFieldValidation(
-    field: keyof T, 
-    value: any, 
+    field: keyof T,
+    value: unknown,
     config: FieldValidationConfig
   ): Promise<ValidationResult> {
     const errors: ValidationError[] = [];
@@ -724,7 +724,7 @@ export class FormValidator<T extends FieldValues = FieldValues> {
       field: fieldOverride || error.path.join('.'),
       message: error.message,
       code: error.code.toUpperCase(),
-      value: (error as any).input,
+      value: (error as { input?: unknown }).input,
       context: { 
         path: error.path,
         expected: 'expected' in error ? error.expected : undefined,
@@ -733,7 +733,7 @@ export class FormValidator<T extends FieldValues = FieldValues> {
     }));
   }
 
-  private generateCacheKey(field: string, value: any, schema?: any): string {
+  private generateCacheKey(field: string, value: unknown, schema?: unknown): string {
     return `${field}:${JSON.stringify(value)}:${schema?.toString() || ''}`;
   }
 }

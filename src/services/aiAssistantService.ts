@@ -1,13 +1,24 @@
 import OpenAI from 'openai';
+import type {
+  AIAssistantQuery,
+  TaxOptimization,
+  SmartAlert,
+  ReportNarrative,
+  Transaction,
+  AIServiceResponse,
+  AIConfiguration
+} from '../types/ai.types';
 
-// Type definitions for missing types
-type AIAssistantQuery = any;
-type TaxOptimization = any;
-type SmartAlert = any;
-type ReportNarrative = any;
-type Transaction = any;
-type AIServiceResponse<T> = any;
-type AIConfiguration = any;
+interface QueryContext {
+  period?: {
+    start: Date;
+    end: Date;
+  };
+  transactions?: Transaction[];
+  balance?: number;
+  metrics?: Record<string, number>;
+  [key: string]: unknown;
+}
 
 // Service d'assistant IA pour les questions comptables et fiscales
 class AIAssistantService {
@@ -36,14 +47,14 @@ class AIAssistantService {
           dangerouslyAllowBrowser: true // Pour usage côté client uniquement en démo
         });
         
-        console.log('AI Assistant Service initialized with OpenAI API');
+        console.warn('AI Assistant Service initialized with OpenAI API');
       } else {
-        console.log('AI Assistant Service initialized in mock mode');
+        console.warn('AI Assistant Service initialized in mock mode');
       }
 
       this.isInitialized = true;
     } catch (error) {
-      console.error('Failed to initialize AI Assistant Service:', error);
+      console.error('Failed to initialize AI Assistant Service:', error instanceof Error ? error.message : String(error));
       this.isInitialized = true; // Continue en mode mock
     }
   }
@@ -111,7 +122,7 @@ class AIAssistantService {
       };
 
     } catch (error) {
-      console.error('Error processing AI assistant query:', error);
+      console.error('Error processing AI assistant query:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: error.message
@@ -146,16 +157,21 @@ class AIAssistantService {
 
   // Requête vers OpenAI API
   private async queryOpenAI(
-    query: string, 
-    type: string, 
-    context?: any
+    query: string,
+    type: string,
+    context?: QueryContext
   ): Promise<{response: string; confidence: number; sources: string[]; suggestions: string[]}> {
     try {
+      // Vérifier que OpenAI est initialisé
+      if (!this.openai) {
+        throw new Error('OpenAI client not initialized');
+      }
+
       // Construction du prompt avec contexte
       const systemPrompt = this.buildSystemPrompt(type, context);
       const userPrompt = this.buildUserPrompt(query, context);
 
-      const completion = await this.openai!.chat.completions.create({
+      const completion = await this.openai.chat.completions.create({
         model: this.config.model,
         messages: [
           { role: 'system', content: systemPrompt },
@@ -176,13 +192,13 @@ class AIAssistantService {
       };
 
     } catch (error) {
-      console.error('OpenAI API error:', error);
+      console.error('OpenAI API error:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
 
   // Construction du prompt système
-  private buildSystemPrompt(type: string, context?: any): string {
+  private buildSystemPrompt(type: string, context?: QueryContext): string {
     const basePrompt = `Vous êtes un assistant comptable expert français. Répondez de manière claire, précise et professionnelle.`;
     
     const typeSpecificPrompts = {
@@ -204,7 +220,7 @@ class AIAssistantService {
   }
 
   // Construction du prompt utilisateur
-  private buildUserPrompt(query: string, context?: any): string {
+  private buildUserPrompt(query: string, context?: QueryContext): string {
     let prompt = query;
     
     // Ajoute du contexte si pertinent
@@ -225,9 +241,9 @@ class AIAssistantService {
 
   // Génération de réponses mock (fallback)
   private generateMockResponse(
-    query: string, 
-    type: string, 
-    context?: any
+    query: string,
+    type: string,
+    context?: QueryContext
   ): {response: string; confidence: number; sources: string[]; suggestions: string[]} {
     
     const responses = {
@@ -317,7 +333,7 @@ class AIAssistantService {
       };
 
     } catch (error) {
-      console.error('Error generating tax optimizations:', error);
+      console.error('Error generating tax optimizations:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: error.message
@@ -434,7 +450,7 @@ class AIAssistantService {
     type: 'monthly' | 'quarterly' | 'annual',
     period: { start: Date; end: Date },
     transactions: Transaction[],
-    metrics: any
+    metrics: Record<string, number>
   ): Promise<AIServiceResponse<ReportNarrative>> {
     try {
       const startTime = Date.now();
@@ -449,7 +465,7 @@ class AIAssistantService {
       };
 
     } catch (error) {
-      console.error('Error generating narrative report:', error);
+      console.error('Error generating narrative report:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: error.message
@@ -459,10 +475,10 @@ class AIAssistantService {
 
   // Génération du contenu du rapport
   private async generateReportContent(
-    type: string,
+    type: 'custom' | 'monthly' | 'quarterly' | 'annual',
     period: { start: Date; end: Date },
     transactions: Transaction[],
-    metrics: any
+    metrics: Record<string, number>
   ): Promise<ReportNarrative> {
     
     const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
@@ -533,7 +549,7 @@ class AIAssistantService {
   }
 
   // Génération des insights par défaut
-  private generateDefaultInsights(transactions: Transaction[], metrics: any): string[] {
+  private generateDefaultInsights(transactions: Transaction[], _metrics: Record<string, number>): string[] {
     const insights: string[] = [];
     
     // Analyse des transactions
@@ -560,7 +576,7 @@ class AIAssistantService {
   }
 
   // Génération des recommandations par défaut
-  private generateDefaultRecommendations(balance: number, metrics: any): string[] {
+  private generateDefaultRecommendations(balance: number, _metrics: Record<string, number>): string[] {
     const recommendations: string[] = [];
     
     if (balance < 0) {
@@ -578,7 +594,7 @@ class AIAssistantService {
   }
 
   // Génération des métriques narratives
-  private generateNarrativeMetrics(income: number, expenses: number, balance: number): any[] {
+  private generateNarrativeMetrics(income: number, expenses: number, balance: number): { name: string; value: number; previousValue: number; change: number; trend: 'up' | 'down' | 'stable'; interpretation: string }[] {
     return [
       {
         name: 'Chiffre d\'affaires',
@@ -613,7 +629,7 @@ class AIAssistantService {
     severity: SmartAlert['severity'],
     title: string,
     message: string,
-    data: any
+    data: Record<string, unknown>
   ): SmartAlert {
     return {
       id: crypto.randomUUID(),
@@ -630,7 +646,7 @@ class AIAssistantService {
   }
 
   // Génération des actions d'alerte
-  private generateAlertActions(type: string, data: any): any[] {
+  private generateAlertActions(type: string, data: Record<string, unknown>): { label: string; action: string; params?: Record<string, unknown>; style?: 'primary' | 'secondary' | 'danger' }[] {
     const actions = [];
     
     switch (type) {

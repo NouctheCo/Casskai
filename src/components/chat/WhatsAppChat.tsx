@@ -179,7 +179,7 @@ export function WhatsAppFloatingButton({
       setTimeout(() => setIsVisible(true), 5000);
 
     } catch (error) {
-      console.error('WhatsApp error:', error);
+      console.error('WhatsApp error:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur",
         description: "Impossible d'ouvrir WhatsApp. Veuillez réessayer."

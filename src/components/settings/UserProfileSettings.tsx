@@ -106,7 +106,7 @@ export function UserProfileSettings() {
         });
       }
     } catch (error) {
-      console.error('Erreur chargement profil:', error);
+      console.error('Erreur chargement profil:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',
         description: 'Impossible de charger votre profil',
@@ -183,7 +183,7 @@ export function UserProfileSettings() {
         description: 'Vos informations ont été sauvegardées avec succès'
       });
     } catch (error) {
-      console.error('Erreur sauvegarde profil:', error);
+      console.error('Erreur sauvegarde profil:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',
         description: 'Impossible de sauvegarder votre profil',
@@ -248,7 +248,7 @@ export function UserProfileSettings() {
         description: 'Votre photo de profil a été changée'
       });
     } catch (error) {
-      console.error('Erreur upload avatar:', error);
+      console.error('Erreur upload avatar:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',
         description: 'Impossible de télécharger l\'avatar',

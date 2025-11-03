@@ -117,7 +117,7 @@ class BankReconciliationService {
       return matches;
 
     } catch (error) {
-      console.error('Erreur réconciliation automatique:', error);
+      console.error('Erreur réconciliation automatique:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
@@ -351,7 +351,7 @@ class BankReconciliationService {
       return true;
 
     } catch (error) {
-      console.error('Erreur validation réconciliation:', error);
+      console.error('Erreur validation réconciliation:', error instanceof Error ? error.message : String(error));
       return false;
     }
   }
@@ -390,7 +390,7 @@ class BankReconciliationService {
       return true;
 
     } catch (error) {
-      console.error('Erreur annulation réconciliation:', error);
+      console.error('Erreur annulation réconciliation:', error instanceof Error ? error.message : String(error));
       return false;
     }
   }
@@ -452,7 +452,7 @@ class BankReconciliationService {
       };
 
     } catch (error) {
-      console.error('Erreur calcul résumé réconciliation:', error);
+      console.error('Erreur calcul résumé réconciliation:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
@@ -585,7 +585,7 @@ class BankReconciliationService {
       return data;
 
     } catch (error) {
-      console.error('Erreur création règle réconciliation:', error);
+      console.error('Erreur création règle réconciliation:', error instanceof Error ? error.message : String(error));
       return null;
     }
   }
@@ -600,7 +600,7 @@ class BankReconciliationService {
       return !error;
 
     } catch (error) {
-      console.error('Erreur mise à jour règle réconciliation:', error);
+      console.error('Erreur mise à jour règle réconciliation:', error instanceof Error ? error.message : String(error));
       return false;
     }
   }
@@ -615,7 +615,7 @@ class BankReconciliationService {
       return !error;
 
     } catch (error) {
-      console.error('Erreur suppression règle réconciliation:', error);
+      console.error('Erreur suppression règle réconciliation:', error instanceof Error ? error.message : String(error));
       return false;
     }
   }

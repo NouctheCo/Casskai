@@ -283,7 +283,7 @@ export default function InventoryPage() {
         setShowArticleForm(false);
       }
     } catch (error) {
-      console.error('Error creating inventory item:', error);
+      console.error('Error creating inventory item:', error instanceof Error ? error.message : String(error));
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -315,7 +315,7 @@ export default function InventoryPage() {
         });
       }
     } catch (error) {
-      console.error('Error creating stock movement:', error);
+      console.error('Error creating stock movement:', error instanceof Error ? error.message : String(error));
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -362,7 +362,7 @@ export default function InventoryPage() {
         });
       }
     } catch (error) {
-      console.error('Error creating movement:', error);
+      console.error('Error creating movement:', error instanceof Error ? error.message : String(error));
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -400,7 +400,7 @@ export default function InventoryPage() {
       setSupplierContact('');
       setShowSupplierForm(false);
     } catch (error) {
-      console.error('Error creating supplier:', error);
+      console.error('Error creating supplier:', error instanceof Error ? error.message : String(error));
       toast({
         variant: "destructive",
         title: "Erreur",

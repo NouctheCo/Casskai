@@ -91,7 +91,7 @@ export const enterpriseService = {
 
       return { data: enterprises, error: null };
     } catch (error) {
-      console.error('Error fetching user enterprises:', error);
+      console.error('Error fetching user enterprises:', error instanceof Error ? error.message : String(error));
       return { 
         data: null, 
         error: new Error(handleSupabaseError(error))
@@ -175,7 +175,7 @@ export const enterpriseService = {
 
       return { data: newEnterprise, error: null };
     } catch (error) {
-      console.error('Error creating enterprise:', error);
+      console.error('Error creating enterprise:', error instanceof Error ? error.message : String(error));
       return { 
         data: null, 
         error: new Error(handleSupabaseError(error))
@@ -208,7 +208,7 @@ export const enterpriseService = {
 
       return { success: true, error: null };
     } catch (error) {
-      console.error('Error updating enterprise:', error);
+      console.error('Error updating enterprise:', error instanceof Error ? error.message : String(error));
       return { 
         success: false, 
         error: new Error(handleSupabaseError(error))
@@ -232,7 +232,7 @@ export const enterpriseService = {
 
       return { success: true, error: null };
     } catch (error) {
-      console.error('Error deleting enterprise:', error);
+      console.error('Error deleting enterprise:', error instanceof Error ? error.message : String(error));
       return { 
         success: false, 
         error: new Error(handleSupabaseError(error))
@@ -269,7 +269,7 @@ export const enterpriseService = {
 
       return { success: true, error: null };
     } catch (error) {
-      console.error('Error setting default enterprise:', error);
+      console.error('Error setting default enterprise:', error instanceof Error ? error.message : String(error));
       return { 
         success: false, 
         error: new Error(handleSupabaseError(error))

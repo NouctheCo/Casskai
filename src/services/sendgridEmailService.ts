@@ -71,7 +71,7 @@ export function initializeSendGrid(apiKey: string) {
   }
 
   sgMail.setApiKey(apiKey);
-  console.log('✅ SendGrid initialized');
+  console.warn('✅ SendGrid initialized');
   return true;
 }
 
@@ -91,10 +91,10 @@ export async function sendEmail(template: EmailTemplate): Promise<boolean> {
     };
 
     await sgMail.send(msg);
-    console.log(`📧 Email sent to ${template.to}`);
+    console.warn(`📧 Email sent to ${template.to}`);
     return true;
   } catch (error) {
-    console.error('❌ Email sending failed:', error);
+    console.error('❌ Email sending failed:', error instanceof Error ? error.message : String(error));
     return false;
   }
 }

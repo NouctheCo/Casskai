@@ -3,24 +3,24 @@ import { motion } from 'framer-motion';
 import { 
   TrendingUp, 
   TrendingDown,
-  Activity,
+  Activity as _Activity,
   AlertTriangle,
-  Loader2,
-  Calendar,
-  Table,
-  BarChart3,
-  PieChart,
-  FileText,
+  Loader2 as _Loader2,
+  Calendar as _Calendar,
+  Table as _Table,
+  BarChart3 as _BarChart3,
+  PieChart as _PieChart,
+  FileText as _FileText,
   Image as ImageIcon,
-  ExternalLink,
+  ExternalLink as _ExternalLink,
   Users,
   Bell,
   Zap,
-  Target,
-  Gauge,
-  MapPin,
-  Clock,
-  CheckSquare,
+  Target as _Target,
+  Gauge as _Gauge,
+  MapPin as _MapPin,
+  Clock as _Clock,
+  CheckSquare as _CheckSquare,
   Settings,
   Thermometer
 } from 'lucide-react';
@@ -44,6 +44,111 @@ const LazyCalendar = lazy(() =>
 interface WidgetRendererProps {
   widget: WidgetConfig;
   isPreview?: boolean;
+}
+
+// Types pour les configs de widgets
+interface KPICardConfig {
+  value?: string | number;
+  change?: number;
+  changeType?: 'percentage' | 'absolute';
+  format?: 'number' | 'currency' | 'percentage';
+  target?: number;
+  color?: string;
+}
+
+interface GaugeWidgetConfig {
+  value?: string | number;
+  min?: number;
+  max?: number;
+  unit?: string;
+  color?: string;
+  label?: string;
+}
+
+interface StepItem {
+  label?: string;
+  name?: string;
+  status?: 'completed' | 'current' | 'upcoming';
+}
+
+interface ProgressTrackerConfig {
+  steps?: (StepItem | string)[];
+  currentStep?: number;
+}
+
+interface ActionItem {
+  label?: string;
+  name?: string;
+  icon?: string;
+  onClick?: () => void;
+}
+
+interface QuickActionsConfig {
+  actions?: (ActionItem | string)[];
+}
+
+interface ActivityItem {
+  text?: string;
+  user?: string;
+  action?: string;
+  time?: string;
+  timestamp?: string;
+  type?: string;
+}
+
+interface RecentActivitiesConfig {
+  activities?: ActivityItem[];
+}
+
+interface NotificationItem {
+  message?: string;
+  title?: string;
+  timestamp?: string;
+  type?: 'info' | 'warning' | 'error' | 'success';
+}
+
+interface NotificationCenterConfig {
+  notifications?: NotificationItem[];
+  unreadCount?: number;
+}
+
+interface WeatherData {
+  temperature?: number;
+  location?: string;
+  condition?: string;
+  humidity?: number;
+}
+
+interface WeatherConfig {
+  temperature?: number;
+  location?: string;
+  condition?: string;
+  humidity?: number;
+  weather?: WeatherData;
+}
+
+interface TextWidgetConfig {
+  text?: string;
+  fontSize?: string;
+  fontWeight?: string;
+  textAlign?: 'left' | 'center' | 'right';
+  textWidget?: {
+    content?: string;
+    fontSize?: string | number;
+    textAlign?: string;
+  };
+}
+
+interface ImageWidgetConfig {
+  imageUrl?: string;
+  alt?: string;
+  objectFit?: 'contain' | 'cover' | 'fill';
+  link?: string;
+  imageWidget?: {
+    src?: string;
+    alt?: string;
+    fit?: 'contain' | 'cover' | 'fill';
+  };
 }
 
 // Composant de fallback pour le loading
@@ -75,9 +180,9 @@ const WidgetSkeleton: React.FC<{ type: string }> = ({ type }) => {
 };
 
 // Composant KPI Card
-const KPICard: React.FC<{ config: any }> = ({ config }) => {
+const KPICard: React.FC<{ config: KPICardConfig }> = ({ config }) => {
   const [animatedValue, setAnimatedValue] = useState(0);
-  const value = config.value || 0;
+  const value = typeof config.value === 'number' ? config.value : parseFloat(String(config.value)) || 0;
   const change = config.change || 0;
   const changeType = config.changeType || 'percentage';
   const format = config.format || 'number';
@@ -93,9 +198,9 @@ const KPICard: React.FC<{ config: any }> = ({ config }) => {
   const formatValue = (val: number) => {
     switch (format) {
       case 'currency':
-        return new Intl.NumberFormat('fr-FR', { 
-          style: 'currency', 
-          currency: 'EUR' 
+        return new Intl.NumberFormat('fr-FR', {
+          style: 'currency',
+          currency: 'EUR'
         }).format(val);
       case 'percentage':
         return `${val}%`;
@@ -155,8 +260,8 @@ const KPICard: React.FC<{ config: any }> = ({ config }) => {
 };
 
 // Composant Gauge
-const GaugeWidget: React.FC<{ config: any }> = ({ config }) => {
-  const value = config.value || 0;
+const GaugeWidget: React.FC<{ config: GaugeWidgetConfig }> = ({ config }) => {
+  const value = typeof config.value === 'number' ? config.value : parseFloat(String(config.value)) || 0;
   const min = config.min || 0;
   const max = config.max || 100;
   const unit = config.unit || '';
@@ -211,7 +316,7 @@ const GaugeWidget: React.FC<{ config: any }> = ({ config }) => {
 };
 
 // Composant Progress Tracker
-const ProgressTracker: React.FC<{ config: any }> = ({ config }) => {
+const ProgressTracker: React.FC<{ config: ProgressTrackerConfig }> = ({ config }) => {
   const steps = config.steps || [];
   const currentStep = config.currentStep || 0;
 
@@ -230,7 +335,7 @@ const ProgressTracker: React.FC<{ config: any }> = ({ config }) => {
       />
       
       <div className="space-y-2">
-        {steps.slice(0, 3).map((step: any, index: number) => (
+        {steps.slice(0, 3).map((step, index: number) => (
           <motion.div
             key={index}
             className={cn(
@@ -245,7 +350,7 @@ const ProgressTracker: React.FC<{ config: any }> = ({ config }) => {
               "w-2 h-2 rounded-full",
               index <= currentStep ? 'bg-green-500' : 'bg-gray-300'
             )} />
-            <span className="truncate">{step.name || step}</span>
+            <span className="truncate">{typeof step === 'string' ? step : (step.name || step.label || '')}</span>
           </motion.div>
         ))}
       </div>
@@ -254,12 +359,12 @@ const ProgressTracker: React.FC<{ config: any }> = ({ config }) => {
 };
 
 // Composant Quick Actions
-const QuickActions: React.FC<{ config: any }> = ({ config }) => {
+const QuickActions: React.FC<{ config: QuickActionsConfig }> = ({ config }) => {
   const actions = config.actions || [];
 
   return (
     <div className="grid grid-cols-2 gap-2">
-      {actions.slice(0, 4).map((action: any, index: number) => (
+      {actions.slice(0, 4).map((action, index: number) => (
         <motion.button
           key={index}
           className="p-2 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-sm"
@@ -271,7 +376,7 @@ const QuickActions: React.FC<{ config: any }> = ({ config }) => {
         >
           <div className="flex items-center space-x-2">
             <Zap className="w-4 h-4 text-blue-500" />
-            <span className="truncate">{action.name || action}</span>
+            <span className="truncate">{typeof action === 'string' ? action : (action.name || action.label || '')}</span>
           </div>
         </motion.button>
       ))}
@@ -280,7 +385,7 @@ const QuickActions: React.FC<{ config: any }> = ({ config }) => {
 };
 
 // Composant Recent Activities
-const RecentActivities: React.FC<{ config: any }> = ({ config }) => {
+const RecentActivities: React.FC<{ config: RecentActivitiesConfig }> = ({ config }) => {
   const activities = config.activities || [
     { user: 'Jean Dupont', action: 'a créé une facture', time: '2min' },
     { user: 'Marie Martin', action: 'a modifié un client', time: '5min' },
@@ -289,7 +394,7 @@ const RecentActivities: React.FC<{ config: any }> = ({ config }) => {
 
   return (
     <div className="space-y-3">
-      {activities.slice(0, 3).map((activity: any, index: number) => (
+      {activities.slice(0, 3).map((activity, index: number) => (
         <motion.div
           key={index}
           className="flex items-start space-x-3 text-sm"
@@ -315,7 +420,7 @@ const RecentActivities: React.FC<{ config: any }> = ({ config }) => {
 };
 
 // Composant Notifications
-const NotificationCenter: React.FC<{ config: any }> = ({ config }) => {
+const NotificationCenter: React.FC<{ config: NotificationCenterConfig }> = ({ config }) => {
   const notifications = config.notifications || [
     { type: 'info', title: 'Nouveau client', message: 'Acme Corp ajouté' },
     { type: 'warning', title: 'Facture en retard', message: 'Facture #123 échue' },
@@ -335,7 +440,7 @@ const NotificationCenter: React.FC<{ config: any }> = ({ config }) => {
 
   return (
     <div className="space-y-2">
-      {notifications.slice(0, 3).map((notification: any, index: number) => (
+      {notifications.slice(0, 3).map((notification, index: number) => (
         <motion.div
           key={index}
           className="flex items-start space-x-2 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg"
@@ -359,7 +464,7 @@ const NotificationCenter: React.FC<{ config: any }> = ({ config }) => {
 };
 
 // Composant Weather
-const WeatherWidget: React.FC<{ config: any }> = ({ config }) => {
+const WeatherWidget: React.FC<{ config: WeatherConfig }> = ({ config }) => {
   const weather = config.weather || {
     location: 'Paris',
     temperature: 22,
@@ -394,15 +499,17 @@ const WeatherWidget: React.FC<{ config: any }> = ({ config }) => {
 };
 
 // Composant Text Widget
-const TextWidget: React.FC<{ config: any }> = ({ config }) => {
-  const { content = 'Contenu du widget texte', fontSize = 14, textAlign = 'left' } = config.textWidget || {};
+const TextWidget: React.FC<{ config: TextWidgetConfig }> = ({ config }) => {
+  const content = config.text || config.textWidget?.content || 'Contenu du widget texte';
+  const fontSize = config.fontSize || config.textWidget?.fontSize || '14';
+  const textAlign = config.textAlign || (config.textWidget?.textAlign as 'left' | 'center' | 'right') || 'left';
 
   return (
-    <div 
+    <div
       className="prose prose-sm dark:prose-invert max-w-none"
-      style={{ 
+      style={{
         fontSize: `${fontSize}px`,
-        textAlign: textAlign as any
+        textAlign: textAlign
       }}
       dangerouslySetInnerHTML={{ __html: content }}
     />
@@ -410,8 +517,10 @@ const TextWidget: React.FC<{ config: any }> = ({ config }) => {
 };
 
 // Composant Image Widget
-const ImageWidget: React.FC<{ config: any }> = ({ config }) => {
-  const { src, alt = 'Widget image', fit = 'cover' } = config.imageWidget || {};
+const ImageWidget: React.FC<{ config: ImageWidgetConfig }> = ({ config }) => {
+  const src = config.imageUrl || config.imageWidget?.src;
+  const alt = config.alt || config.imageWidget?.alt || 'Widget image';
+  const fit = config.objectFit || config.imageWidget?.fit || 'cover';
 
   if (!src) {
     return (
@@ -438,7 +547,7 @@ const ImageWidget: React.FC<{ config: any }> = ({ config }) => {
 // Composant principal WidgetRenderer
 export const WidgetRenderer: React.FC<WidgetRendererProps> = ({ 
   widget, 
-  isPreview = false 
+  isPreview: _isPreview = false 
 }) => {
   // Validation des données du widget
   if (!widget || !widget.type) {
@@ -487,23 +596,24 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
         case 'line-chart':
         case 'bar-chart':
         case 'pie-chart':
-        case 'area-chart':
-          const chartConfig = widget.config?.chart as any;
+        case 'area-chart': {
+          const chartConfig = widget.config?.chart as { data?: unknown[]; [key: string]: unknown } | undefined;
           const chartData = chartConfig?.data && Array.isArray(chartConfig.data)
             ? chartConfig.data
             : [];
           return (
             <Suspense fallback={<WidgetSkeleton type="chart" />}>
               <LazyChart
-                type={widget.type.replace('-chart', '') as any}
+                type={widget.type.replace('-chart', '') as 'line' | 'bar' | 'pie' | 'area'}
                 data={chartData}
                 options={widget.config?.chart || {}}
               />
             </Suspense>
           );
+        }
 
-        case 'table':
-          const tableConfig = widget.config?.table as any;
+        case 'table': {
+          const tableConfig = widget.config?.table as { data?: unknown[]; columns?: unknown[]; [key: string]: unknown } | undefined;
           const tableData = tableConfig?.data && Array.isArray(tableConfig.data)
             ? tableConfig.data
             : [];
@@ -518,9 +628,10 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
               />
             </Suspense>
           );
+        }
 
-        case 'calendar':
-          const calendarConfig = widget.config as any;
+        case 'calendar': {
+          const calendarConfig = widget.config as { calendar?: { events?: unknown[] }; [key: string]: unknown } | undefined;
           const calendarEvents = calendarConfig?.calendar?.events && Array.isArray(calendarConfig.calendar.events)
             ? calendarConfig.calendar.events
             : [];
@@ -529,6 +640,7 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
               <LazyCalendar events={calendarEvents} />
             </Suspense>
           );
+        }
         
         // Widgets non implémentés - placeholder
         case 'heatmap':

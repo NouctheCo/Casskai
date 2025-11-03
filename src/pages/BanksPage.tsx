@@ -87,7 +87,7 @@ const processImportedFile = async (file, extension) => {
         return generateFallbackTransactions(file, extension);
     }
   } catch (error) {
-    console.error('Error processing file:', error);
+    console.error('Error processing file:', error instanceof Error ? error.message : String(error));
     return generateFallbackTransactions(file, extension);
   }
 };
@@ -949,7 +949,7 @@ export default function BanksPage() {
       await loadReconciliationMetrics();
       
     } catch (error) {
-      console.error('Failed to load imported data:', error);
+      console.error('Failed to load imported data:', error instanceof Error ? error.message : String(error));
       toast({
         variant: "destructive",
         title: "Erreur de chargement",
@@ -979,7 +979,7 @@ export default function BanksPage() {
 
       setReconciliationMetrics(metrics);
     } catch (error) {
-      console.error('Failed to calculate reconciliation metrics:', error);
+      console.error('Failed to calculate reconciliation metrics:', error instanceof Error ? error.message : String(error));
     } finally {
       setIsLoadingMetrics(false);
     }
@@ -993,7 +993,7 @@ export default function BanksPage() {
       // Ici on pourrait filtrer par compte spécifique si nécessaire
       await loadReconciliationMetrics();
     } catch (error) {
-      console.error('Failed to load transactions:', error);
+      console.error('Failed to load transactions:', error instanceof Error ? error.message : String(error));
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -1051,7 +1051,7 @@ export default function BanksPage() {
       // Recalculer les métriques
       await loadReconciliationMetrics();
     } catch (error) {
-      console.error('File import failed:', error);
+      console.error('File import failed:', error instanceof Error ? error.message : String(error));
       toast({
         variant: "destructive",
         title: "Erreur d'import",
@@ -1082,7 +1082,7 @@ export default function BanksPage() {
       // Recalculer les métriques
       await loadReconciliationMetrics();
     } catch (error) {
-      console.error('Transaction reconciliation failed:', error);
+      console.error('Transaction reconciliation failed:', error instanceof Error ? error.message : String(error));
       toast({
         variant: "destructive",
         title: "Erreur de réconciliation",

@@ -557,7 +557,7 @@ export default function ProjectsPage() {
         setShowProjectForm(false);
       }
     } catch (error) {
-      console.error('Error creating project:', error);
+      console.error('Error creating project:', error instanceof Error ? error.message : String(error));
       toast({
         variant: "destructive",
         title: "Erreur",

@@ -231,7 +231,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
       });
 
     } catch (error) {
-      console.error('Erreur lors de la réconciliation automatique:', error);
+      console.error('Erreur lors de la réconciliation automatique:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur",
         description: "Échec de la réconciliation automatique",
@@ -260,7 +260,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
       ));
 
     } catch (error) {
-      console.error('Erreur lors de la validation:', error);
+      console.error('Erreur lors de la validation:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur",
         description: "Échec de la validation",
@@ -291,7 +291,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
       }
 
     } catch (error) {
-      console.error('Erreur lors de la récupération du résumé:', error);
+      console.error('Erreur lors de la récupération du résumé:', error instanceof Error ? error.message : String(error));
     }
   };
 

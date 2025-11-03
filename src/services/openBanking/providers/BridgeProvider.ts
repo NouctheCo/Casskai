@@ -95,7 +95,7 @@ export class BridgeProvider extends BankingProvider {
     try {
       await this.authenticateClient();
       this.isInitialized = true;
-    } catch (_error) {
+    } catch (error) {
       const error = _error as Error;
       throw new BankingProviderError(
         'INIT_ERROR',
@@ -109,7 +109,7 @@ export class BridgeProvider extends BankingProvider {
     try {
       const response = await this.makeRequest('GET', '/v2/status') as BridgeStatusResponse;
       return response.status === 'ok';
-    } catch (_error) {
+    } catch (error) {
       return false;
     }
   }
@@ -123,7 +123,7 @@ export class BridgeProvider extends BankingProvider {
       }) as BridgeAuthResponse;
 
       this.accessToken = response.access_token;
-    } catch (_error) {
+    } catch (error) {
       throw new AuthenticationError('Failed to authenticate with Bridge API');
     }
   }
@@ -163,7 +163,7 @@ export class BridgeProvider extends BankingProvider {
       };
 
       return this.createResponse(connection);
-    } catch (_error) {
+    } catch (error) {
       return this.handleError(_error);
     }
   }
@@ -195,7 +195,7 @@ export class BridgeProvider extends BankingProvider {
       };
 
       return this.createResponse(connection);
-    } catch (_error) {
+    } catch (error) {
       return this.handleError(_error);
     }
   }
@@ -213,7 +213,7 @@ export class BridgeProvider extends BankingProvider {
       await this.makeRequest('DELETE', `/v2/connect/items/${itemId}`);
       
       return this.createResponse(undefined);
-    } catch (_error) {
+    } catch (error) {
       return this.handleError(_error);
     }
   }
@@ -227,7 +227,7 @@ export class BridgeProvider extends BankingProvider {
 
       // Mettre à jour la connexion avec les nouvelles données
       return await this.getConnection(connectionId);
-    } catch (_error) {
+    } catch (error) {
       return this.handleError(_error);
     }
   }
@@ -253,7 +253,7 @@ export class BridgeProvider extends BankingProvider {
       };
 
       return this.createResponse(authFlow);
-    } catch (_error) {
+    } catch (error) {
       return this.handleError(_error);
     }
   }
@@ -267,7 +267,7 @@ export class BridgeProvider extends BankingProvider {
       // Mettre à jour la connexion avec les tokens
       const connectionId = ''; // À récupérer depuis authFlowId
       return await this.getConnection(connectionId);
-    } catch (_error) {
+    } catch (error) {
       return this.handleError(_error);
     }
   }
@@ -290,7 +290,7 @@ export class BridgeProvider extends BankingProvider {
       };
 
       return this.createResponse(authFlow);
-  } catch (_error) {
+  } catch (error) {
       return this.handleError(_error);
     }
   }
@@ -325,7 +325,7 @@ export class BridgeProvider extends BankingProvider {
       }));
 
       return this.createResponse(accounts);
-  } catch (_error) {
+  } catch (error) {
       return this.handleError(_error);
     }
   }
@@ -355,7 +355,7 @@ export class BridgeProvider extends BankingProvider {
       };
 
       return this.createResponse(account);
-    } catch (_error) {
+    } catch (error) {
       return this.handleError(_error);
     }
   }
@@ -430,7 +430,7 @@ export class BridgeProvider extends BankingProvider {
         transactions,
         nextCursor: response.pagination?.next_uri ? 'next_page' : undefined
       });
-    } catch (_error) {
+    } catch (error) {
       return this.handleError(_error);
     }
   }
@@ -459,7 +459,7 @@ export class BridgeProvider extends BankingProvider {
       };
 
       return this.createResponse(syncResult);
-    } catch (_error) {
+    } catch (error) {
       return this.handleError(_error);
     }
   }
@@ -480,7 +480,7 @@ export class BridgeProvider extends BankingProvider {
       }
 
       return this.createResponse(syncResults);
-  } catch (_error) {
+  } catch (error) {
       return this.handleError(_error);
     }
   }
@@ -497,7 +497,7 @@ export class BridgeProvider extends BankingProvider {
       });
 
       return this.createResponse(undefined);
-    } catch (_error) {
+    } catch (error) {
       return this.handleError(_error);
     }
   }
@@ -507,7 +507,7 @@ export class BridgeProvider extends BankingProvider {
       const webhookId = ''; // À récupérer depuis la DB
       await this.makeRequest('DELETE', `/v2/webhooks/${webhookId}`);
       return this.createResponse(undefined);
-    } catch (_error) {
+    } catch (error) {
       return this.handleError(_error);
     }
   }
@@ -523,11 +523,11 @@ export class BridgeProvider extends BankingProvider {
           // Traiter la mise à jour du compte
           break;
         default:
-          console.log(`Unhandled webhook event: ${event.type}`);
+          console.warn(`Unhandled webhook event: ${event.type}`);
       }
 
       return this.createResponse(undefined);
-  } catch (_error) {
+  } catch (error) {
       return this.handleError(_error);
     }
   }
@@ -563,7 +563,7 @@ export class BridgeProvider extends BankingProvider {
       const itemId = ''; // À récupérer depuis la DB
       await this.makeRequest('POST', `/v2/connect/items/${itemId}/refresh`);
       return this.createResponse(undefined);
-    } catch (_error) {
+    } catch (error) {
       return this.handleError(_error);
     }
   }
@@ -573,7 +573,7 @@ export class BridgeProvider extends BankingProvider {
       const itemId = ''; // À récupérer depuis la DB
       await this.makeRequest('POST', `/v2/connect/items/${itemId}/revoke`);
       return this.createResponse(undefined);
-    } catch (_error) {
+    } catch (error) {
       return this.handleError(_error);
     }
   }
@@ -620,7 +620,7 @@ export class BridgeProvider extends BankingProvider {
       }
 
       return result;
-    } catch (_error) {
+    } catch (error) {
       if (_error instanceof BankingProviderError) {
         throw _error;
       }

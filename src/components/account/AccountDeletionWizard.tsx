@@ -53,7 +53,7 @@ export const AccountDeletionWizard: React.FC<DeletionWizardProps> = ({
         setCurrentStep('export');
       }
     } catch (error) {
-      console.error('Erreur analyse:', error);
+      console.error('Erreur analyse:', error instanceof Error ? error.message : String(error));
     }
   };
 
@@ -88,7 +88,7 @@ export const AccountDeletionWizard: React.FC<DeletionWizardProps> = ({
         setCurrentStep('farewell');
       }
     } catch (error) {
-      console.error('Erreur suppression:', error);
+      console.error('Erreur suppression:', error instanceof Error ? error.message : String(error));
     } finally {
       setProcessing(false);
     }

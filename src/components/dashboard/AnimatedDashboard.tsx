@@ -15,6 +15,15 @@ import {
   Target
 } from 'lucide-react';
 
+interface ChartDataset {
+  label: string;
+  data: number[];
+  backgroundColor?: string | string[];
+  borderColor?: string;
+  borderWidth?: number;
+  fill?: boolean;
+}
+
 interface DashboardData {
   revenue: {
     current: number;
@@ -35,11 +44,11 @@ interface DashboardData {
   chartData: {
     revenue: {
       labels: string[];
-      datasets: any[];
+      datasets: ChartDataset[];
     };
     clients: {
       labels: string[];
-      datasets: any[];
+      datasets: ChartDataset[];
     };
   };
 }
@@ -176,12 +185,12 @@ export const AnimatedDashboard: React.FC<AnimatedDashboardProps> = ({
                       y: {
                         beginAtZero: false,
                         ticks: {
-                          callback(value: any) {
+                          callback(value: string | number) {
                             return new Intl.NumberFormat('fr-FR', {
                               style: 'currency',
                               currency: 'EUR',
                               notation: 'compact'
-                            }).format(value);
+                            }).format(Number(value));
                           }
                         }
                       }

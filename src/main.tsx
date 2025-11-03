@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './i18n/i18n.ts';
 import App from './App.tsx';
 import './index.css';
-import { ConfigProvider } from '@/contexts/ConfigContext';
+import { ConfigProvider } from './contexts/ConfigContext';
 
 // Debug des variables d'environnement au démarrage (uniquement en mode développement)
 if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_MODE === 'true') {

@@ -19,7 +19,7 @@ export class ReconciliationEngine {
     try {
       this.rules = rules.sort((a, b) => a.priority - b.priority);
       this.isInitialized = true;
-      console.log(`Reconciliation engine initialized with ${rules.length} rules`);
+      console.warn(`Reconciliation engine initialized with ${rules.length} rules`);
     } catch (error) {
       throw new Error(`Failed to initialize reconciliation engine: ${error.message}`);
     }
@@ -416,7 +416,7 @@ export class ReconciliationEngine {
     for (const match of matches) {
       if (match.status === 'matched' && match.confidence > 0.8) {
         // En production, mettre à jour la base de données
-        console.log(`Auto-applied match: ${match.id}`);
+        console.warn(`Auto-applied match: ${match.id}`);
       }
     }
   }

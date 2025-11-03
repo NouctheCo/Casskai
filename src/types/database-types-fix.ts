@@ -136,9 +136,9 @@ export interface Database {
         Update: Partial<Account>
       }
       journals: {
-        Row: any
-        Insert: any
-        Update: any
+        Row: Record<string, unknown>
+        Insert: Record<string, unknown>
+        Update: Record<string, unknown>
       }
       journal_entries: {
         Row: JournalEntry
@@ -151,29 +151,29 @@ export interface Database {
         Update: Partial<JournalEntryLine>
       }
       invoices: {
-        Row: any
-        Insert: any
-        Update: any
+        Row: Record<string, unknown>
+        Insert: Record<string, unknown>
+        Update: Record<string, unknown>
       }
       quotes: {
-        Row: any
-        Insert: any
-        Update: any
+        Row: Record<string, unknown>
+        Insert: Record<string, unknown>
+        Update: Record<string, unknown>
       }
       third_parties: {
-        Row: any
-        Insert: any
-        Update: any
+        Row: Record<string, unknown>
+        Insert: Record<string, unknown>
+        Update: Record<string, unknown>
       }
       transactions: {
-        Row: any
-        Insert: any
-        Update: any
+        Row: Record<string, unknown>
+        Insert: Record<string, unknown>
+        Update: Record<string, unknown>
       }
       payments: {
-        Row: any
-        Insert: any
-        Update: any
+        Row: Record<string, unknown>
+        Insert: Record<string, unknown>
+        Update: Record<string, unknown>
       }
       user_companies: {
         Row: UserCompany

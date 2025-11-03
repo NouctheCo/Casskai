@@ -26,7 +26,7 @@ export class ArchiveService {
     xml_url: string;
   }> {
     try {
-      console.log(`📁 Archiving documents for ${documentId}`);
+      console.warn(`📁 Archiving documents for ${documentId}`);
 
       // Generate file paths with timestamps for versioning
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -66,7 +66,7 @@ export class ArchiveService {
         archived_at: new Date().toISOString()
       });
 
-      console.log(`✅ Documents archived successfully for ${documentId}`);
+      console.warn(`✅ Documents archived successfully for ${documentId}`);
 
       return {
         pdf_url: pdfUrl,
@@ -100,7 +100,7 @@ export class ArchiveService {
     metadata: any;
   }> {
     try {
-      console.log(`📥 Retrieving ${type.toUpperCase()} document for ${documentId}${version ? ` (version: ${version})` : ''}`);
+      console.warn(`📥 Retrieving ${type.toUpperCase()} document for ${documentId}${version ? ` (version: ${version})` : ''}`);
 
       // Find the document path
       const path = await this.findDocumentPath(documentId, type, version);
@@ -144,7 +144,7 @@ export class ArchiveService {
         file_size: content.length
       });
 
-      console.log(`✅ Document retrieved successfully: ${documentId} (${type})`);
+      console.warn(`✅ Document retrieved successfully: ${documentId} (${type})`);
 
       return {
         content,
@@ -182,7 +182,7 @@ export class ArchiveService {
     version: string;
   }>> {
     try {
-      console.log(`📋 Listing document versions for ${documentId}`);
+      console.warn(`📋 Listing document versions for ${documentId}`);
 
       const { data, error } = await supabase.storage
         .from(this.BUCKET_NAME)
@@ -255,7 +255,7 @@ export class ArchiveService {
         }
       }
 
-      console.log(`📋 Found ${versions.length} document versions for ${documentId}`);
+      console.warn(`📋 Found ${versions.length} document versions for ${documentId}`);
       return versions;
 
     } catch (error) {
@@ -281,7 +281,7 @@ export class ArchiveService {
     errors: string[];
   }> {
     try {
-      console.log(`🧹 Starting cleanup of expired documents (older than ${this.RETENTION_YEARS} years)`);
+      console.warn(`🧹 Starting cleanup of expired documents (older than ${this.RETENTION_YEARS} years)`);
 
       const cutoffDate = new Date();
       cutoffDate.setFullYear(cutoffDate.getFullYear() - this.RETENTION_YEARS);
@@ -311,7 +311,7 @@ export class ArchiveService {
         }
       }
 
-      console.log(`🗑️ Found ${expiredDocuments.length} expired documents to delete`);
+      console.warn(`🗑️ Found ${expiredDocuments.length} expired documents to delete`);
 
       // Delete expired documents
       let deletedCount = 0;
@@ -338,7 +338,7 @@ export class ArchiveService {
         }
       }
 
-      console.log(`✅ Cleanup complete: ${deletedCount} documents deleted, ${errors.length} errors`);
+      console.warn(`✅ Cleanup complete: ${deletedCount} documents deleted, ${errors.length} errors`);
 
       return {
         deleted_count: deletedCount,
@@ -366,7 +366,7 @@ export class ArchiveService {
     newest_document: string;
   }> {
     try {
-      console.log('📊 Calculating archive statistics');
+      console.warn('📊 Calculating archive statistics');
 
       const { data, error } = await supabase.storage
         .from(this.BUCKET_NAME)
@@ -406,7 +406,7 @@ export class ArchiveService {
         }
       }
 
-      console.log('📊 Archive statistics calculated:', stats);
+      console.warn('📊 Archive statistics calculated:', stats);
       return stats;
 
     } catch (error) {

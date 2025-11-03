@@ -22,26 +22,33 @@ export const HomePage: React.FC = () => {
 
   const hasLocalCompany = localStorage.getItem('casskai_current_enterprise');
 
-  console.log('🏠 HomePage Debug:', {
-    userId: user?.id,
-    onboardingCompleted,
-    hasCurrentCompany: !!currentCompany,
-    currentCompanyId: currentCompany?.id,
-    hasLocalCompany: !!hasLocalCompany,
-    userMetadata: user?.user_metadata
-  });
+  // Debug onboarding flow
+  if (import.meta.env.DEV) {
+    console.warn('🏠 HomePage Debug:', {
+      userId: user?.id,
+      onboardingCompleted,
+      hasCurrentCompany: !!currentCompany,
+      currentCompanyId: currentCompany?.id,
+      hasLocalCompany: !!hasLocalCompany,
+      userMetadata: user?.user_metadata
+    });
+  }
 
   // Si l'utilisateur est connecté mais l'onboarding n'est pas complété
   // ET qu'il n'y a pas de company dans Supabase ET pas d'entreprise locale
   if (user && !onboardingCompleted && !currentCompany && !hasLocalCompany) {
-    console.log('🎯 HomePage: Redirecting to onboarding');
+    if (import.meta.env.DEV) {
+      console.warn('🎯 HomePage: Redirecting to onboarding');
+    }
     return <Navigate to="/onboarding" replace />;
   }
 
   // Si l'onboarding est marqué comme complété mais que currentCompany n'est pas encore chargé,
   // afficher un état de chargement pour éviter la redirection prématurée vers le dashboard
   if (user && onboardingCompleted && !currentCompany && !hasLocalCompany) {
-    console.log('⏳ HomePage: Onboarding completed but waiting for company data');
+    if (import.meta.env.DEV) {
+      console.warn('⏳ HomePage: Onboarding completed but waiting for company data');
+    }
     return <LoadingFallback message="Chargement des données de l'entreprise..." />;
   }
 

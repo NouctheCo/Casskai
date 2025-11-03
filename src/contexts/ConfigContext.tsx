@@ -64,7 +64,7 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setConfig(DEFAULT_CONFIG);
         localStorage.setItem('casskai_config', JSON.stringify(DEFAULT_CONFIG));
       }
-    } catch (err) {
+    } catch (error) {
       console.error('❌ Erreur lors du chargement de la configuration:', err);
       setError('Erreur lors du chargement de la configuration');
       setConfig(DEFAULT_CONFIG);

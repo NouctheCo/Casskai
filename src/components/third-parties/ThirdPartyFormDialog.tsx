@@ -106,7 +106,7 @@ export function ThirdPartyFormDialog({
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Error creating third party:', error);
+      console.error('Error creating third party:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',
         description: 'Impossible de créer le tiers',

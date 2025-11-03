@@ -52,14 +52,14 @@ export interface ReportParameters {
   dateTo: Date;
   companyId: string;
   currency?: string;
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
   groupBy?: string[];
   includeComparisons?: boolean;
   previousPeriod?: boolean;
 }
 
 export interface ReportResult {
-  data: any;
+  data: Record<string, unknown>;
   metadata: {
     generatedAt: Date;
     dataPoints: number;

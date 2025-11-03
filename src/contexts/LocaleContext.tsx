@@ -55,7 +55,7 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
         document.documentElement.lang = locale;
         console.log('✅ Langue initialisée:', locale);
       } catch (error) {
-        console.error('Error initializing language:', error);
+        console.error('Error initializing language:', error instanceof Error ? error.message : String(error));
         setLoadingLocale(false);
       }
     };
@@ -106,7 +106,7 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
 
       return translation || currentDefaultValue;
     } catch (error) {
-      console.error(`Error translating key '${key}':`, error);
+      console.error(`Error translating key '${key}':`, error instanceof Error ? error.message : String(error));
       return currentDefaultValue;
     }
   };

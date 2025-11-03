@@ -56,12 +56,12 @@ export function useFormValidation<T extends FieldValues = FieldValues>(
   const [isValidating, setIsValidating] = useState<Record<string, boolean>>({});
   
   // Debounced validators par champ
-  const debouncedValidators = useRef<Record<string, any>>({});
+  const debouncedValidators = useRef<Record<string, (value: unknown, callback: (result: ValidationResult) => void) => void>>({});
   
   /**
    * Valide un champ spécifique
    */
-  const validateField = useCallback(async (fieldName: Path<T>, value: any) => {
+  const validateField = useCallback(async (fieldName: Path<T>, value: unknown) => {
     setIsValidating(prev => ({ ...prev, [fieldName]: true }));
     
     try {
@@ -137,7 +137,7 @@ export function useFormValidation<T extends FieldValues = FieldValues>(
       debouncedValidators.current[fieldName] = validator.createDebouncedValidator(fieldName);
     }
     
-    return (value: any) => {
+    return (value: unknown) => {
       debouncedValidators.current[fieldName](value, (result: ValidationResult) => {
         setValidationErrors(prev => ({
           ...prev,
@@ -203,9 +203,9 @@ export function useFormValidation<T extends FieldValues = FieldValues>(
 export function useInputHelpers<T extends FieldValues = FieldValues, K extends Path<T> = Path<T>>(
   fieldName: K,
   options?: {
-    formatter?: (value: any) => string;
-    parser?: (value: string) => any;
-    transformer?: (value: any) => any;
+    formatter?: (value: unknown) => string;
+    parser?: (value: string) => unknown;
+    transformer?: (value: unknown) => unknown;
     validateOnChange?: boolean;
     validateOnBlur?: boolean;
     debounceMs?: number;
@@ -234,7 +234,7 @@ export function useInputHelpers<T extends FieldValues = FieldValues, K extends P
   /**
    * Gestionnaire de changement de valeur
    */
-  const handleChange = useCallback((newValue: any) => {
+  const handleChange = useCallback((newValue: unknown) => {
     // Parse la valeur si un parser est fourni
     const parsedValue = options?.parser ? options.parser(newValue) : newValue;
     
@@ -314,12 +314,12 @@ export function useRealtimeValidation<T extends FieldValues = FieldValues>(
         // Debounce
         setTimeout(() => {
           if (Date.now() - lastValidation[name] >= debounceMs) {
-            validateField(name as Path<T>, (data as any)[name as keyof T]);
+            validateField(name as Path<T>, data[name as keyof T]);
             setLastValidation(prev => ({ ...prev, [name]: Date.now() }));
           }
         }, debounceMs);
       } else {
-        validateField(name as Path<T>, (data as any)[name as keyof T]);
+        validateField(name as Path<T>, data[name as keyof T]);
         setLastValidation(prev => ({ ...prev, [name]: now }));
       }
     });
@@ -343,7 +343,7 @@ export function useCurrencyInput<T extends FieldValues = FieldValues>(
   return useInputHelpers(fieldName, {
     formatter: (value: number) => Formatters.currency(value, currency, locale),
     parser: (value: string) => Parsers.currency(value),
-    transformer: (value: any) => typeof value === 'string' ? Parsers.currency(value) : value
+    transformer: (value: unknown) => typeof value === 'string' ? Parsers.currency(value) : value
   });
 }
 
@@ -357,7 +357,7 @@ export function useDateInput<T extends FieldValues = FieldValues>(
   return useInputHelpers(fieldName, {
     formatter: (value: Date) => value instanceof Date ? Formatters.date(value, locale) : String(value),
     parser: (value: string) => Parsers.date(value),
-    transformer: (value: any) => value instanceof Date ? value : Parsers.date(String(value))
+    transformer: (value: unknown) => value instanceof Date ? value : Parsers.date(String(value))
   });
 }
 
@@ -370,7 +370,7 @@ export function usePhoneInput<T extends FieldValues = FieldValues>(
   return useInputHelpers(fieldName, {
     formatter: (value: string) => Formatters.phone(value),
     parser: (value: string) => Parsers.phone(value),
-    transformer: (value: any) => Parsers.phone(String(value || ''))
+    transformer: (value: unknown) => Parsers.phone(String(value || ''))
   });
 }
 
@@ -384,7 +384,7 @@ export function usePercentageInput<T extends FieldValues = FieldValues>(
   return useInputHelpers(fieldName, {
     formatter: (value: number) => Formatters.percentage(value, locale),
     parser: (value: string) => Parsers.percentage(value),
-    transformer: (value: any) => typeof value === 'string' ? Parsers.percentage(value) : value
+    transformer: (value: unknown) => typeof value === 'string' ? Parsers.percentage(value) : value
   });
 }
 
@@ -397,7 +397,7 @@ export function useSiretInput<T extends FieldValues = FieldValues>(
   return useInputHelpers(fieldName, {
     formatter: (value: string) => Formatters.siret(value),
     parser: (value: string) => Parsers.siret(value),
-    transformer: (value: any) => Parsers.siret(String(value || ''))
+    transformer: (value: unknown) => Parsers.siret(String(value || ''))
   });
 }
 
@@ -481,7 +481,7 @@ export function useFormPersistence<T extends FieldValues = FieldValues>(
               acc[fieldName] = data[fieldName];
             }
             return acc;
-          }, {} as any);
+          }, {} as Record<string, unknown>);
           
           const transformedData = transformForApi(filteredData);
           storage.setItem(key, JSON.stringify(transformedData));

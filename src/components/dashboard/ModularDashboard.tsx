@@ -30,7 +30,7 @@ import {
 } from '../ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { cn } from '../../lib/utils';
-import { WidgetConfig, WidgetLayout, WIDGET_SIZE_MAP, DEFAULT_BREAKPOINTS, DEFAULT_COLS } from '../../types/dashboard.types';
+import { WidgetConfig, WidgetLayout, WidgetLibraryItem, WIDGET_SIZE_MAP, DEFAULT_BREAKPOINTS, DEFAULT_COLS } from '../../types/dashboard.types';
 
 // Import CSS pour react-grid-layout
 import 'react-grid-layout/css/styles.css';
@@ -70,7 +70,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
   const [showWidgetLibrary, setShowWidgetLibrary] = useState(false);
   const [selectedWidget, setSelectedWidget] = useState<string | null>(null);
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
-  const gridRef = useRef<any>(null);
+  const gridRef = useRef<typeof ResponsiveGridLayout | null>(null);
 
   // Configuration responsive pour react-grid-layout
   const breakpoints = DEFAULT_BREAKPOINTS;
@@ -185,7 +185,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
   }, [isEditing, currentDashboard, updateLayout, compactLayout]);
 
   // Gestionnaire d'ajout de widget depuis la bibliothèque
-  const handleAddWidget = useCallback(async (libraryItem: any) => {
+  const handleAddWidget = useCallback(async (libraryItem: WidgetLibraryItem) => {
     if (!currentDashboard) return;
 
     const size = WIDGET_SIZE_MAP[libraryItem.defaultSize] || WIDGET_SIZE_MAP.medium;
@@ -529,7 +529,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
           onLayoutChange={handleLayoutChange}
           onDragStart={handleDragStart}
           onDragStop={handleDragStop}
-          onResizeStop={handleLayoutChange as any}
+          onResizeStop={handleLayoutChange}
         >
           {widgets.filter(widget => widget && widget.id).map(widget => {
             const layout = currentDashboard.layout.find(l => l.i && widget.id && String(l.i) === String(widget.id));

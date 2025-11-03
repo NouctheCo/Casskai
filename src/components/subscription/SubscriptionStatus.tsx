@@ -59,7 +59,7 @@ const SubscriptionStatus: React.FC = () => {
           storage: storageData
         });
       } catch (error) {
-        console.error('Error fetching usage limits:', error);
+        console.error('Error fetching usage limits:', error instanceof Error ? error.message : String(error));
       }
     };
 

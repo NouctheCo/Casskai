@@ -154,9 +154,10 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
           prev.map(msg => msg.isLoading ? errorMessage : msg)
         );
       }
-    } catch (_error) {
-      console.error('Error processing message:', error);
-      
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error('Error processing message:', errorMsg);
+
       const errorMessage: ChatMessage = {
         id: crypto.randomUUID(),
         type: 'assistant',

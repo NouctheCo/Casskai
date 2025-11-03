@@ -6,7 +6,7 @@ import {
   WidgetLayout,
   RealtimeEvent,
   CollaborationState,
-  DashboardSettings,
+  DashboardSettings as _DashboardSettings,
   NotificationSettings,
   DashboardTemplate
 } from '../types/dashboard.types';
@@ -88,7 +88,7 @@ function dashboardReducer(state: DashboardState, action: DashboardAction): Dashb
     case 'SET_DASHBOARDS':
       return { ...state, dashboards: action.payload };
     
-    case 'UPDATE_DASHBOARD':
+    case 'UPDATE_DASHBOARD': {
       if (!state.currentDashboard) return state;
       const updatedDashboard = { ...state.currentDashboard, ...action.payload };
       return {
@@ -98,6 +98,7 @@ function dashboardReducer(state: DashboardState, action: DashboardAction): Dashb
           d.id === updatedDashboard.id ? updatedDashboard : d
         )
       };
+    }
     
     case 'SET_WIDGETS':
       return { ...state, widgets: action.payload };
@@ -214,7 +215,7 @@ const DashboardContext = createContext<DashboardContextType | null>(null);
 
 export function DashboardProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(dashboardReducer, initialState);
-  const realtimeChannel = React.useRef<any>(null);
+  const realtimeChannel = React.useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   // Load initial data
   useEffect(() => {
@@ -403,9 +404,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       isDefault: false
     };
 
-    delete (duplicatedConfig as any).id;
-    delete (duplicatedConfig as any).createdAt;
-    delete (duplicatedConfig as any).updatedAt;
+    delete (duplicatedConfig as Record<string, unknown>).id;
+    delete (duplicatedConfig as Record<string, unknown>).createdAt;
+    delete (duplicatedConfig as Record<string, unknown>).updatedAt;
 
     return await createDashboard(duplicatedConfig);
   };
@@ -475,8 +476,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'UPDATE_LAYOUT', payload: layout });
     
     // Debounce the database update
-    clearTimeout((updateLayout as any).timeoutId);
-    (updateLayout as any).timeoutId = setTimeout(async () => {
+    clearTimeout((updateLayout as typeof updateLayout & { timeoutId?: NodeJS.Timeout }).timeoutId);
+    (updateLayout as typeof updateLayout & { timeoutId?: NodeJS.Timeout }).timeoutId = setTimeout(async () => {
       try {
         await updateDashboard({ layout });
       } catch (error) {
@@ -586,16 +587,19 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       .channel(`dashboard-${state.currentDashboard.id}`)
       .on('presence', { event: 'sync' }, () => {
         const presenceState = realtimeChannel.current.presenceState();
-        const collaborators = Object.entries(presenceState).map(([userId, presence]: [string, any]) => ({
+        const collaborators = Object.entries(presenceState).map(([userId, presence]: [string, unknown[]]) => ({
           userId,
-          ...presence[0]
+          userName: (presence[0] as Record<string, unknown>)?.userName as string || 'Anonymous',
+          avatar: (presence[0] as Record<string, unknown>)?.avatar as string | undefined
         }));
         dispatch({ type: 'SET_COLLABORATORS', payload: collaborators });
       })
-      .on('broadcast', { event: 'dashboard-update' }, (payload) => {
-        dispatch({ type: 'ADD_REALTIME_EVENT', payload: payload.event as any });
+      .on('broadcast', { event: 'dashboard-update' }, (payload: { event: unknown }) => {
+        if (payload.event && typeof payload.event === 'object') {
+          dispatch({ type: 'ADD_REALTIME_EVENT', payload: payload.event as RealtimeEvent });
+        }
       })
-      .subscribe((status) => {
+      .subscribe((status: string) => {
         dispatch({ type: 'SET_CONNECTION_STATUS', payload: status === 'SUBSCRIBED' });
       });
   };

@@ -103,7 +103,7 @@ const handleAPIResponse = (apiCall: (req: any, res: Response) => Promise<APIResp
       const statusCode = result.success ? 200 : 400;
       res.status(statusCode).json(result);
     } catch (error) {
-      console.error('API route error:', error);
+      console.error('API route error:', error instanceof Error ? error.message : String(error));
       res.status(500).json({
         success: false,
         error: 'Internal server error',

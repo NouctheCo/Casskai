@@ -239,7 +239,7 @@ const ModuleManager: React.FC = () => {
           activeModulesFromStorage = JSON.parse(savedModules);
           console.warn('[ModuleManager] Modules chargés depuis localStorage:', activeModulesFromStorage);
         } catch (error) {
-          console.error('[ModuleManager] Erreur parsing localStorage modules:', error);
+          console.error('[ModuleManager] Erreur parsing localStorage modules:', error instanceof Error ? error.message : String(error));
         }
       }
 
@@ -258,7 +258,7 @@ const ModuleManager: React.FC = () => {
       
       setModules(updatedModules);
     } catch (error) {
-      console.error('Erreur de chargement des modules:', error);
+      console.error('Erreur de chargement des modules:', error instanceof Error ? error.message : String(error));
     } finally {
       setIsLoading(false);
     }
@@ -326,7 +326,7 @@ const ModuleManager: React.FC = () => {
         try {
           activeModulesFromStorage = JSON.parse(savedModules);
         } catch (error) {
-          console.error('[ModuleManager] Erreur parsing localStorage modules:', error);
+          console.error('[ModuleManager] Erreur parsing localStorage modules:', error instanceof Error ? error.message : String(error));
         }
       }
 
@@ -344,7 +344,7 @@ const ModuleManager: React.FC = () => {
       });
 
     } catch (error) {
-      console.error('Erreur lors de l\'activation:', error);
+      console.error('Erreur lors de l\'activation:', error instanceof Error ? error.message : String(error));
       
       setActivationStatuses(prev => new Map(prev.set(moduleId, {
         moduleId,

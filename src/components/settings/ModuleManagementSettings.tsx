@@ -104,7 +104,7 @@ export function ModuleManagementSettings() {
             }
             return { moduleKey, success: true };
           } catch (error) {
-            console.error(`❌ Erreur module ${moduleKey}:`, error);
+            console.error(`❌ Erreur module ${moduleKey}:`, error instanceof Error ? error.message : String(error));
             return { moduleKey, success: false, error };
           }
         })
@@ -163,7 +163,7 @@ export function ModuleManagementSettings() {
       });
 
     } catch (error) {
-      console.error('❌ Erreur globale sauvegarde modules:', error);
+      console.error('❌ Erreur globale sauvegarde modules:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',
         description: 'Impossible de sauvegarder les modifications',

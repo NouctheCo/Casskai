@@ -52,7 +52,7 @@ export class InboundService {
     let queueId: string | null = null;
     
     try {
-      console.log(`📥 Processing inbound invoice for company ${companyId}`);
+      console.warn(`📥 Processing inbound invoice for company ${companyId}`);
 
       // Create queue entry
       queueId = await this.createQueueEntry(
@@ -123,7 +123,7 @@ export class InboundService {
         creationResult.invoice_id
       );
 
-      console.log(`✅ Inbound invoice processed successfully: ${creationResult.invoice_id}`);
+      console.warn(`✅ Inbound invoice processed successfully: ${creationResult.invoice_id}`);
 
       return {
         queue_id: queueId,
@@ -233,7 +233,7 @@ export class InboundService {
     errors?: string[];
   }> {
     try {
-      console.log(`🔄 Retrying processing for queue item ${queueId}`);
+      console.warn(`🔄 Retrying processing for queue item ${queueId}`);
 
       // Get queue item
       const queueItem = await this.getQueueStatus(queueId);

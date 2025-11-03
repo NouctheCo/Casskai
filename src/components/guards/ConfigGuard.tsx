@@ -27,7 +27,7 @@ const ConfigGuard: React.FC<ConfigGuardProps> = ({ children, fallback }) => {
       // Recharger la configuration
       window.location.reload();
     } catch (error) {
-      console.error('Erreur lors du retry:', error);
+      console.error('Erreur lors du retry:', error instanceof Error ? error.message : String(error));
     } finally {
       setIsRetrying(false);
     }

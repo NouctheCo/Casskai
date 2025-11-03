@@ -60,7 +60,7 @@ const fixUserCompanies = async () => {
       console.log('🔧 Supabase client créé via CDN');
 
       // Test basique
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('user_companies')
         .select('id')
         .limit(1);

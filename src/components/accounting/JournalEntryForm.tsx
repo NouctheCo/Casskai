@@ -30,8 +30,9 @@ import type {
   JournalEntryFormInitialValues,
   JournalEntryFormValues,
   JournalEntryLineForm,
+  MinimalJournal,
+  MinimalAccount,
 } from '@/types/journalEntries.types';
-import type { MinimalJournal, MinimalAccount } from '@/types/journalEntries.types';
 import { cn } from '@/lib/utils';
 
 const DEFAULT_CURRENCY = 'EUR';
@@ -156,7 +157,7 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
   const { control, handleSubmit, reset, watch, setValue } = form;
   const { fields, append, remove, replace } = useFieldArray({ control, name: 'items' });
 
-  const watchedItems = watch('items') ?? [];
+  const watchedItems = useMemo(() => watch('items') ?? [], [watch]);
 
   const totals = useMemo(() => {
     return watchedItems.reduce(

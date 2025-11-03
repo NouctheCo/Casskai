@@ -135,7 +135,7 @@ export const EnhancedReportsPage: React.FC = () => {
     try {
       await generateReport(report.metadata.id, parameters);
       setShowGenerationModal(false);
-    } catch (err) {
+    } catch (error) {
       console.error('Failed to generate report:', err);
     }
   };
@@ -152,7 +152,7 @@ export const EnhancedReportsPage: React.FC = () => {
     try {
       const estimation = await estimateGeneration(report.metadata.id, parameters);
       console.log('Generation estimate:', estimation);
-    } catch (err) {
+    } catch (error) {
       console.error('Failed to estimate generation:', err);
     }
   };

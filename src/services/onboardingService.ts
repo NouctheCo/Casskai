@@ -116,7 +116,8 @@ class OnboardingService {
         data: initialData
       };
     } catch (error) {
-      console.error('Error initializing onboarding:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Error initializing onboarding:', errorMessage);
       return {
         success: false,
         error: this.formatError(error, 'Initialisation de l\'onboarding')
@@ -156,7 +157,7 @@ class OnboardingService {
         error: 'Aucune session d\'onboarding trouvée'
       };
     } catch (error) {
-      console.error('Error getting onboarding data:', error);
+      console.error('Error getting onboarding data:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: this.formatError(error, 'Récupération des données d\'onboarding')
@@ -224,7 +225,7 @@ class OnboardingService {
         data: updatedData
       };
     } catch (error) {
-      console.error('Error updating company profile:', error);
+      console.error('Error updating company profile:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: this.formatError(error, 'Mise à jour du profil entreprise')
@@ -277,7 +278,7 @@ class OnboardingService {
         data: updatedData
       };
     } catch (error) {
-      console.error('Error updating preferences:', error);
+      console.error('Error updating preferences:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: this.formatError(error, 'Mise à jour des préférences')
@@ -341,7 +342,7 @@ class OnboardingService {
         data: updatedData
       };
     } catch (error) {
-      console.error('Error completing step:', error);
+      console.error('Error completing step:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: this.formatError(error, 'Complétion de l\'\u00e9tape')
@@ -407,7 +408,7 @@ class OnboardingService {
         }
       };
     } catch (error) {
-      console.error('Error completing onboarding:', error);
+      console.error('Error completing onboarding:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         error: this.formatError(error, 'Finalisation de l\'onboarding')
@@ -962,7 +963,7 @@ class OnboardingService {
         createdAt: new Date().toISOString()
       };
 
-      console.log('Entreprise créée:', companyData);
+      console.warn('Entreprise créée:', companyData);
       
       return {
         success: true,

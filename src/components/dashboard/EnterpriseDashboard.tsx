@@ -1,24 +1,24 @@
 // Dashboard Enterprise Exceptionnel pour CassKai
 import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence as _AnimatePresence } from 'framer-motion';
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  ComposedChart, ReferenceLine
+  ComposedChart, ReferenceLine as _ReferenceLine
 } from 'recharts';
 import {
-  TrendingUp, TrendingDown, DollarSign, Users, Target, AlertTriangle,
-  ArrowUpRight, ArrowDownRight, Zap, Eye, RefreshCw, Download, Filter,
-  Calendar, BarChart3, PieChart as PieChartIcon, Activity, Sparkles,
-  Shield, Gauge, Clock, AlertCircle, CheckCircle2,
-  Building, CreditCard, Banknote, Receipt, Package, UserCheck, Settings
+  TrendingUp, TrendingDown as _TrendingDown, DollarSign, Users, Target, AlertTriangle,
+  ArrowUpRight, ArrowDownRight, Zap as _Zap, Eye, RefreshCw, Download, Filter as _Filter,
+  Calendar as _Calendar, BarChart3, PieChart as _PieChartIcon, Activity, Sparkles,
+  Shield, Gauge as _Gauge, Clock, AlertCircle, CheckCircle2,
+  Building, CreditCard, Banknote, Receipt, Package, UserCheck, Settings as _Settings
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs as _Tabs, TabsContent as _TabsContent, TabsList as _TabsList, TabsTrigger as _TabsTrigger } from '@/components/ui/tabs';
 import { useEnterprise } from '@/contexts/EnterpriseContext';
 import { enterpriseDashboardService } from '@/services/enterpriseDashboardService';
 import type {
@@ -292,7 +292,7 @@ const EnterpriseChart: React.FC<{
           </BarChart>
         );
 
-      case 'pie':
+      case 'pie': {
         const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#EC4899', '#84CC16'];
         return (
           <PieChart>
@@ -321,6 +321,7 @@ const EnterpriseChart: React.FC<{
             <Legend />
           </PieChart>
         );
+      }
 
       case 'combo':
         return (
@@ -452,7 +453,7 @@ const EnterpriseChart: React.FC<{
         </CardHeader>
 
         <CardContent>
-          <div style={{ height: 400 }}>
+          <div className="h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               {renderChart()}
             </ResponsiveContainer>
@@ -652,7 +653,7 @@ export const EnterpriseDashboard: React.FC = () => {
       const unsubscribe = enterpriseDashboardService.subscribeToRealTimeUpdates(
         currentEnterprise.id,
         (update: RealTimeUpdate) => {
-          console.log('Real-time update received:', update);
+          console.warn('Real-time update received:', update);
           // Recharger les données ou mettre à jour spécifiquement
           if (update.type === 'data_refresh') {
             loadDashboardData();
@@ -727,7 +728,7 @@ export const EnterpriseDashboard: React.FC = () => {
         <div className="flex items-center space-x-3">
           <Select
             value={filter.period}
-            onValueChange={(value) => setFilter(prev => ({ ...prev, period: value as any }))}
+            onValueChange={(value) => setFilter(prev => ({ ...prev, period: value as DashboardFilter['period'] }))}
           >
             <SelectTrigger className="w-40">
               <SelectValue />
@@ -744,7 +745,7 @@ export const EnterpriseDashboard: React.FC = () => {
 
           <Select
             value={filter.comparison}
-            onValueChange={(value) => setFilter(prev => ({ ...prev, comparison: value as any }))}
+            onValueChange={(value) => setFilter(prev => ({ ...prev, comparison: value as DashboardFilter['comparison'] }))}
           >
             <SelectTrigger className="w-48">
               <SelectValue />
@@ -827,7 +828,7 @@ export const EnterpriseDashboard: React.FC = () => {
       >
         {isLoading ? (
           Array.from({ length: 8 }).map((_, i) => (
-            <EnterpriseKPICard key={i} metric={{} as any} isLoading={true} />
+            <EnterpriseKPICard key={i} metric={{} as DashboardMetric} isLoading={true} />
           ))
         ) : (
           dashboardData?.key_metrics?.map((metric) => (
@@ -842,7 +843,7 @@ export const EnterpriseDashboard: React.FC = () => {
         <div className="lg:col-span-2 space-y-6">
           {isLoading ? (
             Array.from({ length: 2 }).map((_, i) => (
-              <EnterpriseChart key={i} chart={{} as any} isLoading={true} />
+              <EnterpriseChart key={i} chart={{} as DashboardChart} isLoading={true} />
             ))
           ) : (
             dashboardData?.charts?.map((chart) => (
@@ -854,7 +855,7 @@ export const EnterpriseDashboard: React.FC = () => {
         {/* Santé Financière */}
         <div className="space-y-6">
           <FinancialHealthCard
-            healthScore={dashboardData?.financial_health || {} as any}
+            healthScore={dashboardData?.financial_health || {} as FinancialHealthScore}
             isLoading={isLoading}
           />
 

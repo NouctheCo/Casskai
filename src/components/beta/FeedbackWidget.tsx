@@ -56,7 +56,7 @@ export function FeedbackWidget({ className }: FeedbackWidgetProps) {
       setFeedbackType(null);
       setIsOpen(false);
     } catch (error) {
-      console.error('Error submitting feedback:', error);
+      console.error('Error submitting feedback:', error instanceof Error ? error.message : String(error));
       toast.error('Erreur lors de l\'envoi du feedback');
     } finally {
       setIsSubmitting(false);

@@ -21,7 +21,7 @@ const LanguageSwitcher = ({ className = "" }) => {
     try {
       await changeLanguageAndDetectCountry(langCode);
     } catch (error) {
-      console.error('Erreur changement de langue:', error);
+      console.error('Erreur changement de langue:', error instanceof Error ? error.message : String(error));
     }
   };
 
@@ -643,7 +643,7 @@ const UniversalSetupWizard = () => {
       console.log('Configuration finale:', config);
       alert(t('setup.installation.completed'));
     } catch (error) {
-      console.error('Erreur lors de l\'installation:', error);
+      console.error('Erreur lors de l\'installation:', error instanceof Error ? error.message : String(error));
       alert(t('setup.installation.error'));
     }
   };

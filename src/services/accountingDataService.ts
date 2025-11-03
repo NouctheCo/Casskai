@@ -88,7 +88,7 @@ export class AccountingDataService {
       // Simulation de données pour le développement
       return this.generateMockTransactions(companyId, startDate, endDate);
     } catch (error) {
-      console.error('Erreur lors de la récupération des transactions:', error);
+      console.error('Erreur lors de la récupération des transactions:', error instanceof Error ? error.message : String(error));
       return [];
     }
   }
@@ -152,7 +152,7 @@ export class AccountingDataService {
       // TODO: Remplacer par l'appel réel à Supabase
       return this.getDefaultChartOfAccounts();
     } catch (error) {
-      console.error('Erreur lors de la récupération du plan comptable:', error);
+      console.error('Erreur lors de la récupération du plan comptable:', error instanceof Error ? error.message : String(error));
       return this.getDefaultChartOfAccounts();
     }
   }

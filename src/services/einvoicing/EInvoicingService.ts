@@ -56,7 +56,7 @@ export class EInvoicingService {
         archive = true
       } = options;
 
-      console.log(`🚀 Starting e-invoice submission for invoice ${invoiceId}`);
+      console.warn(`🚀 Starting e-invoice submission for invoice ${invoiceId}`);
       
       // Step 1: Load and validate invoice
       const invoice = await this.loadInvoice(invoiceId);
@@ -122,9 +122,10 @@ export class EInvoicingService {
             pdfUrl = (archiveResult as any).pdf_url;
             xmlUrl = (archiveResult as any).xml_url;
           }
-        } catch (e) {
+        } catch (error) {
           // Archiving is optional; continue without URLs if it fails
-          console.warn('Archiving documents failed:', e);
+          const errorMsg = error instanceof Error ? error.message : String(error);
+          console.warn('Archiving documents failed:', errorMsg);
         }
       }
 

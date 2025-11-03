@@ -29,7 +29,7 @@ export class LicenseService {
       }
       return false;
     } catch (error) {
-      console.error('Erreur validation licence:', error);
+      console.error('Erreur validation licence:', error instanceof Error ? error.message : String(error));
       return false;
     }
   }

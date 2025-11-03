@@ -36,7 +36,7 @@ export const clearUserSession = () => {
     window.location.href = '/';
 
   } catch (error) {
-    console.error('Erreur lors du nettoyage de session:', error);
+    console.error('Erreur lors du nettoyage de session:', error instanceof Error ? error.message : String(error));
   }
 };
 

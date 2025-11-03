@@ -44,7 +44,7 @@ export class TenantService {
 
       return true;
     } catch (error) {
-      console.error('Erreur d\'initialisation du tenant:', error);
+      console.error('Erreur d\'initialisation du tenant:', error instanceof Error ? error.message : String(error));
       return false;
     }
   }
@@ -207,7 +207,7 @@ export class TenantService {
     // Dans un environnement de production, ceci utiliserait l'API Supabase
     // pour créer automatiquement un nouveau projet
     
-    console.log('Création du projet Supabase pour:', tenant.name);
+    console.warn('Création du projet Supabase pour:', tenant.name);
     
     // Simulation - en réalité, il faudrait :
     // 1. Appeler l'API Supabase Management
@@ -249,11 +249,11 @@ export class TenantService {
 
   private async executeMigration(tenant: TenantConfig, sql: string): Promise<void> {
     // Exécuter la migration SQL sur la base du tenant
-    console.log(`Exécution migration pour ${tenant.id}:`, `${sql.substring(0, 50)  }...`);
+    console.warn(`Exécution migration pour ${tenant.id}:`, `${sql.substring(0, 50)  }...`);
   }
 
   private async saveTenantConfig(tenant: TenantConfig): Promise<void> {
     // Sauvegarder dans un service central ou fichier local
-    console.log('Sauvegarde config tenant:', tenant.id);
+    console.warn('Sauvegarde config tenant:', tenant.id);
   }
 }

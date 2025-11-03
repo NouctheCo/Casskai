@@ -43,7 +43,7 @@ export default function StripeSuccessPage() {
         showToast('Paiement confirmé avec succès ! Bienvenue dans CassKai Premium.', 'success');
         setIsProcessing(false);
       } catch (error) {
-        console.error('Erreur lors du traitement du succès:', error);
+        console.error('Erreur lors du traitement du succès:', error instanceof Error ? error.message : String(error));
         showToast('Paiement traité avec succès malgré une petite erreur technique.', 'warning');
         setIsProcessing(false);
       }

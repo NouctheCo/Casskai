@@ -129,7 +129,7 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
       await onSubmit(formData);
       onClose();
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error('Error submitting form:', error instanceof Error ? error.message : String(error));
     }
   };
 

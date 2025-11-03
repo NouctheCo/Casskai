@@ -109,7 +109,7 @@ export default function SalesCrmPage() {
         });
       }
     } catch (error) {
-      console.error('Error creating client:', error);
+      console.error('Error creating client:', error instanceof Error ? error.message : String(error));
       toast({
         title: t('common.error'),
         description: 'Erreur lors de la création du client',
@@ -130,7 +130,7 @@ export default function SalesCrmPage() {
         });
       }
     } catch (error) {
-      console.error('Error creating contact:', error);
+      console.error('Error creating contact:', error instanceof Error ? error.message : String(error));
       toast({
         title: t('common.error'),
         description: 'Erreur lors de la création du contact',
@@ -151,7 +151,7 @@ export default function SalesCrmPage() {
         });
       }
     } catch (error) {
-      console.error('Error creating opportunity:', error);
+      console.error('Error creating opportunity:', error instanceof Error ? error.message : String(error));
       toast({
         title: t('common.error'),
         description: 'Erreur lors de la création de l\'opportunité',
@@ -172,7 +172,7 @@ export default function SalesCrmPage() {
         });
       }
     } catch (error) {
-      console.error('Error creating action:', error);
+      console.error('Error creating action:', error instanceof Error ? error.message : String(error));
       toast({
         title: t('common.error'),
         description: 'Erreur lors de la création de l\'action',

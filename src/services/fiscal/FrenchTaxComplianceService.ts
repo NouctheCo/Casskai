@@ -164,7 +164,7 @@ export class FrenchTaxComplianceService {
 
       return declaration;
     } catch (error) {
-      console.error('Erreur génération CA3:', error);
+      console.error('Erreur génération CA3:', error instanceof Error ? error.message : String(error));
       throw new Error('Impossible de générer la déclaration CA3');
     }
   }
@@ -273,7 +273,7 @@ export class FrenchTaxComplianceService {
         updatedAt: new Date()
       };
     } catch (error) {
-      console.error('Erreur génération CVAE:', error);
+      console.error('Erreur génération CVAE:', error instanceof Error ? error.message : String(error));
       throw new Error('Impossible de générer la déclaration CVAE');
     }
   }
@@ -350,7 +350,7 @@ export class FrenchTaxComplianceService {
 
       return fecLines.join('\n');
     } catch (error) {
-      console.error('Erreur génération FEC:', error);
+      console.error('Erreur génération FEC:', error instanceof Error ? error.message : String(error));
       throw new Error('Impossible de générer le FEC');
     }
   }
@@ -405,7 +405,7 @@ export class FrenchTaxComplianceService {
 
       return { errors, warnings, checks };
     } catch (error) {
-      console.error('Erreur validation cohérence:', error);
+      console.error('Erreur validation cohérence:', error instanceof Error ? error.message : String(error));
       return {
         errors: ['Erreur lors de la validation de cohérence'],
         warnings: [],
@@ -474,7 +474,7 @@ export class FrenchTaxComplianceService {
     return tva;
   }
 
-  private async calculateValeurAjoutee(companyId: string, exercice: string) {
+  private async calculateValeurAjoutee(_companyId: string, _exercice: string) {
     // Calcul de la valeur ajoutée selon l'article 1586 sexies du CGI
     // Production - Consommations intermédiaires
     return {
@@ -601,7 +601,7 @@ export class FrenchTaxComplianceService {
   }
 
   // Méthodes de vérification de cohérence
-  private async checkTVAConsistency(companyId: string, period: string) {
+  private async checkTVAConsistency(_companyId: string, _period: string) {
     return {
       name: 'Cohérence TVA',
       status: 'ok' as const,
@@ -609,7 +609,7 @@ export class FrenchTaxComplianceService {
     };
   }
 
-  private async checkAccountBalance(companyId: string, period: string) {
+  private async checkAccountBalance(_companyId: string, _period: string) {
     return {
       name: 'Équilibre débit/crédit',
       status: 'ok' as const,
@@ -617,7 +617,7 @@ export class FrenchTaxComplianceService {
     };
   }
 
-  private async checkResultConsistency(companyId: string, period: string) {
+  private async checkResultConsistency(_companyId: string, _period: string) {
     return {
       name: 'Cohérence résultat',
       status: 'ok' as const,
@@ -625,7 +625,7 @@ export class FrenchTaxComplianceService {
     };
   }
 
-  private async checkMandatoryAccounts(companyId: string) {
+  private async checkMandatoryAccounts(_companyId: string) {
     return {
       name: 'Comptes obligatoires',
       status: 'ok' as const,

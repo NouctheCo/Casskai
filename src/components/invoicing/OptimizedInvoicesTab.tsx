@@ -160,7 +160,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
       setClients(clientsData);
       setCompanySettings(settingsData);
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('Error loading data:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur",
         description: "Impossible de charger les données",
@@ -264,7 +264,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         description: `Aperçu de la facture ${invoice.invoice_number} dans un nouvel onglet`
       });
     } catch (error) {
-      console.error('Error viewing PDF:', error);
+      console.error('Error viewing PDF:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur",
         description: "Impossible d'afficher l'aperçu",
@@ -296,7 +296,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         description: `Facture ${invoice.invoice_number} téléchargée avec succès`
       });
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      console.error('Error generating PDF:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur",
         description: "Impossible de générer le PDF",
@@ -334,7 +334,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         description: `${filteredInvoices.length} facture(s) en cours d'exportation...`
       });
     } catch (error) {
-      console.error('Error during bulk export:', error);
+      console.error('Error during bulk export:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur",
         description: "Impossible d'exporter les factures",
@@ -359,7 +359,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         description: `Nouvelle facture créée: ${duplicatedInvoice.invoice_number}`
       });
     } catch (error) {
-      console.error('Error duplicating invoice:', error);
+      console.error('Error duplicating invoice:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur",
         description: "Impossible de dupliquer la facture.",
@@ -378,7 +378,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
           description: `Avoir créé: ${creditNote.invoice_number}`
         });
       } catch (error) {
-        console.error('Error creating credit note:', error);
+        console.error('Error creating credit note:', error instanceof Error ? error.message : String(error));
         toast({
           title: "Erreur",
           description: "Impossible de créer l'avoir.",
@@ -738,7 +738,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
       const number = await invoicingService.generateInvoiceNumber();
       setFormData(prev => ({ ...prev, invoiceNumber: number }));
     } catch (error) {
-      console.error('Error generating invoice number:', error);
+      console.error('Error generating invoice number:', error instanceof Error ? error.message : String(error));
     }
   };
 
@@ -837,7 +837,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
         description: `${newClient.name} a été ajouté avec succès.`
       });
     } catch (error) {
-      console.error('Error creating client:', error);
+      console.error('Error creating client:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur",
         description: "Impossible de créer le client.",
@@ -907,7 +907,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Error saving invoice:', error);
+      console.error('Error saving invoice:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur",
         description: "Impossible d'enregistrer la facture",

@@ -66,7 +66,7 @@ export class ValidationService {
       };
 
     } catch (error) {
-      console.error('Error during validation:', error);
+      console.error('Error during validation:', error instanceof Error ? error.message : String(error));
       throw new EInvoicingError(
         `Validation failed: ${(error as Error).message}`,
         'VALIDATION_FAILED',

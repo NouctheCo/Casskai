@@ -1,6 +1,6 @@
 import { IReportRepository } from '../../domain/reports/repositories/IReportRepository';
 import { IReportGeneratorService } from '../../domain/reports/services/IReportGeneratorService';
-import { Report, ReportExecution, ReportParameters, ReportResult } from '../../domain/reports/entities/Report';
+import { Report, ReportExecution, ReportParameters } from '../../domain/reports/entities/Report';
 import { BalanceSheetGenerator } from '../../infrastructure/reports/generators/BalanceSheetGenerator';
 import { IncomeStatementGenerator } from '../../infrastructure/reports/generators/IncomeStatementGenerator';
 import { CashFlowGenerator } from '../../infrastructure/reports/generators/CashFlowGenerator';

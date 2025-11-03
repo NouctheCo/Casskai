@@ -30,7 +30,7 @@ export class DispatchService {
     documentId: string
   ): Promise<ChannelResponse> {
     try {
-      console.log(`📤 Submitting document ${documentId} via ${channel}`);
+      console.warn(`📤 Submitting document ${documentId} via ${channel}`);
 
       // Get appropriate provider
       const provider = this.getProvider(channel);
@@ -47,7 +47,7 @@ export class DispatchService {
       // Submit document
       const response = await provider.submitDocument(formattingResult, documentId);
       
-      console.log(`✅ Document ${documentId} submitted successfully via ${channel}:`, response.message_id);
+      console.warn(`✅ Document ${documentId} submitted successfully via ${channel}:`, response.message_id);
       return response;
 
     } catch (error) {
@@ -76,7 +76,7 @@ export class DispatchService {
     details?: any;
   }> {
     try {
-      console.log(`🔍 Getting delivery status for message ${messageId} via ${channel}`);
+      console.warn(`🔍 Getting delivery status for message ${messageId} via ${channel}`);
 
       const provider = this.getProvider(channel);
       if (!provider) {
@@ -85,7 +85,7 @@ export class DispatchService {
 
       const status = await provider.getDeliveryStatus(messageId);
       
-      console.log(`📊 Status for message ${messageId}:`, status.status);
+      console.warn(`📊 Status for message ${messageId}:`, status.status);
       return status;
 
     } catch (error) {
@@ -108,7 +108,7 @@ export class DispatchService {
     reason: string
   ): Promise<boolean> {
     try {
-      console.log(`🚫 Cancelling document ${messageId} via ${channel}: ${reason}`);
+      console.warn(`🚫 Cancelling document ${messageId} via ${channel}: ${reason}`);
 
       const provider = this.getProvider(channel);
       if (!provider) {
@@ -118,9 +118,9 @@ export class DispatchService {
       const result = await provider.cancelDocument(messageId, reason);
       
       if (result) {
-        console.log(`✅ Document ${messageId} cancelled successfully`);
+        console.warn(`✅ Document ${messageId} cancelled successfully`);
       } else {
-        console.log(`⚠️ Document ${messageId} could not be cancelled (may not support cancellation)`);
+        console.warn(`⚠️ Document ${messageId} could not be cancelled (may not support cancellation)`);
       }
       
       return result;
@@ -145,7 +145,7 @@ export class DispatchService {
     error?: string;
   }> {
     try {
-      console.log(`🧪 Testing connectivity for channel ${channel}`);
+      console.warn(`🧪 Testing connectivity for channel ${channel}`);
       
       const startTime = Date.now();
       const provider = this.getProvider(channel);
@@ -160,7 +160,7 @@ export class DispatchService {
       const isAvailable = await provider.isChannelAvailable();
       const latency = Date.now() - startTime;
 
-      console.log(`📊 Channel ${channel} test result: ${isAvailable ? 'OK' : 'FAILED'} (${latency}ms)`);
+      console.warn(`📊 Channel ${channel} test result: ${isAvailable ? 'OK' : 'FAILED'} (${latency}ms)`);
 
       return {
         available: isAvailable,
@@ -218,7 +218,7 @@ export class DispatchService {
       // const pdpProvider1 = new PDPProvider('PROVIDER_NAME');
       // this.providers.set('PDP:PROVIDER_NAME', pdpProvider1);
 
-      console.log(`🔧 Initialized ${this.providers.size} channel providers:`, 
+      console.warn(`🔧 Initialized ${this.providers.size} channel providers:`, 
         Array.from(this.providers.keys()).join(', '));
 
     } catch (error) {
@@ -297,7 +297,7 @@ export class DispatchService {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        console.log(`🔄 Submission attempt ${attempt}/${maxRetries}`);
+        console.warn(`🔄 Submission attempt ${attempt}/${maxRetries}`);
         return await operation();
       } catch (error) {
         lastError = error as Error;
@@ -308,7 +308,7 @@ export class DispatchService {
 
         // Exponential backoff: 1s, 2s, 4s, ...
         const delayMs = baseDelayMs * Math.pow(2, attempt - 1);
-        console.log(`⏳ Waiting ${delayMs}ms before retry...`);
+        console.warn(`⏳ Waiting ${delayMs}ms before retry...`);
         
         await new Promise(resolve => setTimeout(resolve, delayMs));
       }
@@ -330,10 +330,10 @@ export class DispatchService {
     const duration = Date.now() - startTime;
     const status = success ? 'SUCCESS' : 'FAILED';
     
-    console.log(`📊 Submission metrics - Channel: ${channel}, Document: ${documentId}, Status: ${status}, Duration: ${duration}ms`);
+    console.warn(`📊 Submission metrics - Channel: ${channel}, Document: ${documentId}, Status: ${status}, Duration: ${duration}ms`);
     
     if (error) {
-      console.log(`📊 Error details:`, error.message);
+      console.warn(`📊 Error details:`, error.message);
     }
 
     // In production, this would send metrics to a monitoring system

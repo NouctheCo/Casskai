@@ -15,6 +15,11 @@ logger.error = (msg, options) => {
 
 export default defineConfig(({ mode }) => ({
 	customLogger: logger,
+	resolve: {
+		alias: {
+			'@': path.resolve(__dirname, './src'),
+		},
+	},
 	plugins: [
 		react({
 			// Optimize React runtime

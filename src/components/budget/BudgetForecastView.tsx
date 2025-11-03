@@ -63,7 +63,7 @@ export const BudgetForecastView: React.FC<BudgetForecastViewProps> = ({
       } else {
         setForecastData(data);
       }
-    } catch (err) {
+    } catch (error) {
       console.error('Error loading forecast:', err);
       toast({
         title: 'Erreur',

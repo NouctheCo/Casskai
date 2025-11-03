@@ -74,7 +74,7 @@ class ReportsService {
 
       return { data: data || [] };
     } catch (error) {
-      console.error('Exception in getReports:', error);
+      console.error('Exception in getReports:', error instanceof Error ? error.message : String(error));
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la récupération des rapports';
       return {
         data: [],
@@ -111,7 +111,7 @@ class ReportsService {
 
       return { data };
     } catch (error) {
-      console.error('Exception in createReport:', error);
+      console.error('Exception in createReport:', error instanceof Error ? error.message : String(error));
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la création du rapport';
       return {
         data: null,
@@ -136,7 +136,7 @@ class ReportsService {
 
       return { data };
     } catch (error) {
-      console.error('Exception in updateReport:', error);
+      console.error('Exception in updateReport:', error instanceof Error ? error.message : String(error));
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la mise à jour du rapport';
       return {
         data: null,
@@ -159,7 +159,7 @@ class ReportsService {
 
       return { data: true };
     } catch (error) {
-      console.error('Exception in deleteReport:', error);
+      console.error('Exception in deleteReport:', error instanceof Error ? error.message : String(error));
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la suppression du rapport';
       return {
         data: false,
@@ -183,7 +183,7 @@ class ReportsService {
 
       return { data: data as BalanceSheetData };
     } catch (error) {
-      console.error('Exception in generateBalanceSheet:', error);
+      console.error('Exception in generateBalanceSheet:', error instanceof Error ? error.message : String(error));
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la génération du bilan';
       return {
         data: null,
@@ -207,7 +207,7 @@ class ReportsService {
 
       return { data: data as IncomeStatementData };
     } catch (error) {
-      console.error('Exception in generateIncomeStatement:', error);
+      console.error('Exception in generateIncomeStatement:', error instanceof Error ? error.message : String(error));
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la génération du compte de résultat';
       return {
         data: null,
@@ -231,7 +231,7 @@ class ReportsService {
 
       return { data: data as CashFlowData };
     } catch (error) {
-      console.error('Exception in generateCashFlowStatement:', error);
+      console.error('Exception in generateCashFlowStatement:', error instanceof Error ? error.message : String(error));
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la génération du tableau de flux de trésorerie';
       return {
         data: null,
@@ -254,7 +254,7 @@ class ReportsService {
 
       return { data: data as TrialBalanceData };
     } catch (error) {
-      console.error('Exception in generateTrialBalance:', error);
+      console.error('Exception in generateTrialBalance:', error instanceof Error ? error.message : String(error));
       const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la génération de la balance générale';
       return {
         data: null,
@@ -281,7 +281,7 @@ class ReportsService {
       if (error) throw error;
 
       return { data: data || [] };
-    } catch (_error) {
+    } catch (error) {
       return {
         data: [],
         error: { message: 'Erreur lors de la récupération des modèles' }
@@ -332,7 +332,7 @@ class ReportsService {
       if (error) throw error;
 
       return { data: data || newTemplate };
-    } catch (_error) {
+    } catch (error) {
       return {
         data: {} as ReportTemplate,
         error: { message: 'Erreur lors de la création du modèle' }
@@ -358,7 +358,7 @@ class ReportsService {
       if (error) throw error;
 
       return { data: data || [] };
-    } catch (_error) {
+    } catch (error) {
       return {
         data: [],
         error: { message: 'Erreur lors de la récupération des planifications' }
@@ -398,7 +398,7 @@ class ReportsService {
       if (error) throw error;
 
       return { data: data || newSchedule };
-    } catch (_error) {
+    } catch (error) {
       return {
         data: {} as ReportSchedule,
         error: { message: 'Erreur lors de la création de la planification' }
@@ -466,7 +466,7 @@ class ReportsService {
       };
       
       return { data: analytics };
-    } catch (_error) {
+    } catch (error) {
       return {
         data: {} as ReportAnalytics,
         error: { message: 'Erreur lors du calcul des analytiques' }
@@ -524,7 +524,7 @@ class ReportsService {
       };
 
       return { data: dashboardData };
-    } catch (_error) {
+    } catch (error) {
       return {
         data: {} as ReportsDashboardData,
         error: { message: 'Erreur lors de la récupération des données du tableau de bord' }
@@ -605,7 +605,7 @@ class ReportsService {
       console.warn(`Export du rapport ${report.name} en format ${config.format}`);
 
       return { data: exportUrl };
-    } catch (_error) {
+    } catch (error) {
       return {
         data: '',
         error: { message: 'Erreur lors de l\'export du rapport' }
@@ -706,7 +706,7 @@ class ReportsService {
       }
       
       return { data: charts };
-    } catch (_error) {
+    } catch (error) {
       return {
         data: [],
         error: { message: 'Erreur lors de la génération des graphiques' }
@@ -728,7 +728,7 @@ class ReportsService {
       }
 
       return { data: data as FinancialReport };
-    } catch (_error) {
+    } catch (error) {
       return { data: null, error: { message: 'Erreur lors de la récupération du rapport' } };
     }
   }
@@ -755,7 +755,7 @@ class ReportsService {
       });
       if (exportRes.error) return { data: '', error: exportRes.error };
       return { data: exportRes.data };
-    } catch (_error) {
+    } catch (error) {
       return { data: '', error: { message: 'Erreur lors de la génération du lien de téléchargement' } };
     }
   }

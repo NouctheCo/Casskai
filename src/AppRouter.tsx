@@ -43,7 +43,7 @@ const LazyAutomationPage = React.lazy(() => import('@/pages/AutomationPage'));
 const LazyThirdPartiesPage = React.lazy(() => import('@/pages/ThirdPartiesPage'));
 
 const AppRouter: React.FC = () => {
-  const { isAuthenticated, loading, onboardingCompleted, currentCompany, isCheckingOnboarding } = useAuth();
+  const { isAuthenticated, loading, onboardingCompleted, isCheckingOnboarding } = useAuth();
 
   // Memoize the routing logic to prevent infinite re-renders
   const routingState = useMemo(() => {

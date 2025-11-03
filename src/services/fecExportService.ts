@@ -61,7 +61,7 @@ export class FECExportService {
    */
   async generateFECExport(params: FECExportParams): Promise<FECExportResult> {
     try {
-      console.log('🏭 Génération export FEC...', params);
+      console.warn('🏭 Génération export FEC...', params);
 
       // 1. Créer l'entrée d'export en base
       const { data: exportRecord, error: createError } = await supabase
@@ -107,7 +107,7 @@ export class FECExportService {
 
       if (updateError) throw updateError;
 
-      console.log('✅ Export FEC généré avec succès');
+      console.warn('✅ Export FEC généré avec succès');
 
       return {
         success: true,

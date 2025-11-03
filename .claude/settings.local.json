@@ -130,7 +130,8 @@
       "Bash(npm show:*)",
       "Bash(./deploy-staging.sh:*)",
       "Bash(nslookup:*)",
-      "Bash(host:*)"
+      "Bash(host:*)",
+      "Bash(git reset:*)"
     ],
     "deny": []
   }

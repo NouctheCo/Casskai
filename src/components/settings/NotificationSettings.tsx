@@ -103,7 +103,7 @@ export function NotificationSettings() {
         });
       }
     } catch (error) {
-      console.error('Erreur chargement paramètres notifications:', error);
+      console.error('Erreur chargement paramètres notifications:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',
         description: 'Impossible de charger les paramètres de notifications',
@@ -153,7 +153,7 @@ export function NotificationSettings() {
       // Recharger les données après sauvegarde pour s'assurer que l'interface est à jour
       await loadNotificationSettings();
     } catch (error) {
-      console.error('Erreur sauvegarde paramètres notifications:', error);
+      console.error('Erreur sauvegarde paramètres notifications:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',
         description: 'Impossible de sauvegarder les paramètres',

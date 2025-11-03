@@ -12,19 +12,15 @@ import {
   Upload, 
   FileArchive, 
   CheckCircle, 
-  XCircle, 
   AlertTriangle,
   FileText,
   Trash2,
-  Download,
   Eye,
   RefreshCw,
-  Archive,
   Database
 } from 'lucide-react';
 
 export default function FECImportTab() {
-  const { t } = useLocale();
   const { toast } = useToast();
 
   // États

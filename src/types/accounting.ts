@@ -43,6 +43,12 @@ export interface JournalEntry {
   companyId: string;
 }
 
+export interface ValidationResult {
+  isValid: boolean;
+  errors: Array<{ field: string; message: string; severity: 'error' | 'warning' | 'info' }>;
+  warnings: Array<{ field: string; message: string; severity: 'warning' | 'info' }>;
+}
+
 export interface JournalEntryLine {
   id: string;
   accountNumber: string;

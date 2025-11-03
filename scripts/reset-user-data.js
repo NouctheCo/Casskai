@@ -25,7 +25,7 @@ async function resetUserData() {
         console.log('\n🔍 État actuel des données...');
 
         // Entreprises
-        const { data: companies, error: companiesError } = await supabase
+        const { data: companies } = await supabase
             .from('companies')
             .select('*');
 
@@ -35,7 +35,7 @@ async function resetUserData() {
         });
 
         // Liens user_companies
-        const { data: userCompanies, error: userCompaniesError } = await supabase
+        const { data: userCompanies } = await supabase
             .from('user_companies')
             .select('*');
 

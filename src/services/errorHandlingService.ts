@@ -6,13 +6,13 @@ export interface ErrorContext {
   method?: string;
   userId?: string;
   companyId?: string;
-  additional?: Record<string, any>;
+  additional?: Record<string, unknown>;
 }
 
 export interface ApiError {
   code: string;
   message: string;
-  details?: any;
+  details?: unknown;
   severity: 'low' | 'medium' | 'high' | 'critical';
   userMessage: string;
   technicalMessage: string;
@@ -48,10 +48,10 @@ export class ErrorHandlingService {
         return await operation();
       } catch (error) {
         lastError = error as Error;
-        
+
         // Log the attempt
         console.warn(`[${context.service}/${context.method}] Attempt ${attempt + 1} failed:`, error);
-        
+
         // Don't retry if it's the last attempt or if error is not retryable
         if (attempt === maxRetries || !this.isRetryableError(error as Error)) {
           break;
@@ -70,7 +70,7 @@ export class ErrorHandlingService {
    * Wrapper pour les appels Supabase
    */
   async supabaseCall<T>(
-    operation: () => Promise<{ data: T | null; error: any }>,
+    operation: () => Promise<{ data: T | null; error: unknown }>,
     context: ErrorContext
   ): Promise<T> {
     return this.executeWithRetry(async () => {
@@ -132,24 +132,26 @@ export class ErrorHandlingService {
    * Gestion centralisée des erreurs
    */
   private handleError<T>(error: Error, context: ErrorContext): never {
-    const apiError = (error as any).statusCode ? (error as any) : this.createApiError(error, context);
+    const apiError = (error as unknown as {statusCode?: string}).statusCode ? (error as unknown as ApiError) : this.createApiError(error, context);
 
     // Log error for monitoring
-    this.logError(apiError as any, context);
+    this.logError(apiError, context);
 
     // Show user notification
-    this.showErrorToUser(apiError as any);
+    this.showErrorToUser(apiError);
 
     // Report to error tracking service
-    this.reportError(apiError as any, context);
-    
+    this.reportError(apiError, context);
+
     throw apiError;
   }
 
   /**
    * Création d'une erreur API structurée
    */
-  private createApiError(error: any, context: ErrorContext): ApiError {
+  private createApiError(error: unknown, context: ErrorContext): ApiError {
+    const err = error as Record<string, unknown>;
+
     // Map des erreurs Supabase communes
     const supabaseErrorMap: Record<string, Partial<ApiError>> = {
       'PGRST116': {
@@ -233,18 +235,19 @@ export class ErrorHandlingService {
       },
     };
 
-    const errorCode = error.code || error.status?.toString() || 'UNKNOWN';
-    const errorMapping = supabaseErrorMap[errorCode] || httpErrorMap[error.status] || {};
+    const errorCode = String(err.code || (err.status ? String(err.status) : 'UNKNOWN'));
+    const errorStatus = typeof err.status === 'number' ? err.status : undefined;
+    const errorMapping = supabaseErrorMap[errorCode] || (errorStatus ? httpErrorMap[errorStatus] : undefined) || {};
 
     const severity = this.determineSeverity(error, context);
 
     return {
       code: errorCode,
-      message: error.message || 'Une erreur inconnue s\'est produite',
-      details: error.details || error,
+      message: String(err.message || 'Une erreur inconnue s\'est produite'),
+      details: err.details || error,
       severity,
       userMessage: errorMapping.userMessage || this.getDefaultUserMessage(severity),
-      technicalMessage: `[${context.service}/${context.method}] ${error.message}`,
+      technicalMessage: `[${context.service}/${context.method}] ${String(err.message)}`,
       retryable: errorMapping.retryable ?? this.isRetryableError(error),
       ...errorMapping,
     };
@@ -253,27 +256,29 @@ export class ErrorHandlingService {
   /**
    * Détermine la sévérité d'une erreur selon le contexte
    */
-  private determineSeverity(error: any, context: ErrorContext): ApiError['severity'] {
+  private determineSeverity(error: unknown, context: ErrorContext): ApiError['severity'] {
+    const err = error as Record<string, unknown>;
+
     // Erreurs critiques dans les services financiers
     if (context.service && ['invoicingService', 'accountingService', 'subscriptionService'].includes(context.service)) {
       return 'critical';
     }
-    
+
     // Erreurs de connexion/auth
-    if (error.status === 401 || error.code === 'PGRST301') {
+    if (err.status === 401 || err.code === 'PGRST301') {
       return 'high';
     }
-    
+
     // Erreurs serveur
-    if (error.status >= 500) {
+    if (typeof err.status === 'number' && err.status >= 500) {
       return 'high';
     }
-    
+
     // Erreurs client
-    if (error.status >= 400 && error.status < 500) {
+    if (typeof err.status === 'number' && err.status >= 400 && err.status < 500) {
       return 'medium';
     }
-    
+
     return 'low';
   }
 
@@ -296,27 +301,29 @@ export class ErrorHandlingService {
   /**
    * Détermine si une erreur peut être retentée
    */
-  private isRetryableError(error: any): boolean {
+  private isRetryableError(error: unknown): boolean {
+    const err = error as Record<string, unknown>;
+
     // Erreurs réseau temporaires
-    if (error.name === 'NetworkError' || error.message?.includes('fetch')) {
+    if (err.name === 'NetworkError' || (typeof err.message === 'string' && err.message.includes('fetch'))) {
       return true;
     }
-    
+
     // Erreurs serveur temporaires
-    if (error.status >= 500 && error.status <= 504) {
+    if (typeof err.status === 'number' && err.status >= 500 && err.status <= 504) {
       return true;
     }
-    
+
     // Rate limiting
-    if (error.status === 429) {
+    if (err.status === 429) {
       return true;
     }
-    
+
     // Timeout
-    if (error.name === 'TimeoutError') {
+    if (err.name === 'TimeoutError') {
       return true;
     }
-    
+
     return false;
   }
 
@@ -449,7 +456,7 @@ export class ErrorHandlingService {
   /**
    * Envoyer vers service de monitoring externe
    */
-  private sendToMonitoringService(logData: any): void {
+  private sendToMonitoringService(logData: Record<string, unknown>): void {
     // Intégration avec des services comme:
     // - Sentry
     // - LogRocket  
@@ -458,12 +465,15 @@ export class ErrorHandlingService {
     // etc.
     
     // Exemple Sentry:
-    if (typeof window !== 'undefined' && (window as any).Sentry) {
-      (window as any).Sentry.captureException(new Error(logData.error.technicalMessage), {
+    if (typeof window !== 'undefined' && (window as Record<string, unknown>).Sentry) {
+      const Sentry = (window as Record<string, unknown>).Sentry as { captureException: (error: Error, options: Record<string, unknown>) => void };
+      const error = logData.error as { technicalMessage: string; severity: string };
+      const contextData = logData.context as { service?: string; method?: string };
+      Sentry.captureException(new Error(error.technicalMessage), {
         tags: {
-          severity: logData.error.severity,
-          service: logData.context.service,
-          method: logData.context.method,
+          severity: error.severity,
+          service: contextData.service,
+          method: contextData.method,
         },
         extra: logData,
       });
@@ -492,10 +502,10 @@ export const useErrorHandler = () => {
 
 // Décorateur pour wrapper automatiquement les méthodes de service
 export function withErrorHandling(service: string) {
-  return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
+  return function (target: Record<string, unknown>, propertyName: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value;
-    
-    descriptor.value = async function (...args: any[]) {
+
+    descriptor.value = async function (...args: unknown[]) {
       const context: ErrorContext = {
         service,
         method: propertyName,

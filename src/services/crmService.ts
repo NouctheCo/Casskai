@@ -89,7 +89,7 @@ class CrmService {
 
       return { success: true, data: filteredClients };
     } catch (error) {
-      console.error('Error fetching CRM clients:', error);
+      console.error('Error fetching CRM clients:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         data: [],
@@ -144,7 +144,7 @@ class CrmService {
 
       return { success: true, data: newClient };
     } catch (error) {
-      console.error('Error creating CRM client:', error);
+      console.error('Error creating CRM client:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         data: {} as Client,
@@ -196,7 +196,7 @@ class CrmService {
       };
       return { success: true, data: updatedClient };
     } catch (error) {
-      console.error('Error updating CRM client:', error);
+      console.error('Error updating CRM client:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         data: {} as Client,
@@ -215,7 +215,7 @@ class CrmService {
       if (error) throw error;
       return { success: true, data: true };
     } catch (error) {
-      console.error('Error deleting CRM client:', error);
+      console.error('Error deleting CRM client:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         data: false,
@@ -245,7 +245,7 @@ class CrmService {
 
       return { success: true, data: data || [] };
     } catch (error) {
-      console.error('Error fetching CRM contacts:', error);
+      console.error('Error fetching CRM contacts:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         data: [],
@@ -275,7 +275,7 @@ class CrmService {
       if (error) throw error;
       return { success: true, data };
     } catch (error) {
-      console.error('Error creating CRM contact:', error);
+      console.error('Error creating CRM contact:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         data: {} as Contact,
@@ -296,7 +296,7 @@ class CrmService {
       if (error) throw error;
       return { success: true, data };
     } catch (error) {
-      console.error('Error updating CRM contact:', error);
+      console.error('Error updating CRM contact:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         data: {} as Contact,
@@ -315,7 +315,7 @@ class CrmService {
       if (error) throw error;
       return { success: true, data: true };
     } catch (error) {
-      console.error('Error deleting CRM contact:', error);
+      console.error('Error deleting CRM contact:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         data: false,
@@ -350,7 +350,7 @@ class CrmService {
 
       return { success: true, data: data || [] };
     } catch (error) {
-      console.error('Error fetching CRM opportunities:', error);
+      console.error('Error fetching CRM opportunities:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         data: [],
@@ -410,7 +410,7 @@ class CrmService {
       if (error) throw error;
       return { success: true, data };
     } catch (error) {
-      console.error('Error creating CRM opportunity:', error);
+      console.error('Error creating CRM opportunity:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         data: {} as Opportunity,
@@ -452,7 +452,7 @@ class CrmService {
       if (error) throw error;
       return { success: true, data };
     } catch (error) {
-      console.error('Error updating CRM opportunity:', error);
+      console.error('Error updating CRM opportunity:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         data: {} as Opportunity,
@@ -471,7 +471,7 @@ class CrmService {
       if (error) throw error;
       return { success: true, data: true };
     } catch (error) {
-      console.error('Error deleting CRM opportunity:', error);
+      console.error('Error deleting CRM opportunity:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         data: false,
@@ -506,7 +506,7 @@ class CrmService {
 
       return { success: true, data: data || [] };
     } catch (error) {
-      console.error('Error fetching commercial actions:', error);
+      console.error('Error fetching commercial actions:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         data: [],
@@ -578,7 +578,7 @@ class CrmService {
       if (error) throw error;
       return { success: true, data };
     } catch (error) {
-      console.error('Error creating commercial action:', error);
+      console.error('Error creating commercial action:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         data: {} as CommercialAction,
@@ -629,7 +629,7 @@ class CrmService {
       if (error) throw error;
       return { success: true, data };
     } catch (error) {
-      console.error('Error updating commercial action:', error);
+      console.error('Error updating commercial action:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         data: {} as CommercialAction,
@@ -648,7 +648,7 @@ class CrmService {
       if (error) throw error;
       return { success: true, data: true };
     } catch (error) {
-      console.error('Error deleting commercial action:', error);
+      console.error('Error deleting commercial action:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         data: false,
@@ -709,7 +709,7 @@ class CrmService {
 
       return { success: true, data: stats };
     } catch (error) {
-      console.error('Error fetching CRM stats:', error);
+      console.error('Error fetching CRM stats:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         data: {} as CrmStats,
@@ -742,7 +742,7 @@ class CrmService {
 
       return { success: true, data: pipelineStats };
     } catch (error) {
-      console.error('Error fetching pipeline stats:', error);
+      console.error('Error fetching pipeline stats:', error instanceof Error ? error.message : String(error));
       return {
         success: false,
         data: [],
