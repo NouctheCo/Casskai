@@ -1,3 +1,4 @@
+import { devLogger } from './devLogger';
 /**
  * Gestionnaire de cache pour CassKai
  * Gère la synchronisation entre localStorage et Supabase
@@ -13,7 +14,7 @@ export class CacheManager {
    * Nettoie complètement le cache localStorage
    */
   static clearAll(): void {
-    console.log('🧹 Nettoyage complet du cache localStorage...');
+    devLogger.log('🧹 Nettoyage complet du cache localStorage...');
 
     const keysToRemove = [
       this.ENTERPRISES_KEY,
@@ -24,30 +25,30 @@ export class CacheManager {
 
     keysToRemove.forEach(key => {
       localStorage.removeItem(key);
-      console.log(`   ✅ ${key} supprimé`);
+      devLogger.log(`   ✅ ${key} supprimé`);
     });
 
     // Aussi nettoyer toutes les clés Supabase
     Object.keys(localStorage).forEach(key => {
       if (key.startsWith('supabase.') || key.startsWith('casskai_')) {
         localStorage.removeItem(key);
-        console.log(`   ✅ ${key} supprimé`);
+        devLogger.log(`   ✅ ${key} supprimé`);
       }
     });
 
-    console.log('✅ Cache localStorage nettoyé');
+    devLogger.log('✅ Cache localStorage nettoyé');
   }
 
   /**
    * Nettoie seulement le cache des entreprises
    */
   static clearEnterprises(): void {
-    console.log('🏢 Nettoyage du cache des entreprises...');
+    devLogger.log('🏢 Nettoyage du cache des entreprises...');
 
     localStorage.removeItem(this.ENTERPRISES_KEY);
     localStorage.removeItem(this.CURRENT_ENTERPRISE_KEY);
 
-    console.log('✅ Cache des entreprises nettoyé');
+    devLogger.log('✅ Cache des entreprises nettoyé');
   }
 
   /**
@@ -56,7 +57,7 @@ export class CacheManager {
   static clearAndReload(): void {
     this.clearAll();
 
-    console.log('🔄 Rechargement de la page...');
+    devLogger.log('🔄 Rechargement de la page...');
     setTimeout(() => {
       window.location.reload();
     }, 500);
@@ -91,7 +92,7 @@ export class CacheManager {
         enterprisesCount = Array.isArray(enterprises) ? enterprises.length : 0;
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
-        console.warn('Erreur parsing enterprises cache:', errorMsg);
+        devLogger.warn('Erreur parsing enterprises cache:', errorMsg);
       }
     }
 
@@ -146,7 +147,7 @@ export class CacheManager {
    * Déclenche un événement de rafraîchissement pour forcer la synchronisation
    */
   static triggerEnterpriseRefresh(): void {
-    console.log('🔄 Déclenchement d\'un rafraîchissement du contexte Enterprise...');
+    devLogger.log('🔄 Déclenchement d\'un rafraîchissement du contexte Enterprise...');
 
     // Déclencher l'événement que l'EnterpriseContext écoute
     const event = new CustomEvent('enterpriseContextRefresh');
@@ -157,20 +158,20 @@ export class CacheManager {
    * Nettoyage intelligent : nettoie et force la synchronisation
    */
   static smartClean(): void {
-    console.log('🧠 Nettoyage intelligent du cache...');
+    devLogger.log('🧠 Nettoyage intelligent du cache...');
 
     const report = this.getCacheReport();
     const validation = this.validateCache();
 
-    console.log('📊 Rapport du cache:', report);
-    console.log('✅ Validation:', validation);
+    devLogger.log('📊 Rapport du cache:', report);
+    devLogger.log('✅ Validation:', validation);
 
     if (!validation.isValid || report.hasEnterprises) {
-      console.log('🧹 Nettoyage nécessaire...');
+      devLogger.log('🧹 Nettoyage nécessaire...');
       this.clearEnterprises();
       this.triggerEnterpriseRefresh();
     } else {
-      console.log('✅ Cache propre, aucun nettoyage nécessaire');
+      devLogger.log('✅ Cache propre, aucun nettoyage nécessaire');
     }
   }
 }

@@ -1,5 +1,6 @@
 /* eslint-disable */
 import React, { createContext, useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { devLogger } from '@/utils/devLogger';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSupabase } from '@/hooks/useSupabase';
@@ -81,7 +82,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         progress: data.progress
       });
     } catch (error) {
-      console.error('Failed to initialize onboarding:', error);
+      devLogger.error('Failed to initialize onboarding:', error);
       setState(prev => ({
         ...prev,
         isLoading: false,
@@ -408,7 +409,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     
     // Protection contre les appels multiples
     if (finalizationInProgress.current) {
-      console.warn('Finalisation déjà en cours, appel ignoré');
+      devLogger.warn('Finalisation déjà en cours, appel ignoré');
       return { success: false, error: 'Finalisation déjà en cours' };
     }
     
@@ -432,7 +433,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
       // Vérification légère - laissons le système de gouvernance des données gérer les doublons
       // Cette vérification était trop restrictive et bloquait l'onboarding légitime
-      console.log('🔍 Préparation création entreprise:', state.data.companyProfile.name?.trim());
+      devLogger.log('🔍 Préparation création entreprise:', state.data.companyProfile.name?.trim());
 
       // Create company in database
       // Générer un id côté client pour éviter l'utilisation de .single() avec SELECT
@@ -443,7 +444,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       // ============================================
 
     // SOLUTION NATIVE: Utiliser Supabase directement (triggers corrigés)
-    console.log('🔧 [OnboardingContextNew] Creating company via Supabase native client');
+    devLogger.log('🔧 [OnboardingContextNew] Creating company via Supabase native client');
     const companyData = {
           id: companyId,
           name: state.data.companyProfile.name,
@@ -486,7 +487,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           status: 'active'
         };
 
-    console.log('📤 [OnboardingContextNew] Company data to insert via Supabase:', companyData);
+    devLogger.log('📤 [OnboardingContextNew] Company data to insert via Supabase:', companyData);
     
     // Insertion directe dans Supabase (trigger corrigé)
     let { data: company, error: companyError } = await supabase
@@ -496,7 +497,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       .single();
     
     if (companyError) {
-      console.error('❌ [OnboardingContextNew] Company creation error:', companyError);
+      devLogger.error('❌ [OnboardingContextNew] Company creation error:', companyError);
 
       // Gestion spéciale des erreurs RLS/500 - tentative avec Service Role
       if (companyError.message?.includes('500') ||
@@ -504,7 +505,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           companyError.message?.includes('RLS') ||
           companyError.message?.includes('Internal Server Error')) {
 
-        console.warn('🔄 Erreur RLS détectée - tentative de création simplifiée');
+        devLogger.warn('🔄 Erreur RLS détectée - tentative de création simplifiée');
 
         // Tentative avec données minimales pour contourner RLS
         const minimalCompanyData = {
@@ -525,13 +526,13 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           .single();
 
         if (retryError) {
-          console.error('❌ Échec de la création simplifiée aussi:', retryError);
+          devLogger.error('❌ Échec de la création simplifiée aussi:', retryError);
           throw new Error(`Impossible de créer l'entreprise. Erreur: ${retryError.message}`);
         }
 
         // Succès avec données simplifiées
         company = retryCompany;
-        console.warn('✅ Entreprise créée avec données minimales');
+        devLogger.warn('✅ Entreprise créée avec données minimales');
       } else {
         throw new Error(`Failed to create company: ${companyError.message}`);
       }
@@ -541,7 +542,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
       // Create user-company relationship - BYPASS RLS avec Edge Function
       try {
-        console.log('🔧 Tentative création user_companies via Edge Function...');
+        devLogger.log('🔧 Tentative création user_companies via Edge Function...');
 
         // Tentative via Edge Function personnalisée pour bypass RLS
         const { data: edgeFunctionResult, error: edgeFunctionError } = await supabase.functions.invoke('create-company-onboarding', {
@@ -557,7 +558,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         });
 
         if (edgeFunctionError) {
-          console.warn('⚠️ Edge Function non disponible, fallback vers méthode directe');
+          devLogger.warn('⚠️ Edge Function non disponible, fallback vers méthode directe');
 
           // Fallback: insertion directe mais on ignore complètement les erreurs RLS
           const { error: userCompanyError } = await supabase
@@ -571,22 +572,22 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             });
 
           if (userCompanyError) {
-            console.error('❌ Erreur création user_companies:', userCompanyError);
+            devLogger.error('❌ Erreur création user_companies:', userCompanyError);
 
             // RÉCURSION INFINIE: On ignore TOUTES les erreurs RLS/récursion
             if (userCompanyError.message?.includes('recursion') ||
                 userCompanyError.message?.includes('infinite') ||
                 userCompanyError.message?.includes('policy') ||
                 userCompanyError.message?.includes('500')) {
-              console.warn('🔄 RÉCURSION/RLS détectée - IGNORÉE COMPLÈTEMENT pour finaliser onboarding');
+              devLogger.warn('🔄 RÉCURSION/RLS détectée - IGNORÉE COMPLÈTEMENT pour finaliser onboarding');
             } else {
               throw new Error(`Failed to create user-company relationship: ${userCompanyError.message}`);
             }
           } else {
-            console.log('✅ user_companies créé avec succès');
+            devLogger.log('✅ user_companies créé avec succès');
           }
         } else {
-          console.log('✅ user_companies créé via Edge Function');
+          devLogger.log('✅ user_companies créé via Edge Function');
         }
 
       } catch (relationshipError: any) {
@@ -596,12 +597,12 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         if (errorMsg.includes('recursion') ||
             errorMsg.includes('infinite') ||
             errorMsg.includes('policy')) {
-          console.warn('🔄 RÉCURSION INFINIE DÉTECTÉE - ONBOARDING CONTINUE QUAND MÊME');
+          devLogger.warn('🔄 RÉCURSION INFINIE DÉTECTÉE - ONBOARDING CONTINUE QUAND MÊME');
         } else {
-          console.error('❌ Erreur inattendue relation user-company:', errorMsg);
+          devLogger.error('❌ Erreur inattendue relation user-company:', errorMsg);
         }
         // Dans tous les cas, on continue pour permettre à l'utilisateur d'utiliser l'application
-        console.warn('⚠️ user_companies ignoré - l\'utilisateur pourra tout de même utiliser l\'application');
+        devLogger.warn('⚠️ user_companies ignoré - l\'utilisateur pourra tout de même utiliser l\'application');
       }
 
       // Create company modules
@@ -685,7 +686,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
       // Sauvegarder les préférences utilisateur (auparavant ENTIÈREMENT perdues !)
       if (state.data.preferences && Object.keys(state.data.preferences).length > 0) {
-        console.log('💾 Sauvegarde préférences utilisateur:', state.data.preferences);
+        devLogger.log('💾 Sauvegarde préférences utilisateur:', state.data.preferences);
 
         try {
           await supabase
@@ -719,9 +720,9 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
               auto_save: state.data.preferences.autoSave ?? true
             });
 
-          console.log('✅ Préférences utilisateur sauvegardées avec succès');
+          devLogger.log('✅ Préférences utilisateur sauvegardées avec succès');
         } catch (prefError) {
-          console.error('❌ Erreur sauvegarde préférences:', prefError);
+          devLogger.error('❌ Erreur sauvegarde préférences:', prefError);
           // Ne pas faire échouer tout l'onboarding pour les préférences
         }
       }
@@ -732,7 +733,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
       // Sauvegarder les features explorées et activées (auparavant ENTIÈREMENT perdues !)
       if (state.data.featuresExploration && Object.keys(state.data.featuresExploration).length > 0) {
-        console.log('💾 Sauvegarde features exploration:', state.data.featuresExploration);
+        devLogger.log('💾 Sauvegarde features exploration:', state.data.featuresExploration);
 
         try {
           const featuresToInsert = Object.entries(state.data.featuresExploration).map(([featureId, featureData]) => ({
@@ -758,10 +759,10 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
               .from('company_features')
               .insert(featuresToInsert);
 
-            console.log(`✅ ${featuresToInsert.length} features sauvegardées avec succès`);
+            devLogger.log(`✅ ${featuresToInsert.length} features sauvegardées avec succès`);
           }
         } catch (featuresError) {
-          console.error('❌ Erreur sauvegarde features:', featuresError);
+          devLogger.error('❌ Erreur sauvegarde features:', featuresError);
           // Ne pas faire échouer tout l'onboarding pour les features
         }
       }
@@ -821,7 +822,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       //   .upsert(sessionUpsertPayload, { onConflict: 'session_token' });
 
       // if (sessionUpsertError) {
-      //   console.error('❌ Erreur mise à jour session onboarding:', sessionUpsertError);
+      //   devLogger.error('❌ Erreur mise à jour session onboarding:', sessionUpsertError);
       // }
 
       try {
@@ -857,7 +858,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           .from('onboarding_history')
           .insert(historyEntries);
       } catch (historyError) {
-        console.error('❌ Erreur sauvegarde historique:', historyError);
+        devLogger.error('❌ Erreur sauvegarde historique:', historyError);
       }
 
       // DISABLED OnboardingStorageService due to missing onboarding_sessions table
@@ -882,19 +883,19 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       localStorage.removeItem('onboarding_company_data');
       localStorage.removeItem('onboarding_modules');
 
-      console.log('✅ Onboarding terminé avec succès - État local mis à jour');
+      devLogger.log('✅ Onboarding terminé avec succès - État local mis à jour');
 
       return { success: true };
     } catch (error) {
-      console.error('Failed to finalize onboarding - Detailed error:', error);
-      console.error('Error type:', typeof error);
-      console.error('Error constructor:', error?.constructor?.name);
-      console.error('Error keys:', error && typeof error === 'object' ? Object.keys(error) : 'not object');
+      devLogger.error('Failed to finalize onboarding - Detailed error:', error);
+      devLogger.error('Error type:', typeof error);
+      devLogger.error('Error constructor:', error?.constructor?.name);
+      devLogger.error('Error keys:', error && typeof error === 'object' ? Object.keys(error) : 'not object');
       
       // Gestion spécifique des erreurs
       if (error && typeof error === 'object' && 'code' in error) {
         const supabaseError = error as { code: string; message: string; details?: string; hint?: string };
-        console.error('Supabase error details:', {
+        devLogger.error('Supabase error details:', {
           code: supabaseError.code,
           message: supabaseError.message,
           details: supabaseError.details,
@@ -921,7 +922,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       }
       
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error('Generic error message:', errorMessage);
+      devLogger.error('Generic error message:', errorMessage);
       return { success: false, error: `Erreur lors de la finalisation: ${errorMessage}` };
     } finally {
       finalizationInProgress.current = false;
@@ -1022,3 +1023,4 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     </OnboardingContext.Provider>
   );
 };
+

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { devLogger } from '@/utils/devLogger';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -67,18 +68,18 @@ export function CompanySettings() {
 
   // Fonction pour charger les paramètres entreprise
   const loadCompanySettings = async () => {
-    console.log('📋 [DEBUG] loadCompanySettings appelé');
-    console.log('🏢 [DEBUG] currentCompany?.id:', currentCompany?.id);
+    devLogger.log('📋 [DEBUG] loadCompanySettings appelé');
+    devLogger.log('🏢 [DEBUG] currentCompany?.id:', currentCompany?.id);
 
     if (!currentCompany?.id) {
-      console.warn('❌ [DEBUG] Pas de currentCompany.id, arrêt du chargement');
+      devLogger.warn('❌ [DEBUG] Pas de currentCompany.id, arrêt du chargement');
       return;
     }
 
     setIsLoading(true);
     try {
-      console.log('🔍 [DEBUG] Requête Supabase SELECT...');
-      console.log('🆔 [DEBUG] Recherche entreprise avec ID:', currentCompany.id);
+      devLogger.log('🔍 [DEBUG] Requête Supabase SELECT...');
+      devLogger.log('🆔 [DEBUG] Recherche entreprise avec ID:', currentCompany.id);
 
       // Charger les données depuis Supabase
       const { data, error } = await supabase
@@ -87,11 +88,11 @@ export function CompanySettings() {
         .eq('id', currentCompany.id)
         .single();
 
-      console.log('📥 [DEBUG] Résultat chargement data:', data);
-      console.log('❌ [DEBUG] Résultat chargement error:', error);
+      devLogger.log('📥 [DEBUG] Résultat chargement data:', data);
+      devLogger.log('❌ [DEBUG] Résultat chargement error:', error);
 
       if (error) {
-        console.error('💥 [DEBUG] Erreur Supabase chargement détaillée:', {
+        devLogger.error('💥 [DEBUG] Erreur Supabase chargement détaillée:', {
           message: error.message,
           details: error.details,
           hint: error.hint,
@@ -101,23 +102,23 @@ export function CompanySettings() {
       }
 
       if (data) {
-        console.log('✅ [DEBUG] Données brutes Supabase:', data);
-        console.log('🔍 [DEBUG] Type de data:', typeof data, Array.isArray(data));
+        devLogger.log('✅ [DEBUG] Données brutes Supabase:', data);
+        devLogger.log('🔍 [DEBUG] Type de data:', typeof data, Array.isArray(data));
 
         // ✅ CORRECTION : Extraire l'objet du tableau si nécessaire
         const company = Array.isArray(data) ? data[0] : data;
-        console.log('🔍 [DEBUG] Objet company extrait:', company);
-        console.log('🔍 [DEBUG] Colonnes disponibles:', Object.keys(company));
+        devLogger.log('🔍 [DEBUG] Objet company extrait:', company);
+        devLogger.log('🔍 [DEBUG] Colonnes disponibles:', Object.keys(company));
 
         // Tests de mapping individuels
-        console.log('🔍 [DEBUG] company.name:', company.name);
-        console.log('🔍 [DEBUG] company.address:', company.address);
-        console.log('🔍 [DEBUG] company.postal_code:', company.postal_code);
-        console.log('🔍 [DEBUG] company.city:', company.city);
-        console.log('🔍 [DEBUG] company.phone:', company.phone);
-        console.log('🔍 [DEBUG] company.email:', company.email);
-        console.log('🔍 [DEBUG] company.default_currency:', company.default_currency);
-        console.log('🔍 [DEBUG] company.fiscal_year_type:', company.fiscal_year_type);
+        devLogger.log('🔍 [DEBUG] company.name:', company.name);
+        devLogger.log('🔍 [DEBUG] company.address:', company.address);
+        devLogger.log('🔍 [DEBUG] company.postal_code:', company.postal_code);
+        devLogger.log('🔍 [DEBUG] company.city:', company.city);
+        devLogger.log('🔍 [DEBUG] company.phone:', company.phone);
+        devLogger.log('🔍 [DEBUG] company.email:', company.email);
+        devLogger.log('🔍 [DEBUG] company.default_currency:', company.default_currency);
+        devLogger.log('🔍 [DEBUG] company.fiscal_year_type:', company.fiscal_year_type);
 
         const newSettings = {
           // ✅ Informations de base (COLONNES CONFIRMÉES)
@@ -149,51 +150,51 @@ export function CompanySettings() {
           employees: company.employee_count || ''
         };
 
-        console.log('📊 [DEBUG] Settings mappés:', newSettings);
-        console.log('🔍 [DEBUG] Valeurs mappées - name:', newSettings.name);
-        console.log('🔍 [DEBUG] Valeurs mappées - address:', newSettings.address);
-        console.log('🔍 [DEBUG] Valeurs mappées - postalCode:', newSettings.postalCode);
+        devLogger.log('📊 [DEBUG] Settings mappés:', newSettings);
+        devLogger.log('🔍 [DEBUG] Valeurs mappées - name:', newSettings.name);
+        devLogger.log('🔍 [DEBUG] Valeurs mappées - address:', newSettings.address);
+        devLogger.log('🔍 [DEBUG] Valeurs mappées - postalCode:', newSettings.postalCode);
 
         setSettings(newSettings);
       } else {
-        console.warn('⚠️ [DEBUG] Aucune donnée retournée par Supabase');
+        devLogger.warn('⚠️ [DEBUG] Aucune donnée retournée par Supabase');
       }
     } catch (error) {
-      console.error('💥 [DEBUG] Erreur dans catch chargement:', error instanceof Error ? error.message : String(error));
+      devLogger.error('💥 [DEBUG] Erreur dans catch chargement:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',
         description: 'Impossible de charger les paramètres entreprise',
         variant: 'destructive'
       });
     } finally {
-      console.log('🏁 [DEBUG] Fin chargement, setIsLoading(false)');
+      devLogger.log('🏁 [DEBUG] Fin chargement, setIsLoading(false)');
       setIsLoading(false);
     }
   };
 
   // Charger les paramètres entreprise
   useEffect(() => {
-    console.log('🔄 [DEBUG] useEffect loadCompanySettings déclenché');
-    console.log('🏢 [DEBUG] currentCompany dans useEffect:', currentCompany);
+    devLogger.log('🔄 [DEBUG] useEffect loadCompanySettings déclenché');
+    devLogger.log('🏢 [DEBUG] currentCompany dans useEffect:', currentCompany);
 
     loadCompanySettings();
   }, [currentCompany?.id, toast]);
 
   const handleSave = async () => {
-    console.log('🚀 [DEBUG] handleSave appelé');
-    console.log('🏢 [DEBUG] currentCompany:', currentCompany);
-    console.log('🏢 [DEBUG] currentCompany?.id:', currentCompany?.id);
+    devLogger.log('🚀 [DEBUG] handleSave appelé');
+    devLogger.log('🏢 [DEBUG] currentCompany:', currentCompany);
+    devLogger.log('🏢 [DEBUG] currentCompany?.id:', currentCompany?.id);
 
     if (!currentCompany?.id) {
-      console.warn('❌ [DEBUG] Pas de currentCompany.id, arrêt de la fonction');
+      devLogger.warn('❌ [DEBUG] Pas de currentCompany.id, arrêt de la fonction');
       return;
     }
 
-    console.log('📝 [DEBUG] Démarrage sauvegarde, données à sauvegarder:', settings);
+    devLogger.log('📝 [DEBUG] Démarrage sauvegarde, données à sauvegarder:', settings);
     setIsSaving(true);
 
     try {
-      console.log('🔄 [DEBUG] Appel Supabase UPDATE...');
+      devLogger.log('🔄 [DEBUG] Appel Supabase UPDATE...');
 
       // ✅ MAPPING COMPLET ALIGNÉ AVEC LE SCHÉMA SUPABASE
       const updateData = {
@@ -226,8 +227,8 @@ export function CompanySettings() {
         employee_count: settings.employees,
       };
 
-      console.log('📊 [DEBUG] Données sécurisées envoyées à Supabase:', updateData);
-      console.log('🆔 [DEBUG] ID entreprise pour WHERE:', currentCompany.id);
+      devLogger.log('📊 [DEBUG] Données sécurisées envoyées à Supabase:', updateData);
+      devLogger.log('🆔 [DEBUG] ID entreprise pour WHERE:', currentCompany.id);
 
       // Sauvegarder dans Supabase
       const { data, error } = await supabase
@@ -236,11 +237,11 @@ export function CompanySettings() {
         .eq('id', currentCompany.id)
         .select(); // Ajout de select() pour récupérer les données modifiées
 
-      console.log('📥 [DEBUG] Réponse Supabase data:', data);
-      console.log('❌ [DEBUG] Réponse Supabase error:', error);
+      devLogger.log('📥 [DEBUG] Réponse Supabase data:', data);
+      devLogger.log('❌ [DEBUG] Réponse Supabase error:', error);
 
       if (error) {
-        console.error('💥 [DEBUG] Erreur Supabase détaillée:', {
+        devLogger.error('💥 [DEBUG] Erreur Supabase détaillée:', {
           message: error.message,
           details: error.details,
           hint: error.hint,
@@ -249,20 +250,20 @@ export function CompanySettings() {
         throw error;
       }
 
-      console.log('✅ [DEBUG] Sauvegarde réussie!');
+      devLogger.log('✅ [DEBUG] Sauvegarde réussie!');
       toast({
         title: 'Paramètres sauvegardés',
         description: 'Les paramètres de l\'entreprise ont été mis à jour avec succès'
       });
 
       // Recharger les données après sauvegarde pour s'assurer que l'interface est à jour
-      console.log('🔄 [DEBUG] Rechargement des données après sauvegarde...');
+      devLogger.log('🔄 [DEBUG] Rechargement des données après sauvegarde...');
       await loadCompanySettings();
-      console.log('✅ [DEBUG] Données rechargées après sauvegarde');
+      devLogger.log('✅ [DEBUG] Données rechargées après sauvegarde');
     } catch (error) {
-      console.error('💥 [DEBUG] Erreur dans catch:', error instanceof Error ? error.message : String(error));
-      console.error('💥 [DEBUG] Type d\'erreur:', typeof error instanceof Error ? error.message : String(error));
-      console.error('💥 [DEBUG] Erreur complète:', JSON.stringify(error instanceof Error ? error.message : String(error), null, 2));
+      devLogger.error('💥 [DEBUG] Erreur dans catch:', error instanceof Error ? error.message : String(error));
+      devLogger.error('💥 [DEBUG] Type d\'erreur:', typeof error instanceof Error ? error.message : String(error));
+      devLogger.error('💥 [DEBUG] Erreur complète:', JSON.stringify(error instanceof Error ? error.message : String(error), null, 2));
 
       toast({
         title: 'Erreur',
@@ -270,7 +271,7 @@ export function CompanySettings() {
         variant: 'destructive'
       });
     } finally {
-      console.log('🏁 [DEBUG] Fin handleSave, setIsSaving(false)');
+      devLogger.log('🏁 [DEBUG] Fin handleSave, setIsSaving(false)');
       setIsSaving(false);
     }
   };
@@ -674,8 +675,8 @@ export function CompanySettings() {
       <div className="flex justify-end">
         <Button
           onClick={() => {
-            console.log('🔘 [DEBUG] Bouton "Sauvegarder" cliqué');
-            console.log('🔘 [DEBUG] isSaving:', isSaving);
+            devLogger.log('🔘 [DEBUG] Bouton "Sauvegarder" cliqué');
+            devLogger.log('🔘 [DEBUG] isSaving:', isSaving);
             handleSave();
           }}
           disabled={isSaving}
@@ -738,3 +739,4 @@ export function CompanySettings() {
     </div>
   );
 }
+

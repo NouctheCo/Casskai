@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { devLogger } from '@/utils/devLogger';
 import { Enterprise, EnterpriseTaxConfiguration } from '../types/enterprise.types';
 import { useToast } from '../components/ui/use-toast';
 import { supabase } from '../lib/supabase';
@@ -37,7 +38,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const loadEnterprises = async () => {
     // First try to load from Supabase
-    console.log('🏢 Loading enterprises from Supabase...');
+    devLogger.log('🏢 Loading enterprises from Supabase...');
     
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -133,16 +134,16 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           }
           
           setLoading(false);
-          console.log('✅ Enterprises loaded from Supabase');
+          devLogger.log('✅ Enterprises loaded from Supabase');
           return;
         }
       }
     } catch (error) {
-      console.error('❌ Error loading enterprises from Supabase:', error instanceof Error ? error.message : String(error));
+      devLogger.error('❌ Error loading enterprises from Supabase:', error instanceof Error ? error.message : String(error));
     }
 
     // Fallback to localStorage
-    console.log('🏢 Falling back to localStorage...');
+    devLogger.log('🏢 Falling back to localStorage...');
     
     const savedEnterprises = localStorage.getItem('casskai_enterprises');
     let enterpriseList: Enterprise[] = [];
@@ -150,15 +151,15 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     if (savedEnterprises) {
       try {
         enterpriseList = JSON.parse(savedEnterprises);
-        console.log('📦 Enterprises loaded from localStorage:', enterpriseList);
+        devLogger.log('📦 Enterprises loaded from localStorage:', enterpriseList);
       } catch (error) {
-        console.error('❌ Error parsing enterprises from localStorage:', error instanceof Error ? error.message : String(error));
+        devLogger.error('❌ Error parsing enterprises from localStorage:', error instanceof Error ? error.message : String(error));
       }
     }
     
     // If no enterprises, wait for onboarding to create one
     if (enterpriseList.length === 0) {
-      console.log('🏢 No enterprises found. User needs to complete onboarding.');
+      devLogger.log('🏢 No enterprises found. User needs to complete onboarding.');
 
       // Ne pas utiliser l'entreprise par défaut avec un ID invalide
       // L'utilisateur doit terminer l'onboarding pour créer sa première entreprise
@@ -178,7 +179,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
     
     setLoading(false);
-    console.log('✅ Enterprises loaded from localStorage');
+    devLogger.log('✅ Enterprises loaded from localStorage');
   };
 
   useEffect(() => {
@@ -186,7 +187,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     
     // Listen for custom refresh event
     const handleRefresh = () => {
-      console.log('🔄 Actualisation forcée des entreprises...');
+      devLogger.log('🔄 Actualisation forcée des entreprises...');
       loadEnterprises();
     };
     
@@ -200,7 +201,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const currentEnterprise = enterprises.find(e => e.id === currentEnterpriseId) || null;
 
   const addEnterprise = async (enterpriseData: Omit<Enterprise, 'id' | 'createdAt' | 'updatedAt'>) => {
-    console.log('🏢 Ajout d\'une nouvelle entreprise:', enterpriseData);
+    devLogger.log('🏢 Ajout d\'une nouvelle entreprise:', enterpriseData);
     
     const newEnterprise: Enterprise = {
       ...enterpriseData,
@@ -218,11 +219,11 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       description: `L'entreprise ${newEnterprise.name} a été ajoutée avec succès.`
     });
     
-    console.log('✅ Entreprise ajoutée avec succès');
+    devLogger.log('✅ Entreprise ajoutée avec succès');
   };
 
   const updateEnterprise = async (id: string, data: Partial<Enterprise>) => {
-    console.log('🔄 Mise à jour de l\'entreprise:', id, data);
+    devLogger.log('🔄 Mise à jour de l\'entreprise:', id, data);
 
     const updatedEnterprises = enterprises.map(enterprise =>
       enterprise.id === id
@@ -238,11 +239,11 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       description: 'Les informations de l\'entreprise ont été mises à jour avec succès.'
     });
     
-    console.log('✅ Entreprise mise à jour avec succès');
+    devLogger.log('✅ Entreprise mise à jour avec succès');
   };
 
   const deleteEnterprise = async (id: string) => {
-    console.log('🗑️ Suppression de l\'entreprise:', id);
+    devLogger.log('🗑️ Suppression de l\'entreprise:', id);
     
     const updatedEnterprises = enterprises.filter(enterprise => enterprise.id !== id);
     setEnterprises(updatedEnterprises);
@@ -264,11 +265,11 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       description: 'L\'entreprise a été supprimée avec succès.'
     });
     
-    console.log('✅ Entreprise supprimée avec succès');
+    devLogger.log('✅ Entreprise supprimée avec succès');
   };
 
   const switchEnterprise = (enterpriseId: string) => {
-    console.log('🔄 Changement d\'entreprise:', enterpriseId);
+    devLogger.log('🔄 Changement d\'entreprise:', enterpriseId);
     setCurrentEnterpriseId(enterpriseId);
     localStorage.setItem('casskai_current_enterprise', enterpriseId);
     
