@@ -29,22 +29,21 @@ export class BudgetInsightProvider extends BankingProvider {
     try {
       await this.authenticateClient();
       this.isInitialized = true;
-  } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
+    } catch (error) {
+      const err = error as { message?: string };
       throw new BankingProviderError(
         'INIT_ERROR',
-    `Failed to initialize Budget Insight provider: ${(_error as { message?: string })?.message}`,
-    _error as { message?: string }
+        `Failed to initialize Budget Insight provider: ${err?.message}`,
+        error
       );
     }
   }
 
   async isHealthy(): Promise<boolean> {
     try {
-  const response = await this.makeRequest<{ status: string }>('GET', '/2.0/status');
+      const response = await this.makeRequest<{ status: string }>('GET', '/2.0/status');
       return response.status === 'OK';
-  } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
+    } catch {
       return false;
     }
   }
@@ -56,14 +55,13 @@ export class BudgetInsightProvider extends BankingProvider {
         `${this.config.config.clientId}:${this.config.config.clientSecret}`
       ).toString('base64');
 
-  const response = await this.makeRequest<{ access_token: string; expires_in: number }>('POST', '/2.0/auth/init', {}, {
+      const response = await this.makeRequest<{ access_token: string; expires_in: number }>('POST', '/2.0/auth/init', {}, {
         'Authorization': `Basic ${credentials}`
       });
 
       this.accessToken = response.access_token;
       this.tokenExpiresAt = new Date(Date.now() + response.expires_in * 1000);
-  } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
+    } catch {
       throw new AuthenticationError('Failed to authenticate with Budget Insight API');
     }
   }
@@ -104,7 +102,6 @@ export class BudgetInsightProvider extends BankingProvider {
 
       return this.createResponse(connection);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -114,23 +111,23 @@ export class BudgetInsightProvider extends BankingProvider {
 
     try {
       // En production, récupérer userId et connectionId depuis la base de données
-  const _userId = ''; // À récupérer depuis la DB
+      const _userId = ''; // À récupérer depuis la DB
       const biConnectionId = ''; // À récupérer depuis la DB
-      
-  const response = await this.makeRequest<{
+
+      const response = await this.makeRequest<{
         id: number;
         id_connector: string;
         state: string;
         last_update: number;
         created: number;
         connector: { name: string; logo?: string };
-  }>('GET', `/2.0/users/${_userId}/connections/${biConnectionId}`, {
+      }>('GET', `/2.0/users/${_userId}/connections/${biConnectionId}`, {
         expand: 'connector'
       });
 
       const connection: BankConnection = {
         id: connectionId,
-  userId: _userId,
+        userId: _userId,
         providerId: this.providerId,
         providerName: this.providerName,
         bankName: response.connector.name,
@@ -149,25 +146,23 @@ export class BudgetInsightProvider extends BankingProvider {
 
       return this.createResponse(connection);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
 
   async updateConnection(connectionId: string, _updates: Partial<BankConnection>): Promise<OpenBankingResponse<BankConnection>> {
     this.validateConnectionId(connectionId);
-    
-    try {
-  const _initUserId = ''; // À récupérer depuis la DB
-  const biConnectionId = ''; // À récupérer depuis la DB
 
-  await this.makeRequest<unknown>('PUT', `/2.0/users/${_initUserId}/connections/${biConnectionId}`, {
+    try {
+      const _initUserId = ''; // À récupérer depuis la DB
+      const biConnectionId = ''; // À récupérer depuis la DB
+
+      await this.makeRequest<unknown>('PUT', `/2.0/users/${_initUserId}/connections/${biConnectionId}`, {
         // Budget Insight specific updates
       });
 
       return await this.getConnection(connectionId);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -176,14 +171,13 @@ export class BudgetInsightProvider extends BankingProvider {
     this.validateConnectionId(connectionId);
 
     try {
-  const _userId2 = ''; // À récupérer depuis la DB
-  const biConnectionId = ''; // À récupérer depuis la DB
-      
-  await this.makeRequest<unknown>('DELETE', `/2.0/users/${_userId2}/connections/${biConnectionId}`);
-      
+      const _userId2 = ''; // À récupérer depuis la DB
+      const biConnectionId = ''; // À récupérer depuis la DB
+
+      await this.makeRequest<unknown>('DELETE', `/2.0/users/${_userId2}/connections/${biConnectionId}`);
+
       return this.createResponse(undefined);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -192,14 +186,13 @@ export class BudgetInsightProvider extends BankingProvider {
     this.validateConnectionId(connectionId);
 
     try {
-    const _userId3 = ''; // À récupérer depuis la DB
-    const biConnectionId = ''; // À récupérer depuis la DB
+      const _userId3 = ''; // À récupérer depuis la DB
+      const biConnectionId = ''; // À récupérer depuis la DB
 
-  await this.makeRequest<unknown>('POST', `/2.0/users/${_userId3}/connections/${biConnectionId}/sources`);
+      await this.makeRequest<unknown>('POST', `/2.0/users/${_userId3}/connections/${biConnectionId}/sources`);
 
       return await this.getConnection(connectionId);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -225,7 +218,6 @@ export class BudgetInsightProvider extends BankingProvider {
 
       return this.createResponse(authFlow);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -234,37 +226,35 @@ export class BudgetInsightProvider extends BankingProvider {
     try {
       // Budget Insight gère l'authentification côté serveur
       // Le statut de la connexion est mis à jour automatiquement
-  await this.makeRequest<unknown>('POST', '/2.0/auth/complete', { code: authCode });
+      await this.makeRequest<unknown>('POST', '/2.0/auth/complete', { code: authCode });
       const connectionId = ''; // À récupérer depuis _authFlowId
       return await this.getConnection(connectionId);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
 
   async handleSCA(authFlowId: string, challengeResponse: string): Promise<OpenBankingResponse<PSD2AuthFlow>> {
     try {
-  const _userId = ''; // À récupérer depuis authFlowId
-  const _biConnectionId = ''; // À récupérer depuis authFlowId
+      const _userId = ''; // À récupérer depuis authFlowId
+      const _biConnectionId = ''; // À récupérer depuis authFlowId
 
-  const response = await this.makeRequest<{ state: string; consent_id: string; expires_at: number }>('POST', `/2.0/users/${_userId}/connections/${_biConnectionId}/sca`, {
+      const response = await this.makeRequest<{ state: string; consent_id: string; expires_at: number }>('POST', `/2.0/users/${_userId}/connections/${_biConnectionId}/sca`, {
         value: challengeResponse
       });
 
       const authFlow: PSD2AuthFlow = {
         id: authFlowId,
         connectionId: '',
-  status: response.state === 'valid' ? 'completed' : 'pending_sca',
-  consentId: authFlowId,
-  expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+        status: response.state === 'valid' ? 'completed' : 'pending_sca',
+        consentId: authFlowId,
+        expiresAt: new Date(Date.now() + 15 * 60 * 1000),
         createdAt: new Date(),
         updatedAt: new Date()
       };
 
       return this.createResponse(authFlow);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -274,8 +264,8 @@ export class BudgetInsightProvider extends BankingProvider {
     this.validateConnectionId(connectionId);
 
     try {
-  const _userId = ''; // À récupérer depuis la DB
-  const response = await this.makeRequest<{ accounts: Array<{
+      const _userId = ''; // À récupérer depuis la DB
+      const response = await this.makeRequest<{ accounts: Array<{
         id: number;
         name: string;
         connection: { id: number };
@@ -288,7 +278,7 @@ export class BudgetInsightProvider extends BankingProvider {
         number?: string;
         disabled?: boolean;
         last_update: number;
-  }>; }>('GET', `/2.0/users/${_userId}/accounts`, {
+      }>; }>('GET', `/2.0/users/${_userId}/accounts`, {
         expand: 'connection'
       });
 
@@ -318,7 +308,6 @@ export class BudgetInsightProvider extends BankingProvider {
 
       return this.createResponse(accounts);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -328,8 +317,8 @@ export class BudgetInsightProvider extends BankingProvider {
     this.validateAccountId(accountId);
 
     try {
-  const _userId3 = ''; // À récupérer depuis la DB
-  const response = await this.makeRequest<{
+      const _userId3 = ''; // À récupérer depuis la DB
+      const response = await this.makeRequest<{
         id: number;
         name: string;
         type: string;
@@ -341,7 +330,7 @@ export class BudgetInsightProvider extends BankingProvider {
         number?: string;
         disabled?: boolean;
         last_update: number;
-  }>('GET', `/2.0/users/${_userId3}/accounts/${accountId}`);
+      }>('GET', `/2.0/users/${_userId3}/accounts/${accountId}`);
 
       const account: BankAccount = {
         id: crypto.randomUUID(),
@@ -363,7 +352,6 @@ export class BudgetInsightProvider extends BankingProvider {
 
       return this.createResponse(account);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -373,7 +361,6 @@ export class BudgetInsightProvider extends BankingProvider {
       // Budget Insight synchronise automatiquement lors de la requête
       return await this.getAccount(connectionId, accountId);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -394,7 +381,7 @@ export class BudgetInsightProvider extends BankingProvider {
     this.validateDateRange(options.startDate, options.endDate);
 
     try {
-  const _userId4 = ''; // À récupérer depuis la DB
+      const _userId4 = ''; // À récupérer depuis la DB
       const params: Record<string, string> = {
         limit: (options.limit || 100).toString(),
         expand: 'category'
@@ -428,11 +415,11 @@ export class BudgetInsightProvider extends BankingProvider {
           state?: string;
         }>;
         pagination?: { next_uri?: string; offset?: number };
-      }>('GET', 
+      }>('GET',
         `/2.0/users/${_userId4}/accounts/${accountId}/transactions?${queryString}`
       );
 
-  const transactions: BankTransaction[] = response.transactions.map((tx) => ({
+      const transactions: BankTransaction[] = response.transactions.map((tx) => ({
         id: crypto.randomUUID(),
         accountId,
         transactionId: tx.id.toString(),
@@ -441,7 +428,7 @@ export class BudgetInsightProvider extends BankingProvider {
         amount: parseFloat(tx.value),
         currency: tx.currency?.code || 'EUR',
         description: this.normalizeDescription(tx.simplified_wording || tx.wording),
-  originalDescription: (tx as unknown as { original_wording?: string }).original_wording || tx.wording,
+        originalDescription: (tx as unknown as { original_wording?: string }).original_wording || tx.wording,
         category: tx.category ? this.mapBudgetInsightCategory(tx.category) : undefined,
         type: parseFloat(tx.value) >= 0 ? 'credit' : 'debit',
         status: tx.coming ? 'pending' : 'posted',
@@ -457,8 +444,8 @@ export class BudgetInsightProvider extends BankingProvider {
         }
       }));
 
-      const nextCursor = response.pagination && response.pagination.next_uri 
-        ? response.pagination.offset?.toString() 
+      const nextCursor = response.pagination && response.pagination.next_uri
+        ? response.pagination.offset?.toString()
         : undefined;
 
       return this.createResponse({
@@ -466,19 +453,18 @@ export class BudgetInsightProvider extends BankingProvider {
         nextCursor
       });
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
 
   async syncTransactions(connectionId: string, accountId: string): Promise<OpenBankingResponse<SyncResult>> {
     try {
-  const _userId5 = ''; // À récupérer depuis la DB
-  const biConnectionId = ''; // À récupérer depuis la DB
+      const _userId5 = ''; // À récupérer depuis la DB
+      const biConnectionId = ''; // À récupérer depuis la DB
 
       // Force synchronization avec Budget Insight
-  await this.makeRequest<unknown>('POST', `/2.0/users/${_userId5}/connections/${biConnectionId}/sources`);
-      
+      await this.makeRequest<unknown>('POST', `/2.0/users/${_userId5}/connections/${biConnectionId}/sources`);
+
       // Attendre un peu pour la synchronisation
       await new Promise(resolve => setTimeout(resolve, 2000));
 
@@ -502,7 +488,6 @@ export class BudgetInsightProvider extends BankingProvider {
 
       return this.createResponse(syncResult);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -526,7 +511,6 @@ export class BudgetInsightProvider extends BankingProvider {
 
       return this.createResponse(syncResults);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -538,7 +522,6 @@ export class BudgetInsightProvider extends BankingProvider {
       // Cette configuration se fait généralement via le dashboard
       return this.createResponse(undefined);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -548,7 +531,6 @@ export class BudgetInsightProvider extends BankingProvider {
       // Budget Insight webhook removal
       return this.createResponse(undefined);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -569,7 +551,6 @@ export class BudgetInsightProvider extends BankingProvider {
 
       return this.createResponse(undefined);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -591,8 +572,8 @@ export class BudgetInsightProvider extends BankingProvider {
   // Enrichissement
   async categorizeTransaction(transaction: BankTransaction): Promise<OpenBankingResponse<BankTransaction>> {
     try {
-  const _userId6 = ''; // À récupérer depuis la DB
-  const response = await this.makeRequest<{ category?: { name?: string } }>('POST', `/2.0/users/${_userId6}/transactions/categorize`, {
+      const _userId6 = ''; // À récupérer depuis la DB
+      const response = await this.makeRequest<{ category?: { name?: string } }>('POST', `/2.0/users/${_userId6}/transactions/categorize`, {
         wording: transaction.description,
         value: transaction.amount
       });
@@ -604,7 +585,6 @@ export class BudgetInsightProvider extends BankingProvider {
 
       return this.createResponse(enrichedTransaction);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -656,7 +636,7 @@ export class BudgetInsightProvider extends BankingProvider {
       }
 
       const result = await response.json();
-      
+
       if (result.error) {
         throw new BankingProviderError(
           result.error.code || 'API_ERROR',
@@ -667,7 +647,6 @@ export class BudgetInsightProvider extends BankingProvider {
 
       return result;
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
       if (error instanceof BankingProviderError) {
         throw error;
       }

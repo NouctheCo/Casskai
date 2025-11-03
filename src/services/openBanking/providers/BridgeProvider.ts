@@ -96,12 +96,11 @@ export class BridgeProvider extends BankingProvider {
       await this.authenticateClient();
       this.isInitialized = true;
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      const error = _error as Error;
+      const err = error as Error;
       throw new BankingProviderError(
         'INIT_ERROR',
-        `Failed to initialize Bridge provider: ${error.message}`,
-        _error
+        `Failed to initialize Bridge provider: ${err.message}`,
+        error
       );
     }
   }
@@ -110,8 +109,7 @@ export class BridgeProvider extends BankingProvider {
     try {
       const response = await this.makeRequest('GET', '/v2/status') as BridgeStatusResponse;
       return response.status === 'ok';
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
+    } catch {
       return false;
     }
   }
@@ -125,8 +123,7 @@ export class BridgeProvider extends BankingProvider {
       }) as BridgeAuthResponse;
 
       this.accessToken = response.access_token;
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
+    } catch {
       throw new AuthenticationError('Failed to authenticate with Bridge API');
     }
   }
@@ -167,8 +164,7 @@ export class BridgeProvider extends BankingProvider {
 
       return this.createResponse(connection);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -200,8 +196,7 @@ export class BridgeProvider extends BankingProvider {
 
       return this.createResponse(connection);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -216,11 +211,10 @@ export class BridgeProvider extends BankingProvider {
     try {
       const itemId = ''; // À récupérer depuis la DB
       await this.makeRequest('DELETE', `/v2/connect/items/${itemId}`);
-      
+
       return this.createResponse(undefined);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -234,8 +228,7 @@ export class BridgeProvider extends BankingProvider {
       // Mettre à jour la connexion avec les nouvelles données
       return await this.getConnection(connectionId);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -261,8 +254,7 @@ export class BridgeProvider extends BankingProvider {
 
       return this.createResponse(authFlow);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -276,8 +268,7 @@ export class BridgeProvider extends BankingProvider {
       const connectionId = ''; // À récupérer depuis authFlowId
       return await this.getConnection(connectionId);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -299,9 +290,8 @@ export class BridgeProvider extends BankingProvider {
       };
 
       return this.createResponse(authFlow);
-  } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      return this.handleError(_error);
+    } catch (error) {
+      return this.handleError(error);
     }
   }
 
@@ -335,9 +325,8 @@ export class BridgeProvider extends BankingProvider {
       }));
 
       return this.createResponse(accounts);
-  } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      return this.handleError(_error);
+    } catch (error) {
+      return this.handleError(error);
     }
   }
 
@@ -367,8 +356,7 @@ export class BridgeProvider extends BankingProvider {
 
       return this.createResponse(account);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -377,7 +365,6 @@ export class BridgeProvider extends BankingProvider {
       await this.makeRequest('POST', `/v2/accounts/${accountId}/refresh`);
       return await this.getAccount(connectionId, accountId);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
       return this.handleError(error);
     }
   }
@@ -444,8 +431,7 @@ export class BridgeProvider extends BankingProvider {
         nextCursor: response.pagination?.next_uri ? 'next_page' : undefined
       });
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -474,8 +460,7 @@ export class BridgeProvider extends BankingProvider {
 
       return this.createResponse(syncResult);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -495,9 +480,8 @@ export class BridgeProvider extends BankingProvider {
       }
 
       return this.createResponse(syncResults);
-  } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      return this.handleError(_error);
+    } catch (error) {
+      return this.handleError(error);
     }
   }
 
@@ -514,8 +498,7 @@ export class BridgeProvider extends BankingProvider {
 
       return this.createResponse(undefined);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -525,8 +508,7 @@ export class BridgeProvider extends BankingProvider {
       await this.makeRequest('DELETE', `/v2/webhooks/${webhookId}`);
       return this.createResponse(undefined);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -545,9 +527,8 @@ export class BridgeProvider extends BankingProvider {
       }
 
       return this.createResponse(undefined);
-  } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      return this.handleError(_error);
+    } catch (error) {
+      return this.handleError(error);
     }
   }
 
@@ -583,8 +564,7 @@ export class BridgeProvider extends BankingProvider {
       await this.makeRequest('POST', `/v2/connect/items/${itemId}/refresh`);
       return this.createResponse(undefined);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -594,8 +574,7 @@ export class BridgeProvider extends BankingProvider {
       await this.makeRequest('POST', `/v2/connect/items/${itemId}/revoke`);
       return this.createResponse(undefined);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -631,7 +610,7 @@ export class BridgeProvider extends BankingProvider {
       }
 
       const result = await response.json();
-      
+
       if (result.error) {
         throw new BankingProviderError(
           result.error.type || 'API_ERROR',
@@ -642,12 +621,11 @@ export class BridgeProvider extends BankingProvider {
 
       return result;
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      if (_error instanceof BankingProviderError) {
-        throw _error;
+      if (error instanceof BankingProviderError) {
+        throw error;
       }
-      const error = _error as Error;
-      throw new NetworkError(`Request failed: ${error.message}`, _error);
+      const err = error as Error;
+      throw new NetworkError(`Request failed: ${err.message}`, error);
     }
   }
 

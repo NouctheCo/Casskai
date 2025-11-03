@@ -23,7 +23,9 @@ interface ImportMetaEnv {
   readonly VITE_BETA_FEEDBACK_ENABLED?: string;
   readonly VITE_E2E_BYPASS_AUTH?: string;
   readonly VITE_DEBUG_MODE?: string;
+  readonly VITE_LOG_LEVEL?: string;
   readonly DEV?: boolean;
+  readonly PROD?: boolean;
   readonly MODE?: string;
 }
 
