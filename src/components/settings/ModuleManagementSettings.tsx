@@ -1,13 +1,23 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { devLogger } from '@/utils/devLogger';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { devLogger } from '@/utils/devLogger';
 import { Button } from '@/components/ui/button';
+import { devLogger } from '@/utils/devLogger';
 import { Switch } from '@/components/ui/switch';
+import { devLogger } from '@/utils/devLogger';
 import { Label } from '@/components/ui/label';
+import { devLogger } from '@/utils/devLogger';
 import { Badge } from '@/components/ui/badge';
+import { devLogger } from '@/utils/devLogger';
 import { useToast } from '@/components/ui/use-toast';
+import { devLogger } from '@/utils/devLogger';
 import { useAuth } from '@/contexts/AuthContext';
+import { devLogger } from '@/utils/devLogger';
 import { useModules } from '@/hooks/modules.hooks';
+import { devLogger } from '@/utils/devLogger';
 import { Settings, Zap, Star, CheckCircle, AlertCircle, Loader2, Save, Info } from 'lucide-react';
+import { devLogger } from '@/utils/devLogger';
 
 /**
  * Composant unifié pour la gestion des modules
@@ -77,7 +87,7 @@ export function ModuleManagementSettings() {
 
     setIsSaving(true);
     try {
-      console.log('🔧 Application des changements de modules:', pendingChanges);
+      devLogger.log('🔧 Application des changements de modules:', pendingChanges);
 
       const changeEntries = Object.entries(pendingChanges);
       const results = await Promise.allSettled(
@@ -97,14 +107,14 @@ export function ModuleManagementSettings() {
 
             if (willBeActive) {
               await activateModule(moduleKey);
-              console.log(`✅ Module ${moduleKey} activé`);
+              devLogger.log(`✅ Module ${moduleKey} activé`);
             } else {
               await deactivateModule(moduleKey);
-              console.log(`✅ Module ${moduleKey} désactivé`);
+              devLogger.log(`✅ Module ${moduleKey} désactivé`);
             }
             return { moduleKey, success: true };
           } catch (error) {
-            console.error(`❌ Erreur module ${moduleKey}:`, error instanceof Error ? error.message : String(error));
+            devLogger.error(`❌ Erreur module ${moduleKey}:`, error instanceof Error ? error.message : String(error));
             return { moduleKey, success: false, error };
           }
         })
@@ -163,7 +173,7 @@ export function ModuleManagementSettings() {
       });
 
     } catch (error) {
-      console.error('❌ Erreur globale sauvegarde modules:', error instanceof Error ? error.message : String(error));
+      devLogger.error('❌ Erreur globale sauvegarde modules:', error instanceof Error ? error.message : String(error));
       toast({
         title: 'Erreur',
         description: 'Impossible de sauvegarder les modifications',

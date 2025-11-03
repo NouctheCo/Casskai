@@ -164,7 +164,7 @@ export class BridgeProvider extends BankingProvider {
 
       return this.createResponse(connection);
     } catch (error) {
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -196,7 +196,7 @@ export class BridgeProvider extends BankingProvider {
 
       return this.createResponse(connection);
     } catch (error) {
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -214,7 +214,7 @@ export class BridgeProvider extends BankingProvider {
       
       return this.createResponse(undefined);
     } catch (error) {
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -228,7 +228,7 @@ export class BridgeProvider extends BankingProvider {
       // Mettre à jour la connexion avec les nouvelles données
       return await this.getConnection(connectionId);
     } catch (error) {
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -254,7 +254,7 @@ export class BridgeProvider extends BankingProvider {
 
       return this.createResponse(authFlow);
     } catch (error) {
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -268,7 +268,7 @@ export class BridgeProvider extends BankingProvider {
       const connectionId = ''; // À récupérer depuis authFlowId
       return await this.getConnection(connectionId);
     } catch (error) {
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -291,7 +291,7 @@ export class BridgeProvider extends BankingProvider {
 
       return this.createResponse(authFlow);
   } catch (error) {
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -326,7 +326,7 @@ export class BridgeProvider extends BankingProvider {
 
       return this.createResponse(accounts);
   } catch (error) {
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -356,7 +356,7 @@ export class BridgeProvider extends BankingProvider {
 
       return this.createResponse(account);
     } catch (error) {
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -431,7 +431,7 @@ export class BridgeProvider extends BankingProvider {
         nextCursor: response.pagination?.next_uri ? 'next_page' : undefined
       });
     } catch (error) {
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -460,7 +460,7 @@ export class BridgeProvider extends BankingProvider {
 
       return this.createResponse(syncResult);
     } catch (error) {
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -481,7 +481,7 @@ export class BridgeProvider extends BankingProvider {
 
       return this.createResponse(syncResults);
   } catch (error) {
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -498,7 +498,7 @@ export class BridgeProvider extends BankingProvider {
 
       return this.createResponse(undefined);
     } catch (error) {
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -508,7 +508,7 @@ export class BridgeProvider extends BankingProvider {
       await this.makeRequest('DELETE', `/v2/webhooks/${webhookId}`);
       return this.createResponse(undefined);
     } catch (error) {
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -528,7 +528,7 @@ export class BridgeProvider extends BankingProvider {
 
       return this.createResponse(undefined);
   } catch (error) {
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -564,7 +564,7 @@ export class BridgeProvider extends BankingProvider {
       await this.makeRequest('POST', `/v2/connect/items/${itemId}/refresh`);
       return this.createResponse(undefined);
     } catch (error) {
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -574,7 +574,7 @@ export class BridgeProvider extends BankingProvider {
       await this.makeRequest('POST', `/v2/connect/items/${itemId}/revoke`);
       return this.createResponse(undefined);
     } catch (error) {
-      return this.handleError(_error);
+      return this.handleError(error);
     }
   }
 
@@ -692,3 +692,4 @@ export class BridgeProvider extends BankingProvider {
     return categoryMap[categoryId] || 'Autre';
   }
 }
+

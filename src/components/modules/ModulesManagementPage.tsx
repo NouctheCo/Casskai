@@ -1,13 +1,23 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { devLogger } from '@/utils/devLogger';
 import { useNavigate } from 'react-router-dom';
+import { devLogger } from '@/utils/devLogger';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { devLogger } from '@/utils/devLogger';
 import { Button } from '@/components/ui/button';
+import { devLogger } from '@/utils/devLogger';
 import { Badge } from '@/components/ui/badge';
+import { devLogger } from '@/utils/devLogger';
 import { Switch } from '@/components/ui/switch';
+import { devLogger } from '@/utils/devLogger';
 import { Input } from '@/components/ui/input';
+import { devLogger } from '@/utils/devLogger';
 import { useModulesSafe } from '@/contexts/ModulesContext';
+import { devLogger } from '@/utils/devLogger';
 import { motion } from 'framer-motion';
+import { devLogger } from '@/utils/devLogger';
 import { 
+import { devLogger } from '@/utils/devLogger';
   Home,
   Briefcase,
   FileText,
@@ -321,7 +331,7 @@ const ModuleCard: React.FC<ModuleCardProps> = ({
               <Switch
                 checked={isActive}
                 onCheckedChange={(checked) => {
-                  console.log(`Switch changé pour ${module.key}: ${checked}`);
+                  devLogger.log(`Switch changé pour ${module.key}: ${checked}`);
                   onToggle(module.key, checked);
                 }}
                 disabled={
@@ -383,13 +393,13 @@ export default function ModulesManagementPage() {
   // Écouter les changements d'état des modules
   useEffect(() => {
     const handleModuleStateChange = (event: CustomEvent) => {
-      console.log('Module state changed:', event.detail);
+      devLogger.log('Module state changed:', event.detail);
       const stored = localStorage.getItem('casskai-module-states');
       setModuleStates(stored ? JSON.parse(stored) : {});
     };
 
     const handleModuleStatesReset = () => {
-      console.log('Module states reset');
+      devLogger.log('Module states reset');
       const stored = localStorage.getItem('casskai-module-states');
       setModuleStates(stored ? JSON.parse(stored) : {});
     };
@@ -446,7 +456,7 @@ export default function ModulesManagementPage() {
   }, [filteredModules, categories]);
 
   const handleToggleModule = (key: string, active: boolean) => {
-    console.log(`Tentative de ${active ? 'activation' : 'désactivation'} du module ${key}`);
+    devLogger.log(`Tentative de ${active ? 'activation' : 'désactivation'} du module ${key}`);
 
     // En plan payant : vérifier si le module est autorisé pour ce plan
     if (!isTrialUser) {
@@ -493,22 +503,22 @@ export default function ModulesManagementPage() {
         }
       }));
 
-      console.log(`Module ${key} ${active ? 'activé' : 'désactivé'} avec succès`);
+      devLogger.log(`Module ${key} ${active ? 'activé' : 'désactivé'} avec succès`);
     } catch (error) {
-      console.error('Erreur lors du toggle du module:', error instanceof Error ? error.message : String(error));
+      devLogger.error('Erreur lors du toggle du module:', error instanceof Error ? error.message : String(error));
     }
   };
 
   const handleOpenModule = (path: string) => {
     // Vérifier que le chemin n'est pas vide et naviguer correctement
-    console.log('Navigation vers:', path);
+    devLogger.log('Navigation vers:', path);
     
     if (path && path !== '#') {
       // Utiliser React Router pour la navigation au lieu de window.location.href
       // Cela évite les rechargements de page et les redirections non désirées
       navigate(path);
     } else {
-      console.warn('Chemin de module invalide:', path);
+      devLogger.warn('Chemin de module invalide:', path);
     }
   };
 

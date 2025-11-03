@@ -1,7 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
+import { devLogger } from '@/utils/devLogger';
 import { supabase } from '@/lib/supabase';
+import { devLogger } from '@/utils/devLogger';
 import { useAuth } from '@/contexts/AuthContext';
+import { devLogger } from '@/utils/devLogger';
 import type { Database } from '@/types/database.types';
+import { devLogger } from '@/utils/devLogger';
 
 // Generic Supabase hook for CRUD operations with multi-tenancy
 export function useSupabase<T extends keyof Database['public']['Tables']>(
@@ -50,7 +54,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
       setData(result || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch data');
-      console.error(`Error fetching ${tableName}:`, err);
+      devLogger.error(`Error fetching ${tableName}:`, err);
     } finally {
       setLoading(false);
     }
@@ -83,7 +87,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
       // Type-safe record manipulation
       const recordWithMeta = { ...record } as any;
 
-      console.log(`🔧 [useSupabase] Creating record for table: ${tableNameString}`, {
+      devLogger.log(`🔧 [useSupabase] Creating record for table: ${tableNameString}`, {
         companyId,
         isExcluded: excludedCompanyTables.has(tableNameString),
         originalRecord: record
@@ -92,22 +96,22 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
       // FORCE REMOVE company_id from excluded tables
       if (excludedCompanyTables.has(tableNameString)) {
         delete recordWithMeta.company_id;
-        console.log(`🚫 [useSupabase] REMOVED company_id from excluded table: ${tableNameString}`);
+        devLogger.log(`🚫 [useSupabase] REMOVED company_id from excluded table: ${tableNameString}`);
       }
 
       // Only add company_id if not excluded AND companyId exists
       if (companyId && !excludedCompanyTables.has(tableNameString)) {
         recordWithMeta.company_id = companyId;
-        console.log(`✅ [useSupabase] Added company_id: ${companyId}`);
+        devLogger.log(`✅ [useSupabase] Added company_id: ${companyId}`);
       }
 
       // Only add created_by if not in excluded list
       if (!excludedCreatedByTables.has(tableNameString)) {
         recordWithMeta.created_by = user.id;
-        console.log(`✅ [useSupabase] Added created_by: ${user.id}`);
+        devLogger.log(`✅ [useSupabase] Added created_by: ${user.id}`);
       }
 
-      console.log(`📤 [useSupabase] Final record to insert:`, recordWithMeta);
+      devLogger.log(`📤 [useSupabase] Final record to insert:`, recordWithMeta);
 
       const { data: result, error: insertError } = await supabase
         .from(tableName)
@@ -124,7 +128,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create record';
       setError(errorMessage);
-      console.error(`Error creating ${tableName}:`, err);
+      devLogger.error(`Error creating ${tableName}:`, err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -157,7 +161,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update record';
       setError(errorMessage);
-      console.error(`Error updating ${tableName}:`, err);
+      devLogger.error(`Error updating ${tableName}:`, err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -184,7 +188,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete record';
       setError(errorMessage);
-      console.error(`Error deleting ${tableName}:`, err);
+      devLogger.error(`Error deleting ${tableName}:`, err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -214,7 +218,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch record';
       setError(errorMessage);
-      console.error(`Error fetching ${tableName} by ID:`, err);
+      devLogger.error(`Error fetching ${tableName} by ID:`, err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);

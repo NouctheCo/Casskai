@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { crmService } from '@/services/crmService';
 import type { Opportunity, OpportunityStage } from '@/types/crm.types';
+import { devLogger } from '@/utils/devLogger';
 import {
   Euro,
   Calendar,
@@ -84,7 +85,7 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
       }
       setOpportunities(response.data);
     } catch (error) {
-      console.error('Error loading opportunities:', error instanceof Error ? error.message : String(error));
+      devLogger.error('Error loading opportunities:', error instanceof Error ? error.message : String(error));
       toast({
         title: "Erreur",
         description: "Impossible de charger les opportunités",

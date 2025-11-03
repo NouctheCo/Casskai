@@ -1,17 +1,31 @@
 import React, { useState } from 'react';
+import { devLogger } from '@/utils/devLogger';
 import { useTranslation } from 'react-i18next';
+import { devLogger } from '@/utils/devLogger';
 import { motion } from 'framer-motion';
+import { devLogger } from '@/utils/devLogger';
 import { useCrm } from '../hooks/useCrm';
+import { devLogger } from '@/utils/devLogger';
 import { useCRMAnalytics } from '../hooks/useCRMAnalytics';
+import { devLogger } from '@/utils/devLogger';
 import { useToast } from '../components/ui/use-toast.js';
+import { devLogger } from '@/utils/devLogger';
 import { useAuth } from '../contexts/AuthContext';
+import { devLogger } from '@/utils/devLogger';
 import { Button } from '../components/ui/button';
+import { devLogger } from '@/utils/devLogger';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
+import { devLogger } from '@/utils/devLogger';
 import { Badge } from '../components/ui/badge';
+import { devLogger } from '@/utils/devLogger';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { devLogger } from '@/utils/devLogger';
 import { Alert, AlertDescription } from '../components/ui/alert';
+import { devLogger } from '@/utils/devLogger';
 import CrmDashboard from '../components/crm/CrmDashboard';
+import { devLogger } from '@/utils/devLogger';
 import {
+import { devLogger } from '@/utils/devLogger';
   BarChart3,
   Users,
   Target,
@@ -25,6 +39,7 @@ import {
   Calendar
 } from 'lucide-react';
 import {
+import { devLogger } from '@/utils/devLogger';
   ClientFormData,
   ContactFormData,
   OpportunityFormData,
@@ -109,7 +124,7 @@ export default function SalesCrmPage() {
         });
       }
     } catch (error) {
-      console.error('Error creating client:', error instanceof Error ? error.message : String(error));
+      devLogger.error('Error creating client:', error instanceof Error ? error.message : String(error));
       toast({
         title: t('common.error'),
         description: 'Erreur lors de la création du client',
@@ -130,7 +145,7 @@ export default function SalesCrmPage() {
         });
       }
     } catch (error) {
-      console.error('Error creating contact:', error instanceof Error ? error.message : String(error));
+      devLogger.error('Error creating contact:', error instanceof Error ? error.message : String(error));
       toast({
         title: t('common.error'),
         description: 'Erreur lors de la création du contact',
@@ -151,7 +166,7 @@ export default function SalesCrmPage() {
         });
       }
     } catch (error) {
-      console.error('Error creating opportunity:', error instanceof Error ? error.message : String(error));
+      devLogger.error('Error creating opportunity:', error instanceof Error ? error.message : String(error));
       toast({
         title: t('common.error'),
         description: 'Erreur lors de la création de l\'opportunité',
@@ -172,7 +187,7 @@ export default function SalesCrmPage() {
         });
       }
     } catch (error) {
-      console.error('Error creating action:', error instanceof Error ? error.message : String(error));
+      devLogger.error('Error creating action:', error instanceof Error ? error.message : String(error));
       toast({
         title: t('common.error'),
         description: 'Erreur lors de la création de l\'action',
@@ -341,9 +356,9 @@ export default function SalesCrmPage() {
                 <CrmDashboard
                   dashboardData={dashboardData}
                   loading={loading}
-                  onCreateClient={() => console.log('Create client')}
-                  onCreateOpportunity={() => console.log('Create opportunity')}
-                  onCreateAction={() => console.log('Create action')}
+                  onCreateClient={() => devLogger.log('Create client')}
+                  onCreateOpportunity={() => devLogger.log('Create opportunity')}
+                  onCreateAction={() => devLogger.log('Create action')}
                 />
               ) : (
                 <Card>
@@ -449,7 +464,7 @@ export default function SalesCrmPage() {
                           Fonctionnalité complètement intégrée avec Supabase
                         </p>
                       </div>
-                      <Button onClick={() => console.log('Open client management')}>
+                      <Button onClick={() => devLogger.log('Open client management')}>
                         Ouvrir la Gestion des Clients
                       </Button>
                     </div>
@@ -502,7 +517,7 @@ export default function SalesCrmPage() {
                           Suivi des opportunités intégré avec Supabase
                         </p>
                       </div>
-                      <Button onClick={() => console.log('Open opportunities')}>
+                      <Button onClick={() => devLogger.log('Open opportunities')}>
                         Ouvrir le Pipeline
                       </Button>
                     </div>
@@ -545,7 +560,7 @@ export default function SalesCrmPage() {
                           Historique et planification des actions
                         </p>
                       </div>
-                      <Button onClick={() => console.log('Open actions')}>
+                      <Button onClick={() => devLogger.log('Open actions')}>
                         Ouvrir les Actions
                       </Button>
                     </div>

@@ -109,7 +109,7 @@ const handleAPIResponse = (apiCall: (req: any, res: Response) => Promise<APIResp
         error: 'Internal server error',
         timestamp: new Date().toISOString(),
         request_id: `req_${Date.now()}`
-      });
+      } as APIResponse<never>);
     }
   };
 };
