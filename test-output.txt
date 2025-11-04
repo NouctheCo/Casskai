@@ -1,0 +1,310 @@
+
+> casskai@1.0.0 test
+> vitest src/services/ai/OpenAIService.test.ts --run
+
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90mC:/Users/noutc/Casskai[39m
+
+ [31m❯[39m src/services/ai/OpenAIService.test.ts [2m([22m[2m45 tests[22m[2m | [22m[31m18 failed[39m[2m)[22m[32m 132[2mms[22m[39m
+   [32m✓[39m OpenAIService[2m > [22mgetInstance[2m > [22mshould return singleton instance[32m 3[2mms[22m[39m
+   [32m✓[39m OpenAIService[2m > [22mchat[2m > [22mshould send chat request successfully[32m 7[2mms[22m[39m
+   [32m✓[39m OpenAIService[2m > [22mchat[2m > [22mshould handle authentication error[32m 1[2mms[22m[39m
+[31m   [31m×[31m OpenAIService[2m > [22mchat[2m > [22mshould handle HTTP errors[39m[32m 15[2mms[22m[39m
+[31m     → error is not defined[39m
+[31m   [31m×[31m OpenAIService[2m > [22mchat[2m > [22mshould handle network errors[39m[32m 2[2mms[22m[39m
+[31m     → error is not defined[39m
+[31m   [31m×[31m OpenAIService[2m > [22manalyzeFinancialHealth[2m > [22mshould analyze financial health successfully[39m[32m 3[2mms[22m[39m
+[31m     → error is not defined[39m
+[31m   [31m×[31m OpenAIService[2m > [22manalyzeFinancialHealth[2m > [22mshould detect low liquidity[39m[32m 2[2mms[22m[39m
+[31m     → error is not defined[39m
+[31m   [31m×[31m OpenAIService[2m > [22manalyzeFinancialHealth[2m > [22mshould detect revenue growth[39m[32m 2[2mms[22m[39m
+[31m     → error is not defined[39m
+[31m   [31m×[31m OpenAIService[2m > [22manalyzeFinancialHealth[2m > [22mshould handle insufficient data[39m[32m 2[2mms[22m[39m
+[31m     → error is not defined[39m
+[31m   [31m×[31m OpenAIService[2m > [22manalyzeFinancialHealth[2m > [22mshould handle database errors[39m[32m 1[2mms[22m[39m
+[31m     → error is not defined[39m
+   [32m✓[39m OpenAIService[2m > [22mpredictCashFlow[2m > [22mshould predict cash flow successfully[32m 30[2mms[22m[39m
+   [32m✓[39m OpenAIService[2m > [22mpredictCashFlow[2m > [22mshould generate predictions with correct structure[32m 2[2mms[22m[39m
+   [32m✓[39m OpenAIService[2m > [22mpredictCashFlow[2m > [22mshould handle custom month parameter[32m 2[2mms[22m[39m
+   [32m✓[39m OpenAIService[2m > [22mpredictCashFlow[2m > [22mshould handle insufficient history[32m 1[2mms[22m[39m
+   [32m✓[39m OpenAIService[2m > [22mpredictCashFlow[2m > [22mshould handle empty transactions[32m 1[2mms[22m[39m
+[31m   [31m×[31m OpenAIService[2m > [22mpredictCashFlow[2m > [22mshould handle database errors[39m[32m 1[2mms[22m[39m
+[31m     → error is not defined[39m
+   [32m✓[39m OpenAIService[2m > [22mdetectAnomalies[2m > [22mshould detect anomalies successfully[32m 1[2mms[22m[39m
+[31m   [31m×[31m OpenAIService[2m > [22mdetectAnomalies[2m > [22mshould detect unusual amounts[39m[32m 2[2mms[22m[39m
+[31m     → expected 0 to be greater than 0[39m
+[31m   [31m×[31m OpenAIService[2m > [22mdetectAnomalies[2m > [22mshould detect weekend transactions[39m[32m 2[2mms[22m[39m
+[31m     → expected undefined to be defined[39m
+   [32m✓[39m OpenAIService[2m > [22mdetectAnomalies[2m > [22mshould detect suspicious keywords[32m 2[2mms[22m[39m
+[31m   [31m×[31m OpenAIService[2m > [22mdetectAnomalies[2m > [22mshould detect urgent transactions[39m[32m 2[2mms[22m[39m
+[31m     → expected undefined to be defined[39m
+   [32m✓[39m OpenAIService[2m > [22mdetectAnomalies[2m > [22mshould return empty array for no transactions[32m 1[2mms[22m[39m
+   [32m✓[39m OpenAIService[2m > [22mdetectAnomalies[2m > [22mshould sort anomalies by score[32m 2[2mms[22m[39m
+[31m   [31m×[31m OpenAIService[2m > [22mdetectAnomalies[2m > [22mshould handle database errors[39m[32m 1[2mms[22m[39m
+[31m     → error is not defined[39m
+   [32m✓[39m OpenAIService[2m > [22mgetTaxOptimizations[2m > [22mshould get tax optimizations successfully[32m 2[2mms[22m[39m
+   [32m✓[39m OpenAIService[2m > [22mgetTaxOptimizations[2m > [22mshould suggest VAT optimization[32m 2[2mms[22m[39m
+   [32m✓[39m OpenAIService[2m > [22mgetTaxOptimizations[2m > [22mshould suggest depreciation optimization[32m 2[2mms[22m[39m
+   [32m✓[39m OpenAIService[2m > [22mgetTaxOptimizations[2m > [22mshould handle company not found[32m 1[2mms[22m[39m
+   [32m✓[39m OpenAIService[2m > [22mgetTaxOptimizations[2m > [22mshould handle empty transactions[32m 3[2mms[22m[39m
+[31m   [31m×[31m OpenAIService[2m > [22mgetTaxOptimizations[2m > [22mshould handle database errors[39m[32m 2[2mms[22m[39m
+[31m     → error is not defined[39m
+   [32m✓[39m OpenAIService[2m > [22mgenerateSmartAlerts[2m > [22mshould generate smart alerts successfully[32m 2[2mms[22m[39m
+   [32m✓[39m OpenAIService[2m > [22mgenerateSmartAlerts[2m > [22mshould create alerts from financial health insights[32m 1[2mms[22m[39m
+   [32m✓[39m OpenAIService[2m > [22mgenerateSmartAlerts[2m > [22mshould create alerts from negative cash flow predictions[32m 5[2mms[22m[39m
+   [32m✓[39m OpenAIService[2m > [22mgenerateSmartAlerts[2m > [22mshould create alerts from critical anomalies[32m 1[2mms[22m[39m
+   [32m✓[39m OpenAIService[2m > [22mgenerateSmartAlerts[2m > [22mshould handle partial failures gracefully[32m 1[2mms[22m[39m
+   [32m✓[39m OpenAIService[2m > [22mgenerateSmartAlerts[2m > [22mshould handle all services failing[32m 1[2mms[22m[39m
+[31m   [31m×[31m OpenAIService[2m > [22mgenerateSmartAlerts[2m > [22mshould handle complete service failure[39m[32m 1[2mms[22m[39m
+[31m     → error is not defined[39m
+[31m   [31m×[31m OpenAIService[2m > [22mEdge Cases[2m > [22mshould handle null company_id[39m[32m 1[2mms[22m[39m
+[31m     → Service error[39m
+   [32m✓[39m OpenAIService[2m > [22mEdge Cases[2m > [22mshould handle undefined values in transactions[32m 1[2mms[22m[39m
+   [32m✓[39m OpenAIService[2m > [22mEdge Cases[2m > [22mshould handle very large numbers[32m 1[2mms[22m[39m
+   [32m✓[39m OpenAIService[2m > [22mEdge Cases[2m > [22mshould handle special characters in descriptions[32m 1[2mms[22m[39m
+[31m   [31m×[31m OpenAIService[2m > [22mEdge Cases[2m > [22mshould handle zero values[39m[32m 6[2mms[22m[39m
+[31m     → expected true to be false // Object.is equality[39m
+[31m   [31m×[31m OpenAIService[2m > [22mEdge Cases[2m > [22mshould handle negative months parameter[39m[32m 1[2mms[22m[39m
+[31m     → expected true to be false // Object.is equality[39m
+   [32m✓[39m OpenAIService[2m > [22mPerformance[2m > [22mshould measure processing time for chat[32m 1[2mms[22m[39m
+[31m   [31m×[31m OpenAIService[2m > [22mPerformance[2m > [22mshould handle concurrent requests[39m[32m 1[2mms[22m[39m
+[31m     → Service error[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 18 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/services/ai/OpenAIService.test.ts[2m > [22mOpenAIService[2m > [22mchat[2m > [22mshould handle HTTP errors
+[31m[1mReferenceError[22m: error is not defined[39m
+[36m [2m❯[22m OpenAIService.chat src/services/ai/OpenAIService.ts:[2m84:43[22m[39m
+    [90m 82| [39m      }[33m;[39m
+    [90m 83| [39m    } [35mcatch[39m (_error) {
+    [90m 84| [39m      console[33m.[39m[34merror[39m([32m'OpenAI Chat Error:'[39m[33m,[39m error)[33m;[39m
+    [90m   | [39m                                          [31m^[39m
+    [90m 85| [39m      [35mreturn[39m {
+    [90m 86| [39m        success[33m:[39m [35mfalse[39m[33m,[39m
+[90m [2m❯[22m src/services/ai/OpenAIService.test.ts:[2m105:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/18]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/ai/OpenAIService.test.ts[2m > [22mOpenAIService[2m > [22mchat[2m > [22mshould handle network errors
+[31m[1mReferenceError[22m: error is not defined[39m
+[36m [2m❯[22m OpenAIService.chat src/services/ai/OpenAIService.ts:[2m84:43[22m[39m
+    [90m 82| [39m      }[33m;[39m
+    [90m 83| [39m    } [35mcatch[39m (_error) {
+    [90m 84| [39m      console[33m.[39m[34merror[39m([32m'OpenAI Chat Error:'[39m[33m,[39m error)[33m;[39m
+    [90m   | [39m                                          [31m^[39m
+    [90m 85| [39m      [35mreturn[39m {
+    [90m 86| [39m        success[33m:[39m [35mfalse[39m[33m,[39m
+[90m [2m❯[22m src/services/ai/OpenAIService.test.ts:[2m114:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/18]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/ai/OpenAIService.test.ts[2m > [22mOpenAIService[2m > [22manalyzeFinancialHealth[2m > [22mshould analyze financial health successfully
+[31m[1mReferenceError[22m: error is not defined[39m
+[36m [2m❯[22m OpenAIService.analyzeFinancialHealth src/services/ai/OpenAIService.ts:[2m125:57[22m[39m
+    [90m123| [39m      }[33m;[39m
+    [90m124| [39m    } [35mcatch[39m (_error) {
+    [90m125| [39m      console[33m.[39m[34merror[39m([32m'Financial Health Analysis Error:'[39m[33m,[39m error)[33m;[39m
+    [90m   | [39m                                                        [31m^[39m
+    [90m126| [39m      [35mreturn[39m {
+    [90m127| [39m        success[33m:[39m [35mfalse[39m[33m,[39m
+[90m [2m❯[22m src/services/ai/OpenAIService.test.ts:[2m159:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/18]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/ai/OpenAIService.test.ts[2m > [22mOpenAIService[2m > [22manalyzeFinancialHealth[2m > [22mshould detect low liquidity
+[31m[1mReferenceError[22m: error is not defined[39m
+[36m [2m❯[22m OpenAIService.analyzeFinancialHealth src/services/ai/OpenAIService.ts:[2m125:57[22m[39m
+    [90m123| [39m      }[33m;[39m
+    [90m124| [39m    } [35mcatch[39m (_error) {
+    [90m125| [39m      console[33m.[39m[34merror[39m([32m'Financial Health Analysis Error:'[39m[33m,[39m error)[33m;[39m
+    [90m   | [39m                                                        [31m^[39m
+    [90m126| [39m      [35mreturn[39m {
+    [90m127| [39m        success[33m:[39m [35mfalse[39m[33m,[39m
+[90m [2m❯[22m src/services/ai/OpenAIService.test.ts:[2m184:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/18]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/ai/OpenAIService.test.ts[2m > [22mOpenAIService[2m > [22manalyzeFinancialHealth[2m > [22mshould detect revenue growth
+[31m[1mReferenceError[22m: error is not defined[39m
+[36m [2m❯[22m OpenAIService.analyzeFinancialHealth src/services/ai/OpenAIService.ts:[2m125:57[22m[39m
+    [90m123| [39m      }[33m;[39m
+    [90m124| [39m    } [35mcatch[39m (_error) {
+    [90m125| [39m      console[33m.[39m[34merror[39m([32m'Financial Health Analysis Error:'[39m[33m,[39m error)[33m;[39m
+    [90m   | [39m                                                        [31m^[39m
+    [90m126| [39m      [35mreturn[39m {
+    [90m127| [39m        success[33m:[39m [35mfalse[39m[33m,[39m
+[90m [2m❯[22m src/services/ai/OpenAIService.test.ts:[2m222:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/18]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/ai/OpenAIService.test.ts[2m > [22mOpenAIService[2m > [22manalyzeFinancialHealth[2m > [22mshould handle insufficient data
+[31m[1mReferenceError[22m: error is not defined[39m
+[36m [2m❯[22m OpenAIService.analyzeFinancialHealth src/services/ai/OpenAIService.ts:[2m125:57[22m[39m
+    [90m123| [39m      }[33m;[39m
+    [90m124| [39m    } [35mcatch[39m (_error) {
+    [90m125| [39m      console[33m.[39m[34merror[39m([32m'Financial Health Analysis Error:'[39m[33m,[39m error)[33m;[39m
+    [90m   | [39m                                                        [31m^[39m
+    [90m126| [39m      [35mreturn[39m {
+    [90m127| [39m        success[33m:[39m [35mfalse[39m[33m,[39m
+[90m [2m❯[22m src/services/ai/OpenAIService.test.ts:[2m242:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/18]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/ai/OpenAIService.test.ts[2m > [22mOpenAIService[2m > [22manalyzeFinancialHealth[2m > [22mshould handle database errors
+[31m[1mReferenceError[22m: error is not defined[39m
+[36m [2m❯[22m OpenAIService.analyzeFinancialHealth src/services/ai/OpenAIService.ts:[2m125:57[22m[39m
+    [90m123| [39m      }[33m;[39m
+    [90m124| [39m    } [35mcatch[39m (_error) {
+    [90m125| [39m      console[33m.[39m[34merror[39m([32m'Financial Health Analysis Error:'[39m[33m,[39m error)[33m;[39m
+    [90m   | [39m                                                        [31m^[39m
+    [90m126| [39m      [35mreturn[39m {
+    [90m127| [39m        success[33m:[39m [35mfalse[39m[33m,[39m
+[90m [2m❯[22m src/services/ai/OpenAIService.test.ts:[2m260:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/18]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/ai/OpenAIService.test.ts[2m > [22mOpenAIService[2m > [22mpredictCashFlow[2m > [22mshould handle database errors
+[31m[1mReferenceError[22m: error is not defined[39m
+[36m [2m❯[22m OpenAIService.predictCashFlow src/services/ai/OpenAIService.ts:[2m160:52[22m[39m
+    [90m158| [39m      }[33m;[39m
+    [90m159| [39m    } [35mcatch[39m (_error) {
+    [90m160| [39m      console[33m.[39m[34merror[39m([32m'Cash Flow Prediction Error:'[39m[33m,[39m error)[33m;[39m
+    [90m   | [39m                                                   [31m^[39m
+    [90m161| [39m      [35mreturn[39m {
+    [90m162| [39m        success[33m:[39m [35mfalse[39m[33m,[39m
+[90m [2m❯[22m src/services/ai/OpenAIService.test.ts:[2m377:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/18]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/ai/OpenAIService.test.ts[2m > [22mOpenAIService[2m > [22mdetectAnomalies[2m > [22mshould detect unusual amounts
+[31m[1mAssertionError[22m: expected 0 to be greater than 0[39m
+[36m [2m❯[22m src/services/ai/OpenAIService.test.ts:[2m453:35[22m[39m
+    [90m451| [39m
+    [90m452| [39m      [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m453| [39m      [34mexpect[39m(result[33m.[39mdata[33m?.[39mlength)[33m.[39m[34mtoBeGreaterThan[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                                  [31m^[39m
+    [90m454| [39m      const outlierAnomaly = result.data?.find(a => a.transaction.id =…
+    [90m455| [39m      [34mexpect[39m(outlierAnomaly)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/18]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/ai/OpenAIService.test.ts[2m > [22mOpenAIService[2m > [22mdetectAnomalies[2m > [22mshould detect weekend transactions
+[31m[1mAssertionError[22m: expected undefined to be defined[39m
+[36m [2m❯[22m src/services/ai/OpenAIService.test.ts:[2m489:30[22m[39m
+    [90m487| [39m      [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m488| [39m      const weekendAnomaly = result.data?.find(a => a.reasons.includes…
+    [90m489| [39m      [34mexpect[39m(weekendAnomaly)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m490| [39m    })[33m;[39m
+    [90m491| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/18]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/ai/OpenAIService.test.ts[2m > [22mOpenAIService[2m > [22mdetectAnomalies[2m > [22mshould detect urgent transactions
+[31m[1mAssertionError[22m: expected undefined to be defined[39m
+[36m [2m❯[22m src/services/ai/OpenAIService.test.ts:[2m554:29[22m[39m
+    [90m552| [39m        a[33m.[39mreasons[33m.[39m[34msome[39m(r [33m=>[39m r[33m.[39m[34mincludes[39m([32m'urgente'[39m))
+    [90m553| [39m      )[33m;[39m
+    [90m554| [39m      [34mexpect[39m(urgentAnomaly)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m555| [39m    })[33m;[39m
+    [90m556| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/18]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/ai/OpenAIService.test.ts[2m > [22mOpenAIService[2m > [22mdetectAnomalies[2m > [22mshould handle database errors
+[31m[1mReferenceError[22m: error is not defined[39m
+[36m [2m❯[22m OpenAIService.detectAnomalies src/services/ai/OpenAIService.ts:[2m193:49[22m[39m
+    [90m191| [39m      }[33m;[39m
+    [90m192| [39m    } [35mcatch[39m (_error) {
+    [90m193| [39m      console[33m.[39m[34merror[39m([32m'Anomaly Detection Error:'[39m[33m,[39m error)[33m;[39m
+    [90m   | [39m                                                [31m^[39m
+    [90m194| [39m      [35mreturn[39m {
+    [90m195| [39m        success[33m:[39m [35mfalse[39m[33m,[39m
+[90m [2m❯[22m src/services/ai/OpenAIService.test.ts:[2m629:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/18]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/ai/OpenAIService.test.ts[2m > [22mOpenAIService[2m > [22mgetTaxOptimizations[2m > [22mshould handle database errors
+[31m[1mReferenceError[22m: error is not defined[39m
+[36m [2m❯[22m OpenAIService.getTaxOptimizations src/services/ai/OpenAIService.ts:[2m232:48[22m[39m
+    [90m230| [39m      }[33m;[39m
+    [90m231| [39m    } [35mcatch[39m (_error) {
+    [90m232| [39m      console[33m.[39m[34merror[39m([32m'Tax Optimization Error:'[39m[33m,[39m error)[33m;[39m
+    [90m   | [39m                                               [31m^[39m
+    [90m233| [39m      [35mreturn[39m {
+    [90m234| [39m        success[33m:[39m [35mfalse[39m[33m,[39m
+[90m [2m❯[22m src/services/ai/OpenAIService.test.ts:[2m814:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/18]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/ai/OpenAIService.test.ts[2m > [22mOpenAIService[2m > [22mgenerateSmartAlerts[2m > [22mshould handle complete service failure
+[31m[1mReferenceError[22m: error is not defined[39m
+[36m [2m❯[22m OpenAIService.generateSmartAlerts src/services/ai/OpenAIService.ts:[2m316:55[22m[39m
+    [90m314| [39m      }[33m;[39m
+    [90m315| [39m    } [35mcatch[39m (_error) {
+    [90m316| [39m      console[33m.[39m[34merror[39m([32m'Smart Alerts Generation Error:'[39m[33m,[39m error)[33m;[39m
+    [90m   | [39m                                                      [31m^[39m
+    [90m317| [39m      [35mreturn[39m {
+    [90m318| [39m        success[33m:[39m [35mfalse[39m[33m,[39m
+[90m [2m❯[22m src/services/ai/OpenAIService.test.ts:[2m930:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/18]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/ai/OpenAIService.test.ts[2m > [22mOpenAIService[2m > [22mEdge Cases[2m > [22mshould handle null company_id
+[41m[1m FAIL [22m[49m src/services/ai/OpenAIService.test.ts[2m > [22mOpenAIService[2m > [22mPerformance[2m > [22mshould handle concurrent requests
+[31m[1mError[22m: Service error[39m
+[36m [2m❯[22m src/services/ai/OpenAIService.test.ts:[2m928:76[22m[39m
+    [90m926| [39m
+    [90m927| [39m    [34mit[39m([32m'should handle complete service failure'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m928| [39m      vi.spyOn(service as any, 'analyzeFinancialHealth').mockRejectedV…
+    [90m   | [39m                                                                           [31m^[39m
+    [90m929| [39m
+    [90m930| [39m      [35mconst[39m result [33m=[39m [35mawait[39m service[33m.[39m[34mgenerateSmartAlerts[39m(mockCompanyId)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/18]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/ai/OpenAIService.test.ts[2m > [22mOpenAIService[2m > [22mEdge Cases[2m > [22mshould handle zero values
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m src/services/ai/OpenAIService.test.ts:[2m1029:30[22m[39m
+    [90m1027| [39m      [35mconst[39m result [33m=[39m [35mawait[39m service[33m.[39m[34mpredictCashFlow[39m(mockCompanyId[33m,[39m [34m0[39m)[33m;[39m
+    [90m1028| [39m
+    [90m1029| [39m      [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m1030| [39m    })[33m;[39m
+    [90m1031| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/18]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/ai/OpenAIService.test.ts[2m > [22mOpenAIService[2m > [22mEdge Cases[2m > [22mshould handle negative months parameter
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+[36m [2m❯[22m src/services/ai/OpenAIService.test.ts:[2m1035:30[22m[39m
+    [90m1033| [39m      [35mconst[39m result [33m=[39m [35mawait[39m service[33m.[39m[34mpredictCashFlow[39m(mockCompanyId[33m,[39m [33m-[39m[34m5[39m)[33m;[39m
+    [90m1034| [39m
+    [90m1035| [39m      [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m1036| [39m    })[33m;[39m
+    [90m1037| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/18]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m18 failed[39m[22m[2m | [22m[1m[32m27 passed[39m[22m[90m (45)[39m
+[2m   Start at [22m 08:13:48
+[2m   Duration [22m 5.37s[2m (transform 333ms, setup 487ms, collect 281ms, tests 132ms, environment 2.00s, prepare 189ms)[22m
+
