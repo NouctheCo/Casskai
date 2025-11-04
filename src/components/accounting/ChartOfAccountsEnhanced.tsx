@@ -66,7 +66,7 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
         if (error) throw error;
         setBudgetCategories(data || []);
       } catch (err) {
-        console.error('Error loading budget categories:', err);
+        console.error('...', error);
       }
     };
 
@@ -92,7 +92,7 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
         });
         setAccountMappings(mappingsMap);
       } catch (err) {
-        console.error('Error loading mappings:', err);
+        console.error('...', error);
       }
     };
 
@@ -141,11 +141,11 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
       await refresh();
 
     } catch (err: any) {
-      console.error('Error initializing chart:', err);
+      console.error('...', error);
       toast({
         variant: 'destructive',
         title: 'Erreur',
-        description: err.message || 'Impossible d\'initialiser le plan comptable'
+        description: (error as Error).message || 'Impossible d\'initialiser le plan comptable'
       });
     } finally {
       setInitializingChart(false);
@@ -204,11 +204,11 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
         });
       }
     } catch (err: any) {
-      console.error('Error saving mapping:', err);
+      console.error('...', error);
       toast({
         variant: 'destructive',
         title: 'Erreur',
-        description: err.message || 'Impossible de sauvegarder le mapping'
+        description: (error as Error).message || 'Impossible de sauvegarder le mapping'
       });
     } finally {
       setSavingMapping(null);

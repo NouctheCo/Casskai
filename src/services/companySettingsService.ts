@@ -330,7 +330,7 @@ export const useCompanySettings = (companyId: string) => {
       const data = await CompanySettingsService.getCompanySettings(companyId);
       setSettings(data);
     } catch (err: any) {
-      setError(err.message || 'Erreur lors du chargement des paramètres');
+      setError((error as Error).message || 'Erreur lors du chargement des paramètres');
     } finally {
       setLoading(false);
     }
@@ -346,7 +346,7 @@ export const useCompanySettings = (companyId: string) => {
       setSettings(updated);
       return updated;
     } catch (err: any) {
-      setError(err.message || 'Erreur lors de la sauvegarde');
+      setError((error as Error).message || 'Erreur lors de la sauvegarde');
       throw err;
     }
   }, [companyId]);

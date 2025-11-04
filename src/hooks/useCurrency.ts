@@ -141,7 +141,7 @@ export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
 
       return currencyService.formatAmount(amount, targetCurrency);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
+      const errorMessage = err instanceof Error ? (error as Error).message : String(err);
       console.warn('Erreur formatage montant:', errorMessage);
       return amount.toString();
     }
@@ -158,7 +158,7 @@ export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
         await currencyService.updateExchangeRates();
         setLastUpdate(currencyService.getLastUpdate());
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : String(err);
+        const errorMessage = err instanceof Error ? (error as Error).message : String(err);
         console.warn('Impossible de mettre à jour les taux:', errorMessage);
         // Ne pas bloquer l'application si les taux ne peuvent pas être mis à jour
       } finally {
@@ -202,7 +202,7 @@ export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
       const conversion = await currencyService.convertAmount(amount, fromCurrency, targetCurrency);
       return conversion;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur de conversion inconnue';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Erreur de conversion inconnue';
       setError(errorMessage);
       
       if (err instanceof ConversionError) {
@@ -245,7 +245,7 @@ export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
       const results = await currencyService.convertBatch(conversions);
       return results;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur de conversion batch';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Erreur de conversion batch';
       setError(errorMessage);
       throw err;
     } finally {
@@ -277,7 +277,7 @@ export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
       const rate = await currencyService.getExchangeRate(from, to);
       return rate;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur récupération taux';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Erreur récupération taux';
       setError(errorMessage);
       throw err;
     } finally {
@@ -305,7 +305,7 @@ export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
       const updateTime = new Date();
       setLastUpdate(updateTime);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur de rafraîchissement des taux';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Erreur de rafraîchissement des taux';
       setError(errorMessage);
       throw new RateUpdateError(errorMessage, new Date());
     } finally {

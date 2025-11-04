@@ -243,11 +243,11 @@ export class ErrorHandlingService {
 
     return {
       code: errorCode,
-      message: String(err.message || 'Une erreur inconnue s\'est produite'),
+      message: String((error as Error).message || 'Une erreur inconnue s\'est produite'),
       details: err.details || error,
       severity,
       userMessage: errorMapping.userMessage || this.getDefaultUserMessage(severity),
-      technicalMessage: `[${context.service}/${context.method}] ${String(err.message)}`,
+      technicalMessage: `[${context.service}/${context.method}] ${String((error as Error).message)}`,
       retryable: errorMapping.retryable ?? this.isRetryableError(error),
       ...errorMapping,
     };
@@ -305,7 +305,7 @@ export class ErrorHandlingService {
     const err = error as Record<string, unknown>;
 
     // Erreurs réseau temporaires
-    if (err.name === 'NetworkError' || (typeof err.message === 'string' && err.message.includes('fetch'))) {
+    if ((error as Error).name === 'NetworkError' || (typeof (error as Error).message === 'string' && (error as Error).message.includes('fetch'))) {
       return true;
     }
 
@@ -320,7 +320,7 @@ export class ErrorHandlingService {
     }
 
     // Timeout
-    if (err.name === 'TimeoutError') {
+    if ((error as Error).name === 'TimeoutError') {
       return true;
     }
 

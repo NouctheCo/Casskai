@@ -134,7 +134,7 @@ export function useReports(companyId: string): UseReportsReturn {
       const allReports = await reportService.getAllReports();
       setReportDefinitions(allReports);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load reports');
+      setError(err instanceof Error ? (error as Error).message : 'Failed to load reports');
     } finally {
       setLoading(false);
     }
@@ -147,7 +147,7 @@ export function useReports(companyId: string): UseReportsReturn {
       const categoryReports = await reportService.getReportsByCategory(category);
       setReportDefinitions(categoryReports);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load reports by category');
+      setError(err instanceof Error ? (error as Error).message : 'Failed to load reports by category');
     } finally {
       setLoading(false);
     }
@@ -167,7 +167,7 @@ export function useReports(companyId: string): UseReportsReturn {
 
       return execution;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to generate report');
+      setError(err instanceof Error ? (error as Error).message : 'Failed to generate report');
       throw err;
     } finally {
       setGenerating(false);
@@ -181,7 +181,7 @@ export function useReports(companyId: string): UseReportsReturn {
         setCurrentExecution(execution);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to get report execution');
+      setError(err instanceof Error ? (error as Error).message : 'Failed to get report execution');
     }
   }, []);
 
@@ -190,7 +190,7 @@ export function useReports(companyId: string): UseReportsReturn {
       const reportExecutions = await reportService.getReportExecutions(reportId);
       setExecutions(reportExecutions);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to get report executions');
+      setError(err instanceof Error ? (error as Error).message : 'Failed to get report executions');
     }
   }, []);
 
@@ -198,7 +198,7 @@ export function useReports(companyId: string): UseReportsReturn {
     try {
       return await reportService.estimateReportGeneration(reportId, parameters);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to estimate generation time');
+      setError(err instanceof Error ? (error as Error).message : 'Failed to estimate generation time');
       throw err;
     }
   }, []);
@@ -215,7 +215,7 @@ export function useReports(companyId: string): UseReportsReturn {
         }
       }
     } catch (err) {
-      console.error('Failed to refresh execution:', err);
+      console.error('...', error);
     }
   }, []);
 
@@ -232,7 +232,7 @@ export function useReports(companyId: string): UseReportsReturn {
           }
         }
       } catch (err) {
-        console.error('Polling error:', err);
+        console.error('...', error);
         clearInterval(pollInterval);
       }
     }, 2000); // Poll every 2 seconds
@@ -276,7 +276,7 @@ export function useReports(companyId: string): UseReportsReturn {
         };
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to generate balance sheet');
+      setError(err instanceof Error ? (error as Error).message : 'Failed to generate balance sheet');
     }
 
     return null;
@@ -307,7 +307,7 @@ export function useReports(companyId: string): UseReportsReturn {
         };
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to generate income statement');
+      setError(err instanceof Error ? (error as Error).message : 'Failed to generate income statement');
     }
 
     return null;
@@ -335,7 +335,7 @@ export function useReports(companyId: string): UseReportsReturn {
         };
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to generate trial balance');
+      setError(err instanceof Error ? (error as Error).message : 'Failed to generate trial balance');
     }
 
     return null;

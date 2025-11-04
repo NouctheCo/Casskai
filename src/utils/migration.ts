@@ -234,7 +234,7 @@ export const useMigration = () => {
       }
       return success;
     } catch (error) {
-      setError(err instanceof Error ? err.message : 'Erreur de migration');
+      setError(err instanceof Error ? (error as Error).message : 'Erreur de migration');
       return false;
     } finally {
       setIsLoading(false);

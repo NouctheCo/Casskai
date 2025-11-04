@@ -50,7 +50,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
 
       setData(result || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch data');
+      setError(err instanceof Error ? (error as Error).message : 'Failed to fetch data');
       devLogger.error(`Error fetching ${tableName}:`, err);
     } finally {
       setLoading(false);
@@ -123,7 +123,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
       
       return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create record';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to create record';
       setError(errorMessage);
       devLogger.error(`Error creating ${tableName}:`, err);
       throw new Error(errorMessage);
@@ -156,7 +156,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
 
       return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update record';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to update record';
       setError(errorMessage);
       devLogger.error(`Error updating ${tableName}:`, err);
       throw new Error(errorMessage);
@@ -183,7 +183,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
       // Update local state
       setData(prev => prev.filter(item => (item as any).id !== id));
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete record';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to delete record';
       setError(errorMessage);
       devLogger.error(`Error deleting ${tableName}:`, err);
       throw new Error(errorMessage);
@@ -213,7 +213,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
 
       return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch record';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to fetch record';
       setError(errorMessage);
       devLogger.error(`Error fetching ${tableName} by ID:`, err);
       throw new Error(errorMessage);

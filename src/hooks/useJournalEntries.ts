@@ -131,9 +131,9 @@ export function useJournalEntries(companyId: string) {
       setJournalEntries(prev => [entry, ...prev]);
       return entry;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create journal entry';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to create journal entry';
       setError(errorMessage);
-      console.error('Error creating journal entry:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -221,9 +221,9 @@ export function useJournalEntries(companyId: string) {
       setJournalEntries(data || []);
       return { data: data || [], count: count || 0, error: null };
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch journal entries';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to fetch journal entries';
       setError(errorMessage);
-      console.error('Error fetching journal entries:', err);
+      console.error('...', error);
       return { data: [], count: 0, error: errorMessage };
     } finally {
       setLoading(false);
@@ -269,9 +269,9 @@ export function useJournalEntries(companyId: string) {
 
       setJournalEntries(prev => prev.filter(entry => entry.id !== entryId));
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete journal entry';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to delete journal entry';
       setError(errorMessage);
-      console.error('Error deleting journal entry:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -313,9 +313,9 @@ export function useJournalEntries(companyId: string) {
         entry.id === entryId ? updatedEntry : entry
       ));
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to post journal entry';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to post journal entry';
       setError(errorMessage);
-      console.error('Error posting journal entry:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -337,7 +337,7 @@ export function useJournalEntries(companyId: string) {
       if (error) throw error;
       return (data || []) as Account[];
     } catch (err) {
-      console.error('Error fetching accounts list:', err);
+      console.error('...', error);
       return [];
     }
   }, [user, companyId]);
@@ -357,7 +357,7 @@ export function useJournalEntries(companyId: string) {
       if (error) throw error;
       return data || [];
     } catch (err) {
-      console.error('Error fetching journals list:', err);
+      console.error('...', error);
       return [];
     }
   }, [user, companyId]);
@@ -384,7 +384,7 @@ export function useJournalEntries(companyId: string) {
       if (error) throw error;
       return data;
     } catch (err) {
-      console.error('Error fetching journal entry by ID:', err);
+      console.error('...', error);
       return null;
     }
   }, [user, companyId]);

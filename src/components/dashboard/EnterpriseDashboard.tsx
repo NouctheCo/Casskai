@@ -637,8 +637,8 @@ export const EnterpriseDashboard: React.FC = () => {
 
       setDashboardData(data);
     } catch (err) {
-      console.error('Error loading dashboard data:', err);
-      setError(err instanceof Error ? err.message : 'Erreur inconnue');
+      console.error('...', error);
+      setError(err instanceof Error ? (error as Error).message : 'Erreur inconnue');
     } finally {
       setIsLoading(false);
     }

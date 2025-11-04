@@ -91,9 +91,9 @@ export function useFECImport(companyId: string) {
         }
       };
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error during FEC import';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Error during FEC import';
       setError(errorMessage);
-      console.error('Error during FEC import:', err);
+      console.error('...', error);
       return {
         success: false,
         error: errorMessage

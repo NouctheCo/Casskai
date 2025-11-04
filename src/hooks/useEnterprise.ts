@@ -138,9 +138,9 @@ export function useEnterprise() {
 
       return { data: transformedEnterprises, error: null };
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch enterprises';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to fetch enterprises';
       setError(errorMessage);
-      console.error('Error fetching user enterprises:', err);
+      console.error('...', error);
       return { data: [], error: errorMessage };
     } finally {
       setLoading(false);
@@ -225,9 +225,9 @@ export function useEnterprise() {
 
       return newEnterprise;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create enterprise';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to create enterprise';
       setError(errorMessage);
-      console.error('Error creating enterprise:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -304,9 +304,9 @@ export function useEnterprise() {
 
       return updatedEnterprise;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update enterprise';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to update enterprise';
       setError(errorMessage);
-      console.error('Error updating enterprise:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -347,9 +347,9 @@ export function useEnterprise() {
         setCurrentEnterprise({ ...newDefault, isDefault: true });
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to set default enterprise';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to set default enterprise';
       setError(errorMessage);
-      console.error('Error setting default enterprise:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);

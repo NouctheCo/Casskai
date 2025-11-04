@@ -58,8 +58,8 @@ export function useAccounting(companyId: string) {
       if (fetchError) throw fetchError;
       setAccounts(data || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch accounts');
-      console.error('Error fetching accounts:', err);
+      setError(err instanceof Error ? (error as Error).message : 'Failed to fetch accounts');
+      console.error('...', error);
     } finally {
       setLoading(false);
     }
@@ -92,8 +92,8 @@ export function useAccounting(companyId: string) {
       if (fetchError) throw fetchError;
       setJournalEntries(data || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch journal entries');
-      console.error('Error fetching journal entries:', err);
+      setError(err instanceof Error ? (error as Error).message : 'Failed to fetch journal entries');
+      console.error('...', error);
     } finally {
       setLoading(false);
     }
@@ -131,9 +131,9 @@ export function useAccounting(companyId: string) {
 
       return newAccount;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create account';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to create account';
       setError(errorMessage);
-      console.error('Error creating account:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -245,9 +245,9 @@ export function useAccounting(companyId: string) {
       setJournalEntries(prev => [completeEntry, ...prev]);
       return completeEntry;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create journal entry';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to create journal entry';
       setError(errorMessage);
-      console.error('Error creating journal entry:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -277,9 +277,9 @@ export function useAccounting(companyId: string) {
           : entry
       ));
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to post journal entry';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to post journal entry';
       setError(errorMessage);
-      console.error('Error posting journal entry:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -334,8 +334,8 @@ export function useAccounting(companyId: string) {
         totalEquity,
       };
     } catch (err) {
-      console.error('Error generating balance sheet:', err);
-      setError(err instanceof Error ? err.message : 'Failed to generate balance sheet');
+      console.error('...', error);
+      setError(err instanceof Error ? (error as Error).message : 'Failed to generate balance sheet');
       return null;
     }
   }, [user, companyId]);
@@ -359,8 +359,8 @@ export function useAccounting(companyId: string) {
         credit: parseFloat(item.balance) < 0 ? Math.abs(parseFloat(item.balance)) : 0,
       }));
     } catch (err) {
-      console.error('Error generating trial balance:', err);
-      setError(err instanceof Error ? err.message : 'Failed to generate trial balance');
+      console.error('...', error);
+      setError(err instanceof Error ? (error as Error).message : 'Failed to generate trial balance');
       return null;
     }
   }, [user, companyId]);

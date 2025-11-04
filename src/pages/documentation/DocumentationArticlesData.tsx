@@ -1583,7 +1583,7 @@ export const articlesDatabase: Record<string, ArticleData> = {
       '  try {',
       '    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_ENDPOINT_SECRET);',
       '  } catch (error) {',
-      '    return res.status(400).send(`Webhook Error: ${err.message}`);',
+      '    return res.status(400).send(`Webhook Error: ${(error as Error).message}`);',
       '  }',
       '',
       '  switch (event.type) {',

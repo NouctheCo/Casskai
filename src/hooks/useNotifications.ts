@@ -65,7 +65,7 @@ export function useNotifications(options: UseNotificationsOptions = {}): UseNoti
         setError(result.error || 'Erreur de chargement');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur inconnue');
+      setError(err instanceof Error ? (error as Error).message : 'Erreur inconnue');
     } finally {
       setLoading(false);
     }
@@ -84,7 +84,7 @@ export function useNotifications(options: UseNotificationsOptions = {}): UseNoti
         setUnreadCount(result.data);
       }
     } catch (err) {
-      console.error('Error fetching unread count:', err);
+      console.error('...', error);
     }
   }, [user?.id]);
 

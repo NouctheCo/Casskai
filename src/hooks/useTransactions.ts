@@ -91,8 +91,8 @@ export function useTransactions(companyId: string) {
 
       setTransactions(data || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch transactions');
-      console.error('Error fetching transactions:', err);
+      setError(err instanceof Error ? (error as Error).message : 'Failed to fetch transactions');
+      console.error('...', error);
     } finally {
       setLoading(false);
     }
@@ -130,9 +130,9 @@ export function useTransactions(companyId: string) {
       setTransactions(prev => [newTransaction, ...prev]);
       return newTransaction;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create transaction';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to create transaction';
       setError(errorMessage);
-      console.error('Error creating transaction:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -173,9 +173,9 @@ export function useTransactions(companyId: string) {
 
       return updatedTransaction;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update transaction';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to update transaction';
       setError(errorMessage);
-      console.error('Error updating transaction:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -200,9 +200,9 @@ export function useTransactions(companyId: string) {
 
       setTransactions(prev => prev.filter(transaction => transaction.id !== id));
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete transaction';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to delete transaction';
       setError(errorMessage);
-      console.error('Error deleting transaction:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -250,7 +250,7 @@ export function useTransactions(companyId: string) {
 
       return stats;
     } catch (err) {
-      console.error('Error calculating transaction statistics:', err);
+      console.error('...', error);
       return null;
     }
   }, [user, companyId]);
@@ -278,9 +278,9 @@ export function useTransactions(companyId: string) {
           : transaction
       ));
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to reconcile transactions';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to reconcile transactions';
       setError(errorMessage);
-      console.error('Error reconciling transactions:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);

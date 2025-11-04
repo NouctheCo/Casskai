@@ -49,7 +49,7 @@ export const useTrial = (): UseTrialReturn => {
       setTrialInfo(info);
     } catch (err) {
       setError('Erreur lors du chargement des informations d\'essai');
-      console.error('Error loading trial info:', err);
+      console.error('...', error);
     } finally {
       setIsLoading(false);
     }
@@ -62,7 +62,7 @@ export const useTrial = (): UseTrialReturn => {
       const canCreate = await trialService.canCreateTrial(user.id);
       setCanCreateTrial(canCreate);
     } catch (err) {
-      console.error('Error checking trial eligibility:', err);
+      console.error('...', error);
     }
   };
 
@@ -201,7 +201,7 @@ export const useTrialStatistics = () => {
       setStatistics(stats);
     } catch (err) {
       setError('Erreur lors du chargement des statistiques');
-      console.error('Error loading trial statistics:', err);
+      console.error('...', error);
     } finally {
       setIsLoading(false);
     }
@@ -234,7 +234,7 @@ export const useExpiringTrials = (daysAhead: number = 7) => {
       setExpiringTrials(trials);
     } catch (err) {
       setError('Erreur lors du chargement des essais expirants');
-      console.error('Error loading expiring trials:', err);
+      console.error('...', error);
     } finally {
       setIsLoading(false);
     }

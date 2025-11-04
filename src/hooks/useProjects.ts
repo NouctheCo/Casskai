@@ -91,7 +91,7 @@ export function useProjects(): UseProjectsReturn {
         setError(response.error || 'Failed to fetch projects');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
     } finally {
       setProjectsLoading(false);
     }
@@ -112,7 +112,7 @@ export function useProjects(): UseProjectsReturn {
         setError(response.error || 'Failed to fetch tasks');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
     } finally {
       setTasksLoading(false);
     }
@@ -133,7 +133,7 @@ export function useProjects(): UseProjectsReturn {
         setError(response.error || 'Failed to fetch time entries');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
     } finally {
       setTimeEntriesLoading(false);
     }
@@ -154,7 +154,7 @@ export function useProjects(): UseProjectsReturn {
         setError(response.error || 'Failed to fetch project metrics');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
     } finally {
       setMetricsLoading(false);
     }
@@ -206,7 +206,7 @@ export function useProjects(): UseProjectsReturn {
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
       return false;
     }
   }, [currentCompany?.id, fetchProjects, fetchMetrics, fetchCategories, fetchManagers]);
@@ -224,7 +224,7 @@ export function useProjects(): UseProjectsReturn {
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
       return false;
     }
   }, [fetchProjects, fetchMetrics]);
@@ -242,7 +242,7 @@ export function useProjects(): UseProjectsReturn {
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
       return false;
     }
   }, [fetchProjects, fetchMetrics]);
@@ -261,7 +261,7 @@ export function useProjects(): UseProjectsReturn {
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
       return false;
     }
   }, [currentCompany?.id, fetchProjectTasks]);
@@ -281,7 +281,7 @@ export function useProjects(): UseProjectsReturn {
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
       return false;
     }
   }, [currentCompany?.id, fetchTimeEntries, fetchMetrics]);

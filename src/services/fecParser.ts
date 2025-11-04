@@ -201,7 +201,7 @@ export class FECParser {
             errors.push({
               row: rowNumber,
               field: err.path.join('.'),
-              message: err.message,
+              message: (error as Error).message,
               type: 'validation',
               severity: 'error'
             });

@@ -88,7 +88,7 @@ export function useEnterpriseTaxData() {
       }
       
     } catch (err) {
-      console.error('Error loading tax data:', err);
+      console.error('...', error);
       const errorInfo = handleSupabaseError(err, 'Loading tax data');
       setError(new Error(errorInfo.message));
       toast({
@@ -146,7 +146,7 @@ export function useEnterpriseTaxData() {
       setTaxRates(mapTaxRatesFromDB(data || []));
       
     } catch (err) {
-      console.error('Error initializing default tax rates:', err);
+      console.error('...', error);
       // Ne pas bloquer l'application si l'initialisation échoue
     }
   };
@@ -184,7 +184,7 @@ export function useEnterpriseTaxData() {
       setDeclarations(mapDeclarationsFromDB(data || []));
       
     } catch (err) {
-      console.error('Error initializing default declarations:', err);
+      console.error('...', error);
       // Ne pas bloquer l'application si l'initialisation échoue
     }
   };
@@ -257,7 +257,7 @@ export function useEnterpriseTaxData() {
       
       return newRate;
     } catch (err) {
-      console.error('Error adding tax rate:', err);
+      console.error('...', error);
       const errorInfo = handleSupabaseError(err, 'Adding tax rate');
       toast({
         variant: 'destructive',
@@ -307,7 +307,7 @@ export function useEnterpriseTaxData() {
       ));
       
     } catch (err) {
-      console.error('Error updating tax rate:', err);
+      console.error('...', error);
       const errorInfo = handleSupabaseError(err, 'Updating tax rate');
       toast({
         variant: 'destructive',
@@ -337,7 +337,7 @@ export function useEnterpriseTaxData() {
       setTaxRates(prev => prev.filter(rate => rate.id !== id));
       
     } catch (err) {
-      console.error('Error deleting tax rate:', err);
+      console.error('...', error);
       const errorInfo = handleSupabaseError(err, 'Deleting tax rate');
       toast({
         variant: 'destructive',
@@ -399,7 +399,7 @@ export function useEnterpriseTaxData() {
       
       return newDeclaration;
     } catch (err) {
-      console.error('Error adding declaration:', err);
+      console.error('...', error);
       const errorInfo = handleSupabaseError(err, 'Adding declaration');
       toast({
         variant: 'destructive',
@@ -451,7 +451,7 @@ export function useEnterpriseTaxData() {
       ));
       
     } catch (err) {
-      console.error('Error updating declaration:', err);
+      console.error('...', error);
       const errorInfo = handleSupabaseError(err, 'Updating declaration');
       toast({
         variant: 'destructive',
@@ -496,7 +496,7 @@ export function useEnterpriseTaxData() {
       ));
       
     } catch (err) {
-      console.error('Error marking declaration as submitted:', err);
+      console.error('...', error);
       const errorInfo = handleSupabaseError(err, 'Marking declaration as submitted');
       toast({
         variant: 'destructive',
@@ -554,7 +554,7 @@ export function useEnterpriseTaxData() {
       
       return newPayment;
     } catch (err) {
-      console.error('Error adding payment:', err);
+      console.error('...', error);
       const errorInfo = handleSupabaseError(err, 'Adding payment');
       toast({
         variant: 'destructive',

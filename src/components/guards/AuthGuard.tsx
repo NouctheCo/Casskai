@@ -35,7 +35,7 @@ export const AuthForm: React.FC = () => {
     try {
       await signIn(signInForm);
     } catch (err: any) {
-      setError(err.message || 'Erreur de connexion.');
+      setError((error as Error).message || 'Erreur de connexion.');
     } finally {
       setLoading(false);
     }
@@ -65,7 +65,7 @@ export const AuthForm: React.FC = () => {
       setSignUpForm({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
       setActiveTab('signin');
     } catch (err: any) {
-      setError(err.message || "Erreur lors de l'inscription.");
+      setError((error as Error).message || "Erreur lors de l'inscription.");
     } finally {
       setLoading(false);
     }

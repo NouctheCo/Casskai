@@ -80,7 +80,7 @@ export const EInvoiceSubmissionForm: React.FC<EInvoiceSubmissionFormProps> = ({
           setInvoiceOptions(data.data || []);
         }
       } catch (error) {
-        console.error('Error loading invoices:', err);
+        console.error('...', error);
       } finally {
         setIsLoadingInvoices(false);
       }
@@ -120,7 +120,7 @@ export const EInvoiceSubmissionForm: React.FC<EInvoiceSubmissionFormProps> = ({
         setSelectedInvoiceId('');
       }
     } catch (error) {
-      setError(err instanceof Error ? err.message : 'Erreur lors de la soumission');
+      setError(err instanceof Error ? (error as Error).message : 'Erreur lors de la soumission');
     } finally {
       setIsSubmitting(false);
     }

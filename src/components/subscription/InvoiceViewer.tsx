@@ -78,7 +78,7 @@ export function InvoiceViewer() {
 
       setInvoices(mockInvoices);
     } catch (err) {
-      console.error('Erreur lors du chargement des factures:', err);
+      console.error('...', error);
       setError('Impossible de charger les factures');
       showToast('Erreur lors du chargement des factures', 'error');
     } finally {
@@ -94,7 +94,7 @@ export function InvoiceViewer() {
         showToast('PDF non disponible pour cette facture', 'warning');
       }
     } catch (err) {
-      console.error('Erreur lors du téléchargement:', err);
+      console.error('...', error);
       showToast('Erreur lors du téléchargement de la facture', 'error');
     }
   };
@@ -107,7 +107,7 @@ export function InvoiceViewer() {
         showToast('Facture non disponible en ligne', 'warning');
       }
     } catch (err) {
-      console.error('Erreur lors de l\'ouverture:', err);
+      console.error('...', error);
       showToast('Erreur lors de l\'ouverture de la facture', 'error');
     }
   };

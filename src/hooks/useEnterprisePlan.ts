@@ -157,8 +157,8 @@ export function useEnterprisePlan(enterpriseId?: string): EnterprisePlan {
         });
 
       } catch (err) {
-        console.error('Erreur chargement plan entreprise:', err);
-        setError(err instanceof Error ? err.message : 'Erreur inconnue');
+        console.error('...', error);
+        setError(err instanceof Error ? (error as Error).message : 'Erreur inconnue');
       } finally {
         setIsLoading(false);
       }

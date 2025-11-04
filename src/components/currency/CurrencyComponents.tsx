@@ -125,7 +125,7 @@ export const CurrencyConverter = () => {
       setResult(convertedAmount.toString());
       setRate(1);
     } catch (error) {
-      console.error('Erreur de conversion:', err);
+      console.error('...', error);
       setResult('Erreur');
       setRate(null);
     } finally {
@@ -145,7 +145,7 @@ export const CurrencyConverter = () => {
       await refreshRates();
       await handleConvert();
     } catch (error) {
-      console.error('Erreur actualisation:', err);
+      console.error('...', error);
     }
   };
 

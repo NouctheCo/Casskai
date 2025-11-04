@@ -108,9 +108,9 @@ export function useThirdParties(companyId: string) {
       setThirdParties(data || []);
       return { data: data || [], count: count || 0, error: null };
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch third parties';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to fetch third parties';
       setError(errorMessage);
-      console.error('Error fetching third parties:', err);
+      console.error('...', error);
       return { data: [], count: 0, error: errorMessage };
     } finally {
       setLoading(false);
@@ -141,9 +141,9 @@ export function useThirdParties(companyId: string) {
       setThirdParties(prev => [newThirdParty, ...prev]);
       return newThirdParty;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create third party';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to create third party';
       setError(errorMessage);
-      console.error('Error creating third party:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -177,9 +177,9 @@ export function useThirdParties(companyId: string) {
 
       return updatedThirdParty;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update third party';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to update third party';
       setError(errorMessage);
-      console.error('Error updating third party:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -204,9 +204,9 @@ export function useThirdParties(companyId: string) {
 
       setThirdParties(prev => prev.filter(tp => tp.id !== id));
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete third party';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to delete third party';
       setError(errorMessage);
-      console.error('Error deleting third party:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -228,7 +228,7 @@ export function useThirdParties(companyId: string) {
       if (fetchError) throw fetchError;
       return data;
     } catch (err) {
-      console.error('Error fetching third party by ID:', err);
+      console.error('...', error);
       return null;
     }
   }, [user, companyId]);
@@ -273,7 +273,7 @@ export function useThirdParties(companyId: string) {
 
       return stats;
     } catch (err) {
-      console.error('Error calculating third party statistics:', err);
+      console.error('...', error);
       return null;
     }
   }, [user, companyId]);

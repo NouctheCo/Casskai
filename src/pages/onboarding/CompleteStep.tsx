@@ -296,7 +296,7 @@ export default function CompleteStep() {
       window.location.href = '/dashboard';
 
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
+      const errorMessage = err instanceof Error ? (error as Error).message : String(err);
       console.error('Error completing onboarding:', errorMessage);
       setStatus('error');
 

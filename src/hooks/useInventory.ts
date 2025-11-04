@@ -74,7 +74,7 @@ export function useInventory(): UseInventoryReturn {
       const response = await InventoryService.getInventoryItems(currentCompany.id);
       setItems(response);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
     } finally {
       setItemsLoading(false);
     }
@@ -90,7 +90,7 @@ export function useInventory(): UseInventoryReturn {
       const response = await InventoryService.getStockMovements(currentCompany.id);
       setMovements(response);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
     } finally {
       setMovementsLoading(false);
     }
@@ -106,7 +106,7 @@ export function useInventory(): UseInventoryReturn {
       const response = await InventoryService.getInventoryMetrics(currentCompany.id);
       setMetrics(response);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
     } finally {
       setMetricsLoading(false);
     }
@@ -134,7 +134,7 @@ export function useInventory(): UseInventoryReturn {
       await fetchCategories();
       return true;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
       return false;
     }
   }, [currentCompany?.id, fetchItems, fetchMetrics, fetchCategories]);
@@ -146,7 +146,7 @@ export function useInventory(): UseInventoryReturn {
       await fetchMetrics();
       return true;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
       return false;
     }
   }, [fetchItems, fetchMetrics]);
@@ -158,7 +158,7 @@ export function useInventory(): UseInventoryReturn {
       await fetchMetrics();
       return true;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
       return false;
     }
   }, [fetchItems, fetchMetrics]);
@@ -173,7 +173,7 @@ export function useInventory(): UseInventoryReturn {
       await fetchMetrics();
       return true;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
       return false;
     }
   }, [currentCompany?.id, fetchMovements, fetchItems, fetchMetrics]);

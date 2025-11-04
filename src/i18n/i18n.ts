@@ -309,7 +309,7 @@ const initializeI18n = async () => {
     }
     return true;
   } catch (err) {
-    console.error('Erreur d\'initialisation i18n:', err);
+    console.error('...', error);
     // Fallback: initialiser avec une configuration minimale
     try {
       await i18n.init({

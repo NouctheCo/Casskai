@@ -76,7 +76,7 @@ export function useAutomation(): UseAutomationReturn {
         setError(response.error || 'Failed to fetch workflows');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -97,7 +97,7 @@ export function useAutomation(): UseAutomationReturn {
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
       return false;
     }
   }, [currentCompany?.id, fetchWorkflows]);
@@ -115,7 +115,7 @@ export function useAutomation(): UseAutomationReturn {
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
       return false;
     }
   }, [fetchWorkflows]);
@@ -133,7 +133,7 @@ export function useAutomation(): UseAutomationReturn {
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
       return false;
     }
   }, [fetchWorkflows]);
@@ -151,7 +151,7 @@ export function useAutomation(): UseAutomationReturn {
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
       return false;
     }
   }, [fetchWorkflows]);
@@ -170,7 +170,7 @@ export function useAutomation(): UseAutomationReturn {
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
       return false;
     }
   }, [fetchWorkflows]);
@@ -191,7 +191,7 @@ export function useAutomation(): UseAutomationReturn {
         setError(response.error || 'Failed to fetch executions');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
     } finally {
       setExecutionsLoading(prev => ({ ...prev, [workflowId]: false }));
     }
@@ -210,7 +210,7 @@ export function useAutomation(): UseAutomationReturn {
         setError(response.error || 'Failed to fetch templates');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
     } finally {
       setTemplatesLoading(false);
     }

@@ -28,7 +28,7 @@ export class AccountingValidationService {
           errors.push({
             row: 0,
             field: err.path.join('.'),
-            message: err.message,
+            message: (error as Error).message,
             type: 'validation',
             severity: 'error'
           });

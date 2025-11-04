@@ -86,8 +86,8 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
       setCapabilities(data);
       setIsEnabled(data.enabled);
     } catch (err) {
-      console.error('Error loading capabilities:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load capabilities');
+      console.error('...', error);
+      setError(err instanceof Error ? (error as Error).message : 'Failed to load capabilities');
       setIsEnabled(false);
       setCapabilities(null);
     }
@@ -100,7 +100,7 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
       const data = await apiCall(`/companies/${companyId}/einvoicing/statistics`);
       setStatistics(data);
     } catch (err) {
-      console.error('Error loading statistics:', err);
+      console.error('...', error);
     }
   }, [companyId, isEnabled, apiCall]);
 
@@ -111,7 +111,7 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
       const data = await apiCall(`/companies/${companyId}/einvoicing/documents?limit=20`);
       setDocuments(data.documents || []);
     } catch (err) {
-      console.error('Error loading documents:', err);
+      console.error('...', error);
     }
   }, [companyId, isEnabled, apiCall]);
 
@@ -126,7 +126,7 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
         loadDocuments()
       ]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to refresh data');
+      setError(err instanceof Error ? (error as Error).message : 'Failed to refresh data');
     } finally {
       setIsLoading(false);
     }
@@ -140,7 +140,7 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
       });
       await refreshData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to enable feature');
+      setError(err instanceof Error ? (error as Error).message : 'Failed to enable feature');
       throw err;
     } finally {
       setIsLoading(false);
@@ -158,7 +158,7 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
       setStatistics(null);
       setDocuments([]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to disable feature');
+      setError(err instanceof Error ? (error as Error).message : 'Failed to disable feature');
       throw err;
     } finally {
       setIsLoading(false);
@@ -185,7 +185,7 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
 
       return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to submit invoice';
+      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to submit invoice';
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {
@@ -206,7 +206,7 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
       
       return document;
     } catch (err) {
-      console.error('Error getting document status:', err);
+      console.error('...', error);
       return null;
     }
   }, [companyId, apiCall]);
@@ -234,7 +234,7 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
             pendingDocuments.map(doc => getDocumentStatus(doc.id))
           );
         } catch (err) {
-          console.error('Error polling document status:', err);
+          console.error('...', error);
         }
       }
     }, 30000); // Poll every 30 seconds

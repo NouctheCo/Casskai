@@ -27,7 +27,7 @@ export function useCountries() {
         setCountries(data);
       } catch (err) {
         setError('Erreur lors du chargement des pays');
-        console.error(err);
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -61,7 +61,7 @@ export function useSectors() {
         setSectors(data);
       } catch (err) {
         setError('Erreur lors du chargement des secteurs');
-        console.error(err);
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -75,7 +75,7 @@ export function useSectors() {
       const data = await referentialsService.searchSectors(searchTerm);
       return data;
     } catch (err) {
-      console.error('Erreur recherche secteurs:', err);
+      console.error('...', error);
       return sectors;
     }
   }, [sectors]);
@@ -105,7 +105,7 @@ export function useCompanySizes() {
         setCompanySizes(data);
       } catch (err) {
         setError('Erreur lors du chargement des tailles d\'entreprise');
-        console.error(err);
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -141,7 +141,7 @@ export function useTimezones(popularOnly = false) {
         setTimezones(data);
       } catch (err) {
         setError('Erreur lors du chargement des fuseaux horaires');
-        console.error(err);
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -175,7 +175,7 @@ export function useCurrencies() {
         setCurrencies(data);
       } catch (err) {
         setError('Erreur lors du chargement des devises');
-        console.error(err);
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -215,7 +215,7 @@ export function useTaxRates(countryCode?: string) {
         setTaxRates(data);
       } catch (err) {
         setError('Erreur lors du chargement des taux de taxes');
-        console.error(err);
+        console.error(error);
       } finally {
         setLoading(false);
       }
