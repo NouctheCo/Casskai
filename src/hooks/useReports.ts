@@ -256,7 +256,7 @@ export function useReports(companyId: string): UseReportsReturn {
 
       // Wait for completion in simple cases
       if (execution.status === 'completed' && execution.result?.data) {
-        const data = execution.result.data;
+        const data = execution.result.data as any; // Temp fix for TS2339
         return {
           assets: {
             current_assets: data.assets?.current || {},
@@ -295,7 +295,7 @@ export function useReports(companyId: string): UseReportsReturn {
       const execution = await generateReport('income_statement', parameters);
 
       if (execution.status === 'completed' && execution.result?.data) {
-        const data = execution.result.data;
+        const data = execution.result.data as any; // Temp fix for TS2339
         return {
           revenue: data.revenue || {},
           expenses: data.expenses || {},
@@ -326,7 +326,7 @@ export function useReports(companyId: string): UseReportsReturn {
       const execution = await generateReport('trial_balance', parameters);
 
       if (execution.status === 'completed' && execution.result?.data) {
-        const data = execution.result.data;
+        const data = execution.result.data as any; // Temp fix for TS2339
         return {
           accounts: data.accounts || [],
           total_debits: data.total_debits || 0,
