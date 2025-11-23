@@ -11,18 +11,23 @@ describe('OnboardingProgressService', () => {
   });
 
   describe('getNextStep', () => {
-    it('should return company step after welcome', () => {
+    it('should return preferences step after welcome', () => {
       const nextStep = service.getNextStep('welcome');
-      expect(nextStep).toBe('company');
-    });
-
-    it('should return preferences step after company', () => {
-      const nextStep = service.getNextStep('company');
       expect(nextStep).toBe('preferences');
     });
 
-    it('should return complete step after preferences', () => {
+    it('should return company step after preferences', () => {
       const nextStep = service.getNextStep('preferences');
+      expect(nextStep).toBe('company');
+    });
+
+    it('should return modules step after company', () => {
+      const nextStep = service.getNextStep('company');
+      expect(nextStep).toBe('modules');
+    });
+
+    it('should return complete step after modules', () => {
+      const nextStep = service.getNextStep('modules');
       expect(nextStep).toBe('complete');
     });
 
@@ -38,13 +43,18 @@ describe('OnboardingProgressService', () => {
       expect(previousStep).toBe(null);
     });
 
-    it('should return welcome step before company', () => {
-      const previousStep = service.getPreviousStep('company');
+    it('should return welcome step before preferences', () => {
+      const previousStep = service.getPreviousStep('preferences');
       expect(previousStep).toBe('welcome');
     });
 
-    it('should return company step before preferences', () => {
-      const previousStep = service.getPreviousStep('preferences');
+    it('should return preferences step before company', () => {
+      const previousStep = service.getPreviousStep('company');
+      expect(previousStep).toBe('preferences');
+    });
+
+    it('should return company step before modules', () => {
+      const previousStep = service.getPreviousStep('modules');
       expect(previousStep).toBe('company');
     });
   });
@@ -60,18 +70,18 @@ describe('OnboardingProgressService', () => {
       expect(progress).toBe(0);
     });
 
-    it('should return 25% for one completed step', () => {
+    it('should return 20% for one completed step', () => {
       const progress = service.calculateProgress(['welcome']);
-      expect(progress).toBe(25);
+      expect(progress).toBe(20);
     });
 
-    it('should return 50% for two completed steps', () => {
-      const progress = service.calculateProgress(['welcome', 'company']);
-      expect(progress).toBe(50);
+    it('should return 40% for two completed steps', () => {
+      const progress = service.calculateProgress(['welcome', 'preferences']);
+      expect(progress).toBe(40);
     });
 
     it('should return 100% for all completed steps', () => {
-      const progress = service.calculateProgress(['welcome', 'company', 'preferences', 'complete']);
+      const progress = service.calculateProgress(['welcome', 'preferences', 'company', 'modules', 'complete']);
       expect(progress).toBe(100);
     });
   });
@@ -106,7 +116,7 @@ describe('OnboardingProgressService', () => {
           timezone: 'Europe/Paris',
           modules: ['accounting']
         },
-        completedSteps: ['welcome', 'company', 'preferences', 'complete'],
+        completedSteps: ['welcome', 'preferences', 'company', 'modules', 'complete'],
         startedAt: new Date().toISOString(),
         lastSavedAt: new Date().toISOString(),
         isComplete: false
@@ -199,9 +209,9 @@ describe('OnboardingProgressService', () => {
 
       expect(result.success).toBe(true);
       expect(result.data).toBeDefined();
-      expect(result.data!.totalSteps).toBe(4);
+      expect(result.data!.totalSteps).toBe(5);
       expect(result.data!.completedSteps).toBe(2);
-      expect(result.data!.percentage).toBe(50);
+      expect(result.data!.percentage).toBe(40);
     });
   });
 
@@ -213,7 +223,7 @@ describe('OnboardingProgressService', () => {
       expect(result.data).toBeDefined();
       expect(result.data!.totalSessions).toBeGreaterThan(0);
       expect(result.data!.completedSessions).toBeGreaterThan(0);
-      expect(result.data!.stepsMetrics).toHaveLength(4);
+      expect(result.data!.stepsMetrics).toHaveLength(5);
     });
   });
 
@@ -235,7 +245,7 @@ describe('OnboardingProgressService', () => {
           timezone: 'Europe/Paris',
           modules: ['accounting']
         },
-        completedSteps: ['welcome', 'company'],
+        completedSteps: ['welcome'],
         startedAt: new Date().toISOString(),
         lastSavedAt: new Date().toISOString(),
         isComplete: false
@@ -243,11 +253,10 @@ describe('OnboardingProgressService', () => {
 
       const stepsWithStatus = service.getStepsWithStatus(data);
 
-      expect(stepsWithStatus).toHaveLength(4);
+      expect(stepsWithStatus).toHaveLength(5);
       expect(stepsWithStatus[0].isCompleted).toBe(true); // welcome
-      expect(stepsWithStatus[1].isCompleted).toBe(true); // company
-      expect(stepsWithStatus[2].isCompleted).toBe(false); // preferences
-      expect(stepsWithStatus[2].isCurrent).toBe(true); // preferences is current
+      expect(stepsWithStatus[1].isCompleted).toBe(false); // preferences
+      expect(stepsWithStatus[1].isCurrent).toBe(true); // preferences is current
     });
   });
 
@@ -255,7 +264,7 @@ describe('OnboardingProgressService', () => {
     it('should calculate remaining time correctly', () => {
       const data: OnboardingData = {
         userId: 'test-user',
-        currentStep: 'preferences',
+        currentStep: 'modules',
         companyProfile: {
           name: 'Test Company',
           industry: 'Technology',
@@ -269,16 +278,16 @@ describe('OnboardingProgressService', () => {
           timezone: 'Europe/Paris',
           modules: ['accounting']
         },
-        completedSteps: ['welcome', 'company'],
+        completedSteps: ['welcome', 'preferences', 'company'],
         startedAt: new Date().toISOString(),
         lastSavedAt: new Date().toISOString(),
         isComplete: false
       };
 
       const remainingTime = service.getEstimatedRemainingTime(data);
-      
-      // Should be preferences (3min) + complete (2min) = 5min
-      expect(remainingTime).toBe(5);
+
+      // Should be modules (4min) + complete (2min) = 6min
+      expect(remainingTime).toBe(6);
     });
 
     it('should return 0 when all steps are completed', () => {
@@ -298,7 +307,7 @@ describe('OnboardingProgressService', () => {
           timezone: 'Europe/Paris',
           modules: ['accounting']
         },
-        completedSteps: ['welcome', 'company', 'preferences', 'complete'],
+        completedSteps: ['welcome', 'preferences', 'company', 'modules', 'complete'],
         startedAt: new Date().toISOString(),
         lastSavedAt: new Date().toISOString(),
         isComplete: true

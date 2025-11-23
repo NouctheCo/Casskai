@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import Stripe from 'stripe';
 import { supabase } from '@/lib/supabase';
-import { SubscriptionService } from '../subscriptionService';
+import { subscriptionService } from '../subscriptionService';
 
 // Mock Stripe
 const mockStripe = {
@@ -77,7 +77,10 @@ vi.mock('@/lib/supabase', () => ({
       update: vi.fn(() => ({
         eq: vi.fn(() => ({ data: null, error: null }))
       })),
-      upsert: vi.fn(() => ({ data: null, error: null }))
+      upsert: vi.fn(() => ({ data: null, error: null })),
+      delete: vi.fn(() => ({
+        eq: vi.fn(() => ({ data: null, error: null }))
+      }))
     })),
     auth: {
       getUser: vi.fn(() => ({ 
@@ -89,11 +92,8 @@ vi.mock('@/lib/supabase', () => ({
 }));
 
 describe('Stripe Integration Tests', () => {
-  let subscriptionService: any;
-
   beforeEach(() => {
     vi.clearAllMocks();
-    subscriptionService = new SubscriptionService();
   });
 
   afterEach(() => {
@@ -416,7 +416,14 @@ describe('Stripe Integration Tests', () => {
             customer: 'cus_test123',
             subscription: 'sub_test123',
             amount_paid: 2900,
-            status: 'paid'
+            status: 'paid',
+            lines: {
+              data: [{
+                period: {
+                  end: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60
+                }
+              }]
+            }
           }
         }
       };

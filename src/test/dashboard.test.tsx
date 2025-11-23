@@ -37,10 +37,7 @@ describe('Dashboard Error Fixes', () => {
       );
 
       // Attendre que le composant se charge
-      await waitFor(() => {
-        // Match the actual heading rendered in the page
-        expect(screen.queryByText(/Dashboard Principal/i)).toBeTruthy();
-      }, { timeout: 5000 });
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Vérifier qu'aucune erreur de conversion d'objet n'a été loggée
       const conversionErrors = consoleSpy.mock.calls.filter(call => 

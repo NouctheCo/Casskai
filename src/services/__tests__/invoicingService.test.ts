@@ -278,8 +278,9 @@ describe('InvoicingService', () => {
         }).format(amount);
       };
 
-      expect(formatAmount(1234.56, 'EUR')).toBe('1\u202f234,56 €');
-      expect(formatAmount(1234.56, 'USD')).toBe('1\u202f234,56 $US');
+      // Note: Space character varies by environment
+      expect(formatAmount(1234.56, 'EUR')).toMatch(/1.234,56.€/);
+      expect(formatAmount(1234.56, 'USD')).toMatch(/1.234,56.\$US/);
     });
 
     it('should handle currency precision correctly', () => {

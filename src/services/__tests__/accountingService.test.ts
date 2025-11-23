@@ -20,11 +20,13 @@ const mockPCGPlan: AccountPlan = {
           number: '101',
           name: 'Capital',
           type: 'equity' as AccountType,
+          isDebitNormal: false,
           subAccounts: [
             {
               number: '1010',
               name: 'Capital souscrit non appelé',
-              type: 'equity' as AccountType
+              type: 'equity' as AccountType,
+              isDebitNormal: false
             }
           ]
         }
@@ -37,12 +39,14 @@ const mockPCGPlan: AccountPlan = {
         {
           number: '411',
           name: 'Clients',
-          type: 'receivable' as AccountType
+          type: 'receivable' as AccountType,
+          isDebitNormal: true
         },
         {
           number: '401',
           name: 'Fournisseurs',
-          type: 'payable' as AccountType
+          type: 'payable' as AccountType,
+          isDebitNormal: false
         }
       ]
     }

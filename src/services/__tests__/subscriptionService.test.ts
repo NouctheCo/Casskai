@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { supabase } from '@/lib/supabase';
-import { SubscriptionService, UsageLimits, FeatureAccess } from '../subscriptionService';
+import { subscriptionService, UsageLimits, FeatureAccess } from '../subscriptionService';
 
 // Mock Supabase client
 vi.mock('@/lib/supabase', () => ({
@@ -32,11 +32,8 @@ vi.mock('@/lib/supabase', () => ({
 }));
 
 describe('SubscriptionService', () => {
-  let subscriptionService: any;
-
   beforeEach(() => {
     vi.clearAllMocks();
-    subscriptionService = new (require('../subscriptionService').default || require('../subscriptionService').SubscriptionService)();
   });
 
   afterEach(() => {
