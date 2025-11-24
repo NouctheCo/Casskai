@@ -183,3 +183,6 @@ import-files/
 # - Les configurations locales qui varient selon l'environnement
 
 # Ne versionner que .env.example pour la doc
+
+# Playwright test results
+test-results/
