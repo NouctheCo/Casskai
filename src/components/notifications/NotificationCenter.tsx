@@ -148,7 +148,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
 
   // Marquer comme lu
   const markAsRead = async (notification: Notification) => {
-    if (notification.is_read) return;
+    if (notification.read) return;
 
     try {
       const result = await notificationService.markAsRead(notification.id);
@@ -308,7 +308,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
                       border-l-4 p-4 border-b border-gray-100 dark:border-gray-800
                       hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer
                       transition-colors duration-200
-                      ${!notification.is_read ? 'bg-blue-50/50 dark:bg-blue-950/50' : ''}
+                      ${!notification.read ? 'bg-blue-50/50 dark:bg-blue-950/50' : ''}
                     `}
                     onClick={() => markAsRead(notification)}
                   >
@@ -322,10 +322,10 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
                           <div>
                             <h4 className={`
                               text-sm font-medium text-gray-900 dark:text-gray-100
-                              ${!notification.is_read ? 'font-semibold' : ''}
+                              ${!notification.read ? 'font-semibold' : ''}
                             `}>
                               {notification.title}
-                              {!notification.is_read && (
+                              {!notification.read && (
                                 <div className="inline-block w-2 h-2 bg-blue-500 rounded-full ml-2" />
                               )}
                             </h4>
@@ -335,7 +335,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
                           </div>
 
                           <div className="flex items-center gap-1">
-                            {!notification.is_read && (
+                            {!notification.read && (
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -436,3 +436,4 @@ export function useNotificationCenter() {
     refreshUnreadCount: loadUnreadCount
   };
 }
+

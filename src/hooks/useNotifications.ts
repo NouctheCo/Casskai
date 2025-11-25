@@ -65,7 +65,7 @@ export function useNotifications(options: UseNotificationsOptions = {}): UseNoti
         setError(result.error || 'Erreur de chargement');
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Erreur inconnue');
+      setError(err instanceof Error ? err.message : 'Erreur inconnue');
     } finally {
       setLoading(false);
     }
@@ -84,7 +84,7 @@ export function useNotifications(options: UseNotificationsOptions = {}): UseNoti
         setUnreadCount(result.data);
       }
     } catch (err) {
-      console.error('...', error);
+      console.error('Error fetching unread count:', err);
     }
   }, [user?.id]);
 
@@ -94,7 +94,7 @@ export function useNotifications(options: UseNotificationsOptions = {}): UseNoti
     setNotifications(prev => [notification, ...prev].slice(0, limit));
 
     // Update unread count
-    if (!notification.is_read) {
+    if (!notification.read) {
       setUnreadCount(prev => prev + 1);
     }
 
@@ -179,7 +179,7 @@ export function useNotifications(options: UseNotificationsOptions = {}): UseNoti
       setNotifications(prev => prev.filter(n => n.id !== id));
       // Update unread count if it was unread
       const notification = notifications.find(n => n.id === id);
-      if (notification && !notification.is_read) {
+      if (notification && !notification.read) {
         setUnreadCount(prev => Math.max(0, prev - 1));
       }
       toast.success('Notification archivée');
@@ -193,7 +193,7 @@ export function useNotifications(options: UseNotificationsOptions = {}): UseNoti
       setNotifications(prev => prev.filter(n => n.id !== id));
       // Update unread count if it was unread
       const notification = notifications.find(n => n.id === id);
-      if (notification && !notification.is_read) {
+      if (notification && !notification.read) {
         setUnreadCount(prev => Math.max(0, prev - 1));
       }
       toast.success('Notification supprimée');
@@ -218,3 +218,6 @@ export function useUnreadNotificationsCount(): number {
   const { unreadCount } = useNotifications({ autoSubscribe: true, showToast: false, limit: 1 });
   return unreadCount;
 }
+
+
+

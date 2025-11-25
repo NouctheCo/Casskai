@@ -131,7 +131,16 @@
       "Bash(./deploy-staging.sh:*)",
       "Bash(nslookup:*)",
       "Bash(host:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(git restore:*)",
+      "Bash(timeout 10 bash:*)",
+      "Bash(dir /b \"c:\\Users\\noutc\\Casskai\\supabase\\migrations\")",
+      "Bash(src/pages/HumanResourcesPage.tsx.tmp)",
+      "Bash(do sleep 10)",
+      "Bash(taskkill:*)",
+      "Bash(NUL)",
+      "Bash(timeout /t 3)",
+      "Bash(if exist dist rmdir /s /q dist)"
     ],
     "deny": []
   }

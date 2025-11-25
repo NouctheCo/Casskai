@@ -13,7 +13,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { LoadingFallback } from '@/components/ui/LoadingFallback';
 import ErrorBoundary, { setupGlobalErrorHandling } from '@/components/ErrorBoundary';
 import { UpdateNotification, OfflineIndicator } from '@/hooks/useServiceWorker';
-import { FeedbackWidget } from '@/components/beta/FeedbackWidget';
+
 import AppRouter from './AppRouter'; // Import the new router
 
 // Initialiser la gestion d'erreurs globale
@@ -65,8 +65,7 @@ function App() {
                           </Suspense>
                           <Toaster />
                           <UpdateNotification />
-                          <OfflineIndicator />
-                          <FeedbackWidget />
+                          <OfflineIndicator />
                         </TooltipProvider>
                       </EnterpriseProvider>
                     ) : (
@@ -78,8 +77,7 @@ function App() {
                             </Suspense>
                             <Toaster />
                             <UpdateNotification />
-                            <OfflineIndicator />
-                            <FeedbackWidget />
+                            <OfflineIndicator />
                           </TooltipProvider>
                         </EnterpriseProvider>
                       </ModulesProviderWrapper>

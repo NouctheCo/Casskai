@@ -18,7 +18,8 @@ import {
   Eye,
   RefreshCw,
   Database
-} from 'lucide-react';
+} from 'lucide-react';
+import { fecService } from '@/services/fecService';
 
 export default function FECImportTab() {
   const { toast } = useToast();
@@ -48,84 +49,7 @@ export default function FECImportTab() {
     { key: 'balance', label: 'Vérification des équilibres...', duration: 1000 }
   ];
 
-  // Données simulées pour l'analyse
-  const mockAnalysisResult = {
-    isValid: true,
-    fileInfo: {
-      name: 'FEC_12345678_20240101_20241231.txt',
-      size: '2.4 MB',
-      lines: 1247,
-      encoding: 'UTF-8'
-    },
-    company: {
-      siren: '123456789',
-      name: 'ENTREPRISE DEMO SARL',
-      period: {
-        start: '2024-01-01',
-        end: '2024-12-31'
-      }
-    },
-    statistics: {
-      totalEntries: 342,
-      totalAccounts: 87,
-      totalJournals: 8,
-      totalDebit: 485720.45,
-      totalCredit: 485720.45,
-      unbalancedEntries: 0
-    },
-    errors: [],
-    warnings: [
-      { line: 145, message: 'Compte 445660 non standard pour une TVA déductible' },
-      { line: 267, message: 'Libellé vide pour l\'écriture ECR-0145' }
-    ],
-    preview: {
-      accounts: [
-        { code: '101000', name: 'Capital social', type: 'EQUITY', entries: 2 },
-        { code: '411000', name: 'Clients', type: 'ASSET', entries: 45 },
-        { code: '401000', name: 'Fournisseurs', type: 'LIABILITY', entries: 32 },
-        { code: '512000', name: 'Banque', type: 'ASSET', entries: 78 },
-        { code: '701000', name: 'Ventes', type: 'REVENUE', entries: 67 }
-      ],
-      journals: [
-        { code: 'VTE', name: 'Ventes', entries: 67 },
-        { code: 'ACH', name: 'Achats', entries: 45 },
-        { code: 'BQ', name: 'Banque', entries: 78 },
-        { code: 'OD', name: 'Opérations diverses', entries: 152 }
-      ],
-      sampleEntries: [
-        {
-          date: '2024-01-15',
-          journal: 'VTE',
-          number: 'ECR-001',
-          reference: 'FAC-2024-001',
-          description: 'Facture client ABC',
-          debit: 1200.00,
-          credit: 0,
-          account: '411000'
-        },
-        {
-          date: '2024-01-15',
-          journal: 'VTE',
-          number: 'ECR-001',
-          reference: 'FAC-2024-001',
-          description: 'Vente marchandises',
-          debit: 0,
-          credit: 1000.00,
-          account: '701000'
-        },
-        {
-          date: '2024-01-15',
-          journal: 'VTE',
-          number: 'ECR-001',
-          reference: 'FAC-2024-001',
-          description: 'TVA collectée',
-          debit: 0,
-          credit: 200.00,
-          account: '445710'
-        }
-      ]
-    }
-  };
+  // ✅ Analyse FEC réelle via fecService
 
   // Gestion du drag & drop
   const handleDragOver = useCallback((e) => {
@@ -199,7 +123,17 @@ export default function FECImportTab() {
       }
 
       // Simulation d'analyse réussie
-      setAnalysisResult(mockAnalysisResult);
+      // ✅ Analyser le fichier FEC avec le vrai service
+        const analysis = await fecService.analyzeFECFile(file);
+        setAnalysisResult(analysis);
+        
+        if (!analysis.isValid) {
+          showToast({
+            title: 'Fichier FEC invalide',
+            description: ` erreur(s) détectée(s)`,
+            type: 'error'
+          });
+        }
       
       toast({
         title: "Analyse terminée",

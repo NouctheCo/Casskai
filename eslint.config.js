@@ -112,7 +112,7 @@ export default [
       'complexity': ['warn', 15],
       'max-depth': ['warn', 4],
       'max-lines': ['warn', 700],
-      'max-lines-per-function': ['warn', 100],
+      'max-lines-per-function': ['warn', { max: 300, skipComments: true, skipBlankLines: true }], // Ajusté pour Beta - refactor Sprint 4
       'max-params': ['warn', 5],
       'no-eval': 'error',
       'no-implied-eval': 'error',

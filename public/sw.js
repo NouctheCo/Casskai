@@ -1,11 +1,22 @@
-// Service Worker pour CassKai - Offline-First avec performance optimisée
-const CACHE_VERSION = 'v1.3.2';
-const CACHE_NAMES = {
-  static: `casskai-static-${CACHE_VERSION}`,
-  dynamic: `casskai-dynamic-${CACHE_VERSION}`,
-  api: `casskai-api-${CACHE_VERSION}`,
-  images: `casskai-images-${CACHE_VERSION}`,
-};
+// Service Worker DÉSACTIVÉ - Cause des conflits avec Vite
+// Pour le réactiver, voir sw.js.backup
+
+self.addEventListener('install', () => {
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => caches.delete(cacheName))
+      );
+    }).then(() => self.clients.claim())
+  );
+});
+
+console.log('🚫 Service Worker désactivé - Tous les caches supprimés');
+return;
 
 // Ressources à mettre en cache immédiatement
 const STATIC_ASSETS = [

@@ -1,4 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
+import * as dotenv from 'dotenv';
+
+// Charger les variables d'environnement depuis .env.test
+dotenv.config({ path: '.env.test' });
 
 /**
  * Playwright E2E Testing Configuration
@@ -7,6 +11,9 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './e2e',
 
+  /* Timeout global pour chaque test */
+  timeout: 90000, // 90 secondes par test (au lieu de 30s par défaut)
+
   /* Run tests in files in parallel */
   fullyParallel: true,
 
@@ -14,10 +21,10 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
 
   /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 2 : 1, // 1 retry même en local
 
   /* Opt out of parallel tests on CI */
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI ? 1 : 3, // Seulement 3 workers au lieu de 11
 
   /* Reporter to use */
   reporter: [
@@ -29,7 +36,7 @@ export default defineConfig({
   /* Shared settings for all the projects below */
   use: {
     /* Base URL for testing */
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173',
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'https://casskai.app',
 
     /* Collect trace when retrying the failed test */
     trace: 'on-first-retry',

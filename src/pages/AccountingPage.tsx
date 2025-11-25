@@ -18,6 +18,8 @@ import { useSubscription } from '@/contexts/SubscriptionContext';
 
 import { AccountingService } from '@/services/accountingService';
 
+import { accountingDataService } from '@/services/accountingDataService';
+
 import { supabase } from '@/lib/supabase';
 
 import { 
@@ -113,6 +115,14 @@ interface AccountingData {
   accountsCount: number;
 
   journalsCount: number;
+
+  totalBalanceTrend?: number;
+
+  totalDebitTrend?: number;
+
+  totalCreditTrend?: number;
+
+  entriesCountTrend?: number;
 
 }
 
@@ -324,17 +334,9 @@ const QuickActions: React.FC<QuickActionsProps> = ({ onNewEntry, onViewReports, 
 
 const RecentAccountingActivities = () => {
 
-  const activities = [
-
-    { type: 'entry', description: 'Nouvelle écriture - Facture F-001', time: '2 min', icon: FileText, color: 'blue' },
-
-    { type: 'validation', description: 'Validation journal des ventes', time: '1h', icon: CheckCircle, color: 'green' },
-
-    { type: 'export', description: 'Export FEC généré', time: '3h', icon: Download, color: 'purple' },
-
-    { type: 'balance', description: 'Balance des comptes mise à jour', time: '1j', icon: BarChart3, color: 'orange' }
-
-  ];
+  // Remplacé : Plus de données mockées
+  // À l'avenir, ces activités seront chargées depuis une table d'audit dans Supabase
+  const activities: never[] = [];
 
 
 
@@ -358,21 +360,33 @@ const RecentAccountingActivities = () => {
 
         <div className="space-y-3">
 
-          {activities.map((activity, index) => (
+          {activities.length === 0 ? (
 
-            <motion.div
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
 
-              key={index}
+              <Activity className="w-12 h-12 mx-auto mb-3 opacity-30" />
 
-              initial={{ opacity: 0, x: -10 }}
+              <p className="text-sm">Aucune activité récente</p>
 
-              animate={{ opacity: 1, x: 0 }}
+            </div>
 
-              transition={{ delay: index * 0.1 }}
+          ) : (
 
-              className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50"
+            activities.map((activity, index) => (
 
-            >
+              <motion.div
+
+                key={index}
+
+                initial={{ opacity: 0, x: -10 }}
+
+                animate={{ opacity: 1, x: 0 }}
+
+                transition={{ delay: index * 0.1 }}
+
+                className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50"
+
+              >
 
               <div className={`w-8 h-8 rounded-lg ${
 
@@ -418,7 +432,7 @@ const RecentAccountingActivities = () => {
 
             </motion.div>
 
-          ))}
+          )))}
 
         </div>
 
@@ -514,37 +528,39 @@ export default function AccountingPageOptimized() {
         const companyId = companies[0].id;
         setCurrentCompanyId(companyId);
 
+        // Calculate period dates
+        const now = new Date();
+        let periodStart: string;
+        let periodEnd: string;
 
+        switch (selectedPeriod) {
+          case 'current-month':
+            periodStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+            periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+            break;
+          case 'current-quarter': {
+            const quarterMonth = Math.floor(now.getMonth() / 3) * 3;
+            periodStart = new Date(now.getFullYear(), quarterMonth, 1).toISOString().split('T')[0];
+            periodEnd = new Date(now.getFullYear(), quarterMonth + 3, 0).toISOString().split('T')[0];
+            break;
+          }
+          case 'current-year':
+            periodStart = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
+            periodEnd = new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0];
+            break;
+          default:
+            periodStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+            periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+        }
 
-        // Compter les comptes, journaux et écritures
-
-        const [accountsResult, journalsResult, entriesResult] = await Promise.all([
-
-          supabase.from('accounts').select('*', { count: 'exact', head: true }).eq('company_id', companyId),
-
-          supabase.from('journals').select('*', { count: 'exact', head: true }).eq('company_id', companyId),
-
-          supabase.from('journal_entries').select('*', { count: 'exact', head: true }).eq('company_id', companyId)
-
-        ]);
-
-
-
-        setAccountingData({
-
-          totalBalance: 0, // À calculer depuis les écritures
-
-          totalDebit: 0,   // À calculer
-
-          totalCredit: 0,  // À calculer
-
-          entriesCount: entriesResult.count || 0,
-
-          accountsCount: accountsResult.count || 0,
-
-          journalsCount: journalsResult.count || 0
-
+        // Get accounting stats with trends
+        const stats = await accountingDataService.getAccountingStatsWithTrends({
+          periodStart,
+          periodEnd,
+          companyId
         });
+
+        setAccountingData(stats);
 
 
 
@@ -770,13 +786,13 @@ export default function AccountingPageOptimized() {
 
           color="blue"
 
-          trend={8.5}
+          trend={accountingData.totalBalanceTrend}
 
           description="Balance générale"
 
         />
 
-        
+
 
         <AccountingKPICard
 
@@ -788,13 +804,13 @@ export default function AccountingPageOptimized() {
 
           color="green"
 
-          trend={12.3}
+          trend={accountingData.totalDebitTrend}
 
           description="Débits ce mois"
 
         />
 
-        
+
 
         <AccountingKPICard
 
@@ -806,13 +822,13 @@ export default function AccountingPageOptimized() {
 
           color="purple"
 
-          trend={-2.1}
+          trend={accountingData.totalCreditTrend}
 
           description="Crédits ce mois"
 
         />
 
-        
+
 
         <AccountingKPICard
 
@@ -824,7 +840,7 @@ export default function AccountingPageOptimized() {
 
           color="orange"
 
-          trend={15.7}
+          trend={accountingData.entriesCountTrend}
 
           description="Écritures saisies"
 
@@ -898,59 +914,24 @@ export default function AccountingPageOptimized() {
 
           <div className="grid gap-6 lg:grid-cols-3">
 
+            {/* Répartition par journal - Temporarily hidden until real journal stats implementation */}
+            {/*
             <div className="lg:col-span-2">
-
               <Card>
-
                 <CardHeader>
-
                   <CardTitle className="flex items-center space-x-2">
-
                     <PieChart className="w-5 h-5 text-purple-500" />
-
                     <span>Répartition par journal</span>
-
                   </CardTitle>
-
                 </CardHeader>
-
                 <CardContent>
-
-                  <div className="space-y-4">
-
-                    {[
-
-                      { name: 'Journal des ventes', amount: 45670, percentage: 65, color: 'blue' },
-
-                      { name: 'Journal des achats', amount: 18440, percentage: 26, color: 'green' },
-
-                      { name: 'Journal de banque', amount: 6320, percentage: 9, color: 'purple' }
-
-                    ].map((journal, index) => (
-
-                      <div key={index} className="space-y-2">
-
-                        <div className="flex justify-between text-sm">
-
-                          <span className="font-medium">{journal.name}</span>
-
-                          <span>{journal.amount.toLocaleString('fr-FR')} € ({journal.percentage}%)</span>
-
-                        </div>
-
-                        <Progress value={journal.percentage} className="h-2" />
-
-                      </div>
-
-                    ))}
-
+                  <div className="text-sm text-gray-500 text-center py-4">
+                    Statistiques disponibles après ajout d'écritures comptables
                   </div>
-
                 </CardContent>
-
               </Card>
-
             </div>
+            */}
 
             
 

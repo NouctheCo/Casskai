@@ -1,3 +1,5 @@
+import type { AccountPlan } from '@/types/accounting';
+
 // Plan Comptable Général (PCG) - Structure comptable française
 // Ce fichier définit la structure hiérarchique du plan comptable selon les normes françaises
 
@@ -703,13 +705,25 @@ export const getAccountHierarchy = (code: string): PCGAccount[] => {
   return hierarchy;
 };
 
-// Export par défaut
-export default {
-  classes: PCG_CLASSES,
-  accounts: PCG_ACCOUNTS,
-  getAccountsByClass,
-  getAccountsByType,
-  findAccount,
-  getChildAccounts,
-  getAccountHierarchy
+// Export par défaut conforme à AccountPlan
+const PCG_FRANCE: AccountPlan = {
+  standard: 'PCG',
+  country: 'FR',
+  // Convertir PCGClass vers AccountClass avec la structure attendue
+  classes: PCG_CLASSES.map(pcgClass => ({
+    number: pcgClass.class.toString(),
+    name: pcgClass.name,
+    type: pcgClass.type,
+    accounts: PCG_ACCOUNTS
+      .filter(acc => acc.code.startsWith(pcgClass.class.toString()))
+      .map(acc => ({
+        number: acc.code,
+        name: acc.name,
+        type: acc.type as 'immobilisations' | 'stocks' | 'creances' | 'tresorerie' | 'dettes' | 'capitaux' | 'charges' | 'produits',
+        isDebitNormal: acc.type === 'asset' || acc.type === 'expense',
+        subAccounts: []
+      }))
+  }))
 };
+
+export default PCG_FRANCE;

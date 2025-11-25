@@ -77,7 +77,7 @@ export function MainLayout() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="flex items-center space-x-2">
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <img src="/logo.svg" alt="CassKai" className="w-16 h-16 animate-pulse" />
           <span className="text-sm text-gray-600 dark:text-gray-300">
             {t('common.loading', { defaultValue: 'Chargement...' })}
           </span>

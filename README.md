@@ -1,183 +1,168 @@
-# Supabase CLI
-
-[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=main)](https://coveralls.io/github/supabase/cli?branch=main) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
-](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
-
-[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
-
-This repository contains all the functionality for Supabase CLI.
-
-- [x] Running Supabase locally
-- [x] Managing database migrations
-- [x] Creating and deploying Supabase Functions
-- [x] Generating types directly from your database schema
-- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
-
-## Getting started
-
-### Install the CLI
-
-Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
-
-```bash
-npm i supabase --save-dev
-```
-
-To install the beta release channel:
-
-```bash
-npm i supabase@beta --save-dev
-```
-
-When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
-
-```
-NODE_OPTIONS=--no-experimental-fetch yarn add supabase
-```
-
-> **Note**
-For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
-
-<details>
-  <summary><b>macOS</b></summary>
-
-  Available via [Homebrew](https://brew.sh). To install:
-
-  ```sh
-  brew install supabase/tap/supabase
-  ```
-
-  To install the beta release channel:
+<div align="center">
+  <img src="public/logo.svg" alt="CassKai Logo" width="200"/>
   
-  ```sh
-  brew install supabase/tap/supabase-beta
-  brew link --overwrite supabase-beta
-  ```
+  # CassKai Business Suite
   
-  To upgrade:
+  **Plateforme de gestion tout-en-un pour PME et indépendants**
+  
+  [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/votre-username/casskai)
+  [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+  [![Status](https://img.shields.io/badge/status-Beta-yellow.svg)](https://casskai.app)
+  
+  [🌐 Site Web](https://casskai.app) · [📚 Documentation](https://docs.casskai.app) · [🐛 Signaler un Bug](https://github.com/votre-username/casskai/issues)
+</div>
 
-  ```sh
-  brew upgrade supabase
-  ```
-</details>
+---
 
-<details>
-  <summary><b>Windows</b></summary>
+## 📋 À propos
 
-  Available via [Scoop](https://scoop.sh). To install:
+**CassKai®** est une solution de gestion d'entreprise moderne et complète, développée par **Noutche Conseil SAS**, conçue spécifiquement pour les PME et les indépendants francophones.
 
-  ```powershell
-  scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
-  scoop install supabase
-  ```
+### ✨ Fonctionnalités principales
 
-  To upgrade:
+- **💰 Comptabilité** - Gestion complète du plan comptable, écritures, rapports financiers
+- **📄 Facturation** - Création et suivi des factures, devis, avoirs
+- **🏦 CRM** - Gestion des clients, prospects, contacts et opportunités
+- **📊 Tableaux de bord** - Visualisation en temps réel de vos KPIs
+- **📈 Budget & Prévisions** - Planification budgétaire et analyses prédictives
+- **💳 Trésorerie** - Suivi des flux de trésorerie et rapprochements bancaires
+- **📦 Stock** - Gestion des inventaires et mouvements
+- **👥 RH** - Gestion simplifiée des employés et paies
+- **🔐 Sécurité & Conformité** - Conforme RGPD, certifié NF525 (à venir)
 
-  ```powershell
-  scoop update supabase
-  ```
-</details>
+## 🚀 Démarrage rapide
 
-<details>
-  <summary><b>Linux</b></summary>
+### Prérequis
 
-  Available via [Homebrew](https://brew.sh) and Linux packages.
+- Node.js >= 18.0.0
+- npm >= 8.0.0
+- Un compte Supabase (gratuit)
 
-  #### via Homebrew
-
-  To install:
-
-  ```sh
-  brew install supabase/tap/supabase
-  ```
-
-  To upgrade:
-
-  ```sh
-  brew upgrade supabase
-  ```
-
-  #### via Linux packages
-
-  Linux packages are provided in [Releases](https://github.com/supabase/cli/releases). To install, download the `.apk`/`.deb`/`.rpm`/`.pkg.tar.zst` file depending on your package manager and run the respective commands.
-
-  ```sh
-  sudo apk add --allow-untrusted <...>.apk
-  ```
-
-  ```sh
-  sudo dpkg -i <...>.deb
-  ```
-
-  ```sh
-  sudo rpm -i <...>.rpm
-  ```
-
-  ```sh
-  sudo pacman -U <...>.pkg.tar.zst
-  ```
-</details>
-
-<details>
-  <summary><b>Other Platforms</b></summary>
-
-  You can also install the CLI via [go modules](https://go.dev/ref/mod#go-install) without the help of package managers.
-
-  ```sh
-  go install github.com/supabase/cli@latest
-  ```
-
-  Add a symlink to the binary in `$PATH` for easier access:
-
-  ```sh
-  ln -s "$(go env GOPATH)/bin/cli" /usr/bin/supabase
-  ```
-
-  This works on other non-standard Linux distros.
-</details>
-
-<details>
-  <summary><b>Community Maintained Packages</b></summary>
-
-  Available via [pkgx](https://pkgx.sh/). Package script [here](https://github.com/pkgxdev/pantry/blob/main/projects/supabase.com/cli/package.yml).
-  To install in your working directory:
-
-  ```bash
-  pkgx install supabase
-  ```
-
-  Available via [Nixpkgs](https://nixos.org/). Package script [here](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/tools/supabase-cli/default.nix).
-</details>
-
-### Run the CLI
+### Installation
 
 ```bash
-supabase bootstrap
+# Cloner le repository
+git clone https://github.com/votre-username/casskai.git
+cd casskai
+
+# Installer les dépendances
+npm install
+
+# Configurer les variables d'environnement
+cp .env.example .env.local
+# Éditer .env.local avec vos clés Supabase
+
+# Lancer le serveur de développement
+npm run dev
 ```
 
-Or using npx:
+L'application sera accessible sur `http://localhost:5173`
+
+## 🛠️ Stack technique
+
+- **Frontend**: React 18 + TypeScript + Vite
+- **UI**: Tailwind CSS + Radix UI + Framer Motion
+- **Backend**: Supabase (PostgreSQL + Auth + Edge Functions)
+- **État**: React Context API + localStorage
+- **Charts**: Recharts
+- **PDF**: jsPDF + html2canvas
+- **Excel**: SheetJS (xlsx)
+- **Routing**: React Router v6
+
+## 📦 Scripts disponibles
 
 ```bash
-npx supabase bootstrap
+npm run dev              # Lancer en mode développement
+npm run build            # Build de production optimisé
+npm run build:fast       # Build rapide (dev)
+npm run lint             # Vérifier le code
+npm run lint:fix         # Corriger automatiquement
+npm run type-check       # Vérifier les types TypeScript
+npm run preview          # Prévisualiser le build
 ```
 
-The bootstrap command will guide you through the process of setting up a Supabase project using one of the [starter](https://github.com/supabase-community/supabase-samples/blob/main/samples.json) templates.
+## 🏗️ Architecture
 
-## Docs
-
-Command & config reference can be found [here](https://supabase.com/docs/reference/cli/about).
-
-## Breaking changes
-
-We follow semantic versioning for changes that directly impact CLI commands, flags, and configurations.
-
-However, due to dependencies on other service images, we cannot guarantee that schema migrations, seed.sql, and generated types will always work for the same CLI major version. If you need such guarantees, we encourage you to pin a specific version of CLI in package.json.
-
-## Developing
-
-To run from source:
-
-```sh
-# Go >= 1.22
-go run . help
 ```
+casskai/
+├── public/              # Assets statiques (logos, favicons, etc.)
+├── src/
+│   ├── components/      # Composants React réutilisables
+│   │   ├── ui/          # Composants UI de base
+│   │   ├── layout/      # Layouts (Header, Sidebar, Footer)
+│   │   ├── charts/      # Composants de graphiques
+│   │   └── ...
+│   ├── pages/           # Pages de l'application
+│   ├── contexts/        # Contextes React (Auth, Entreprise, Locale, etc.)
+│   ├── services/        # Services (API, exports, etc.)
+│   ├── hooks/           # Hooks personnalisés
+│   ├── lib/             # Utilitaires et config
+│   ├── locales/         # Fichiers de traduction (i18n)
+│   ├── types/           # Définitions TypeScript
+│   └── supabase/        # Configuration Supabase
+├── supabase/            # Migrations et Edge Functions
+└── docs/                # Documentation
+```
+
+## 🔒 Sécurité
+
+CassKai prend la sécurité très au sérieux :
+
+- ✅ Authentification sécurisée (Supabase Auth)
+- ✅ Row Level Security (RLS) sur toutes les tables
+- ✅ Chiffrement des données sensibles
+- ✅ Conformité RGPD
+- ✅ Logs d'audit complets
+- ✅ Isolation multi-tenant
+
+Pour signaler une vulnérabilité : security@casskai.app
+
+## 📝 Roadmap
+
+### Version 1.0 (Beta - Décembre 2025)
+- [x] Sprint 1 : Architecture & Authentification
+- [x] Sprint 2 : Modules principaux (Comptabilité, Facturation, CRM)
+- [x] Sprint 3 : UX/UI, Performance, SEO
+- [ ] Sprint 4 : Tests E2E complets
+- [ ] Sprint 5 : Documentation utilisateur
+
+### Version 1.1 (Q1 2026)
+- [ ] Certification NF525 (logiciel de caisse)
+- [ ] Intégration bancaire (DSP2)
+- [ ] Application mobile (React Native)
+- [ ] API publique
+
+### Version 2.0 (Q2 2026)
+- [ ] IA prédictive avancée
+- [ ] Automatisations complètes
+- [ ] Marketplace de plugins
+
+## 🤝 Contribution
+
+Les contributions sont les bienvenues ! Consultez notre [Guide de Contribution](CONTRIBUTING.md) pour plus de détails.
+
+## 📄 License
+
+Ce projet est sous licence **MIT** - voir le fichier [LICENSE](LICENSE) pour plus de détails.
+
+**CassKai®** est une marque déposée de **Noutche Conseil SAS** (INPI).
+
+## 👥 Auteurs
+
+Développé avec ❤️ par **Noutche Conseil SAS**
+
+- 🌐 Site web : [https://casskai.app](https://casskai.app)
+- 📧 Email : contact@casskai.app
+- 💼 LinkedIn : [CassKai](https://linkedin.com/company/casskai)
+
+## 🙏 Remerciements
+
+- Supabase pour l'infrastructure backend
+- Radix UI pour les composants accessibles
+- Toute la communauté open-source
+
+---
+
+<div align="center">
+  <sub>© 2025 Noutche Conseil SAS - Tous droits réservés</sub>
+</div>
