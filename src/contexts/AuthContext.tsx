@@ -54,9 +54,33 @@ interface Company {
 
 
 
+// Interface pour le profil utilisateur depuis public.users
+
+export interface UserProfile {
+
+  id: string;
+
+  email: string;
+
+  full_name: string | null;
+
+  avatar_url: string | null;
+
+  phone: string | null;
+
+  created_at: string;
+
+  updated_at: string;
+
+}
+
+
+
 interface AuthContextType {
 
   user: User | null;
+
+  userProfile: UserProfile | null; // Profil depuis public.users
 
   session: Session | null;
 
@@ -91,6 +115,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
   const [user, setUser] = useState<User | null>(null);
+
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null); // Profil depuis public.users
 
   const [session, setSession] = useState<Session | null>(null);
 
@@ -248,6 +274,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       setUser(null);
 
+      setUserProfile(null); // Nettoyer le profil
+
       setSession(null);
 
       setCurrentCompany(null);
@@ -305,6 +333,48 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(currentUser);
 
     setIsAuthenticated(true);
+
+
+
+    // ✅ SÉCURITÉ: Charger le profil depuis public.users (pas auth.users)
+
+    try {
+
+      const { data: profile, error: profileError } = await supabase
+
+        .from('users')
+
+        .select('id, email, full_name, avatar_url, phone, created_at, updated_at')
+
+        .eq('id', currentUser.id)
+
+        .single();
+
+
+
+      if (profileError) {
+
+        console.error('⚠️  Erreur chargement profil public.users:', profileError);
+
+        // Ne pas bloquer l'authentification si le profil n'existe pas encore
+
+        setUserProfile(null);
+
+      } else {
+
+        setUserProfile(profile);
+
+        console.log('✅ Profil utilisateur chargé depuis public.users');
+
+      }
+
+    } catch (error) {
+
+      console.error('⚠️  Exception chargement profil:', error);
+
+      setUserProfile(null);
+
+    }
 
 
 
@@ -630,6 +700,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const value = {
 
     user,
+
+    userProfile, // Profil depuis public.users
 
     session,
 
