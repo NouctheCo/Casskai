@@ -738,7 +738,9 @@ export function useJournalEntries(companyId: string) {
 
         .eq('is_active', true)
 
-        .eq('is_detail_account', true)
+        // ✅ Correction: Retourner TOUS les comptes (principaux ET auxiliaires)
+        // Commenté le filtre is_detail_account pour avoir tous les comptes
+        // .eq('is_detail_account', true)
 
         .order('account_number');
 

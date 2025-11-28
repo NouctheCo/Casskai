@@ -515,7 +515,9 @@ class JournalEntriesService {
       .select('id, account_number, account_name, account_type, account_class, is_active, is_detail_account')
       .eq('company_id', companyId)
       .eq('is_active', true)
-      .eq('is_detail_account', true)
+      // ✅ Correction: Retourner TOUS les comptes (principaux ET auxiliaires)
+      // Commenté le filtre is_detail_account pour avoir tous les comptes
+      // .eq('is_detail_account', true)
       .order('account_number', { ascending: true });
 
     if (error) {

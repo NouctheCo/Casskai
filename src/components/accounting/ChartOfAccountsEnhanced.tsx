@@ -658,7 +658,8 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionner un compte parent" />
                   </SelectTrigger>
-                  <SelectContent>
+                  {/* ✅ Correction bug z-index: SelectContent avec z-index très élevé pour être au-dessus du modal */}
+                  <SelectContent className="z-[99999]" position="popper" sideOffset={5}>
                     <SelectItem value="__none__">
                       {t('noParent', 'Aucun (compte principal)')}
                     </SelectItem>
