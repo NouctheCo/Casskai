@@ -50,7 +50,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
 
       setData(result || []);
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Failed to fetch data');
+      setError(err instanceof Error ? (err as Error).message : 'Failed to fetch data');
       devLogger.error(`Error fetching ${tableName}:`, err);
     } finally {
       setLoading(false);
@@ -84,7 +84,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
       // Type-safe record manipulation
       const recordWithMeta = { ...record } as any;
 
-      devLogger.log(`🔧 [useSupabase] Creating record for table: ${tableNameString}`, {
+      devLogger.info(`🔧 [useSupabase] Creating record for table: ${tableNameString}`, {
         companyId,
         isExcluded: excludedCompanyTables.has(tableNameString),
         originalRecord: record
@@ -93,22 +93,22 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
       // FORCE REMOVE company_id from excluded tables
       if (excludedCompanyTables.has(tableNameString)) {
         delete recordWithMeta.company_id;
-        devLogger.log(`🚫 [useSupabase] REMOVED company_id from excluded table: ${tableNameString}`);
+        devLogger.info(`🚫 [useSupabase] REMOVED company_id from excluded table: ${tableNameString}`);
       }
 
       // Only add company_id if not excluded AND companyId exists
       if (companyId && !excludedCompanyTables.has(tableNameString)) {
         recordWithMeta.company_id = companyId;
-        devLogger.log(`✅ [useSupabase] Added company_id: ${companyId}`);
+        devLogger.info(`✅ [useSupabase] Added company_id: ${companyId}`);
       }
 
       // Only add created_by if not in excluded list
       if (!excludedCreatedByTables.has(tableNameString)) {
         recordWithMeta.created_by = user.id;
-        devLogger.log(`✅ [useSupabase] Added created_by: ${user.id}`);
+        devLogger.info(`✅ [useSupabase] Added created_by: ${user.id}`);
       }
 
-      devLogger.log(`📤 [useSupabase] Final record to insert:`, recordWithMeta);
+      devLogger.info(`📤 [useSupabase] Final record to insert:`, recordWithMeta);
 
       const { data: result, error: insertError } = await supabase
         .from(tableName)
@@ -123,7 +123,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
       
       return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to create record';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to create record';
       setError(errorMessage);
       devLogger.error(`Error creating ${tableName}:`, err);
       throw new Error(errorMessage);
@@ -156,7 +156,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
 
       return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to update record';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to update record';
       setError(errorMessage);
       devLogger.error(`Error updating ${tableName}:`, err);
       throw new Error(errorMessage);
@@ -183,7 +183,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
       // Update local state
       setData(prev => prev.filter(item => (item as any).id !== id));
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to delete record';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to delete record';
       setError(errorMessage);
       devLogger.error(`Error deleting ${tableName}:`, err);
       throw new Error(errorMessage);
@@ -213,7 +213,7 @@ export function useSupabase<T extends keyof Database['public']['Tables']>(
 
       return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to fetch record';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to fetch record';
       setError(errorMessage);
       devLogger.error(`Error fetching ${tableName} by ID:`, err);
       throw new Error(errorMessage);

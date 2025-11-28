@@ -9,6 +9,21 @@ import { useOnboarding } from '@/hooks/useOnboarding';
 export default function OnboardingPage() {
   const { state } = useOnboarding();
 
+  // Loading fallback to prevent blank screen during initialization
+  if (!state.isInitialized || state.isLoading || !state.currentStep) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto"></div>
+          <div className="space-y-2">
+            <p className="text-xl font-semibold text-gray-900 dark:text-white">Initialisation en cours...</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Configuration de votre espace de travail</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   useEffect(() => {
   }, [state.currentStep]);
 

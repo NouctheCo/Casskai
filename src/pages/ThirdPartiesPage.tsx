@@ -10,6 +10,8 @@ import { Button } from '../components/ui/button';
 
 import { Badge } from '../components/ui/badge';
 
+import { EmptyList } from '../components/ui/EmptyState';
+
 import { Input } from '../components/ui/input';
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
@@ -18,13 +20,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 
-import { useToast } from '../components/ui/use-toast';
+import { toastError, toastSuccess, toastDeleted, toastCreated, toastUpdated } from '@/lib/toast-helpers';
 
 import { useEnterprise } from '../contexts/EnterpriseContext';
 
 import { unifiedThirdPartiesService } from '@/services/unifiedThirdPartiesService';
 
 import { ThirdPartyFormDialog } from '@/components/third-parties/ThirdPartyFormDialog';
+
+import { TransactionsTab } from '@/components/third-parties/TransactionsTab';
+
+import { ImportTab } from '@/components/third-parties/ImportTab';
+
+import { AgingAnalysisTab } from '@/components/third-parties/AgingAnalysisTab';
 
 import {
 
@@ -40,15 +48,15 @@ import {
 
 } from '../types/third-parties.types';
 
-import { 
+import {
 
-  Users, 
+  Users,
 
-  Building2, 
+  Building2,
 
-  UserCheck, 
+  UserCheck,
 
-  TrendingUp, 
+  TrendingUp,
 
   TrendingDown,
 
@@ -80,7 +88,9 @@ import {
 
   DollarSign,
 
-  Sparkles
+  Sparkles,
+
+  Upload
 
 } from 'lucide-react';
 
@@ -89,8 +99,6 @@ import {
 const ThirdPartiesPage: React.FC = () => {
 
   const { t } = useTranslation();
-
-  const { toast } = useToast();
 
   const { currentEnterprise } = useEnterprise();
 
@@ -321,15 +329,7 @@ const ThirdPartiesPage: React.FC = () => {
 
       console.error('Error loading third parties:', error instanceof Error ? error.message : String(error));
 
-      toast({
-
-        title: 'Erreur de chargement',
-
-        description: 'Impossible de charger les tiers',
-
-        variant: 'destructive'
-
-      });
+      toastError('Impossible de charger les tiers');
 
     }
 
@@ -457,13 +457,7 @@ const ThirdPartiesPage: React.FC = () => {
 
     );
 
-    toast({
-
-      title: 'Export réussi',
-
-      description: 'Les tiers ont été exportés en CSV'
-
-    });
+    toastSuccess('Tiers exportés en CSV avec succès');
 
   };
 
@@ -487,13 +481,7 @@ const ThirdPartiesPage: React.FC = () => {
 
     setSelectedThirdParty(thirdParty);
 
-    toast({
-
-      title: 'Affichage des détails',
-
-      description: `Détails de ${thirdParty.name}`,
-
-    });
+    toastSuccess(`Affichage des détails de ${thirdParty.name}`);
 
     // TODO: Open modal or navigate to detail view
 
@@ -505,13 +493,7 @@ const ThirdPartiesPage: React.FC = () => {
 
     setSelectedThirdParty(thirdParty);
 
-    toast({
-
-      title: 'Modification',
-
-      description: `Édition de ${thirdParty.name}`,
-
-    });
+    toastUpdated(`Édition de ${thirdParty.name}`);
 
     // TODO: Open edit modal or navigate to edit form
 
@@ -543,27 +525,13 @@ const ThirdPartiesPage: React.FC = () => {
 
       await loadThirdParties();
 
-      toast({
-
-        title: 'Suppression réussie',
-
-        description: 'Le tiers a été supprimé avec succès',
-
-      });
+      toastDeleted('Le tiers');
 
     } catch (error) {
 
       console.error('Error deleting third party:', error instanceof Error ? error.message : String(error));
 
-      toast({
-
-        title: 'Erreur de suppression',
-
-        description: 'Impossible de supprimer le tiers',
-
-        variant: 'destructive'
-
-      });
+      toastError('Impossible de supprimer le tiers');
 
     }
 
@@ -757,7 +725,7 @@ const ThirdPartiesPage: React.FC = () => {
 
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
 
-            <TabsTrigger value="new-third-party">Nouveau Tiers</TabsTrigger>
+            <TabsTrigger value="import">Import</TabsTrigger>
 
           </TabsList>
 
@@ -1663,21 +1631,19 @@ const ThirdPartiesPage: React.FC = () => {
 
             {filteredThirdParties.length === 0 && (
 
-              <Card>
+              <EmptyList
 
-                <CardContent className="p-8 text-center">
+                icon={Users}
 
-                  <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                title="Aucun tiers trouvé"
 
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun tiers trouvé</h3>
+                description="Aucun tiers ne correspond aux critères de recherche actuels."
 
-                  <p className="text-gray-600 mb-4">
+                action={{
 
-                    Aucun tiers ne correspond aux critères de recherche actuels.
+                  label: 'Réinitialiser les filtres',
 
-                  </p>
-
-                  <Button onClick={() => setFilters({ 
+                  onClick: () => setFilters({ 
 
                     search: '', 
 
@@ -1691,15 +1657,11 @@ const ThirdPartiesPage: React.FC = () => {
 
                     has_overdue: undefined 
 
-                  })}>
+                  })
 
-                    Réinitialiser les filtres
+                }}
 
-                  </Button>
-
-                </CardContent>
-
-              </Card>
+              />
 
             )}
 
@@ -1711,105 +1673,7 @@ const ThirdPartiesPage: React.FC = () => {
 
           <TabsContent value="aging" className="space-y-6">
 
-            <Card>
-
-              <CardHeader>
-
-                <CardTitle>Analyse d'Ancienneté des Créances</CardTitle>
-
-                <p className="text-sm text-gray-600">
-
-                  Répartition des créances par période d'ancienneté
-
-                </p>
-
-              </CardHeader>
-
-              <CardContent>
-
-                <div className="overflow-x-auto">
-
-                  <table className="w-full">
-
-                    <thead>
-
-                      <tr className="border-b">
-
-                        <th className="text-left py-3 px-4">Tiers</th>
-
-                        <th className="text-right py-3 px-4">0-30 jours</th>
-
-                        <th className="text-right py-3 px-4">31-60 jours</th>
-
-                        <th className="text-right py-3 px-4">61-90 jours</th>
-
-                        <th className="text-right py-3 px-4">91-120 jours</th>
-
-                        <th className="text-right py-3 px-4">&gt;120 jours</th>
-
-                        <th className="text-right py-3 px-4">Total</th>
-
-                      </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                      {agingReport.map((report) => (
-
-                        <tr key={report.third_party_id} className="border-b hover:bg-gray-50">
-
-                          <td className="py-3 px-4 font-medium">{report.third_party_name}</td>
-
-                          <td className="text-right py-3 px-4">
-
-                            {formatCurrency(report.aging_buckets.current)}
-
-                          </td>
-
-                          <td className="text-right py-3 px-4">
-
-                            {formatCurrency(report.aging_buckets.bucket_30)}
-
-                          </td>
-
-                          <td className="text-right py-3 px-4 text-yellow-600">
-
-                            {formatCurrency(report.aging_buckets.bucket_60)}
-
-                          </td>
-
-                          <td className="text-right py-3 px-4 text-orange-600">
-
-                            {formatCurrency(report.aging_buckets.bucket_90)}
-
-                          </td>
-
-                          <td className="text-right py-3 px-4 text-red-600">
-
-                            {formatCurrency(report.aging_buckets.bucket_over_120)}
-
-                          </td>
-
-                          <td className="text-right py-3 px-4 font-semibold">
-
-                            {formatCurrency(report.total_outstanding)}
-
-                          </td>
-
-                        </tr>
-
-                      ))}
-
-                    </tbody>
-
-                  </table>
-
-                </div>
-
-              </CardContent>
-
-            </Card>
+            {currentEnterprise?.id && <AgingAnalysisTab companyId={currentEnterprise.id} />}
 
           </TabsContent>
 
@@ -1819,87 +1683,17 @@ const ThirdPartiesPage: React.FC = () => {
 
           <TabsContent value="transactions" className="space-y-6">
 
-            <Card>
-
-              <CardHeader>
-
-                <CardTitle>Transactions Récentes</CardTitle>
-
-                <p className="text-sm text-gray-600">
-
-                  Historique des transactions avec les tiers
-
-                </p>
-
-              </CardHeader>
-
-              <CardContent>
-
-                <div className="p-8 border-2 border-dashed border-gray-300 rounded-lg text-center">
-
-                  <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Transactions</h3>
-
-                  <p className="text-sm text-gray-600 mb-4">
-
-                    L'affichage des transactions sera disponible dans la prochaine version
-
-                  </p>
-
-                </div>
-
-              </CardContent>
-
-            </Card>
+            {currentEnterprise?.id && <TransactionsTab companyId={currentEnterprise.id} />}
 
           </TabsContent>
 
 
 
-          {/* New Third Party Tab */}
+          {/* Import Tab */}
 
-          <TabsContent value="new-third-party" className="space-y-6">
+          <TabsContent value="import" className="space-y-6">
 
-            <Card>
-
-              <CardHeader>
-
-                <CardTitle>Créer un Nouveau Tiers</CardTitle>
-
-                <p className="text-sm text-gray-600">
-
-                  Ajoutez un nouveau client, fournisseur ou partenaire
-
-                </p>
-
-              </CardHeader>
-
-              <CardContent>
-
-                <div className="p-8 border-2 border-dashed border-gray-300 rounded-lg text-center">
-
-                  <Plus className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Formulaire de Création</h3>
-
-                  <p className="text-sm text-gray-600 mb-4">
-
-                    Le formulaire de création de tiers sera disponible dans la prochaine version
-
-                  </p>
-
-                  <Button disabled>
-
-                    Créer un Tiers
-
-                  </Button>
-
-                </div>
-
-              </CardContent>
-
-            </Card>
+            {currentEnterprise?.id && <ImportTab companyId={currentEnterprise.id} />}
 
           </TabsContent>
 

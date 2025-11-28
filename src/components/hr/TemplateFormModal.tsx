@@ -14,7 +14,8 @@ import type {
   DocumentTemplate,
   DocumentTemplateFormData,
   DocumentCategory,
-  TemplateVariable
+  TemplateVariable,
+  DocumentTemplateType
 } from '@/types/hr-document-templates.types';
 
 interface TemplateFormModalProps {
@@ -172,7 +173,7 @@ export function TemplateFormModal({
               </label>
               <Input
                 value={formData.template_type}
-                onChange={(e) => setFormData({ ...formData, template_type: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, template_type: e.target.value as DocumentTemplateType })}
                 required
                 placeholder="Ex: cdi, cdd, stage, avenant_salaire, certificat_travail..."
               />

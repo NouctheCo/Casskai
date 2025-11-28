@@ -1,0 +1,152 @@
+    ,
+    {
+      number: '8',
+      name: 'COMPTES DES AUTRES CHARGES ET DES AUTRES PRODUITS (HAO)',
+      type: 'expense',
+      accounts: [
+        {
+          number: '81',
+          name: 'VALEURS COMPTABLES DES CESSIONS D\'IMMOBILISATIONS',
+          type: 'charges',
+          isDebitNormal: true,
+          subAccounts: [
+            { number: '811', name: 'Immobilisations incorporelles', type: 'charges', isDebitNormal: true },
+            { number: '812', name: 'Immobilisations corporelles', type: 'charges', isDebitNormal: true },
+            { number: '816', name: 'Immobilisations financières', type: 'charges', isDebitNormal: true }
+          ]
+        },
+        {
+          number: '82',
+          name: 'PRODUITS DES CESSIONS D\'IMMOBILISATIONS',
+          type: 'produits',
+          isDebitNormal: false,
+          subAccounts: [
+            { number: '821', name: 'Immobilisations incorporelles', type: 'produits', isDebitNormal: false },
+            { number: '822', name: 'Immobilisations corporelles', type: 'produits', isDebitNormal: false },
+            { number: '826', name: 'Immobilisations financières', type: 'produits', isDebitNormal: false }
+          ]
+        },
+        {
+          number: '83',
+          name: 'CHARGES HORS ACTIVITÉS ORDINAIRES',
+          type: 'charges',
+          isDebitNormal: true,
+          subAccounts: [
+            { number: '831', name: 'Charges HAO constatées', type: 'charges', isDebitNormal: true },
+            { number: '834', name: 'Pertes sur créances HAO', type: 'charges', isDebitNormal: true },
+            { number: '835', name: 'Dons et libéralités accordés', type: 'charges', isDebitNormal: true },
+            { number: '836', name: 'Abandons de créances consentis', type: 'charges', isDebitNormal: true },
+            { number: '838', name: 'Autres charges HAO', type: 'charges', isDebitNormal: true }
+          ]
+        },
+        {
+          number: '84',
+          name: 'PRODUITS HORS ACTIVITÉS ORDINAIRES',
+          type: 'produits',
+          isDebitNormal: false,
+          subAccounts: [
+            { number: '841', name: 'Produits HAO constatés', type: 'produits', isDebitNormal: false },
+            { number: '845', name: 'Subventions d\'équilibre', type: 'produits', isDebitNormal: false },
+            { number: '846', name: 'Reprises HAO', type: 'produits', isDebitNormal: false },
+            { number: '848', name: 'Autres produits HAO', type: 'produits', isDebitNormal: false }
+          ]
+        },
+        {
+          number: '85',
+          name: 'DOTATIONS HORS ACTIVITÉS ORDINAIRES',
+          type: 'charges',
+          isDebitNormal: true,
+          subAccounts: [
+            { number: '851', name: 'Dotations aux amortissements HAO', type: 'charges', isDebitNormal: true },
+            { number: '852', name: 'Dotations aux provisions HAO', type: 'charges', isDebitNormal: true }
+          ]
+        },
+        {
+          number: '86',
+          name: 'REPRISES HORS ACTIVITÉS ORDINAIRES',
+          type: 'produits',
+          isDebitNormal: false,
+          subAccounts: [
+            { number: '861', name: 'Reprises d\'amortissements HAO', type: 'produits', isDebitNormal: false },
+            { number: '862', name: 'Reprises de provisions HAO', type: 'produits', isDebitNormal: false }
+          ]
+        },
+        {
+          number: '87',
+          name: 'PARTICIPATIONS DES TRAVAILLEURS',
+          type: 'charges',
+          isDebitNormal: true,
+          subAccounts: [
+            { number: '871', name: 'Participation des travailleurs', type: 'charges', isDebitNormal: true }
+          ]
+        },
+        {
+          number: '88',
+          name: 'SUBVENTIONS D\'ÉQUILIBRE',
+          type: 'produits',
+          isDebitNormal: false,
+          subAccounts: [
+            { number: '881', name: 'Subventions d\'équilibre État', type: 'produits', isDebitNormal: false },
+            { number: '888', name: 'Autres subventions d\'équilibre', type: 'produits', isDebitNormal: false }
+          ]
+        },
+        {
+          number: '89',
+          name: 'IMPÔTS SUR LE RÉSULTAT',
+          type: 'charges',
+          isDebitNormal: true,
+          subAccounts: [
+            { number: '891', name: 'Impôts sur les bénéfices', type: 'charges', isDebitNormal: true },
+            { number: '899', name: 'Autres impôts sur résultat', type: 'charges', isDebitNormal: true }
+          ]
+        }
+      ]
+    },
+    {
+      number: '9',
+      name: 'COMPTES DE LA COMPTABILITÉ ANALYTIQUE',
+      type: 'expense',
+      accounts: [
+        {
+          number: '90',
+          name: 'COMPTES RÉFLÉCHIS',
+          type: 'charges',
+          isDebitNormal: true,
+          subAccounts: [
+            { number: '901', name: 'Compte de liaison charges', type: 'charges', isDebitNormal: true },
+            { number: '902', name: 'Compte de liaison produits', type: 'produits', isDebitNormal: false }
+          ]
+        },
+        {
+          number: '92',
+          name: 'CENTRES D\'ANALYSE',
+          type: 'charges',
+          isDebitNormal: true,
+          subAccounts: [
+            { number: '921', name: 'Centres principaux', type: 'charges', isDebitNormal: true },
+            { number: '922', name: 'Centres auxiliaires', type: 'charges', isDebitNormal: true }
+          ]
+        },
+        {
+          number: '93',
+          name: 'COÛTS',
+          type: 'charges',
+          isDebitNormal: true,
+          subAccounts: [
+            { number: '931', name: 'Coûts d\'achat', type: 'charges', isDebitNormal: true },
+            { number: '932', name: 'Coûts de production', type: 'charges', isDebitNormal: true },
+            { number: '934', name: 'Coûts de revient', type: 'charges', isDebitNormal: true }
+          ]
+        },
+        {
+          number: '94',
+          name: 'INVENTAIRE PERMANENT',
+          type: 'stocks',
+          isDebitNormal: true,
+          subAccounts: [
+            { number: '941', name: 'Stocks matières', type: 'stocks', isDebitNormal: true },
+            { number: '943', name: 'Stocks produits finis', type: 'stocks', isDebitNormal: true }
+          ]
+        }
+      ]
+    }

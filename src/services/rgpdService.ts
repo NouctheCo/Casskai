@@ -407,9 +407,9 @@ export function useUserDataExport() {
       const data = await exportUserData(userId);
       downloadUserDataExport(data, userId);
       return data;
-    } catch (err) {
-      setError(String(err));
-      throw err;
+    } catch (error) {
+      setError(String(error));
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -435,9 +435,9 @@ export function useAccountDeletion() {
         throw new Error(result.error || 'Échec suppression compte');
       }
       return result;
-    } catch (err) {
-      setError(String(err));
-      throw err;
+    } catch (error) {
+      setError(String(error));
+      throw error;
     } finally {
       setLoading(false);
     }

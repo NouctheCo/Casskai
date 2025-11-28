@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { motion } from 'framer-motion';
 
-import { useToast } from '@/components/ui/use-toast';
+import { toastSuccess } from '@/lib/toast-helpers';
 
 import GDPRService from '@/services/gdprService';
 
@@ -71,8 +71,6 @@ import { PublicNavigation } from '@/components/navigation/PublicNavigation';
 const GDPRPage = () => {
 
   const { t, i18n } = useTranslation();
-
-  const { toast } = useToast();
 
 
 
@@ -428,15 +426,7 @@ const GDPRPage = () => {
 
       setFormErrors(validationErrors);
 
-      toast({
-
-        variant: "destructive",
-
-        title: "Erreurs de validation",
-
-        description: validationErrors.join(', ')
-
-      });
+      toastSuccess(validationErrors.join(', '));
 
       return;
 
@@ -468,15 +458,7 @@ const GDPRPage = () => {
 
       // Afficher la confirmation avec toast
 
-      (toast as any)({
-
-        title: "Demande RGPD envoyée",
-
-        description: `Votre demande de ${getRequestTypeLabel(requestForm.type)} a été enregistrée. Vous recevrez une réponse sous ${GDPRService.getLegalTimeframe(requestForm.type)}.`,
-
-        duration: 6000
-
-      });
+      toastSuccess(`Votre demande de ${getRequestTypeLabel(requestForm.type)} a été enregistrée. Vous recevrez une réponse sous ${GDPRService.getLegalTimeframe(requestForm.type)}.`);
 
       
 
@@ -504,15 +486,7 @@ const GDPRPage = () => {
 
       console.error('Error submitting GDPR request:', error instanceof Error ? error.message : String(error));
 
-      toast({
-
-        variant: "destructive",
-
-        title: "Erreur",
-
-        description: "Impossible d'envoyer votre demande. Veuillez réessayer ou nous contacter directement."
-
-      });
+      toastSuccess("Impossible d'envoyer votre demande. Veuillez réessayer ou nous contacter directement.");
 
     } finally {
 

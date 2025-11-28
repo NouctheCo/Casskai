@@ -2,9 +2,10 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/components/ui/use-toast';
+import { toastError, toastSuccess } from '@/lib/toast-helpers';
 import { useAuth } from '@/contexts/AuthContext';
 import { bankStorageAdapter, BankStorageTransaction } from '@/services/bankStorageAdapter';
+import { TransactionCategorization } from '@/components/banking/TransactionCategorization';
 import {
   Upload,
   RefreshCw,
@@ -13,11 +14,11 @@ import {
   FileText,
   TrendingUp,
   TrendingDown,
-  DollarSign
+  DollarSign,
+  Tag
 } from 'lucide-react';
 
 const BanksPageNew: React.FC = () => {
-  const { toast } = useToast();
   const { user, currentCompany } = useAuth();
 
   // State
@@ -26,6 +27,7 @@ const BanksPageNew: React.FC = () => {
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'import' | 'categorization' | 'history'>('import');
   const [metrics, setMetrics] = useState({
     totalTransactions: 0,
     reconciledTransactions: 0,
@@ -58,10 +60,7 @@ const BanksPageNew: React.FC = () => {
             account.id
           );
           if (migrationResult.success && migrationResult.migrated > 0) {
-            toast({
-              title: "Données migrées",
-              description: `${migrationResult.migrated} transactions migrées depuis localStorage vers Supabase`
-            });
+            toastSuccess(`${migrationResult.migrated} transactions migrées depuis localStorage vers Supabase`);
           }
         }
       }
@@ -89,11 +88,8 @@ const BanksPageNew: React.FC = () => {
 
     } catch (error) {
       console.error('Error loading data:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur de chargement",
-        description: error instanceof Error ? error.message : "Impossible de charger les données"
-      });
+      toastError(error instanceof Error ? error.message : "Impossible de charger les données"
+     );
     } finally {
       setLoading(false);
     }
@@ -147,28 +143,18 @@ const BanksPageNew: React.FC = () => {
       const result = await bankStorageAdapter.importFile(file, accountId, currentCompany.id);
 
       if (result.success) {
-        toast({
-          title: "Import réussi",
-          description: `${result.imported_count} transactions importées, ${result.skipped_count} doublons ignorés`
-        });
+        toastSuccess(`${result.imported_count} transactions importées, ${result.skipped_count} doublons ignorés`);
 
         // Reload data
         await loadTransactions();
         await loadMetrics();
       } else {
-        toast({
-          variant: "destructive",
-          title: "Erreur d'import",
-          description: result.message + (result.errors ? ` (${result.errors.length} erreurs)` : '')
-        });
+        toastError(result.message + (result.errors ? ` (${result.errors.length} erreurs)` : ''));
       }
     } catch (error) {
       console.error('Import error:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur d'import",
-        description: error instanceof Error ? error.message : "Impossible d'importer le fichier"
-      });
+      toastError(error instanceof Error ? error.message : "Impossible d'importer le fichier"
+     );
     } finally {
       setUploading(false);
       event.target.value = ''; // Reset input
@@ -181,10 +167,8 @@ const BanksPageNew: React.FC = () => {
       const success = await bankStorageAdapter.reconcileTransaction(transactionId);
 
       if (success) {
-        toast({
-          title: "Transaction réconciliée",
-          description: "La transaction a été marquée comme réconciliée"
-        });
+        toastSuccess("La transaction a été marquée comme réconciliée"
+       );
 
         // Reload
         await loadTransactions();
@@ -192,11 +176,8 @@ const BanksPageNew: React.FC = () => {
       }
     } catch (error) {
       console.error('Reconciliation error:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de réconcilier la transaction"
-      });
+      toastError("Impossible de réconcilier la transaction"
+     );
     }
   };
 
@@ -220,6 +201,50 @@ const BanksPageNew: React.FC = () => {
         <p className="text-gray-600 mt-2">
           Importez vos relevés bancaires et gérez vos transactions
         </p>
+      </div>
+
+      {/* Tabs Navigation */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow mb-6">
+        <div className="flex border-b">
+          <button
+            onClick={() => setActiveTab('import')}
+            className={`flex items-center gap-2 px-6 py-3 font-medium transition ${
+              activeTab === 'import'
+                ? 'border-b-2 border-primary text-primary'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <Upload className="h-4 w-4" />
+            Import
+          </button>
+          <button
+            onClick={() => setActiveTab('categorization')}
+            className={`flex items-center gap-2 px-6 py-3 font-medium transition ${
+              activeTab === 'categorization'
+                ? 'border-b-2 border-primary text-primary'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <Tag className="h-4 w-4" />
+            Catégorisation
+            {metrics.pendingReconciliation > 0 && (
+              <span className="bg-yellow-500 text-white text-xs rounded-full px-2 py-0.5">
+                {metrics.pendingReconciliation}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`flex items-center gap-2 px-6 py-3 font-medium transition ${
+              activeTab === 'history'
+                ? 'border-b-2 border-primary text-primary'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <FileText className="h-4 w-4" />
+            Historique
+          </button>
+        </div>
       </div>
 
       {/* Metrics Cards */}
@@ -273,21 +298,22 @@ const BanksPageNew: React.FC = () => {
         </Card>
       </div>
 
-      {/* Import Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Import de relevé bancaire</CardTitle>
-          <CardDescription>
-            Formats supportés: CSV, OFX, QIF
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      {/* Tab Content: Import */}
+      {activeTab === 'import' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Import de relevé bancaire</CardTitle>
+            <CardDescription>
+              Formats supportés: CSV, OFX, QIF
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
               Compte bancaire
             </label>
             <select
-              className="w-full p-2 border rounded-lg"
+              className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
               value={selectedAccountId}
               onChange={(e) => setSelectedAccountId(e.target.value)}
               disabled={loading}
@@ -305,11 +331,12 @@ const BanksPageNew: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
               Fichier de relevé
             </label>
             <Input
               type="file"
+              className="dark:file:text-gray-200"
               accept=".csv,.ofx,.qif"
               onChange={handleFileImport}
               disabled={uploading || loading}
@@ -317,15 +344,26 @@ const BanksPageNew: React.FC = () => {
           </div>
 
           {uploading && (
-            <div className="flex items-center gap-2 text-blue-600">
+            <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
               <RefreshCw className="h-4 w-4 animate-spin" />
               <span>Import en cours...</span>
             </div>
           )}
         </CardContent>
       </Card>
+      )}
 
-      {/* Transactions List */}
+      {/* Tab Content: Categorization */}
+      {activeTab === 'categorization' && selectedAccountId && (
+        <TransactionCategorization
+          bankAccountId={selectedAccountId}
+          bankAccountNumber="512000"
+          onRefresh={loadData}
+        />
+      )}
+
+      {/* Tab Content: History */}
+      {activeTab === 'history' && (
       <Card>
         <CardHeader>
           <CardTitle>Transactions ({transactions.length})</CardTitle>
@@ -420,6 +458,7 @@ const BanksPageNew: React.FC = () => {
           )}
         </CardContent>
       </Card>
+      )}
     </div>
   );
 };

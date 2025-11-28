@@ -132,7 +132,7 @@ export const useConfig = (): UseConfigReturn => {
   } catch (err) {
       const configError: ConfigError = {
         code: ERROR_CODES.CONFIG_NOT_FOUND,
-        message: err instanceof Error ? (error as Error).message : 'Erreur de sauvegarde',
+        message: err instanceof Error ? (err as Error).message : 'Erreur de sauvegarde',
         details: (err as unknown) as Record<string, unknown>,
         timestamp: new Date().toISOString()
       };
@@ -166,7 +166,7 @@ export const useConfig = (): UseConfigReturn => {
   } catch (err) {
       const configError: ConfigError = {
         code: ERROR_CODES.SUPABASE_CONNECTION_FAILED,
-        message: err instanceof Error ? (error as Error).message : ERROR_MESSAGES[ERROR_CODES.SUPABASE_CONNECTION_FAILED],
+        message: err instanceof Error ? (err as Error).message : ERROR_MESSAGES[ERROR_CODES.SUPABASE_CONNECTION_FAILED],
     details: (err as unknown) as Record<string, unknown>,
         timestamp: new Date().toISOString()
       };
@@ -232,7 +232,7 @@ export const useConfig = (): UseConfigReturn => {
       // Fallback local simple
       setConfig(prev => prev ? ({ ...prev, ...(updates as Partial<AppConfig>) }) : prev);
     } catch (err) {
-  const message = err instanceof Error ? (error as Error).message : 'Update failed';
+  const message = err instanceof Error ? (err as Error).message : 'Update failed';
   // Some tests expect a string error
   // @ts-expect-error - test expectation allows string
   setError(message);

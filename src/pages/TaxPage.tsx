@@ -12,10 +12,11 @@ import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { useToast } from '../components/ui/use-toast';
+import { toastError, toastSuccess, toastDeleted, toastUpdated } from '@/lib/toast-helpers';
 import { useEnterprise } from '../contexts/EnterpriseContext';
 import { taxService } from '../services/taxService';
 import { TaxCompliancePanel } from '../components/fiscal/TaxCompliancePanel';
+import { FiscalCalendarTab } from '../components/fiscal/FiscalCalendarTab';
 import {
   TaxDeclaration,
   TaxCalendarEvent,
@@ -62,7 +63,6 @@ const localizer = dateFnsLocalizer({
 
 const TaxPage: React.FC = () => {
   const { t } = useTranslation();
-  const { toast } = useToast();
   const { currentEnterprise } = useEnterprise();
   
   // State management
@@ -144,19 +144,11 @@ const TaxPage: React.FC = () => {
         setDashboardData(response.data);
       }
       if (response.error) {
-        toast({
-          title: 'Erreur de chargement',
-          description: 'Impossible de charger les données du tableau de bord',
-          variant: 'destructive'
-        });
+        toastError('Impossible de charger les données du tableau de bord');
       }
     } catch (error) {
       console.error('Error loading dashboard data:', error instanceof Error ? error.message : String(error));
-      toast({
-        title: 'Erreur de chargement',
-        description: 'Impossible de charger les données du tableau de bord',
-        variant: 'destructive'
-      });
+      toastError('Impossible de charger les données du tableau de bord');
     }
   };
 
@@ -167,19 +159,11 @@ const TaxPage: React.FC = () => {
         setDeclarations(response.data);
       }
       if (response.error) {
-        toast({
-          title: 'Erreur de chargement',
-          description: 'Impossible de charger les déclarations',
-          variant: 'destructive'
-        });
+        toastError('Impossible de charger les déclarations');
       }
     } catch (error) {
       console.error('Error loading declarations:', error instanceof Error ? error.message : String(error));
-      toast({
-        title: 'Erreur de chargement',
-        description: 'Impossible de charger les déclarations',
-        variant: 'destructive'
-      });
+      toastError('Impossible de charger les déclarations');
     }
   };
 
@@ -267,10 +251,7 @@ const TaxPage: React.FC = () => {
 
   const handleExportDeclarations = () => {
     (taxService as any).exportDeclarationsToCSV(filteredDeclarations, 'declarations_fiscales');
-    toast({
-      title: 'Export réussi',
-      description: 'Les déclarations ont été exportées en CSV'
-    });
+    toastSuccess('Déclarations exportées en CSV avec succès');
   };
 
   const handleCreateDeclaration = async (e: React.FormEvent) => {
@@ -299,10 +280,7 @@ const TaxPage: React.FC = () => {
       const response = await taxService.createTaxDeclaration(currentEnterprise.id, declarationData);
 
       if (response.data) {
-        toast({
-          title: 'Déclaration créée',
-          description: 'La déclaration a été créée avec succès'
-        });
+        toastSuccess('Déclaration créée avec succès');
 
         // Reset form
         setNewDeclaration({
@@ -322,19 +300,11 @@ const TaxPage: React.FC = () => {
         // Switch to declarations tab
         setActiveTab('declarations');
       } else if (response.error) {
-        toast({
-          title: 'Erreur',
-          description: response.error.message || 'Impossible de créer la déclaration',
-          variant: 'destructive'
-        });
+        toastError(response.error.message || 'Impossible de créer la déclaration');
       }
     } catch (error) {
       console.error('Error creating declaration:', error);
-      toast({
-        title: 'Erreur',
-        description: 'Une erreur est survenue lors de la création',
-        variant: 'destructive'
-      });
+      toastError('Une erreur est survenue lors de la création');
     } finally {
       setIsSubmitting(false);
     }
@@ -347,17 +317,10 @@ const TaxPage: React.FC = () => {
         setAlerts(prev => prev.map(alert => 
           alert.id === alertId ? response.data : alert
         ));
-        toast({
-          title: 'Alerte confirmée',
-          description: 'L\'alerte a été marquée comme prise en compte'
-        });
+        toastSuccess('Alerte marquée comme prise en compte');
       }
     } catch (error) {
-      toast({
-        title: 'Erreur',
-        description: 'Impossible de confirmer l\'alerte',
-        variant: 'destructive'
-      });
+      toastError('Impossible de confirmer l\'alerte');
     }
   };
 
@@ -369,18 +332,12 @@ const TaxPage: React.FC = () => {
   };
 
   const handleViewDeclaration = (declaration: TaxDeclaration) => {
-    toast({
-      title: 'Affichage de la déclaration',
-      description: `Détails de ${declaration.name}`,
-    });
+    toastSuccess(`Affichage des détails de ${declaration.name}`);
     // TODO: Open modal or navigate to detail view
   };
 
   const handleEditDeclaration = (declaration: TaxDeclaration) => {
-    toast({
-      title: 'Modification de la déclaration',
-      description: `Édition de ${declaration.name}`,
-    });
+    toastUpdated(`Édition de ${declaration.name}`);
     // TODO: Open edit modal or navigate to edit form
   };
 
@@ -393,25 +350,15 @@ const TaxPage: React.FC = () => {
       // TODO: Implement delete API call
       // await taxService.deleteDeclaration(declarationId);
       await loadDeclarations();
-      toast({
-        title: 'Suppression réussie',
-        description: 'La déclaration a été supprimée avec succès',
-      });
+      toastDeleted('La déclaration');
     } catch (error) {
       console.error('Error deleting declaration:', error instanceof Error ? error.message : String(error));
-      toast({
-        title: 'Erreur de suppression',
-        description: 'Impossible de supprimer la déclaration',
-        variant: 'destructive'
-      });
+      toastError('Impossible de supprimer la déclaration');
     }
   };
 
   const handleEditObligation = (obligation: TaxObligation) => {
-    toast({
-      title: 'Modification de l\'obligation',
-      description: `Édition de ${(obligation as any).name}`,
-    });
+    toastUpdated(`Édition de ${(obligation as any).name}`);
     // TODO: Open edit modal or navigate to edit form
   };
 
@@ -424,17 +371,10 @@ const TaxPage: React.FC = () => {
       // TODO: Implement delete API call
       // await taxService.deleteObligation(obligationId);
       await loadObligations();
-      toast({
-        title: 'Suppression réussie',
-        description: 'L\'obligation a été supprimée avec succès',
-      });
+      toastDeleted('L\'obligation');
     } catch (error) {
       console.error('Error deleting obligation:', error instanceof Error ? error.message : String(error));
-      toast({
-        title: 'Erreur de suppression',
-        description: 'Impossible de supprimer l\'obligation',
-        variant: 'destructive'
-      });
+      toastError('Impossible de supprimer l\'obligation');
     }
   };
 
@@ -986,27 +926,16 @@ const TaxPage: React.FC = () => {
 
           {/* Calendar Tab */}
           <TabsContent value="calendar" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Calendrier Fiscal</CardTitle>
-                <p className="text-sm text-gray-600">
-                  Vue d'ensemble de vos obligations et échéances fiscales
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="h-96 border rounded-lg p-4">
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-center">
-                      <CalendarIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">Calendrier Fiscal</h3>
-                      <p className="text-sm text-gray-600">
-                        L'affichage du calendrier sera disponible dans la prochaine version
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {currentEnterprise?.id && (
+              <FiscalCalendarTab
+                countryCode={(currentEnterprise as any).country || 'FR'}
+                enterpriseId={currentEnterprise.id}
+                completedEventIds={declarations
+                  .filter(d => d.status === 'completed')
+                  .map(d => d.id)
+                }
+              />
+            )}
           </TabsContent>
 
           {/* Alerts Tab */}
@@ -1139,6 +1068,7 @@ const TaxPage: React.FC = () => {
                           checked={obligation.auto_generate}
                           readOnly
                           className="h-4 w-4"
+                          aria-label="Génération automatique"
                         />
                         <span className="text-sm">Génération automatique</span>
                       </div>
@@ -1148,6 +1078,7 @@ const TaxPage: React.FC = () => {
                           checked={obligation.requires_approval}
                           readOnly
                           className="h-4 w-4"
+                          aria-label="Approbation requise"
                         />
                         <span className="text-sm">Approbation requise</span>
                       </div>
@@ -1157,6 +1088,7 @@ const TaxPage: React.FC = () => {
                           checked={obligation.email_notifications}
                           readOnly
                           className="h-4 w-4"
+                          aria-label="Notifications email"
                         />
                         <span className="text-sm">Notifications email</span>
                       </div>

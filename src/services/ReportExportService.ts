@@ -10,6 +10,7 @@ export interface ExportOptions {
   orientation?: 'portrait' | 'landscape';
   title?: string;
   subtitle?: string;
+  fileName?: string;
   includeCharts?: boolean;
   watermark?: string;
   companyInfo?: {
@@ -25,7 +26,9 @@ export interface TableData {
   headers: string[];
   rows: any[][];
   title?: string;
-  summary?: Record<string, any>;
+  subtitle?: string;
+  summary?: Record<string, any> | any[][];
+  footer?: string[];
 }
 
 export interface ChartData {
@@ -126,7 +129,7 @@ export class ReportExportService {
               pdf.internal.pageSize.height - 10
             );
           }
-        };
+        } as any;
 
         autoTable(pdf, tableConfig);
         currentY = (pdf as any).lastAutoTable?.finalY + 15 || currentY + 50;
@@ -265,22 +268,30 @@ export class ReportExportService {
 
   // CSV Export simple et efficace
   exportToCSV(
-    data: TableData,
+    data: TableData | TableData[],
     options: ExportOptions = { format: 'csv' }
   ): string {
     try {
-      const csvContent = [
-        data.headers.join(','),
-        ...data.rows.map(row =>
-          row.map(cell =>
-            typeof cell === 'string' && cell.includes(',')
-              ? `"${cell.replace(/"/g, '""')}"`
-              : cell
-          ).join(',')
-        )
-      ].join('\n');
+      const tables = Array.isArray(data) ? data : [data];
+      let csvContent = '';
 
-      const csvBlob = new Blob([`\ufeff${  csvContent}`], {
+      tables.forEach((table, index) => {
+        if (index > 0) csvContent += '\n\n';
+        if (table.title) csvContent += `${table.title}\n`;
+
+        csvContent += [
+          table.headers.join(','),
+          ...table.rows.map(row =>
+            row.map(cell =>
+              typeof cell === 'string' && cell.includes(',')
+                ? `"${cell.replace(/"/g, '""')}"`
+                : cell
+            ).join(',')
+          )
+        ].join('\n');
+      });
+
+      const csvBlob = new Blob([`\ufeff${csvContent}`], {
         type: 'text/csv;charset=utf-8'
       });
 
@@ -308,9 +319,10 @@ export class ReportExportService {
   // Helpers privés
   private async addPDFHeader(pdf: any, companyInfo: any, title?: string, subtitle?: string) {
     // Logo si disponible
-    if (companyInfo.logo) {
+    const logoUrl = companyInfo.logo || '/logo.png';
+    if (logoUrl) {
       try {
-        pdf.addImage(companyInfo.logo, 'PNG', 20, 10, 30, 20);
+        pdf.addImage(logoUrl, 'PNG', 20, 10, 30, 20);
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
         console.warn('Impossible de charger le logo:', errorMsg);

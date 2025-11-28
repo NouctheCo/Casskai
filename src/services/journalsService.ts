@@ -166,7 +166,7 @@ export class JournalsService {
 
       return {
         entriesCount: data?.length || 0,
-        lastEntryDate: data?.[0]?.date || null
+        lastEntryDate: data?.[0]?.entry_date || null
       };
     } catch (error) {
       console.error('Erreur stats journal:', error);

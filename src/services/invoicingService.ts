@@ -149,6 +149,11 @@ class InvoicingService {
         throw new Error(`Failed to fetch invoices: ${error.message}`);
       }
 
+      // Gérer le cas où data est null (base vide)
+      if (!data) {
+        return [];
+      }
+
       const enrichedInvoices = data.map(invoice => ({
         ...invoice,
         third_party: invoice.third_party,

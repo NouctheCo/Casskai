@@ -3,15 +3,6 @@
  * Privacy-friendly analytics without cookies
  */
 
-declare global {
-  interface Window {
-    plausible?: (
-      eventName: string,
-      options?: { props?: Record<string, string | number | boolean> }
-    ) => void;
-  }
-}
-
 /**
  * Track a custom event in Plausible Analytics
  * Only tracks in production environment

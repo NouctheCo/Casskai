@@ -16,10 +16,12 @@ type FECQueryRow = {
   description: string | null;
   auxiliary_account?: string | null;
   letterage?: string | null;
-  accounts: { number: string; name: string } | null;
+  account_number?: string | null;
+  account_name?: string | null;
   journal_entries: {
     entry_number: string;
     entry_date: string;
+    reference_number?: string | null;
     reference?: string | null;
     description?: string | null;
     journals: { code: string; name: string } | null;
@@ -66,16 +68,15 @@ export class IntegratedAccountingService {
           journals: null
     }) as NonNullable<FECQueryRow['journal_entries']>;
     const journal = entry.journals ?? { code: '', name: '' };
-    const account = item?.accounts ?? { number: '', name: '' };
 
     const journalCode = String(journal.code || '');
     const journalName = String(journal.name || '');
     const entryNumber = String(entry.entry_number || '');
     const entryDate = this.formatFECDate(String(entry.entry_date || new Date().toISOString()));
-    const accountNum = String(account.number || '');
-    const accountName = String(account.name || '');
+    const accountNum = String(item.account_number || '');
+    const accountName = String(item.account_name || '');
     const compAuxNum = String(item.auxiliary_account || '');
-    const pieceRef = String(entry.reference || '');
+    const pieceRef = String(entry.reference_number || entry.reference || '');
     const pieceDate = entryDate;
     const label = String(item.description || entry.description || '');
     const debit = this.formatFECAmount(Number(item.debit_amount || 0));
@@ -276,10 +277,10 @@ export class IntegratedAccountingService {
   private static async ensureAccountExists(accountNumber: string, companyId: string): Promise<string> {
     // Vérification de l'existence
     const existing = await supabase
-      .from('accounts')
+      .from('chart_of_accounts')
       .select('id')
       .eq('company_id', companyId)
-      .eq('number', accountNumber)
+      .eq('account_number', accountNumber)
       .single();
 
     if (existing.data) {
@@ -290,7 +291,7 @@ export class IntegratedAccountingService {
     const accountData = this.generateAccountData(accountNumber, companyId);
     
     const { data, error } = await supabase
-      .from('accounts')
+      .from('chart_of_accounts')
       .insert(accountData)
       .select('id')
       .single();
@@ -309,14 +310,16 @@ export class IntegratedAccountingService {
     const accountClass = accountNumber.charAt(0);
     const accountName = this.generateAccountName(accountNumber);
     const accountType = this.getAccountType(accountClass);
+    const numericClass = Number.parseInt(accountClass, 10);
 
     return {
       company_id: companyId,
-      number: accountNumber,
-      name: accountName,
-      type: accountType,
-      class: accountClass,
+      account_number: accountNumber,
+      account_name: accountName,
+      account_type: accountType,
+      account_class: Number.isNaN(numericClass) ? null : numericClass,
       is_active: true,
+      is_detail_account: true,
       created_at: new Date().toISOString()
     };
   }
@@ -387,18 +390,18 @@ export class IntegratedAccountingService {
    */
   private static getAccountType(accountClass: string): string {
     const typeMapping: Record<string, string> = {
-      '1': 'EQUITY',
-      '2': 'ASSET',
-      '3': 'ASSET',
-      '4': 'LIABILITY',
-      '5': 'ASSET',
-      '6': 'EXPENSE',
-      '7': 'REVENUE',
-      '8': 'EXPENSE',
-      '9': 'EXPENSE'
+      '1': 'equity',
+      '2': 'asset',
+      '3': 'asset',
+      '4': 'liability',
+      '5': 'asset',
+      '6': 'expense',
+      '7': 'revenue',
+      '8': 'expense',
+      '9': 'expense'
     };
 
-    return typeMapping[accountClass] || 'ASSET';
+    return typeMapping[accountClass] || 'asset';
   }
 
   /**
@@ -413,7 +416,7 @@ export class IntegratedAccountingService {
             company_id: entry.companyId,
             journal_id: journalId,
             entry_number: entry.entryNumber,
-            entry_date: entry.entry_date,
+            entry_date: entry.date,
             description: entry.description,
             reference: entry.reference,
             status: 'validated'
@@ -425,19 +428,43 @@ export class IntegratedAccountingService {
           throw new Error(`Erreur sauvegarde écriture: ${entryError.message}`);
         }
 
-        const entryItems = entry.items.map((item) => ({
-          journal_entry_id: journalEntry.id,
-          account_id: item.accountId,
-          debit_amount: item.debitAmount,
-          credit_amount: item.creditAmount,
-          description: item.description,
-          auxiliary_account: item.auxiliaryAccount,
-          letterage: item.letterage
-        }));
+        const accountIds = Array.from(new Set(entry.items.map((item) => item.accountId))).filter(Boolean);
+        let accountMap = new Map<string, { account_number?: string | null; account_name?: string | null }>();
+
+        if (accountIds.length > 0) {
+          const { data: accountsData, error: accountsError } = await supabase
+            .from('chart_of_accounts')
+            .select('id, account_number, account_name')
+            .eq('company_id', entry.companyId)
+            .in('id', accountIds as string[]);
+
+          if (accountsError) {
+            throw new Error(`Erreur récupération comptes: ${accountsError.message}`);
+          }
+
+          accountMap = new Map((accountsData ?? []).map((account) => [account.id, account]));
+        }
+
+        const entryItems = entry.items.map((item, index) => {
+          const accountInfo = accountMap.get(item.accountId);
+
+          return {
+            journal_entry_id: journalEntry.id,
+            account_id: item.accountId,
+            debit_amount: item.debitAmount,
+            credit_amount: item.creditAmount,
+            description: item.description,
+            auxiliary_account: item.auxiliaryAccount,
+            letterage: item.letterage,
+            line_order: index + 1,
+            account_number: accountInfo?.account_number ?? null,
+            account_name: accountInfo?.account_name ?? null
+          };
+        });
 
         if (entryItems.length > 0) {
           const { error: itemsError } = await supabase
-            .from('journal_entry_items')
+            .from('journal_entry_lines')
             .insert(entryItems);
 
           if (itemsError) {
@@ -461,18 +488,20 @@ export class IntegratedAccountingService {
   static async exportFEC(companyId: string, year: number): Promise<string> {
     // Récupération des écritures de l'année
     const { data: entries, error } = await supabase
-      .from('journal_entry_items')
+      .from('journal_entry_lines')
       .select(`
         debit_amount,
         credit_amount,
         description,
         auxiliary_account,
         letterage,
-        accounts (number, name),
+        account_number,
+        account_name,
+        line_order,
         journal_entries (
           entry_number,
-          date,
-          reference,
+          entry_date,
+          reference_number,
           description,
           journals (code, name)
         )

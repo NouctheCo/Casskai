@@ -146,7 +146,7 @@ export const PublicNavigation: React.FC<PublicNavigationProps> = ({ variant = 'l
 
             <div className="relative">
               <img 
-                src="/logo.svg" 
+                src="/logo.png" 
                 alt="CassKai Logo" 
                 className="w-10 h-10"
               />

@@ -309,7 +309,7 @@ export class ModuleManager {
       tenantId: 'current-tenant', // À remplacer par le vrai tenantId
       permissions: await this.getUserPermissions(userId),
       config,
-      services: await this.createModuleServices(),
+      services: await this.createModuleServices() as any,
     };
   }
 

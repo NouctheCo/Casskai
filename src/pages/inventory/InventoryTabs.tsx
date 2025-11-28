@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { useToast } from '@/components/ui/use-toast';
+import { toastSuccess } from '@/lib/toast-helpers';
 import {
   Factory,
   Truck,
@@ -105,7 +105,6 @@ interface InventoryTabsProps {
 }
 
 export function ProductionTab({ mockProductionOrders }: { mockProductionOrders: ProductionOrder[] }) {
-  const { toast } = useToast();
 
   return (
     <Card>
@@ -118,7 +117,7 @@ export function ProductionTab({ mockProductionOrders }: { mockProductionOrders: 
             </CardTitle>
             <CardDescription>Gestion de la production et assemblage</CardDescription>
           </div>
-          <Button onClick={() => toast({ title: "Nouvel ordre", description: "Interface à implémenter" })}>
+          <Button onClick={() => toastSuccess("Interface à implémenter")}>
             <PlusCircle className="h-4 w-4 mr-2" />
             Nouvel ordre
           </Button>

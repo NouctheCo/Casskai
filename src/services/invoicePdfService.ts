@@ -60,6 +60,14 @@ export class InvoicePdfService {
    * Ajoute l'en-tête de l'entreprise
    */
   private static addCompanyHeader(doc: jsPDF, companyData: CompanyInfo | undefined, primaryColor: number[]) {
+    // Logo CassKai (par défaut si non fourni)
+    try {
+      const logoUrl = companyData?.logo || '/logo.png';
+      // Note: En production, convertir le SVG en base64 pour l'inclure
+      doc.addImage(logoUrl, 'PNG', 20, 10, 30, 20);
+    } catch (error) {
+      console.warn('Logo non chargé dans le PDF:', error);
+    }
     // Logo ou nom de l'entreprise
     doc.setFontSize(24);
     doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
@@ -116,20 +124,20 @@ export class InvoicePdfService {
     doc.setFont(undefined, 'bold');
     doc.text('FACTURE N°:', invoiceInfoX, yPos);
     doc.setFont(undefined, 'normal');
-    doc.text(invoice.invoice_number, invoiceInfoX + 30, yPos);
+    doc.text(invoice.invoice_number as string, invoiceInfoX + 30, yPos);
     yPos += 6;
     
     doc.setFont(undefined, 'bold');
     doc.text('Date:', invoiceInfoX, yPos);
     doc.setFont(undefined, 'normal');
-    doc.text(new Date(invoice.issue_date).toLocaleDateString('fr-FR'), invoiceInfoX + 30, yPos);
+    doc.text(new Date(invoice.issue_date as string).toLocaleDateString('fr-FR'), invoiceInfoX + 30, yPos);
     yPos += 6;
     
     if (invoice.due_date) {
       doc.setFont(undefined, 'bold');
       doc.text('Échéance:', invoiceInfoX, yPos);
       doc.setFont(undefined, 'normal');
-      doc.text(new Date(invoice.due_date).toLocaleDateString('fr-FR'), invoiceInfoX + 30, yPos);
+      doc.text(new Date(invoice.due_date as any).toLocaleDateString('fr-FR'), invoiceInfoX + 30, yPos);
       yPos += 6;
     }
     
@@ -143,14 +151,14 @@ export class InvoicePdfService {
       yPos += 8;
       doc.setFontSize(11);
       doc.setFont(undefined, 'bold');
-      doc.text(invoice.client.name, 20, yPos);
+      doc.text(invoice.client.name as string, 20, yPos);
       
       yPos += 6;
       doc.setFont(undefined, 'normal');
       doc.setFontSize(10);
       
       if (invoice.client.address_street) {
-        doc.text(invoice.client.address_street, 20, yPos);
+        doc.text(invoice.client.address_street as string, 20, yPos);
         yPos += 5;
       }
       if (invoice.client.address_city) {
@@ -275,7 +283,7 @@ export class InvoicePdfService {
         
         doc.setFont(undefined, 'normal');
         doc.setFontSize(9);
-        const notesLines = doc.splitTextToSize(invoice.notes, 170);
+        const notesLines = doc.splitTextToSize(invoice.notes as string, 170);
         doc.text(notesLines, 20, startY + 6);
         startY += 6 + (notesLines.length * 4);
       }
@@ -289,7 +297,7 @@ export class InvoicePdfService {
         
         doc.setFont(undefined, 'normal');
         doc.setFontSize(9);
-        const termsLines = doc.splitTextToSize(invoice.terms, 170);
+        const termsLines = doc.splitTextToSize(invoice.terms as string, 170);
         doc.text(termsLines, 20, startY + 6);
       }
     }

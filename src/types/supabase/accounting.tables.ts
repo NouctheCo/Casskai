@@ -1,6 +1,6 @@
 import { Json } from './base.types'
 
-// Accounting tables: accounts, journals, journal_entries, journal_entry_items, journal_lines, third_parties
+// Accounting tables: accounts, journals, journal_entries, journal_entry_lines, journal_lines, third_parties
 export interface AccountingTables {
   accounts: {
     Row: {
@@ -152,42 +152,42 @@ export interface AccountingTables {
       fec_entry_num?: string | null
     }
   }
-  journal_entry_items: {
+  journal_entry_lines: {
     Row: {
       id: string
       journal_entry_id: string
-      company_id: string
       account_id: string
+      description: string
       debit_amount: number
-      currency: string
-      description: string | null
+      credit_amount: number
+      line_order: number | null
       created_at: string | null
-      updated_at: string | null
-      credit_amount: number | null
+      account_number: string | null
+      account_name: string | null
     }
     Insert: {
       id?: string
       journal_entry_id: string
-      company_id: string
       account_id: string
+      description: string
       debit_amount?: number
-      currency: string
-      description?: string | null
+      credit_amount?: number
+      line_order?: number | null
       created_at?: string | null
-      updated_at?: string | null
-      credit_amount?: number | null
+      account_number?: string | null
+      account_name?: string | null
     }
     Update: {
       id?: string
       journal_entry_id?: string
-      company_id?: string
       account_id?: string
+      description?: string
       debit_amount?: number
-      currency?: string
-      description?: string | null
+      credit_amount?: number
+      line_order?: number | null
       created_at?: string | null
-      updated_at?: string | null
-      credit_amount?: number | null
+      account_number?: string | null
+      account_name?: string | null
     }
   }
   journal_lines: {

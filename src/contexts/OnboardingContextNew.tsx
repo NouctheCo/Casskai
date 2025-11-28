@@ -63,10 +63,13 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setState(prev => ({ ...prev, isLoading: true }));
 
     try {
-      // Load existing data - DISABLED OnboardingStorageService due to missing onboarding_sessions table
-      // const response = await storageService.getOnboardingData(user.id);
-      // const savedData = response.success ? response.data : null;
-      const data = { ...initialData, userId: user.id };
+      const response = await storageService.getOnboardingData(user.id);
+      const savedData = response.success ? response.data : null;
+      const data = savedData ? { ...savedData, userId: user.id } : { ...initialData, userId: user.id };
+
+      if (!savedData) {
+        await storageService.saveOnboardingData(user.id, data);
+      }
 
       // Initialize steps
       const steps = progressService.getStepsWithStatus(data);
@@ -103,10 +106,9 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         lastSavedAt: new Date().toISOString()
       };
 
-      // Save asynchronously without blocking - DISABLED due to missing onboarding_sessions table
-      // if (user?.id) {
-      //   storageService.saveOnboardingData(user.id, updatedData);
-      // }
+      if (user?.id) {
+        void storageService.saveOnboardingData(user.id, updatedData);
+      }
 
       return {
         ...prev,
@@ -145,10 +147,9 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         lastSavedAt: new Date().toISOString()
       };
 
-      // Save asynchronously without blocking - DISABLED due to missing onboarding_sessions table
-      // if (user?.id) {
-      //   storageService.saveOnboardingData(user.id, updatedData);
-      // }
+      if (user?.id) {
+        void storageService.saveOnboardingData(user.id, updatedData);
+      }
 
       return {
         ...prev,
@@ -167,10 +168,9 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         lastSavedAt: new Date().toISOString()
       };
 
-      // Save asynchronously without blocking - DISABLED due to missing onboarding_sessions table
-      // if (user?.id) {
-      //   storageService.saveOnboardingData(user.id, updatedData);
-      // }
+      if (user?.id) {
+        void storageService.saveOnboardingData(user.id, updatedData);
+      }
 
       return {
         ...prev,
@@ -189,10 +189,9 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         lastSavedAt: new Date().toISOString()
       };
 
-      // Save asynchronously without blocking - DISABLED due to missing onboarding_sessions table
-      // if (user?.id) {
-      //   storageService.saveOnboardingData(user.id, updatedData);
-      // }
+      if (user?.id) {
+        void storageService.saveOnboardingData(user.id, updatedData);
+      }
 
       return {
         ...prev,
@@ -214,10 +213,9 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         lastSavedAt: new Date().toISOString()
       };
 
-      // Save asynchronously without blocking - DISABLED due to missing onboarding_sessions table
-      // if (user?.id) {
-      //   storageService.saveOnboardingData(user.id, updatedData);
-      // }
+      if (user?.id) {
+        void storageService.saveOnboardingData(user.id, updatedData);
+      }
 
       return {
         ...prev,
@@ -275,10 +273,9 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       lastSavedAt: new Date().toISOString()
     };
 
-    // Save asynchronously - DISABLED due to missing onboarding_sessions table
-    // if (user?.id) {
-    //   await storageService.saveOnboardingData(user.id, updatedData);
-    // }
+    if (user?.id) {
+      await storageService.saveOnboardingData(user.id, updatedData);
+    }
 
     setState(prev => ({
       ...prev,
@@ -422,29 +419,55 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         return { success: false, error: 'Session expirée. Veuillez vous reconnecter.' };
       }
 
-      // DISABLED OnboardingStorageService due to missing onboarding_sessions table
-      // const activeSessionResponse = await storageService.getActiveSession(user.id);
-      // const activeSession = activeSessionResponse.success ? activeSessionResponse.data : null;
-      const activeSession = null;
-      const sessionToken = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-        ? crypto.randomUUID()
-        : `session_${Date.now()}`;
-      const sessionStartedAt = state.data.startedAt || new Date().toISOString();
+      const activeSessionResponse = await storageService.getActiveSession(user.id);
+      const activeSession = activeSessionResponse.success ? activeSessionResponse.data : null;
+      const sessionToken = activeSession?.sessionToken || (
+        typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID()
+          : `session_${Date.now()}`
+      );
+      const sessionStartedAt = activeSession?.sessionData?.startedAt
+        || state.data.startedAt
+        || new Date().toISOString();
 
-      // Vérification légère - laissons le système de gouvernance des données gérer les doublons
-      // Cette vérification était trop restrictive et bloquait l'onboarding légitime
-      devLogger.log('🔍 Préparation création entreprise:', state.data.companyProfile.name?.trim());
+      devLogger.debug('🔍 Préparation création entreprise:', state.data.companyProfile.name?.trim());
 
-      // Create company in database
-      // Générer un id côté client pour éviter l'utilisation de .single() avec SELECT
-      const companyId = crypto.randomUUID();
+      const { data: existingCompany, error: existingCompanyError } = await supabase
+        .from('companies')
+        .select('id, status, owner_id')
+        .eq('owner_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (existingCompanyError) {
+        devLogger.error('❌ Impossible de vérifier les entreprises existantes:', existingCompanyError);
+        throw new Error('Impossible de vérifier les entreprises existantes');
+      }
+
+      const companyAlreadyExists = !!existingCompany?.id;
+      const existingCompanyId = existingCompany?.id ?? null;
+      if (companyAlreadyExists && !existingCompanyId) {
+        throw new Error('Entreprise existante détectée sans identifiant valide.');
+      }
+
+      const companyId = existingCompanyId
+        ?? (
+          typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+            ? crypto.randomUUID()
+            : `company_${Date.now()}`
+        );
+
+      if (companyAlreadyExists) {
+        devLogger.info('ℹ️ Entreprise déjà existante détectée, réutilisation de l’ID:', companyId);
+      }
 
     // ============================================
       // SAUVEGARDE COMPLÈTE COMPANIES - 8 NOUVELLES COLONNES
       // ============================================
 
     // SOLUTION NATIVE: Utiliser Supabase directement (triggers corrigés)
-    devLogger.log('🔧 [OnboardingContextNew] Creating company via Supabase native client');
+    devLogger.debug('🔧 [OnboardingContextNew] Creating company via Supabase native client');
     const companyData = {
           id: companyId,
           name: state.data.companyProfile.name,
@@ -487,37 +510,45 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           status: 'active'
         };
 
-    devLogger.log('📤 [OnboardingContextNew] Company data to insert via Supabase:', companyData);
-    
-    devLogger.log('📤 [OnboardingContextNew] Company data to insert via Supabase:', companyData);
+    devLogger.debug('📤 [OnboardingContextNew] Company data to insert via Supabase:', companyData);
 
-    // FIX: Use PostgreSQL function to create company and user_companies atomically
-    // This bypasses RLS issues by using SECURITY DEFINER
-    try {
-      const { data: result, error: rpcError } = await supabase.rpc('create_company_with_user', {
-        p_company_id: companyId,
-        p_user_id: user.id,
-        p_company_data: companyData
-      });
+    if (!companyAlreadyExists) {
+      try {
+        const { data: result, error: rpcError } = await supabase.rpc('create_company_with_user', {
+          p_company_id: companyId,
+          p_user_id: user.id,
+          p_company_data: companyData
+        });
 
-      if (rpcError) {
-        devLogger.error('❌ [OnboardingContextNew] RPC error:', rpcError);
-        throw new Error(`Failed to create company: ${rpcError.message}`);
+        if (rpcError) {
+          devLogger.error('❌ [OnboardingContextNew] RPC error:', rpcError);
+          throw new Error(`Failed to create company: ${rpcError.message}`);
+        }
+
+        if (!result || result.success !== true) {
+          const errorMsg = result?.error || 'Unknown error from database function';
+          devLogger.error('❌ [OnboardingContextNew] Function returned error:', errorMsg);
+          throw new Error(`Failed to create company: ${errorMsg}`);
+        }
+
+        const rpcCompanyId = typeof result.company_id === 'string' ? result.company_id : null;
+        if (!rpcCompanyId) {
+          throw new Error('La fonction create_company_with_user n’a pas renvoyé d’identifiant d’entreprise.');
+        }
+
+        if (rpcCompanyId !== companyId) {
+          throw new Error('Incohérence entre l’ID demandé et celui retourné par la base.');
+        }
+
+        devLogger.info('✅ Company and user_companies created successfully:', companyId);
+      } catch (err: any) {
+        devLogger.error('❌ [OnboardingContextNew] Company creation failed:', err);
+        throw new Error(`Failed to create company: ${err.message}`);
       }
-
-      if (!result || result.success !== true) {
-        const errorMsg = result?.error || 'Unknown error from database function';
-        devLogger.error('❌ [OnboardingContextNew] Function returned error:', errorMsg);
-        throw new Error(`Failed to create company: ${errorMsg}`);
-      }
-
-      devLogger.log('✅ Company and user_companies created successfully:', companyId);
-    } catch (err: any) {
-      devLogger.error('❌ [OnboardingContextNew] Company creation failed:', err);
-      throw new Error(`Failed to create company: ${err.message}`);
+    } else {
+      devLogger.info('⏭️ Création d’entreprise ignorée (déjà existante).');
     }
 
-    // Use the company data we prepared (we already have all the fields including ID)
     const company = companyData;
 
 
@@ -526,7 +557,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       const baseModules = ['dashboard', 'settings', 'users', 'security'];
       const enabledModules = Array.from(new Set([...baseModules, ...selectedModules]));
 
-      if (enabledModules.length > 0) {
+      if (!companyAlreadyExists && enabledModules.length > 0) {
         const moduleNames = {
           'dashboard': 'Tableau de Bord',
           'settings': 'Paramètres',
@@ -594,15 +625,20 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         await supabase
           .from('company_modules')
           .insert(modulesToInsert);
+      } else if (companyAlreadyExists) {
+        devLogger.info('ℹ️ Modules déjà configurés pour cette entreprise, saut de l’insertion.');
       }
+
+      // Journaux créés automatiquement par le trigger SQL create_journals_for_new_company
+      devLogger.info('ℹ️ Journaux créés automatiquement par trigger SQL');
 
       // ============================================
       // SAUVEGARDE USER_PREFERENCES - NOUVELLES DONNÉES PHASE 1
       // ============================================
 
       // Sauvegarder les préférences utilisateur (auparavant ENTIÈREMENT perdues !)
-      if (state.data.preferences && Object.keys(state.data.preferences).length > 0) {
-        devLogger.log('💾 Sauvegarde préférences utilisateur:', state.data.preferences);
+      if (!companyAlreadyExists && state.data.preferences && Object.keys(state.data.preferences).length > 0) {
+        devLogger.debug('💾 Sauvegarde préférences utilisateur:', state.data.preferences);
 
         try {
           await supabase
@@ -636,11 +672,13 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
               auto_save: state.data.preferences.autoSave ?? true
             });
 
-          devLogger.log('✅ Préférences utilisateur sauvegardées avec succès');
+          devLogger.info('✅ Préférences utilisateur sauvegardées avec succès');
         } catch (prefError) {
           devLogger.error('❌ Erreur sauvegarde préférences:', prefError);
           // Ne pas faire échouer tout l'onboarding pour les préférences
         }
+      } else if (companyAlreadyExists) {
+        devLogger.info('ℹ️ Préférences utilisateur déjà enregistrées, saut de l’insertion.');
       }
 
       // ============================================
@@ -648,8 +686,8 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       // ============================================
 
       // Sauvegarder les features explorées et activées (auparavant ENTIÈREMENT perdues !)
-      if (state.data.featuresExploration && Object.keys(state.data.featuresExploration).length > 0) {
-        devLogger.log('💾 Sauvegarde features exploration:', state.data.featuresExploration);
+      if (!companyAlreadyExists && state.data.featuresExploration && Object.keys(state.data.featuresExploration).length > 0) {
+        devLogger.debug('💾 Sauvegarde features exploration:', state.data.featuresExploration);
 
         try {
           const featuresToInsert = Object.entries(state.data.featuresExploration).map(([featureId, featureData]) => ({
@@ -675,12 +713,61 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
               .from('company_features')
               .insert(featuresToInsert);
 
-            devLogger.log(`✅ ${featuresToInsert.length} features sauvegardées avec succès`);
+            devLogger.info(`✅ ${featuresToInsert.length} features sauvegardées avec succès`);
           }
         } catch (featuresError) {
           devLogger.error('❌ Erreur sauvegarde features:', featuresError);
           // Ne pas faire échouer tout l'onboarding pour les features
         }
+      } else if (companyAlreadyExists) {
+        devLogger.info('ℹ️ Features déjà enregistrées pour cette entreprise, saut de l’insertion.');
+      }
+
+      const { data: userCompanyLink, error: userCompanyError } = await supabase
+        .from('user_companies')
+        .select('id, role, is_active, is_default')
+        .eq('user_id', user.id)
+        .eq('company_id', companyId)
+        .maybeSingle();
+
+      if (userCompanyError) {
+        devLogger.error('❌ Impossible de vérifier user_companies:', userCompanyError);
+        throw new Error('Impossible de vérifier le lien utilisateur-entreprise');
+      }
+
+      if (!userCompanyLink) {
+        const { error: insertUserCompanyError } = await supabase
+          .from('user_companies')
+          .insert({
+            user_id: user.id,
+            company_id: companyId,
+            role: 'owner',
+            is_active: true,
+            is_default: true
+          });
+
+        if (insertUserCompanyError) {
+          devLogger.error('❌ Impossible de créer user_companies:', insertUserCompanyError);
+          throw new Error('Impossible de créer le lien utilisateur-entreprise');
+        }
+
+        devLogger.info('🔗 Relation user_companies créée pour garantir les accès.');
+      } else if (userCompanyLink.role !== 'owner' || !userCompanyLink.is_active || !userCompanyLink.is_default) {
+        const { error: updateUserCompanyError } = await supabase
+          .from('user_companies')
+          .update({
+            role: 'owner',
+            is_active: true,
+            is_default: true
+          })
+          .eq('id', userCompanyLink.id);
+
+        if (updateUserCompanyError) {
+          devLogger.error('❌ Impossible de corriger user_companies:', updateUserCompanyError);
+          throw new Error('Impossible de corriger le lien utilisateur-entreprise');
+        }
+
+        devLogger.info('🔗 Relation user_companies mise à jour pour rester cohérente.');
       }
 
       const completionTimestamp = new Date().toISOString();
@@ -777,8 +864,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         devLogger.error('❌ Erreur sauvegarde historique:', historyError);
       }
 
-      // DISABLED OnboardingStorageService due to missing onboarding_sessions table
-      // await storageService.clearOnboardingData(user.id, { finalStatus: 'completed' });
+      await storageService.clearOnboardingData(user.id, { finalStatus: 'completed' });
 
       // ============================================
       // MISE À JOUR ÉTAT LOCAL - ONBOARDING TERMINÉ
@@ -799,7 +885,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       localStorage.removeItem('onboarding_company_data');
       localStorage.removeItem('onboarding_modules');
 
-      devLogger.log('✅ Onboarding terminé avec succès - État local mis à jour');
+      devLogger.info('✅ Onboarding terminé avec succès - État local mis à jour');
 
       return { success: true };
     } catch (error) {
@@ -887,8 +973,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       } : null;
 
       if (updatedData && user?.id) {
-        // DISABLED OnboardingStorageService due to missing onboarding_sessions table
-        // await storageService.saveOnboardingData(user.id, updatedData);
+        await storageService.saveOnboardingData(user.id, updatedData);
         setState(prev => ({ ...prev, data: updatedData }));
       }
     },
@@ -903,15 +988,13 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     },
     saveProgress: async () => {
       if (state.data && user?.id) {
-        // DISABLED OnboardingStorageService due to missing onboarding_sessions table
-        // await storageService.saveOnboardingData(user.id, state.data);
+        await storageService.saveOnboardingData(user.id, state.data);
       }
     },
     loadProgress: initializeOnboarding,
     clearProgress: () => {
       if (user?.id) {
-        // DISABLED OnboardingStorageService due to missing onboarding_sessions table
-        // storageService.clearOnboardingData(user.id);
+        void storageService.clearOnboardingData(user.id);
       }
       setState(initialState);
     },

@@ -24,6 +24,12 @@ import { useAuth } from '@/contexts/AuthContext';
 
 import paymentsService from '@/services/paymentsService';
 
+import { thirdPartiesService } from '@/services/thirdPartiesService';
+
+import type { ThirdParty } from '@/types/third-parties.types';
+
+import ClientSelector from '@/components/invoicing/ClientSelector';
+
 import { 
 
   Plus,
@@ -246,6 +252,8 @@ const PaymentFormDialog = ({ open, onClose, onSave }) => {
 
     reference: `REF-${new Date().getFullYear()}-${String(Date.now()).slice(-3)}`,
 
+    clientId: '',
+
     clientName: '',
 
     invoiceNumber: '',
@@ -266,13 +274,13 @@ const PaymentFormDialog = ({ open, onClose, onSave }) => {
 
   const handleSave = () => {
 
-    if (!formData.clientName || !formData.amount) {
+    if ((!formData.clientId && !formData.clientName) || !formData.amount) {
 
       toast({
 
         title: "Erreur",
 
-        description: "Veuillez remplir tous les champs obligatoires.",
+        description: "Veuillez sélectionner un client et remplir tous les champs obligatoires.",
 
         variant: "destructive"
 
@@ -290,6 +298,8 @@ const PaymentFormDialog = ({ open, onClose, onSave }) => {
 
       reference: formData.reference,
 
+      clientId: formData.clientId,
+
       clientName: formData.clientName,
 
       invoiceNumber: formData.invoiceNumber,
@@ -304,9 +314,7 @@ const PaymentFormDialog = ({ open, onClose, onSave }) => {
 
       status: 'completed',
 
-      description: formData.description,
-
-      clientId: `client${  Date.now()}`
+      description: formData.description
 
     };
 
@@ -335,6 +343,8 @@ const PaymentFormDialog = ({ open, onClose, onSave }) => {
     setFormData({
 
       reference: `REF-${new Date().getFullYear()}-${String(Date.now()).slice(-3)}`,
+
+      clientId: '',
 
       clientName: '',
 
@@ -390,23 +400,21 @@ const PaymentFormDialog = ({ open, onClose, onSave }) => {
 
 
 
-          <div>
+          <ClientSelector
 
-            <Label htmlFor="clientName">Client *</Label>
+            value={formData.clientId}
 
-            <Input
+            onChange={(clientId) => setFormData(prev => ({ ...prev, clientId }))}
 
-              id="clientName"
+            label="Client"
 
-              value={formData.clientName}
+            placeholder="Sélectionner un client"
 
-              onChange={(e) => setFormData(prev => ({ ...prev, clientName: e.target.value }))}
+            required
 
-              placeholder="Nom du client"
+          />
 
-            />
-
-          </div>
+          {formData.clientId && <p className="text-xs text-gray-500">Client sélectionné</p>}
 
           
 
@@ -936,11 +944,21 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
       setPayments(transformedPayments);
     } catch (error) {
       console.error('Error loading payments:', error instanceof Error ? error.message : String(error));
-      toast({
-        title: 'Erreur',
-        description: 'Impossible de charger les paiements',
-        variant: 'destructive'
-      });
+      
+      // Ne pas afficher d'erreur si c'est juste une base vide ou une erreur PGRST116 (pas de résultats)
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const isEmptyDataError = errorMessage.includes('PGRST116') || errorMessage.includes('no rows');
+      
+      if (!isEmptyDataError) {
+        toast({
+          title: 'Erreur',
+          description: 'Impossible de charger les paiements',
+          variant: 'destructive'
+        });
+      }
+      
+      // Initialiser avec un tableau vide même en cas d'erreur
+      setPayments([]);
     } finally {
       setLoading(false);
     }
@@ -1302,7 +1320,7 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
 
                   onChange={(e) => setSearchTerm(e.target.value)}
 
-                  className="pl-10 w-64"
+                  className="pl-10 w-40"
 
                 />
 
@@ -1312,7 +1330,7 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
 
               <Select value={typeFilter} onValueChange={setTypeFilter}>
 
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-28">
 
                   <SelectValue />
 
@@ -1334,7 +1352,7 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
 
               <Select value={statusFilter} onValueChange={setStatusFilter}>
 
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-28">
 
                   <SelectValue />
 
@@ -1356,7 +1374,7 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
 
               
 
-              <Button variant="outline" onClick={handleExportPayments}>
+              <Button variant="outline" size="sm" onClick={handleExportPayments}>
 
                 <Download className="w-4 h-4 mr-2" />
 

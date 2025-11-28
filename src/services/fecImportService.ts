@@ -309,13 +309,13 @@ export const fecImportService = {
     try {
       // 1. Récupérer les comptes existants
       const { data: existingAccounts, error: fetchError } = await supabase
-        .from('accounts')
+        .from('chart_of_accounts')
         .select('account_number')
         .eq('company_id', companyId);
       
       if (fetchError) throw fetchError;
       
-      const existingAccountNumbers = new Set(existingAccounts.map(a => a.account_number));
+      const existingAccountNumbers = new Set((existingAccounts || []).map(a => a.account_number));
       const accountsToCreate = [];
       
       // 2. Identifier les comptes à créer
@@ -327,13 +327,15 @@ export const fecImportService = {
           accountsToCreate.push({
             company_id: companyId,
             account_number: accountNumber,
-            name: accountInfo.name || `Compte ${accountNumber}`,
-            type,
-            class: accountClass,
+            account_name: accountInfo.name || `Compte ${accountNumber}`,
+            account_type: type,
+            account_class: accountClass,
             description: `Compte importé depuis FEC - ${accountInfo.name || accountNumber}`,
             is_active: true,
-            currency: 'EUR', // Par défaut
-            balance: 0,
+            is_detail_account: true,
+            balance_debit: 0,
+            balance_credit: 0,
+            current_balance: 0,
             imported_from_fec: true
           });
         }
@@ -342,7 +344,7 @@ export const fecImportService = {
       // 3. Créer les comptes manquants
       if (accountsToCreate.length > 0) {
         const { data: createdAccounts, error: insertError } = await supabase
-          .from('accounts')
+          .from('chart_of_accounts')
           .insert(accountsToCreate)
           .select();
         
@@ -380,7 +382,7 @@ export const fecImportService = {
       if (journalsError) throw journalsError;
       
       const { data: accounts, error: accountsError } = await supabase
-        .from('accounts')
+        .from('chart_of_accounts')
         .select('id, account_number')
         .eq('company_id', companyId);
       
@@ -388,11 +390,11 @@ export const fecImportService = {
       
       // Créer des maps pour faciliter la recherche
       const journalMap = new Map(journals.map(j => [j.code, j.id]));
-      const accountMap = new Map(accounts.map(a => [a.account_number, a.id]));
+      const accountMap = new Map((accounts || []).map(a => [a.account_number, a.id]));
       
       // 2. Préparer les écritures à créer
       const journalEntriesToCreate = [];
-      const journalEntryItemsToCreate = [];
+      const journalEntryLinesToCreate = [];
       const errors = [];
       
       for (const [key, entriesGroup] of entriesByJournalAndNum) {
@@ -444,12 +446,19 @@ export const fecImportService = {
       
       // 4. Préparer les lignes d'écritures
       const entryMap = new Map();
-      for (let i = 0; i < journalEntriesToCreate.length; i++) {
-        const key = `${journalEntriesToCreate[i].fec_journal_code}-${journalEntriesToCreate[i].fec_entry_num}`;
-        if (createdEntries[i]) {
-          entryMap.set(key, createdEntries[i].id);
+      createdEntries.forEach((entry, index) => {
+        if (!entry?.id) return;
+        const byReturnedData = entry?.fec_journal_code && entry?.fec_entry_num
+          ? `${entry.fec_journal_code}-${entry.fec_entry_num}`
+          : null;
+        const fallbackKey = journalEntriesToCreate[index]
+          ? `${journalEntriesToCreate[index].fec_journal_code}-${journalEntriesToCreate[index].fec_entry_num}`
+          : null;
+        const key = byReturnedData || fallbackKey;
+        if (key) {
+          entryMap.set(key, entry.id);
         }
-      }
+      });
       
       for (const [key, entriesGroup] of entriesByJournalAndNum) {
         const journalEntryId = entryMap.get(key);
@@ -463,7 +472,7 @@ export const fecImportService = {
         }
         
         // Créer les lignes d'écriture
-        for (const entry of entriesGroup) {
+        entriesGroup.forEach((entry, index) => {
           const accountId = accountMap.get(entry.accountNumber);
           
           if (!accountId) {
@@ -471,34 +480,35 @@ export const fecImportService = {
               key,
               message: `Account with number ${entry.accountNumber} not found in the database.`
             });
-            continue;
+            return;
           }
           
-          journalEntryItemsToCreate.push({
+          journalEntryLinesToCreate.push({
             journal_entry_id: journalEntryId,
-            company_id: companyId,
             account_id: accountId,
+            description: entry.label || entry.reference || `Ligne ${index + 1}`,
             debit_amount: entry.debit || 0,
             credit_amount: entry.credit || 0,
-            currency: 'EUR', // Par défaut
-            description: entry.label || ''
+            line_order: index + 1,
+            account_number: entry.accountNumber,
+            account_name: entry.accountName || null
           });
-        }
+        });
       }
       
       // 5. Insérer les lignes d'écritures
-      if (journalEntryItemsToCreate.length > 0) {
+      if (journalEntryLinesToCreate.length > 0) {
         // Insérer par lots de 100 pour éviter les problèmes de taille de requête
         const batchSize = 100;
-        for (let i = 0; i < journalEntryItemsToCreate.length; i += batchSize) {
-          const batch = journalEntryItemsToCreate.slice(i, i + batchSize);
+        for (let i = 0; i < journalEntryLinesToCreate.length; i += batchSize) {
+          const batch = journalEntryLinesToCreate.slice(i, i + batchSize);
           const { error: itemsError } = await supabase
-            .from('journal_entry_items')
+            .from('journal_entry_lines')
             .insert(batch);
           
           if (itemsError) {
             errors.push({
-              message: `Error inserting batch of journal entry items: ${itemsError.message}`
+              message: `Error inserting batch of journal entry lines: ${itemsError.message}`
             });
           }
         }
@@ -506,7 +516,7 @@ export const fecImportService = {
       
       return {
         created: createdEntries.length,
-        itemsCreated: journalEntryItemsToCreate.length,
+        itemsCreated: journalEntryLinesToCreate.length,
         errors
       };
     } catch (error) {

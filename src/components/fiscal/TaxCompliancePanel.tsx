@@ -194,7 +194,7 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
                 </CardTitle>
                 <p className="text-blue-700 mt-1 flex items-center gap-2">
                   <Globe className="h-4 w-4" />
-                  Système adapté aux réglementations {countryName.toLowerCase()}es
+                  Système adapté aux réglementations de {countryName}
                   <span className="mx-2">•</span>
                   <Banknote className="h-4 w-4" />
                   Devise: {currency}
@@ -328,7 +328,7 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
             Déclarations Obligatoires - {countryName}
           </CardTitle>
           <p className="text-sm text-gray-600">
-            Déclarations fiscales requises selon la réglementation {countryName.toLowerCase()}e
+            Déclarations fiscales requises selon la réglementation de {countryName}
           </p>
         </CardHeader>
         <CardContent>

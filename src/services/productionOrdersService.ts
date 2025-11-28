@@ -3,9 +3,12 @@ import { supabase } from '@/lib/supabase';
 export interface ProductionOrderComponent {
   itemId: string;
   itemName: string;
+  reference?: string;
   needed: number;
   allocated: number;
   available: number;
+  reserved?: number;
+  shortfall: number;
 }
 
 export interface ProductionOrder {
@@ -98,17 +101,33 @@ class ProductionOrdersService {
               inventory_item_id,
               needed,
               allocated,
-              inventory_items!inner(id, name, quantity)
+              inventory_items!inner(
+                id,
+                reference,
+                name,
+                quantity_on_hand,
+                reserved_quantity,
+                available_quantity
+              )
             `)
             .eq('production_order_id', order.id);
 
-          const transformedComponents = (components || []).map((comp: any) => ({
-            itemId: comp.inventory_item_id,
-            itemName: comp.inventory_items.name,
-            needed: comp.needed,
-            allocated: comp.allocated,
-            available: comp.inventory_items.quantity
-          }));
+          const transformedComponents = (components || []).map((comp: any) => {
+            const available = Number(comp.inventory_items.available_quantity ?? (Number(comp.inventory_items.quantity_on_hand ?? 0) - Number(comp.inventory_items.reserved_quantity ?? 0)));
+            const reserved = Number(comp.inventory_items.reserved_quantity ?? 0);
+            const shortfall = Math.max(0, Number(comp.needed ?? 0) - available);
+
+            return {
+              itemId: comp.inventory_item_id,
+              itemName: comp.inventory_items.name,
+              reference: comp.inventory_items.reference,
+              needed: comp.needed,
+              allocated: comp.allocated,
+              available,
+              reserved,
+              shortfall
+            } as ProductionOrderComponent;
+          });
 
           return {
             ...order,
@@ -149,17 +168,33 @@ class ProductionOrdersService {
           inventory_item_id,
           needed,
           allocated,
-          inventory_items!inner(id, name, quantity)
+          inventory_items!inner(
+            id,
+            reference,
+            name,
+            quantity_on_hand,
+            reserved_quantity,
+            available_quantity
+          )
         `)
         .eq('production_order_id', data.id);
 
-      const transformedComponents = (components || []).map((comp: any) => ({
-        itemId: comp.inventory_item_id,
-        itemName: comp.inventory_items.name,
-        needed: comp.needed,
-        allocated: comp.allocated,
-        available: comp.inventory_items.quantity
-      }));
+      const transformedComponents = (components || []).map((comp: any) => {
+        const available = Number(comp.inventory_items.available_quantity ?? (Number(comp.inventory_items.quantity_on_hand ?? 0) - Number(comp.inventory_items.reserved_quantity ?? 0)));
+        const reserved = Number(comp.inventory_items.reserved_quantity ?? 0);
+        const shortfall = Math.max(0, Number(comp.needed ?? 0) - available);
+
+        return {
+          itemId: comp.inventory_item_id,
+          itemName: comp.inventory_items.name,
+          reference: comp.inventory_items.reference,
+          needed: comp.needed,
+          allocated: comp.allocated,
+          available,
+          reserved,
+          shortfall
+        } as ProductionOrderComponent;
+      });
 
       return {
         ...data,

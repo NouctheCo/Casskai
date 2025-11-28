@@ -103,12 +103,12 @@ class DashboardStatsService {
     let expenses = 0;
 
     lines?.forEach(line => {
-      const accountNumber = line.chart_of_accounts?.account_number;
+      const accountNumber = (line as any).chart_of_accounts?.account_number;
       if (!accountNumber) return;
       
       const accountClass = accountNumber.charAt(0);
-      const debit = line.debit_amount || 0;
-      const credit = line.credit_amount || 0;
+      const debit = (line as any).debit_amount || 0;
+      const credit = (line as any).credit_amount || 0;
 
       // Classe 7 = Produits (revenues)
       if (accountClass === '7') {

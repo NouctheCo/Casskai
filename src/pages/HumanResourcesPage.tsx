@@ -4,10 +4,11 @@ import { motion } from 'framer-motion';
 import { useHR } from '@/hooks/useHR';
 import { useHRPayroll } from '@/hooks/useHRPayroll';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/components/ui/use-toast';
+import { toastError, toastSuccess } from '@/lib/toast-helpers';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { BetaBadge } from '@/components/ui/BetaBadge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
@@ -52,7 +53,6 @@ import {
 
 export default function HumanResourcesPage() {
   const { t } = useTranslation();
-  const { toast } = useToast();
   const { currentCompany } = useAuth();
 
   // Use the new HR hook
@@ -135,17 +135,10 @@ export default function HumanResourcesPage() {
     );
 
     if (response.success) {
-      toast({
-        title: "Succès",
-        description: "Document uploadé avec succès"
-      });
+      toastSuccess("Document uploadé avec succès");
       return true;
     } else {
-      toast({
-        title: "Erreur",
-        description: response.error || "Impossible d'uploader le document",
-        variant: "destructive"
-      });
+      toastError(response.error || "Impossible d'uploader le document");
       return false;
     }
   };
@@ -177,9 +170,13 @@ export default function HumanResourcesPage() {
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <Users className="w-8 h-8 text-blue-600" />
             Ressources Humaines
+            <BetaBadge variant="secondary" />
           </h1>
           <p className="text-muted-foreground">
             Gérez vos employés, congés, frais et temps de travail
+            <Badge variant="outline" className="ml-2 text-xs">
+              {t('common.inDevelopment', 'En développement')}
+            </Badge>
           </p>
         </div>
 

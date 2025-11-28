@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { X, Save, Eye, Send } from 'lucide-react';
 import { hrDocumentTemplatesService } from '@/services/hrDocumentTemplatesService';
 import type { DocumentTemplate, GenerateDocumentRequest } from '@/types/hr-document-templates.types';
-import type { Employee } from '@/types/hr.types';
+type Employee = any; // Employee type not yet defined
 
 interface GenerateDocumentModalProps {
   isOpen: boolean;

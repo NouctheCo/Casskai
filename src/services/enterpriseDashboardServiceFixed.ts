@@ -67,7 +67,17 @@ export class EnterpriseDashboardServiceFixed {
         period_comparisons: [],
         alerts: [],
         operational_kpis: [],
-        profitability_analysis: {}
+        profitability_analysis: {
+          gross_margin: 0,
+          operating_margin: 0,
+          net_margin: 0,
+          ebitda: 0,
+          roi: 0,
+          roe: 0,
+          roa: 0,
+          by_product_line: [],
+          by_customer_segment: []
+        }
       };
 
       return { data: dashboardData, error: null };

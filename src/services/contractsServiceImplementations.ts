@@ -22,7 +22,7 @@ export async function getContracts(
       .from('contracts')
       .select(`
         *,
-        client:third_parties(id, name)
+        client:customers(id, name)
       `)
       .eq('company_id', enterpriseId);
 
@@ -31,11 +31,11 @@ export async function getContracts(
       query = query.eq('client_id', filters.client_id);
     }
 
-    if (filters?.status && filters.status !== 'all') {
+    if (filters?.status && (filters.status as any) !== 'all') {
       query = query.eq('status', filters.status);
     }
 
-    if (filters?.contract_type && filters.contract_type !== 'all') {
+    if (filters?.contract_type && (filters.contract_type as any) !== 'all') {
       query = query.eq('rfa_calculation_type', filters.contract_type);
     }
 
@@ -51,12 +51,12 @@ export async function getContracts(
       id: c.id,
       enterprise_id: c.company_id,
       client_id: c.client_id,
-      client_name: (c.client as any)?.name || 'Inconnu',
+      client_name: (c.client as any)?.name || 'Client inconnu',
       contract_name: c.contract_name,
       contract_type: c.rfa_calculation_type || 'progressive',
       discount_config: {
         type: c.rfa_calculation_type || 'progressive',
-        rate: c.rfa_base_percentage || 0,
+        rate: (c.rfa_base_percentage ? c.rfa_base_percentage / 100 : 0),
         tiers: c.rfa_tiers || []
       },
       start_date: c.start_date,
@@ -84,7 +84,7 @@ export async function getContract(id: string): Promise<ContractServiceResponse<C
       .from('contracts')
       .select(`
         *,
-        client:third_parties(id, name)
+        client:customers(id, name)
       `)
       .eq('id', id)
       .single();
@@ -99,18 +99,21 @@ export async function getContract(id: string): Promise<ContractServiceResponse<C
       id: data.id,
       enterprise_id: data.company_id,
       client_id: data.client_id,
-      client_name: (data.client as any)?.name || 'Inconnu',
+      client_name: (data.client as any)?.name || 'Client inconnu',
       contract_name: data.contract_name,
-      contract_type: data.contract_type as any,
-      discount_config: data.discount_config as any,
+      contract_type: data.rfa_calculation_type as any,
+      discount_config: {
+        type: data.rfa_calculation_type || 'progressive',
+        rate: (data.rfa_base_percentage ? data.rfa_base_percentage / 100 : 0),
+        tiers: data.rfa_tiers || []
+      },
       start_date: data.start_date,
       end_date: data.end_date,
       status: data.status as any,
       currency: data.currency || 'EUR',
-      notes: data.notes,
       created_at: data.created_at,
       updated_at: data.updated_at
-    };
+    } as any;
 
     return { data: contract, success: true };
   } catch (error) {
@@ -133,17 +136,20 @@ export async function createContract(
         company_id: enterpriseId,
         client_id: contractData.client_id,
         contract_name: contractData.contract_name,
-        contract_type: contractData.contract_type,
-        discount_config: contractData.discount_config,
+        contract_number: `CTR-${Date.now()}`,
+        rfa_calculation_type: contractData.contract_type,
+        rfa_base_percentage: contractData.discount_config.rate ? contractData.discount_config.rate * 100 : 0,
+        rfa_tiers: contractData.discount_config.tiers || [],
+        has_rfa: true,
         start_date: contractData.start_date,
         end_date: contractData.end_date,
-        status: contractData.status || 'draft',
+        status: (contractData as any).status || 'draft',
         currency: contractData.currency || 'EUR',
-        notes: contractData.notes
+        description: (contractData as any).notes
       })
       .select(`
         *,
-        client:third_parties(id, name)
+        client:customers(id, name)
       `)
       .single();
 
@@ -153,18 +159,21 @@ export async function createContract(
       id: data.id,
       enterprise_id: data.company_id,
       client_id: data.client_id,
-      client_name: (data.client as any)?.name || 'Inconnu',
+      client_name: (data.client as any)?.name || 'Client inconnu',
       contract_name: data.contract_name,
-      contract_type: data.contract_type as any,
-      discount_config: data.discount_config as any,
+      contract_type: data.rfa_calculation_type as any,
+      discount_config: {
+        type: data.rfa_calculation_type || 'progressive',
+        rate: (data.rfa_base_percentage ? data.rfa_base_percentage / 100 : 0),
+        tiers: data.rfa_tiers || []
+      },
       start_date: data.start_date,
       end_date: data.end_date,
       status: data.status as any,
       currency: data.currency || 'EUR',
-      notes: data.notes,
       created_at: data.created_at,
       updated_at: data.updated_at
-    };
+    } as any;
 
     return { data: contract, success: true };
   } catch (error) {
@@ -185,13 +194,16 @@ export async function updateContract(
 
     if (contractData.contract_name) updateData.contract_name = contractData.contract_name;
     if (contractData.client_id) updateData.client_id = contractData.client_id;
-    if (contractData.contract_type) updateData.contract_type = contractData.contract_type;
-    if (contractData.discount_config) updateData.discount_config = contractData.discount_config;
+    if (contractData.contract_type) updateData.rfa_calculation_type = contractData.contract_type;
+    if (contractData.discount_config) {
+      updateData.rfa_base_percentage = contractData.discount_config.rate ? contractData.discount_config.rate * 100 : 0;
+      updateData.rfa_tiers = contractData.discount_config.tiers || [];
+    }
     if (contractData.start_date) updateData.start_date = contractData.start_date;
     if (contractData.end_date) updateData.end_date = contractData.end_date;
-    if (contractData.status) updateData.status = contractData.status;
+    if ((contractData as any).status) updateData.status = (contractData as any).status;
     if (contractData.currency) updateData.currency = contractData.currency;
-    if (contractData.notes !== undefined) updateData.notes = contractData.notes;
+    if ((contractData as any).notes !== undefined) updateData.description = (contractData as any).notes;
 
     const { data, error } = await supabase
       .from('contracts')
@@ -199,7 +211,7 @@ export async function updateContract(
       .eq('id', id)
       .select(`
         *,
-        client:third_parties(id, name)
+        client:customers(id, name)
       `)
       .single();
 
@@ -213,18 +225,21 @@ export async function updateContract(
       id: data.id,
       enterprise_id: data.company_id,
       client_id: data.client_id,
-      client_name: (data.client as any)?.name || 'Inconnu',
+      client_name: (data.client as any)?.name || 'Client inconnu',
       contract_name: data.contract_name,
-      contract_type: data.contract_type as any,
-      discount_config: data.discount_config as any,
+      contract_type: data.rfa_calculation_type as any,
+      discount_config: {
+        type: data.rfa_calculation_type || 'progressive',
+        rate: (data.rfa_base_percentage ? data.rfa_base_percentage / 100 : 0),
+        tiers: data.rfa_tiers || []
+      },
       start_date: data.start_date,
       end_date: data.end_date,
       status: data.status as any,
       currency: data.currency || 'EUR',
-      notes: data.notes,
       created_at: data.created_at,
       updated_at: data.updated_at
-    };
+    } as any;
 
     return { data: contract, success: true };
   } catch (error) {
@@ -283,7 +298,7 @@ export async function getRFACalculations(
       .from('rfa_calculations')
       .select(`
         *,
-        contract:contracts(id, contract_name, client:third_parties(name))
+        contract:contracts(id, contract_name, client:customers(name))
       `)
       .eq('company_id', enterpriseId);
 
@@ -291,7 +306,7 @@ export async function getRFACalculations(
       query = query.eq('contract_id', filters.contract_id);
     }
 
-    if (filters?.status && filters.status !== 'all') {
+    if (filters?.status && (filters.status as any) !== 'all') {
       query = query.eq('status', filters.status);
     }
 
@@ -312,8 +327,8 @@ export async function getRFACalculations(
       contract_id: r.contract_id,
       enterprise_id: r.company_id,
       client_id: (r.contract as any)?.client_id || '',
-      contract_name: (r.contract as any)?.contract_name || 'Inconnu',
-      client_name: (r.contract as any)?.client?.name || 'Inconnu',
+      contract_name: (r.contract as any)?.contract_name || 'Contrat inconnu',
+      client_name: (r.contract as any)?.client?.name || 'Client inconnu',
       period_start: r.period_start,
       period_end: r.period_end,
       turnover_amount: Number(r.turnover_amount) || 0,
@@ -321,7 +336,7 @@ export async function getRFACalculations(
       tier_reached: 0,
       calculation_details: r.calculation_details || {
         type: (r.contract as any)?.rfa_calculation_type || 'progressive',
-        applied_rate: Number(r.rfa_percentage) || 0
+        applied_rate: Number(r.rfa_percentage) ? Number(r.rfa_percentage) / 100 : 0
       },
       status: r.status as any,
       currency: r.currency || 'EUR',
@@ -371,7 +386,7 @@ export async function createRFACalculation(
       })
       .select(`
         *,
-        contract:contracts(id, contract_name, client:third_parties(name))
+        contract:contracts(id, contract_name, client:customers(name))
       `)
       .single();
 
@@ -384,7 +399,6 @@ export async function createRFACalculation(
       client_name: (data.contract as any)?.client?.name || 'Inconnu',
       period_start: data.period_start,
       period_end: data.period_end,
-      total_turnover: Number(data.total_turnover) || 0,
       discount_amount: Number(data.discount_amount) || 0,
       discount_rate: Number(data.discount_rate) || 0,
       tier_breakdown: data.tier_breakdown,
@@ -393,7 +407,7 @@ export async function createRFACalculation(
       calculated_at: data.calculated_at,
       validated_at: data.validated_at,
       validated_by: data.validated_by
-    };
+    } as any;
 
     return { data: rfa, success: true };
   } catch (error) {
@@ -419,7 +433,7 @@ export async function getDashboardData(enterpriseId: string): Promise<ContractSe
       .from('rfa_calculations')
       .select(`
         *,
-        contract:contracts(id, contract_name, client_id, currency, client:third_parties(name))
+        contract:contracts(id, contract_name, client_id, currency, client:customers(name))
       `)
       .eq('company_id', enterpriseId)
       .gte('period_start', yearStart)
@@ -437,7 +451,7 @@ export async function getDashboardData(enterpriseId: string): Promise<ContractSe
     rfaCalcs?.forEach(rfa => {
       const contract = rfa.contract as any;
       const clientId = contract?.client_id;
-      const clientName = contract?.client?.name || 'Inconnu';
+      const clientName = contract?.client?.name || 'Client inconnu';
       const currency = contract?.currency || 'EUR';
 
       if (clientId) {
@@ -470,8 +484,8 @@ export async function getDashboardData(enterpriseId: string): Promise<ContractSe
         contract_id: r.contract_id,
         enterprise_id: enterpriseId,
         client_id: contract?.client_id || '',
-        contract_name: contract?.contract_name || 'Inconnu',
-        client_name: contract?.client?.name || 'Inconnu',
+        contract_name: contract?.contract_name || 'Contrat inconnu',
+        client_name: contract?.client?.name || 'Client inconnu',
         period_start: r.period_start,
         period_end: r.period_end,
         turnover_amount: Number(r.turnover_amount) || 0,
@@ -479,7 +493,7 @@ export async function getDashboardData(enterpriseId: string): Promise<ContractSe
         tier_reached: 0,
         calculation_details: r.calculation_details || {
           type: contract?.rfa_calculation_type || 'progressive',
-          applied_rate: Number(r.rfa_percentage) || 0
+          applied_rate: Number(r.rfa_percentage) ? Number(r.rfa_percentage) / 100 : 0
         },
         status: r.status as any,
         currency: r.currency || contract?.currency || 'EUR',
@@ -535,7 +549,7 @@ export async function getDashboardData(enterpriseId: string): Promise<ContractSe
       recent_calculations: recentCalculations,
       monthly_rfa: [], // Could be calculated from RFA data grouped by month
       top_clients: topClients,
-      alerts: alerts,
+      alerts: alerts as any,
       upcoming_renewals: upcomingRenewals.map(c => ({
         id: c.id,
         enterprise_id: c.company_id,

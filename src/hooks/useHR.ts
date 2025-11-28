@@ -85,7 +85,7 @@ export function useHR(): UseHRReturn {
         setError(response.error || 'Failed to fetch employees');
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
     } finally {
       setEmployeesLoading(false);
     }
@@ -106,7 +106,7 @@ export function useHR(): UseHRReturn {
         setError(response.error || 'Failed to fetch leaves');
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
     } finally {
       setLeavesLoading(false);
     }
@@ -127,7 +127,7 @@ export function useHR(): UseHRReturn {
         setError(response.error || 'Failed to fetch expenses');
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
     } finally {
       setExpensesLoading(false);
     }
@@ -148,7 +148,7 @@ export function useHR(): UseHRReturn {
         setError(response.error || 'Failed to fetch time entries');
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -169,7 +169,7 @@ export function useHR(): UseHRReturn {
         setError(response.error || 'Failed to fetch HR metrics');
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
     } finally {
       setMetricsLoading(false);
     }
@@ -191,7 +191,7 @@ export function useHR(): UseHRReturn {
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
       return false;
     }
   }, [currentCompany?.id, fetchEmployees, fetchMetrics]);
@@ -209,7 +209,7 @@ export function useHR(): UseHRReturn {
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
       return false;
     }
   }, [fetchEmployees, fetchMetrics]);
@@ -227,7 +227,7 @@ export function useHR(): UseHRReturn {
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
       return false;
     }
   }, [fetchEmployees, fetchMetrics]);
@@ -247,7 +247,7 @@ export function useHR(): UseHRReturn {
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
       return false;
     }
   }, [currentCompany?.id, fetchLeaves, fetchMetrics]);
@@ -265,7 +265,7 @@ export function useHR(): UseHRReturn {
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
       return false;
     }
   }, [fetchLeaves, fetchMetrics]);
@@ -285,7 +285,7 @@ export function useHR(): UseHRReturn {
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
       return false;
     }
   }, [currentCompany?.id, fetchExpenses, fetchMetrics]);
@@ -304,7 +304,7 @@ export function useHR(): UseHRReturn {
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
       return false;
     }
   }, [currentCompany?.id, fetchTimeEntries]);

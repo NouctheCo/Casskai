@@ -93,12 +93,12 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
   );
 
   const filteredSessions = sessions.filter(s =>
-    s.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    s.session_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.location?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const filteredCertifications = certifications.filter(c =>
-    c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.certification_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.issuing_organization?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -259,9 +259,9 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
                         <Clock className="w-4 h-4 text-gray-400" />
                         <span>{training.duration_hours}h</span>
                       </div>
-                      {training.cost && (
+                      {training.cost_per_participant && (
                         <div className="text-sm font-semibold text-green-600">
-                          {training.cost} {training.cost_currency}
+                          {training.cost_per_participant} {training.currency}
                         </div>
                       )}
                     </div>
@@ -322,7 +322,7 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
                             {session.status.replace('_', ' ')}
                           </Badge>
                         </div>
-                        <CardTitle className="text-lg">{session.title || 'Session'}</CardTitle>
+                        <CardTitle className="text-lg">{session.session_name || 'Session'}</CardTitle>
                         <p className="text-sm text-gray-600">
                           {new Date(session.start_date).toLocaleDateString('fr-FR')}
                           {session.end_date && ` - ${new Date(session.end_date).toLocaleDateString('fr-FR')}`}
@@ -337,9 +337,9 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
                       </p>
                     )}
 
-                    {session.instructor_name && (
+                    {session.trainer_name && (
                       <p className="text-sm text-gray-700 mb-4">
-                        👨‍🏫 Formateur: {session.instructor_name}
+                        👨‍🏫 Formateur: {session.trainer_name}
                       </p>
                     )}
 
@@ -438,7 +438,7 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
                               <Badge className="bg-green-100 text-green-800">Active</Badge>
                             )}
                           </div>
-                          <CardTitle className="text-lg">{cert.name}</CardTitle>
+                          <CardTitle className="text-lg">{cert.certification_name}</CardTitle>
                           <p className="text-sm text-gray-600">{cert.employee_name}</p>
                         </div>
                         <Award className="w-8 h-8 text-yellow-500" />
@@ -474,7 +474,7 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
                         )}
                       </div>
 
-                      {cert.verification_url && (
+                      {cert.credential_url && (
                         <Button variant="link" size="sm" className="p-0 h-auto mt-2">
                           Vérifier la certification →
                         </Button>

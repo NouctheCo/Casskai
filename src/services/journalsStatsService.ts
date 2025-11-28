@@ -115,10 +115,9 @@ class JournalsStatsService {
 
       // Récupérer les lignes d'écriture pour calculer débits et crédits
       const { data: items, error: itemsError } = await supabase
-        .from('journal_entry_items')
+        .from('journal_entry_lines')
         .select('debit_amount, credit_amount')
-        .in('journal_entry_id', entryIds)
-        .eq('company_id', companyId);
+        .in('journal_entry_id', entryIds);
 
       if (itemsError) {
         console.error('Error fetching journal entry items:', itemsError);

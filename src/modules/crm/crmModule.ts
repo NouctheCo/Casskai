@@ -113,7 +113,7 @@ export class CRMModule implements Module {
   definition = CRM_MODULE_DEFINITION;
 
   async onInstall(context: ModuleContext): Promise<void> {
-    devLogger.log('[CRM] Installation du module CRM');
+    devLogger.info('[CRM] Installation du module CRM');
     
     // Créer les tables nécessaires
     await this.createDatabaseSchema(context);
@@ -126,7 +126,7 @@ export class CRMModule implements Module {
   }
 
   async onActivate(context: ModuleContext): Promise<void> {
-    devLogger.log('[CRM] Activation du module CRM');
+    devLogger.info('[CRM] Activation du module CRM');
     
     // Initialiser les services
     await this.initializeServices(context);
@@ -136,7 +136,7 @@ export class CRMModule implements Module {
   }
 
   async onDeactivate(context: ModuleContext): Promise<void> {
-    devLogger.log('[CRM] Désactivation du module CRM');
+    devLogger.info('[CRM] Désactivation du module CRM');
     
     // Arrêter les tâches automatiques
     await this.stopAutomatedTasks(context);
@@ -267,7 +267,7 @@ export class CRMModule implements Module {
     ];
 
     // Exécuter les schémas (simulation)
-    devLogger.log('[CRM] Création du schéma de base de données', schemas.length, 'tables');
+    devLogger.info('[CRM] Création du schéma de base de données', schemas.length, 'tables');
   }
 
   private async createDefaultPipelines(context: ModuleContext): Promise<void> {
@@ -302,7 +302,7 @@ export class CRMModule implements Module {
       },
     ];
 
-    devLogger.log('[CRM] Création des pipelines par défaut:', defaultPipelines.length);
+    devLogger.info('[CRM] Création des pipelines par défaut:', defaultPipelines.length);
   }
 
   private async createDefaultTemplates(context: ModuleContext): Promise<void> {
@@ -376,12 +376,12 @@ Cordialement,
       },
     ];
 
-    devLogger.log('[CRM] Création des templates par défaut:', defaultTemplates.length);
+    devLogger.info('[CRM] Création des templates par défaut:', defaultTemplates.length);
   }
 
   private async initializeServices(context: ModuleContext): Promise<void> {
     // Initialiser les services CRM
-    devLogger.log('[CRM] Initialisation des services');
+    devLogger.info('[CRM] Initialisation des services');
     
     // Service de signature électronique
     await this.initializeSignatureService(context);
@@ -395,7 +395,7 @@ Cordialement,
 
   private async initializeSignatureService(context: ModuleContext): Promise<void> {
     const provider = context.config.signatureProvider || 'internal';
-    devLogger.log('[CRM] Initialisation du service de signature:', provider);
+    devLogger.info('[CRM] Initialisation du service de signature:', provider);
     
     // Configuration selon le fournisseur
     switch (provider) {
@@ -416,25 +416,25 @@ Cordialement,
 
   private async initializeEmailService(context: ModuleContext): Promise<void> {
     if (context.config.emailIntegration) {
-      devLogger.log('[CRM] Initialisation du service email');
+      devLogger.info('[CRM] Initialisation du service email');
       // Configurer l'intégration email
     }
   }
 
   private async initializeDocumentService(context: ModuleContext): Promise<void> {
-    devLogger.log('[CRM] Initialisation du service de génération de documents');
+    devLogger.info('[CRM] Initialisation du service de génération de documents');
     // Service pour générer les PDF, devis, factures
   }
 
   private async startAutomatedTasks(context: ModuleContext): Promise<void> {
     if (context.config.autoFollowUp) {
-      devLogger.log('[CRM] Démarrage des tâches de relance automatique');
+      devLogger.info('[CRM] Démarrage des tâches de relance automatique');
       // Démarrer les tâches cron pour les relances
     }
   }
 
   private async stopAutomatedTasks(context: ModuleContext): Promise<void> {
-    devLogger.log('[CRM] Arrêt des tâches automatiques');
+    devLogger.info('[CRM] Arrêt des tâches automatiques');
     // Arrêter les tâches cron
   }
 
@@ -589,17 +589,17 @@ Cordialement,
 
   // Tâches automatisées
   private async sendFollowUpReminders(): Promise<void> {
-    devLogger.log('[CRM] Envoi des relances automatiques');
+    devLogger.info('[CRM] Envoi des relances automatiques');
     // Logique de relance automatique
   }
 
   private async checkQuoteExpirations(): Promise<void> {
-    devLogger.log('[CRM] Vérification des expirations de devis');
+    devLogger.info('[CRM] Vérification des expirations de devis');
     // Logique de vérification d'expiration
   }
 
   private async generatePipelineAnalytics(): Promise<void> {
-    devLogger.log('[CRM] Génération des analytics pipeline');
+    devLogger.info('[CRM] Génération des analytics pipeline');
     // Logique d'analytics
   }
 }

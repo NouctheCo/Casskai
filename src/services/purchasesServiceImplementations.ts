@@ -1,6 +1,30 @@
 import { supabase } from '../lib/supabase';
 import { Purchase, PurchaseFormData, PurchaseFilters, PurchaseStats, Supplier } from '../types/purchase.types';
 
+const toNumber = (value: unknown, fallback = 0): number => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const mapPurchaseRecord = (record: Record<string, any>): Purchase => ({
+  id: record.id,
+  invoice_number: record.invoice_number,
+  purchase_date: record.purchase_date,
+  supplier_id: record.supplier_id,
+  supplier_name: (record.supplier as any)?.name || record.supplier_name || 'Inconnu',
+  description: record.description || '',
+  amount_ht: toNumber(record.amount_ht ?? record.subtotal_amount),
+  tva_amount: toNumber(record.tva_amount ?? record.tax_amount),
+  amount_ttc: toNumber(record.amount_ttc ?? record.total_amount),
+  tva_rate: toNumber(record.tva_rate ?? record.tax_rate ?? 20),
+  payment_status: record.payment_status as any,
+  payment_date: record.payment_date || record.paid_at || undefined,
+  due_date: record.due_date,
+  created_at: record.created_at,
+  updated_at: record.updated_at,
+  company_id: record.company_id
+});
+
 /**
  * Get all purchases with filters
  */
@@ -42,24 +66,7 @@ export async function getPurchases(
 
     if (error) throw error;
 
-    const purchases: Purchase[] = (data || []).map(p => ({
-      id: p.id,
-      invoice_number: p.invoice_number,
-      purchase_date: p.purchase_date,
-      supplier_id: p.supplier_id,
-      supplier_name: (p.supplier as any)?.name || 'Inconnu',
-      description: p.description || '',
-      amount_ht: Number(p.amount_ht) || 0,
-      tva_amount: Number(p.tva_amount) || 0,
-      amount_ttc: Number(p.amount_ttc) || 0,
-      tva_rate: Number(p.tva_rate) || 20,
-      payment_status: p.payment_status as any,
-      payment_date: p.payment_date || undefined,
-      due_date: p.due_date,
-      created_at: p.created_at,
-      updated_at: p.updated_at,
-      company_id: p.company_id
-    }));
+    const purchases: Purchase[] = (data || []).map(mapPurchaseRecord);
 
     return { data: purchases };
   } catch (error) {
@@ -88,26 +95,7 @@ export async function getPurchaseById(id: string): Promise<{ data: Purchase | nu
       return { data: null };
     }
 
-    const purchase: Purchase = {
-      id: data.id,
-      invoice_number: data.invoice_number,
-      purchase_date: data.purchase_date,
-      supplier_id: data.supplier_id,
-      supplier_name: (data.supplier as any)?.name || 'Inconnu',
-      description: data.description || '',
-      amount_ht: Number(data.amount_ht) || 0,
-      tva_amount: Number(data.tva_amount) || 0,
-      amount_ttc: Number(data.amount_ttc) || 0,
-      tva_rate: Number(data.tva_rate) || 20,
-      payment_status: data.payment_status as any,
-      payment_date: data.payment_date || undefined,
-      due_date: data.due_date,
-      created_at: data.created_at,
-      updated_at: data.updated_at,
-      company_id: data.company_id
-    };
-
-    return { data: purchase };
+    return { data: mapPurchaseRecord(data) };
   } catch (error) {
     console.error('Error fetching purchase:', error);
     return { data: null, error };
@@ -132,8 +120,8 @@ export async function createPurchase(
         purchase_date: purchaseData.purchase_date,
         due_date: purchaseData.due_date,
         description: purchaseData.description,
-        amount_ht: purchaseData.amount_ht,
-        tva_rate: purchaseData.tva_rate,
+        subtotal_amount: purchaseData.amount_ht,
+        tax_rate: purchaseData.tva_rate,
         payment_status: 'pending'
       })
       .select(`
@@ -153,26 +141,7 @@ export async function createPurchase(
       throw error;
     }
 
-    const purchase: Purchase = {
-      id: data.id,
-      invoice_number: data.invoice_number,
-      purchase_date: data.purchase_date,
-      supplier_id: data.supplier_id,
-      supplier_name: (data.supplier as any)?.name || 'Inconnu',
-      description: data.description || '',
-      amount_ht: Number(data.amount_ht) || 0,
-      tva_amount: Number(data.tva_amount) || 0,
-      amount_ttc: Number(data.amount_ttc) || 0,
-      tva_rate: Number(data.tva_rate) || 20,
-      payment_status: data.payment_status as any,
-      payment_date: data.payment_date || undefined,
-      due_date: data.due_date,
-      created_at: data.created_at,
-      updated_at: data.updated_at,
-      company_id: data.company_id
-    };
-
-    return { data: purchase };
+    return { data: data ? mapPurchaseRecord(data) : null };
   } catch (error) {
     console.error('Error creating purchase:', error);
     return { data: null, error };
@@ -194,8 +163,8 @@ export async function updatePurchase(
     if (purchaseData.purchase_date) updateData.purchase_date = purchaseData.purchase_date;
     if (purchaseData.due_date) updateData.due_date = purchaseData.due_date;
     if (purchaseData.description !== undefined) updateData.description = purchaseData.description;
-    if (purchaseData.amount_ht !== undefined) updateData.amount_ht = purchaseData.amount_ht;
-    if (purchaseData.tva_rate !== undefined) updateData.tva_rate = purchaseData.tva_rate;
+    if (purchaseData.amount_ht !== undefined) updateData.subtotal_amount = purchaseData.amount_ht;
+    if (purchaseData.tva_rate !== undefined) updateData.tax_rate = purchaseData.tva_rate;
 
     const { data, error } = await supabase
       .from('purchases')
@@ -221,26 +190,7 @@ export async function updatePurchase(
       return { data: null, error: { message: 'Achat introuvable' } };
     }
 
-    const purchase: Purchase = {
-      id: data.id,
-      invoice_number: data.invoice_number,
-      purchase_date: data.purchase_date,
-      supplier_id: data.supplier_id,
-      supplier_name: (data.supplier as any)?.name || 'Inconnu',
-      description: data.description || '',
-      amount_ht: Number(data.amount_ht) || 0,
-      tva_amount: Number(data.tva_amount) || 0,
-      amount_ttc: Number(data.amount_ttc) || 0,
-      tva_rate: Number(data.tva_rate) || 20,
-      payment_status: data.payment_status as any,
-      payment_date: data.payment_date || undefined,
-      due_date: data.due_date,
-      created_at: data.created_at,
-      updated_at: data.updated_at,
-      company_id: data.company_id
-    };
-
-    return { data: purchase };
+    return { data: mapPurchaseRecord(data) };
   } catch (error) {
     console.error('Error updating purchase:', error);
     return { data: null, error };
@@ -278,7 +228,7 @@ export async function markAsPaid(
       .from('purchases')
       .update({
         payment_status: 'paid',
-        payment_date: paymentDate || new Date().toISOString().split('T')[0]
+        paid_at: paymentDate || new Date().toISOString().split('T')[0]
       })
       .eq('id', id)
       .select(`
@@ -293,26 +243,7 @@ export async function markAsPaid(
       return { data: null, error: { message: 'Achat introuvable' } };
     }
 
-    const purchase: Purchase = {
-      id: data.id,
-      invoice_number: data.invoice_number,
-      purchase_date: data.purchase_date,
-      supplier_id: data.supplier_id,
-      supplier_name: (data.supplier as any)?.name || 'Inconnu',
-      description: data.description || '',
-      amount_ht: Number(data.amount_ht) || 0,
-      tva_amount: Number(data.tva_amount) || 0,
-      amount_ttc: Number(data.amount_ttc) || 0,
-      tva_rate: Number(data.tva_rate) || 20,
-      payment_status: data.payment_status as any,
-      payment_date: data.payment_date || undefined,
-      due_date: data.due_date,
-      created_at: data.created_at,
-      updated_at: data.updated_at,
-      company_id: data.company_id
-    };
-
-    return { data: purchase };
+    return { data: mapPurchaseRecord(data) };
   } catch (error) {
     console.error('Error marking purchase as paid:', error);
     return { data: null, error };
@@ -327,14 +258,14 @@ export async function getPurchaseStats(companyId: string): Promise<{ data: Purch
     // Get all purchases for the company
     const { data: purchases, error } = await supabase
       .from('purchases')
-      .select('amount_ttc, payment_status')
+      .select('total_amount, payment_status')
       .eq('company_id', companyId);
 
     if (error) throw error;
 
     const stats: PurchaseStats = {
       total_purchases: purchases?.length || 0,
-      total_amount: purchases?.reduce((sum, p) => sum + Number(p.amount_ttc), 0) || 0,
+      total_amount: purchases?.reduce((sum, p) => sum + toNumber((p as any).amount_ttc ?? p.total_amount), 0) || 0,
       pending_payments: purchases?.filter(p => p.payment_status === 'pending').length || 0,
       overdue_payments: purchases?.filter(p => p.payment_status === 'overdue').length || 0
     };

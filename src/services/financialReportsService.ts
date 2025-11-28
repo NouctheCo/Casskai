@@ -95,8 +95,8 @@ class FinancialReportsService {
 
     // Récupérer tous les comptes de l'entreprise
     const { data: accounts, error: accountsError } = await supabase
-      .from('accounts')
-      .select('account_number, name, type, class')
+      .from('chart_of_accounts')
+      .select('account_number, account_name, account_type, account_class')
       .eq('company_id', companyId)
       .order('account_number');
 
@@ -180,9 +180,9 @@ class FinancialReportsService {
 
       return {
         account_number: account.account_number,
-        account_name: account.name || '',
-        account_type: this.mapAccountType(account.type, account.class),
-        account_class: account.class || parseInt(account.account_number[0]) || 0,
+        account_name: account.account_name || '',
+        account_type: this.mapAccountType(account.account_type, account.account_class),
+        account_class: account.account_class || Number.parseInt(account.account_number?.[0] ?? '0', 10) || 0,
         opening_balance: openingBalance,
         debit: periodDebit,
         credit: periodCredit,

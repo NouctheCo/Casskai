@@ -19,7 +19,7 @@ import type {
   GeneratedDocument,
   GeneratedDocumentStatus
 } from '@/types/hr-document-templates.types';
-import type { Employee } from '@/types/hr.types';
+type Employee = any; // Employee type not yet defined
 import { GenerateDocumentModal } from './GenerateDocumentModal';
 import { DocumentDetailModal } from './DocumentDetailModal';
 

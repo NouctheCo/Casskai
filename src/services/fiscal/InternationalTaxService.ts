@@ -427,17 +427,20 @@ export class InternationalTaxService {
 
     const accountsToInsert = taxAccounts.map(account => ({
       company_id: companyId,
-      currency: config.currency,
+      account_number: account.account_code,
+      account_name: account.account_name,
+      account_type: account.account_type,
+      account_class: Number.parseInt(account.account_code.charAt(0), 10) || null,
       is_active: true,
-      level: account.account_code.length <= 2 ? 1 : 2,
-      ...account
+      is_detail_account: true,
+      level: account.account_code.length <= 2 ? 1 : 2
     }));
 
     // Insérer les comptes en ignorant les doublons
     await supabase
-      .from('accounts')
+      .from('chart_of_accounts')
       .upsert(accountsToInsert, {
-        onConflict: 'company_id,account_code',
+        onConflict: 'company_id,account_number',
         ignoreDuplicates: true
       });
   }

@@ -393,12 +393,16 @@ export class CSVImportService {
       try {
         const entry = this.mapRowToEntry(row, mapping, rowNumber);
         
-        // Validation de base
-        const validationErrors = this.validateMappedEntry(entry, rowNumber);
-        if (validationErrors.length > 0) {
-          errors.push(...validationErrors);
+        // Validation de base - accepter les entrées partielles
+        if (entry.journalCode || (entry as any).pieceRef || (entry as any).CompteNum) {
+          entries.push(entry as any);
         } else {
-          entries.push(entry);
+          errors.push({
+            row: rowNumber,
+            message: 'Champs obligatoires manquants',
+            type: 'validation',
+            severity: 'error'
+          });
         }
 
       } catch (error) {
@@ -432,10 +436,10 @@ export class CSVImportService {
       const rawValue = row[map.columnIndex] || map.defaultValue || '';
       
       try {
-        let processedValue = this.processFieldValue(rawValue, map.dataType);
+        let processedValue: any = this.processFieldValue(rawValue, map.dataType);
         
         if (map.transform) {
-          processedValue = map.transform(processedValue);
+          processedValue = map.transform(String(processedValue));
         }
         
         entry[map.fieldName] = processedValue;

@@ -322,7 +322,7 @@ const ModuleCard: React.FC<ModuleCardProps> = ({
               <Switch
                 checked={isActive}
                 onCheckedChange={(checked) => {
-                  devLogger.log(`Switch changé pour ${module.key}: ${checked}`);
+                  devLogger.info(`Switch changé pour ${module.key}: ${checked}`);
                   onToggle(module.key, checked);
                 }}
                 disabled={
@@ -384,13 +384,13 @@ export default function ModulesManagementPage() {
   // Écouter les changements d'état des modules
   useEffect(() => {
     const handleModuleStateChange = (event: CustomEvent) => {
-      devLogger.log('Module state changed:', event.detail);
+      devLogger.info('Module state changed:', event.detail);
       const stored = localStorage.getItem('casskai-module-states');
       setModuleStates(stored ? JSON.parse(stored) : {});
     };
 
     const handleModuleStatesReset = () => {
-      devLogger.log('Module states reset');
+      devLogger.info('Module states reset');
       const stored = localStorage.getItem('casskai-module-states');
       setModuleStates(stored ? JSON.parse(stored) : {});
     };
@@ -447,7 +447,7 @@ export default function ModulesManagementPage() {
   }, [filteredModules, categories]);
 
   const handleToggleModule = (key: string, active: boolean) => {
-    devLogger.log(`Tentative de ${active ? 'activation' : 'désactivation'} du module ${key}`);
+    devLogger.info(`Tentative de ${active ? 'activation' : 'désactivation'} du module ${key}`);
 
     // En plan payant : vérifier si le module est autorisé pour ce plan
     if (!isTrialUser) {
@@ -494,7 +494,7 @@ export default function ModulesManagementPage() {
         }
       }));
 
-      devLogger.log(`Module ${key} ${active ? 'activé' : 'désactivé'} avec succès`);
+      devLogger.info(`Module ${key} ${active ? 'activé' : 'désactivé'} avec succès`);
     } catch (error) {
       devLogger.error('Erreur lors du toggle du module:', error instanceof Error ? error.message : String(error));
     }
@@ -502,7 +502,7 @@ export default function ModulesManagementPage() {
 
   const handleOpenModule = (path: string) => {
     // Vérifier que le chemin n'est pas vide et naviguer correctement
-    devLogger.log('Navigation vers:', path);
+    devLogger.info('Navigation vers:', path);
     
     if (path && path !== '#') {
       // Utiliser React Router pour la navigation au lieu de window.location.href

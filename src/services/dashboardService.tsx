@@ -30,8 +30,8 @@ export const dashboardService = {
     try {
       // 1. Statistiques des comptes par classe
       const { data: accounts, error: accountsError } = await supabase
-        .from('accounts')
-        .select('class, type, balance, is_active')
+        .from('chart_of_accounts')
+        .select('account_class, account_type, account_number, current_balance, is_active')
         .eq('company_id', currentEnterpriseId);
 
       if (accountsError) throw accountsError;
@@ -68,17 +68,23 @@ export const dashboardService = {
 
       // Calculer les balances par type
       accounts.forEach(account => {
-        const balance = account.balance || 0;
+        const accountClass = account.account_class ?? Number.parseInt(account.account_number?.charAt(0) ?? '', 10);
+
+        if (Number.isNaN(accountClass)) {
+          return;
+        }
+
+        const balance = account.current_balance ?? 0;
         
         // Grouper par classe
-        if (!stats.accounts.by_class[account.class]) {
-          stats.accounts.by_class[account.class] = { count: 0, balance: 0 };
+        if (!stats.accounts.by_class[accountClass]) {
+          stats.accounts.by_class[accountClass] = { count: 0, balance: 0 };
         }
-        stats.accounts.by_class[account.class].count++;
-        stats.accounts.by_class[account.class].balance += balance;
+        stats.accounts.by_class[accountClass].count++;
+        stats.accounts.by_class[accountClass].balance += balance;
 
         // Calculer par type de bilan
-        switch (account.class) {
+        switch (accountClass) {
           case 1:
           case 2:
           case 3:
@@ -180,10 +186,10 @@ export const dashboardService = {
     try {
       // Récupérer les mouvements des comptes de trésorerie (classe 5)
       const { data: accounts, error: accountsError } = await supabase
-        .from('accounts')
-        .select('id, balance')
+        .from('chart_of_accounts')
+        .select('id, current_balance, account_class, account_number')
         .eq('company_id', currentEnterpriseId)
-        .eq('class', 5)
+        .eq('account_class', 5)
         .eq('is_active', true);
 
       if (accountsError) throw accountsError;
@@ -194,7 +200,7 @@ export const dashboardService = {
       
       for (let i = months - 1; i >= 0; i--) {
         const monthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
-        const totalBalance = accounts.reduce((sum, acc) => sum + (acc.balance || 0), 0);
+        const totalBalance = accounts.reduce((sum, acc) => sum + (acc.current_balance || 0), 0);
         
         cashFlowData.push({
           month: monthDate.toISOString().slice(0, 7),
@@ -223,7 +229,7 @@ export const dashboardService = {
         .select(`
           id, entry_date, entry_number, description, status,
           journals (code, name),
-          journal_entry_items (debit_amount, credit_amount)
+          journal_entry_lines (debit_amount, credit_amount, account_number, account_name, line_order)
         `)
         .eq('company_id', currentEnterpriseId)
         .order('entry_date', { ascending: false })
@@ -234,7 +240,7 @@ export const dashboardService = {
 
       // Calculer le montant total pour chaque écriture
       const entriesWithAmount = (data || []).map(entry => {
-        const totalAmount = entry.journal_entry_items.reduce(
+        const totalAmount = (entry.journal_entry_lines || []).reduce(
           (sum, item) => sum + (item.debit_amount || 0), 0
         );
         return { ...entry, total_amount: totalAmount };
@@ -257,15 +263,18 @@ export const dashboardService = {
       const dateFrom = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
       
       const { data, error } = await supabase
-        .from('journal_entry_items')
+        .from('journal_entry_lines')
         .select(`
           account_id,
+          account_number,
+          account_name,
+          line_order,
           debit_amount,
           credit_amount,
-          accounts!inner (id, account_number, name, balance),
-          journal_entries!inner (entry_date)
+          chart_of_accounts!inner (id, account_number, account_name, current_balance),
+          journal_entries!inner (entry_date, company_id)
         `)
-        .eq('company_id', currentEnterpriseId)
+        .eq('journal_entries.company_id', currentEnterpriseId)
         .gte('journal_entries.entry_date', dateFrom);
 
       if (error) throw error;
@@ -277,7 +286,7 @@ export const dashboardService = {
         const accountId = item.account_id;
         if (!accountActivity[accountId]) {
           accountActivity[accountId] = {
-            account: item.accounts,
+            account: item.chart_of_accounts,
             total_movement: 0,
             transaction_count: 0
           };
@@ -314,17 +323,17 @@ export const dashboardService = {
         .from('journal_entries')
         .select(`
           id, entry_number, description,
-          journal_entry_items (debit_amount, credit_amount)
+          journal_entry_lines (debit_amount, credit_amount, account_number, account_name, line_order)
         `)
         .eq('company_id', currentEnterpriseId)
         .eq('status', 'draft');
 
       if (!balanceError && unbalancedEntries) {
         unbalancedEntries.forEach(entry => {
-          const totalDebit = entry.journal_entry_items.reduce(
+          const totalDebit = (entry.journal_entry_lines || []).reduce(
             (sum, item) => sum + (item.debit_amount || 0), 0
           );
-          const totalCredit = entry.journal_entry_items.reduce(
+          const totalCredit = (entry.journal_entry_lines || []).reduce(
             (sum, item) => sum + (item.credit_amount || 0), 0
           );
           
@@ -342,31 +351,37 @@ export const dashboardService = {
 
       // 2. Vérifier les comptes avec des soldes anormaux
       const { data: accounts, error: accountsError } = await supabase
-        .from('accounts')
-        .select('id, account_number, name, type, class, balance')
+        .from('chart_of_accounts')
+        .select('id, account_number, account_name, account_type, account_class, current_balance')
         .eq('company_id', currentEnterpriseId)
         .eq('is_active', true);
 
       if (!accountsError && accounts) {
         accounts.forEach(account => {
+          const accountClass = account.account_class ?? Number.parseInt(account.account_number?.charAt(0) ?? '', 10);
+
+          if (Number.isNaN(accountClass)) {
+            return;
+          }
+
           // Détecter les soldes anormaux selon le type de compte
-          const isDebitAccount = [1, 2, 3, 5, 6].includes(account.class);
-          const balance = account.balance || 0;
+          const isDebitAccount = [1, 2, 3, 5, 6].includes(accountClass);
+          const balance = account.current_balance || 0;
           
           if (isDebitAccount && balance < 0) {
             alerts.push({
               type: 'info',
               title: 'Solde négatif inhabituel',
-              message: `Le compte ${account.account_number} - ${account.name} a un solde négatif`,
+              message: `Le compte ${account.account_number} - ${account.account_name} a un solde négatif`,
               action: 'view_account',
               data: { accountId: account.id }
             });
-          } else if (!isDebitAccount && balance > 0 && account.class === 4) {
+          } else if (!isDebitAccount && balance > 0 && accountClass === 4) {
             // Comptes de dettes avec solde débiteur
             alerts.push({
               type: 'info',
               title: 'Solde débiteur sur compte de dette',
-              message: `Le compte ${account.account_number} - ${account.name} a un solde débiteur`,
+              message: `Le compte ${account.account_number} - ${account.account_name} a un solde débiteur`,
               action: 'view_account',
               data: { accountId: account.id }
             });

@@ -84,7 +84,7 @@ class FinancialHealthService {
         growth_score: growthScore,
         risk_score: riskScore,
         sustainability_score: sustainabilityScore,
-        recommendations,
+        recommendations: recommendations as any,
         critical_alerts: criticalAlerts,
         last_updated: new Date().toISOString()
       };
@@ -114,13 +114,29 @@ class FinancialHealthService {
       const endDate = new Date();
       const startDate = subMonths(endDate, 12);
 
-      // Récupérer les écritures comptables
-      const { data: entries, error } = await supabase
+      // D'abord, récupérer les IDs des écritures dans la période
+      const { data: journalEntries } = await supabase
         .from('journal_entries')
-        .select('account_code, debit, credit')
+        .select('id')
         .eq('company_id', companyId)
         .gte('entry_date', startDate.toISOString().split('T')[0])
         .lte('entry_date', endDate.toISOString().split('T')[0]);
+
+      if (!journalEntries || journalEntries.length === 0) {
+        return null;
+      }
+
+      const entryIds = journalEntries.map(e => e.id);
+
+      // Récupérer les lignes d'écritures comptables avec les comptes
+      const { data: entries, error } = await supabase
+        .from('journal_entry_lines')
+        .select(`
+          debit_amount,
+          credit_amount,
+          account:chart_of_accounts!journal_entry_lines_account_id_fkey(account_number)
+        `)
+        .in('journal_entry_id', entryIds);
 
       if (error) {
         console.error('Error fetching journal entries:', error);
@@ -141,15 +157,19 @@ class FinancialHealthService {
       let cashBalance = 0;    // Classe 5 (comptes financiers)
 
       entries.forEach(entry => {
-        const accountClass = entry.account_number.charAt(0);
-        const netAmount = (entry.debit || 0) - (entry.credit || 0);
+        if (!(entry as any).account?.account_number) return;
+
+        const accountClass = (entry as any).account.account_number.charAt(0);
+        const debit = Number((entry as any).debit_amount) || 0;
+        const credit = Number((entry as any).credit_amount) || 0;
+        const netAmount = debit - credit;
 
         switch (accountClass) {
           case '7': // Produits
-            revenue += (entry.credit || 0) - (entry.debit || 0);
+            revenue += credit - debit;
             break;
           case '6': // Charges
-            expenses += (entry.debit || 0) - (entry.credit || 0);
+            expenses += debit - credit;
             break;
           case '2': // Immobilisations
             assets += netAmount;
@@ -260,21 +280,35 @@ class FinancialHealthService {
       const endDate3MonthsAgo = subMonths(new Date(), 3);
       const startDate3MonthsAgo = subMonths(endDate3MonthsAgo, 12);
 
-      const { data: oldEntries } = await supabase
+      // D'abord, récupérer les IDs des écritures de la période précédente
+      const { data: oldJournalEntries } = await supabase
         .from('journal_entries')
-        .select('account_number, debit, credit')
+        .select('id')
         .eq('company_id', companyId)
         .gte('entry_date', startDate3MonthsAgo.toISOString().split('T')[0])
         .lte('entry_date', endDate3MonthsAgo.toISOString().split('T')[0]);
 
-      if (!oldEntries || oldEntries.length === 0) {
+      if (!oldJournalEntries || oldJournalEntries.length === 0) {
         return 50; // Pas assez d'historique
       }
 
+      const oldEntryIds = oldJournalEntries.map(e => e.id);
+
+      const { data: oldEntries } = await supabase
+        .from('journal_entry_lines')
+        .select(`
+          debit_amount,
+          credit_amount,
+          account:chart_of_accounts!journal_entry_lines_account_id_fkey(account_number)
+        `)
+        .in('journal_entry_id', oldEntryIds);
+
       let oldRevenue = 0;
-      oldEntries.forEach(entry => {
-        if (entry.account_number.charAt(0) === '7') {
-          oldRevenue += (entry.credit || 0) - (entry.debit || 0);
+      (oldEntries || []).forEach(entry => {
+        if ((entry as any).account?.account_number?.charAt(0) === '7') {
+          const credit = Number((entry as any).credit_amount) || 0;
+          const debit = Number((entry as any).debit_amount) || 0;
+          oldRevenue += credit - debit;
         }
       });
 

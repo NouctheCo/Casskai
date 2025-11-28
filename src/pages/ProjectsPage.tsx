@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 
 import { Badge } from '@/components/ui/badge';
 
-import { useToast } from '@/components/ui/use-toast';
+import { toastError, toastSuccess, toastCreated, toastUpdated, toastDeleted } from '@/lib/toast-helpers';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -119,8 +119,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export default function ProjectsPage() {
 
   const { t } = useLocale();
-
-  const { toast } = useToast();
 
 
 
@@ -442,15 +440,7 @@ export default function ProjectsPage() {
 
     if (!projectName.trim() || !projectClient.trim() || !projectBudget) {
 
-      toast({
-
-        variant: "destructive",
-
-        title: "Erreur",
-
-        description: "Veuillez remplir tous les champs obligatoires"
-
-      });
+      toastSuccess("Veuillez remplir tous les champs obligatoires");
 
       return;
 
@@ -528,13 +518,7 @@ export default function ProjectsPage() {
 
 
 
-        toast({
-
-          title: "Succès",
-
-          description: "Projet créé avec succès"
-
-        });
+        toastSuccess("Projet créé avec succès");
 
         setShowProjectForm(false);
 
@@ -544,19 +528,11 @@ export default function ProjectsPage() {
 
       console.error('Error creating project:', error instanceof Error ? error.message : String(error));
 
-      toast({
-
-        variant: "destructive",
-
-        title: "Erreur",
-
-        description: "Impossible de créer le projet"
-
-      });
+      toastSuccess("Impossible de créer le projet");
 
     }
 
-  }, [projectName, projectClient, projectDescription, projectBudget, projectManager, projectStatus, startDate, endDate, toast, createProject]);
+  }, [projectName, projectClient, projectDescription, projectBudget, projectManager, projectStatus, startDate, endDate, createProject]);
 
 
 
@@ -566,29 +542,15 @@ export default function ProjectsPage() {
 
       // Cette fonction sera implémentée dans le hook plus tard
 
-      toast({
-
-        title: "Information",
-
-        description: "Fonction de mise à jour des tâches à implémenter"
-
-      });
+      toastSuccess("Fonction de mise à jour des tâches à implémenter");
 
     } catch (error) {
 
-      toast({
-
-        variant: "destructive",
-
-        title: "Erreur",
-
-        description: "Impossible de mettre à jour la tâche"
-
-      });
+      toastSuccess("Impossible de mettre à jour la tâche");
 
     }
 
-  }, [toast]);
+  }, []);
 
 
 
@@ -602,31 +564,17 @@ export default function ProjectsPage() {
 
       if (success) {
 
-        toast({
-
-          title: "Projet mis à jour",
-
-          description: "Le statut du projet a été modifié"
-
-        });
+        toastSuccess("Le statut du projet a été modifié");
 
       }
 
     } catch (error) {
 
-      toast({
-
-        variant: "destructive",
-
-        title: "Erreur",
-
-        description: "Impossible de mettre à jour le projet"
-
-      });
+      toastSuccess("Impossible de mettre à jour le projet");
 
     }
 
-  }, [toast, updateProject]);
+  }, [updateProject]);
 
 
 
@@ -1290,7 +1238,7 @@ export default function ProjectsPage() {
 
                     </div>
 
-                    <Button variant="outline" size="icon"><Filter className="h-4 w-4" /></Button>
+                    <Button variant="outline" size="icon" aria-label="Filtrer les projets"><Filter className="h-4 w-4" aria-hidden="true" /></Button>
 
                   </div>
 
@@ -1434,7 +1382,7 @@ export default function ProjectsPage() {
 
                   </div>
 
-                  <Button onClick={() => toast({ title: "Nouvelle tâche", description: "Interface à implémenter" })}>
+                  <Button onClick={() => toastSuccess("Interface à implémenter")}>
 
                     <PlusCircle className="h-4 w-4 mr-2" />
 
@@ -1704,7 +1652,7 @@ export default function ProjectsPage() {
 
                   </div>
 
-                  <Button onClick={() => toast({ title: "Nouvelle entrée", description: "Interface à implémenter" })}>
+                  <Button onClick={() => toastSuccess("Interface à implémenter")}>
 
                     <PlusCircle className="h-4 w-4 mr-2" />
 
@@ -1824,7 +1772,7 @@ export default function ProjectsPage() {
 
                   </div>
 
-                  <Button onClick={() => toast({ title: "Nouvelle facture", description: "Interface à implémenter" })}>
+                  <Button onClick={() => toastSuccess("Interface à implémenter")}>
 
                     <PlusCircle className="h-4 w-4 mr-2" />
 

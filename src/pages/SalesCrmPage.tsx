@@ -4,14 +4,20 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { useCrm } from '../hooks/useCrm';
 import { useCRMAnalytics } from '../hooks/useCRMAnalytics';
-import { useToast } from '../components/ui/use-toast.js';
+import { toastError, toastSuccess, toastCreated, toastUpdated, toastDeleted } from '@/lib/toast-helpers';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import CrmDashboard from '../components/crm/CrmDashboard';
+import CrmDashboard from '../components/crm/CrmDashboard';
+import ClientsManagement from '../components/crm/ClientsManagement';
+import OpportunitiesKanban from '../components/crm/OpportunitiesKanban';
+import CommercialActions from '../components/crm/CommercialActions';
+import { NewClientModal } from '../components/crm/NewClientModal';
+import { NewOpportunityModal } from '../components/crm/NewOpportunityModal';
+import { NewActionModal } from '../components/crm/NewActionModal';
 import {
   BarChart3,
   Users,
@@ -34,7 +40,7 @@ import {
 
 export default function SalesCrmPage() {
   const { t } = useTranslation();
-  const { toast } = useToast();
+  
   const { currentCompany } = useAuth();
 
   // Use the new CRM hook
@@ -72,7 +78,10 @@ export default function SalesCrmPage() {
   });
 
   // State management
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [showNewClientModal, setShowNewClientModal] = useState(false);
+  const [showNewOpportunityModal, setShowNewOpportunityModal] = useState(false);
+  const [showNewActionModal, setShowNewActionModal] = useState(false);
 
   // Animation variants
   const containerVariants = {
@@ -103,19 +112,11 @@ export default function SalesCrmPage() {
     try {
       const success = await createClient(clientData);
       if (success) {
-        toast({
-          title: t('common.success'),
-          description: 'Client créé avec succès',
-          variant: 'default'
-        });
+        toastSuccess("Action réussie");
       }
     } catch (error) {
       devLogger.error('Error creating client:', error instanceof Error ? error.message : String(error));
-      toast({
-        title: t('common.error'),
-        description: 'Erreur lors de la création du client',
-        variant: 'destructive'
-      });
+      toastError("Erreur");
     }
   };
 
@@ -124,19 +125,11 @@ export default function SalesCrmPage() {
     try {
       const success = await createContact(contactData);
       if (success) {
-        toast({
-          title: t('common.success'),
-          description: 'Contact créé avec succès',
-          variant: 'default'
-        });
+        toastSuccess("Action réussie");
       }
     } catch (error) {
       devLogger.error('Error creating contact:', error instanceof Error ? error.message : String(error));
-      toast({
-        title: t('common.error'),
-        description: 'Erreur lors de la création du contact',
-        variant: 'destructive'
-      });
+      toastError("Erreur");
     }
   };
 
@@ -145,19 +138,11 @@ export default function SalesCrmPage() {
     try {
       const success = await createOpportunity(opportunityData);
       if (success) {
-        toast({
-          title: t('common.success'),
-          description: 'Opportunité créée avec succès',
-          variant: 'default'
-        });
+        toastSuccess("Action réussie");
       }
     } catch (error) {
       devLogger.error('Error creating opportunity:', error instanceof Error ? error.message : String(error));
-      toast({
-        title: t('common.error'),
-        description: 'Erreur lors de la création de l\'opportunité',
-        variant: 'destructive'
-      });
+      toastError("Erreur");
     }
   };
 
@@ -166,19 +151,11 @@ export default function SalesCrmPage() {
     try {
       const success = await createCommercialAction(actionData);
       if (success) {
-        toast({
-          title: t('common.success'),
-          description: 'Action commerciale créée avec succès',
-          variant: 'default'
-        });
+        toastSuccess("Action réussie");
       }
     } catch (error) {
       devLogger.error('Error creating action:', error instanceof Error ? error.message : String(error));
-      toast({
-        title: t('common.error'),
-        description: 'Erreur lors de la création de l\'action',
-        variant: 'destructive'
-      });
+      toastError("Erreur");
     }
   };
 
@@ -342,9 +319,9 @@ export default function SalesCrmPage() {
                 <CrmDashboard
                   dashboardData={dashboardData}
                   loading={loading}
-                  onCreateClient={() => devLogger.log('Create client')}
-                  onCreateOpportunity={() => devLogger.log('Create opportunity')}
-                  onCreateAction={() => devLogger.log('Create action')}
+                  onCreateClient={() => setShowNewClientModal(true)}
+                  onCreateOpportunity={() => setShowNewOpportunityModal(true)}
+                  onCreateAction={() => setShowNewActionModal(true)}
                 />
               ) : (
                 <Card>
@@ -450,7 +427,7 @@ export default function SalesCrmPage() {
                           Fonctionnalité complètement intégrée avec Supabase
                         </p>
                       </div>
-                      <Button onClick={() => devLogger.log('Open client management')}>
+                      <Button onClick={() => devLogger.info('Open client management')}>
                         Ouvrir la Gestion des Clients
                       </Button>
                     </div>
@@ -503,7 +480,7 @@ export default function SalesCrmPage() {
                           Suivi des opportunités intégré avec Supabase
                         </p>
                       </div>
-                      <Button onClick={() => devLogger.log('Open opportunities')}>
+                      <Button onClick={() => devLogger.info('Open opportunities')}>
                         Ouvrir le Pipeline
                       </Button>
                     </div>
@@ -546,7 +523,7 @@ export default function SalesCrmPage() {
                           Historique et planification des actions
                         </p>
                       </div>
-                      <Button onClick={() => devLogger.log('Open actions')}>
+                      <Button onClick={() => devLogger.info('Open actions')}>
                         Ouvrir les Actions
                       </Button>
                     </div>
@@ -557,6 +534,31 @@ export default function SalesCrmPage() {
           </TabsContent>
         </Tabs>
       </motion.div>
+
+      {/* Modals */}
+      <NewClientModal
+        open={showNewClientModal}
+        onOpenChange={setShowNewClientModal}
+        onSuccess={() => {
+          fetchDashboardData();
+        }}
+      />
+
+      <NewOpportunityModal
+        open={showNewOpportunityModal}
+        onOpenChange={setShowNewOpportunityModal}
+        onSuccess={() => {
+          fetchDashboardData();
+        }}
+      />
+
+      <NewActionModal
+        open={showNewActionModal}
+        onOpenChange={setShowNewActionModal}
+        onSuccess={() => {
+          fetchDashboardData();
+        }}
+      />
     </div>
   );
 }

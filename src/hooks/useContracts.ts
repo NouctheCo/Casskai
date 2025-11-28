@@ -71,6 +71,7 @@ export const useContracts = (): UseContractsReturn => {
   const [rfaCalculations, setRFACalculations] = useState<RFACalculation[]>([]);
   const [simulationResults, setSimulationResults] = useState<SimulationResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Filtres
   const [filters, setFilters] = useState<ContractFilters>({});
@@ -127,7 +128,7 @@ export const useContracts = (): UseContractsReturn => {
         return false;
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Erreur inconnue';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Erreur inconnue';
       toast({
         title: "Erreur",
         description: errorMessage,
@@ -163,7 +164,7 @@ export const useContracts = (): UseContractsReturn => {
         return false;
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Erreur inconnue';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Erreur inconnue';
       toast({
         title: "Erreur",
         description: errorMessage,
@@ -199,7 +200,7 @@ export const useContracts = (): UseContractsReturn => {
         return false;
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Erreur inconnue';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Erreur inconnue';
       toast({
         title: "Erreur",
         description: errorMessage,
@@ -230,7 +231,7 @@ export const useContracts = (): UseContractsReturn => {
         });
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Erreur inconnue';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Erreur inconnue';
       toast({
         title: "Erreur",
         description: errorMessage,
@@ -267,7 +268,7 @@ export const useContracts = (): UseContractsReturn => {
         return false;
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Erreur inconnue';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Erreur inconnue';
       toast({
         title: "Erreur",
         description: errorMessage,
@@ -300,7 +301,7 @@ export const useContracts = (): UseContractsReturn => {
         });
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Erreur inconnue';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Erreur inconnue';
       toast({
         title: "Erreur",
         description: errorMessage,
@@ -324,7 +325,7 @@ export const useContracts = (): UseContractsReturn => {
       } else {
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Erreur inconnue';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Erreur inconnue';
     } finally {
       setLoading(false);
     }

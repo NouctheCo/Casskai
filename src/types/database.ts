@@ -9,6 +9,7 @@ export interface Company {
   fiscal_year_start: string;
   tax_number?: string;
   address?: CompanyAddress;
+  owner_id?: string; // For ownership checks
   created_at: string;
   updated_at: string;
 }

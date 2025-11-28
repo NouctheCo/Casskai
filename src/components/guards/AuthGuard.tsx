@@ -72,7 +72,7 @@ export const AuthForm: React.FC = () => {
 
     } catch (err: any) {
 
-      setError((error as Error).message || 'Erreur de connexion.');
+      setError((err as Error).message || 'Erreur de connexion.');
 
     } finally {
 
@@ -133,7 +133,7 @@ export const AuthForm: React.FC = () => {
 
     } catch (err: any) {
 
-      setError((error as Error).message || "Erreur lors de l'inscription.");
+      setError((err as Error).message || "Erreur lors de l'inscription.");
 
     } finally {
 
@@ -151,7 +151,13 @@ export const AuthForm: React.FC = () => {
 
       <Card className="w-full max-w-md">
 
-        <CardHeader className="text-center">
+        <CardHeader className="text-center space-y-4">
+
+          <div className="flex justify-center">
+
+            <img src="/logo.png" alt="CassKai" className="h-16 w-auto" />
+
+          </div>
 
           <CardTitle className="text-2xl">Bienvenue sur CassKai</CardTitle>
 

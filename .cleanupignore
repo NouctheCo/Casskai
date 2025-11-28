@@ -1,0 +1,145 @@
+# ============================================================================
+# .cleanupignore - Fichiers à TOUJOURS PRÉSERVER lors des nettoyages
+# ============================================================================
+# Ce fichier documente les fichiers et dossiers essentiels qui ne doivent
+# JAMAIS être supprimés lors des opérations de nettoyage du projet.
+# ============================================================================
+
+# ============================================================================
+# DOCUMENTATION OFFICIELLE (NE JAMAIS SUPPRIMER)
+# ============================================================================
+README.md
+LICENSE
+CHANGELOG.md
+ARCHITECTURE.md
+API_DOCUMENTATION.md
+DEPLOYMENT_GUIDE.md
+ROADMAP_PUBLIQUE.md
+PRE_LAUNCH_CHECKLIST.md
+CLAUDE.md
+
+# ============================================================================
+# CONFIGURATION DU PROJET (NE JAMAIS SUPPRIMER)
+# ============================================================================
+package.json
+package-lock.json
+.env.example
+docker-compose.yml
+Dockerfile
+nginx.conf
+vite.config.ts
+vitest.config.ts
+playwright.config.ts
+postcss.config.js
+tailwind.config.cjs
+tsconfig.json
+tsconfig.app.json
+tsconfig.node.json
+tsconfig.test.json
+tsconfig.build.json
+eslint.config.js
+.prettierrc
+.prettierignore
+components.json
+cspell.config.json
+renovate.json
+sonar-project.properties
+
+# ============================================================================
+# SCRIPTS DE DÉPLOIEMENT (NE JAMAIS SUPPRIMER)
+# ============================================================================
+deploy-vps.ps1
+deploy-vps.sh
+
+# ============================================================================
+# DOSSIERS ESSENTIELS (NE JAMAIS SUPPRIMER)
+# ============================================================================
+src/
+public/
+supabase/
+docs/
+scripts/
+e2e/
+tests/
+backend/
+.vscode/
+.github/
+.husky/
+.commitlintrc.js
+.lintstagedrc.js
+.nvmrc
+.hintrc
+.supabaserc
+sql/
+
+# ============================================================================
+# FICHIERS DE BUILD (NE PAS SUPPRIMER MANUELLEMENT)
+# ============================================================================
+# Ces fichiers sont générés automatiquement, mais ne doivent pas être
+# supprimés manuellement (utilisez npm run clean à la place)
+dist/
+node_modules/
+
+# ============================================================================
+# FICHIERS TEMPORAIRES OK À SUPPRIMER
+# ============================================================================
+# Logs
+*.log
+
+# Rapports temporaires
+*_report.json
+*_audit.json
+audit_*.json
+
+# Scripts de fix temporaires
+fix-*.ps1
+fix-*.py
+fix-*.js
+fix-*.cjs
+fix-*.sh
+
+# Scripts de migration temporaires
+apply-*.ps1
+apply-*.py
+migrate-*.js
+patch-*.py
+integrate-*.ps1
+
+# Documentation temporaire
+RAPPORT_*.md
+AUDIT_*.md
+BILAN_*.md
+MISSION_*.md
+CORRECTION_*.md
+SPRINT_*.md
+FIX_*.md
+PROGRESS_*.md
+DIAGNOSTIC_*.md
+REFACTORING_*.md
+README_*_MISSION.md
+
+# Fichiers SQL temporaires (SAUF supabase/migrations/)
+*.sql (à la racine uniquement)
+
+# Fichiers de test temporaires
+test-output.*
+temp-*.json
+tmp-*.txt
+
+# Dossiers temporaires
+coverage/
+playwright-report/
+test-results/
+.auth/
+.netlify/
+_cleanup_backup_*/
+
+# ============================================================================
+# RÈGLES DE NETTOYAGE
+# ============================================================================
+# 1. Toujours faire un backup avant de supprimer
+# 2. Tester avec -DryRun avant la suppression réelle
+# 3. Vérifier avec npm run type-check après le nettoyage
+# 4. Ne jamais supprimer les fichiers de ce .cleanupignore
+# 5. Conserver les migrations officielles dans supabase/migrations/
+# ============================================================================

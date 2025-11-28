@@ -103,7 +103,7 @@ export function FeedbackTab({ companyId, employees, currentUserId }: FeedbackTab
     const matchesSearch =
       fb.employee_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       fb.from_employee_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      fb.message?.toLowerCase().includes(searchTerm.toLowerCase());
+      fb.content?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = typeFilter === 'all' || fb.feedback_type === typeFilter;
     return matchesSearch && matchesType;
   });
@@ -263,7 +263,7 @@ export function FeedbackTab({ companyId, employees, currentUserId }: FeedbackTab
 
               <CardContent>
                 <div className="bg-gray-50 p-4 rounded-lg mb-4">
-                  <p className="text-gray-700 whitespace-pre-wrap">{feedback.message}</p>
+                  <p className="text-gray-700 whitespace-pre-wrap">{feedback.content}</p>
                 </div>
 
                 {feedback.response && (

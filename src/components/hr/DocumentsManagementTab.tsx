@@ -205,14 +205,13 @@ export const DocumentsManagementTab: React.FC<DocumentsManagementTabProps> = ({
 
           {/* Employee filter */}
           <Select
-            value={filters.employee_id}
+            value={filters.employee_id || undefined}
             onValueChange={(value) => setFilters({ ...filters, employee_id: value })}
           >
             <SelectTrigger>
               <SelectValue placeholder="Tous les employés" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tous</SelectItem>
               {employees.map(emp => (
                 <SelectItem key={emp.id} value={emp.id}>
                   {emp.first_name} {emp.last_name}
@@ -223,14 +222,13 @@ export const DocumentsManagementTab: React.FC<DocumentsManagementTabProps> = ({
 
           {/* Document type filter */}
           <Select
-            value={filters.document_type}
+            value={filters.document_type || undefined}
             onValueChange={(value) => setFilters({ ...filters, document_type: value as DocumentType })}
           >
             <SelectTrigger>
               <SelectValue placeholder="Type de document" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tous les types</SelectItem>
               {Object.entries(documentTypeLabels).map(([value, label]) => (
                 <SelectItem key={value} value={value}>{label}</SelectItem>
               ))}
@@ -239,14 +237,13 @@ export const DocumentsManagementTab: React.FC<DocumentsManagementTabProps> = ({
 
           {/* Status filter */}
           <Select
-            value={filters.status}
+            value={filters.status || undefined}
             onValueChange={(value) => setFilters({ ...filters, status: value as DocumentStatus })}
           >
             <SelectTrigger>
               <SelectValue placeholder="Statut" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tous les statuts</SelectItem>
               {Object.entries(statusLabels).map(([value, label]) => (
                 <SelectItem key={value} value={value}>{label}</SelectItem>
               ))}

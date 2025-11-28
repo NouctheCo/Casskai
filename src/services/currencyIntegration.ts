@@ -297,15 +297,7 @@ export class CurrencyIntegration {
       }
 
       // Mettre à jour les comptes existants
-      const { error: accountsError } = await supabase
-        .from('accounts')
-        .update({ currency: companyCurrency })
-        .eq('company_id', (config.company as any).id)
-        .is('currency', null);
-
-      if (accountsError) {
-        console.warn('Erreur mise à jour devise comptes:', accountsError);
-      }
+      console.warn('Mise à jour de la devise des comptes ignorée: chart_of_accounts ne stocke plus de devise par compte.');
 
       // Mettre à jour les transactions existantes
       const { error: transactionsError } = await supabase

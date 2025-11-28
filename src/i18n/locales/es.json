@@ -1,686 +1,3295 @@
 {
   "translation": {
-    "light": "Claro",
-    "dark": "Oscuro", 
-    "system": "Sistema"
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
   },
   "common": {
-    "loading": "Cargando...",
-    "error": "Error",
     "success": "Éxito",
-    "dashboard": "Panel de control",
-    "settings": "Configuración",
-    "logout": "Cerrar sesión",
-    "welcome": "Bienvenido",
+    "error": "Error",
     "save": "Guardar",
     "cancel": "Cancelar",
     "delete": "Eliminar",
-    "edit": "Editar",
+    "edit": "Modificar",
     "create": "Crear",
-    "actions": "Acciones",
+    "actions": "Actions",
     "view": "Ver",
-    "forecasts": "Previsiones",
-    "guest": "Invitado",
+    "dashboard": "Panel de Control",
+    "forecasts": "Prévisions",
+    "guest": "Invité",
     "humanResources": "Recursos Humanos",
     "inventory": "Inventario",
     "invoicing": "Facturación",
-    "month": "Mes",
-    "noCompanySelectedTitle": "Ninguna Empresa Seleccionada",
+    "loading": "Cargando...",
+    "month": "Mois",
+    "noCompanySelectedTitle": "Aucune entreprise sélectionnée",
     "projects": "Proyectos",
+    "purchases": "Compras",
     "quarter": "Trimestre",
-    "salesCrm": "Ventas y CRM",
+    "salesCrm": "Ventes & CRM",
+    "settings": "Configuración",
     "thirdParties": "Terceros",
-    "configure": "Configurar",
-    "getStarted": "Comenzar",
-    "year": "Año",
-    "update": "Actualizar",
-    "saving": "Guardando...",
-    "back": "Atrás",
-    "underDevelopment": "En Desarrollo",
-    "underDevelopmentMessage": "Este módulo está actualmente en desarrollo. Estará disponible pronto.",
-    "comingSoon": "Próximamente",
-    "newFeatures": "Nuevas Funcionalidades",
-    "stayTuned": "Mantente Atento",
-    "stayTunedMessage": "Estamos trabajando duro para traerte esta funcionalidad. Gracias por tu paciencia.",
-    "backToDashboard": "Volver al Panel",
-    "close": "Cerrar",
+    "configure": "Configurer",
+    "getStarted": "Commencer",
+    "year": "Année",
+    "update": "Mettre à jour",
+    "saving": "Enregistrement...",
+    "back": "Retour",
+    "underDevelopment": "En cours de développement",
+    "underDevelopmentMessage": "Ce module est actuellement en cours de développement. Il sera bientôt disponible.",
+    "comingSoon": "Bientôt disponible",
+    "newFeatures": "Nouvelles fonctionnalités",
+    "stayTuned": "Restez à l'écoute",
+    "stayTunedMessage": "Nous travaillons dur pour vous apporter cette fonctionnalité. Merci de su patience.",
+    "backToDashboard": "Retour au tableau de bord",
+    "exporting": "Exportando...",
     "search": "Buscar",
-    "all": "Todos",
-    "email": "Correo electrónico",
-    "submit": "Enviar",
-    "visible": "Visible",
-    "users": "Usuarios",
-    "clients": "Clientes",
-    "storage": "Almacenamiento",
-    "warning": "Advertencia",
-    "noCompanySelected": "Ninguna Empresa Seleccionada",
-    "confirmDeleteAll": "Confirmar Eliminar Todo",
-    "deleteAllEntriesConfirmation": "¿Está seguro de que desea eliminar todos los asientos?",
-    "deleteAllEntriesWarning": "Esta acción no se puede deshacer y eliminará permanentemente todos los asientos.",
-    "balanceError": "Error de Balance",
-    "canceled": "Cancelado",
-    "input": "Entrada",
-    "newJournal": "Nuevo Diario",
-    "entry_date": "Fecha del Asiento",
-    "journal_id": "ID del Diario",
-    "reference_number": "Número de Referencia",
-    "backupNow": "Respaldar Ahora",
-    "goHome": "Ir al Inicio",
-    "pageNotFound": "Página No Encontrada",
-    "quickActions": "Acciones Rápidas",
-    "quickActionsDesc": "Acceso a funciones utilizadas frecuentemente",
-    "settingsDescription": "Gestionar las preferencias de la aplicación",
-    "themeDescription": "Elige tu tema preferido",
-    "languageDescription": "Selecciona tu idioma",
-    "userProfileDesc": "Gestionar información del perfil",
-    "companySettingsDesc": "Configurar ajustes de la empresa",
-    "notificationsDesc": "Gestionar preferencias de notificaciones",
-    "configureButton": "Configurar",
-    "noPermissionManageRolesOrUsers": "No tiene permisos para gestionar roles o usuarios",
-    "france": "Francia"
+    "beta": "Beta",
+    "inDevelopment": "En Desarrollo"
+  },
+  "hr": {
+    "title": "Recursos Humanos",
+    "description": "Gestione sus empleados, vacaciones, gastos y formación",
+    "employees": {
+      "title": "Empleados",
+      "add": "Añadir empleado",
+      "edit": "Editar empleado",
+      "delete": "Eliminar empleado",
+      "noEmployees": "Sin empleados",
+      "noEmployeesDescription": "Añada su primer empleado para comenzar",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Email",
+      "phone": "Teléfono",
+      "position": "Puesto",
+      "department": "Departamento",
+      "hireDate": "Fecha de Contratación",
+      "endDate": "Fecha de Fin",
+      "contractType": "Tipo de Contrato",
+      "manager": "Supervisor",
+      "salary": "Salario",
+      "salaryType": "Tipo de Salario",
+      "status": "Estado",
+      "employeeNumber": "Número de Empleado",
+      "birthDate": "Fecha de Nacimiento",
+      "leaveBalance": "Saldo de Vacaciones",
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "onLeave": "De Vacaciones",
+      "terminated": "Terminado"
+    },
+    "contractTypes": {
+      "cdi": "Indefinido",
+      "cdd": "Temporal",
+      "intern": "Prácticas",
+      "freelance": "Autónomo",
+      "apprentice": "Aprendiz"
+    },
+    "salaryTypes": {
+      "hourly": "Por Hora",
+      "monthly": "Mensual",
+      "annual": "Anual"
+    },
+    "departments": {
+      "direction": "Dirección",
+      "hr": "Recursos Humanos",
+      "finance": "Finanzas",
+      "sales": "Ventas",
+      "marketing": "Marketing",
+      "it": "IT",
+      "production": "Producción",
+      "logistics": "Logística",
+      "customerService": "Servicio al Cliente"
+    },
+    "training": {
+      "title": "Formación",
+      "add": "Nueva formación",
+      "edit": "Editar formación",
+      "delete": "Eliminar formación",
+      "noTrainings": "Sin formación",
+      "noTrainingsDescription": "Cree su primer catálogo de formación",
+      "name": "Nombre de la Formación",
+      "description": "Descripción",
+      "category": "Categoría",
+      "duration": "Duración (horas)",
+      "type": "Tipo",
+      "provider": "Proveedor de Formación",
+      "cost": "Coste",
+      "isActive": "Activo",
+      "sessions": {
+        "title": "Sesiones",
+        "add": "Nueva sesión",
+        "edit": "Editar sesión",
+        "delete": "Eliminar sesión",
+        "noSessions": "Sin sesiones",
+        "startDate": "Fecha de Inicio",
+        "endDate": "Fecha de Fin",
+        "location": "Ubicación",
+        "maxParticipants": "Máximo de Participantes",
+        "trainer": "Formador",
+        "trainerEmail": "Email del Formador",
+        "status": "Estado",
+        "notes": "Notas",
+        "planned": "Planificada",
+        "inProgress": "En Curso",
+        "completed": "Completada",
+        "cancelled": "Cancelada"
+      },
+      "enrollments": {
+        "title": "Inscripciones",
+        "add": "Inscribir empleado",
+        "status": "Estado",
+        "completionDate": "Fecha de Finalización",
+        "score": "Puntuación",
+        "feedback": "Comentario",
+        "enrolled": "Inscrito",
+        "attended": "Asistió",
+        "completed": "Completado",
+        "noShow": "No Asistió",
+        "cancelled": "Cancelado"
+      },
+      "types": {
+        "internal": "Interna",
+        "external": "Externa",
+        "online": "En Línea",
+        "certification": "Certificación"
+      }
+    },
+    "certifications": {
+      "title": "Certificaciones",
+      "add": "Nueva certificación",
+      "edit": "Editar certificación",
+      "delete": "Eliminar certificación",
+      "noCertifications": "Sin certificaciones",
+      "name": "Nombre de la Certificación",
+      "organization": "Organización Emisora",
+      "issueDate": "Fecha de Emisión",
+      "expiryDate": "Fecha de Expiración",
+      "credentialId": "ID de Credencial",
+      "credentialUrl": "URL de Credencial"
+    },
+    "leave": {
+      "title": "Vacaciones",
+      "add": "Nueva solicitud",
+      "edit": "Editar solicitud",
+      "delete": "Eliminar solicitud",
+      "approve": "Aprobar",
+      "reject": "Rechazar",
+      "noLeaves": "Sin solicitudes de vacaciones",
+      "noLeavesDescription": "Las solicitudes de vacaciones aparecerán aquí",
+      "type": "Tipo de Vacaciones",
+      "startDate": "Fecha de Inicio",
+      "endDate": "Fecha de Fin",
+      "days": "Días",
+      "reason": "Motivo",
+      "status": "Estado",
+      "approvedBy": "Aprobado Por",
+      "approvedAt": "Aprobado El",
+      "rejectionReason": "Motivo del Rechazo",
+      "pending": "Pendiente",
+      "approved": "Aprobado",
+      "rejected": "Rechazado",
+      "cancelled": "Cancelado",
+      "types": {
+        "paid": "Vacaciones Pagadas",
+        "unpaid": "Sin Sueldo",
+        "sick": "Baja por Enfermedad",
+        "maternity": "Maternidad",
+        "paternity": "Paternidad",
+        "family": "Evento Familiar",
+        "other": "Otro"
+      }
+    },
+    "expense": {
+      "title": "Gastos",
+      "add": "Nuevo informe de gastos",
+      "edit": "Editar informe",
+      "delete": "Eliminar informe",
+      "approve": "Aprobar",
+      "reject": "Rechazar",
+      "reimburse": "Reembolsar",
+      "noExpenses": "Sin informes de gastos",
+      "noExpensesDescription": "Los informes de gastos aparecerán aquí",
+      "category": "Categoría",
+      "amount": "Monto",
+      "currency": "Moneda",
+      "date": "Fecha",
+      "description": "Descripción",
+      "receipt": "Recibo",
+      "status": "Estado",
+      "approvedBy": "Aprobado Por",
+      "approvedAt": "Aprobado El",
+      "reimbursedAt": "Reembolsado El",
+      "pending": "Pendiente",
+      "approved": "Aprobado",
+      "rejected": "Rechazado",
+      "reimbursed": "Reembolsado",
+      "categories": {
+        "travel": "Viaje",
+        "meals": "Comidas",
+        "accommodation": "Alojamiento",
+        "equipment": "Equipo",
+        "training": "Formación",
+        "other": "Otro"
+      }
+    },
+    "documents": {
+      "title": "Documentos",
+      "add": "Nuevo documento",
+      "upload": "Subir documento",
+      "download": "Descargar",
+      "delete": "Eliminar",
+      "noDocuments": "Sin documentos",
+      "name": "Nombre del Documento",
+      "category": "Categoría",
+      "fileType": "Tipo de Archivo",
+      "fileSize": "Tamaño",
+      "uploadedBy": "Subido Por",
+      "uploadedAt": "Subido El",
+      "categories": {
+        "contract": "Contrato",
+        "payslip": "Nómina",
+        "certificate": "Certificado",
+        "other": "Otro"
+      }
+    },
+    "analytics": {
+      "title": "Análisis de RH",
+      "totalEmployees": "Empleados Totales",
+      "activeEmployees": "Empleados Activos",
+      "newHires": "Nuevas Contrataciones",
+      "thisMonth": "Este Mes",
+      "pendingLeaves": "Vacaciones Pendientes",
+      "approvedLeaves": "Vacaciones Aprobadas",
+      "pendingExpenses": "Gastos Pendientes",
+      "totalExpenseAmount": "Monto Total de Gastos"
+    }
+  },
+  "landing": {
+    "nav": {
+      "features": "Fonctionnalités",
+      "pricing": "Tarifs",
+      "testimonials": "Témoignages",
+      "contact": "Contact",
+      "login": "Connexion",
+      "signup": "Commencer"
+    },
+    "hero": {
+      "badge": "🚀 Solution Beta - Gestion d'entreprise moderne",
+      "title": "Gérez su entreprise",
+      "subtitle": "en toute simplicité",
+      "description": "CassKai simplifie la gestion d'entreprise avec une suite complète : comptabilité, facturation, CRM, projets, RH et bien plus. Tout en un, simple et puissant.",
+      "cta": {
+        "start": "Essai gratuit 30 jours",
+        "demo": "Ver la démo",
+        "beta": "Devenir beta testeur"
+      },
+      "stats": {
+        "companies": "Entreprises",
+        "uptime": "Disponibilité",
+        "support": "Soporte",
+        "rating": "Satisfaction"
+      }
+    },
+    "features": {
+      "badge": "Suite complète",
+      "title": "Tout ce dont vous avez besoin",
+      "subtitle": "dans une seule application",
+      "description": "CassKai réunit tous les outils essentiels à la gestion de su entreprise dans une interface moderne et intuitive.",
+      "accounting": {
+        "title": "Contabilidad & Finances",
+        "description": "Gestion complète de su comptabilité avec asientos automatisées, plan comptable personnalisable et rapports financiers en temps réel."
+      },
+      "invoicing": {
+        "title": "Facturación & CRM",
+        "description": "Créez et envoyez sus facturas en quelques clics. Gérez sus clients, suivez sus ventes et automatisez sus relances."
+      },
+      "analytics": {
+        "title": "Analyses & Informes",
+        "description": "Tableaux de bord interactifs, analyses prédictives et rapports personnalisables pour piloter su entreprise en toute connaissance."
+      },
+      "hr": {
+        "title": "Recursos Humanos",
+        "description": "Gestion complète de sus employés : paie, congés, absences, formations et déclarations sociales simplifiées.",
+        "badge": "Beta - En développement actif"
+      },
+      "projects": {
+        "title": "Gestion de Proyectos",
+        "description": "Planifiez, suivez et livrez sus projets à temps. Gestion d'equipos, budgets et échéances dans une interface intuitive."
+      },
+      "banking": {
+        "title": "Gestion Bancaire",
+        "description": "Connectez sus cuentas bancaires, automatisez les rapprochements et suivez su trésorerie en temps réel."
+      },
+      "security": {
+        "title": "Sécurité maximale",
+        "description": "Données chiffrées, sauvegardes automatiques et conformité RGPD."
+      },
+      "access": {
+        "title": "Accès partout",
+        "description": "Application web responsive accessible depuis tous sus appareils."
+      },
+      "automation": {
+        "title": "Automatisation",
+        "description": "Workflows intelligents qui vous font gagner du temps au quotidien."
+      }
+    },
+    "pricing": {
+      "badge": "Tarifs transparents",
+      "title": "Choisissez su plan",
+      "subtitle": "et démarrez aujourd'hui",
+      "description": "Tous nos plans incluent un essai gratuit de 30 jours, sans engagement et sans carte bancaire.",
+      "period": "/mois",
+      "period.annual": "/an",
+      "monthly": "Mensuel",
+      "annual": "Annuel",
+      "popular": "Plus populaire",
+      "cta": "Commencer l'essai gratuit",
+      "selectCountry": "Sélectionnez su pays",
+      "pricesIn": "Prix affichés en",
+      "starter": {
+        "name": "Starter",
+        "description": "Parfait pour débuter",
+        "features": {
+          "invoicing": "Facturación illimitée",
+          "clients": "Jusqu'à 100 clients",
+          "accounting": "Contabilidad de base",
+          "reports": "10 rapports standards",
+          "support": "Soporte email",
+          "storage": "5 GB de stockage"
+        }
+      },
+      "professional": {
+        "name": "Professionnel",
+        "description": "Pour les entreprises en croissance",
+        "features": {
+          "everything": "Tout du plan Starter",
+          "clients": "Clientes illimités",
+          "advanced": "Contabilidad avancée",
+          "crm": "CRM complet",
+          "projects": "Gestion de projets",
+          "hr": "RH de base",
+          "reports": "Informes illimités",
+          "api": "API Access",
+          "storage": "50 GB de stockage",
+          "support": "Soporte prioritaire"
+        }
+      },
+      "enterprise": {
+        "name": "Entreprise",
+        "description": "Solution complète sur mesure",
+        "features": {
+          "everything": "Tout du plan Professionnel",
+          "users": "Utilisateurs illimités",
+          "hr_advanced": "RH avancées",
+          "banking": "Import des fichiers bancaires",
+          "forecasting": "Prévisions financières",
+          "audit": "Piste d'audit complète",
+          "integrations": "Intégrations personnalisées",
+          "storage": "Stockage illimité",
+          "support": "Soporte dédié 24/7",
+          "onboarding": "Formation incluse"
+        }
+      },
+      "guarantee": {
+        "security": {
+          "title": "Sécurité garantie",
+          "description": "Vos datos sont chiffrées et sauvegardées quotidiennement"
+        },
+        "trial": {
+          "title": "30 jours gratuits",
+          "description": "Testez toutes les fonctionnalités sans engagement"
+        },
+        "support": {
+          "title": "Soporte expert",
+          "description": "Notre equipo vous accompagne dans su réussite"
+        }
+      }
+    },
+    "testimonials": {
+      "badge": "Premiers utilisateurs",
+      "title": "Premiers utilisateurs",
+      "subtitle": "et beta-testeurs",
+      "description": "Retours honnêtes de nos primers utilisateurs et des professionnels qui testent CassKai.",
+      "marie": {
+        "content": "CassKai a révolutionné notre gestion financière. L'interface est intuitive et nous fait gagner un temps précieux chaque jour."
+      },
+      "pierre": {
+        "content": "Excellent outil pour mes clients PME. Les rapports automatisés et la conformité fiscale sont parfaits."
+      },
+      "sophie": {
+        "content": "La gestion multi-entités et les tableaux de bord nous donnent une vision claire de nos performances."
+      },
+      "alex": {
+        "content": "En phase de test depuis 3 mois. L'import des relevés bancaires me fait gagner 2h par semaine. Interface claire, j'attends les prochaines fonctionnalités !"
+      },
+      "fatou": {
+        "content": "Parfait pour mes clients PME au Sénégal. Le support du SYSCOHADA était indispensable. Facile à expliquer aux entrepreneurs."
+      },
+      "thomas": {
+        "content": "J'ai testé la v1.0 pendant 2 mois. Quelques bugs mais l'equipo est réactive. Le module projets sera top quand il sera fini."
+      }
+    },
+    "roi": {
+      "badge": "Retour sur investissement",
+      "title": "Pourquoi choisir CassKai ?",
+      "subtitle": "Le ROI est immédiat",
+      "description": "Calculé sur la base de nos utilisateurs actuels, découvrez les économies réelles que vous pouvez réaliser.",
+      "accounting": {
+        "title": "Économies comptabilité",
+        "description": "vs expert-comptable traditionnel"
+      },
+      "time": {
+        "title": "Temps gagné",
+        "description": "sur les tâches administratives"
+      },
+      "productivity": {
+        "title": "Productivité",
+        "description": "amélioration globale"
+      }
+    },
+    "contact": {
+      "badge": "Nous contacter",
+      "title": "Une question ?",
+      "subtitle": "Nous sommes là pour vous",
+      "description": "Notre equipo d'experts est disponible pour répondre à toutes sus questions et vous accompagner dans su réussite.",
+      "email": {
+        "title": "Correo",
+        "description": "Réponse sous 24h"
+      },
+      "phone": {
+        "title": "Teléfono",
+        "description": "Lun-Ven 9h-18h"
+      },
+      "chat": {
+        "title": "Chat en direct",
+        "content": "Soporte instantané",
+        "description": "Disponible 24/7"
+      }
+    },
+    "coverage": {
+      "title": "Una solución adaptada a su país",
+      "subtitle": "CassKai se adapta automáticamente a sus estándares contables locales. Más de 30 países soportados.",
+      "count": "33 países soportados • 4 estándares contables • Todas las monedas"
+    },
+    "footer": {
+      "description": "La solution complète de gestion d'entreprise pour les PME et indépendants.",
+      "coverage": "Disponible en Francia, Bélgica, Luxemburgo y en 30 países africanos",
+      "copyright": "Tous droits réservés.",
+      "ssl": "SSL Sécurisé",
+      "gdpr_compliant": "Conforme RGPD",
+      "company": {
+        "title": "Entreprise",
+        "capitalSocial": "Capital social: 1 500,00 €",
+        "tva": "TVA: FR85909672685",
+        "rcs": "RCS: 909 672 685 R.C.S. Evry",
+        "nafCode": "Code NAF: 70.22Z",
+        "activity": "Activité: Conseil de gestion"
+      },
+      "compliance": {
+        "title": "Conformité",
+        "ssl": "SSL/TLS Sécurisé",
+        "gdpr": "Conforme RGPD",
+        "iso": "ISO 27001"
+      },
+      "convention": {
+        "title": "Convention",
+        "description1": "Bureaux d'études techniques",
+        "description2": "et sociétés de conseils",
+        "idcc": "IDCC 1486"
+      },
+      "legalNotice": "Inscrit au RCS d'Evry le 27/01/2022 - Domaine d'activité: Conseil de gestion",
+      "version": "Version 2.0",
+      "product": {
+        "title": "Produit",
+        "features": "Fonctionnalités",
+        "pricing": "Tarifs",
+        "security": "Sécurité",
+        "integrations": "Intégrations"
+      },
+      "support": {
+        "title": "Soporte",
+        "help": "Centre d'aide",
+        "documentation": "Documentación",
+        "api": "API",
+        "status": "Statut"
+      },
+      "legal": {
+        "title": "Légal",
+        "privacy": "Confidentialité",
+        "terms": "Conditions",
+        "cookies": "Cookies",
+        "gdpr": "RGPD"
+      }
+    }
   },
   "sidebar": {
-    "dashboard": "Panel de control",
+    "dashboard": "Panel de Control",
     "accounting": "Contabilidad",
+    "accountingImport": "Import/Export Comptable",
     "banking": "Bancos",
     "invoicing": "Facturación",
     "purchases": "Compras",
-    "sales": "Ventas y CRM", 
+    "sales": "Ventes & CRM",
     "humanResources": "Recursos Humanos",
     "projects": "Proyectos",
     "inventory": "Inventario",
-    "reports": "Informes Financieros",
-    "forecasts": "Previsiones Financieras",
+    "reports": "Informes financiers",
+    "forecasts": "Prévisions financières",
     "thirdParties": "Terceros",
-    "tax": "Impuestos",
-    "contracts": "Contratos y RFA",
-    "security": "Seguridad y Privacidad",
+    "tax": "Taxes",
+    "contracts": "Contrats & RFA",
+    "security": "Sécurité & Confidentialité",
     "settings": "Configuración"
   },
   "forecasts": {
-    "title": "Previsiones Financieras",
-    "description": "Gestione y analice sus previsiones presupuestarias y proyecciones financieras",
-    "dashboard": {
-      "title": "Panel de Control",
-      "totalForecasts": "Total Previsiones",
-      "activeScenarios": "Escenarios Activos",
-      "avgAccuracy": "Precisión Media",
-      "nextReview": "Próxima Revisión",
+    "title": "Prévisions Financières",
+    "description": "Gérez et analysez sus prévisions budgétaires et projections financières",
+    "forecastsDashboard": {
+      "title": "Tableau de Bord",
+      "totalForecasts": "Total Prévisions",
+      "activeScenarios": "Scénarios Activos",
+      "avgAccuracy": "Précision Moyenne",
+      "nextReview": "Prochaine Révision",
       "trends": {
-        "revenue": "Ingresos",
+        "revenue": "Revenus",
         "expenses": "Gastos",
-        "cashFlow": "Flujo de Caja",
-        "profitability": "Rentabilidad"
+        "cashFlow": "Flux de Trésorerie",
+        "profitability": "Rentabilité"
       },
-      "recentForecasts": "Previsiones Recientes",
-      "upcomingReviews": "Revisiones Programadas"
+      "recentForecasts": "Prévisions Récentes",
+      "upcomingReviews": "Révisions Programmées"
     },
     "scenarios": {
-      "optimistic": "Optimista",
-      "realistic": "Realista",
-      "pessimistic": "Pesimista",
-      "custom": "Personalizado",
-      "growthRate": "Tasa de Crecimiento",
-      "marketConditions": "Condiciones del Mercado",
+      "optimistic": "Optimiste",
+      "realistic": "Réaliste",
+      "pessimistic": "Pessimiste",
+      "custom": "Personnalisé",
+      "growthRate": "Taux de croissance",
+      "marketConditions": "Conditions de marché",
       "favorable": "Favorable",
-      "stable": "Estable",
-      "unfavorable": "Desfavorable"
+      "stable": "Stable",
+      "unfavorable": "Défavorable"
     },
     "status": {
       "draft": "Borrador",
-      "review": "En Revisión",
-      "approved": "Aprobado",
-      "published": "Publicado"
+      "review": "En révision",
+      "approved": "Approuvé",
+      "published": "Publié"
     },
     "buttons": {
-      "newForecast": "Nueva Previsión",
+      "newForecast": "Nouvelle Prévision",
       "export": "Exportar",
-      "analyze": "Analizar",
-      "compare": "Comparar"
+      "analyze": "Analyser",
+      "compare": "Comparer"
     }
   },
   "thirdParties": {
-    "title": "Gestión de Terceros",
-    "description": "Gestione sus clientes, proveedores y socios comerciales",
-    "dashboard": {
-      "title": "Panel de Control",
-      "totalThirdParties": "Total Terceros",
-      "activeClients": "Clientes Activos",
-      "activeSuppliers": "Proveedores Activos",
-      "newThisMonth": "Nuevos Este Mes",
-      "totalReceivables": "Total Cuentas por Cobrar",
-      "totalPayables": "Total Cuentas por Pagar",
-      "overdueReceivables": "Cuentas por Cobrar Vencidas",
-      "overduePayables": "Cuentas por Pagar Vencidas",
-      "topClients": "Top Clientes por Facturación",
-      "topSuppliers": "Top Proveedores por Gasto"
+    "title": "Terceros",
+    "active": "Activo",
+    "address": "Dirección",
+    "balance": "Solde",
+    "city": "Ciudad",
+    "country": "País",
+    "createSuccess": "Terceros créé avec succès",
+    "createTitle": "Crear un tiers",
+    "defaultCurrency": "Moneda par défaut",
+    "deleteConfirmation": "Êtes-vous sûr de vouloir supprimer {name} ?",
+    "deleteError": "Error lors de la suppression du tiers",
+    "deleteSuccess": "Terceros supprimé avec succès",
+    "description": "Gérez sus clients et fournisseurs",
+    "editTitle": "Modificar un tiers",
+    "email": "Correo",
+    "errorLoading": "Error lors du chargement des tiers",
+    "filterStatus": "Filtrar par statut",
+    "formDescription": "Remplissez les informations du tiers",
+    "import": {
+      "errorTitle": "Error d'importation",
+      "processingDesc": "Traitement des datos en cours...",
+      "processingTitle": "Importation en cours",
+      "successDesc": "{count} tiers importés avec succès"
     },
-    "types": {
-      "client": "Cliente",
-      "supplier": "Proveedor",
-      "partner": "Socio",
-      "both": "Cliente/Proveedor"
+    "validation": {
+      "websiteInvalid": "Format de site web invalide",
+      "emailInvalid": "Format d'email invalide",
+      "nameRequired": "Le nom est requis"
     },
-    "categories": {
-      "individual": "Particular",
-      "company": "Empresa",
-      "government": "Administración Pública",
-      "nonprofit": "Sin Ánimo de Lucro"
+    "website": "Site web",
+    "contactName": "Contact principal",
+    "name": "Nombre",
+    "noResults": "Sin resultados trouvé",
+    "notes": "Notes",
+    "notesPlaceholder": "Notes ou commentaires sur ce tiers",
+    "pageSubtitle": "Gérez sus clients et fournisseurs",
+    "pageTitle": "Gestion des tiers",
+    "paymentTerms": "Conditions de paiement",
+    "paymentTermsPlaceholder": "Ex: 30 jours fin de mois",
+    "phone": "Teléfono",
+    "postalCode": "Código Postal",
+    "saveError": "Error lors de l'enregistrement du tiers",
+    "searchPlaceholder": "Buscar un {type}...",
+    "selectCompany": "Sélectionnez une entreprise",
+    "selectCompanyPrompt": "Veuillez sélectionner une entreprise",
+    "selectCompanyToViewClients": "Sélectionnez une entreprise pour voir les clients",
+    "selectCompanyToViewSuppliers": "Sélectionnez une entreprise pour voir les fournisseurs",
+    "selectCountry": "Sélectionner un pays",
+    "solvencyAnalysis": "Analyse de solvabilité",
+    "solvencyAnalysisComingSoonDetail": "L'analyse de solvabilité avec notation automatique sera bientôt disponible",
+    "solvencyAnalysisSubtitle": "Analysez la santé financière de sus tiers",
+    "status": "Statut",
+    "taxNumber": "Numéro fiscal",
+    "unpaidTracking": "Suivi des impayés",
+    "unpaidTrackingComingSoonDetail": "Le suivi automatique des impayés avec rappels sera bientôt disponible",
+    "unpaidTrackingSubtitle": "Suivez et gérez sus créances impayées",
+    "updateSuccess": "Terceros mis à jour avec succès"
+  },
+  "tax": "Taxes",
+  "contracts": {
+    "title": "Contrats & RFA",
+    "subtitle": "Gestion des contrats clients et calcul automatisé des remises de fin d'année",
+    "description": "Gérez sus contrats commerciaux et calculez automatiquement les remises de fin d'année",
+    "tabs": {
+      "dashboard": "Panel de Control",
+      "contracts": "Contrats",
+      "calculations": "Calculs RFA"
     },
-    "form": {
-      "generalInfo": "Información General",
-      "contactInfo": "Información de Contacto",
-      "financialInfo": "Información Financiera",
-      "documents": "Documentos",
-      "name": "Razón Social",
-      "type": "Tipo",
-      "category": "Categoría",
-      "taxNumber": "NIF/CIF",
-      "email": "Correo Electrónico",
-      "phone": "Teléfono",
-      "address": "Dirección",
-      "city": "Ciudad",
-      "postalCode": "Código Postal",
-      "country": "País",
-      "creditLimit": "Límite de Crédito",
-      "paymentTerms": "Condiciones de Pago",
-      "website": "Sitio Web",
-      "notes": "Notas"
-    },
-    "buttons": {
-      "newThirdParty": "Nuevo Tercero",
-      "import": "Importar",
-      "export": "Exportar",
-      "filter": "Filtrar"
+    "stats": {
+      "total_contracts": "Contrats totaux",
+      "active_contracts": "Contrats actifs",
+      "total_rfa_pending": "RFA en attente",
+      "total_rfa_paid": "RFA payées",
+      "average_rate": "Taux moyen",
+      "clients_with_contracts": "Clientes sous contrat"
     },
     "status": {
       "active": "Activo",
-      "inactive": "Inactivo",
-      "suspended": "Suspendido"
-    }
-  },
-  "accounting": {
-    "title": "Contabilidad",
-    "description": "Gestione su plan contable, asientos contables y operaciones contables",
-    "tabs": {
-      "chartOfAccounts": "Plan Contable",
-      "journalEntries": "Asientos Contables",
-      "journals": "Diarios",
-      "fecImport": "Importación FEC",
-      "reports": "Informes"
+      "expired": "Expiré",
+      "archived": "Archivé",
+      "draft": "Borrador"
     },
-    "chartOfAccounts": {
-      "title": "Plan Contable",
-      "description": "Gestione su plan contable",
-      "newAccount": "Nueva Cuenta",
-      "accountNumber": "Número de Cuenta",
-      "accountName": "Nombre de Cuenta",
-      "accountType": "Tipo de Cuenta",
-      "accountClass": "Clase de Cuenta",
-      "balance": "Saldo",
+    "type": {
+      "progressive": "Paliers progressifs",
+      "fixed_percent": "Pourcentage fixe",
+      "fixed_amount": "Importe fixe"
+    },
+    "rfa_status": {
+      "pending": "Pendiente",
+      "validated": "Validado",
+      "paid": "Payé",
+      "cancelled": "Annulé"
+    },
+    "alerts": {
+      "title": "Alertes importantes",
+      "tier_approaching": "Palier proche",
+      "contract_expiring": "Contrat expirant",
+      "rfa_threshold": "Seuil RFA",
+      "anomaly_detected": "Anomalie détectée"
+    },
+    "top_clients": "Top clients RFA",
+    "recent_calculations": "Calculs récents",
+    "rfa_calculations": "Calculs RFA",
+    "new_contract": "Nuevo contrat",
+    "search_placeholder": "Buscar un contrat ou client...",
+    "form": {
+      "create_title": "Crear un contrat",
+      "create_description": "Renseignez les détails du contrat et sélectionnez le client concerné.",
+      "general_info": "Informacións générales",
+      "client": "Client",
+      "name": "Nombre du contrat",
+      "type": "Type de remise",
+      "start_date": "Fecha de début",
+      "end_date": "Fecha de fin (optionnelle)",
       "currency": "Moneda",
-      "isActive": "Activa",
-      "actions": "Acciones",
-      "noAccountsFound": "No se encontraron cuentas",
-      "createFirstAccount": "Cree su primera cuenta",
-      "searchPlaceholder": "Buscar cuentas...",
-      "importStandardChart": "Importar Plan Estándar"
+      "discount_config": "Configuration des remises",
+      "conditions": "Conditions particulières"
     },
-    "journalEntries": {
-      "title": "Asientos Contables",
-      "description": "Gestione sus asientos contables",
-      "newEntry": "Nuevo Asiento",
-      "entryDate": "Fecha del Asiento",
+    "calculator": {
+      "title": "Calculateur RFA",
+      "single": "Calcul simple",
+      "simulation": "Simulation scénarios"
+    },
+    "export": {
+      "contracts": "Exportar les contrats",
+      "calculations": "Exportar les calculs RFA"
+    },
+    "buttons": {
+      "new_contract": "Nuevo contrat",
+      "new_calculation": "Nuevo calcul",
+      "simulate": "Simuler",
+      "export": "Exportar",
+      "calculate": "Calculer",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "edit": "Modificar",
+      "archive": "Archiver",
+      "view": "Ver"
+    },
+    "new": "Nuevo Contrat"
+  },
+  "reports": {
+    "financialReports": "Informes Financiers",
+    "generateAndAnalyze": "Générez et analysez sus rapports comptables",
+    "noCompanySelected": "Aucune entreprise sélectionnée",
+    "selectCompanyPrompt": "Sélectionnez une entreprise pour générer des rapports",
+    "dataLoadError": "Error lors du chargement des datos comptables",
+    "generationError": "Error lors de la génération du rapport",
+    "exportStarted": "Export démarré",
+    "exportMessage": "Export {format} en cours de préparation...",
+    "generateReport": "Générer le rapport",
+    "exportPdf": "Export PDF",
+    "exportExcel": "Export Excel",
+    "close": "Fermer",
+    "periodLabel": "Période",
+    "comingSoon": "Bientôt disponible",
+    "requestDemo": "Demander une démo",
+    "recalculateBalances": "Recalculer les soldes",
+    "balancesRecalculated": "Soldes des cuentas recalculés avec succès",
+    "balancesRecalculationError": "Error lors du recalcul des soldes des cuentas",
+    "currentYear": "Année en cours",
+    "lastYear": "Année précédente",
+    "currentMonth": "Mois en cours",
+    "lastMonth": "Mois précédent",
+    "balanceSheet": "Bilan",
+    "balanceSheetDesc": "Situation patrimoniale à une date donnée",
+    "incomeStatement": "Compte de résultat",
+    "incomeStatementDesc": "Performance financière sur une période",
+    "cashFlowStatement": "Flux de trésorerie",
+    "cashFlowDesc": "Mouvements de trésorerie",
+    "trialBalance": "Balance générale",
+    "trialBalanceDesc": "Soldes de tous les cuentas",
+    "assets": "ACTIF",
+    "liabilities": "PASSIF",
+    "revenues": "PRODUITS",
+    "expenses": "CHARGES",
+    "fixedAssets": "Immobilisations",
+    "inventory": "Stocks",
+    "receivables": "Créances",
+    "payables": "Dettes",
+    "cash": "Trésorerie",
+    "salesRevenue": "Facturación",
+    "otherRevenues": "Autres produits",
+    "financialRevenues": "Produits financiers",
+    "purchases": "Compras",
+    "externalExpenses": "Services extérieurs",
+    "personnelExpenses": "Charges de personnel",
+    "otherExpenses": "Autres charges",
+    "subtotal": "Sous-total",
+    "total": "TOTAL",
+    "totalAssets": "TOTAL ACTIF",
+    "totalLiabilities": "TOTAL PASSIF",
+    "totalRevenues": "TOTAL PRODUITS",
+    "totalExpenses": "TOTAL CHARGES",
+    "netResult": "RÉSULTAT NET",
+    "balanced": "Bilan équilibré",
+    "unbalanced": "Bilan déséquilibré",
+    "accountNumber": "N° Compte",
+    "accountName": "Libellé",
+    "debit": "Débit",
+    "credit": "Crédit",
+    "balance": "Solde",
+    "showingFirstAccounts": "Affichage des 10 primers cuentas sur {total}",
+    "customAnalysis": "Analyses Personnalisées",
+    "customAnalysisDesc": "Créez des analyses sur mesure selon sus besoins"
+  },
+  "crm": {
+    "crmDashboard": {
+      "title": "Panel de Control CRM",
+      "stats": {
+        "totalClients": "Total clients",
+        "activeOpportunities": "Opportunités actives",
+        "pipelineValue": "Valeur du pipeline",
+        "conversionRate": "Taux de conversion"
+      },
+      "pipeline": {
+        "title": "Pipeline des ventes",
+        "deals": "affaires",
+        "avgDeal": "Affaire moy."
+      },
+      "revenue": {
+        "title": "Évolution du chiffre d'affaires",
+        "total": "Total ce mois"
+      },
+      "recentOpportunities": {
+        "title": "Opportunités récentes"
+      },
+      "recentActions": {
+        "title": "Actions récentes"
+      },
+      "topClients": {
+        "title": "Meilleurs clients"
+      },
+      "quickActions": "Actions rapides",
+      "overdue": "en retard",
+      "pending": "en attente",
+      "actions": {
+        "newClient": "Nuevo client",
+        "newOpportunity": "Nouvelle opportunité",
+        "newAction": "Nouvelle action"
+      }
+    },
+    "clientsManagement": {
+      "title": "Gestion des clients",
+      "clients": "Clientes",
+      "contacts": "Contacts",
+      "addClient": "Añadir un client",
+      "addContact": "Añadir un contact"
+    },
+    "clientsTable": {
+      "company": "Entreprise",
+      "industry": "Secteur",
+      "size": "Taille",
+      "status": "Statut",
+      "location": "Localisation",
+      "contacts": "Contacts",
+      "revenue": "CA"
+    },
+    "contactsTable": {
+      "name": "Nombre",
+      "company": "Entreprise",
+      "position": "Poste",
+      "email": "Correo",
+      "phone": "Teléfono",
+      "created": "Créé le"
+    },
+    "clientForm": {
+      "createTitle": "Crear un nouveau client",
+      "editTitle": "Modificar le client",
+      "companyName": "Nombre de l'entreprise",
+      "industry": "Secteur d'activité",
+      "size": "Taille",
+      "status": "Statut",
+      "city": "Ciudad",
+      "website": "Site web",
+      "address": "Dirección",
+      "notes": "Notes"
+    },
+    "contactForm": {
+      "createTitle": "Crear un nouveau contact",
+      "firstName": "Nombre",
+      "lastName": "Nombre",
+      "email": "Correo",
+      "phone": "Teléfono",
+      "position": "Poste",
+      "client": "Client",
+      "selectClient": "Sélectionner un client"
+    },
+    "opportunities": {
+      "title": "Gestión de Oportunidades",
+      "description": "Suivez sus opportunités commerciales",
+      "create": "Crear une opportunité",
+      "add": "Añadir",
+      "nextAction": "Prochaine action",
+      "subtitle": "oportunidades",
+      "count": "{count} oportunidades",
+      "pipelineValue": "Pipeline: {value}",
+      "search": "Buscar una oportunidad...",
+      "addOpportunity": "Nueva oportunidad",
+      "editOpportunity": "Editar oportunidad",
+      "deleteOpportunity": "Eliminar oportunidad",
+      "noOpportunities": "Sin oportunidades",
+      "noOpportunitiesDesc": "Cree su primera oportunidad de venta",
+      "openPipeline": "Abrir Pipeline",
+      "fields": {
+        "name": "Nombre de la oportunidad",
+        "client": "Cliente",
+        "value": "Valor",
+        "probability": "Probabilidad",
+        "stage": "Etapa",
+        "expectedCloseDate": "Fecha de cierre prevista",
+        "assignedTo": "Asignado a",
+        "source": "Origen",
+        "notes": "Notas"
+      },
+      "stages": {
+        "lead": "Lead",
+        "prospection": "Prospección",
+        "qualified": "Calificado",
+        "qualification": "Calificación",
+        "proposal": "Propuesta",
+        "negotiation": "Negociación",
+        "closing": "Cierre",
+        "won": "Ganada",
+        "lost": "Perdida"
+      },
+      "sources": {
+        "website": "Sitio web",
+        "referral": "Referencia",
+        "linkedin": "LinkedIn",
+        "coldCall": "Llamada en frío",
+        "event": "Evento",
+        "other": "Otro"
+      }
+    },
+    "opportunityForm": {
+      "createTitle": "Crear une nouvelle opportunité",
+      "editTitle": "Modificar l'opportunité",
+      "title": "Titre",
+      "stage": "Paso",
+      "client": "Client",
+      "contact": "Contact",
+      "selectClient": "Sélectionner un client",
+      "selectContact": "Sélectionner un contact",
+      "value": "Valeur",
+      "probability": "Probabilité",
+      "expectedCloseDate": "Fecha de clôture prévue",
+      "priority": "Priorité",
+      "source": "Source",
+      "assignedTo": "Assigné à",
       "description": "Descripción",
-      "reference": "Referencia",
-      "journal": "Diario",
-      "totalDebit": "Total Debe",
-      "totalCredit": "Total Haber",
-      "status": "Estado",
-      "actions": "Acciones",
-      "noEntriesFound": "No se encontraron asientos",
-      "createFirstEntry": "Cree su primer asiento contable",
-      "searchPlaceholder": "Buscar asientos..."
+      "nextAction": "Prochaine action",
+      "nextActionDate": "Fecha de la prochaine action"
     },
-    "journals": {
-      "title": "Diarios",
-      "description": "Gestione sus diarios contables",
-      "newJournal": "Nuevo Diario",
-      "journalCode": "Código del Diario",
-      "journalName": "Nombre del Diario",
-      "journalType": "Tipo de Diario",
-      "description": "Descripción",
-      "isActive": "Activo",
-      "actions": "Acciones",
-      "noJournalsFound": "No se encontraron diarios",
-      "createFirstJournal": "Cree su primer diario"
-    }
-  },
-  "journal_entries": {
-    "account": "Cuenta",
-    "add_item": "Añadir Apunte",
-    "balanced": "Cuadrado",
-    "cancel": "Cancelar",
-    "create": "Crear",
-    "credit": "Haber",
-    "date": "Fecha",
-    "debit": "Debe",
-    "description": "Descripción",
-    "difference": "Diferencia",
-    "edit": "Editar",
-    "error_loading_accounts": "Error cargando cuentas",
-    "error_loading_journals": "Error cargando diarios",
-    "items": "Apuntes",
-    "journal": "Diario",
-    "network_error": "Error de red",
-    "new": "Nuevo",
-    "no_accounts_found": "No se encontraron cuentas",
-    "no_enterprise_selected": "Ninguna empresa seleccionada",
-    "no_journals_found": "No se encontraron diarios",
-    "reference": "Referencia",
-    "remove_item": "Quitar Apunte",
-    "retry": "Reintentar",
-    "supabase_not_configured": "Supabase no configurado",
-    "unbalanced": "Descuadrado",
-    "update": "Actualizar"
-  },
-  "accountTypes": {
-    "ASSET": "Activo",
-    "LIABILITY": "Pasivo",
-    "EQUITY": "Patrimonio Neto",
-    "REVENUE": "Ingresos",
-    "EXPENSE": "Gastos",
-    "COST_OF_GOODS_SOLD": "Coste de Mercancías Vendidas"
-  },
-  "accountClasses": {
-    "1": "Clase 1 - Cuentas de Financiación Básica",
-    "2": "Clase 2 - Cuentas del Activo No Corriente",
-    "3": "Clase 3 - Cuentas de Existencias",
-    "4": "Clase 4 - Cuentas de Acreedores y Deudores",
-    "5": "Clase 5 - Cuentas Financieras",
-    "6": "Clase 6 - Cuentas de Compras y Gastos",
-    "7": "Clase 7 - Cuentas de Ventas e Ingresos",
-    "8": "Clase 8 - Cuentas de Gastos Imputados",
-    "9": "Clase 9 - Cuentas de Ingresos Imputados"
-  },
-  "auth": {
-    "login": "Iniciar Sesión",
-    "signup": "Registrarse",
-    "email": "Correo Electrónico",
-    "password": "Contraseña",
-    "confirmPassword": "Confirmar Contraseña",
-    "firstName": "Nombre",
-    "lastName": "Apellidos",
-    "loginButton": "Iniciar Sesión",
-    "signupButton": "Crear Cuenta",
-    "forgotPassword": "¿Olvidó su contraseña?",
-    "noAccount": "¿No tiene una cuenta?",
-    "hasAccount": "¿Ya tiene una cuenta?",
-    "createAccount": "Crear Cuenta",
-    "goToLogin": "Iniciar Sesión",
-    "goToRegister": "Registrarse",
-    "emailRequired": "El correo electrónico es obligatorio",
-    "passwordRequired": "La contraseña es obligatoria",
-    "firstNameRequired": "El nombre es obligatorio",
-    "lastNameRequired": "Los apellidos son obligatorios",
-    "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
-    "emailInvalid": "Por favor introduzca un correo electrónico válido",
-    "passwordMismatch": "Las contraseñas no coinciden",
-    "loginError": "Correo electrónico o contraseña inválidos",
-    "signupError": "Error al crear la cuenta",
-    "emailPlaceholder": "Introduzca su correo electrónico",
-    "passwordPlaceholder": "Introduzca su contraseña",
-    "firstNamePlaceholder": "Introduzca su nombre",
-    "lastNamePlaceholder": "Introduzca sus apellidos",
-    "confirmPasswordPlaceholder": "Confirme su contraseña",
-    "creating": "Creando cuenta...",
-    "loggingIn": "Iniciando sesión...",
-    "checkYourEmail": "Revise Su Correo",
-    "emailSentTitle": "Correo de Confirmación Enviado",
-    "checkEmailAgain": "Revise su correo de nuevo",
-    "checkSpamFolder": "Revise su carpeta de spam",
-    "emailConfirmedTitle": "Correo Confirmado",
-    "emailConfirmedMessage": "Su correo electrónico ha sido confirmado exitosamente.",
-    "emailNotConfirmed": "Correo no confirmado",
-    "contactSupport": "Contactar Soporte",
-    "backToLogin": "Volver al Login",
-    "forgotPasswordTitle": "Restablecer Contraseña",
-    "forgotPasswordSubtitle": "Introduzca su correo para restablecer su contraseña",
-    "resetPasswordButton": "Enviar Enlace de Restablecimiento",
-    "resetLinkSent": "Enlace de restablecimiento enviado a su correo",
-    "confirmationEmailResent": "Correo de confirmación reenviado",
-    "emailAlreadyExists": "Ya existe una cuenta con este correo electrónico",
-    "invalidCredentials": "Correo electrónico o contraseña inválidos",
-    "fixErrors": "Por favor corrija los errores anteriores",
-    "hidePassword": "Ocultar contraseña",
-    "showPassword": "Mostrar contraseña",
-    "and": "y",
-    "termsOfService": "Términos del Servicio",
-    "privacyPolicy": "Política de Privacidad",
-    "bySigningUp": "Al registrarse, acepta nuestros",
-    "importantNote": "Nota Importante",
-    "emailNotConfirmedNote": "Por favor revise su correo y haga clic en el enlace de confirmación antes de iniciar sesión.",
-    "enterprise": "Empresarial",
-    "collaborative": "Colaborativo",
-    "allRightsReserved": "Todos los derechos reservados",
-    "firstNameTooShort": "El nombre debe tener al menos 2 caracteres",
-    "createAccountButton": "Crear Cuenta"
-  },
-  "formats": {
-    "date": {
-      "short": "DD/MM/YYYY",
-      "medium": "DD MMM YYYY",
-      "long": "DD [de] MMMM [de] YYYY",
-      "full": "dddd, DD [de] MMMM [de] YYYY"
-    },
-    "currency": {
-      "symbol": "€",
-      "code": "EUR",
-      "format": "#.##0,00 €",
-      "position": "after"
-    },
-    "number": {
-      "decimal": ",",
-      "thousand": ".",
-      "precision": 2
-    }
-  },
-  "errors": {
-    "required": "Este campo es obligatorio",
-    "invalid": "Valor inválido",
-    "minLength": "Debe tener al menos {min} caracteres",
-    "maxLength": "Debe tener como máximo {max} caracteres",
-    "email": "Por favor introduzca una dirección de correo válida",
-    "number": "Por favor introduzca un número válido",
-    "positive": "El valor debe ser positivo",
-    "networkError": "Error de red. Por favor inténtelo de nuevo.",
-    "serverError": "Error del servidor. Por favor inténtelo más tarde.",
-    "unauthorized": "Acceso no autorizado",
-    "forbidden": "Acceso prohibido",
-    "notFound": "Recurso no encontrado",
-    "validationError": "Error de validación"
-  },
-  "messages": {
-    "saveSuccess": "Guardado exitosamente",
-    "deleteSuccess": "Eliminado exitosamente",
-    "updateSuccess": "Actualizado exitosamente", 
-    "createSuccess": "Creado exitosamente",
-    "importSuccess": "Importado exitosamente",
-    "exportSuccess": "Exportado exitosamente",
-    "confirmDelete": "¿Está seguro de que desea eliminar este elemento?",
-    "confirmAction": "¿Está seguro de que desea realizar esta acción?",
-    "noData": "No hay datos disponibles",
-    "loadingData": "Cargando datos...",
-    "processingRequest": "Procesando solicitud...",
-    "operationCompleted": "Operación completada exitosamente"
-  },
-  "onboarding": {
-    "welcome": {
-      "title": "¡Bienvenido a CassKai!",
-      "subtitle": "Estamos emocionados de ayudarte a gestionar tu negocio. Configuremos juntos tu plataforma en unos simples pasos.",
-      "whatYouGet": "Lo que obtienes con CassKai",
-      "nextSteps": "Próximos pasos",
-      "startSetup": "Iniciar configuración",
-      "duration": "⏱️ Configuración estimada: 3-5 minutos"
-    },
-    "steps": {
-      "features": "Funcionalidades",
-      "featuresDesc": "Descubre nuestros módulos",
-      "preferences": "Preferencias", 
-      "preferencesDesc": "Personaliza tu experiencia",
-      "company": "Empresa",
-      "companyDesc": "Configura tu negocio"
-    },
-    "features": {
-      "title": "Elige tus funcionalidades",
-      "subtitle": "Selecciona los módulos que se adapten a tus necesidades. Siempre puedes cambiarlos más tarde."
-    },
-    "preferences": {
-      "title": "Configura tus preferencias",
-      "subtitle": "Personaliza tu experiencia CassKai según tus necesidades"
-    },
-    "company": {
-      "title": "Información de tu empresa",
-      "subtitle": "Introduce los detalles de tu negocio"
-    },
-    "complete": {
-      "welcomeTitle": "¡Bienvenido a CassKai!",
-      "welcomeSubtitle": "¡Tu plataforma está lista! Ahora puedes empezar a gestionar tu negocio con CassKai.",
-      "configuringTitle": "Configuración en progreso...",
-      "configuringSubtitle": "Estamos preparando tu espacio de trabajo personalizado..."
-    },
-    "completion": {
-      "title": "¡Configuración completada!",
-      "subtitle": "Tu instancia CassKai está ahora operativa",
-      "next_steps": "Próximos pasos",
-      "explore_dashboard": "Explorar panel",
-      "invite_team": "Invitar a tu equipo",
-      "import_data": "Importar tus datos"
-    }
-  },
-  "security": {
-    "title": "Seguridad y Privacidad",
-    "score": "Puntuación",
-    "generate_report": "Generar Informe",
-    "tabs": {
-      "security": "Seguridad",
-      "privacy": "Privacidad",
-      "gdpr": "RGPD",
-      "incidents": "Incidentes",
-      "compliance": "Cumplimiento"
-    },
-    "overview": {
-      "title": "Resumen de Seguridad",
-      "description": "Monitorea y configura tus ajustes de seguridad",
-      "security_score": "Puntuación de Seguridad",
-      "open_incidents": "Incidentes Abiertos",
-      "audit_logging": "Registro de Auditoría"
-    },
-    "authentication": {
-      "title": "Configuración de Autenticación",
-      "two_factor": {
-        "title": "Autenticación de Dos Factores",
-        "description": "Requerir 2FA para todas las cuentas de usuario"
+    "actions": {
+      "title": "Acciones Comerciales",
+      "description": "Gérez sus activités commerciales",
+      "create": "Crear une action",
+      "overdue": "En retard",
+      "stats": {
+        "total": "Total",
+        "completed": "Completadoes",
+        "planned": "Planifiées",
+        "overdue": "En retard"
       },
-      "password_policy": {
-        "title": "Política de Contraseñas",
-        "description": "Establecer requisitos de complejidad de contraseñas",
-        "min_length": "Longitud Mínima",
-        "require_uppercase": "Requerir Mayúsculas",
-        "require_numbers": "Requerir Números",
-        "require_symbols": "Requerir Símbolos"
-      },
-      "session_timeout": {
-        "title": "Tiempo de Espera de Sesión",
-        "description": "Duración de inactividad antes del cierre automático",
-        "minutes": "minutos"
-      }
-    },
-    "access_control": {
-      "title": "Control de Acceso",
-      "ip_whitelist": {
-        "title": "Lista Blanca de IP",
-        "description": "Restringir acceso a direcciones IP específicas"
-      },
-      "role_permissions": {
-        "title": "Permisos por Rol",
-        "description": "Gestionar permisos basados en roles"
-      }
-    },
-    "privacy": {
-      "title": "Configuración de Privacidad",
-      "data_retention": {
-        "title": "Retención de Datos",
-        "description": "Establecer período de retención de datos",
-        "days": "días"
-      },
-      "data_export": {
-        "title": "Exportación de Datos",
-        "description": "Permitir a usuarios exportar sus datos",
-        "export_button": "Exportar Mis Datos"
-      },
-      "cookies": {
-        "title": "Gestión de Cookies",
-        "essential": "Cookies Esenciales",
-        "analytics": "Cookies Analíticas",
-        "marketing": "Cookies de Marketing"
-      }
-    },
-    "gdpr": {
-      "title": "Cumplimiento RGPD",
-      "status": "Estado de Cumplimiento",
-      "compliant": "Conforme",
-      "non_compliant": "No Conforme",
-      "requests": {
-        "title": "Solicitudes RGPD",
-        "new_request": "Nueva Solicitud",
+      "subtitle": "acciones",
+      "count": "{count} acciones",
+      "search": "Buscar una acción...",
+      "addAction": "Nueva acción",
+      "editAction": "Editar acción",
+      "deleteAction": "Eliminar acción",
+      "noActions": "Sin acciones",
+      "noActionsDesc": "Planifique sus próximas actividades comerciales",
+      "openActions": "Abrir Acciones",
+      "fields": {
         "type": "Tipo",
+        "subject": "Asunto",
+        "client": "Cliente",
+        "opportunity": "Oportunidad",
+        "dueDate": "Fecha límite",
+        "dueTime": "Hora",
         "status": "Estado",
-        "date": "Fecha",
-        "action": "Acción",
-        "types": {
-          "access": "Acceso a Datos",
-          "portability": "Portabilidad de Datos",
-          "rectification": "Rectificación",
-          "erasure": "Borrado"
-        },
-        "statuses": {
-          "pending": "Pendiente",
-          "processing": "Procesando",
-          "completed": "Completado",
-          "rejected": "Rechazado"
-        }
+        "priority": "Prioridad",
+        "assignedTo": "Asignado a",
+        "notes": "Notas",
+        "result": "Resultado"
       },
-      "data_processing": {
-        "title": "Registro de Procesamiento de Datos",
-        "purpose": "Propósito",
-        "legal_basis": "Base Legal",
-        "categories": "Categorías de Datos"
-      }
-    },
-    "incidents": {
-      "title": "Incidentes de Seguridad",
-      "report_incident": "Reportar Incidente",
-      "severity": "Gravedad",
-      "status": "Estado",
-      "date": "Fecha",
-      "description": "Descripción",
-      "severities": {
+      "types": {
+        "call": "Llamada",
+        "email": "Email",
+        "meeting": "Reunión",
+        "task": "Tarea",
+        "followup": "Seguimiento",
+        "demo": "Demostración",
+        "proposal": "Enviar propuesta"
+      },
+      "statuses": {
+        "planned": "Planificada",
+        "inProgress": "En Progreso",
+        "completed": "Completada",
+        "cancelled": "Cancelada",
+        "overdue": "Vencida"
+      },
+      "priorities": {
         "low": "Baja",
         "medium": "Media",
         "high": "Alta",
-        "critical": "Crítica"
+        "urgent": "Urgente"
+      }
+    },
+    "actionsTable": {
+      "type": "Type",
+      "title": "Titre",
+      "client": "Client",
+      "contact": "Contact",
+      "status": "Statut",
+      "priority": "Priorité",
+      "dueDate": "Fecha d'échéance",
+      "assigned": "Assigné"
+    },
+    "actionForm": {
+      "createTitle": "Crear une nouvelle action",
+      "editTitle": "Modificar l'action",
+      "type": "Type",
+      "status": "Statut",
+      "title": "Titre",
+      "description": "Descripción",
+      "client": "Client",
+      "contact": "Contact",
+      "opportunity": "Opportunité",
+      "selectClient": "Sélectionner un client",
+      "selectContact": "Sélectionner un contact",
+      "selectOpportunity": "Sélectionner une opportunité",
+      "noClient": "Aucun client",
+      "noContact": "Aucun contact",
+      "noOpportunity": "Aucune opportunité",
+      "priority": "Priorité",
+      "dueDate": "Fecha d'échéance",
+      "assignedTo": "Assigné à",
+      "outcome": "Résultat"
+    },
+    "stages": {
+      "prospecting": "Prospection",
+      "qualification": "Qualification",
+      "proposal": "Proposition",
+      "negotiation": "Négociation",
+      "closing": "Finalisation",
+      "won": "Gagnée",
+      "lost": "Perdue"
+    },
+    "priority": {
+      "low": "Faible",
+      "medium": "Moyenne",
+      "high": "Élevée"
+    },
+    "clientStatus": {
+      "active": "Activo",
+      "prospect": "Prospect",
+      "inactive": "Inactivo",
+      "lost": "Perdu"
+    },
+    "clientSize": {
+      "small": "Petite",
+      "medium": "Moyenne",
+      "large": "Grande"
+    },
+    "actionTypes": {
+      "call": "Appel",
+      "email": "Correo",
+      "meeting": "Réunion",
+      "task": "Tâche",
+      "note": "Note",
+      "demo": "Démo",
+      "proposal": "Proposition"
+    },
+    "actionStatus": {
+      "planned": "Planifiée",
+      "completed": "Completadoe",
+      "cancelled": "Annulée"
+    },
+    "filters": {
+      "title": "Filtres",
+      "search": "Recherche",
+      "searchPlaceholder": "Buscar...",
+      "searchActions": "Buscar des actions...",
+      "status": "Statut",
+      "industry": "Secteur",
+      "size": "Taille",
+      "type": "Type",
+      "priority": "Priorité",
+      "dateFrom": "Fecha de début",
+      "dateTo": "Fecha de fin",
+      "clear": "Effacer les filtres",
+      "allStatuses": "Tous les statuts",
+      "allIndustries": "Tous les secteurs",
+      "allSizes": "Toutes les tailles",
+      "allTypes": "Tous les types",
+      "allPriorities": "Toutes les priorités"
+    },
+    "title": "Ventas y CRM",
+    "subtitle": "Gestione sus clientes, oportunidades y acciones comerciales",
+    "refresh": "Actualizar",
+    "exportReport": "Informe Completo",
+    "integratedWithSupabase": "Integrado con Supabase",
+    "tabs": {
+      "dashboard": "Panel de Control",
+      "clients": "Clientes",
+      "opportunities": "Oportunidades",
+      "actions": "Acciones"
+    },
+    "dashboard": {
+      "title": "Panel de Control CRM",
+      "stats": {
+        "totalClients": "Total Clientes",
+        "activeOpportunities": "Oportunidades Activas",
+        "pipelineValue": "Valor del Pipeline",
+        "conversionRate": "Tasa de Conversión",
+        "wonThisMonth": "Ganadas este mes",
+        "lostThisMonth": "Perdidas este mes",
+        "vsLastMonth": "vs mes anterior"
+      },
+      "pipeline": {
+        "title": "Pipeline de Ventas",
+        "deals": "negocios",
+        "deal": "negocio",
+        "totalValue": "Valor total",
+        "avgDeal": "Valor promedio",
+        "stages": {
+          "prospection": "Prospección",
+          "qualification": "Calificación",
+          "proposal": "Propuesta",
+          "negotiation": "Negociación",
+          "closing": "Cierre",
+          "won": "Ganada",
+          "lost": "Perdida"
+        }
+      },
+      "revenue": {
+        "title": "Evolución de Ingresos",
+        "total": "Total",
+        "monthly": "Ingresos Mensuales",
+        "cumulative": "Ingresos Acumulados"
+      },
+      "recentOpportunities": {
+        "title": "Oportunidades Recientes",
+        "noOpportunities": "Sin oportunidades recientes",
+        "viewAll": "Ver todas"
+      },
+      "recentActions": {
+        "title": "Acciones Recientes",
+        "noActions": "Sin acciones recientes",
+        "viewAll": "Ver todas"
+      },
+      "topClients": {
+        "title": "Mejores Clientes",
+        "t": "Mejores Clientes",
+        "noClients": "Sin clientes",
+        "viewAll": "Ver todos",
+        "revenue": "Ingresos"
+      },
+      "quickActions": "Acciones Rápidas",
+      "overdue": "vencidas",
+      "pending": "pendientes",
+      "completed": "completadas",
+      "actions": {
+        "newClient": "Nuevo Cliente",
+        "newOpportunity": "Nueva Oportunidad",
+        "newAction": "Nueva Acción",
+        "newTask": "Nueva Tarea"
+      }
+    },
+    "clients": {
+      "title": "Gestión de Clientes",
+      "subtitle": "clientes",
+      "count": "{count} clientes",
+      "search": "Buscar un cliente...",
+      "addClient": "Añadir cliente",
+      "editClient": "Editar cliente",
+      "deleteClient": "Eliminar cliente",
+      "viewClient": "Ver cliente",
+      "noClients": "Sin clientes",
+      "noClientsDesc": "Comience añadiendo su primer cliente",
+      "openModule": "Abrir Gestión de Clientes",
+      "fields": {
+        "name": "Nombre",
+        "email": "Email",
+        "phone": "Teléfono",
+        "company": "Empresa",
+        "address": "Dirección",
+        "city": "Ciudad",
+        "country": "País",
+        "type": "Tipo",
+        "status": "Estado",
+        "createdAt": "Creado",
+        "totalRevenue": "Ingresos Totales",
+        "lastContact": "Último contacto"
+      },
+      "types": {
+        "prospect": "Prospecto",
+        "client": "Cliente",
+        "former": "Ex cliente",
+        "lead": "Lead"
       },
       "statuses": {
-        "open": "Abierto",
-        "investigating": "Investigando",
-        "resolved": "Resuelto",
-        "closed": "Cerrado"
+        "active": "Activo",
+        "inactive": "Inactivo",
+        "blocked": "Bloqueado"
+      }
+    },
+    "reports": {
+      "title": "Informe CRM Completo",
+      "generating": "Generando...",
+      "generated": "Informe generado con éxito",
+      "error": "Error al generar el informe",
+      "download": "Descargar",
+      "period": "Período",
+      "summary": "Resumen",
+      "sections": {
+        "overview": "Visión General",
+        "clients": "Análisis de Clientes",
+        "pipeline": "Análisis del Pipeline",
+        "actions": "Análisis de Acciones",
+        "forecast": "Pronóstico"
+      },
+      "metrics": {
+        "newClients": "Nuevos clientes",
+        "opportunities": "Oportunidades creadas",
+        "wonDeals": "Negocios ganados",
+        "lostDeals": "Negocios perdidos",
+        "totalRevenue": "Ingresos totales",
+        "avgDealSize": "Tamaño promedio del negocio",
+        "salesCycle": "Ciclo de venta promedio",
+        "winRate": "Tasa de éxito"
+      }
+    }
+  },
+  "auth": {
+    "firstName": "Nombre",
+    "lastName": "Nombre",
+    "firstNamePlaceholder": "Votre prénom",
+    "lastNamePlaceholder": "Votre nom",
+    "register": "S'inscrire",
+    "createYourAccount": "Créez su compte",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?"
+  },
+  "accountingPage": {
+    "title": "Gestion Comptable",
+    "description": "Gérez sus asientos, plan comptable et journaux.",
+    "saveErrorTitle": "Error d'enregistrement",
+    "balanceError": "Le débit et le crédit doivent être équilibrés.",
+    "saveSuccessTitle": "Écriture enregistrée",
+    "saveSuccessMessage": "L'écriture comptable a été enregistrée avec succès.",
+    "noCompanySelected": {
+      "title": "Aucune entreprise sélectionnée",
+      "message": "Veuillez sélectionner une entreprise pour gérer la comptabilité"
+    }
+  },
+  "accounting": {
+    "chartDetection": {
+      "title": "Plan comptable détecté",
+      "confidence": {
+        "high": "Recommandé",
+        "medium": "Suggéré",
+        "low": "Par défaut"
+      },
+      "mandatory": "Obligatoire",
+      "alternatives": "Plans alternatifs",
+      "alternativeNote": "Peut être utilisé pour les multinationales ou cas spécifiques",
+      "useRecommended": "Utiliser ce plan"
+    },
+    "syscohada": {
+      "fullName": "Système Comptable OHADA",
+      "alert": {
+        "title": "País membre de l'OHADA",
+        "description": "Le SYSCOHADA révisé 2017 est le plan comptable légal dans les 17 pays membres de l'Organisation pour l'Harmonisation en Afrique du Droit des Affaires (OHADA)."
+      },
+      "memberCountries": "Ver tous les pays membres de l'OHADA"
+    },
+    "pcg": {
+      "fullName": "Plan Comptable Général"
+    },
+    "journalTypes": {
+      "sale": "Ventas",
+      "purchase": "Compras",
+      "bank": "Banco",
+      "cash": "Caja",
+      "miscellaneous": "Operaciones diversas",
+      "general": "General",
+      "opening": "Saldos de apertura",
+      "other": "Otro"
+    }
+  },
+  "journal_entries": {
+    "items_min_required": "Minimum 2 lignes requis",
+    "total": "Total"
+  },
+  "purchases": {
+    "title": "Gestion des Compras",
+    "description": "Gérez sus achats, facturas fournisseurs et paiements",
+    "noPurchases": "Aucun achat pour le moment",
+    "noPurchasesDescription": "Créez su primer achat pour commencer",
+    "createPurchase": "Nouvel achat",
+    "table": {
+      "invoiceNumber": "N° Facture",
+      "date": "Fecha",
+      "supplier": "Fournisseur",
+      "description": "Descripción",
+      "amountHT": "Importe HT",
+      "amountTTC": "Importe TTC",
+      "status": "Statut",
+      "dueDate": "Échéance"
+    },
+    "status": {
+      "paid": "Payé",
+      "pending": "Pendiente",
+      "overdue": "En retard"
+    },
+    "form": {
+      "createTitle": "Nouvel achat",
+      "editTitle": "Modificar l'achat",
+      "invoiceNumber": "Numéro de factura",
+      "invoiceNumberPlaceholder": "FAC-2024-001",
+      "purchaseDate": "Fecha d'achat",
+      "supplier": "Fournisseur",
+      "selectSupplier": "Sélectionnez un fournisseur",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Descripción de l'achat...",
+      "dueDate": "Fecha d'échéance",
+      "amounts": "Importes",
+      "amountHT": "Importe HT",
+      "tvaRate": "Taux TVA",
+      "calculatedAmounts": "Importes calculés",
+      "tvaAmount": "Importe TVA",
+      "amountTTC": "Importe TTC",
+      "attachments": "Pièces jointes",
+      "uploadFiles": "Descargar des fichiers",
+      "acceptedFormats": "PDF, JPG, PNG acceptés",
+      "validation": {
+        "invoiceNumberRequired": "Le numéro de factura est requis",
+        "purchaseDateRequired": "La date d'achat est requise",
+        "supplierRequired": "Le fournisseur est requis",
+        "descriptionRequired": "La description est requise",
+        "amountRequired": "Le montant doit être supérieur à 0",
+        "dueDateRequired": "La date d'échéance est requise",
+        "dueDateInvalid": "La date d'échéance doit être postérieure à la date d'achat",
+        "formErrors": "Veuillez corriger les erreurs du formulaire"
+      }
+    },
+    "filters": {
+      "title": "Filtres",
+      "search": "Recherche",
+      "searchPlaceholder": "N° factura, fournisseur, description...",
+      "supplier": "Fournisseur",
+      "allSuppliers": "Tous les fournisseurs",
+      "paymentStatus": "Statut de paiement",
+      "allStatuses": "Tous les statuts",
+      "dateFrom": "Fecha de début",
+      "dateTo": "Fecha de fin",
+      "clear": "Effacer",
+      "activeFilters": "Filtres actifs"
+    },
+    "actions": {
+      "markAsPaid": "Marquer comme payé",
+      "export": "Exportar",
+      "generateReport": "Générer rapport PDF"
+    },
+    "stats": {
+      "totalPurchases": "Total achats",
+      "totalPurchasesDescription": "Nombrebre total d'achats",
+      "totalAmount": "Importe total",
+      "totalAmountDescription": "Importe total des achats",
+      "pendingPayments": "Paiements en attente",
+      "pendingPaymentsDescription": "Facturas non payées",
+      "overduePayments": "Paiements en retard",
+      "overduePaymentsDescription": "Facturas en retard",
+      "attention": "Atención",
+      "urgent": "Urgent"
+    },
+    "notifications": {
+      "createSuccess": "Achat créé avec succès",
+      "updateSuccess": "Achat mis à jour avec succès",
+      "deleteSuccess": "Achat supprimé avec succès",
+      "markAsPaidSuccess": "Facture marquée comme payée",
+      "exportSuccess": "Export réalisé avec succès",
+      "duplicateInvoice": "Une factura avec ce numéro existe déjà",
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cet achat ?",
+      "markAsPaidConfirm": "Marquer cette factura comme payée ?"
+    }
+  },
+  "entries": "asientos",
+  "navigation": {
+    "chartOfAccounts": "Plan comptable",
+    "journals": "Journaux",
+    "fec": "FEC",
+    "setupAssistant": "Assistant de configuration"
+  },
+  "tour": {
+    "back": "Retour",
+    "close": "Fermer",
+    "last": "Terminer",
+    "next": "Suivant",
+    "skip": "Passer",
+    "welcome": {
+      "title": "¡Bienvenido a CassKai!",
+      "intro": "Le guiaremos a través de las funciones principales en algunos pasos.",
+      "duration": "Este recorrido dura aproximadamente 2 minutos y puede salir en cualquier momento."
+    },
+    "welcomeTour": {
+      "title": "¡Bienvenido a CassKai!",
+      "intro": "Le guiaremos a través de las funciones principales en algunos pasos.",
+      "duration": "Este recorrido dura aproximadamente 2 minutos y puede salir en cualquier momento.",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "skip": "Omitir",
+      "finish": "Finalizar",
+      "stepCounter": "Paso {{current}} de {{total}}"
+    },
+    "quickStart": {
+      "title": "Sus primeros pasos",
+      "description": "Estas tarjetas lo guían en la configuración inicial de {{companyName}}. Haga clic en cada una para iniciar la acción correspondiente."
+    },
+    "accounting": {
+      "title": "Contabilidad",
+      "description": "Comience creando sus primeros asientos contables. Este es el corazón de su gestión financiera.",
+      "time": "Tiempo estimado: 5 minutos"
+    },
+    "invoicing": {
+      "title": "Facturación",
+      "description": "Cree y envíe sus facturas profesionales directamente desde la aplicación."
+    },
+    "banking": {
+      "title": "Conexión bancaria",
+      "description": "Sincronice sus cuentas bancarias para un seguimiento automático de sus transacciones."
+    },
+    "progress": {
+      "title": "Progression",
+      "description": "Suivez su avancement dans la configuration initiale. Chaque action complétée fait progresser cette barre."
+    },
+    "help": {
+      "title": "¿Necesita ayuda?",
+      "description": "Accédez à notre documentation, tutoriels vidéo et support client à tout moment."
+    },
+    "navigation": {
+      "title": "Menu de navigation",
+      "description": "Explorez tous les modules disponibles : Contabilidad, Facturación, CRM, Informes, etc."
+    },
+    "ready": {
+      "title": "Vous êtes prêt !",
+      "description": "Vous pouvez maintenant commencer à utiliser CassKai.",
+      "tip": "Astuce : Vous pouvez relancer ce tour à tout moment depuis les paramètres."
+    }
+  },
+  "dashboard": {
+    "welcome": {
+      "greeting": "¡Bienvenido {{name}}! 🎉",
+      "defaultUserName": "sur CassKai",
+      "subtitle": "Estamos preparando su espacio de trabajo personalizado...",
+      "companyReady": "{{companyName}} está listo para comenzar.",
+      "accountReady": "Cuenta creada con éxito",
+      "stepsCompleted": "{{completed}}/{{total}} pasos completados",
+      "progress": "Progreso de la configuración",
+      "steps": {
+        "accounting": {
+          "title": "Crear sus primeros asientos",
+          "description": "Comience por registrar sus operaciones contables"
+        },
+        "invoicing": {
+          "title": "Emitir su primera factura",
+          "description": "Cree y envíe facturas a sus clientes"
+        },
+        "banking": {
+          "title": "Conectar su banco",
+          "description": "Sincronice sus cuentas bancarias para un seguimiento automático"
+        },
+        "team": {
+          "title": "Invitar a su equipo",
+          "description": "Agregue colaboradores a su espacio"
+        }
+      },
+      "quickStartTitle": "Primeros pasos recomendados",
+      "stepLabel": "Paso {{step}}",
+      "estimatedTime": "⏱️ {{time}}",
+      "help": {
+        "title": "¿Necesita ayuda?",
+        "description": "Nuestro equipo está aquí para guiarlo en el uso de CassKai",
+        "documentation": "Documentación",
+        "support": "Soporte",
+        "tutorials": "Tutoriales en video"
+      },
+      "stats": {
+        "revenue": "Facturación",
+        "expenses": "Gastos",
+        "invoices": "Facturas",
+        "clients": "Clientes",
+        "empty": "Comience a ingresar sus datos"
+      }
+    },
+    "activeClients": "Clientes actifs",
+    "activeClientsDescription": "Nombrebre de clients avec activité récente",
+    "cashBalance": "Solde de trésorerie",
+    "cashflow": "Flux de trésorerie",
+    "cashflowDescription": "Évolution des entrées et sorties de trésorerie",
+    "clients": "Clientes",
+    "comparedToPreviousPeriod": "Par rapport à la période précédente",
+    "dashboardWelcomeMessage": "Bienvenue, {userName}!",
+    "expenses": "Gastos",
+    "expensesDescription": "Gastos de la période",
+    "financialSummary": "Résumé financier",
+    "financialSummaryDescription": "Aperçu de su situation financière",
+    "netProfit": "Bénéfice net",
+    "netProfitDescription": "Bénéfice après déduction des charges",
+    "newInvoice": "Nouvelle factura",
+    "newOpportunity": "Nouvelle opportunité",
+    "newPurchaseOrder": "Nouvel achat",
+    "noUpcomingDeadlines": "Aucune échéance à venir",
+    "overdueInvoices": "Facturas en retard",
+    "pendingInvoices": "Facturas en attente",
+    "profit": "Bénéfice",
+    "revenue": "Facturación",
+    "revenueDescription": "Revenus de la période",
+    "revenueExpenseTrend": "Tendance Revenus/Gastos",
+    "revenueExpenseTrendDescription": "Évolution des revenus et dépenses",
+    "shortcutsDescription": "Accédez rapidement aux fonctionnalités principales",
+    "shortcutsTitle": "Accès rapides",
+    "suppliers": "Proveedores",
+    "totalExpenses": "Total des dépenses",
+    "totalExpensesDescription": "Gastos et charges de la période",
+    "totalRevenue": "Facturación total",
+    "totalRevenueDescription": "Revenus de la période actuelle",
+    "upcomingDeadlines": "Échéances à venir",
+    "upcomingDeadlinesDescription": "Échéances et obligations à venir"
+  },
+  "financialForecasts": "Prévisions financières",
+  "client": "Client",
+  "supplier": "Fournisseur",
+  "invoicing": "Facturación",
+  "salesCrm": "Ventes & CRM",
+  "humanResources": "Recursos Humanos",
+  "projects": "Proyectos",
+  "inventory": "Inventario",
+  "accountingPageTitle": "Contabilidad",
+  "bankConnections": "Bancos",
+  "financialReports": "Informes financiers",
+  "settings": "Configuración",
+  "date": "Fecha",
+  "description": "Descripción",
+  "reference": "Référence",
+  "type": "Type",
+  "status": "Statut",
+  "actions": "Actions",
+  "debit": "Débit",
+  "credit": "Crédit",
+  "balance": "Solde",
+  "accountNumber": "Numéro de compte",
+  "accountName": "Nombre du compte",
+  "class": "Classe",
+  "active": "Activo",
+  "inactive": "Inactivo",
+  "currency": {
+    "formats": {
+      "capital_social": "Capital social ({currency})",
+      "annual_revenue": "Facturación annuel ({currency})",
+      "estimation_hint": "Estimation ou exercice précédent • Moneda : {currency} ({country})"
+    }
+  },
+  "allClasses": "Toutes les classes",
+  "allTypes": "Tous les types",
+  "allStatuses": "Tous les statuts",
+  "filterByClass": "Filtrar par classe",
+  "filterByType": "Filtrar par type",
+  "searchAccountsPlaceholder": "Buscar des cuentas...",
+  "noAccountsYet": "Aucun compte pour le moment",
+  "startByCreatingAccountOrImport": "Commencez par créer un compte ou importez un plan comptable standard",
+  "newAccount": "Nuevo compte",
+  "editAccount": "Modificar le compte",
+  "createAccountDescription": "Crear un nouveau compte dans su plan comptable",
+  "editAccountDescription": "Modificar les informations du compte",
+  "accountCreatedSuccess": "Cuenta creada con éxito",
+  "accountUpdatedSuccess": "Compte mis à jour avec succès",
+  "accountDescriptionPlaceholder": "Descripción du compte",
+  "capitalPlaceholder": "Capital social",
+  "parentAccountCodeOptional": "Code du compte parent (optionnel)",
+  "descriptionOptional": "Descripción (optionnelle)",
+  "fieldRequired": "Ce champ est obligatoire",
+  "accountNumberUniqueError": "Ce numéro de compte existe déjà",
+  "importDefaultChart": "Importar plan standard",
+  "defaultChartImportedSuccess": "Plan comptable standard importé avec succès",
+  "defaultChartImportError": "Error lors de l'importation du plan comptable standard",
+  "chartOfAccounts": "Plan comptable",
+  "chartOfAccountsDescription": "Gérez su plan comptable",
+  "journals": {
+    "journalDetails": "Detalles del diario",
+    "code": "Código",
+    "name": "Nombre",
+    "type": "Tipo",
+    "status": "Estado",
+    "statistics": "Estadísticas",
+    "entries": "Asientos",
+    "totalDebit": "Total débito",
+    "totalCredit": "Total crédito",
+    "close": "Cerrar",
+    "view": "Ver",
+    "viewEntries": "Ver asientos",
+    "activate": "Activar",
+    "deactivate": "Desactivar",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "lastEntry": "Último asiento",
+    "noEntries": "Sin asientos",
+    "journalActivated": "Diario activado con éxito",
+    "journalDeactivated": "Diario desactivado con éxito",
+    "errorTogglingStatus": "Error al cambiar el estado",
+    "totalJournals": "Total diarios",
+    "activeJournals": "Diarios activos",
+    "totalEntries": "Total asientos",
+    "totalAmount": "Total montos",
+    "accountingJournals": "Diarios contables",
+    "journalCode": "Código",
+    "journalName": "Nombre del diario",
+    "journalType": "Tipo",
+    "entriesCount": "Asientos",
+    "totalDebits": "Total débitos",
+    "totalCredits": "Total créditos",
+    "lastEntryDate": "Último asiento",
+    "actions": "Acciones"
+  },
+  "journal": "Journal",
+  "accountingEntries": "Écritures comptables",
+  "accountingEntriesList": "Liste des asientos",
+  "newEntry": "Nouvelle écriture",
+  "dateFrom": "Fecha de début",
+  "dateTo": "Fecha de fin",
+  "allJournals": "Tous les journaux",
+  "allAccounts": "Tous les cuentas",
+  "applyFilters": "Appliquer les filtres",
+  "clearFilters": "Effacer les filtres",
+  "numberShort": "N°",
+  "noEntriesFound": "Aucune écriture trouvée",
+  "previous": "Précédent",
+  "next": "Suivant",
+  "entry": "écriture",
+  "pageWithCount": "Page {currentPage} sur {totalPages} ({totalEntries} asientos)",
+  "confirmDeletion": "Confirmer la suppression",
+  "confirmDeleteEntryMessage": "Êtes-vous sûr de vouloir supprimer cette écriture ? Cette action est irréversible.",
+  "confirmDeleteAllEntriesMessage": "Êtes-vous sûr de vouloir supprimer TOUTES les asientos comptables ? Cette action est irréversible et supprimera définitivement toutes les asientos de cette entreprise.",
+  "journalEntryDeletedSuccess": "Écriture supprimée avec succès",
+  "allEntriesDeletedSuccess": "Toutes les asientos ont été supprimées avec succès.",
+  "entryCreatedSuccess": "Écriture créée avec succès",
+  "entryUpdatedSuccess": "Écriture mise à jour avec succès",
+  "failedToDeleteEntry": "Échec de la suppression de l'écriture",
+  "failedToDeleteAllEntries": "Échec de la suppression des asientos",
+  "failedToSubmitEntry": "Échec de l'enregistrement de l'écriture",
+  "copySuffix": "(copie)",
+  "errorFetchingEntries": "Error lors de la récupération des asientos",
+  "errorFetchingAccounts": "Error lors de la récupération des cuentas",
+  "errorFetchingDropdownData": "Error lors de la récupération des datos",
+  "success": "Éxito",
+  "error": "Error",
+  "save": "Guardar",
+  "cancel": "Cancelar",
+  "delete": "Eliminar",
+  "deleteAll": "Tout supprimer",
+  "deleteAllEntries": "Eliminar toutes les asientos",
+  "deleting": "Suppression en cours...",
+  "edit": "Modificar",
+  "noCompanySelectedMessage": "Veuillez sélectionner une entreprise pour continuer",
+  "noCompanySelectedMessageAccounting": "Veuillez sélectionner une entreprise pour accéder à la comptabilité",
+  "setupAssistant": "Assistant de configuration",
+  "fec": "FEC",
+  "fecImport": {
+    "description": "Importez su fichier FEC (Fichier des Écritures Comptables) pour créer des asientos, cuentas et journaux",
+    "parsing": "Analyse du fichier en cours...",
+    "importing": "Importation des datos en cours...",
+    "button": {
+      "clearFile": "Effacer",
+      "importing": "Importation en cours...",
+      "startImport": "Démarrer l'importation",
+      "reset": "Réinitialiser"
+    },
+    "dropzone": {
+      "clickToUpload": "Cliquez pour télécharger",
+      "orDragAndDrop": "ou glissez-déposez",
+      "fileTypes": "Fichier FEC (.txt ou .csv)",
+      "selectFile": "Sélectionner un fichier FEC"
+    },
+    "error": {
+      "notEnoughLines": "Fichier trop court. Un fichier FEC doit contenir au moins un en-tête et une ligne de datos.",
+      "lineFormat": "Ligne {line}: Format invalide, attendu {expected} champs, reçu {actual}.",
+      "invalidDate": "Ligne {line}: Format de date EcritureFecha invalide: {date}",
+      "noValidEntries": "Aucune entrée valide trouvée dans le fichier. Veuillez vérifier les erreurs.",
+      "missingColumns": "Colonnes requises manquantes: {columns}",
+      "fileType": "Type de fichier invalide. Veuillez télécharger un fichier .txt ou .csv, ou un fichier sans extension.",
+      "fileSize": "Le fichier est trop volumineux. La taille maximale est de 10 Mo.",
+      "readingFile": "Error lors de la lecture du fichier",
+      "handlingFile": "Error lors du traitement du fichier",
+      "parsingFailed": "Échec de l'analyse du fichier FEC",
+      "noDataOrCompany": "Aucune donnée à importer ou aucune entreprise sélectionnée",
+      "cannotImportWithErrors": "Impossible d'importer des datos avec des erreurs et sans entrées valides",
+      "unbalancedEntries": "{count} asientos non équilibrées trouvées."
+    },
+    "feedback": {
+      "errors": "Errors d'analyse",
+      "errorsFound": "{count} erreurs trouvées dans le fichier.",
+      "moreErrors": "et {count} autres erreurs",
+      "summary": "Résumé du fichier",
+      "company": "Entreprise",
+      "siren": "SIREN",
+      "period": "Période",
+      "entries": "Écritures",
+      "accounts": "Comptes",
+      "journals": "Journaux",
+      "totalDebit": "Total Débit",
+      "totalCredit": "Total Crédit",
+      "unbalanced": "Écritures non équilibrées",
+      "balanceDifference": "Les asientos ne sont pas équilibrées. Différence: {balance}",
+      "noData": "Aucune donnée",
+      "noDataFound": "Aucune entrée valide n'a été trouvée dans le fichier.",
+      "unbalancedEntries": "Écritures non équilibrées",
+      "unbalancedEntriesFound": "{count} asientos non équilibrées trouvées.",
+      "unbalancedEntry": "Écriture {key}: Différence de {difference}",
+      "moreUnbalanced": "et {count} autres asientos non équilibrées"
+    },
+    "data": {
+      "unavailable": "N/A"
+    },
+    "summary": {
+      "title": "Aperçu des datos FEC",
+      "groupedEntries": "Écritures groupées",
+      "entries": "Écritures",
+      "accounts": "Comptes",
+      "journals": "Journaux",
+      "journalEntry": "Journal-Écriture",
+      "date": "Fecha",
+      "description": "Descripción",
+      "debit": "Débit",
+      "credit": "Crédit",
+      "lines": "Lignes",
+      "journal": "Journal",
+      "entryNum": "N° Écriture",
+      "account": "Compte",
+      "accountNumber": "Numéro de compte",
+      "accountName": "Nombre du compte",
+      "accountType": "Type",
+      "accountClass": "Classe",
+      "journalCode": "Code journal",
+      "journalType": "Type",
+      "moreEntries": "... et {count} autres asientos",
+      "search": "Buscar des asientos..."
+    },
+    "import": {
+      "successTitle": "Importation réussie",
+      "errorTitle": "Échec de l'importation",
+      "successDescription": "Les datos FEC ont été importées avec succès.",
+      "accountsCreated": "{count} cuentas créés",
+      "journalsCreated": "{count} journaux créés",
+      "entriesCreated": "{count} asientos comptables créées",
+      "entriesWithErrors": "{count} asientos comportaient des erreurs",
+      "failed": "Échec de l'importation des datos FEC",
+      "success": "Données FEC importées avec succès"
+    }
+  },
+  "accountTypes": {
+    "asset": "Activo",
+    "liability": "Pasivo",
+    "equity": "Patrimonio",
+    "revenue": "Ingresos",
+    "expense": "Gastos",
+    "ASSET": "Activo",
+    "LIABILITY": "Pasivo",
+    "EQUITY": "Patrimonio",
+    "REVENUE": "Ingresos",
+    "EXPENSE": "Gastos",
+    "COST_OF_GOODS_SOLD": "Costo de bienes vendidos"
+  },
+  "accountClasses": {
+    "1": "Classe 1 - Comptes de capitaux",
+    "2": "Classe 2 - Comptes d'immobilisations",
+    "3": "Classe 3 - Comptes de stocks",
+    "4": "Classe 4 - Comptes de tiers",
+    "5": "Classe 5 - Comptes financiers",
+    "6": "Classe 6 - Comptes de charges",
+    "7": "Classe 7 - Comptes de produits",
+    "8": "Classe 8 - Comptes spéciaux",
+    "9": "Classe 9 - Contabilidad analytique"
+  },
+  "pagination": {
+    "showing": "Affichage de {start} à {end} sur {total} éléments",
+    "noResults": "Sin resultados",
+    "page": "Page",
+    "of": "sur",
+    "entries": "entrées",
+    "currentPage": "Page actuelle",
+    "totalPages": "Total des pages",
+    "totalEntries": "Total des entrées"
+  },
+  "selectAccountClass": "Sélectionner une classe de compte",
+  "selectAccountType": "Sélectionner un type de compte",
+  "userManagement": {
+    "title": "Gestion des Utilisateurs",
+    "description": "Gérez les utilisateurs, invitations et rôles",
+    "fetchUsersError": "Error lors du chargement des utilisateurs",
+    "adminApiError": "Error d'accès à l'API admin",
+    "noRoleAssigned": "Aucun rôle assigné",
+    "accessDenied": "Accès refusé",
+    "insufficientPermissions": "Permissions insuffisantes",
+    "pageDescription": "Gérez les utilisateurs, rôles et invitations pour su entreprise",
+    "inviteUserTitle": "Inviter un Nouvel Utilisateur",
+    "inviteUserDescription": "Envoyez un email d'invitation pour ajouter un nouvel utilisateur à su entreprise",
+    "emailAddress": "Dirección email",
+    "emailPlaceholder": "utilisateur@exemple.com",
+    "sendInvitation": "Envoyer l'Invitation",
+    "companyUsersTitle": "Utilisateurs de l'Entreprise",
+    "companyUsersDescription": "Visualisez et gérez les utilisateurs actuellement dans su entreprise",
+    "noUsersFound": "Aucun utilisateur trouvé dans cette entreprise",
+    "inviteFirstUser": "Utilisez le formulaire ci-dessus pour inviter su primer membre d'equipo !",
+    "userNameHeader": "Utilisateur",
+    "assignedRole": "Rôle assigné",
+    "assignRole": "Assigner un rôle",
+    "assignRoleToUser": "Assigner un rôle à l'utilisateur",
+    "selectRole": "Sélectionner un rôle",
+    "selectRoleForUser": "Sélectionnez un nouveau rôle pour {0}",
+    "selectRolePlaceholder": "Sélectionner un rôle",
+    "cancel": "Cancelar",
+    "saveChanges": "Guardar les modifications",
+    "systemRole": "Rôle système",
+    "noCompanyTitle": "Aucune entreprise sélectionnée",
+    "selectCompanyPrompt": "Veuillez sélectionner une entreprise pour gérer les utilisateurs",
+    "emailRequired": "L'email est requis pour envoyer une invitation",
+    "invitationSent": "Invitation envoyée à {0}",
+    "invitationError": "Échec de l'envoi de l'invitation",
+    "emailNotAvailable": "Correo non disponible",
+    "userNotAvailable": "Utilisateur non disponible",
+    "unknownEmail": "Correo inconnu",
+    "unknownUser": "Utilisateur inconnu",
+    "roleAssigned": "Rôle assigné avec succès",
+    "roleAssignError": "Échec de l'assignation du rôle",
+    "manageUsersButton": "Gérer les Utilisateurs & Rôles",
+    "settingsCardPrompt": "Contrôlez qui a accès et ce qu'ils peuvent faire",
+    "accessControlInfo": "Définissez les droits d'accès et invitez de nouveaux membres",
+    "actions": "Actions"
+  },
+  "signup": {
+    "appName": "CassKai",
+    "loading": "Cargando...",
+    "createAccountTitle": "Crear un compte",
+    "createAccountDescription": "Rejoignez CassKai pour gérer su comptabilité",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "loginButton": "Se connecter",
+    "allRightsReserved": "Tous droits réservés",
+    "termsAgreement": "En créant un compte, vous acceptez nos",
+    "and": "et notre",
+    "termsOfService": "Conditions d'utilisation",
+    "firstName": "Nombre",
+    "lastName": "Nombre de famille",
+    "emailAddress": "Dirección email",
+    "emailPlaceholder": "exemple@email.com",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "companyName": "Nombre de l'entreprise",
+    "companyNameOptional": "Nombre de l'entreprise (optionnel)",
+    "createAccount": "Crear mon compte",
+    "creatingAccount": "Création en cours...",
+    "passwordRequirements": "Le mot de passe doit contenir au moins 8 caractères",
+    "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
+    "fillAllFields": "Veuillez remplir tous les champs obligatoires",
+    "accountCreatedTitle": "Cuenta creada con éxito !",
+    "accountCreatedMessage": "Un email de confirmation a été envoyé à su adresse. Veuillez vérifier su boîte de réception.",
+    "accountCreatedNoConfirm": "Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.",
+    "emailAlreadyExists": "Cette adresse email est déjà utilisée",
+    "weakPassword": "Le mot de passe est trop faible",
+    "invalidEmail": "Dirección email invalide",
+    "signupError": "Error lors de la création du compte",
+    "signupFailed": "Échec de la création du compte. Veuillez réessayer.",
+    "unexpectedError": "Une erreur inattendue s'est produite",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe"
+  },
+  "theme": "Thème",
+  "language": "Idioma",
+  "subscriptionManagement": "Gestion Abonnement",
+  "subscriptionManagementDesc": "Gérez su abonnement et facturation",
+  "currentPlan": "Plan actuel",
+  "price": "Prix",
+  "renewsOn": "Renouvellement le",
+  "manageSubscriptionButton": "Gérer l'abonnement",
+  "noSubscriptionFound": "Aucun abonnement trouvé",
+  "subscribeNowButton": "S'abonner maintenant",
+  "noPermissionManageBilling": "Vous n'avez pas la permission de gérer la facturation",
+  "stripePortalInfo": "Gestion via portail Stripe sécurisé",
+  "unknownPlan": "Plan inconnu",
+  "manageModules": "Gestion des Modules",
+  "moduleActivationDescription": "Activez ou désactivez les modules selon sus besoins",
+  "noPermissionManageModules": "Vous n'avez pas la permission de gérer les modules",
+  "saveChanges": "Guardar les modifications",
+  "moduleSettingsUpdated": "Configuración des modules mis à jour",
+  "moduleSettingsUpdateError": "Error lors de la mise à jour des modules",
+  "userProfile": "Profil Utilisateur",
+  "companySettings": "Configuración Entreprise",
+  "notifications": "Notifications",
+  "comingSoon": "Bientôt disponible",
+  "subscription_active": "Activo",
+  "subscription_inactive": "Inactivo",
+  "subscription_past_due": "En retard",
+  "interval_month": "mois",
+  "interval_year": "année",
+  "interval_week": "semaine",
+  "backupAndExport": "Sauvegarde et Export",
+  "exportData": "Exportar les datos",
+  "generateFECReport": "Générer rapport FEC",
+  "backupData": "Sauvegarder datos",
+  "importData": "Importar datos",
+  "fecCompliance": "Les exports respectent les normes comptables françaises (FEC, DGI)",
+  "taxes": {
+    "title": "Taxes",
+    "subtitle": "Gérez sus déclarations et conformités fiscales",
+    "noCompanySelected": "Aucune entreprise sélectionnée",
+    "selectCompanyPrompt": "Sélectionnez une entreprise pour gérer les taxes",
+    "france": "France",
+    "belgium": "Belgique",
+    "switzerland": "Suisse",
+    "luxembourg": "Luxembourg",
+    "taxDeadlines": "Échéances Fiscales",
+    "upcomingDeadlines": "Prochaines échéances et déclarations à effectuer",
+    "type": "Type",
+    "declaration": "Déclaration",
+    "dueDate": "Échéance",
+    "status": "Statut",
+    "amount": "Importe",
+    "actions": "Actions",
+    "pending": "Pendiente",
+    "overdue": "En retard",
+    "completed": "Completado",
+    "submitted": "Déposé",
+    "taxRates": "Taux de Taxes",
+    "manageRates": "Gérez sus taux de TVA et d'impôts",
+    "addRate": "Añadir",
+    "editRate": "Modificar le taux",
+    "rateName": "Nombre du taux",
+    "rateValue": "Taux (%)",
+    "rateType": "Type",
+    "description": "Descripción",
+    "corporateTax": "Impôt sur les sociétés",
+    "incomeTax": "Impôt sur le revenu",
+    "other": "Autre",
+    "taxCalculator": "Calculateur de Taxes",
+    "calculateTaxes": "Calculez rapidement sus taxes",
+    "baseAmount": "Importe HT",
+    "taxRate": "Taux (%)",
+    "calculate": "Calculer",
+    "taxAmount": "Taxe",
+    "totalAmount": "Total TTC",
+    "taxRegimes": "Régimes Fiscaux",
+    "availableRegimes": "Régimes fiscaux disponibles pour su pays",
+    "conditions": "Conditions",
+    "obligations": "Obligations",
+    "success": "Éxito",
+    "error": "Error",
+    "rateDeleted": "Taux supprimé avec succès",
+    "rateSaved": "Taux enregistré avec succès",
+    "fillAllFields": "Veuillez remplir tous les champs",
+    "invalidNumbers": "Veuillez saisir des nombres valides",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "view": "Ver",
+    "edit": "Modificar",
+    "delete": "Eliminar",
+    "export": "Exportar",
+    "import": "Importar",
+    "print": "Imprimer",
+    "download": "Descargar",
+    "selectRate": "Choisir un taux",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "filterBy": "Filtrar par",
+    "sortBy": "Trier par",
+    "all": "Tout",
+    "reset": "Réinitialiser",
+    "period": "Période",
+    "monthly": "Mensuel",
+    "quarterly": "Trimestriel",
+    "yearly": "Annuel",
+    "custom": "Personnalisé",
+    "from": "Du",
+    "to": "Au",
+    "draft": "Borrador",
+    "inProgress": "En cours",
+    "validated": "Validado",
+    "rejected": "Rejeté",
+    "vatDeclaration": "Déclaration de TVA",
+    "corporateTaxDeclaration": "Déclaration IS",
+    "socialContributions": "Cotisations sociales",
+    "withholdingTax": "Prélèvement à la source",
+    "noData": "Aucune donnée disponible",
+    "noDeadlines": "Aucune échéance à venir",
+    "loading": "Cargando...",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce taux ?",
+    "cannotBeUndone": "Cette action ne peut pas être annulée",
+    "lastUpdate": "Dernière mise à jour",
+    "createdBy": "Créé par",
+    "modifiedBy": "Modifié par",
+    "history": "Historique",
+    "notes": "Notes",
+    "attachments": "Pièces jointes",
+    "required": "Champ obligatoire",
+    "invalidFormat": "Format invalide",
+    "minValue": "La valeur minimale est {min}",
+    "maxValue": "La valeur maximale est {max}",
+    "advancedSettings": "Configuración avancés",
+    "autoCalculate": "Calcul automatique",
+    "roundingRules": "Règles d'arrondi",
+    "defaultRate": "Taux par défaut",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "liasseFiscale": "Liasse fiscale",
+    "vatQuarterly": "TVA trimestrielle",
+    "vatMonthly": "TVA mensuelle",
+    "annualTaxReturn": "Déclaration annuelle",
+    "declareNow": "Déclarer maintenant",
+    "scheduleReminder": "Programmer un rappel",
+    "markAsCompleted": "Marquer comme terminé",
+    "downloadForm": "Descargar le formulaire",
+    "taxReduction": "Réduction d'impôt",
+    "taxCredit": "Crédit d'impôt",
+    "taxExemption": "Exonération",
+    "realNormal": "Réel Normal",
+    "realSimplified": "Réel Simplifié",
+    "microEnterprise": "Micro-entreprise",
+    "revenue": "Facturación",
+    "services": "Services",
+    "sales": "Ventes",
+    "validUntil": "Valide jusqu'au",
+    "effectiveDate": "Fecha d'effet",
+    "expiryDate": "Fecha d'expiration",
+    "monthlyAmounts": "Importes fiscaux par mois",
+    "exportSuccess": "Rapport exporté avec succès",
+    "exportError": "Error lors de l'export du PDF",
+    "reminderSet": "Rappel programmé",
+    "reminderDescription": "Vous serez notifié 3 jours avant l'échéance de {name}",
+    "reminderTitle": "Rappel fiscal",
+    "reminderMessage": "{name} est due dans 3 jours",
+    "pastDueDate": "La date d'échéance est déjà passée",
+    "notificationDenied": "Permission de notification refusée",
+    "notificationsNotSupported": "Les notifications ne sont pas supportées par su navigateur",
+    "importSuccess": "{count} taux importés avec succès",
+    "importError": "Error lors de l'import du fichier",
+    "fileReadError": "Error lors de la lecture du fichier",
+    "importErrors": "Errors d'import"
+  },
+  "header": {
+    "search": "Buscar...",
+    "profile": "Mon profil",
+    "settings": "Configuración",
+    "help": "Aide",
+    "logout": "Se déconnecter",
+    "guestUser": "Utilisateur",
+    "noEmail": "pas d'email"
+  },
+  "enterprise": {
+    "select": "Sélectionner une entreprise",
+    "yourEnterprises": "Vos entreprises",
+    "addNew": "Añadir une entreprise",
+    "manage": "Gérer les entreprises",
+    "current": "Actuelle",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette entreprise ?",
+    "name": "Nombre commercial",
+    "legalName": "Raison sociale",
+    "registrationNumber": "N° d'immatriculation",
+    "vatNumber": "N° TVA intracommunautaire",
+    "country": "País",
+    "currency": "Moneda",
+    "address": "Dirección",
+    "street": "Rue",
+    "postalCode": "Código Postal",
+    "city": "Ciudad",
+    "taxRegime": "Régime fiscal",
+    "generalInfo": "Informacións générales",
+    "generalInfoDesc": "Informacións de base de su entreprise",
+    "addressInfo": "Dirección",
+    "addressInfoDesc": "Dirección du siège social",
+    "fiscalInfo": "Informacións fiscales",
+    "fiscalInfoDesc": "Régime fiscal et année comptable",
+    "settings": "Configuración",
+    "settingsDesc": "Préférences et configuration",
+    "fiscalYearStart": "Début exercice fiscal",
+    "fiscalYearEnd": "Fin exercice fiscal",
+    "vatPeriod": "Périodicité TVA",
+    "defaultVATRate": "Taux TVA par défaut",
+    "defaultPaymentTerms": "Délai de paiement (jours)",
+    "taxReminderDays": "Rappel échéances fiscales (jours avant)",
+    "roundingRule": "Règle d'arrondi",
+    "autoCalculateTax": "Calcul automatique des taxes",
+    "autoCalculateTaxDesc": "Calculer automatiquement les taxes sur les facturas",
+    "emailNotifications": "Notifications par email",
+    "emailNotificationsDesc": "Recevoir des rappels pour les échéances fiscales",
+    "tabs": {
+      "general": "Général",
+      "address": "Dirección",
+      "fiscal": "Fiscal",
+      "settings": "Configuración"
+    },
+    "regimes": {
+      "realNormal": "Réel Normal",
+      "realSimplified": "Réel Simplifié",
+      "microEnterprise": "Micro-entreprise",
+      "other": "Autre"
+    },
+    "periods": {
+      "monthly": "Mensuelle",
+      "quarterly": "Trimestrielle",
+      "yearly": "Annuelle",
+      "none": "No assujetti"
+    },
+    "rounding": {
+      "up": "Arrondir au supérieur",
+      "down": "Arrondir à l'inférieur",
+      "nearest": "Au plus proche"
+    },
+    "errors": {
+      "nameRequired": "Le nom est requis",
+      "legalNameRequired": "La raison sociale est requise",
+      "registrationRequired": "Le numéro d'immatriculation est requis",
+      "streetRequired": "L'adresse est requise",
+      "postalCodeRequired": "Le code postal est requis",
+      "cityRequired": "La ville est requise"
+    }
+  },
+  "setup": {
+    "wizard": {
+      "title": "Configuration Casskai",
+      "subtitle": "Solution de gestion financière multi-marchés",
+      "welcome": "Bienvenue dans l'assistant de configuration",
+      "steps": {
+        "market": "Marché & Localisation",
+        "supabase": "Configuration Supabase",
+        "company": "Informacións Entreprise",
+        "mobile_money": "Mobile Money",
+        "admin": "Compte Administrateur"
+      }
+    },
+    "market": {
+      "detected": "Marché détecté automatiquement : {{market}}",
+      "select": "Sélectionnez su marché principal",
+      "selected": "Sélectionné",
+      "regions": {
+        "europe": "🇪🇺 Europe",
+        "africa": "🌍 Afrique",
+        "americas": "🌎 Amériques"
+      },
+      "countries": {
+        "france": "France",
+        "belgium": "Belgique",
+        "benin": "Bénin",
+        "ivory_coast": "Côte d'Ivoire",
+        "burkina_faso": "Burkina Faso",
+        "mali": "Mali",
+        "senegal": "Sénégal",
+        "togo": "Togo",
+        "canada": "Canada (QC)"
+      }
+    },
+    "supabase": {
+      "info": "Vous devez créer un projet Supabase gratuit sur supabase.com",
+      "info_title": "Información importante",
+      "info_description": "Vous devez avoir créé un projet Supabase avant de continuer. Les clés sont disponibles dans les paramètres de su projet.",
+      "url_label": "URL du projet Supabase",
+      "url_placeholder": "https://su-projet.supabase.co",
+      "key_label": "Clé API Supabase (anon)",
+      "key_placeholder": "eyJhbGciOiJIUzI1NiIsInR5cCI...",
+      "test_connection": "Tester la connexion",
+      "testing": "Test en cours...",
+      "success": "Connexion Supabase réussie ! Configuration automatique en cours...",
+      "error": "Error de connexion. Vérifiez sus paramètres Supabase.",
+      "required": "Ce champ est obligatoire"
+    },
+    "company": {
+      "config_for": "Configuration pour : {{country}}",
+      "ohada_activated": "Configuration OHADA activée",
+      "ohada_description": "Plan comptable SYSCOHADA, support Mobile Money, conformité fiscale locale.",
+      "name_label": "Nombre de l'entreprise",
+      "name_placeholder_african": "Entreprise SARL-U",
+      "name_placeholder_default": "Mon Entreprise SARL",
+      "legal_form": "Forme juridique",
+      "legal_forms": {
+        "select": "Sélectionner...",
+        "sarl": "SARL (Société à Responsabilité Limitée)",
+        "suarl": "SUARL (Société Unipersonnelle à Responsabilité Limitée)",
+        "sa": "SA (Société Anonyme)",
+        "sas": "SAS (Société par Actions Simplifiée)",
+        "gie": "GIE (Groupement d'Intérêt Économique)",
+        "ei": "EI (Entreprise Individuelle)"
+      },
+      "tax_number": {
+        "african": "Numéro d'Identification Fiscale (NIF)",
+        "france": "SIREN/SIRET",
+        "belgium": "TVA BE",
+        "default": "Numéro fiscal"
+      },
+      "tax_number_placeholder": {
+        "african": "Ex: 2024123456789",
+        "france": "12345678901234",
+        "belgium": "BE0123456789",
+        "default": "Numéro fiscal"
+      },
+      "capital_label": "Capital social (en CFA)",
+      "capital_placeholder": "1000000",
+      "capital_minimum": "Capital minimum : 1,000,000 CFA pour SARL, 10,000,000 CFA pour SA",
+      "sector_label": "Secteur d'activité",
+      "sectors": {
+        "select": "Sélectionner...",
+        "african": {
+          "agriculture": "Agriculture et élevage",
+          "commerce": "Commerce et distribution",
+          "services": "Services",
+          "industrie": "Industrie et manufacturing",
+          "btp": "BTP et construction",
+          "transport": "Transport et logistique",
+          "telecom": "Télécommunications",
+          "finance": "Services financiers",
+          "education": "Éducation et formation",
+          "sante": "Santé",
+          "tourisme": "Tourisme et hôtellerie",
+          "energie": "Énergie et mines"
+        },
+        "default": {
+          "commerce": "Commerce",
+          "services": "Services",
+          "industrie": "Industrie",
+          "btp": "BTP",
+          "it": "Informatique",
+          "consulting": "Conseil"
+        }
+      }
+    },
+    "mobile_money": {
+      "title": "Mobile Money",
+      "description": "Configurez les moyens de paiement mobile populaires dans su région.",
+      "not_applicable": "Mobile Money non applicable",
+      "not_applicable_description": "Cette fonctionnalité est spécifique aux marchés africains.",
+      "providers_label": "Moyens de paiement mobile à activer",
+      "providers": {
+        "benin": {
+          "mtn": "MTN Mobile Money",
+          "moov": "Moov Money"
+        },
+        "ivory_coast": {
+          "orange": "Orange Money",
+          "mtn": "MTN Mobile Money",
+          "moov": "Moov Money"
+        },
+        "burkina_faso": {
+          "orange": "Orange Money",
+          "moov": "Moov Money"
+        },
+        "mali": {
+          "orange": "Orange Money",
+          "moov": "Moov Money"
+        },
+        "senegal": {
+          "orange": "Orange Money",
+          "wave": "Wave",
+          "free": "Free Money"
+        },
+        "togo": {
+          "flooz": "Flooz",
+          "tmoney": "T-Money"
+        }
+      },
+      "note_title": "Note importante",
+      "note_description": "L'intégration Mobile Money nécessite des partenariats avec les opérateurs. Ces options seront disponibles dans une version future de CassKai."
+    },
+    "admin": {
+      "email_label": "Correo administrateur",
+      "email_placeholder": "admin@monentreprise.com",
+      "password_label": "Mot de passe",
+      "password_placeholder": "Mot de passe sécurisé",
+      "final_config": "Configuration finale",
+      "tasks": {
+        "database": "Installation du schéma de base de datos",
+        "accounting_plan": "Import du plan comptable {{standard}}",
+        "currencies": "Configuration des devises et taux",
+        "features": "Activation des fonctionnalités locales",
+        "mobile_money": "Configuration Mobile Money ({{count}} opérateurs)"
+      }
+    },
+    "navigation": {
+      "previous": "Précédent",
+      "next": "Suivant",
+      "finish": "Finaliser l'installation",
+      "step_of": "Paso {{current}} sur {{total}}"
+    },
+    "validation": {
+      "required": "Ce champ est obligatoire",
+      "email_invalid": "Dirección email invalide",
+      "password_min": "Le mot de passe doit contenir au moins 8 caractères",
+      "company_name_required": "Le nom de l'entreprise est requis",
+      "supabase_connection_required": "La connexion Supabase doit être testée"
+    },
+    "installation": {
+      "starting": "Démarrage de l'installation...",
+      "creating_database": "Création de la base de datos...",
+      "importing_accounting": "Import du plan comptable...",
+      "configuring_company": "Configuration de l'entreprise...",
+      "creating_admin": "Création du compte administrateur...",
+      "finalizing": "Finalisation...",
+      "completed": "Installation terminée avec succès !",
+      "error": "Error lors de l'installation",
+      "redirecting": "Redirection vers Casskai...",
+      "please_wait": "Veuillez patienter, cela peut prendre quelques minutes."
+    },
+    "features": {
+      "ohada_compliance": "Conformité OHADA",
+      "mobile_money_integration": "Intégration Mobile Money",
+      "local_tax_compliance": "Conformité fiscale locale",
+      "multi_currency": "Multi-devises",
+      "automatic_exchange_rates": "Taux de change automatiques",
+      "local_banking": "Connexions bancaires locales",
+      "regulatory_reports": "Informes réglementaires",
+      "fiscal_calendar": "Calendrier fiscal local"
+    },
+    "currencies": {
+      "eur": "Euro",
+      "xof": "Franc CFA BCEAO",
+      "xaf": "Franc CFA BEAC",
+      "usd": "Dollar américain",
+      "cad": "Dollar canadien",
+      "gbp": "Livre sterling"
+    },
+    "standards": {
+      "pcg": "Plan Comptable Général (France)",
+      "pcg_belge": "Plan Comptable Général Belge",
+      "syscohada": "SYSCOHADA (Afrique de l'Ouest)",
+      "gaap": "GAAP (Canada)",
+      "ifrs": "IFRS International"
+    }
+  },
+  "company": {
+    "management": {
+      "title": "Gestion des Entreprises",
+      "description": "Créez et gérez sus entreprises",
+      "create": "Crear une entreprise",
+      "edit": "Modificar l'entreprise",
+      "delete": "Eliminar l'entreprise",
+      "switch": "Changer d'entreprise",
+      "no_companies": "Aucune entreprise créée",
+      "create_first": "Créez su primera entreprise pour commencer",
+      "current_company": "Entreprise actuelle",
+      "select_company": "Sélectionner une entreprise"
+    },
+    "fields": {
+      "trading_name": "Nombre commercial",
+      "legal_name": "Raison sociale",
+      "registration_number": "N° d'immatriculation",
+      "vat_number": "N° TVA",
+      "tax_number": "N° fiscal",
+      "legal_form": "Forme juridique",
+      "share_capital": "Capital social",
+      "business_sector": "Secteur d'activité",
+      "accounting_standard": "Standard comptable",
+      "base_currency": "Moneda de base",
+      "fiscal_year_start": "Début exercice fiscal",
+      "fiscal_year_end": "Fin exercice fiscal"
+    }
+  },
+  "mobile_money": {
+    "title": "Mobile Money",
+    "description": "Gestion des paiements mobile",
+    "providers": "Opérateurs",
+    "transactions": "Transactions",
+    "balance": "Solde",
+    "transfer": "Transfert",
+    "top_up": "Recharge",
+    "withdraw": "Retrait",
+    "fees": "Frais",
+    "history": "Historique"
+  },
+  "geography": {
+    "countries": {
+      "BJ": "Bénin",
+      "CI": "Côte d'Ivoire",
+      "BF": "Burkina Faso",
+      "ML": "Mali",
+      "SN": "Sénégal",
+      "TG": "Togo",
+      "FR": "France",
+      "BE": "Belgique",
+      "CA": "Canada",
+      "US": "États-Unis",
+      "GB": "Royaume-Uni"
+    },
+    "regions": {
+      "west_africa": "Afrique de l'Ouest",
+      "europe": "Europe",
+      "north_america": "Amérique du Nord"
+    }
+  },
+  "accounting_standards": {
+    "SYSCOHADA": "SYSCOHADA",
+    "PCG": "Plan Comptable Général",
+    "GAAP": "GAAP",
+    "IFRS": "IFRS"
+  },
+  "legal_forms": {
+    "african": {
+      "SARL": "SARL",
+      "SUARL": "SUARL",
+      "SA": "SA",
+      "SAS": "SAS",
+      "GIE": "GIE",
+      "EI": "EI"
+    },
+    "french": {
+      "SARL": "SARL",
+      "EURL": "EURL",
+      "SA": "SA",
+      "SAS": "SAS",
+      "SASU": "SASU",
+      "SNC": "SNC",
+      "EI": "EI",
+      "EIRL": "EIRL"
+    }
+  },
+  "currencies_extended": {
+    "XOF": {
+      "name": "Franc CFA BCEAO",
+      "symbol": "CFA",
+      "format": "{{amount}} CFA"
+    },
+    "XAF": {
+      "name": "Franc CFA BEAC",
+      "symbol": "FCFA",
+      "format": "{{amount}} FCFA"
+    },
+    "EUR": {
+      "name": "Euro",
+      "symbol": "€",
+      "format": "{{amount}} €"
+    },
+    "USD": {
+      "name": "Dollar américain",
+      "symbol": "$",
+      "format": "${{amount}}"
+    },
+    "CAD": {
+      "name": "Dollar canadien",
+      "symbol": "CAD",
+      "format": "{{amount}} CAD"
+    }
+  },
+  "installation": {
+    "wizard": {
+      "title": "Assistant d'Installation",
+      "subtitle": "Configuration de su instance Casskai",
+      "progress": "Progression : {{step}}/{{total}}",
+      "estimated_time": "Temps estimé : {{minutes}} minutes"
+    },
+    "status": {
+      "not_started": "No démarré",
+      "in_progress": "En cours",
+      "completed": "Completado",
+      "failed": "Échec",
+      "skipped": "Ignoré"
+    }
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Bienvenue dans CassKai !",
+      "subtitle": "Nous sommes ravis de vous accompagner dans la gestion de su entreprise. Configurons ensemble su plateforme en quelques étapes simples.",
+      "whatYouGet": "Ce que vous obtenez avec CassKai",
+      "nextSteps": "Les étapes suivantes",
+      "startSetup": "Commencer la configuration",
+      "duration": "⏱️ Configuration estimée : 3-5 minutes"
+    },
+    "steps": {
+      "features": "Fonctionnalités",
+      "featuresDesc": "Découvrez nos modules",
+      "preferences": "Préférences",
+      "preferencesDesc": "Personnalisez su expérience",
+      "company": "Entreprise",
+      "companyDesc": "Configurez su société"
+    },
+    "features": {
+      "title": "Choisissez sus fonctionnalités",
+      "subtitle": "Sélectionnez les modules qui correspondent à sus besoins. Vous pourrez toujours les modifier plus tard."
+    },
+    "preferences": {
+      "title": "Configurez sus préférences",
+      "subtitle": "Personnalisez su expérience CassKai selon sus besoins"
+    },
+    "company": {
+      "title": "Informacións de su entreprise",
+      "subtitle": "Renseignez les détails de su société"
+    },
+    "complete": {
+      "welcomeTitle": "Bienvenue dans CassKai !",
+      "welcomeSubtitle": "Votre plateforme est prête ! Vous pouvez maintenant commencer à gérer su entreprise avec CassKai.",
+      "configuringTitle": "Configuration en cours...",
+      "configuringSubtitle": "Estamos preparando su espacio de trabajo personalizado..."
+    },
+    "completion": {
+      "title": "Configuration terminée !",
+      "subtitle": "Votre instance Casskai est maintenant opérationnelle",
+      "next_steps": "Prochaines étapes",
+      "explore_dashboard": "Explorer le tableau de bord",
+      "invite_team": "Invitar a su equipo",
+      "import_data": "Importar sus datos"
+    }
+  },
+  "business_sectors": {
+    "african": {
+      "agriculture": "Agriculture et élevage",
+      "commerce": "Commerce et distribution",
+      "services": "Services",
+      "industrie": "Industrie et manufacturing",
+      "btp": "BTP et construction",
+      "transport": "Transport et logistique",
+      "telecom": "Télécommunications",
+      "finance": "Services financiers",
+      "education": "Éducation et formation",
+      "sante": "Santé",
+      "tourisme": "Tourisme et hôtellerie",
+      "energie": "Énergie et mines",
+      "mining": "Mines et extraction",
+      "textiles": "Textile et confection",
+      "food_processing": "Agroalimentaire"
+    },
+    "european": {
+      "commerce": "Commerce",
+      "services": "Services",
+      "industrie": "Industrie",
+      "btp": "BTP",
+      "it": "Informatique",
+      "consulting": "Conseil",
+      "finance": "Finance",
+      "real_estate": "Immobilier",
+      "healthcare": "Santé",
+      "education": "Éducation",
+      "hospitality": "Hôtellerie-restauration",
+      "media": "Médias et communication"
+    }
+  },
+  "pricing": {
+    "plans": {
+      "starter": {
+        "name": "Starter",
+        "price_eur": "19€/mois",
+        "price_xof": "12K FCFA/mois",
+        "price_cad": "25$ CAD/mois"
+      },
+      "professional": {
+        "name": "Professionnel",
+        "price_eur": "49€/mois",
+        "price_xof": "32K FCFA/mois",
+        "price_cad": "65$ CAD/mois"
+      },
+      "enterprise": {
+        "name": "Entreprise",
+        "price_eur": "99€/mois",
+        "price_xof": "65K FCFA/mois",
+        "price_cad": "129$ CAD/mois"
+      }
+    },
+    "features": {
+      "companies": "Entreprises",
+      "users": "Utilisateurs",
+      "transactions": "Transactions/mois",
+      "storage": "Stockage",
+      "support": "Soporte",
+      "api_access": "Accès API",
+      "custom_reports": "Informes personnalisés",
+      "mobile_money": "Mobile Money",
+      "multi_currency": "Multi-devises",
+      "bank_sync": "Synchronisation bancaire"
+    }
+  },
+  "regions_detailed": {
+    "west_africa": {
+      "name": "Afrique de l'Ouest",
+      "description": "Zone économique et monétaire ouest-africaine",
+      "currency": "Franc CFA BCEAO (XOF)",
+      "central_bank": "Banco Centrale des États de l'Afrique de l'Ouest",
+      "accounting_standard": "SYSCOHADA",
+      "countries": [
+        "Bénin",
+        "Burkina Faso",
+        "Côte d'Ivoire",
+        "Mali",
+        "Niger",
+        "Sénégal",
+        "Togo",
+        "Guinée-Bissau"
+      ]
+    },
+    "central_africa": {
+      "name": "Afrique Centrale",
+      "description": "Zone économique et monétaire d'Afrique centrale",
+      "currency": "Franc CFA BEAC (XAF)",
+      "central_bank": "Banco des États de l'Afrique Centrale",
+      "accounting_standard": "SYSCOHADA",
+      "countries": [
+        "Cameroun",
+        "République centrafricaine",
+        "Tchad",
+        "République du Congo",
+        "Guinée équatoriale",
+        "Gabon"
+      ]
+    }
+  },
+  "fiscal_calendars": {
+    "france": {
+      "year_start": "01-01",
+      "year_end": "12-31",
+      "vat_periods": [
+        "monthly",
+        "quarterly"
+      ],
+      "major_deadlines": {
+        "vat_annual": "05-02",
+        "corporate_tax": "05-15",
+        "social_declarations": "01-31"
+      }
+    },
+    "ohada": {
+      "year_start": "01-01",
+      "year_end": "12-31",
+      "vat_periods": [
+        "monthly"
+      ],
+      "major_deadlines": {
+        "vat_monthly": "15",
+        "corporate_tax": "04-30",
+        "annual_returns": "04-30"
+      }
+    }
+  },
+  "mobile_money_operators": {
+    "orange_money": {
+      "name": "Orange Money",
+      "countries": [
+        "CI",
+        "BF",
+        "ML",
+        "SN"
+      ],
+      "services": [
+        "transfer",
+        "payment",
+        "top_up",
+        "withdraw"
+      ],
+      "fees": {
+        "transfer_local": "1%",
+        "transfer_international": "2.5%",
+        "payment": "0.5%"
+      }
+    },
+    "mtn_mobile_money": {
+      "name": "MTN Mobile Money",
+      "countries": [
+        "BJ",
+        "CI"
+      ],
+      "services": [
+        "transfer",
+        "payment",
+        "top_up",
+        "withdraw"
+      ],
+      "fees": {
+        "transfer_local": "1.2%",
+        "payment": "0.8%"
+      }
+    },
+    "moov_money": {
+      "name": "Moov Money",
+      "countries": [
+        "BJ",
+        "CI",
+        "BF",
+        "ML"
+      ],
+      "services": [
+        "transfer",
+        "payment",
+        "top_up"
+      ],
+      "fees": {
+        "transfer_local": "1.1%",
+        "payment": "0.6%"
+      }
+    },
+    "wave": {
+      "name": "Wave",
+      "countries": [
+        "SN"
+      ],
+      "services": [
+        "transfer",
+        "payment"
+      ],
+      "fees": {
+        "transfer_local": "0%",
+        "payment": "1%"
+      }
+    },
+    "flooz": {
+      "name": "Flooz",
+      "countries": [
+        "TG"
+      ],
+      "services": [
+        "transfer",
+        "payment",
+        "top_up"
+      ],
+      "fees": {
+        "transfer_local": "1%",
+        "payment": "0.7%"
+      }
+    }
+  },
+  "market_features": {
+    "france": [
+      "RGPD",
+      "FEC",
+      "SEPA",
+      "TVA EU",
+      "DSN",
+      "DAS2"
+    ],
+    "belgium": [
+      "RGPD",
+      "BNB",
+      "Bancontact",
+      "TVA EU"
+    ],
+    "benin": [
+      "OHADA",
+      "Mobile Money",
+      "DGI",
+      "CNSS",
+      "Douanes"
+    ],
+    "ivory_coast": [
+      "OHADA",
+      "Orange Money",
+      "DGI",
+      "CNPS"
+    ],
+    "burkina_faso": [
+      "OHADA",
+      "Mobile Money",
+      "DGID",
+      "CNSS"
+    ],
+    "mali": [
+      "OHADA",
+      "Orange Money",
+      "DGI",
+      "INPS"
+    ],
+    "senegal": [
+      "OHADA",
+      "Wave",
+      "DGI",
+      "CSS"
+    ],
+    "togo": [
+      "OHADA",
+      "Flooz",
+      "OTR",
+      "CNSS"
+    ],
+    "canada": [
+      "TPS/TVQ",
+      "ARC",
+      "Interac",
+      "CRA"
+    ]
+  },
+  "connectAndTrackBanks": "Connectez et suivez sus bancos",
+  "manage": "Gérer",
+  "viewTransactions": "Ver transactions",
+  "disconnect": "Déconnecter",
+  "connectBank": "Connecter une banco",
+  "bankReconciliation": "Rapprochement bancaire",
+  "transactionCategorization": "Catégorisation des transactions",
+  "cashFlowForecast": "Prévision de trésorerie",
+  "reconcileTransactions": "Rapprocher les transactions",
+  "aiCategorization": "Catégorisation IA",
+  "historyBasedProjections": "Projections basées sur l'historique",
+  "secureBankConnection": "Connexion bancaire sécurisée",
+  "secureBankConnectionDisclaimer": "Toutes les connexions bancaires sont sécurisées et cryptées",
+  "lastSyncToday": "Dernière synchro aujourd'hui",
+  "lastSyncYesterday": "Dernière synchro hier",
+  "noAccountsConnected": "Aucun compte connecté",
+  "connectFirstAccountPrompt": "Connectez su primer compte",
+  "light": "Clair",
+  "dark": "Sombre",
+  "system": "Système",
+  "noCompanySelectedTitle": "Aucune entreprise sélectionnée",
+  "addInvoice": "Añadir factura",
+  "noEmail": "Pas d'email",
+  "viewDetails": "Ver détails",
+  "message": "Message",
+  "error_description": "Descripción d'erreur",
+  "humanresourcespage": {
+    "grez_votre_personnel_congs_notes_de_frais_et_paie": "Gérez su personnel, congés, notes de frais et paie",
+    "ajouter_employe": "Añadir Employé",
+    "nouvel_employ": "Nouvel Employé",
+    "prnom": "Nombre",
+    "nom": "Nombre",
+    "email_professionnel": "Correo professionnel",
+    "tlphone": "Teléfono",
+    "poste": "Poste",
+    "dpartement": "Département",
+    "date_dembauche": "Fecha d'embauche",
+    "salaire_brut_mois": "Salaire brut (€/mois)",
+    "type_de_contrat": "Type de contrat",
+    "adresse": "Dirección",
+    "employs": "Employés",
+    "commercial": "Commercial",
+    "comptabilit": "Contabilidad",
+    "informatique": "Informatique",
+    "marketing": "Marketing",
+    "production": "Production",
+    "ressources_humaines": "Recursos Humanos",
+    "actif": "Activo",
+    "inactif": "Inactivo",
+    "cdi": "CDI",
+    "cdd": "CDD",
+    "stage": "Stage",
+    "freelance": "Freelance"
+  },
+  "inventorypage": {
+    "grez_vos_stocks_de_marchandises_et_suivi_de_production": "Gérez sus stocks de marchandises et suivi de production",
+    "articles_en_stock": "Articles en stock",
+    "nouvel_article": "Nouvel article",
+    "nom_de_larticle": "Nombre de l'article",
+    "rfrence": "Référence",
+    "catgorie": "Catégorie",
+    "prix_dachat_": "Prix d'achat (€)",
+    "prix_de_vente_": "Prix de vente (€)",
+    "stock_initial": "Stock initial",
+    "stock_minimum": "Stock minimum",
+    "unit": "Unité",
+    "emplacement": "Emplacement",
+    "matires_premires": "Matières primeros",
+    "produits_finis": "Produits finis",
+    "fournitures": "Fournitures",
+    "services": "Services",
+    "unit_": "Unité",
+    "kg": "Kg",
+    "litres": "Litres",
+    "pices": "Pièces",
+    "heures": "Heures",
+    "mtres": "Mètres",
+    "entrept_principal": "Entrepôt principal",
+    "entrept_secondaire": "Entrepôt secondaire",
+    "magasin": "Magasin",
+    "bureau": "Bureau"
+  },
+  "projectspage": {
+    "suivez_vos_projets_internes_et_clients": "Suivez sus projets internes et clients",
+    "nouveau_projet": "Nuevo projet",
+    "nom_du_projet": "Nombre du projet",
+    "description": "Descripción",
+    "client": "Client",
+    "chef_de_projet": "Chef de projet",
+    "date_de_dbut": "Fecha de début",
+    "date_de_fin_prvue": "Fecha de fin prévue",
+    "budget_": "Presupuesto (€)",
+    "statut": "Statut",
+    "projets": "Proyectos",
+    "planifi": "Planifié",
+    "en_cours": "En cours",
+    "en_attente": "Pendiente",
+    "termin": "Completado",
+    "annul": "Annulé",
+    "voir_projet": "Ver projet",
+    "modifier": "Modificar",
+    "supprimer": "Eliminar",
+    "aucun_projet": "Aucun projet",
+    "premier_projet": "Premier projet"
+  },
+  "security": {
+    "title": "Sécurité et Confidentialité",
+    "score": "Score",
+    "generate_report": "Générer un rapport",
+    "tabs": {
+      "security": "Sécurité",
+      "privacy": "Confidentialité",
+      "gdpr": "RGPD",
+      "incidents": "Incidents",
+      "compliance": "Conformité"
+    },
+    "overview": {
+      "title": "Aperçu de la sécurité",
+      "description": "Surveillez et configurez sus paramètres de sécurité",
+      "security_score": "Score de sécurité",
+      "open_incidents": "Incidents ouverts",
+      "audit_logging": "Journalisation d'audit"
+    },
+    "authentication": {
+      "title": "Configuración d'authentification",
+      "two_factor": {
+        "title": "Authentification à deux facteurs",
+        "description": "Exiger la 2FA pour tous les cuentas utilisateur"
+      },
+      "password_policy": {
+        "title": "Politique de mot de passe",
+        "description": "Définir les exigences de complexité des mots de passe",
+        "min_length": "Longueur minimale",
+        "require_uppercase": "Exiger des majuscules",
+        "require_numbers": "Exiger des chiffres",
+        "require_symbols": "Exiger des symboles"
+      },
+      "session_timeout": {
+        "title": "Délai d'expiration de session",
+        "description": "Durée d'inactivité avant déconnexion automatique",
+        "minutes": "minutes"
+      }
+    },
+    "access_control": {
+      "title": "Contrôle d'accès",
+      "ip_whitelist": {
+        "title": "Liste blanche IP",
+        "description": "Restreindre l'accès à des adresses IP spécifiques"
+      },
+      "role_permissions": {
+        "title": "Permissions par rôle",
+        "description": "Gérer les autorisations basées sur les rôles"
+      }
+    },
+    "privacy": {
+      "title": "Configuración de confidentialité",
+      "data_retention": {
+        "title": "Rétention des datos",
+        "description": "Définir la durée de conservation des datos",
+        "days": "jours"
+      },
+      "data_export": {
+        "title": "Exportation des datos",
+        "description": "Permettre aux utilisateurs d'exporter leurs datos",
+        "export_button": "Exportar mes datos"
+      },
+      "cookies": {
+        "title": "Gestion des cookies",
+        "essential": "Cookies essentiels",
+        "analytics": "Cookies analytiques",
+        "marketing": "Cookies marketing"
+      }
+    },
+    "termsOfService": {
+      "title": "Conditions Générales d'Utilisation",
+      "subtitle": "Les règles qui régissent l'utilisation de CassKai",
+      "lastUpdated": "Dernière mise à jour",
+      "preamble": {
+        "title": "Préambule",
+        "content": "Les présentes Conditions Générales d'Utilisation (CGU) régissent l'utilisation de la plateforme CassKai, éditée par Noutche Conseil SAS, société par actions simplifiée au capital de 1 500,00 euros.",
+        "legalInfo": "Informacións légales de l'éditeur :",
+        "company": {
+          "name": "Noutche Conseil SAS",
+          "legalForm": "Société par Actions Simplifiée Unipersonnelle",
+          "capital": "1 500,00 €",
+          "siren": "909 672 685",
+          "siret": "909 672 685 00023",
+          "rcs": "Evry 909 672 685",
+          "vat": "FR85909672685",
+          "nafCode": "70.22Z",
+          "collectiveAgreement": "IDCC 1486"
+        },
+        "fields": {
+          "denomination": "Dénomination :",
+          "legalForm": "Forme juridique :",
+          "capital": "Capital social :",
+          "siren": "SIREN :",
+          "siret": "SIRET :",
+          "rcs": "RCS :",
+          "vat": "TVA :",
+          "nafCode": "Code NAF :",
+          "collectiveAgreement": "Convention collective :"
+        }
+      },
+      "definitions": {
+        "title": "Définitions",
+        "platform": "CassKai ou la Plateforme : La solution logicielle de gestion d'entreprise accessible via www.casskai.app",
+        "editor": "L'Éditeur : Noutche Conseil SAS, société éditrice de CassKai",
+        "user": "L'Utilisateur : Toute personne physique ou morale utilisant CassKai",
+        "client": "Le Client : L'Utilisateur ayant souscrit à un abonnement payant",
+        "services": "Les Services : L'ensemble des fonctionnalités proposées par CassKai",
+        "data": "Les Données : Informacións saisies, stockées ou traitées via CassKai",
+        "account": "Le Compte : Espace personnel de l'Utilisateur sur CassKai"
+      },
+      "acceptance": {
+        "title": "Acceptation des CGU",
+        "content": "L'utilisation de CassKai implique l'acceptation pleine et entière des présentes CGU",
+        "binding": "Ces conditions sont opposables dès la primera utilisation",
+        "updates": "L'Éditeur se réserve le droit de modifier les CGU à tout moment",
+        "notification": "Les modifications seront notifiées aux Utilisateurs"
+      }
+    },
+    "privacyPolicy": {
+      "title": "Politique de Confidentialité",
+      "subtitle": "CassKai s'engage à protéger et respecter su vie privée",
+      "lastUpdated": "Dernière mise à jour",
+      "company": {
+        "name": "Noutche Conseil SASU",
+        "siren": "909 672 685",
+        "siret": "909 672 685 00023",
+        "rcs": "909 672 685 R.C.S. Evry",
+        "address": "Inscrit au greffe d'Evry"
+      },
+      "introduction": {
+        "title": "Introduction",
+        "content": "Noutche Conseil SAS, société éditrice de CassKai (ci-après \"nous\", \"notre\" ou \"CassKai\"), s'engage à protéger et à respecter su vie privée. Cette politique de confidentialité explique comment nous collectons, utilisons, partageons et protégeons sus informations personnelles lorsque vous utilisez notre plateforme de gestion d'entreprise.",
+        "companyInfo": "Informacións sur l'entreprise :",
+        "legalName": "Raison sociale :",
+        "registrationNumber": "SIREN :",
+        "businessNumber": "SIRET :",
+        "commercialRegister": "RCS :",
+        "registeredAddress": "Dirección :"
+      },
+      "dataCollection": {
+        "title": "Données que nous collectons",
+        "identification": {
+          "title": "1. Informacións d'identification :",
+          "items": [
+            "Nombre, prénom, adresse email",
+            "Numéro de téléphone",
+            "Informacións de l'entreprise (nom, SIREN, adresse)",
+            "Photo de profil (optionnelle)"
+          ]
+        },
+        "usage": {
+          "title": "2. Données d'utilisation :",
+          "items": [
+            "Logs de connexion et d'activité",
+            "Dirección IP et informations sur l'appareil",
+            "Pages visitées et fonctionnalités utilisées",
+            "Préférences et paramètres"
+          ]
+        },
+        "business": {
+          "title": "3. Données métier :",
+          "items": [
+            "Données comptables et financières",
+            "Informacións clients et fournisseurs",
+            "Facturas et devis",
+            "Documents et fichiers uploadés"
+          ]
+        }
+      },
+      "dataUsage": {
+        "title": "Utilisation de sus datos",
+        "purposes": [
+          "Fournir et maintenir nos services",
+          "Personnaliser su expérience utilisateur",
+          "Traiter sus demandes et transactions",
+          "Vous envoyer des communications importantes",
+          "Améliorer nos services et développer de nouvelles fonctionnalités",
+          "Assurer la sécurité et prévenir la fraude",
+          "Respecter nos obligations légales"
+        ]
+      },
+      "dataSharing": {
+        "title": "Partage de sus datos",
+        "intro": "Nous ne vendons jamais sus datos personnelles. Nous pouvons partager sus informations uniquement dans les cas suivants :",
+        "cases": [
+          "Avec su consentement explicite",
+          "Avec nos prestataires de services de confiance (hébergement, support technique)",
+          "Pour se conformer à une obligation légale",
+          "Pour protéger nos droits et notre sécurité",
+          "En cas de fusion, acquisition ou vente d'actifs"
+        ]
+      },
+      "dataSecurity": {
+        "title": "Sécurité des datos",
+        "intro": "Nous mettons en place des mesures techniques et organisationnelles appropriées pour protéger sus datos :",
+        "measures": [
+          "Chiffrement des datos en transit et au repos",
+          "Contrôles d'accès stricts",
+          "Surveillance continue de la sécurité",
+          "Sauvegardes régulières et sécurisées",
+          "Formation du personnel sur la protection des datos",
+          "Audits de sécurité réguliers"
+        ]
+      },
+      "yourRights": {
+        "title": "Vos droits",
+        "intro": "Conformément au RGPD, vous disposez des droits suivants :",
+        "rights": [
+          "Droit d'accès à sus datos personnelles",
+          "Droit de rectification des datos inexactes",
+          "Droit à l'effacement (\"droit à l'oubli\")",
+          "Droit à la limitation du traitement",
+          "Droit à la portabilité des datos",
+          "Droit d'opposition au traitement",
+          "Droit de retirer su consentement",
+          "Droit d'introduire une réclamation auprès de la CNIL"
+        ],
+        "exercise": "Pour exercer ces droits, contactez-nous à"
+      },
+      "dataRetention": {
+        "title": "Conservation des datos",
+        "periods": [
+          "Données de compte : conservées tant que su compte est actif",
+          "Données de facturation : conservées 10 ans (obligation légale)",
+          "Logs de connexion : conservés 1 an",
+          "Données marketing : conservées 3 ans après le dernier contact"
+        ],
+        "deletion": "Après ces périodes, sus datos sont automatiquement supprimées ou anonymisées."
+      },
+      "cookies": {
+        "title": "Cookies et technologies similaires",
+        "description": "Nous utilisons des cookies pour améliorer su expérience. Vous pouvez gérer sus préférences de cookies dans les paramètres de su navigateur.",
+        "types": {
+          "essential": "Cookies essentiels : nécessaires au fonctionnement du site",
+          "analytics": "Cookies analytiques : pour comprendre l'utilisation du site",
+          "preferences": "Cookies de préférences : pour mémoriser sus choix"
+        }
+      },
+      "updates": {
+        "title": "Modifications de cette politique",
+        "content": "Nous pouvons mettre à jour cette politique de confidentialité. Les modifications importantes vous seront notifiées par email ou via notre plateforme."
+      },
+      "contact": {
+        "title": "Nous contacter",
+        "intro": "Pour toute question concernant cette politique de confidentialité ou sus datos personnelles, contactez-nous :",
+        "dpo": "Délégué à la Protection des Données"
+      }
+    },
+    "gdpr": {
+      "title": "Conformité RGPD",
+      "status": "Statut de conformité",
+      "compliant": "Conforme",
+      "non_compliant": "No conforme",
+      "requests": {
+        "title": "Demandes RGPD",
+        "new_request": "Nouvelle demande",
+        "type": "Type",
+        "status": "Statut",
+        "date": "Fecha",
+        "action": "Action",
+        "types": {
+          "access": "Accès aux datos",
+          "portability": "Portabilité des datos",
+          "rectification": "Rectification",
+          "erasure": "Effacement"
+        },
+        "statuses": {
+          "pending": "Pendiente",
+          "processing": "En traitement",
+          "completed": "Completado",
+          "rejected": "Rejeté"
+        }
+      },
+      "data_processing": {
+        "title": "Registre des traitements",
+        "purpose": "Finalité",
+        "legal_basis": "Base légale",
+        "categories": "Catégories de datos"
+      }
+    },
+    "incidents": {
+      "title": "Incidents de sécurité",
+      "report_incident": "Signaler un incident",
+      "severity": "Gravité",
+      "status": "Statut",
+      "date": "Fecha",
+      "description": "Descripción",
+      "severities": {
+        "low": "Faible",
+        "medium": "Moyenne",
+        "high": "Élevée",
+        "critical": "Critique"
+      },
+      "statuses": {
+        "open": "Ouvert",
+        "investigating": "En investigation",
+        "resolved": "Résolu",
+        "closed": "Fermé"
       }
     },
     "compliance": {
-      "title": "Informe de Cumplimiento",
-      "generate": "Generar Informe",
-      "last_generated": "Último Informe Generado",
+      "title": "Rapport de conformité",
+      "generate": "Générer le rapport",
+      "last_generated": "Dernier rapport généré",
       "download": "Descargar",
-      "score": "Puntuación de Cumplimiento",
+      "score": "Score de conformité",
       "areas": {
-        "authentication": "Autenticación",
-        "data_protection": "Protección de Datos",
-        "access_control": "Control de Acceso",
-        "audit_logging": "Registro de Auditoría",
-        "incident_response": "Respuesta a Incidentes"
+        "authentication": "Authentification",
+        "data_protection": "Protection des datos",
+        "access_control": "Contrôle d'accès",
+        "audit_logging": "Journalisation d'audit",
+        "incident_response": "Réponse aux incidents"
       }
     },
     "buttons": {
       "save": "Guardar",
       "cancel": "Cancelar",
       "delete": "Eliminar",
-      "edit": "Editar",
+      "edit": "Modificar",
       "view": "Ver",
       "download": "Descargar",
       "export": "Exportar",
-      "generate": "Generar",
-      "enable": "Activar",
-      "disable": "Desactivar"
+      "generate": "Générer",
+      "enable": "Activer",
+      "disable": "Désactiver"
     },
     "messages": {
-      "settings_updated": "Configuración de Seguridad Actualizada",
-      "settings_update_success": "Tu configuración de seguridad se ha guardado correctamente.",
-      "privacy_updated": "Configuración de Privacidad Actualizada",
-      "privacy_update_success": "Tus preferencias de privacidad se han guardado.",
-      "update_failed": "Actualización Fallida",
-      "update_failed_description": "Falló la actualización de la configuración de seguridad",
-      "report_generated": "Informe generado correctamente",
-      "export_started": "Exportación iniciada",
-      "incident_reported": "Incidente reportado correctamente"
+      "settings_updated": "Configuración de sécurité mis à jour",
+      "settings_update_success": "Vos paramètres de sécurité ont été sauvegardés avec succès.",
+      "privacy_updated": "Configuración de confidentialité mis à jour",
+      "privacy_update_success": "Vos préférences de confidentialité ont été sauvegardées.",
+      "update_failed": "Échec de la mise à jour",
+      "update_failed_description": "Échec de la mise à jour des paramètres de sécurité",
+      "report_generated": "Rapport généré avec succès",
+      "export_started": "Exportation démarrée",
+      "incident_reported": "Incident signalé avec succès"
     }
   },
-
+  "cookies": {
+    "title": "🍪 Nous utilisons des cookies",
+    "description": "CassKai utilise des cookies pour améliorer su expérience, analyser l'utilisation du site et personnaliser le contenu. Les cookies essentiels sont nécessaires au fonctionnement de l'application.",
+    "acceptAll": "Tout accepter",
+    "declineAll": "Tout refuser",
+    "customize": "Personnaliser mes choix",
+    "learnMore": "Politique de confidentialité",
+    "settings": {
+      "title": "Configuración des cookies",
+      "description": "Personnalisez sus préférences de cookies. Les cookies essentiels sont toujours activés car nécessaires au fonctionnement de l'application.",
+      "alwaysActive": "Toujours actifs",
+      "essential": {
+        "title": "✅ Cookies essentiels",
+        "description": "Ces cookies sont nécessaires au fonctionnement de l'application : authentification, session, sécurité."
+      },
+      "analytics": {
+        "title": "📊 Cookies analytiques",
+        "description": "Nous aident à comprendre comment vous utilisez CassKai pour améliorer l'expérience. Aucune donnée personnelle identifiable n'est collectée."
+      },
+      "marketing": {
+        "title": "🎯 Cookies marketing",
+        "description": "Permettent de vous proposer du contenu personnalisé et des publicités pertinentes sur d'autres sites web."
+      },
+      "cancel": "Cancelar",
+      "save": "Guardar mes préférences"
+    }
+  },
   "international": {
     "landing": {
-      "badge": "Presencia Internacional",
-      "title": "Donde sea que estés,",
-      "subtitle": "CassKai se adapta",
-      "description": "Nuestra plataforma se adapta automáticamente a las especificidades locales: monedas, regulaciones, idiomas y prácticas empresariales de cada país.",
+      "badge": "Présence internationale",
+      "title": "Partout où vous êtes,",
+      "subtitle": "CassKai s'adapte",
+      "description": "Notre plateforme s'adapte automatiquement aux spécificités locales : devises, réglementations, langues et pratiques commerciales de chaque pays.",
       "stats": {
-        "countries": "Países compatibles",
-        "currencies": "Monedas integradas", 
+        "countries": "País supportés",
+        "currencies": "Monedas intégrées",
         "languages": "Idiomas disponibles"
       },
       "regions": {
         "europe": {
-          "name": "Europa",
-          "description": "Cumplimiento RGPD y estándares europeos"
+          "name": "Europe",
+          "description": "Conformité RGPD et standards européens"
         },
         "west_africa": {
-          "name": "África Occidental",
-          "description": "Integración con sistemas bancarios locales"
+          "name": "Afrique de l'Ouest",
+          "description": "Intégration avec les systèmes bancaires locaux"
         },
         "central_africa": {
-          "name": "África Central", 
-          "description": "Adaptación a regulaciones CEMAC"
+          "name": "Afrique Centrale",
+          "description": "Adaptation aux régulations CEMAC"
         },
         "north_africa": {
-          "name": "África del Norte",
-          "description": "Soporte multilingüe árabe/francés"
+          "name": "Afrique du Nord",
+          "description": "Soporte multilingue arabe/français"
         },
         "east_africa": {
-          "name": "África Oriental",
-          "description": "Integración Mobile Money"
+          "name": "Afrique de l'Est",
+          "description": "Intégration Mobile Money"
         }
       },
-      "countries_label": "países",
-      "available_countries": "Países disponibles",
+      "countries_label": "pays",
+      "available_countries": "País disponibles",
       "cta": {
-        "title": "¿Tu país aún no está listado?",
-        "description": "Agregamos nuevos países regularmente. Contáctanos para discutir la integración de tu mercado local.",
-        "button": "Contáctanos"
+        "title": "Votre pays n'est pas encore listé ?",
+        "description": "Nous ajoutons régulièrement de nouveaux pays. Contactez-nous pour discuter de l'intégration de su marché local.",
+        "button": "Nous contacter"
       }
     },
     "settings": {
-      "preferences_updated": "Preferencias regionales actualizadas",
-      "currency_updated": "Moneda actualizada",
-      "auto_adaptations": "Adaptaciones automáticas para {country}: {changes}",
-      "currency_auto_hint": "Moneda establecida automáticamente según el país: {country}",
-      "currency_auto_selected": "Moneda seleccionada automáticamente según el país de la empresa",
-      "language_recommended": "Idioma recomendado para {country}: {language}",
-      "timezone_recommended": "Zona horaria recomendada para {country}: {timezone}"
+      "preferences_updated": "Préférences régionales mises à jour",
+      "currency_updated": "Moneda mise à jour",
+      "auto_adaptations": "Adaptations automatiques pour {country}: {changes}",
+      "currency_auto_hint": "Moneda automatiquement définie selon le pays : {country}",
+      "currency_auto_selected": "Moneda automatiquement sélectionnée selon le pays d'activité",
+      "language_recommended": "Idioma recommandée pour {country}: {language}",
+      "timezone_recommended": "Fuseau recommandé pour {country}: {timezone}"
     },
     "onboarding": {
-      "regional_preferences": "Preferencias regionales detectadas",
+      "regional_preferences": "Préférences régionales détectées",
       "currency_label": "Moneda",
-      "timezone_label": "Zona horaria",
-      "language_label": "Idioma", 
-      "auto_applied_hint": "Estos ajustes se aplicarán automáticamente y podrán modificarse posteriormente en configuración."
-    }
-  },
-
-  "currency": {
-    "formats": {
-      "capital_social": "Capital social ({currency})",
-      "annual_revenue": "Ingresos anuales ({currency})",
-      "estimation_hint": "Estimación o año fiscal anterior • Moneda: {currency} ({country})"
+      "timezone_label": "Fuseau",
+      "language_label": "Idioma",
+      "auto_applied_hint": "Ces paramètres seront appliqués automatiquement et pourront être modifiés plus tard dans les paramètres."
     }
   }
 }

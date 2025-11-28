@@ -25,7 +25,7 @@ export function useCountries() {
         setError(null);
         const data = await referentialsService.getCountries();
         setCountries(data);
-      } catch (err) {
+      } catch (error) {
         setError('Erreur lors du chargement des pays');
         console.error(error);
       } finally {
@@ -59,7 +59,7 @@ export function useSectors() {
         setError(null);
         const data = await referentialsService.getSectors();
         setSectors(data);
-      } catch (err) {
+      } catch (error) {
         setError('Erreur lors du chargement des secteurs');
         console.error(error);
       } finally {
@@ -74,7 +74,7 @@ export function useSectors() {
     try {
       const data = await referentialsService.searchSectors(searchTerm);
       return data;
-    } catch (err) {
+    } catch (error) {
       console.error('...', error);
       return sectors;
     }
@@ -103,7 +103,7 @@ export function useCompanySizes() {
         setError(null);
         const data = await referentialsService.getCompanySizes();
         setCompanySizes(data);
-      } catch (err) {
+      } catch (error) {
         setError('Erreur lors du chargement des tailles d\'entreprise');
         console.error(error);
       } finally {
@@ -139,7 +139,7 @@ export function useTimezones(popularOnly = false) {
           ? await referentialsService.getPopularTimezones()
           : await referentialsService.getTimezones();
         setTimezones(data);
-      } catch (err) {
+      } catch (error) {
         setError('Erreur lors du chargement des fuseaux horaires');
         console.error(error);
       } finally {
@@ -173,7 +173,7 @@ export function useCurrencies() {
         setError(null);
         const data = await referentialsService.getCurrencies();
         setCurrencies(data);
-      } catch (err) {
+      } catch (error) {
         setError('Erreur lors du chargement des devises');
         console.error(error);
       } finally {
@@ -213,7 +213,7 @@ export function useTaxRates(countryCode?: string) {
         setError(null);
         const data = await referentialsService.getTaxRates(countryCode);
         setTaxRates(data);
-      } catch (err) {
+      } catch (error) {
         setError('Erreur lors du chargement des taux de taxes');
         console.error(error);
       } finally {

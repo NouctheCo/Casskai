@@ -16,7 +16,7 @@ export function ProjectHeader({ onNewProject, itemVariants }: ProjectHeaderProps
   return (
     <motion.div
       className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0"
-      variants={itemVariants}
+      variants={itemVariants as any}
     >
       <div className="space-y-2">
         <div className="flex items-center space-x-2">

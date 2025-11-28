@@ -27,7 +27,12 @@ const LazyHumanResourcesPage = React.lazy(() => import('@/pages/HumanResourcesPa
 const LazySalesCrmPage = React.lazy(() => import('@/pages/SalesCrmPage'));
 const LazyBillingPage = React.lazy(() => import('@/pages/BillingPage'));
 const LazyPrivacyPolicyPage = React.lazy(() => import('@/pages/PrivacyPolicyPage'));
+const LazyTermsOfServicePage = React.lazy(() => import('@/pages/TermsOfServicePage'));
+const LazyTermsOfSalePage = React.lazy(() => import('@/pages/TermsOfSalePage'));
 const LazyCookiesPolicyPage = React.lazy(() => import('@/pages/CookiesPolicyPage'));
+const LazyLegalPage = React.lazy(() => import('@/pages/LegalPage'));
+const LazyRoadmapPage = React.lazy(() => import('@/pages/RoadmapPage'));
+const LazyFAQPage = React.lazy(() => import('@/pages/FAQPage'));
 const LazyGDPRPage = React.lazy(() => import('@/pages/GDPRPage'));
 const LazyDiagnosticPage = React.lazy(() => import('@/pages/DiagnosticPage'));
 const LazyDocumentationArticlePage = React.lazy(() => import('@/pages/DocumentationArticlePage'));
@@ -41,6 +46,7 @@ const LazyStripeCancelPage = React.lazy(() => import('@/pages/StripeCancelPage')
 const LazyBudgetPage = React.lazy(() => import('@/pages/BudgetPage'));
 const LazyAutomationPage = React.lazy(() => import('@/pages/AutomationPage'));
 const LazyThirdPartiesPage = React.lazy(() => import('@/pages/ThirdPartiesPage'));
+const LazyRGPDAdminDashboard = React.lazy(() => import('@/pages/admin/RGPDAdminDashboard'));
 
 const AppRouter: React.FC = () => {
   const { isAuthenticated, loading, onboardingCompleted, isCheckingOnboarding } = useAuth();
@@ -111,9 +117,34 @@ const AppRouter: React.FC = () => {
                 <LazyPrivacyPolicyPage />
               </Suspense>
             } />
+            <Route path="terms-of-service" element={
+              <Suspense fallback={<LoadingFallback />}>
+                <LazyTermsOfServicePage />
+              </Suspense>
+            } />
+            <Route path="terms-of-sale" element={
+              <Suspense fallback={<LoadingFallback />}>
+                <LazyTermsOfSalePage />
+              </Suspense>
+            } />
             <Route path="cookies-policy" element={
               <Suspense fallback={<LoadingFallback />}>
                 <LazyCookiesPolicyPage />
+              </Suspense>
+            } />
+            <Route path="legal" element={
+              <Suspense fallback={<LoadingFallback />}>
+                <LazyLegalPage />
+              </Suspense>
+            } />
+            <Route path="roadmap" element={
+              <Suspense fallback={<LoadingFallback />}>
+                <LazyRoadmapPage />
+              </Suspense>
+            } />
+            <Route path="faq" element={
+              <Suspense fallback={<LoadingFallback />}>
+                <LazyFAQPage />
               </Suspense>
             } />
             <Route path="gdpr" element={
@@ -265,10 +296,17 @@ const AppRouter: React.FC = () => {
                 </Suspense>
               </ProtectedRoute>
             } />
-            <Route path="tiers" element={
+            <Route path="admin/rgpd" element={
               <ProtectedRoute>
                 <Suspense fallback={<LoadingFallback />}>
-                  <LazyThirdPartiesPage />
+                  <LazyRGPDAdminDashboard />
+                </Suspense>
+              </ProtectedRoute>
+            } />
+            <Route path="diagnostic" element={
+              <ProtectedRoute>
+                <Suspense fallback={<LoadingFallback />}>
+                  <LazyDiagnosticPage />
                 </Suspense>
               </ProtectedRoute>
             } />

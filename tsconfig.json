@@ -9,11 +9,19 @@
     "isolatedModules": true,
     "noEmit": true,
     "allowJs": true,
+    
+    // ⏳ STRICT MODE - Phase 1 (Progressif) - EN COURS
+    // Activé progressivement après correction erreurs syntaxe
     "strict": false,
+    
+    // 📊 QUALITÉ CODE - Activé
+    "noUnusedLocals": false, // Désactivé temporairement (trop de warnings)
+    "noUnusedParameters": false,
+    "forceConsistentCasingInFileNames": true,
+    
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
     "useDefineForClassFields": true,
     "allowImportingTsExtensions": true,
     "baseUrl": ".",

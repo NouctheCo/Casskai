@@ -1,12 +1,13 @@
 /* eslint-disable max-lines */
 // Service fiscal multi-pays pour CassKai
 import { frenchTaxComplianceService } from './FrenchTaxComplianceService';
+import { getTaxConfiguration, TAX_CONFIGURATIONS } from '../../data/taxConfigurations';
 
 export interface CountryTaxConfig {
   country: string;
   countryName: string;
   currency: string;
-  accountingStandard: 'PCG' | 'SYSCOHADA' | 'IFRS' | 'GAAP' | 'LOCAL';
+  accountingStandard: 'PCG' | 'SYSCOHADA' | 'IFRS' | 'SCF' | 'GAAP' | 'LOCAL';
   vatRates: {
     standard: number;
     reduced: number[];
@@ -594,6 +595,40 @@ export class MultiCountryTaxService {
    * Obtient la configuration fiscale pour un pays
    */
   getTaxConfig(countryCode: string): CountryTaxConfig {
+    // Try to get from new comprehensive tax configurations first
+    const comprehensiveConfig = getTaxConfiguration(countryCode);
+    if (comprehensiveConfig) {
+      // Convert comprehensive config to CountryTaxConfig format
+      return {
+        country: comprehensiveConfig.countryCode,
+        countryName: comprehensiveConfig.countryName,
+        currency: comprehensiveConfig.currency,
+        accountingStandard: comprehensiveConfig.accountingStandard,
+        vatRates: {
+          standard: comprehensiveConfig.vat.standard,
+          reduced: comprehensiveConfig.vat.reduced,
+          exempt: comprehensiveConfig.vat.exemptions.length > 0
+        },
+        corporateTaxRate: comprehensiveConfig.corporateTax.standardRate,
+        fiscalYearEnd: comprehensiveConfig.fiscalYearEnd.replace('/', '-'),
+        declarations: comprehensiveConfig.taxTypes.map(tt => ({
+          id: tt.id,
+          name: tt.name,
+          description: tt.description,
+          frequency: tt.frequency,
+          deadline: tt.deadline,
+          mandatory: tt.mandatory,
+          forms: [tt.id]
+        })),
+        deadlines: comprehensiveConfig.taxTypes.reduce((acc, tt) => {
+          acc[tt.id] = tt.deadline;
+          return acc;
+        }, {} as Record<string, string>),
+        languages: ['fr-FR'] // Default, could be enhanced based on country
+      };
+    }
+
+    // Fallback to old config
     const config = COUNTRY_TAX_CONFIGS[countryCode];
     if (!config) {
       console.warn(`Configuration fiscale non trouvée pour ${countryCode}, utilisation de FR par défaut`);
@@ -754,11 +789,35 @@ export class MultiCountryTaxService {
   private async generateFrenchDeclaration(declarationType: string, companyId: string, period: string) {
     switch (declarationType) {
       case 'CA3':
+      case 'TVA_CA3':
         return await frenchTaxComplianceService.generateCA3Declaration(companyId, period);
+
+      case 'TVA_CA12':
+      case 'CA12':
+        // CA12 utilise la même structure que CA3 mais avec fréquence annuelle
+        return await frenchTaxComplianceService.generateCA3Declaration(companyId, period);
+
+      case 'TVA_CA12E':
+      case 'CA12E':
+        // CA12E (trimestriel) utilise aussi la structure CA3
+        return await frenchTaxComplianceService.generateCA3Declaration(companyId, period);
+
       case 'LIASSE_FISCALE':
         return await frenchTaxComplianceService.generateLiasseFiscale(companyId, period);
+
+      case 'IS':
+        // IS (Impôt sur les Sociétés) fait partie de la liasse fiscale
+        return await frenchTaxComplianceService.generateLiasseFiscale(companyId, period);
+
       case 'CVAE':
         return await frenchTaxComplianceService.generateCVAEDeclaration(companyId, period);
+
+      case 'CFE':
+        return await frenchTaxComplianceService.generateCFEDeclaration(companyId, period);
+
+      case 'DSN':
+        return await frenchTaxComplianceService.generateDSNDeclaration(companyId, period);
+
       default:
         throw new Error(`Type de déclaration ${declarationType} non supporté pour la France`);
     }

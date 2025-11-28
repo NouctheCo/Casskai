@@ -96,11 +96,11 @@ export class BridgeProvider extends BankingProvider {
       await this.authenticateClient();
       this.isInitialized = true;
     } catch (error) {
-      const error = _error as Error;
+      const err = error as Error;
       throw new BankingProviderError(
         'INIT_ERROR',
-        `Failed to initialize Bridge provider: ${error.message}`,
-        _error
+        `Failed to initialize Bridge provider: ${err.message}`,
+        error
       );
     }
   }
@@ -621,11 +621,11 @@ export class BridgeProvider extends BankingProvider {
 
       return result;
     } catch (error) {
-      if (_error instanceof BankingProviderError) {
-        throw _error;
+      if (error instanceof BankingProviderError) {
+        throw error;
       }
-      const error = _error as Error;
-      throw new NetworkError(`Request failed: ${error.message}`, _error);
+      const err = error as Error;
+      throw new NetworkError(`Request failed: ${err.message}`, error);
     }
   }
 

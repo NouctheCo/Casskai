@@ -140,7 +140,10 @@
       "Bash(taskkill:*)",
       "Bash(NUL)",
       "Bash(timeout /t 3)",
-      "Bash(if exist dist rmdir /s /q dist)"
+      "Bash(if exist dist rmdir /s /q dist)",
+      "Bash(timeout:*)",
+      "Bash(dir deploy-vps.ps1)",
+      "Bash(del add-journal-translations.cjs fix-journal-translations.cjs)"
     ],
     "deny": []
   }

@@ -66,12 +66,12 @@ export class EnterpriseDashboardService {
         },
 
         key_metrics: this.formatMetrics(data.key_metrics || []),
-        charts: this.formatCharts(data.charts || []),
+        charts: this.formatCharts(data.charts || []) as any,
         financial_health: this.formatFinancialHealth(data.financial_health),
         cash_flow_forecast: data.cash_flow_forecast || [],
         budget_comparison: data.budget_comparison || [],
         period_comparisons: data.period_comparisons || [],
-        alerts: this.formatAlerts(data.alerts || []),
+        alerts: this.formatAlerts(data.alerts || []) as any,
         operational_kpis: data.operational_kpis || [],
         profitability_analysis: data.profitability_analysis || {}
       };
@@ -307,7 +307,7 @@ export class EnterpriseDashboardService {
       color: (metric.color as string) || 'blue',
       category: (metric.category as DashboardMetric['category']) || 'financial',
       icon: (metric.icon as string) || 'TrendingUp'
-    }));
+    })) as any;
   }
 
   private formatCharts(rawCharts: Array<Record<string, unknown>>) {
@@ -318,29 +318,25 @@ export class EnterpriseDashboardService {
     }));
   }
 
-  private formatFinancialHealth(rawHealth: unknown): FinancialHealthScore {
-    if (!rawHealth) {
-      return {
-        overall_score: 0,
-        liquidity_score: 0,
-        profitability_score: 0,
-        efficiency_score: 0,
-        growth_score: 0,
-        risk_score: 0,
-        sustainability_score: 0,
-        recommendations: [],
-        critical_alerts: [],
-        last_updated: new Date().toISOString()
-      };
+  private formatFinancialHealth(rawHealth: unknown): FinancialHealthScore | null {
+    const health = rawHealth as Partial<FinancialHealthScore> | null | undefined;
+
+    if (!health || typeof health.overall_score !== 'number') {
+      return null;
     }
 
-    const health = rawHealth as Record<string, unknown>;
     return {
-      ...health,
-      recommendations: (health.recommendations as string[]) || [],
-      critical_alerts: (health.critical_alerts as string[]) || [],
-      last_updated: new Date().toISOString()
-    } as FinancialHealthScore;
+      overall_score: health.overall_score,
+      liquidity_score: health.liquidity_score ?? 0,
+      profitability_score: health.profitability_score ?? 0,
+      efficiency_score: health.efficiency_score ?? 0,
+      growth_score: health.growth_score ?? 0,
+      risk_score: health.risk_score ?? 0,
+      sustainability_score: health.sustainability_score ?? 0,
+      recommendations: Array.isArray(health.recommendations) ? health.recommendations : [],
+      critical_alerts: Array.isArray(health.critical_alerts) ? health.critical_alerts : [],
+      last_updated: health.last_updated || new Date().toISOString()
+    };
   }
 
   private formatAlerts(rawAlerts: Array<Record<string, unknown>>) {

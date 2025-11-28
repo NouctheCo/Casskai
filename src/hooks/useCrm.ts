@@ -105,7 +105,7 @@ export function useCrm(): UseCrmReturn {
         setError(errorMsg);
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
     } finally {
       setClientsLoading(false);
     }
@@ -126,7 +126,7 @@ export function useCrm(): UseCrmReturn {
         setError(getErrorMessage(response.error) || 'Failed to fetch contacts');
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
     } finally {
       setContactsLoading(false);
     }
@@ -148,7 +148,7 @@ export function useCrm(): UseCrmReturn {
         setError(getErrorMessage(response.error) || 'Failed to fetch opportunities');
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
     } finally {
       setOpportunitiesLoading(false);
     }
@@ -171,7 +171,7 @@ export function useCrm(): UseCrmReturn {
         setError(getErrorMessage(response.error) || 'Failed to fetch commercial actions');
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -202,7 +202,7 @@ export function useCrm(): UseCrmReturn {
         setError(errorMsg);
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
     } finally {
       setStatsLoading(false);
     }
@@ -223,7 +223,7 @@ export function useCrm(): UseCrmReturn {
         setError(getErrorMessage(response.error) || 'Failed to fetch dashboard data');
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -245,7 +245,7 @@ export function useCrm(): UseCrmReturn {
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
       return false;
     }
   }, [currentCompany?.id, fetchClients]);
@@ -263,7 +263,7 @@ export function useCrm(): UseCrmReturn {
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
       return false;
     }
   }, [fetchClients]);
@@ -281,7 +281,7 @@ export function useCrm(): UseCrmReturn {
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
       return false;
     }
   }, [fetchClients]);
@@ -301,7 +301,7 @@ export function useCrm(): UseCrmReturn {
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
       return false;
     }
   }, [currentCompany?.id, fetchContacts]);
@@ -321,7 +321,7 @@ export function useCrm(): UseCrmReturn {
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
       return false;
     }
   }, [currentCompany?.id, fetchOpportunities]);
@@ -341,7 +341,7 @@ export function useCrm(): UseCrmReturn {
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Unknown error');
+      setError(err instanceof Error ? (err as Error).message : 'Unknown error');
       return false;
     }
   }, [currentCompany?.id, fetchCommercialActions]);

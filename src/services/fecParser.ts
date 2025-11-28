@@ -79,14 +79,14 @@ export class FECParser {
           const content = event.target?.result;
           const result = this.parseFECContent(content as string, { ...options, delimiter });
           resolve(result as any);
-        } catch (error) {
+        } catch (err) {
           resolve({
             success: false,
             totalRows: 0,
             validRows: 0,
             errors: [{
               row: 0,
-              message: `Erreur de lecture du fichier: ${(error as any).message}`,
+              message: `Erreur de lecture du fichier: ${(err as any).message}`,
               type: 'format',
               severity: 'error'
             }],
@@ -201,7 +201,7 @@ export class FECParser {
             errors.push({
               row: rowNumber,
               field: err.path.join('.'),
-              message: (error as Error).message,
+              message: err.message,
               type: 'validation',
               severity: 'error'
             });
@@ -226,10 +226,10 @@ export class FECParser {
         // Validations métier
         this.validateBusinessRules(entry, rowNumber, warnings);
 
-      } catch (error) {
+      } catch (err) {
         errors.push({
           row: rowNumber,
-          message: `Erreur de parsing: ${error.message}`,
+          message: `Erreur de parsing: ${(err as Error).message}`,
           type: 'format',
           severity: 'error'
         });

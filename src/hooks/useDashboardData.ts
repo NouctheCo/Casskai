@@ -167,11 +167,7 @@ export function useDashboardData() {
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Erreur inconnue');
       setError(error);
-      showToast({
-        title: 'Erreur de chargement',
-        description: 'Impossible de charger les données du dashboard',
-        type: 'error'
-      });
+      showToast('Impossible de charger les données du dashboard', 'error');
     } finally {
       setIsLoading(false);
     }

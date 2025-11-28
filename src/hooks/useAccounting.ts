@@ -33,6 +33,17 @@ export interface BalanceSheetData {
   totalEquity: number;
 }
 
+export interface CreateAccountData {
+  account_number: string;
+  account_name: string;
+  account_type: AccountType;
+  account_class?: number | null;
+  description?: string;
+  parent_account_id?: string | null;
+  is_detail_account?: boolean;
+  level?: number | null;
+}
+
 export function useAccounting(companyId: string) {
   const { user } = useAuth();
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -50,16 +61,17 @@ export function useAccounting(companyId: string) {
     try {
       const { data, error: fetchError } = await supabase
         .from('chart_of_accounts')
-        .select('id, company_id, account_number, account_name as name, account_type as type, account_class as class, is_detail_account, parent_account_id, created_at, updated_at')
+        .select('*')
         .eq('company_id', companyId)
-        .eq('is_detail_account', true)
+        .eq('is_active', true)
         .order('account_number');
 
       if (fetchError) throw fetchError;
-      setAccounts(data || []);
+      setAccounts(data ?? []);
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Failed to fetch accounts');
-      console.error('...', error);
+      const message = err instanceof Error ? err.message : 'Failed to fetch accounts';
+      setError(message);
+      console.error('Failed to fetch accounts', err);
     } finally {
       setLoading(false);
     }
@@ -79,9 +91,12 @@ export function useAccounting(companyId: string) {
           *,
           journal_entry_lines (
             *,
-            accounts (
+            chart_of_accounts (
+              id,
               account_number,
-              name
+              account_name,
+              account_type,
+              account_class
             )
           )
         `)
@@ -92,34 +107,35 @@ export function useAccounting(companyId: string) {
       if (fetchError) throw fetchError;
       setJournalEntries(data || []);
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Failed to fetch journal entries');
-      console.error('...', error);
+      const message = err instanceof Error ? err.message : 'Failed to fetch journal entries';
+      setError(message);
+      console.error('Failed to fetch journal entries', err);
     } finally {
       setLoading(false);
     }
   }, [user, companyId]);
 
   // Create a new account
-  const createAccount = useCallback(async (accountData: {
-    account_number: string;
-    name: string;
-    type: AccountType;
-    class: number;
-    description?: string;
-    parent_account_id?: string;
-  }): Promise<Account | null> => {
+  const createAccount = useCallback(async (accountData: CreateAccountData): Promise<Account | null> => {
     if (!user || !companyId) throw new Error('User not authenticated or company not selected');
 
     setLoading(true);
     setError(null);
 
     try {
+      const payload: Partial<Account> = {
+        ...accountData,
+        company_id: companyId,
+        account_class: accountData.account_class ?? null,
+        parent_account_id: accountData.parent_account_id ?? null,
+        description: accountData.description ?? null,
+        is_detail_account: accountData.is_detail_account ?? true,
+        level: accountData.level ?? null,
+      };
+
       const { data: newAccount, error: insertError } = await supabase
-        .from('accounts')
-        .insert({
-          ...accountData,
-          company_id: companyId,
-        })
+        .from('chart_of_accounts')
+        .insert(payload)
         .select()
         .single();
 
@@ -131,9 +147,9 @@ export function useAccounting(companyId: string) {
 
       return newAccount;
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to create account';
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create account';
       setError(errorMessage);
-      console.error('...', error);
+      console.error('Failed to create account', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -208,15 +224,17 @@ export function useAccounting(companyId: string) {
       if (entryError) throw entryError;
 
       // Create journal entry lines
-      const linesData = entryData.lines.map((line, index) => ({
-        company_id: companyId,
-        journal_entry_id: newEntry.id,
-        account_id: line.account_id,
-        description: line.description,
-        debit: line.debit,
-        credit: line.credit,
-        line_order: index + 1,
-      }));
+      const accountMap = new Map(accounts.map((account) => [account.id, account]));
+      const linesData = entryData.lines.map((line, index) => {
+        const accountInfo = accountMap.get(line.account_id);
+        return {
+          journal_entry_id: newEntry.id,
+          account_id: line.account_id,
+          description: line.description || '',
+          debit_amount: line.debit,
+          credit_amount: line.credit
+        } satisfies Partial<JournalEntryLine>;
+      });
 
       const { error: linesError } = await supabase
         .from('journal_entry_lines')
@@ -231,9 +249,9 @@ export function useAccounting(companyId: string) {
           *,
           journal_entry_lines (
             *,
-            accounts (
+            chart_of_accounts (
               account_number,
-              name
+              account_name
             )
           )
         `)
@@ -245,14 +263,14 @@ export function useAccounting(companyId: string) {
       setJournalEntries(prev => [completeEntry, ...prev]);
       return completeEntry;
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to create journal entry';
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create journal entry';
       setError(errorMessage);
-      console.error('...', error);
+      console.error('Failed to create journal entry', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
     }
-  }, [user, companyId, generateEntryNumber]);
+  }, [user, companyId, generateEntryNumber, accounts]);
 
   // Post a journal entry (mark as posted)
   const postJournalEntry = useCallback(async (entryId: string): Promise<void> => {
@@ -277,9 +295,9 @@ export function useAccounting(companyId: string) {
           : entry
       ));
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to post journal entry';
+      const errorMessage = err instanceof Error ? err.message : 'Failed to post journal entry';
       setError(errorMessage);
-      console.error('...', error);
+      console.error('Failed to post journal entry', err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -334,8 +352,9 @@ export function useAccounting(companyId: string) {
         totalEquity,
       };
     } catch (err) {
-      console.error('...', error);
-      setError(err instanceof Error ? (error as Error).message : 'Failed to generate balance sheet');
+      const message = err instanceof Error ? err.message : 'Failed to generate balance sheet';
+      console.error('Failed to generate balance sheet', err);
+      setError(message);
       return null;
     }
   }, [user, companyId]);
@@ -359,8 +378,9 @@ export function useAccounting(companyId: string) {
         credit: parseFloat(item.balance) < 0 ? Math.abs(parseFloat(item.balance)) : 0,
       }));
     } catch (err) {
-      console.error('...', error);
-      setError(err instanceof Error ? (error as Error).message : 'Failed to generate trial balance');
+      const message = err instanceof Error ? err.message : 'Failed to generate trial balance';
+      console.error('Failed to generate trial balance', err);
+      setError(message);
       return null;
     }
   }, [user, companyId]);

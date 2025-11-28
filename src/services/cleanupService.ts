@@ -31,7 +31,7 @@ export class CleanupService {
 
       // Supprimer les lignes d'écritures
       const { error: itemsError } = await supabase
-        .from('journal_entry_items')
+        .from('journal_entry_lines')
         .delete()
         .in('journal_entry_id', entryIds);
 

@@ -21,6 +21,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { useToast } from '@/components/ui/use-toast';
 import { journalEntriesService } from '@/services/journalEntriesService';
 import { useAuth } from '@/contexts/AuthContext';
+import { useJournalEntries } from '@/hooks/useJournalEntries';
 
 import {
 
@@ -102,7 +103,7 @@ function useEntryFormState(entry) {
 
 
 
-function EntryLineForm({ line, index, updateLine, removeLine, canRemove }) {
+function EntryLineForm({ line, index, updateLine, removeLine, canRemove, accounts }) {
 
   return (
 
@@ -136,15 +137,15 @@ function EntryLineForm({ line, index, updateLine, removeLine, canRemove }) {
 
           <SelectContent>
 
-            <SelectItem value="411000">411000 - Clients</SelectItem>
+            {accounts.map((account) => (
 
-            <SelectItem value="701000">701000 - Ventes</SelectItem>
+              <SelectItem key={account.id} value={account.id}>
 
-            <SelectItem value="445710">445710 - TVA collectée</SelectItem>
+                {account.account_number} - {account.account_name}
 
-            <SelectItem value="512000">512000 - Banque</SelectItem>
+              </SelectItem>
 
-            <SelectItem value="607000">607000 - Achats</SelectItem>
+            ))}
 
           </SelectContent>
 
@@ -296,7 +297,7 @@ function EntryTotals({ totals }) {
 
 
 
-const EntryFormDialog = ({ open, onClose, entry = null, onSave }) => {
+const EntryFormDialog = ({ open, onClose, entry = null, onSave, accounts }) => {
 
   const { toast } = useToast();
 
@@ -333,19 +334,25 @@ const EntryFormDialog = ({ open, onClose, entry = null, onSave }) => {
   };
 
   const updateLine = (index, field, value) => {
-
     setFormData(prev => ({
-
       ...prev,
-
-      lines: prev.lines.map((line, i) => 
-
-        i === index ? { ...line, [field]: value } : line
-
-      )
-
+      lines: prev.lines.map((line, i) => {
+        if (i === index) {
+          const updatedLine = { ...line, [field]: value };
+          
+          // Auto-fill description when account is selected
+          if (field === 'account' && value) {
+            const selectedAccount = accounts.find(account => account.id === value);
+            if (selectedAccount && !line.description) {
+              updatedLine.description = selectedAccount.account_name;
+            }
+          }
+          
+          return updatedLine;
+        }
+        return line;
+      })
     }));
-
   };
 
   const calculateTotals = () => {
@@ -525,6 +532,8 @@ const EntryFormDialog = ({ open, onClose, entry = null, onSave }) => {
                     removeLine={removeLine}
 
                     canRemove={formData.lines.length > 2}
+
+                    accounts={accounts}
 
                   />
 
@@ -999,13 +1008,27 @@ export default function OptimizedJournalEntriesTab() {
   const { toast } = useToast();
 
   const { currentCompany } = useAuth();
+  const { createJournalEntry, loading: hookLoading, error: hookError, getAccountsList } = useJournalEntries(currentCompany?.id || '');
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [accounts, setAccounts] = useState([]);
 
   // Charger les écritures réelles depuis Supabase
   useEffect(() => {
     loadEntries();
+    loadAccounts();
   }, [currentCompany?.id]);
+
+  const loadAccounts = async () => {
+    if (!currentCompany?.id) return;
+
+    try {
+      const accountsList = await getAccountsList();
+      setAccounts(accountsList);
+    } catch (error) {
+      console.error('Error loading accounts:', error);
+    }
+  };
 
   const loadEntries = async () => {
     if (!currentCompany?.id) {
@@ -1028,11 +1051,11 @@ export default function OptimizedJournalEntriesTab() {
           reference: entry.entry_number || entry.reference_number || 'N/A',
           date: entry.entry_date,
           description: entry.description || '',
-          totalDebit: (entry.journal_entry_items || []).reduce((sum, item) => sum + (Number(item.debit_amount) || 0), 0),
-          totalCredit: (entry.journal_entry_items || []).reduce((sum, item) => sum + (Number(item.credit_amount) || 0), 0),
+          totalDebit: (entry.journal_entry_lines || []).reduce((sum, item) => sum + (Number(item.debit_amount) || 0), 0),
+          totalCredit: (entry.journal_entry_lines || []).reduce((sum, item) => sum + (Number(item.credit_amount) || 0), 0),
           status: entry.status === 'posted' ? 'validated' : 'draft',
-          lines: (entry.journal_entry_items || []).map(item => ({
-            account: item.accounts?.account_number || '',
+          lines: (entry.journal_entry_lines || []).map(item => ({
+            account: item.chart_of_accounts?.account_number || '',
             description: item.description || '',
             debit: item.debit_amount?.toString() || '',
             credit: item.credit_amount?.toString() || ''
@@ -1104,24 +1127,59 @@ export default function OptimizedJournalEntriesTab() {
 
 
 
-  const handleSaveEntry = (entryData) => {
+  const handleSaveEntry = async (entryData) => {
+    console.log('[OptimizedJournalEntriesTab] handleSaveEntry called with:', entryData);
 
-    if (editingEntry) {
-
-      setEntries(prev => prev.map(entry => 
-
-        entry.id === editingEntry.id ? { ...entryData, id: editingEntry.id } : entry
-
-      ));
-
-    } else {
-
-      setEntries(prev => [...prev, { ...entryData, id: Date.now() }]);
-
+    if (!currentCompany?.id) {
+      toast({
+        title: "Erreur",
+        description: "Aucune entreprise sélectionnée",
+        variant: "destructive"
+      });
+      return;
     }
 
-    setEditingEntry(null);
+    try {
+      // Convertir les données du formulaire au format attendu par le hook
+      const journalEntryData = {
+        date: entryData.date,
+        description: entryData.description,
+        reference: entryData.reference,
+        items: entryData.lines.map(line => ({
+          account_id: line.account, // Maintenant line.account contient déjà l'UUID
+          description: line.description,
+          debit_amount: parseFloat(line.debit) || 0,
+          credit_amount: parseFloat(line.credit) || 0
+        }))
+      };
 
+      console.log('[OptimizedJournalEntriesTab] Calling createJournalEntry with:', journalEntryData);
+
+      const result = await createJournalEntry(journalEntryData);
+
+      if (result) {
+        console.log('[OptimizedJournalEntriesTab] Entry created successfully:', result);
+        toast({
+          title: "Écriture créée",
+          description: "L'écriture a été enregistrée avec succès en base de données."
+        });
+
+        // Recharger les données depuis Supabase
+        await loadEntries();
+
+        setShowEntryForm(false);
+        setEditingEntry(null);
+      } else {
+        throw new Error('Échec de la création de l\'écriture');
+      }
+    } catch (error) {
+      console.error('[OptimizedJournalEntriesTab] Error creating entry:', error);
+      toast({
+        title: "Erreur",
+        description: error instanceof Error ? error.message : "Impossible de créer l'écriture",
+        variant: "destructive"
+      });
+    }
   };
 
 
@@ -1136,18 +1194,48 @@ export default function OptimizedJournalEntriesTab() {
 
 
 
-  const handleDeleteEntry = (entry) => {
+  const handleDeleteEntry = async (entry) => {
+    // Confirmation
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette écriture ? Cette action est irréversible.')) {
+      return;
+    }
 
-    setEntries(prev => prev.filter(e => e.id !== entry.id));
+    if (!currentCompany?.id) {
+      toast({
+        title: "Erreur",
+        description: "Aucune entreprise sélectionnée",
+        variant: "destructive"
+      });
+      return;
+    }
 
-    toast({
+    try {
+      console.log('🗑️ Début suppression écriture:', entry.id);
 
-      title: "Écriture supprimée",
+      // ✅ SUPPRESSION RÉELLE EN BASE DE DONNÉES
+      const result = await journalEntriesService.deleteJournalEntry(entry.id, currentCompany.id);
 
-      description: "L'écriture a été supprimée avec succès."
+      if (result.success) {
+        toast({
+          title: "Écriture supprimée",
+          description: "L'écriture a été supprimée définitivement de la base de données."
+        });
 
-    });
+        // ✅ RECHARGER LA LISTE DEPUIS LA BASE (pas juste filtrer localement)
+        await loadEntries();
 
+        console.log('✅ Écriture supprimée et liste rechargée');
+      } else {
+        throw new Error('Échec de la suppression');
+      }
+    } catch (error) {
+      console.error('❌ Erreur suppression:', error);
+      toast({
+        title: "Erreur de suppression",
+        description: error instanceof Error ? error.message : "Impossible de supprimer l'écriture",
+        variant: "destructive"
+      });
+    }
   };
 
 
@@ -1439,6 +1527,8 @@ export default function OptimizedJournalEntriesTab() {
         entry={editingEntry}
 
         onSave={handleSaveEntry}
+
+        accounts={accounts}
 
       />
 

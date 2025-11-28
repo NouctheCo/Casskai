@@ -176,7 +176,8 @@ export class AccountingDataService {
 
       // Simulation de données pour le développement
 
-      return this.generateMockTransactions(companyId, startDate, endDate);
+      // return this.generateMockTransactions(companyId, startDate, endDate);
+      return [];
 
     } catch (error) {
 
@@ -302,9 +303,28 @@ export class AccountingDataService {
 
     try {
 
-      // TODO: Remplacer par l'appel réel à Supabase
+      const { data, error } = await supabase
+        .from('chart_of_accounts')
+        .select('*')
+        .eq('company_id', companyId)
+        .eq('is_active', true)
+        .order('account_number');
 
-      return this.getDefaultChartOfAccounts();
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        return this.getDefaultChartOfAccounts();
+      }
+
+      return data.map(account => ({
+        account_code: account.account_number || '',
+        account_name: account.account_name || '',
+        account_type: this.determineAccountType(account.account_number || ''),
+        account_class: (account.account_number?.charAt(0) || '1') as '1' | '2' | '3' | '4' | '5' | '6' | '7',
+        parent_code: account.parent_account_id || undefined,
+        is_active: account.is_active ?? true,
+        balance_type: this.determineBalanceType(account.account_number || '')
+      }));
 
     } catch (error) {
 
@@ -314,6 +334,95 @@ export class AccountingDataService {
 
     }
 
+  }
+
+  /**
+   * Retourne le plan comptable par défaut (Plan Comptable OHADA)
+   */
+  private getDefaultChartOfAccounts(): ChartOfAccounts[] {
+    return [
+      // Classe 1 - Comptes de capitaux
+      { account_code: '101', account_name: 'Capital social', account_type: 'equity', account_class: '1', is_active: true, balance_type: 'credit' },
+      { account_code: '106', account_name: 'Réserves', account_type: 'equity', account_class: '1', is_active: true, balance_type: 'credit' },
+      { account_code: '12', account_name: 'Résultat de l\'exercice', account_type: 'equity', account_class: '1', is_active: true, balance_type: 'credit' },
+      { account_code: '16', account_name: 'Emprunts et dettes assimilées', account_type: 'liability', account_class: '1', is_active: true, balance_type: 'credit' },
+      
+      // Classe 2 - Comptes d'immobilisations
+      { account_code: '21', account_name: 'Immobilisations incorporelles', account_type: 'asset', account_class: '2', is_active: true, balance_type: 'debit' },
+      { account_code: '22', account_name: 'Terrains', account_type: 'asset', account_class: '2', is_active: true, balance_type: 'debit' },
+      { account_code: '23', account_name: 'Bâtiments', account_type: 'asset', account_class: '2', is_active: true, balance_type: 'debit' },
+      { account_code: '24', account_name: 'Matériel', account_type: 'asset', account_class: '2', is_active: true, balance_type: 'debit' },
+      
+      // Classe 3 - Comptes de stocks
+      { account_code: '31', account_name: 'Marchandises', account_type: 'asset', account_class: '3', is_active: true, balance_type: 'debit' },
+      { account_code: '32', account_name: 'Matières premières', account_type: 'asset', account_class: '3', is_active: true, balance_type: 'debit' },
+      { account_code: '37', account_name: 'Stocks de produits finis', account_type: 'asset', account_class: '3', is_active: true, balance_type: 'debit' },
+      
+      // Classe 4 - Comptes de tiers
+      { account_code: '401', account_name: 'Fournisseurs', account_type: 'liability', account_class: '4', is_active: true, balance_type: 'credit' },
+      { account_code: '411', account_name: 'Clients', account_type: 'asset', account_class: '4', is_active: true, balance_type: 'debit' },
+      { account_code: '421', account_name: 'Personnel - Rémunérations dues', account_type: 'liability', account_class: '4', is_active: true, balance_type: 'credit' },
+      { account_code: '43', account_name: 'Organismes sociaux', account_type: 'liability', account_class: '4', is_active: true, balance_type: 'credit' },
+      { account_code: '44', account_name: 'État et collectivités publiques', account_type: 'liability', account_class: '4', is_active: true, balance_type: 'credit' },
+      
+      // Classe 5 - Comptes de trésorerie
+      { account_code: '512', account_name: 'Banques', account_type: 'asset', account_class: '5', is_active: true, balance_type: 'debit' },
+      { account_code: '53', account_name: 'Caisse', account_type: 'asset', account_class: '5', is_active: true, balance_type: 'debit' },
+      
+      // Classe 6 - Comptes de charges
+      { account_code: '601', account_name: 'Achats de marchandises', account_type: 'expense', account_class: '6', is_active: true, balance_type: 'debit' },
+      { account_code: '604', account_name: 'Achats de matières premières', account_type: 'expense', account_class: '6', is_active: true, balance_type: 'debit' },
+      { account_code: '61', account_name: 'Transports', account_type: 'expense', account_class: '6', is_active: true, balance_type: 'debit' },
+      { account_code: '62', account_name: 'Services extérieurs', account_type: 'expense', account_class: '6', is_active: true, balance_type: 'debit' },
+      { account_code: '63', account_name: 'Impôts et taxes', account_type: 'expense', account_class: '6', is_active: true, balance_type: 'debit' },
+      { account_code: '64', account_name: 'Charges de personnel', account_type: 'expense', account_class: '6', is_active: true, balance_type: 'debit' },
+      { account_code: '65', account_name: 'Autres charges', account_type: 'expense', account_class: '6', is_active: true, balance_type: 'debit' },
+      
+      // Classe 7 - Comptes de produits
+      { account_code: '701', account_name: 'Ventes de marchandises', account_type: 'revenue', account_class: '7', is_active: true, balance_type: 'credit' },
+      { account_code: '706', account_name: 'Prestations de services', account_type: 'revenue', account_class: '7', is_active: true, balance_type: 'credit' },
+      { account_code: '707', account_name: 'Produits des activités annexes', account_type: 'revenue', account_class: '7', is_active: true, balance_type: 'credit' },
+      { account_code: '75', account_name: 'Autres produits', account_type: 'revenue', account_class: '7', is_active: true, balance_type: 'credit' },
+    ];
+  }
+
+  /**
+   * Détermine le type de compte en fonction du numéro
+   */
+  private determineAccountType(accountNumber: string): 'asset' | 'liability' | 'equity' | 'revenue' | 'expense' {
+    const firstChar = accountNumber.charAt(0);
+    switch (firstChar) {
+      case '1':
+        return 'equity';
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+        return accountNumber.startsWith('4') && parseInt(accountNumber.charAt(1)) < 2 ? 'liability' : 'asset';
+      case '6':
+        return 'expense';
+      case '7':
+        return 'revenue';
+      default:
+        return 'asset';
+    }
+  }
+
+  /**
+   * Détermine le type de solde (débit ou crédit) en fonction du numéro de compte
+   */
+  private determineBalanceType(accountNumber: string): 'debit' | 'credit' {
+    const firstChar = accountNumber.charAt(0);
+    // Classes 1, 4 (certains), 7 = crédit
+    // Classes 2, 3, 5, 6 = débit
+    if (firstChar === '1' || firstChar === '7') return 'credit';
+    if (firstChar === '4') {
+      // 401-429 = crédit (fournisseurs, dettes)
+      // 430+ = débit (clients, créances)
+      const accountNum = parseInt(accountNumber.substring(0, 3));
+      return accountNum >= 401 && accountNum < 430 ? 'credit' : 'debit';
+    }
+    return 'debit';
   }
 
 

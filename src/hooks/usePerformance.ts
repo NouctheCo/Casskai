@@ -171,7 +171,7 @@ export const useLazyLoading = <T>(
               setData(result);
             })
             .catch(err => {
-              setError(err);
+              setError(error);
             })
             .finally(() => {
               setIsLoading(false);

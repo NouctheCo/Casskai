@@ -72,7 +72,7 @@ export function useCompanies() {
       }
 
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Failed to fetch companies');
+      setError(err instanceof Error ? (err as Error).message : 'Failed to fetch companies');
       console.error('...', error);
     } finally {
       setLoading(false);
@@ -128,7 +128,7 @@ export function useCompanies() {
 
       return newCompany;
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to create company';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to create company';
       setError(errorMessage);
       console.error('...', error);
       throw new Error(errorMessage);
@@ -179,7 +179,7 @@ export function useCompanies() {
         is_default: companies.find(c => c.id === companyId)?.is_default || false
       };
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to update company';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to update company';
       setError(errorMessage);
       console.error('...', error);
       throw new Error(errorMessage);

@@ -87,7 +87,7 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
       setIsEnabled(data.enabled);
     } catch (err) {
       console.error('...', error);
-      setError(err instanceof Error ? (error as Error).message : 'Failed to load capabilities');
+      setError(err instanceof Error ? (err as Error).message : 'Failed to load capabilities');
       setIsEnabled(false);
       setCapabilities(null);
     }
@@ -126,7 +126,7 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
         loadDocuments()
       ]);
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Failed to refresh data');
+      setError(err instanceof Error ? (err as Error).message : 'Failed to refresh data');
     } finally {
       setIsLoading(false);
     }
@@ -140,7 +140,7 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
       });
       await refreshData();
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Failed to enable feature');
+      setError(err instanceof Error ? (err as Error).message : 'Failed to enable feature');
       throw err;
     } finally {
       setIsLoading(false);
@@ -158,7 +158,7 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
       setStatistics(null);
       setDocuments([]);
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Failed to disable feature');
+      setError(err instanceof Error ? (err as Error).message : 'Failed to disable feature');
       throw err;
     } finally {
       setIsLoading(false);
@@ -185,7 +185,7 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
 
       return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to submit invoice';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to submit invoice';
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {

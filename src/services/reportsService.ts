@@ -907,11 +907,11 @@ class ReportsService {
 
       // Utiliser des données mockées si flag activé
 
-      if (this.useMocks) {
+      // if (this.useMocks) { // TODO: Implement mock mode if needed
 
-        return { data: this.getMockDashboardData() };
+      //   return { data: this.getMockDashboardData() };
 
-      }
+      // }
 
 
 

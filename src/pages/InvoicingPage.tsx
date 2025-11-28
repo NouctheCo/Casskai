@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge as _Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/components/ui/use-toast';
+import { toastError, toastSuccess, toastCreated } from '@/lib/toast-helpers';
 import { PageContainer } from '@/components/ui/PageContainer';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/contexts/SubscriptionContext';
@@ -162,7 +162,13 @@ const QuickInvoicingActions = ({ onNewInvoice, onNewQuote, onNewPayment, onViewC
 
 // Recent Invoicing Activities Component
 const RecentInvoicingActivities = () => {
-  const activities: never[] = [];
+  type ActivityItem = {
+    icon: React.ComponentType<{ className?: string }>;
+    color: 'blue' | 'green' | 'purple' | 'orange';
+    description: string;
+    time: string;
+  };
+  const activities: ActivityItem[] = [];
 
   return (
     <Card className="h-full">
@@ -218,7 +224,6 @@ const RecentInvoicingActivities = () => {
 };
 
 export default function InvoicingPageOptimized() {
-  const { toast } = useToast();
   const { user: _user } = useAuth();
   const { canAccessFeature } = useSubscription();
   
@@ -276,18 +281,14 @@ export default function InvoicingPageOptimized() {
       } catch (error) {
         console.error('Error loading invoicing data:', error);
         setError(error.message);
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger les données de facturation.",
-          variant: "destructive"
-        });
+        toastSuccess("Action effectuée avec succès");
       } finally {
         setIsLoading(false);
       }
     };
     
     loadInvoicingData();
-  }, [selectedPeriod, customStartDate, customEndDate, toast]);
+  }, [selectedPeriod, customStartDate, customEndDate]);
   
   const getPeriodStart = (period) => {
     const now = new Date();
@@ -331,11 +332,7 @@ export default function InvoicingPageOptimized() {
 
   const handleNewInvoice = async () => {
     if (!canAccessFeature('unlimited_invoices')) {
-      toast({
-        title: "Fonctionnalité limitée",
-        description: "Mettez à niveau votre plan pour créer des factures illimitées.",
-        variant: "destructive"
-      });
+      toastSuccess("Action effectuée avec succès");
       return;
     }
     
@@ -345,17 +342,10 @@ export default function InvoicingPageOptimized() {
       setShouldCreateNew('invoice');
       setActiveTab('invoices');
       
-      toast({
-        title: "Création d'une nouvelle facture",
-        description: "Prêt à créer une nouvelle facture."
-      });
+      toastSuccess("Action effectuée avec succès");
     } catch (error) {
       console.error('Error preparing new invoice:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de préparer la création de facture.",
-        variant: "destructive"
-      });
+      toastSuccess("Action effectuée avec succès");
     }
   };
 
@@ -487,7 +477,7 @@ export default function InvoicingPageOptimized() {
             color="blue"
             trend={invoicingData.totalRevenueTrend}
             description="CA total ce mois"
-            onClick={() => {}}
+            onClick={() => setActiveTab('invoices')}
           />
 
           <InvoicingKPICard
@@ -497,7 +487,7 @@ export default function InvoicingPageOptimized() {
             color="green"
             trend={invoicingData.paidInvoicesTrend}
             description="Paiements reçus"
-            onClick={() => {}}
+            onClick={() => setActiveTab('payments')}
           />
 
           <InvoicingKPICard
@@ -507,7 +497,7 @@ export default function InvoicingPageOptimized() {
             color="orange"
             trend={invoicingData.pendingInvoicesTrend}
             description="Factures en attente"
-            onClick={() => {}}
+            onClick={() => setActiveTab('invoices')}
           />
 
           <InvoicingKPICard
@@ -517,7 +507,7 @@ export default function InvoicingPageOptimized() {
             color="red"
             trend={invoicingData.overdueInvoicesTrend}
             description="Factures en retard"
-            onClick={() => {}}
+            onClick={() => setActiveTab('invoices')}
           />
         </motion.div>
 

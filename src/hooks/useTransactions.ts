@@ -91,7 +91,7 @@ export function useTransactions(companyId: string) {
 
       setTransactions(data || []);
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Failed to fetch transactions');
+      setError(err instanceof Error ? (err as Error).message : 'Failed to fetch transactions');
       console.error('...', error);
     } finally {
       setLoading(false);
@@ -130,7 +130,7 @@ export function useTransactions(companyId: string) {
       setTransactions(prev => [newTransaction, ...prev]);
       return newTransaction;
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to create transaction';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to create transaction';
       setError(errorMessage);
       console.error('...', error);
       throw new Error(errorMessage);
@@ -173,7 +173,7 @@ export function useTransactions(companyId: string) {
 
       return updatedTransaction;
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to update transaction';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to update transaction';
       setError(errorMessage);
       console.error('...', error);
       throw new Error(errorMessage);
@@ -200,7 +200,7 @@ export function useTransactions(companyId: string) {
 
       setTransactions(prev => prev.filter(transaction => transaction.id !== id));
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to delete transaction';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to delete transaction';
       setError(errorMessage);
       console.error('...', error);
       throw new Error(errorMessage);
@@ -278,7 +278,7 @@ export function useTransactions(companyId: string) {
           : transaction
       ));
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to reconcile transactions';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to reconcile transactions';
       setError(errorMessage);
       console.error('...', error);
       throw new Error(errorMessage);

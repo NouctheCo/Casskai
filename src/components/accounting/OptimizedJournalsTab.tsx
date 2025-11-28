@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
+import { createPortal } from 'react-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { Button } from '@/components/ui/button';
@@ -10,9 +10,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 
 import { useToast } from '@/components/ui/use-toast';
 
-import { BarChart3, FileText, CheckCircle, AlertCircle, Eye, RefreshCw } from 'lucide-react';
+import { BarChart3, FileText, CheckCircle, AlertCircle, Eye, RefreshCw, X, ToggleLeft, ToggleRight } from 'lucide-react';
 import { journalsStatsService, type JournalStats } from '@/services/journalsStatsService';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
+import { supabase } from '@/lib/supabase';
 
 
 
@@ -21,8 +23,11 @@ export default function OptimizedJournalsTab() {
   const { toast } = useToast();
 
   const { currentCompany } = useAuth();
+  const { t } = useTranslation();
   const [journals, setJournals] = useState<JournalStats[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedJournal, setSelectedJournal] = useState<JournalStats | null>(null);
+  const [showJournalDetail, setShowJournalDetail] = useState(false);
 
   // Charger les journaux réels depuis Supabase
   useEffect(() => {
@@ -204,42 +209,57 @@ export default function OptimizedJournalsTab() {
 
     totalJournals: journals.length,
 
-    totalEntries: journals.reduce((sum, j) => sum + j.entries, 0),
+    totalEntries: journals.reduce((sum, j) => sum + j.entriesCount, 0),
 
     totalDebit: journals.reduce((sum, j) => sum + j.totalDebit, 0),
 
-    activeJournals: journals.filter(j => j.status === 'active').length
+    activeJournals: journals.filter(j => j.isActive).length
 
   };
 
 
 
-  const handleViewJournal = async (journal) => {
-
+  const handleViewJournal = (journal: JournalStats) => {
     if (!userCanView) return;
+    console.log('🔍 Viewing journal:', journal);
+    setSelectedJournal(journal);
+    setShowJournalDetail(true);
+  };
 
-    
+  const handleToggleJournalStatus = async (journal: JournalStats) => {
+    if (!currentCompany?.id) return;
 
-    setViewingJournal(journal.id);
+    console.log('🔄 Toggling journal status:', journal);
 
-    // Simuler un délai de chargement
+    try {
+      const { error } = await supabase
+        .from('journals')
+        .update({
+          is_active: !journal.isActive,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', journal.id);
 
-    await new Promise(resolve => setTimeout(resolve, 800));
+      if (error) throw error;
 
-    
+      toast({
+        title: t('success', 'Succès'),
+        description: journal.isActive
+          ? t('journals.journalDeactivated')
+          : t('journals.journalActivated')
+      });
 
-    toast({
-
-      title: "Journal consulté",
-
-      description: `Le journal "${journal.name}" (${journal.code}) a été ouvert avec succès.`
-
-    });
-
-    
-
-    setViewingJournal(null);
-
+      // Rafraîchir la liste des journaux
+      const journalsData = await journalsStatsService.getJournalsWithStats(currentCompany.id);
+      setJournals(journalsData);
+    } catch (error: any) {
+      console.error('Error toggling journal status:', error);
+      toast({
+        variant: 'destructive',
+        title: t('error', 'Erreur'),
+        description: error.message || t('journals.errorTogglingStatus')
+      });
+    }
   };
 
 
@@ -262,7 +282,7 @@ export default function OptimizedJournalsTab() {
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total journaux</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('journals.totalJournals')}</p>
 
                 <p className="text-2xl font-bold">{summary.totalJournals}</p>
 
@@ -274,7 +294,7 @@ export default function OptimizedJournalsTab() {
 
         </Card>
 
-        
+
 
         <Card>
 
@@ -286,7 +306,7 @@ export default function OptimizedJournalsTab() {
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Journaux actifs</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('journals.activeJournals')}</p>
 
                 <p className="text-2xl font-bold">{summary.activeJournals}</p>
 
@@ -298,7 +318,7 @@ export default function OptimizedJournalsTab() {
 
         </Card>
 
-        
+
 
         <Card>
 
@@ -310,7 +330,7 @@ export default function OptimizedJournalsTab() {
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total écritures</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('journals.totalEntries')}</p>
 
                 <p className="text-2xl font-bold">{summary.totalEntries}</p>
 
@@ -322,7 +342,7 @@ export default function OptimizedJournalsTab() {
 
         </Card>
 
-        
+
 
         <Card>
 
@@ -334,7 +354,7 @@ export default function OptimizedJournalsTab() {
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total montants</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('journals.totalAmount')}</p>
 
                 <p className="text-xl font-bold">{summary.totalDebit.toFixed(2)} €</p>
 
@@ -360,7 +380,7 @@ export default function OptimizedJournalsTab() {
 
             <BarChart3 className="w-5 h-5 text-blue-500" />
 
-            <span>Journaux comptables</span>
+            <span>{t('journals.accountingJournals')}</span>
 
           </CardTitle>
 
@@ -376,23 +396,23 @@ export default function OptimizedJournalsTab() {
 
                 <TableRow>
 
-                  <TableHead>Code</TableHead>
+                  <TableHead>{t('journals.journalCode')}</TableHead>
 
-                  <TableHead>Nom du journal</TableHead>
+                  <TableHead>{t('journals.journalName')}</TableHead>
 
-                  <TableHead>Type</TableHead>
+                  <TableHead>{t('journals.journalType')}</TableHead>
 
-                  <TableHead className="text-right">Écritures</TableHead>
+                  <TableHead className="text-right">{t('journals.entriesCount')}</TableHead>
 
-                  <TableHead className="text-right">Total débits</TableHead>
+                  <TableHead className="text-right">{t('journals.totalDebits')}</TableHead>
 
-                  <TableHead className="text-right">Total crédits</TableHead>
+                  <TableHead className="text-right">{t('journals.totalCredits')}</TableHead>
 
-                  <TableHead>Statut</TableHead>
+                  <TableHead>{t('journals.status')}</TableHead>
 
-                  <TableHead>Dernière écriture</TableHead>
+                  <TableHead>{t('journals.lastEntryDate')}</TableHead>
 
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-right">{t('journals.actions')}</TableHead>
 
                 </TableRow>
 
@@ -414,7 +434,7 @@ export default function OptimizedJournalsTab() {
 
                         {getTypeIcon(journal.type)}
 
-                        <span className="capitalize">{journal.type}</span>
+                        <span className="capitalize">{t(`accounting.journalTypes.${journal.type}`, { defaultValue: journal.type })}</span>
 
                       </div>
 
@@ -422,7 +442,7 @@ export default function OptimizedJournalsTab() {
 
                     <TableCell className="text-right">
 
-                      <Badge variant="secondary">{journal.entries}</Badge>
+                      <Badge variant="secondary">{journal.entriesCount}</Badge>
 
                     </TableCell>
 
@@ -438,36 +458,34 @@ export default function OptimizedJournalsTab() {
 
                     </TableCell>
 
-                    <TableCell>{getStatusBadge(journal.status)}</TableCell>
+                    <TableCell>{getStatusBadge(journal.isActive ? 'active' : 'inactive')}</TableCell>
 
-                    <TableCell>{new Date(journal.lastEntry).toLocaleDateString('fr-FR')}</TableCell>
+                    <TableCell>{journal.lastEntryDate ? new Date(journal.lastEntryDate).toLocaleDateString('fr-FR') : '-'}</TableCell>
 
                     <TableCell>
-
-                      <Button 
-
-                        variant="ghost" 
-
-                        size="sm" 
-
-                        onClick={() => handleViewJournal(journal)}
-
-                        disabled={!userCanView || viewingJournal === journal.id}
-
-                      >
-
-                        {viewingJournal === journal.id ? (
-
-                          <RefreshCw className="w-4 h-4 animate-spin" />
-
-                        ) : (
-
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleViewJournal(journal)}
+                          disabled={!userCanView}
+                          title={t('journals.viewEntries')}
+                        >
                           <Eye className="w-4 h-4" />
-
-                        )}
-
-                      </Button>
-
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleToggleJournalStatus(journal)}
+                          title={journal.isActive ? t('journals.deactivate') : t('journals.activate')}
+                        >
+                          {journal.isActive ? (
+                            <ToggleRight className="w-4 h-4 text-green-600" />
+                          ) : (
+                            <ToggleLeft className="w-4 h-4 text-gray-400" />
+                          )}
+                        </Button>
+                      </div>
                     </TableCell>
 
                   </TableRow>
@@ -484,6 +502,99 @@ export default function OptimizedJournalsTab() {
 
       </Card>
 
+      {/* Modale de détail du journal */}
+      {showJournalDetail && selectedJournal && createPortal(
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4"
+          onClick={() => {
+            setShowJournalDetail(false);
+            setSelectedJournal(null);
+          }}
+        >
+          <div
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-6 w-full max-w-2xl max-h-[85vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">
+                {t('journals.journalDetails')}
+              </h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setShowJournalDetail(false);
+                  setSelectedJournal(null);
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-500">{t('journals.code')}</label>
+                  <p className="font-mono text-lg">{selectedJournal.code}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">{t('journals.name')}</label>
+                  <p className="text-lg">{selectedJournal.name}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">{t('journals.type')}</label>
+                  <p>{t(`accounting.journalTypes.${selectedJournal.type}`, { defaultValue: selectedJournal.type })}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">{t('journals.status')}</label>
+                  <div>
+                    {selectedJournal.isActive ? (
+                      <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                        {t('journals.active')}
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                        {t('journals.inactive')}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Stats du journal */}
+              <div className="border-t pt-4 mt-4">
+                <h3 className="font-medium mb-2">{t('journals.statistics')}</h3>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                    <p className="text-2xl font-bold">{selectedJournal.entriesCount || 0}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('journals.entries')}</p>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                    <p className="text-2xl font-bold">{selectedJournal.totalDebit.toFixed(2)} €</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('journals.totalDebit')}</p>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                    <p className="text-2xl font-bold">{selectedJournal.totalCredit.toFixed(2)} €</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('journals.totalCredit')}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
+              <Button
+                onClick={() => {
+                  setShowJournalDetail(false);
+                  setSelectedJournal(null);
+                }}
+              >
+                {t('journals.close')}
+              </Button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
 
   );

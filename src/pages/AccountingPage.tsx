@@ -12,7 +12,7 @@ import { Progress } from '@/components/ui/progress';
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-import { useToast } from '@/components/ui/use-toast';
+import { toastError, toastSuccess } from '@/lib/toast-helpers';
 
 import { useSubscription } from '@/contexts/SubscriptionContext';
 
@@ -54,6 +54,8 @@ import {
 
   CheckCircle,
 
+  Upload,
+
   type LucideIcon
 
 } from 'lucide-react';
@@ -65,6 +67,8 @@ import ChartOfAccountsEnhanced from '@/components/accounting/ChartOfAccountsEnha
 import OptimizedJournalsTab from '@/components/accounting/OptimizedJournalsTab';
 
 import OptimizedReportsTab from '@/components/accounting/OptimizedReportsTab';
+
+import FECImport from '@/components/accounting/FECImport';
 
 
 
@@ -336,7 +340,13 @@ const RecentAccountingActivities = () => {
 
   // Remplacé : Plus de données mockées
   // À l'avenir, ces activités seront chargées depuis une table d'audit dans Supabase
-  const activities: never[] = [];
+  type ActivityItem = {
+    icon: React.ComponentType<{ className?: string }>;
+    color: 'blue' | 'green' | 'purple' | 'orange';
+    description: string;
+    time: string;
+  };
+  const activities: ActivityItem[] = [];
 
 
 
@@ -447,8 +457,6 @@ const RecentAccountingActivities = () => {
 
 
 export default function AccountingPageOptimized() {
-
-  const { toast } = useToast();
 
   const { canAccessFeature } = useSubscription();
 
@@ -588,15 +596,7 @@ export default function AccountingPageOptimized() {
 
     if (!canAccessFeature('accounting_entries')) {
 
-      toast({
-
-        title: "Fonctionnalité non disponible",
-
-        description: "Mettez à niveau votre plan pour accéder aux écritures illimitées.",
-
-        variant: "destructive"
-
-      });
+      toastError('Mettez à niveau votre plan pour accéder aux écritures illimitées.');
 
       return;
 
@@ -612,15 +612,7 @@ export default function AccountingPageOptimized() {
 
     if (!canAccessFeature('advanced_reports')) {
 
-      toast({
-
-        title: "Rapports avancés",
-
-        description: "Les rapports avancés sont disponibles avec le plan Professionnel.",
-
-        variant: "destructive"
-
-      });
+      toastError('Les rapports avancés sont disponibles avec le plan Professionnel.');
 
       return;
 
@@ -634,13 +626,7 @@ export default function AccountingPageOptimized() {
 
   const handleExportData = () => {
 
-    toast({
-
-      title: "Export en cours",
-
-      description: "Génération du fichier FEC en cours...",
-
-    });
+    toastSuccess('Génération du fichier FEC en cours...');
 
   };
 
@@ -852,7 +838,7 @@ export default function AccountingPageOptimized() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
 
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
 
           <TabsTrigger value="overview" className="flex items-center space-x-2">
 
@@ -875,6 +861,14 @@ export default function AccountingPageOptimized() {
             <BookOpen className="w-4 h-4" />
 
             <span>Plan comptable</span>
+
+          </TabsTrigger>
+
+          <TabsTrigger value="fec-import" className="flex items-center space-x-2">
+
+            <Upload className="w-4 h-4" />
+
+            <span>📥 Import FEC</span>
 
           </TabsTrigger>
 
@@ -954,6 +948,12 @@ export default function AccountingPageOptimized() {
         <TabsContent value="accounts">
 
           <ChartOfAccountsEnhanced currentEnterpriseId={currentCompanyId} />
+
+        </TabsContent>
+
+        <TabsContent value="fec-import">
+
+          <FECImport currentEnterpriseId={currentCompanyId} />
 
         </TabsContent>
 

@@ -301,23 +301,23 @@ export function PerformanceReviewsTab({
 
               <CardContent>
                 {/* Period */}
-                {review.review_period && (
+                {review.review_date && (
                   <div className="bg-gray-50 p-3 rounded-lg mb-4">
                     <p className="text-sm font-semibold mb-1">Période évaluée</p>
-                    <p className="text-sm text-gray-700">{review.review_period}</p>
+                    <p className="text-sm text-gray-700">{new Date(review.review_date).toLocaleDateString('fr-FR')}</p>
                   </div>
                 )}
 
                 {/* Ratings par compétence */}
-                {review.competency_ratings && Object.keys(review.competency_ratings).length > 0 && (
+                {review.competencies_ratings && Object.keys(review.competencies_ratings).length > 0 && (
                   <div className="mb-4">
                     <p className="text-sm font-semibold mb-2">Compétences</p>
                     <div className="grid grid-cols-2 gap-2">
-                      {Object.entries(review.competency_ratings).map(([comp, rating]) => (
+                      {Object.entries(review.competencies_ratings).map(([comp, rating]) => (
                         <div key={comp} className="flex items-center justify-between bg-gray-50 p-2 rounded">
                           <span className="text-sm text-gray-700 capitalize">{comp}</span>
                           <div className="flex items-center gap-1">
-                            {getRatingStars(rating as number)}
+                            {getRatingStars(rating as unknown as number)}
                           </div>
                         </div>
                       ))}
@@ -448,9 +448,6 @@ function ReviewDetailModal({ review, onClose }: { review: PerformanceReview; onC
             <p className="text-sm text-gray-600">
               Par {review.reviewer_name} • {new Date(review.review_date).toLocaleDateString('fr-FR')}
             </p>
-            {review.review_period && (
-              <p className="text-sm text-gray-600">Période: {review.review_period}</p>
-            )}
           </div>
 
           {/* Ratings */}
@@ -496,10 +493,10 @@ function ReviewDetailModal({ review, onClose }: { review: PerformanceReview; onC
           )}
 
           {/* Comments */}
-          {review.reviewer_comments && (
+          {review.manager_comments && (
             <div>
               <h4 className="font-semibold mb-2">Commentaires de l'évaluateur</h4>
-              <p className="text-gray-700 whitespace-pre-wrap">{review.reviewer_comments}</p>
+              <p className="text-gray-700 whitespace-pre-wrap">{review.manager_comments}</p>
             </div>
           )}
 

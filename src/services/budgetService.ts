@@ -139,7 +139,7 @@ export class BudgetService {
       }
 
       // Calculer les totaux
-      const totals = this.calculateBudgetTotals(budgetData.categories);
+      const totals = this.calculateBudgetTotals(budgetData.categories as unknown as BudgetCategory[]);
 
       // Créer le budget principal
       const { data: budget, error: budgetError } = await supabase
@@ -228,7 +228,7 @@ export class BudgetService {
 
       // Recalculer les totaux si les catégories ont changé
       if (budgetData.categories) {
-        const totals = this.calculateBudgetTotals(budgetData.categories);
+        const totals = this.calculateBudgetTotals(budgetData.categories as unknown as BudgetCategory[]);
         updateData = {
           total_revenue_budget: totals.revenue,
           total_expense_budget: totals.expense,
@@ -637,6 +637,50 @@ export class BudgetService {
       errors,
       warnings
     };
+  }
+
+  /**
+   * Crée un budget à partir de données importées (Excel/CSV)
+   */
+  async createBudgetFromImport(
+    companyId: string,
+    importData: BudgetImportData
+  ): Promise<{ data: Budget | null; error: unknown | null }> {
+    try {
+      // Convertir les données importées au format BudgetFormData
+      const budgetData: BudgetFormData = {
+        year: importData.year,
+        categories: importData.categories.map(cat => ({
+          category: cat.category,
+          subcategory: cat.subcategory,
+          category_type: cat.category_type,
+          account_codes: [],
+          monthly_amounts: [
+            cat.jan, cat.feb, cat.mar, cat.apr, cat.may, cat.jun,
+            cat.jul, cat.aug, cat.sep, cat.oct, cat.nov, cat.dec
+          ],
+          annual_amount: cat.jan + cat.feb + cat.mar + cat.apr + cat.may + cat.jun +
+                        cat.jul + cat.aug + cat.sep + cat.oct + cat.nov + cat.dec,
+          driver_type: 'fixed',
+          notes: cat.notes,
+        })),
+        assumptions: importData.assumptions?.map(ass => ({
+          key: ass.key,
+          description: ass.description,
+          value: ass.value,
+          unit: ass.unit,
+          category: ass.category,
+          confidence_level: 80,
+        })) || []
+      };
+
+      // Créer le budget
+      return this.createBudget(companyId, budgetData);
+
+    } catch (error) {
+      console.error('Error creating budget from import:', error instanceof Error ? error.message : String(error));
+      return { data: null, error };
+    }
   }
 }
 

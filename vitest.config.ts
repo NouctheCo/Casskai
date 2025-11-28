@@ -8,6 +8,10 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    // 🔧 Charger explicitement les variables .env (dont VITE_TEST_SUPABASE_SERVICE_ROLE_KEY)
+    env: {
+      VITE_TEST_SUPABASE_SERVICE_ROLE_KEY: process.env.VITE_TEST_SUPABASE_SERVICE_ROLE_KEY || '',
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

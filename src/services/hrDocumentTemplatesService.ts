@@ -407,7 +407,14 @@ export class HRDocumentTemplatesService {
 
       const stats: ArchiveStats = {
         total_documents: data.length,
-        by_type: {},
+        by_type: {
+          contract: 0,
+          amendment: 0,
+          letter: 0,
+          termination: 0,
+          certificate: 0,
+          other: 0
+        },
         total_size_mb: 0,
         expiring_soon: 0,
         can_be_destroyed: 0

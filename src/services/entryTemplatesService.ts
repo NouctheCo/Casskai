@@ -275,10 +275,10 @@ export class EntryTemplatesService {
 
     if (templateAccount.accountNumber) {
       const account = await supabase
-        .from('accounts')
+        .from('chart_of_accounts')
         .select('id')
         .eq('company_id', companyId)
-        .eq('number', templateAccount.accountNumber)
+        .eq('account_number', templateAccount.accountNumber)
         .eq('is_active', true)
         .single();
 
@@ -412,10 +412,10 @@ export class EntryTemplatesService {
         (rule.accountCredit || '445711');
 
       const vatAccount = await supabase
-        .from('accounts')
+        .from('chart_of_accounts')
         .select('id')
         .eq('company_id', companyId)
-        .eq('number', vatAccountNumber)
+        .eq('account_number', vatAccountNumber)
         .single();
 
       if (vatAccount.data) {

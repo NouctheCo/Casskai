@@ -19,7 +19,10 @@ type RawVATEntry = {
   credit_amount: number | null;
   description: string | null;
   journal_entries: { entry_date: string; reference: string; description?: string | null } | null;
-  accounts: { number: string; name: string; type?: string | null } | null;
+  account_number?: string | null;
+  account_name?: string | null;
+  line_order?: number | null;
+  accounts?: { number: string; name: string; type?: string | null } | null;
 };
 
 type VATDeclarationEntry = {
@@ -383,10 +386,10 @@ export class VATCalculationService {
   ): Promise<{ id: string; number: string; name: string }> {
     // Recherche du compte existant
     const account = await supabase
-      .from('accounts')
-      .select('id, number, name')
+      .from('chart_of_accounts')
+      .select('id, number:account_number, name:account_name')
       .eq('company_id', companyId)
-      .eq('number', accountNumber)
+      .eq('account_number', accountNumber)
       .single();
 
     if (account.data) {
@@ -395,16 +398,17 @@ export class VATCalculationService {
 
     // Création du compte s'il n'existe pas
     const newAccount = await supabase
-      .from('accounts')
+      .from('chart_of_accounts')
       .insert({
         company_id: companyId,
-        number: accountNumber,
-        name: accountName,
-        type: accountNumber.startsWith('4456') ? 'LIABILITY' : 'ASSET',
-        class: '4',
-        is_active: true
+        account_number: accountNumber,
+        account_name: accountName,
+        account_type: accountNumber.startsWith('4456') ? 'liability' : 'asset',
+        account_class: 4,
+        is_active: true,
+        is_detail_account: true
       })
-      .select('id, number, name')
+      .select('id, number:account_number, name:account_name')
       .single();
 
     if (newAccount.error) {
@@ -449,18 +453,21 @@ export class VATCalculationService {
   // Récupération des écritures TVA pour la période
   private static async fetchPeriodVATEntries(companyId: string, startDate: string, endDate: string): Promise<RawVATEntry[]> {
     const vatEntries = await supabase
-      .from('journal_entry_items')
+      .from('journal_entry_lines')
       .select(`
         debit_amount,
         credit_amount,
         description,
+        account_number,
+        account_name,
+        line_order,
         journal_entries (entry_date, reference, description),
-        accounts (number, name, type)
+        accounts:chart_of_accounts (number:account_number, name:account_name, type:account_type)
       `)
       .eq('journal_entries.company_id', companyId)
       .gte('journal_entries.entry_date', startDate)
       .lte('journal_entries.entry_date', endDate)
-      .like('accounts.number', '445%')
+      .like('account_number', '445%')
       .order('journal_entries.entry_date');
 
     if (!vatEntries.data) {
@@ -470,18 +477,24 @@ export class VATCalculationService {
       debit_amount: number | null;
       credit_amount: number | null;
       description: string | null;
+      account_number?: string | null;
+      account_name?: string | null;
+      line_order?: number | null;
       journal_entries: unknown;
-      accounts: unknown;
+      accounts?: unknown;
     }>;
     const normalized: RawVATEntry[] = raw.map((e) => {
       const je = this.asSingle<{ entry_date: string; reference: string; description?: string | null }>(e.journal_entries);
-      const acc = this.asSingle<{ number: string; name: string; type?: string | null }>(e.accounts);
+      const acc = this.asSingle<{ number: string; name: string; type?: string | null } | null>(e.accounts);
       return {
         debit_amount: e.debit_amount ?? 0,
         credit_amount: e.credit_amount ?? 0,
         description: e.description ?? null,
         journal_entries: je ?? null,
-        accounts: acc ?? null,
+        account_number: e.account_number ?? acc?.number ?? null,
+        account_name: e.account_name ?? acc?.name ?? null,
+        line_order: typeof e.line_order === 'number' ? e.line_order : null,
+        accounts: acc ?? undefined,
       };
     });
     return normalized;
@@ -502,16 +515,17 @@ export class VATCalculationService {
     const entries: VATDeclarationEntry[] = [];
 
     data.forEach((entry) => {
-      const accountNumber = entry.accounts?.number ?? '';
+      const accountNumber = entry.account_number ?? entry.accounts?.number ?? '';
+      const accountName = entry.account_name ?? entry.accounts?.name ?? '';
       const debit = entry.debit_amount || 0;
       const credit = entry.credit_amount || 0;
 
-      if (entry.journal_entries && entry.accounts) {
+      if (entry.journal_entries) {
         entries.push({
           entry_date: entry.journal_entries.entry_date,
           reference: entry.journal_entries.reference,
           accountNumber,
-          accountName: entry.accounts.name,
+          accountName,
           debit,
           credit,
           vatRate: this.extractVATRateFromDescription(entry.description || '')
@@ -583,11 +597,11 @@ export class VATCalculationService {
       // Contrepartie selon le mode de paiement
       if (paymentDate) {
         const bankAccount = await supabase
-          .from('accounts')
+          .from('chart_of_accounts')
           .select('id')
           .eq('company_id', companyId)
-          .eq('type', 'ASSET')
-          .like('number', '512%') // Compte de banque
+          .eq('account_type', 'asset')
+          .like('account_number', '512%') // Compte de banque
           .limit(1)
           .single();
 
@@ -678,15 +692,18 @@ export class VATCalculationService {
     const yearStart = new Date();
     yearStart.setMonth(0, 1); // 1er janvier
     
-    const revenue = await supabase
-      .from('journal_entry_items')
-      .select('credit_amount, accounts!inner(number)')
+    const { data: revenueLines, error: revenueError } = await supabase
+      .from('journal_entry_lines')
+      .select('credit_amount, account_number')
       .eq('journal_entries.company_id', companyId)
       .gte('journal_entries.entry_date', yearStart.toISOString())
-      .like('accounts.number', '7%') // Comptes de vente
-      .single();
+      .like('account_number', '7%'); // Comptes de vente
 
-    const annualRevenue = revenue.data?.credit_amount || 0;
+    if (revenueError) {
+      throw new Error(`Impossible de récupérer le chiffre d'affaires: ${revenueError.message}`);
+    }
+
+    const annualRevenue = (revenueLines ?? []).reduce((sum, line) => sum + (line.credit_amount || 0), 0);
 
     // Seuils 2024
     const thresholds = {

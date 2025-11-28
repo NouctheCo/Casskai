@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { FileText, History, Archive, BarChart3 } from 'lucide-react';
-import { ReportGenerationTab } from './ReportGenerationTab';
+import OptimizedReportsTab from '../accounting/OptimizedReportsTab';
 import { ReportHistoryTab } from './ReportHistoryTab';
 import { ReportArchiveTab } from './ReportArchiveTab';
 
@@ -59,11 +59,7 @@ export function ReportsManagementTabs({ companyId }: ReportsManagementTabsProps)
 
           <div className="mt-6">
             <TabsContent value="generation" className="space-y-4">
-              <ReportGenerationTab
-                companyId={companyId}
-                refreshTrigger={refreshTrigger}
-                onReportGenerated={refreshAll}
-              />
+              <OptimizedReportsTab />
             </TabsContent>
 
             <TabsContent value="history" className="space-y-4">

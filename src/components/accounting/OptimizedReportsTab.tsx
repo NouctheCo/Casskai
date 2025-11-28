@@ -50,7 +50,11 @@ import {
 
   Target,
 
-  Zap
+  Zap,
+
+  Activity,
+
+  Package
 
 } from 'lucide-react';
 
@@ -68,33 +72,55 @@ import { dashboardStatsService, type DashboardStats } from '@/services/dashboard
 
 // Type union strict pour les types de rapports
 
-type ReportType = 
+type ReportType =
 
-  | 'balance_sheet' 
+  | 'balance_sheet'
 
-  | 'income_statement' 
+  | 'income_statement'
 
-  | 'cash_flow' 
+  | 'cash_flow'
 
-  | 'trial_balance' 
+  | 'trial_balance'
 
-  | 'general_ledger' 
+  | 'general_ledger'
 
-  | 'aged_receivables' 
+  | 'aged_receivables'
 
-  | 'aged_payables' 
+  | 'aged_payables'
 
-  | 'financial_ratios' 
+  | 'financial_ratios'
 
-  | 'vat_report' 
+  | 'vat_report'
 
-  | 'budget_variance' 
+  | 'budget_variance'
 
-  | 'kpi_dashboard' 
+  | 'kpi_dashboard'
 
-  | 'tax_summary';
+  | 'tax_summary'
 
+  | 'inventory_valuation';
 
+// Liste des rapports actuellement implémentés
+const AVAILABLE_REPORTS: ReportType[] = [
+  'balance_sheet',
+  'income_statement',
+  'cash_flow',
+  'trial_balance',
+  'general_ledger',
+  'aged_receivables',
+  'aged_payables',
+  'financial_ratios',
+  'budget_variance',
+  'vat_report',
+  'kpi_dashboard',
+  'tax_summary',
+  'inventory_valuation'
+];
+
+// Helper pour vérifier si un rapport est disponible
+const isReportAvailable = (reportType: string): boolean => {
+  return AVAILABLE_REPORTS.includes(reportType as ReportType);
+};
 
 export default function OptimizedReportsTab() {
 
@@ -151,6 +177,15 @@ export default function OptimizedReportsTab() {
   const userCanDownload = true;
 
 
+
+  // Logging pour debug
+  console.log('🔍 OptimizedReportsTab render:', {
+    userCanView,
+    userCanDownload,
+    availableReportsCount: AVAILABLE_REPORTS.length,
+    selectedPeriod,
+    selectedReportType
+  });
 
   // Définition des rapports financiers professionnels avec leurs icônes et couleurs
 
@@ -209,6 +244,94 @@ export default function OptimizedReportsTab() {
       frequency: 'Mensuel',
       compliance: 'DGFiP',
       estimatedTime: '4-5 min'
+    },
+    {
+      type: 'cash_flow',
+      name: 'Tableau de Flux de Trésorerie',
+      description: 'Flux d\'exploitation, investissement et financement',
+      icon: TrendingUp,
+      color: 'red',
+      category: 'États de synthèse',
+      frequency: 'Mensuel',
+      compliance: 'IFRS',
+      estimatedTime: '3-4 min'
+    },
+    {
+      type: 'aged_receivables',
+      name: 'Analyse des Créances Clients',
+      description: 'Ancienneté des créances et risques clients',
+      icon: Users,
+      color: 'orange',
+      category: 'Analyses',
+      frequency: 'Mensuel',
+      compliance: 'Gestion',
+      estimatedTime: '2-3 min'
+    },
+    {
+      type: 'financial_ratios',
+      name: 'Analyse par Ratios Financiers',
+      description: 'Ratios de liquidité, rentabilité, activité et endettement',
+      icon: BarChart3,
+      color: 'purple',
+      category: 'Analyses',
+      frequency: 'Trimestriel',
+      compliance: 'Gestion',
+      estimatedTime: '3-5 min'
+    },
+    {
+      type: 'aged_payables',
+      name: 'Analyse des Dettes Fournisseurs',
+      description: 'Ancienneté des dettes et échéances fournisseurs',
+      icon: Users,
+      color: 'red',
+      category: 'Analyses',
+      frequency: 'Mensuel',
+      compliance: 'Gestion',
+      estimatedTime: '2-3 min'
+    },
+    {
+      type: 'budget_variance',
+      name: 'Analyse des Écarts Budgétaires',
+      description: 'Comparaison Budget vs Réalisé avec analyse des écarts',
+      icon: BarChart3,
+      color: 'indigo',
+      category: 'Analyses',
+      frequency: 'Mensuel',
+      compliance: 'Gestion',
+      estimatedTime: '3-4 min'
+    },
+    {
+      type: 'kpi_dashboard',
+      name: 'Tableau de Bord KPI',
+      description: 'Vue d\'ensemble des indicateurs clés de performance',
+      icon: Activity,
+      color: 'cyan',
+      category: 'Analyses',
+      frequency: 'Mensuel',
+      compliance: 'Gestion',
+      estimatedTime: '4-5 min'
+    },
+    {
+      type: 'tax_summary',
+      name: 'Synthèse Fiscale',
+      description: 'Calendrier des obligations fiscales et récapitulatif',
+      icon: Calendar,
+      color: 'yellow',
+      category: 'Fiscal',
+      frequency: 'Annuel',
+      compliance: 'Légal',
+      estimatedTime: '3-4 min'
+    },
+    {
+      type: 'inventory_valuation',
+      name: 'Valorisation des Stocks',
+      description: 'Analyse de la valorisation et rotation des stocks',
+      icon: Package,
+      color: 'emerald',
+      category: 'Analyses',
+      frequency: 'Mensuel',
+      compliance: 'Gestion',
+      estimatedTime: '3-4 min'
     }
   ];
 
@@ -372,6 +495,60 @@ export default function OptimizedReportsTab() {
 
           break;
 
+        case 'cash_flow':
+
+          downloadUrl = await reportGenerationService.generateCashFlow(filters, exportOptions);
+
+          break;
+
+        case 'aged_receivables':
+
+          downloadUrl = await reportGenerationService.generateAgedReceivables(filters, exportOptions);
+
+          break;
+
+        case 'aged_payables':
+
+          downloadUrl = await reportGenerationService.generateAgedPayables(filters, exportOptions);
+
+          break;
+
+        case 'financial_ratios':
+
+          downloadUrl = await reportGenerationService.generateFinancialRatios(filters, exportOptions);
+
+          break;
+
+        case 'vat_report':
+
+          downloadUrl = await reportGenerationService.generateVATReport(filters, exportOptions);
+
+          break;
+
+        case 'budget_variance':
+
+          downloadUrl = await reportGenerationService.generateBudgetVariance(filters, exportOptions);
+
+          break;
+
+        case 'kpi_dashboard':
+
+          downloadUrl = await reportGenerationService.generateKPIDashboard(filters, exportOptions);
+
+          break;
+
+        case 'tax_summary':
+
+          downloadUrl = await reportGenerationService.generateTaxSummary(filters, exportOptions);
+
+          break;
+
+        case 'inventory_valuation':
+
+          downloadUrl = await reportGenerationService.generateInventoryValuation(filters, exportOptions);
+
+          break;
+
         default:
 
           throw new Error('Type de rapport non supporté');
@@ -408,7 +585,11 @@ export default function OptimizedReportsTab() {
 
       } catch (error) {
 
-      showToast("Impossible de générer le rapport. Veuillez réessayer.", 'error');
+      console.error('Erreur génération rapport:', error);
+
+      const errorMessage = error instanceof Error ? error.message : "Impossible de générer le rapport. Veuillez réessayer.";
+
+      showToast(errorMessage, 'error');
 
     } finally {
 
@@ -592,27 +773,175 @@ export default function OptimizedReportsTab() {
 
 
 
-  // Gestionnaire pour consulter un rapport
+  // Gestionnaire pour consulter un rapport - génère puis ouvre
 
-  const handleViewReport = async (report: FinancialReport) => {
+  const handleViewReport = async (reportType: string, reportName: string) => {
+
+    console.log('👁️ handleViewReport appelé:', { reportType, reportName, userCanView });
 
     if (!userCanView) return;
 
-    
 
-    setViewingReport(report.id);
+
+    setViewingReport(reportType);
 
     try {
 
-      // Simulation d'ouverture du rapport
+      const periodDates = getPeriodDates(selectedPeriod);
 
-      await new Promise(resolve => setTimeout(resolve, 800));
 
-      showToast(`Rapport "${report.name}" ouvert avec succès.`, 'success');
+
+      if (!currentCompany?.id) {
+
+        throw new Error('Aucune entreprise sélectionnée');
+
+      }
+
+
+
+      const filters = {
+
+        companyId: currentCompany.id,
+
+        startDate: periodDates.start,
+
+        endDate: periodDates.end
+
+      };
+
+
+
+      const exportOptions = {
+
+        format: 'pdf' as const,
+
+        title: `${reportName} - ${selectedPeriod}`,
+
+        companyInfo: {
+
+          name: currentCompany.name,
+
+          address: currentCompany.address,
+
+          phone: currentCompany.phone,
+
+          email: currentCompany.email
+
+        }
+
+      };
+
+
+
+      let downloadUrl: string;
+
+      switch (reportType) {
+
+        case 'balance_sheet':
+
+          downloadUrl = await reportGenerationService.generateBalanceSheet(filters, exportOptions);
+
+          break;
+
+        case 'income_statement':
+
+          downloadUrl = await reportGenerationService.generateIncomeStatement(filters, exportOptions);
+
+          break;
+
+        case 'trial_balance':
+
+          downloadUrl = await reportGenerationService.generateTrialBalance(filters, exportOptions);
+
+          break;
+
+        case 'general_ledger':
+
+          downloadUrl = await reportGenerationService.generateGeneralLedger(filters, exportOptions);
+
+          break;
+
+        case 'cash_flow':
+
+          downloadUrl = await reportGenerationService.generateCashFlow(filters, exportOptions);
+
+          break;
+
+        case 'aged_receivables':
+
+          downloadUrl = await reportGenerationService.generateAgedReceivables(filters, exportOptions);
+
+          break;
+
+        case 'financial_ratios':
+
+          downloadUrl = await reportGenerationService.generateFinancialRatios(filters, exportOptions);
+
+          break;
+
+        case 'vat_report':
+
+          downloadUrl = await reportGenerationService.generateVATReport(filters, exportOptions);
+
+          break;
+
+        case 'aged_payables':
+
+          downloadUrl = await reportGenerationService.generateAgedPayables(filters, exportOptions);
+
+          break;
+
+        case 'budget_variance':
+
+          downloadUrl = await reportGenerationService.generateBudgetVariance(filters, exportOptions);
+
+          break;
+
+        case 'kpi_dashboard':
+
+          downloadUrl = await reportGenerationService.generateKPIDashboard(filters, exportOptions);
+
+          break;
+
+        case 'tax_summary':
+
+          downloadUrl = await reportGenerationService.generateTaxSummary(filters, exportOptions);
+
+          break;
+
+        case 'inventory_valuation':
+
+          downloadUrl = await reportGenerationService.generateInventoryValuation(filters, exportOptions);
+
+          break;
+
+        default:
+
+          showToast(`Le rapport "${reportName}" n'est pas encore disponible.`, 'warning');
+
+          return;
+
+      }
+
+
+
+      // Ouvrir dans un nouvel onglet
+
+      if (downloadUrl) {
+
+        window.open(downloadUrl, '_blank');
+
+        showToast(`Rapport "${reportName}" ouvert avec succès.`, 'success');
+
+      }
 
     } catch (error) {
 
-      showToast("Impossible d'ouvrir le rapport. Veuillez réessayer.", 'error');
+      console.error('Erreur ouverture rapport:', error);
+
+      const errorMessage = error instanceof Error ? error.message : "Impossible d'ouvrir le rapport. Veuillez réessayer.";
+
+      showToast(errorMessage, 'error');
 
     } finally {
 
@@ -624,41 +953,181 @@ export default function OptimizedReportsTab() {
 
 
 
-  // Gestionnaire pour télécharger un rapport
+  // Gestionnaire pour télécharger un rapport - génère puis télécharge
 
-  const handleDownloadReport = async (report: FinancialReport) => {
+  const handleDownloadReport = async (reportType: string, reportName: string) => {
+
+    console.log('🔽 handleDownloadReport appelé:', { reportType, reportName, userCanDownload });
 
     if (!userCanDownload) return;
 
-    
 
-    setDownloadingReport(report.id);
+
+    setDownloadingReport(reportType);
 
     try {
 
-      // Simulation du téléchargement
+      const periodDates = getPeriodDates(selectedPeriod);
 
-      await new Promise(resolve => setTimeout(resolve, 600));
 
-      
 
-      // Simuler le téléchargement
+      if (!currentCompany?.id) {
 
-      const link = document.createElement('a');
+        throw new Error('Aucune entreprise sélectionnée');
 
-      link.href = report.file_url || '#';
+      }
 
-      link.download = `${report.name}.${report.file_format}`;
 
-      link.click();
 
-      
+      const filters = {
 
-      showToast(`Rapport "${report.name}" téléchargé avec succès.`, 'success');
+        companyId: currentCompany.id,
+
+        startDate: periodDates.start,
+
+        endDate: periodDates.end
+
+      };
+
+
+
+      const exportOptions = {
+
+        format: 'pdf' as const,
+
+        title: `${reportName} - ${selectedPeriod}`,
+
+        companyInfo: {
+
+          name: currentCompany.name,
+
+          address: currentCompany.address,
+
+          phone: currentCompany.phone,
+
+          email: currentCompany.email
+
+        }
+
+      };
+
+
+
+      let downloadUrl: string;
+
+      switch (reportType) {
+
+        case 'balance_sheet':
+
+          downloadUrl = await reportGenerationService.generateBalanceSheet(filters, exportOptions);
+
+          break;
+
+        case 'income_statement':
+
+          downloadUrl = await reportGenerationService.generateIncomeStatement(filters, exportOptions);
+
+          break;
+
+        case 'trial_balance':
+
+          downloadUrl = await reportGenerationService.generateTrialBalance(filters, exportOptions);
+
+          break;
+
+        case 'general_ledger':
+
+          downloadUrl = await reportGenerationService.generateGeneralLedger(filters, exportOptions);
+
+          break;
+
+        case 'cash_flow':
+
+          downloadUrl = await reportGenerationService.generateCashFlow(filters, exportOptions);
+
+          break;
+
+        case 'aged_receivables':
+
+          downloadUrl = await reportGenerationService.generateAgedReceivables(filters, exportOptions);
+
+          break;
+
+        case 'financial_ratios':
+
+          downloadUrl = await reportGenerationService.generateFinancialRatios(filters, exportOptions);
+
+          break;
+
+        case 'vat_report':
+
+          downloadUrl = await reportGenerationService.generateVATReport(filters, exportOptions);
+
+          break;
+
+        case 'aged_payables':
+
+          downloadUrl = await reportGenerationService.generateAgedPayables(filters, exportOptions);
+
+          break;
+
+        case 'budget_variance':
+
+          downloadUrl = await reportGenerationService.generateBudgetVariance(filters, exportOptions);
+
+          break;
+
+        case 'kpi_dashboard':
+
+          downloadUrl = await reportGenerationService.generateKPIDashboard(filters, exportOptions);
+
+          break;
+
+        case 'tax_summary':
+
+          downloadUrl = await reportGenerationService.generateTaxSummary(filters, exportOptions);
+
+          break;
+
+        case 'inventory_valuation':
+
+          downloadUrl = await reportGenerationService.generateInventoryValuation(filters, exportOptions);
+
+          break;
+
+        default:
+
+          showToast(`Le rapport "${reportName}" n'est pas encore disponible.`, 'warning');
+
+          return;
+
+      }
+
+
+
+      // Télécharger le fichier
+
+      if (downloadUrl) {
+
+        const link = document.createElement('a');
+
+        link.href = downloadUrl;
+
+        link.download = `${reportName}-${selectedPeriod}.pdf`;
+
+        link.click();
+
+        showToast(`Rapport "${reportName}" téléchargé avec succès.`, 'success');
+
+      }
 
     } catch (error) {
 
-      showToast("Impossible de télécharger le rapport. Veuillez réessayer.", 'error');
+      console.error('Erreur téléchargement rapport:', error);
+
+      const errorMessage = error instanceof Error ? error.message : 'Impossible de télécharger le rapport. Veuillez réessayer.';
+
+      showToast(errorMessage, 'error');
 
     } finally {
 
@@ -993,6 +1462,12 @@ export default function OptimizedReportsTab() {
 
                   <div className="flex flex-col items-end space-y-1">
 
+                    {!isReportAvailable(report.type) && (
+                      <Badge variant="default" className="text-xs font-medium bg-yellow-500 hover:bg-yellow-600 text-white">
+                        Bientôt disponible
+                      </Badge>
+                    )}
+
                     <Badge variant="outline" className="text-xs font-medium">
 
                       {report.frequency}
@@ -1067,7 +1542,7 @@ export default function OptimizedReportsTab() {
 
                     onClick={() => handleGenerateReport(report.type, report.name)}
 
-                    disabled={isGenerating === report.type || !userCanGenerate}
+                    disabled={isGenerating === report.type || !userCanGenerate || !isReportAvailable(report.type)}
 
                   >
 
@@ -1095,85 +1570,51 @@ export default function OptimizedReportsTab() {
 
                   </Button>
 
-                  <Button 
+                  <Button
 
-                    variant="outline" 
+                    variant="outline"
 
                     size="sm"
 
-                    onClick={() => handleViewReport({
+                    onClick={() => handleViewReport(report.type, report.name)}
 
-                      id: report.type,
-
-                      company_id: currentCompany?.id || 'comp-1',
-
-                      name: report.name,
-
-                      type: report.type as ReportType,
-
-                      format: 'detailed',
-
-                      period_start: '',
-
-                      period_end: '',
-
-                      status: 'ready',
-
-                      file_format: 'pdf',
-
-                      created_at: new Date().toISOString(),
-
-                      updated_at: new Date().toISOString()
-
-                    })}
-
-                    disabled={!userCanView}
+                    disabled={!userCanView || viewingReport === report.type || !isReportAvailable(report.type)}
 
                   >
 
-                    <Eye className="w-4 h-4" />
+                    {viewingReport === report.type ? (
+
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+
+                    ) : (
+
+                      <Eye className="w-4 h-4" />
+
+                    )}
 
                   </Button>
 
-                  <Button 
+                  <Button
 
-                    variant="outline" 
+                    variant="outline"
 
                     size="sm"
 
-                    onClick={() => handleDownloadReport({
+                    onClick={() => handleDownloadReport(report.type, report.name)}
 
-                      id: report.type,
-
-                      company_id: currentCompany?.id || 'comp-1',
-
-                      name: report.name,
-
-                      type: report.type as ReportType,
-
-                      format: 'detailed',
-
-                      period_start: '',
-
-                      period_end: '',
-
-                      status: 'ready',
-
-                      file_format: 'pdf',
-
-                      file_url: `/reports/${report.type}.pdf`,
-
-                      created_at: new Date().toISOString(),
-
-                      updated_at: new Date().toISOString()
-
-                    })}
-
-                    disabled={!userCanDownload}
+                    disabled={!userCanDownload || downloadingReport === report.type || !isReportAvailable(report.type)}
 
                   >
 
-                    <Download className="w-4 h-4" />
+                    {downloadingReport === report.type ? (
+
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+
+                    ) : (
+
+                      <Download className="w-4 h-4" />
+
+                    )}
 
                   </Button>
 
@@ -1241,19 +1682,19 @@ export default function OptimizedReportsTab() {
 
                   <div className="flex items-center space-x-2">
 
-                    <Button 
+                    <Button
 
-                      variant="outline" 
+                      variant="outline"
 
                       size="sm"
 
-                      onClick={() => handleViewReport(report)}
+                      onClick={() => handleViewReport(report.type, report.name)}
 
-                      disabled={!userCanView || viewingReport === report.id}
+                      disabled={!userCanView || viewingReport === report.type}
 
                     >
 
-                      {viewingReport === report.id ? (
+                      {viewingReport === report.type ? (
 
                         <RefreshCw className="w-4 h-4 mr-1 animate-spin" />
 
@@ -1267,19 +1708,19 @@ export default function OptimizedReportsTab() {
 
                     </Button>
 
-                    <Button 
+                    <Button
 
-                      variant="outline" 
+                      variant="outline"
 
                       size="sm"
 
-                      onClick={() => handleDownloadReport(report)}
+                      onClick={() => handleDownloadReport(report.type, report.name)}
 
-                      disabled={!userCanDownload || downloadingReport === report.id}
+                      disabled={!userCanDownload || downloadingReport === report.type}
 
                     >
 
-                      {downloadingReport === report.id ? (
+                      {downloadingReport === report.type ? (
 
                         <RefreshCw className="w-4 h-4 animate-spin" />
 

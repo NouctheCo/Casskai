@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,6 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Employee } from '@/services/hrService';
+import { employeeFormSchema } from '@/lib/validation-schemas';
+import { z } from 'zod';
+
+type EmployeeFormData = z.infer<typeof employeeFormSchema>;
 
 interface EmployeeFormModalProps {
   isOpen: boolean;
@@ -20,63 +26,82 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
   onSubmit,
   employee
 }) => {
-  const [formData, setFormData] = useState({
-    employee_number: employee?.employee_number || '',
-    first_name: employee?.first_name || '',
-    last_name: employee?.last_name || '',
-    email: employee?.email || '',
-    phone: employee?.phone || '',
-    position: employee?.position || '',
-    department: employee?.department || '',
-    hire_date: employee?.hire_date || new Date().toISOString().split('T')[0],
-    salary: employee?.salary?.toString() || '',
-    salary_currency: employee?.salary_currency || 'EUR',
-    contract_type: employee?.contract_type || 'permanent' as const,
-    status: employee?.status || 'active' as const,
-    address: employee?.address || '',
-    city: employee?.city || '',
-    postal_code: employee?.postal_code || '',
-    emergency_contact: employee?.emergency_contact || '',
-    emergency_phone: employee?.emergency_phone || '',
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const form = useForm<EmployeeFormData>({
+    resolver: zodResolver(employeeFormSchema),
+    mode: 'onChange',
+    defaultValues: {
+      employee_number: employee?.employee_number || '',
+      first_name: employee?.first_name || '',
+      last_name: employee?.last_name || '',
+      email: employee?.email || '',
+      phone: employee?.phone || '',
+      position: employee?.position || '',
+      department: employee?.department || '',
+      hire_date: employee?.hire_date || new Date().toISOString().split('T')[0],
+      salary: employee?.salary?.toString() || '',
+      salary_currency: employee?.salary_currency || 'EUR',
+      contract_type: employee?.contract_type || 'permanent',
+      status: employee?.status || 'active',
+      address: employee?.address || '',
+      city: employee?.city || '',
+      postal_code: employee?.postal_code || '',
+      emergency_contact: employee?.emergency_contact || '',
+      emergency_phone: employee?.emergency_phone || '',
+    },
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const validate = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.first_name.trim()) newErrors.first_name = 'Prénom requis';
-    if (!formData.last_name.trim()) newErrors.last_name = 'Nom requis';
-    if (!formData.email.trim()) newErrors.email = 'Email requis';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Email invalide';
+  // Reset form when employee changes
+  useEffect(() => {
+    if (employee) {
+      form.reset({
+        employee_number: employee.employee_number || '',
+        first_name: employee.first_name || '',
+        last_name: employee.last_name || '',
+        email: employee.email || '',
+        phone: employee.phone || '',
+        position: employee.position || '',
+        department: employee.department || '',
+        hire_date: employee.hire_date || new Date().toISOString().split('T')[0],
+        salary: employee.salary?.toString() || '',
+        salary_currency: employee.salary_currency || 'EUR',
+        contract_type: employee.contract_type || 'permanent',
+        status: employee.status || 'active',
+        address: employee.address || '',
+        city: employee.city || '',
+        postal_code: employee.postal_code || '',
+        emergency_contact: employee.emergency_contact || '',
+        emergency_phone: employee.emergency_phone || '',
+      });
     }
-    if (!formData.position.trim()) newErrors.position = 'Poste requis';
-    if (!formData.department.trim()) newErrors.department = 'Département requis';
-    if (!formData.hire_date) newErrors.hire_date = 'Date d\'embauche requise';
-    if (!formData.employee_number.trim()) newErrors.employee_number = 'Matricule requis';
+  }, [employee, form]);
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validate()) return;
-
+  const handleFormSubmit = form.handleSubmit(async (data) => {
     setIsSubmitting(true);
     try {
       const success = await onSubmit({
-        ...formData,
-        salary: formData.salary ? parseFloat(formData.salary) : undefined,
-        salary_currency: formData.salary_currency,
-        contract_type: formData.contract_type as any,
-        status: formData.status as any,
+        employee_number: data.employee_number,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email || '',
+        phone: data.phone,
+        position: data.position,
+        department: data.department,
+        hire_date: data.hire_date,
+        salary: data.salary ? parseFloat(data.salary) : undefined,
+        salary_currency: data.salary_currency,
+        contract_type: data.contract_type,
+        status: data.status,
+        address: data.address,
+        city: data.city,
+        postal_code: data.postal_code,
+        emergency_contact: data.emergency_contact,
+        emergency_phone: data.emergency_phone,
       });
 
       if (success) {
+        form.reset();
         onClose();
       }
     } catch (error) {
@@ -84,7 +109,7 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
     } finally {
       setIsSubmitting(false);
     }
-  };
+  });
 
   if (!isOpen) return null;
 
@@ -105,13 +130,14 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Fermer"
           >
-            <X className="h-6 w-6" />
+            <X className="h-6 w-6" aria-hidden="true" />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6">
+        <form onSubmit={handleFormSubmit} className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Section Informations Personnelles */}
             <div className="col-span-2">
@@ -124,12 +150,11 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
               <Label htmlFor="employee_number">Matricule *</Label>
               <Input
                 id="employee_number"
-                value={formData.employee_number}
-                onChange={e => setFormData({ ...formData, employee_number: e.target.value })}
-                className={errors.employee_number ? 'border-red-500' : ''}
+                {...form.register('employee_number')}
+                className={form.formState.errors.employee_number ? 'border-red-500' : ''}
               />
-              {errors.employee_number && (
-                <p className="text-sm text-red-500 mt-1">{errors.employee_number}</p>
+              {form.formState.errors.employee_number && (
+                <p className="text-sm text-red-500 mt-1">{form.formState.errors.employee_number.message}</p>
               )}
             </div>
 
@@ -137,12 +162,11 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
               <Label htmlFor="first_name">Prénom *</Label>
               <Input
                 id="first_name"
-                value={formData.first_name}
-                onChange={e => setFormData({ ...formData, first_name: e.target.value })}
-                className={errors.first_name ? 'border-red-500' : ''}
+                {...form.register('first_name')}
+                className={form.formState.errors.first_name ? 'border-red-500' : ''}
               />
-              {errors.first_name && (
-                <p className="text-sm text-red-500 mt-1">{errors.first_name}</p>
+              {form.formState.errors.first_name && (
+                <p className="text-sm text-red-500 mt-1">{form.formState.errors.first_name.message}</p>
               )}
             </div>
 
@@ -150,12 +174,11 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
               <Label htmlFor="last_name">Nom *</Label>
               <Input
                 id="last_name"
-                value={formData.last_name}
-                onChange={e => setFormData({ ...formData, last_name: e.target.value })}
-                className={errors.last_name ? 'border-red-500' : ''}
+                {...form.register('last_name')}
+                className={form.formState.errors.last_name ? 'border-red-500' : ''}
               />
-              {errors.last_name && (
-                <p className="text-sm text-red-500 mt-1">{errors.last_name}</p>
+              {form.formState.errors.last_name && (
+                <p className="text-sm text-red-500 mt-1">{form.formState.errors.last_name.message}</p>
               )}
             </div>
 
@@ -164,12 +187,11 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
               <Input
                 id="email"
                 type="email"
-                value={formData.email}
-                onChange={e => setFormData({ ...formData, email: e.target.value })}
-                className={errors.email ? 'border-red-500' : ''}
+                {...form.register('email')}
+                className={form.formState.errors.email ? 'border-red-500' : ''}
               />
-              {errors.email && (
-                <p className="text-sm text-red-500 mt-1">{errors.email}</p>
+              {form.formState.errors.email && (
+                <p className="text-sm text-red-500 mt-1">{form.formState.errors.email.message}</p>
               )}
             </div>
 
@@ -178,8 +200,7 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
               <Input
                 id="phone"
                 type="tel"
-                value={formData.phone}
-                onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                {...form.register('phone')}
               />
             </div>
 
@@ -194,22 +215,21 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
               <Label htmlFor="position">Poste *</Label>
               <Input
                 id="position"
-                value={formData.position}
-                onChange={e => setFormData({ ...formData, position: e.target.value })}
-                className={errors.position ? 'border-red-500' : ''}
+                {...form.register('position')}
+                className={form.formState.errors.position ? 'border-red-500' : ''}
               />
-              {errors.position && (
-                <p className="text-sm text-red-500 mt-1">{errors.position}</p>
+              {form.formState.errors.position && (
+                <p className="text-sm text-red-500 mt-1">{form.formState.errors.position.message}</p>
               )}
             </div>
 
             <div>
               <Label htmlFor="department">Département *</Label>
               <Select
-                value={formData.department}
-                onValueChange={value => setFormData({ ...formData, department: value })}
+                value={form.watch('department')}
+                onValueChange={value => form.setValue('department', value, { shouldValidate: true })}
               >
-                <SelectTrigger className={errors.department ? 'border-red-500' : ''}>
+                <SelectTrigger className={form.formState.errors.department ? 'border-red-500' : ''}>
                   <SelectValue placeholder="Sélectionner un département" />
                 </SelectTrigger>
                 <SelectContent>
@@ -224,8 +244,8 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
                   <SelectItem value="Service Client">Service Client</SelectItem>
                 </SelectContent>
               </Select>
-              {errors.department && (
-                <p className="text-sm text-red-500 mt-1">{errors.department}</p>
+              {form.formState.errors.department && (
+                <p className="text-sm text-red-500 mt-1">{form.formState.errors.department.message}</p>
               )}
             </div>
 
@@ -234,12 +254,11 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
               <Input
                 id="hire_date"
                 type="date"
-                value={formData.hire_date}
-                onChange={e => setFormData({ ...formData, hire_date: e.target.value })}
-                className={errors.hire_date ? 'border-red-500' : ''}
+                {...form.register('hire_date')}
+                className={form.formState.errors.hire_date ? 'border-red-500' : ''}
               />
-              {errors.hire_date && (
-                <p className="text-sm text-red-500 mt-1">{errors.hire_date}</p>
+              {form.formState.errors.hire_date && (
+                <p className="text-sm text-red-500 mt-1">{form.formState.errors.hire_date.message}</p>
               )}
             </div>
 
@@ -249,16 +268,15 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
                 id="salary"
                 type="number"
                 step="0.01"
-                value={formData.salary}
-                onChange={e => setFormData({ ...formData, salary: e.target.value })}
+                {...form.register('salary')}
               />
             </div>
 
             <div>
               <Label htmlFor="salary_currency">Devise du salaire</Label>
               <Select
-                value={formData.salary_currency}
-                onValueChange={value => setFormData({ ...formData, salary_currency: value })}
+                value={form.watch('salary_currency')}
+                onValueChange={value => form.setValue('salary_currency', value)}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -286,8 +304,8 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
             <div>
               <Label htmlFor="contract_type">Type de contrat</Label>
               <Select
-                value={formData.contract_type}
-                onValueChange={value => setFormData({ ...formData, contract_type: value as any })}
+                value={form.watch('contract_type')}
+                onValueChange={value => form.setValue('contract_type', value as any)}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -304,8 +322,8 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
             <div>
               <Label htmlFor="status">Statut</Label>
               <Select
-                value={formData.status}
-                onValueChange={value => setFormData({ ...formData, status: value as any })}
+                value={form.watch('status')}
+                onValueChange={value => form.setValue('status', value as any)}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -329,8 +347,7 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
               <Label htmlFor="address">Adresse</Label>
               <Input
                 id="address"
-                value={formData.address}
-                onChange={e => setFormData({ ...formData, address: e.target.value })}
+                {...form.register('address')}
               />
             </div>
 
@@ -338,8 +355,7 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
               <Label htmlFor="city">Ville</Label>
               <Input
                 id="city"
-                value={formData.city}
-                onChange={e => setFormData({ ...formData, city: e.target.value })}
+                {...form.register('city')}
               />
             </div>
 
@@ -347,8 +363,7 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
               <Label htmlFor="postal_code">Code postal</Label>
               <Input
                 id="postal_code"
-                value={formData.postal_code}
-                onChange={e => setFormData({ ...formData, postal_code: e.target.value })}
+                {...form.register('postal_code')}
               />
             </div>
 
@@ -363,8 +378,7 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
               <Label htmlFor="emergency_contact">Nom du contact</Label>
               <Input
                 id="emergency_contact"
-                value={formData.emergency_contact}
-                onChange={e => setFormData({ ...formData, emergency_contact: e.target.value })}
+                {...form.register('emergency_contact')}
               />
             </div>
 
@@ -373,8 +387,7 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
               <Input
                 id="emergency_phone"
                 type="tel"
-                value={formData.emergency_phone}
-                onChange={e => setFormData({ ...formData, emergency_phone: e.target.value })}
+                {...form.register('emergency_phone')}
               />
             </div>
           </div>

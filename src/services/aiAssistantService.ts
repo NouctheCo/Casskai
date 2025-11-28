@@ -373,7 +373,7 @@ class AIAssistantService {
           'Documenter l\'utilisation professionnelle'
         ],
         status: 'suggested'
-      });
+      } as TaxOptimization);
     }
 
     return optimizations;
@@ -402,14 +402,14 @@ class AIAssistantService {
           description: 'Anticiper ou reporter certaines dépenses pour optimiser l\'impôt',
           potentialSavings: 2000,
           effort: 'low',
-          deadline: endOfYear,
+          deadline: endOfYear.toISOString(),
           requirements: [
             'Identifier les dépenses à anticiper',
             'Vérifier les règles de déductibilité',
             'Planifier les achats'
           ],
           status: 'suggested'
-        });
+        } as any);
       }
     }
 
@@ -439,7 +439,7 @@ class AIAssistantService {
           'Évaluer les avantages/inconvénients'
         ],
         status: 'suggested'
-      });
+      } as TaxOptimization);
     }
 
     return optimizations;

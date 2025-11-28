@@ -41,6 +41,13 @@ export class PDFService {
     doc.setFillColor(...primaryColor);
     doc.rect(0, 0, pageWidth, 25, 'F');
     
+    // Logo CassKai
+    try {
+      doc.addImage('/logo.png', 'PNG', pageWidth - 50, 5, 25, 15);
+    } catch (error) {
+      console.warn('Logo non chargé:', error);
+    }
+    
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(20);
     doc.setFont('helvetica', 'bold');

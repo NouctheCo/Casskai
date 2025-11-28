@@ -1,5 +1,5 @@
 // Dashboard Enterprise Exceptionnel pour CassKai
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence as _AnimatePresence } from 'framer-motion';
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
@@ -9,7 +9,7 @@ import {
 import {
   TrendingUp, TrendingDown as _TrendingDown, DollarSign, Users, Target, AlertTriangle,
   ArrowUpRight, ArrowDownRight, Zap as _Zap, Eye, RefreshCw, Download, Filter as _Filter,
-  Calendar as _Calendar, BarChart3, PieChart as _PieChartIcon, Activity, Sparkles,
+  Calendar as _Calendar, BarChart as _BarChartIcon, BarChart3, PieChart as _PieChartIcon, Activity, Sparkles,
   Shield, Gauge as _Gauge, Clock, AlertCircle, CheckCircle2,
   Building, CreditCard, Banknote, Receipt, Package, UserCheck, Settings as _Settings
 } from 'lucide-react';
@@ -20,7 +20,9 @@ import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs as _Tabs, TabsContent as _TabsContent, TabsList as _TabsList, TabsTrigger as _TabsTrigger } from '@/components/ui/tabs';
 import { useEnterprise } from '@/contexts/EnterpriseContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { enterpriseDashboardServiceFixed as enterpriseDashboardService } from '@/services/enterpriseDashboardServiceFixed';
+import { useNavigate } from 'react-router-dom';
 import type {
   EnterpriseDashboardData,
   DashboardMetric,
@@ -30,6 +32,8 @@ import type {
   RealTimeUpdate
 } from '@/types/enterprise-dashboard.types';
 import { AIAssistantChat } from '../ai/AIAssistantChat';
+import { WelcomeDashboard } from '@/components/dashboard/WelcomeDashboard';
+import { OnboardingTour } from '@/components/dashboard/OnboardingTour';
 
 // Composant KPI Card Enterprise
 const EnterpriseKPICard: React.FC<{
@@ -466,9 +470,9 @@ const EnterpriseChart: React.FC<{
 
 // Composant Santé Financière
 const FinancialHealthCard: React.FC<{
-  healthScore: FinancialHealthScore;
+  data: FinancialHealthScore | null;
   isLoading?: boolean;
-}> = ({ healthScore, isLoading }) => {
+}> = ({ data, isLoading }) => {
   if (isLoading) {
     return (
       <Card>
@@ -491,6 +495,12 @@ const FinancialHealthCard: React.FC<{
       </Card>
     );
   }
+
+  if (!data) {
+    return null;
+  }
+
+  const healthScore = data;
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-green-600 bg-green-50';
@@ -607,6 +617,8 @@ const FinancialHealthCard: React.FC<{
 // Composant principal du Dashboard Enterprise
 export const EnterpriseDashboard: React.FC = () => {
   const { currentEnterprise } = useEnterprise();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [dashboardData, setDashboardData] = useState<EnterpriseDashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -632,7 +644,7 @@ export const EnterpriseDashboard: React.FC = () => {
       );
 
       if (error) {
-        throw new Error(error.message || 'Erreur lors du chargement des données');
+        throw new Error((error as { message?: string }).message || 'Erreur lors du chargement des données');
       }
 
       setDashboardData(data);
@@ -672,6 +684,49 @@ export const EnterpriseDashboard: React.FC = () => {
       };
     }
   }, [loadDashboardData, currentEnterprise?.id]);
+
+  const isNewAccount = useMemo(() => {
+    if (isLoading) return false;
+    if (error && !dashboardData) return true;
+    if (!dashboardData) return true;
+
+    const hasNoFinancialData = !dashboardData.financial_health;
+    const hasNoTransactions = !dashboardData.transactions || dashboardData.transactions.length === 0;
+    const hasNoJournalEntries = !dashboardData.journal_entries || dashboardData.journal_entries.length === 0;
+
+    return hasNoFinancialData && hasNoTransactions && hasNoJournalEntries;
+  }, [dashboardData, isLoading, error]);
+
+  useEffect(() => {
+    console.log('🔍 Dashboard Debug:', {
+      isLoading,
+      hasError: Boolean(error),
+      hasDashboardData: Boolean(dashboardData),
+      isNewAccount,
+      financialHealth: dashboardData?.financial_health,
+      transactionsCount: dashboardData?.transactions?.length || 0,
+      journalEntriesCount: dashboardData?.journal_entries?.length || 0
+    });
+  }, [isLoading, error, dashboardData, isNewAccount]);
+
+  if (isLoading) {
+    return <div className="p-6 text-center text-gray-600">Chargement...</div>;
+  }
+
+  if (isNewAccount || (error && !dashboardData)) {
+    return (
+      <div className="space-y-8 p-6 max-w-5xl mx-auto">
+        <OnboardingTour
+          isNewAccount={true}
+          companyName={currentEnterprise?.name || 'votre entreprise'}
+        />
+        <WelcomeDashboard
+          companyName={currentEnterprise?.name || 'votre entreprise'}
+          userName={user?.user_metadata?.full_name || undefined}
+        />
+      </div>
+    );
+  }
 
   if (error) {
     return (
@@ -860,10 +915,37 @@ export const EnterpriseDashboard: React.FC = () => {
 
         {/* Santé Financière */}
         <div className="space-y-6">
-          <FinancialHealthCard
-            healthScore={dashboardData?.financial_health || {} as FinancialHealthScore}
-            isLoading={isLoading}
-          />
+          {isLoading ? (
+            <FinancialHealthCard data={dashboardData?.financial_health ?? null} isLoading />
+          ) : dashboardData?.financial_health ? (
+            <FinancialHealthCard data={dashboardData.financial_health} isLoading={false} />
+          ) : (
+            <Card className="p-6">
+              <div className="text-center space-y-4">
+                <div className="mx-auto w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
+                  <_BarChartIcon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Santé Financière
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Aucune donnée financière disponible pour le moment.
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500">
+                    Commencez à enregistrer vos écritures comptables pour voir votre score de santé financière.
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate('/accounting')}
+                  className="mt-4"
+                >
+                  Accéder à la comptabilité
+                </Button>
+              </div>
+            </Card>
+          )}
 
           {/* Alertes */}
           {dashboardData?.alerts && dashboardData.alerts.length > 0 && (

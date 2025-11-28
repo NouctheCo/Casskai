@@ -177,7 +177,7 @@ class MigrationService {
     // Cette fonction vérifie si les tables principales existent
     const requiredTables = [
       'companies', 'user_companies', 'roles', 'permissions', 'role_permissions',
-      'accounts', 'journals', 'journal_entries', 'journal_entry_items',
+      'accounts', 'journals', 'journal_entries', 'journal_entry_lines',
       'bank_accounts', 'bank_transactions', 'third_parties', 'currencies', 'exchange_rates'
     ];
 

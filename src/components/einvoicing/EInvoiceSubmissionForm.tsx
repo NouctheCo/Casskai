@@ -120,7 +120,7 @@ export const EInvoiceSubmissionForm: React.FC<EInvoiceSubmissionFormProps> = ({
         setSelectedInvoiceId('');
       }
     } catch (error) {
-      setError(err instanceof Error ? (error as Error).message : 'Erreur lors de la soumission');
+      setError(error instanceof Error ? (error as Error).message : 'Erreur lors de la soumission');
     } finally {
       setIsSubmitting(false);
     }

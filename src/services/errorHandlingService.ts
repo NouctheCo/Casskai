@@ -243,11 +243,11 @@ export class ErrorHandlingService {
 
     return {
       code: errorCode,
-      message: String((error as Error).message || 'Une erreur inconnue s\'est produite'),
+      message: String((err as unknown as Error).message || 'Une erreur inconnue s\'est produite'),
       details: err.details || error,
       severity,
       userMessage: errorMapping.userMessage || this.getDefaultUserMessage(severity),
-      technicalMessage: `[${context.service}/${context.method}] ${String((error as Error).message)}`,
+      technicalMessage: `[${context.service}/${context.method}] ${String((err as unknown as Error).message)}`,
       retryable: errorMapping.retryable ?? this.isRetryableError(error),
       ...errorMapping,
     };
@@ -305,7 +305,7 @@ export class ErrorHandlingService {
     const err = error as Record<string, unknown>;
 
     // Erreurs réseau temporaires
-    if ((error as Error).name === 'NetworkError' || (typeof (error as Error).message === 'string' && (error as Error).message.includes('fetch'))) {
+    if ((err as unknown as Error).name === 'NetworkError' || (typeof (err as unknown as Error).message === 'string' && (err as unknown as Error).message.includes('fetch'))) {
       return true;
     }
 
@@ -320,7 +320,7 @@ export class ErrorHandlingService {
     }
 
     // Timeout
-    if ((error as Error).name === 'TimeoutError') {
+    if ((err as unknown as Error).name === 'TimeoutError') {
       return true;
     }
 
@@ -440,7 +440,7 @@ export class ErrorHandlingService {
         user_id: context.userId,
         company_id: context.companyId,
         details: {
-          ...error.details,
+          ...(error.details as Record<string, any> || {}),
           url: window.location.href,
           userAgent: navigator.userAgent,
           additional: context.additional,
@@ -465,8 +465,8 @@ export class ErrorHandlingService {
     // etc.
     
     // Exemple Sentry:
-    if (typeof window !== 'undefined' && (window as Record<string, unknown>).Sentry) {
-      const Sentry = (window as Record<string, unknown>).Sentry as { captureException: (error: Error, options: Record<string, unknown>) => void };
+    if (typeof window !== 'undefined' && (window as unknown as Record<string, unknown>).Sentry) {
+      const Sentry = (window as unknown as Record<string, unknown>).Sentry as { captureException: (error: Error, options: Record<string, unknown>) => void };
       const error = logData.error as { technicalMessage: string; severity: string };
       const contextData = logData.context as { service?: string; method?: string };
       Sentry.captureException(new Error(error.technicalMessage), {

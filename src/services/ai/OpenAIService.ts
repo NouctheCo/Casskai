@@ -104,8 +104,8 @@ export class OpenAIService {
         .order('entry_date', { ascending: false });
 
       const { data: accounts } = await supabase
-        .from('accounts')
-        .select('account_code, account_name, account_type, current_balance')
+        .from('chart_of_accounts')
+        .select('account_code:account_number, account_name, account_type, current_balance')
         .eq('company_id', companyId)
         .eq('is_active', true);
 
@@ -423,10 +423,10 @@ export class OpenAIService {
         predictedBalance: predictedIncome - predictedExpenses,
         confidence: Math.max(0.5, 0.9 - (i * 0.1)), // Confiance décroissante avec le temps
         factors: [
-          { id: 'historical', name: 'Historique', impact: 0.7 },
-          { id: 'trend', name: 'Tendance', impact: trend },
-          { id: 'seasonality', name: 'Saisonnalité', impact: 0.1 }
-        ],
+          { id: 'historical', name: 'Historique', impact: 0.7, factor: 'historical' },
+          { id: 'trend', name: 'Tendance', impact: trend, factor: 'trend' },
+          { id: 'seasonality', name: 'Saisonnalité', impact: 0.1, factor: 'seasonality' }
+        ] as any,
         trend: predictedIncome > avgIncome ? 'up' : predictedIncome < avgIncome ? 'down' : 'stable'
       });
     }

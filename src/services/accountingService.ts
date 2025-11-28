@@ -240,15 +240,15 @@ export class AccountingService {
         account_number: account.code,
         account_name: account.name,
         account_type: this.mapPCGTypeToDBType(account.type),
-        account_class: parseInt(account.code.charAt(0)),
+        account_class: parseInt(account.code.charAt(0), 10) || null,
         parent_account_id: null,
         description: account.description || null,
-        is_active: account.isActive || true,
-        normal_balance: this.getAccountNormalBalance(account.type)
+        is_active: account.isActive ?? true,
+        is_detail_account: true
       }));
 
       const { data, error } = await supabase
-        .from('accounts')
+        .from('chart_of_accounts')
         .insert(accountsToCreate)
         .select();
 
@@ -274,15 +274,13 @@ export class AccountingService {
           accountsToCreate.push({
             company_id: companyId,
             account_number: account.number,
-            name: account.name,
-            type: this.mapSYSCOHADATypeToDBType(account.type),
-            class: parseInt(account.number.charAt(0)),
+            account_name: account.name,
+            account_type: this.mapSYSCOHADATypeToDBType(account.type),
+            account_class: parseInt(account.number.charAt(0), 10) || null,
             parent_account_id: null,
             description: null,
             is_active: true,
-            balance: 0,
-            currency: 'XOF', // Franc CFA par défaut
-            tax_rate: 0
+            is_detail_account: true
           });
 
           // Ajouter les sous-comptes
@@ -291,15 +289,13 @@ export class AccountingService {
               accountsToCreate.push({
                 company_id: companyId,
                 account_number: subAccount.number,
-                name: subAccount.name,
-                type: this.mapSYSCOHADATypeToDBType(subAccount.type),
-                class: parseInt(subAccount.number.charAt(0)),
+                account_name: subAccount.name,
+                account_type: this.mapSYSCOHADATypeToDBType(subAccount.type),
+                account_class: parseInt(subAccount.number.charAt(0), 10) || null,
                 parent_account_id: null, // Sera défini après création du compte parent
                 description: null,
                 is_active: true,
-                balance: 0,
-                currency: 'XOF',
-                tax_rate: 0
+                is_detail_account: true
               });
             }
           }
@@ -307,7 +303,7 @@ export class AccountingService {
       }
 
       const { data, error } = await supabase
-        .from('accounts')
+        .from('chart_of_accounts')
         .insert(accountsToCreate)
         .select();
 

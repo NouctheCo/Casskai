@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DatePicker } from '@/components/ui/date-picker';
-import { useToast } from '@/components/ui/use-toast';
+import { toastError, toastSuccess } from '@/lib/toast-helpers';
 
 interface ProjectFormProps {
   onCancel: () => void;
@@ -32,7 +32,6 @@ export interface ProjectFormData {
 }
 
 export function ProjectForm({ onCancel, onSubmit }: ProjectFormProps) {
-  const { toast } = useToast();
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [projectName, setProjectName] = useState('');
@@ -48,11 +47,7 @@ export function ProjectForm({ onCancel, onSubmit }: ProjectFormProps) {
 
   const handleSubmit = useCallback(async () => {
     if (!projectName.trim() || !projectClient.trim() || !projectBudget) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs obligatoires"
-      });
+      toastError("Veuillez remplir tous les champs obligatoires");
       return;
     }
 
@@ -91,19 +86,12 @@ export function ProjectForm({ onCancel, onSubmit }: ProjectFormProps) {
         setStartDate(null);
         setEndDate(null);
 
-        toast({
-          title: "Succès",
-          description: "Projet créé avec succès"
-        });
+        toastSuccess("Projet créé avec succès");
       }
     } catch (_error) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de créer le projet"
-      });
+      toastError("Impossible de créer le projet");
     }
-  }, [projectName, projectClient, projectDescription, projectBudget, projectManager, projectStatus, startDate, endDate, toast, onSubmit]);
+  }, [projectName, projectClient, projectDescription, projectBudget, projectManager, projectStatus, startDate, endDate, onSubmit]);
 
   return (
     <Card>

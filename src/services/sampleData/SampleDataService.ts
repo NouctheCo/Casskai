@@ -335,16 +335,22 @@ export class SampleDataService {
       const accounts = this.getChartOfAccounts(chartConfig);
       const accountsToInsert = accounts.map(account => ({
         company_id: this.companyId,
-        account_code: account.code,
+        account_number: account.code,
         account_name: account.name,
         account_type: account.type,
+        account_class: Number(account.code?.charAt(0)) || null,
         level: account.level,
         is_active: true,
-        currency: chartConfig.currency
+        is_detail_account: true,
+        description: `Compte ${account.name} (${account.code}) importé automatiquement`,
+        balance_debit: 0,
+        balance_credit: 0,
+        current_balance: 0,
+        imported_from_fec: false
       }));
 
       const { error: accountsError } = await supabase
-        .from('accounts')
+        .from('chart_of_accounts')
         .insert(accountsToInsert);
 
       if (!accountsError) results.accounts = accountsToInsert.length;
@@ -450,7 +456,7 @@ export class SampleDataService {
         'products',
         'suppliers',
         'customers',
-        'accounts'
+        'chart_of_accounts'
       ];
 
       for (const table of tablesToReset) {

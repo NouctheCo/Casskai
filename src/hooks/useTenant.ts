@@ -29,7 +29,7 @@ export function useTenant() {
         setError('Impossible d\'initialiser le tenant');
       }
     } catch (err) {
-      setError(err instanceof Error ? (error as Error).message : 'Erreur inconnue');
+      setError(err instanceof Error ? (err as Error).message : 'Erreur inconnue');
     } finally {
       setIsLoading(false);
     }

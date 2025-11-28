@@ -158,7 +158,7 @@ export function useEnterprisePlan(enterpriseId?: string): EnterprisePlan {
 
       } catch (err) {
         console.error('...', error);
-        setError(err instanceof Error ? (error as Error).message : 'Erreur inconnue');
+        setError(err instanceof Error ? (err as Error).message : 'Erreur inconnue');
       } finally {
         setIsLoading(false);
       }

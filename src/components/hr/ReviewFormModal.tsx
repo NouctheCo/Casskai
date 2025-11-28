@@ -46,7 +46,7 @@ export function ReviewFormModal({
     strengths: '',
     areas_for_improvement: '',
     development_plan: '',
-    reviewer_comments: '',
+    manager_comments: '',
     goals_achieved: '',
     goals_total: '',
     promotion_recommended: false,
@@ -64,13 +64,13 @@ export function ReviewFormModal({
         reviewer_id: review.reviewer_id,
         review_type: review.review_type,
         review_date: review.review_date,
-        review_period: review.review_period || '',
+        review_period: review.review_date, // Use review_date as review_period
         overall_rating: review.overall_rating || 3,
-        competency_ratings: review.competency_ratings || {},
+        competency_ratings: (review.competencies_ratings || {}) as any,
         strengths: review.strengths || '',
         areas_for_improvement: review.areas_for_improvement || '',
         development_plan: review.development_plan || '',
-        reviewer_comments: review.reviewer_comments || '',
+        manager_comments: review.manager_comments || '',
         goals_achieved: review.goals_achieved?.toString() || '',
         goals_total: review.goals_total?.toString() || '',
         promotion_recommended: review.promotion_recommended || false,
@@ -110,7 +110,7 @@ export function ReviewFormModal({
         strengths: formData.strengths.trim() || null,
         areas_for_improvement: formData.areas_for_improvement.trim() || null,
         development_plan: formData.development_plan.trim() || null,
-        reviewer_comments: formData.reviewer_comments.trim() || null,
+        manager_comments: formData.manager_comments.trim() || null,
         goals_achieved: formData.goals_achieved ? parseInt(formData.goals_achieved) : null,
         goals_total: formData.goals_total ? parseInt(formData.goals_total) : null,
         promotion_recommended: formData.promotion_recommended,
@@ -355,11 +355,11 @@ export function ReviewFormModal({
 
           {/* Commentaires */}
           <div>
-            <Label htmlFor="reviewer_comments">Commentaires de l'évaluateur</Label>
+            <Label htmlFor="manager_comments">Commentaires de l'évaluateur</Label>
             <textarea
-              id="reviewer_comments"
-              value={formData.reviewer_comments}
-              onChange={(e) => setFormData({ ...formData, reviewer_comments: e.target.value })}
+              id="manager_comments"
+              value={formData.manager_comments}
+              onChange={(e) => setFormData({ ...formData, manager_comments: e.target.value })}
               rows={3}
               className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
               placeholder="Commentaires additionnels..."

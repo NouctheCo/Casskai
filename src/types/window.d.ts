@@ -14,7 +14,11 @@ interface Window {
   // Plausible Analytics
   plausible?: (
     eventName: string,
-    options?: { props?: Record<string, string | number | boolean> }
+    options?: { 
+      props?: Record<string, string | number | boolean | any>;
+      u?: string;
+      callback?: () => void;
+    }
   ) => void;
 
   // Sentry Error Tracking

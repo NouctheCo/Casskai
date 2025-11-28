@@ -255,24 +255,30 @@ export class FECService {
         try {
           // Créer ou récupérer le compte
           const { data: account } = await supabase
-            .from('accounts')
+            .from('chart_of_accounts')
             .select('id')
             .eq('company_id', companyId)
-            .eq('number', entry.CompteNum)
+            .eq('account_number', entry.CompteNum)
             .single();
 
           let accountId = account?.id;
 
           if (!accountId) {
             // Créer le compte s'il n'existe pas
+            const accountClass = Number(entry.CompteNum?.charAt(0)) || null;
+            // const accountType = this.mapAccountClassToType(accountClass);
+            const accountType = null; // Simplified for now
             const { data: newAccount, error: accountError } = await supabase
-              .from('accounts')
+              .from('chart_of_accounts')
               .insert({
                 company_id: companyId,
-                number: entry.CompteNum,
-                name: entry.CompteLib,
-                class: entry.CompteNum.charAt(0),
-                is_active: true
+                account_number: entry.CompteNum,
+                account_name: entry.CompteLib,
+                account_type: accountType,
+                account_class: accountClass,
+                is_active: true,
+                is_detail_account: true,
+                description: entry.CompteLib ?? null,
               })
               .select()
               .single();

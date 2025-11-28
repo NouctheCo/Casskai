@@ -32,8 +32,8 @@ export class BudgetInsightProvider extends BankingProvider {
   } catch (error) {
       throw new BankingProviderError(
         'INIT_ERROR',
-    `Failed to initialize Budget Insight provider: ${(_error as { message?: string })?.message}`,
-    _error as { message?: string }
+    `Failed to initialize Budget Insight provider: ${(error as { message?: string })?.message}`,
+    error as { message?: string }
       );
     }
   }

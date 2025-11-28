@@ -166,8 +166,8 @@ export function useUserManagement(companyId: string) {
         .filter((u: User | null): u is User => u !== null);
 
       return transformedUsers as User[];
-    } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to fetch users';
+    } catch (error) {
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Failed to fetch users';
       setError(errorMessage);
       console.error('...', error);
       return [];
@@ -239,8 +239,8 @@ export function useUserManagement(companyId: string) {
       };
 
       return user;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to fetch user';
+    } catch (error) {
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Failed to fetch user';
       setError(errorMessage);
       console.error('...', error);
       return null;
@@ -299,8 +299,8 @@ export function useUserManagement(companyId: string) {
         createdAt: invitation.created_at,
         message: invitation.message
       };
-    } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to create invitation';
+    } catch (error) {
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Failed to create invitation';
       setError(errorMessage);
       console.error('...', error);
       throw new Error(errorMessage);
@@ -355,8 +355,8 @@ export function useUserManagement(companyId: string) {
 
       // Return updated user
       return await getUserById(userId);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to update user';
+    } catch (error) {
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Failed to update user';
       setError(errorMessage);
       console.error('...', error);
       throw new Error(errorMessage);
@@ -405,8 +405,8 @@ export function useUserManagement(companyId: string) {
 
       // Return updated user
       return await getUserById(userId);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to toggle user status';
+    } catch (error) {
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Failed to toggle user status';
       setError(errorMessage);
       console.error('...', error);
       throw new Error(errorMessage);
@@ -448,8 +448,8 @@ export function useUserManagement(companyId: string) {
         createdAt: inv.created_at,
         message: inv.message
       }));
-    } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to fetch invitations';
+    } catch (error) {
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Failed to fetch invitations';
       setError(errorMessage);
       console.error('...', error);
       return [];
@@ -501,8 +501,8 @@ export function useUserManagement(companyId: string) {
         createdAt: invitation.created_at,
         message: invitation.message
       };
-    } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to resend invitation';
+    } catch (error) {
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Failed to resend invitation';
       setError(errorMessage);
       console.error('...', error);
       throw new Error(errorMessage);
@@ -529,8 +529,8 @@ export function useUserManagement(companyId: string) {
 
       // Log activity
       await logActivity(currentUser.id, 'invitation.cancel', 'invitations', invitationId);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to cancel invitation';
+    } catch (error) {
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Failed to cancel invitation';
       setError(errorMessage);
       console.error('...', error);
       throw new Error(errorMessage);
@@ -567,8 +567,8 @@ export function useUserManagement(companyId: string) {
         userAgent: activity.user_agent || '',
         timestamp: activity.created_at
       }));
-    } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to fetch activities';
+    } catch (error) {
+      const errorMessage = error instanceof Error ? (error as Error).message : 'Failed to fetch activities';
       setError(errorMessage);
       console.error('...', error);
       return [];
@@ -625,7 +625,7 @@ export function useUserManagement(companyId: string) {
       });
 
       return stats;
-    } catch (err) {
+    } catch (error) {
       console.error('...', error);
       return {
         total: 0,
@@ -651,7 +651,7 @@ export function useUserManagement(companyId: string) {
         const searchableText = `${user.firstName} ${user.lastName} ${user.email} ${user.department} ${user.position}`.toLowerCase();
         return searchableText.includes(query.toLowerCase());
       });
-    } catch (err) {
+    } catch (error) {
       console.error('...', error);
       return [];
     }

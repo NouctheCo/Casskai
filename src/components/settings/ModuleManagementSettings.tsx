@@ -78,7 +78,7 @@ export function ModuleManagementSettings() {
 
     setIsSaving(true);
     try {
-      devLogger.log('🔧 Application des changements de modules:', pendingChanges);
+      devLogger.info('🔧 Application des changements de modules:', pendingChanges);
 
       const changeEntries = Object.entries(pendingChanges);
       const results = await Promise.allSettled(
@@ -98,10 +98,10 @@ export function ModuleManagementSettings() {
 
             if (willBeActive) {
               await activateModule(moduleKey);
-              devLogger.log(`✅ Module ${moduleKey} activé`);
+              devLogger.info(`✅ Module ${moduleKey} activé`);
             } else {
               await deactivateModule(moduleKey);
-              devLogger.log(`✅ Module ${moduleKey} désactivé`);
+              devLogger.info(`✅ Module ${moduleKey} désactivé`);
             }
             return { moduleKey, success: true };
           } catch (error) {

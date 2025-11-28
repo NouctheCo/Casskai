@@ -81,7 +81,7 @@ export function useJournals(companyId: string) {
       setJournals(data || []);
       return { data: data || [], count: count || 0, error: null };
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to fetch journals';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to fetch journals';
       setError(errorMessage);
       console.error('...', error);
       return { data: [], count: 0, error: errorMessage };
@@ -134,7 +134,7 @@ export function useJournals(companyId: string) {
       setJournals(prev => [newJournal, ...prev]);
       return newJournal;
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to create journal';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to create journal';
       setError(errorMessage);
       console.error('...', error);
       throw new Error(errorMessage);
@@ -193,7 +193,7 @@ export function useJournals(companyId: string) {
 
       return updatedJournal;
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to update journal';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to update journal';
       setError(errorMessage);
       console.error('...', error);
       throw new Error(errorMessage);
@@ -234,7 +234,7 @@ export function useJournals(companyId: string) {
         setJournals(prev => prev.filter(journal => journal.id !== id));
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to delete journal';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to delete journal';
       setError(errorMessage);
       console.error('...', error);
       throw new Error(errorMessage);
@@ -325,7 +325,7 @@ export function useJournals(companyId: string) {
       setJournals(createdJournals || []);
       return createdJournals || [];
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to create default journals';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to create default journals';
       setError(errorMessage);
       console.error('...', error);
       throw new Error(errorMessage);

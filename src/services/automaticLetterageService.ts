@@ -8,8 +8,13 @@ interface AccountingEntry extends Record<string, unknown> {
   id?: string;
   account?: string;
   accountNumber?: string;
+  accountName?: string;
   accountId?: string;
   account_id?: string;
+  account_name?: string;
+  account_number?: string;
+  lineOrder?: number | null;
+  line_order?: number | null;
   amount?: number;
   debitAmount?: number;
   creditAmount?: number;
@@ -70,7 +75,7 @@ export class AutomaticLetterageService {
       accountPattern: '411%',
       criteria: [
         { field: 'amount', exactMatch: true },
-        { field: 'entry_date', daysWindow: 60 }
+        { field: 'date', daysWindow: 60 }
       ],
       tolerance: 0.01,
       autoValidate: true
@@ -81,7 +86,7 @@ export class AutomaticLetterageService {
       accountPattern: '401%',
       criteria: [
         { field: 'amount', exactMatch: true },
-        { field: 'entry_date', daysWindow: 90 }
+        { field: 'date', daysWindow: 90 }
       ],
       tolerance: 0.01,
       autoValidate: true
@@ -103,7 +108,7 @@ export class AutomaticLetterageService {
       accountPattern: '512%',
       criteria: [
         { field: 'amount', exactMatch: true },
-        { field: 'entry_date', daysWindow: 5 }
+        { field: 'date', daysWindow: 5 }
       ],
       tolerance: 0.00,
       autoValidate: true
@@ -238,19 +243,25 @@ export class AutomaticLetterageService {
     id: string;
     accountId: string;
     accountNumber: string;
+    accountName: string;
     entry_date: string;
     reference: string;
     description: string;
     debitAmount: number;
     creditAmount: number;
+    lineOrder: number | null;
     thirdParty?: string;
     entryId: string;
   }>> {
     let query = supabase
-      .from('journal_entry_items')
+      .from('journal_entry_lines')
       .select(`
         id,
         account_id,
+        journal_entry_id,
+        account_number,
+        account_name,
+        line_order,
         debit_amount,
         credit_amount,
         description,
@@ -270,18 +281,25 @@ export class AutomaticLetterageService {
 
     if (!result.data) return [];
 
-    return result.data.map((item: AccountingEntry) => ({
-      id: item.id as string,
-      accountId: item.account_id as string,
-      accountNumber: (item.accounts as { number?: string })?.number as string,
-      entry_date: (item.journal_entries as { date?: string })?.entry_date as string,
-      reference: (item.journal_entries as { reference?: string })?.reference || '',
-      description: item.description || (item.journal_entries as { description?: string })?.description || '',
-      debitAmount: item.debit_amount || 0,
-      creditAmount: item.credit_amount || 0,
-      thirdParty: item.auxiliary_account as string,
-      entryId: (item.journal_entries as { id?: string })?.id as string
-    }));
+    return result.data.map((item: AccountingEntry) => {
+      const accountFromRelation = item.accounts as { number?: string; name?: string };
+      const journalEntry = item.journal_entries as { id?: string; entry_date?: string; reference?: string; description?: string };
+
+      return {
+        id: item.id as string,
+        accountId: item.account_id as string,
+        accountNumber: (item.account_number as string) || (accountFromRelation?.number as string) || '',
+        accountName: (item.account_name as string) || accountFromRelation?.name || '',
+        entry_date: journalEntry?.entry_date as string,
+        reference: journalEntry?.reference || '',
+        description: item.description || journalEntry?.description || '',
+        debitAmount: item.debit_amount || 0,
+        creditAmount: item.credit_amount || 0,
+        lineOrder: typeof item.line_order === 'number' ? item.line_order : null,
+        thirdParty: item.auxiliary_account as string,
+        entryId: journalEntry?.id as string || (item.journal_entry_id as string)
+      };
+    });
   }
 
   /**
@@ -487,7 +505,7 @@ export class AutomaticLetterageService {
           }
           break;
 
-        case 'entry_date': {
+        case 'date': {
           const avgDateDiff = this.calculateAverageDateDifference(debits, credits);
           if (criterion.daysWindow && avgDateDiff <= criterion.daysWindow) {
             points += 1 - (avgDateDiff / criterion.daysWindow) * 0.5;
@@ -537,8 +555,8 @@ export class AutomaticLetterageService {
 
     debits.forEach(debit => {
       credits.forEach(credit => {
-        const debitDate = new Date(debit.entry_date);
-        const creditDate = new Date(credit.entry_date);
+        const debitDate = new Date(debit.entry_date as any);
+        const creditDate = new Date(credit.entry_date as any);
         const diff = Math.abs(debitDate.getTime() - creditDate.getTime()) / (1000 * 60 * 60 * 24);
         totalDiff += diff;
         count++;
@@ -622,7 +640,7 @@ export class AutomaticLetterageService {
     const allEntries = [...match.debitEntries, ...match.creditEntries];
     
     await supabase
-      .from('journal_entry_items')
+      .from('journal_entry_lines')
       .update({ letterage: match.letterCode })
       .in('id', allEntries);
   }
@@ -675,7 +693,7 @@ export class AutomaticLetterageService {
     unletteredCount: number;
   }> {
     const result = await supabase
-      .from('journal_entry_items')
+      .from('journal_entry_lines')
       .update({ letterage: null })
       .eq('letterage', letterCode)
       .eq('journal_entries.company_id', companyId)
@@ -719,19 +737,21 @@ export class AutomaticLetterageService {
   }> {
     // Statistiques globales
     let query = supabase
-      .from('journal_entry_items')
+      .from('journal_entry_lines')
       .select(`
         id,
         letterage,
         debit_amount,
         credit_amount,
-        accounts!inner (number, name),
+        account_number,
+        account_name,
+        line_order,
         journal_entries!inner (entry_date, company_id)
       `)
       .eq('journal_entries.company_id', companyId);
 
     if (accountPattern) {
-      query = query.like('accounts.number', accountPattern.replace('%', '*'));
+      query = query.like('account_number', accountPattern.replace('%', '*'));
     }
     if (dateFrom) query = query.gte('journal_entries.entry_date', dateFrom);
     if (dateTo) query = query.lte('journal_entries.entry_date', dateTo);
@@ -751,12 +771,13 @@ export class AutomaticLetterageService {
     const accountStats = new Map<string, { accountNumber: string; accountName: string; totalEntries: number; lettered: number }>();
 
     result.data.forEach((item: AccountingEntry) => {
-      const accounts = item.accounts as { number?: string; name?: string };
-      const key = `${accounts?.number}|${accounts?.name}`;
+      const accountNumber = (item.account_number as string) || '';
+      const accountName = (item.account_name as string) || '';
+      const key = `${accountNumber}|${accountName}`;
       if (!accountStats.has(key)) {
         accountStats.set(key, {
-          accountNumber: accounts?.number || '',
-          accountName: accounts?.name || '',
+          accountNumber,
+          accountName,
           totalEntries: 0,
           lettered: 0
         });
@@ -775,7 +796,7 @@ export class AutomaticLetterageService {
 
     // Lettrages récents
     const recentQuery = await supabase
-      .from('journal_entry_items')
+      .from('journal_entry_lines')
       .select(`
         letterage,
         debit_amount,
@@ -796,7 +817,7 @@ export class AutomaticLetterageService {
         if (!letterGroups.has(key)) {
           letterGroups.set(key, {
             letterCode: key,
-            entry_date: (item.journal_entries as { date?: string })?.entry_date || '',
+            entry_date: (item.journal_entries as { date?: string })?.date || '',
             entriesCount: 0,
             totalAmount: 0
           });

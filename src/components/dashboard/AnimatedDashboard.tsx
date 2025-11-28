@@ -1,22 +1,16 @@
 import React, { useState, useEffect } from 'react';
 
-import { 
-useDashboardData, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
+
+import { KPICard, AnimatedNumber } from '../ui/AnimatedCard';
+
+import { DragDropGrid, DragDropItem } from '../ui/DragDropGrid';
+
+import { AnimatedChart } from '../ui/AnimatedChart';
+
+import { DashboardSkeleton } from '../ui/SkeletonLoader';
 
 import { 
-useDashboardData, KPICard, AnimatedNumber } from '../ui/AnimatedCard';
-
-import { 
-useDashboardData, DragDropGrid, DragDropItem } from '../ui/DragDropGrid';
-
-import { 
-useDashboardData, AnimatedChart } from '../ui/AnimatedChart';
-
-import { 
-useDashboardData, DashboardSkeleton } from '../ui/SkeletonLoader';
-
-import { 
-useDashboardData, 
 
   TrendingUp, 
 
@@ -35,7 +29,6 @@ useDashboardData,
   Target
 
 } from 'lucide-react';
-import { useDashboardData } from '@/hooks/useDashboardData';
 import { useDashboardData } from '@/hooks/useDashboardData';
 
 

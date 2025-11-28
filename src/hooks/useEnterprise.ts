@@ -138,7 +138,7 @@ export function useEnterprise() {
 
       return { data: transformedEnterprises, error: null };
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to fetch enterprises';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to fetch enterprises';
       setError(errorMessage);
       console.error('...', error);
       return { data: [], error: errorMessage };
@@ -225,7 +225,7 @@ export function useEnterprise() {
 
       return newEnterprise;
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to create enterprise';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to create enterprise';
       setError(errorMessage);
       console.error('...', error);
       throw new Error(errorMessage);
@@ -304,7 +304,7 @@ export function useEnterprise() {
 
       return updatedEnterprise;
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to update enterprise';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to update enterprise';
       setError(errorMessage);
       console.error('...', error);
       throw new Error(errorMessage);
@@ -347,7 +347,7 @@ export function useEnterprise() {
         setCurrentEnterprise({ ...newDefault, isDefault: true });
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? (error as Error).message : 'Failed to set default enterprise';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to set default enterprise';
       setError(errorMessage);
       console.error('...', error);
       throw new Error(errorMessage);
