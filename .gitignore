@@ -35,14 +35,17 @@ src/**/*.js.map
 .env
 .env.local
 .env.development.local
+.env.test
 .env.test.local
-.env.production.local
 .env.production
+.env.production.local
+.env.production-test
 .env.staging
 .env.hostinger
 
-# Ne versionner que .env.example pour la doc
+# Ne versionner que .env.example et .env.sample pour la doc
 !.env.example
+!.env.sample
 
 # Configuration Supabase locale
 supabase/.env
