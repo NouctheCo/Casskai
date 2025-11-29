@@ -518,6 +518,61 @@
     "messages": {
       "actionSuccess": "Acción exitosa",
       "error": "Error"
+    },
+    "dashboard": {
+      "stats": {
+        "totalClients": "Total Clientes",
+        "activeOpportunities": "Oportunidades Activas",
+        "pipelineValue": "Valor Pipeline",
+        "conversionRate": "Tasa de Conversión"
+      },
+      "pipeline": {
+        "title": "Pipeline de Ventas",
+        "deals": "negocios",
+        "avgDeal": "Negocio promedio"
+      },
+      "revenue": {
+        "title": "Ingresos",
+        "total": "Total"
+      },
+      "recentOpportunities": {
+        "title": "Oportunidades Recientes"
+      },
+      "recentActions": {
+        "title": "Acciones Recientes"
+      },
+      "topClients": {
+        "title": "Top Clientes"
+      },
+      "quickActions": "Acciones Rápidas:",
+      "overdue": "atrasado",
+      "pending": "pendiente",
+      "actions": {
+        "newClient": "Nuevo Cliente",
+        "newOpportunity": "Nueva Oportunidad",
+        "newAction": "Nueva Acción"
+      }
+    },
+    "stages": {
+      "prospect": "Prospecto",
+      "qualification": "Calificación",
+      "proposal": "Propuesta",
+      "negotiation": "Negociación",
+      "closing": "Cierre"
+    },
+    "priority": {
+      "high": "Alta",
+      "medium": "Media",
+      "low": "Baja"
+    },
+    "actionStatus": {
+      "pending": "Pendiente",
+      "completed": "Completada",
+      "cancelled": "Cancelada"
+    },
+    "clientStatus": {
+      "active": "Activo",
+      "inactive": "Inactivo"
     }
   },
   "currencies_extended": {
@@ -3538,6 +3593,74 @@
     "pipeline_value": "Valor del pipeline"
   },
   "third_parties": "Terceros",
+  "auditLogs": {
+    "title": "Registros de Auditoría",
+    "subtitle": "Trazabilidad completa de las acciones realizadas en {{company}}",
+    "loginRequired": "Por favor inicie sesión para acceder a los registros de auditoría.",
+    "filters": "Filtros",
+    "refresh": "Actualizar",
+    "exportCsv": "Exportar CSV",
+    "applyFilters": "Aplicar filtros",
+    "searchFilters": "Filtros de búsqueda",
+    "noLogs": "No se encontraron registros de auditoría",
+    "noLogsDesc": "Los registros de auditoría aparecerán aquí a medida que se realicen acciones.",
+    "error": "Error",
+    "loadError": "No se pueden cargar los registros de auditoría",
+    "stats": {
+      "total": "Total de registros",
+      "critical": "Acciones críticas",
+      "uniqueUsers": "Usuarios únicos",
+      "today": "Hoy"
+    },
+    "columns": {
+      "datetime": "Fecha y Hora",
+      "action": "Acción",
+      "table": "Tabla",
+      "user": "Usuario",
+      "level": "Nivel",
+      "details": "Detalles",
+      "viewDetails": "Ver detalles"
+    },
+    "filterLabels": {
+      "actionType": "Tipo de acción",
+      "all": "Todos",
+      "table": "Tabla",
+      "tablePlaceholder": "Ej.: invoices, users...",
+      "securityLevel": "Nivel de seguridad",
+      "startDate": "Fecha de inicio",
+      "endDate": "Fecha de fin",
+      "limit": "Límite"
+    },
+    "actions": {
+      "CREATE": "CREATE",
+      "UPDATE": "UPDATE",
+      "DELETE": "DELETE",
+      "VIEW": "VIEW",
+      "LOGIN": "LOGIN",
+      "LOGOUT": "LOGOUT",
+      "RGPD_EXPORT": "RGPD_EXPORT",
+      "RGPD_DELETE_ACCOUNT": "RGPD_DELETE_ACCOUNT",
+      "SIGNUP": "SIGNUP"
+    },
+    "securityLevels": {
+      "low": "Bajo",
+      "standard": "Estándar",
+      "high": "Alto",
+      "critical": "Crítico"
+    },
+    "detailsPanel": {
+      "changedFields": "Campos modificados:",
+      "oldValues": "Valores antiguos:",
+      "newValues": "Valores nuevos:",
+      "ip": "IP:",
+      "compliance": "Cumplimiento:",
+      "system": "Sistema"
+    },
+    "compliance": {
+      "title": "Nota de cumplimiento",
+      "description": "Los registros de auditoría se conservan durante al menos 2 años de conformidad con los requisitos del RGPD (Artículo 5), SOC2 e ISO27001. Estos registros se utilizan únicamente para fines de trazabilidad, seguridad y cumplimiento."
+    }
+  },
   "banking": {
     "title": "Banca y Tesorería",
     "subtitle": "Importe sus extractos bancarios y gestione sus transacciones",

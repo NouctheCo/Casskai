@@ -551,6 +551,61 @@
     "messages": {
       "actionSuccess": "Action réussie",
       "error": "Erreur"
+    },
+    "dashboard": {
+      "stats": {
+        "totalClients": "Total Clients",
+        "activeOpportunities": "Opportunités Actives",
+        "pipelineValue": "Valeur Pipeline",
+        "conversionRate": "Taux de Conversion"
+      },
+      "pipeline": {
+        "title": "Pipeline de Ventes",
+        "deals": "affaires",
+        "avgDeal": "Affaire moyenne"
+      },
+      "revenue": {
+        "title": "Revenus",
+        "total": "Total"
+      },
+      "recentOpportunities": {
+        "title": "Opportunités Récentes"
+      },
+      "recentActions": {
+        "title": "Actions Récentes"
+      },
+      "topClients": {
+        "title": "Top Clients"
+      },
+      "quickActions": "Actions Rapides :",
+      "overdue": "en retard",
+      "pending": "en attente",
+      "actions": {
+        "newClient": "Nouveau Client",
+        "newOpportunity": "Nouvelle Opportunité",
+        "newAction": "Nouvelle Action"
+      }
+    },
+    "stages": {
+      "prospect": "Prospect",
+      "qualification": "Qualification",
+      "proposal": "Proposition",
+      "negotiation": "Négociation",
+      "closing": "Clôture"
+    },
+    "priority": {
+      "high": "Haute",
+      "medium": "Moyenne",
+      "low": "Basse"
+    },
+    "actionStatus": {
+      "pending": "En attente",
+      "completed": "Terminée",
+      "cancelled": "Annulée"
+    },
+    "clientStatus": {
+      "active": "Actif",
+      "inactive": "Inactif"
     }
   },
   "currencies_extended": {
@@ -3010,6 +3065,8 @@
     "title": "Gestion Fiscale",
     "subtitle": "Gérez vos déclarations, obligations et calendrier fiscal",
     "realTime": "En temps réel",
+    "realtime": "En temps réel",
+    "newDeclaration": "Nouvelle déclaration",
     "export": "Exporter",
     "newDeclaration": {
       "title": "Créer une Nouvelle Déclaration",
@@ -3040,9 +3097,9 @@
     "dashboard": {
       "metrics": {
         "totalDeclarations": "Total Déclarations",
-        "pending": "En Attente",
-        "overdue": "En Retard",
-        "activeAlerts": "Alertes Actives"
+        "pendingDeclarations": "En attente",
+        "overdueDeclarations": "En retard",
+        "activeAlerts": "Alertes actives"
       },
       "financialOverview": {
         "title": "Aperçu Financier",
@@ -3614,5 +3671,73 @@
     "convert_to_customer": "Convertir en client",
     "pipeline_value": "Valeur du pipeline"
   },
-  "third_parties": "Tiers"
+  "third_parties": "Tiers",
+  "auditLogs": {
+    "title": "Logs d'Audit",
+    "subtitle": "Traçabilité complète des actions effectuées sur {{company}}",
+    "loginRequired": "Veuillez vous connecter pour accéder aux logs d'audit.",
+    "filters": "Filtres",
+    "refresh": "Actualiser",
+    "exportCsv": "Export CSV",
+    "applyFilters": "Appliquer les filtres",
+    "searchFilters": "Filtres de recherche",
+    "noLogs": "Aucun log d'audit trouvé",
+    "noLogsDesc": "Les logs d'audit apparaîtront ici au fur et à mesure des actions effectuées.",
+    "error": "Erreur",
+    "loadError": "Impossible de charger les logs d'audit",
+    "stats": {
+      "total": "Total logs",
+      "critical": "Actions critiques",
+      "uniqueUsers": "Utilisateurs uniques",
+      "today": "Aujourd'hui"
+    },
+    "columns": {
+      "datetime": "Date & Heure",
+      "action": "Action",
+      "table": "Table",
+      "user": "Utilisateur",
+      "level": "Niveau",
+      "details": "Détails",
+      "viewDetails": "Voir détails"
+    },
+    "filterLabels": {
+      "actionType": "Type d'action",
+      "all": "Tous",
+      "table": "Table",
+      "tablePlaceholder": "Ex: invoices, users...",
+      "securityLevel": "Niveau de sécurité",
+      "startDate": "Date début",
+      "endDate": "Date fin",
+      "limit": "Limite"
+    },
+    "actions": {
+      "CREATE": "CREATE",
+      "UPDATE": "UPDATE",
+      "DELETE": "DELETE",
+      "VIEW": "VIEW",
+      "LOGIN": "LOGIN",
+      "LOGOUT": "LOGOUT",
+      "RGPD_EXPORT": "RGPD_EXPORT",
+      "RGPD_DELETE_ACCOUNT": "RGPD_DELETE_ACCOUNT",
+      "SIGNUP": "SIGNUP"
+    },
+    "securityLevels": {
+      "low": "Low",
+      "standard": "Standard",
+      "high": "High",
+      "critical": "Critical"
+    },
+    "detailsPanel": {
+      "changedFields": "Champs modifiés:",
+      "oldValues": "Anciennes valeurs:",
+      "newValues": "Nouvelles valeurs:",
+      "ip": "IP:",
+      "compliance": "Conformité:",
+      "system": "Système"
+    },
+    "compliance": {
+      "title": "Note de conformité",
+      "description": "Les logs d'audit sont conservés pendant au moins 2 ans conformément aux exigences RGPD (Article 5), SOC2 et ISO27001. Ces logs sont utilisés uniquement à des fins de traçabilité, sécurité et conformité."
+    }
+  }
 }

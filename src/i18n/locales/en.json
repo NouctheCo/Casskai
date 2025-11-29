@@ -511,6 +511,61 @@
     "messages": {
       "actionSuccess": "Action successful",
       "error": "Error"
+    },
+    "dashboard": {
+      "stats": {
+        "totalClients": "Total Clients",
+        "activeOpportunities": "Active Opportunities",
+        "pipelineValue": "Pipeline Value",
+        "conversionRate": "Conversion Rate"
+      },
+      "pipeline": {
+        "title": "Sales Pipeline",
+        "deals": "deals",
+        "avgDeal": "Average deal"
+      },
+      "revenue": {
+        "title": "Revenue",
+        "total": "Total"
+      },
+      "recentOpportunities": {
+        "title": "Recent Opportunities"
+      },
+      "recentActions": {
+        "title": "Recent Actions"
+      },
+      "topClients": {
+        "title": "Top Clients"
+      },
+      "quickActions": "Quick Actions:",
+      "overdue": "overdue",
+      "pending": "pending",
+      "actions": {
+        "newClient": "New Client",
+        "newOpportunity": "New Opportunity",
+        "newAction": "New Action"
+      }
+    },
+    "stages": {
+      "prospect": "Prospect",
+      "qualification": "Qualification",
+      "proposal": "Proposal",
+      "negotiation": "Negotiation",
+      "closing": "Closing"
+    },
+    "priority": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "actionStatus": {
+      "pending": "Pending",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "clientStatus": {
+      "active": "Active",
+      "inactive": "Inactive"
     }
   },
   "currencies_extended": {
@@ -3526,6 +3581,74 @@
     "pipeline_value": "Pipeline value"
   },
   "third_parties": "Third parties",
+  "auditLogs": {
+    "title": "Audit Logs",
+    "subtitle": "Complete traceability of actions performed on {{company}}",
+    "loginRequired": "Please log in to access audit logs.",
+    "filters": "Filters",
+    "refresh": "Refresh",
+    "exportCsv": "Export CSV",
+    "applyFilters": "Apply filters",
+    "searchFilters": "Search filters",
+    "noLogs": "No audit logs found",
+    "noLogsDesc": "Audit logs will appear here as actions are performed.",
+    "error": "Error",
+    "loadError": "Unable to load audit logs",
+    "stats": {
+      "total": "Total logs",
+      "critical": "Critical actions",
+      "uniqueUsers": "Unique users",
+      "today": "Today"
+    },
+    "columns": {
+      "datetime": "Date & Time",
+      "action": "Action",
+      "table": "Table",
+      "user": "User",
+      "level": "Level",
+      "details": "Details",
+      "viewDetails": "View details"
+    },
+    "filterLabels": {
+      "actionType": "Action type",
+      "all": "All",
+      "table": "Table",
+      "tablePlaceholder": "E.g.: invoices, users...",
+      "securityLevel": "Security level",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "limit": "Limit"
+    },
+    "actions": {
+      "CREATE": "CREATE",
+      "UPDATE": "UPDATE",
+      "DELETE": "DELETE",
+      "VIEW": "VIEW",
+      "LOGIN": "LOGIN",
+      "LOGOUT": "LOGOUT",
+      "RGPD_EXPORT": "RGPD_EXPORT",
+      "RGPD_DELETE_ACCOUNT": "RGPD_DELETE_ACCOUNT",
+      "SIGNUP": "SIGNUP"
+    },
+    "securityLevels": {
+      "low": "Low",
+      "standard": "Standard",
+      "high": "High",
+      "critical": "Critical"
+    },
+    "detailsPanel": {
+      "changedFields": "Changed fields:",
+      "oldValues": "Old values:",
+      "newValues": "New values:",
+      "ip": "IP:",
+      "compliance": "Compliance:",
+      "system": "System"
+    },
+    "compliance": {
+      "title": "Compliance note",
+      "description": "Audit logs are retained for at least 2 years in accordance with GDPR requirements (Article 5), SOC2 and ISO27001. These logs are used solely for traceability, security and compliance purposes."
+    }
+  },
   "banking": {
     "title": "Banking & Cash",
     "subtitle": "Import your bank statements and manage your transactions",

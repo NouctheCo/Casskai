@@ -443,6 +443,8 @@ export default function InvoicingPageOptimized() {
                         value={customStartDate}
                         onChange={(e) => setCustomStartDate(e.target.value)}
                         className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Sélectionner une date de début"
+                        title="Date de début de la période personnalisée"
                       />
                     </div>
                     <div className="flex flex-col">
@@ -452,6 +454,8 @@ export default function InvoicingPageOptimized() {
                         value={customEndDate}
                         onChange={(e) => setCustomEndDate(e.target.value)}
                         className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Sélectionner une date de fin"
+                        title="Date de fin de la période personnalisée"
                       />
                     </div>
                   </div>
