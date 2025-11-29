@@ -18,15 +18,26 @@ import { supabase } from '@/lib/supabase';
 // ========================================
 
 export interface UserDataExport {
+  // Métadonnées export
+  export_metadata: {
+    export_date: string;
+    export_format: 'json';
+    user_id: string;
+    requested_by: string;
+    rgpd_article: 'Article 15 & 20';
+  };
+
   // Données personnelles
-  profile: {
-    id: string;
+  personal_data: {
     email: string;
+    full_name: string | null;
     first_name: string | null;
     last_name: string | null;
     phone: string | null;
+    avatar_url: string | null;
     created_at: string;
     updated_at: string;
+    last_login: string | null;
   };
 
   // Entreprises associées
@@ -35,15 +46,51 @@ export interface UserDataExport {
     name: string;
     role: string;
     joined_at: string;
+    is_owner: boolean;
   }>;
 
-  // Données métier (anonymisables)
-  business_data: {
-    invoices_count: number;
-    journal_entries_count: number;
-    contacts_count: number;
-    documents_count: number;
-  };
+  // Préférences utilisateur
+  preferences: {
+    language: string;
+    timezone: string;
+    theme: string;
+    notifications: Record<string, boolean>;
+  } | null;
+
+  // Données métier (vraies données, pas des counts - Article 20 RGPD)
+  // Limitées aux 2 dernières années pour protection des données volumineuses
+  invoices: Array<{
+    id: string;
+    invoice_number: string;
+    invoice_date: string;
+    due_date: string;
+    total_amount: number;
+    status: string;
+    client_reference: string; // Anonymisé pour protection des tiers
+  }>;
+
+  journal_entries: Array<{
+    id: string;
+    entry_date: string;
+    reference: string;
+    description: string;
+    total_debit: number;
+    total_credit: number;
+  }>;
+
+  documents: Array<{
+    id: string;
+    document_type: string;
+    document_name: string;
+    created_at: string;
+    // Métadonnées uniquement, pas le contenu
+  }>;
+
+  activity_log: Array<{
+    action: string;
+    timestamp: string;
+    details: string;
+  }>;
 
   // Consentements
   consents: Array<{
@@ -51,13 +98,6 @@ export interface UserDataExport {
     given_at: string;
     revoked_at: string | null;
   }>;
-
-  // Métadonnées export
-  export_metadata: {
-    requested_at: string;
-    format: 'JSON';
-    rgpd_article: 'Article 15 & 20';
-  };
 }
 
 export interface AccountDeletionResult {
@@ -89,26 +129,85 @@ export interface RGPDLog {
 // ========================================
 
 /**
+ * Vérifie si l'utilisateur peut exporter ses données (rate limiting)
+ * Limite: 1 export toutes les 24h pour éviter les abus
+ *
+ * @returns { allowed: true } si l'export est autorisé
+ * @returns { allowed: false, nextAllowedAt } si l'export est limité
+ */
+export async function canExportData(userId: string): Promise<{ allowed: boolean; nextAllowedAt?: string }> {
+  try {
+    const { data } = await supabase
+      .from('rgpd_logs')
+      .select('created_at, timestamp')
+      .eq('user_id', userId)
+      .eq('operation', 'DATA_EXPORT')
+      .eq('status', 'SUCCESS')
+      .order('timestamp', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!data) {
+      return { allowed: true };
+    }
+
+    // Utiliser created_at ou timestamp selon ce qui est disponible
+    const lastExportDate = data.timestamp || data.created_at;
+    const lastExport = new Date(lastExportDate);
+    const nextAllowed = new Date(lastExport.getTime() + 24 * 60 * 60 * 1000); // +24h
+
+    if (new Date() < nextAllowed) {
+      return {
+        allowed: false,
+        nextAllowedAt: nextAllowed.toISOString()
+      };
+    }
+
+    return { allowed: true };
+  } catch (error) {
+    console.error('Erreur vérification rate limit:', error);
+    // En cas d'erreur, autoriser l'export (fail-open pour droits RGPD)
+    return { allowed: true };
+  }
+}
+
+/**
  * Exporte toutes les données personnelles d'un utilisateur au format JSON
- * Conforme RGPD Article 15 (Droit d'accès)
+ * Conforme RGPD Article 15 (Droit d'accès) & Article 20 (Portabilité des données)
+ *
+ * ⚠️  IMPORTANT: Retourne les VRAIES données, pas des counts (conformité Article 20)
+ * Protection des tiers: Les noms de clients/fournisseurs sont anonymisés
+ * Limite temporelle: 2 ans pour les données volumineuses
+ * Rate limiting: 1 export par 24h (vérifier avec canExportData() avant d'appeler)
  */
 export async function exportUserData(userId: string): Promise<UserDataExport> {
   try {
-    // 1. Profil utilisateur
-    const { data: profile, error: profileError } = await supabase
-      .from('user_profiles')
+    // Vérifier authentification
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user || user.id !== userId) {
+      throw new Error('Non autorisé - vous ne pouvez exporter que vos propres données');
+    }
+
+    // Date limite : 2 ans en arrière (protection données volumineuses)
+    const twoYearsAgo = new Date();
+    twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+    const dateLimit = twoYearsAgo.toISOString();
+
+    // 1. Profil utilisateur depuis public.users (pas user_profiles)
+    const { data: profile } = await supabase
+      .from('users')
       .select('*')
       .eq('id', userId)
       .single();
 
-    if (profileError) throw profileError;
-
     // 2. Entreprises associées
-    const { data: companies, error: companiesError } = await supabase
+    const { data: companies } = await supabase
       .from('user_companies')
       .select(`
         company_id,
         role,
+        is_owner,
         created_at,
         companies (
           id,
@@ -117,59 +216,145 @@ export async function exportUserData(userId: string): Promise<UserDataExport> {
       `)
       .eq('user_id', userId);
 
-    if (companiesError) throw companiesError;
+    // 3. Préférences utilisateur
+    const { data: preferences } = await supabase
+      .from('user_preferences')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
 
-    // 3. Statistiques données métier
-    const [invoicesCount, entriesCount, contactsCount, documentsCount] = await Promise.all([
-      supabase.from('invoices').select('id', { count: 'exact', head: true }).eq('created_by', userId),
-      supabase.from('journal_entries').select('id', { count: 'exact', head: true }).eq('created_by', userId),
-      supabase.from('third_parties').select('id', { count: 'exact', head: true }).eq('created_by', userId),
-      supabase.from('documents').select('id', { count: 'exact', head: true }).eq('uploaded_by', userId)
-    ]);
+    // 4. Récupérer les IDs des entreprises de l'utilisateur
+    const companyIds = companies?.map(c => c.company_id) || [];
 
-    // 4. Consentements cookies (depuis localStorage - à implémenter côté client)
+    // 5. Factures (anonymisées pour protection des tiers)
+    let invoices: any[] = [];
+    if (companyIds.length > 0) {
+      const { data } = await supabase
+        .from('invoices')
+        .select('id, invoice_number, invoice_date, due_date, total_amount, status, customer_id')
+        .in('company_id', companyIds)
+        .gte('invoice_date', dateLimit)
+        .order('invoice_date', { ascending: false })
+        .limit(1000);
+
+      // Anonymiser les clients pour protection RGPD des tiers
+      invoices = (data || []).map((inv, index) => ({
+        id: inv.id,
+        invoice_number: inv.invoice_number,
+        invoice_date: inv.invoice_date,
+        due_date: inv.due_date,
+        total_amount: inv.total_amount,
+        status: inv.status,
+        client_reference: `CLIENT-${String(index + 1).padStart(3, '0')}` // Anonymisé
+      }));
+    }
+
+    // 6. Écritures comptables
+    let journalEntries: any[] = [];
+    if (companyIds.length > 0) {
+      const { data } = await supabase
+        .from('journal_entries')
+        .select('id, entry_date, reference, description, total_debit, total_credit')
+        .in('company_id', companyIds)
+        .gte('entry_date', dateLimit)
+        .order('entry_date', { ascending: false })
+        .limit(1000);
+
+      journalEntries = data || [];
+    }
+
+    // 7. Documents RH (métadonnées uniquement, pas le contenu)
+    let documents: any[] = [];
+    if (companyIds.length > 0) {
+      const { data } = await supabase
+        .from('hr_generated_documents')
+        .select('id, document_type, document_name, created_at')
+        .in('company_id', companyIds)
+        .gte('created_at', dateLimit)
+        .order('created_at', { ascending: false })
+        .limit(500);
+
+      documents = data || [];
+    }
+
+    // 8. Logs d'activité (si table existe)
+    let activityLog: any[] = [];
+    try {
+      const { data } = await supabase
+        .from('audit_logs')
+        .select('action, created_at, details')
+        .eq('user_id', userId)
+        .gte('created_at', dateLimit)
+        .order('created_at', { ascending: false })
+        .limit(500);
+
+      activityLog = (data || []).map(log => ({
+        action: log.action,
+        timestamp: log.created_at,
+        details: typeof log.details === 'object' ? JSON.stringify(log.details) : String(log.details || '')
+      }));
+    } catch {
+      // Table audit_logs n'existe peut-être pas, continuer sans erreur
+      activityLog = [];
+    }
+
+    // 9. Consentements
     const consents = await getUserConsents(userId);
 
-    // 5. Construire export
+    // 10. Construire export conforme Article 20 RGPD
     const exportData: UserDataExport = {
-      profile: {
-        id: profile.id,
-        email: profile.email,
-        first_name: profile.first_name,
-        last_name: profile.last_name,
-        phone: profile.phone,
-        created_at: profile.created_at,
-        updated_at: profile.updated_at
-      },
-      companies: companies?.map((uc) => {
-        const company = Array.isArray(uc.companies) ? uc.companies[0] : uc.companies;
-        return {
-          id: company?.id || '',
-          name: company?.name || '',
-          role: uc.role,
-          joined_at: uc.created_at
-        };
-      }) || [],
-      business_data: {
-        invoices_count: invoicesCount.count || 0,
-        journal_entries_count: entriesCount.count || 0,
-        contacts_count: contactsCount.count || 0,
-        documents_count: documentsCount.count || 0
-      },
-      consents,
       export_metadata: {
-        requested_at: new Date().toISOString(),
-        format: 'JSON',
+        export_date: new Date().toISOString(),
+        export_format: 'json',
+        user_id: userId,
+        requested_by: user.email || userId,
         rgpd_article: 'Article 15 & 20'
-      }
+      },
+      personal_data: {
+        email: profile?.email || user.email || '',
+        full_name: profile?.full_name || null,
+        first_name: profile?.first_name || null,
+        last_name: profile?.last_name || null,
+        phone: profile?.phone || null,
+        avatar_url: profile?.avatar_url || null,
+        created_at: profile?.created_at || user.created_at,
+        updated_at: profile?.updated_at || user.created_at,
+        last_login: user.last_sign_in_at || null
+      },
+      companies: (companies || []).map(c => {
+        const company = Array.isArray(c.companies) ? c.companies[0] : c.companies;
+        return {
+          id: c.company_id,
+          name: company?.name || 'N/A',
+          role: c.role,
+          joined_at: c.created_at,
+          is_owner: c.is_owner || false
+        };
+      }),
+      preferences: preferences ? {
+        language: preferences.language || 'fr',
+        timezone: preferences.timezone || 'Europe/Paris',
+        theme: preferences.theme || 'light',
+        notifications: preferences.notifications || {}
+      } : null,
+      invoices,
+      journal_entries: journalEntries,
+      documents,
+      activity_log: activityLog,
+      consents
     };
 
-    // 6. Logger opération RGPD
+    // 11. Logger opération RGPD pour conformité
     await logRGPDOperation({
       user_id: userId,
       operation: 'DATA_EXPORT',
       status: 'SUCCESS',
-      details: 'Export données personnelles réussi',
+      details: JSON.stringify({
+        invoices_count: invoices.length,
+        entries_count: journalEntries.length,
+        documents_count: documents.length,
+        companies_count: companies?.length || 0
+      }),
       timestamp: new Date().toISOString()
     });
 
@@ -451,6 +636,7 @@ import * as React from 'react';
 
 export default {
   exportUserData,
+  canExportData,
   deleteUserAccount,
   revokeCookieConsent,
   downloadUserDataExport,
