@@ -64,6 +64,8 @@ interface Company {
 
   updated_at?: string;
 
+  onboarding_completed_at?: string | null;
+
 }
 
 
@@ -426,7 +428,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const localOnboardingFlag = localStorage.getItem(`onboarding_completed_${currentUser.id}`);
 
         // 2. Vérifier si onboarding_completed_at est défini dans la BDD
-        const hasOnboardingCompletedInDB = companies.some(c => (c as any).onboarding_completed_at !== null);
+        const hasOnboardingCompletedInDB = companies.some(c => c.onboarding_completed_at !== null);
 
         // 3. Fallback : Si l'entreprise existe et que l'utilisateur en est propriétaire, considérer l'onboarding terminé
         //    (pour compatibilité avec les anciennes données avant la migration)
