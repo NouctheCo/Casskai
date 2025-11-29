@@ -1,4 +1,18 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import { supabase } from '@/lib/supabase';
+import { auditService } from './auditService';
+import { logger } from '@/utils/logger';
 
 export interface Invoice {
   id: string;
@@ -145,7 +159,7 @@ class InvoicingService {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Error fetching invoices:', error);
+        logger.error('InvoicingService: Error fetching invoices:', error);
         throw new Error(`Failed to fetch invoices: ${error.message}`);
       }
 
@@ -162,7 +176,7 @@ class InvoicingService {
 
       return enrichedInvoices;
     } catch (error) {
-      console.error('Error in getInvoices:', error);
+      logger.error('InvoicingService: Error in getInvoices:', error);
       throw error;
     }
   }
@@ -195,7 +209,7 @@ class InvoicingService {
         invoice_lines: data.invoice_lines || []
       } as InvoiceWithDetails;
     } catch (error) {
-      console.error('Error in getInvoiceById:', error);
+      logger.error('InvoicingService: Error in getInvoiceById:', error);
       throw error;
     }
   }
@@ -284,9 +298,26 @@ class InvoicingService {
         throw new Error('Failed to retrieve created invoice');
       }
 
+      // 4. Audit trail (fire-and-forget, never blocks)
+      auditService.logAsync({
+        event_type: 'CREATE',
+        table_name: 'invoices',
+        record_id: invoice.id,
+        company_id: companyId,
+        new_values: {
+          invoice_number,
+          type: invoiceData.type || 'sale',
+          total_amount,
+          third_party_id: invoiceData.third_party_id,
+          items_count: items.length
+        },
+        security_level: 'standard',
+        compliance_tags: ['SOC2', 'ISO27001']
+      });
+
       return createdInvoice;
     } catch (error) {
-      console.error('Error in createInvoice:', error);
+      logger.error('InvoicingService: Error in createInvoice:', error);
       throw error;
     }
   }
@@ -310,9 +341,21 @@ class InvoicingService {
         throw new Error('Failed to retrieve updated invoice');
       }
 
+      // Audit trail (fire-and-forget, never blocks)
+      auditService.logAsync({
+        event_type: 'UPDATE',
+        table_name: 'invoices',
+        record_id: id,
+        company_id: companyId,
+        new_values: { status },
+        changed_fields: ['status'],
+        security_level: 'standard',
+        compliance_tags: ['SOC2', 'ISO27001']
+      });
+
       return updatedInvoice;
     } catch (error) {
-      console.error('Error in updateInvoiceStatus:', error);
+      logger.error('InvoicingService: Error in updateInvoiceStatus:', error);
       throw error;
     }
   }
@@ -320,6 +363,9 @@ class InvoicingService {
   async deleteInvoice(id: string): Promise<void> {
     try {
       const companyId = await this.getCurrentCompanyId();
+
+      // Get invoice details before deletion for audit trail
+      const invoiceToDelete = await this.getInvoiceById(id);
 
       const { error } = await supabase
         .from('invoices')
@@ -330,8 +376,28 @@ class InvoicingService {
       if (error) {
         throw new Error(`Failed to delete invoice: ${error.message}`);
       }
+
+      // Audit trail (fire-and-forget, never blocks)
+      // Deletion is HIGH security level as it's irreversible
+      if (invoiceToDelete) {
+        auditService.logAsync({
+          event_type: 'DELETE',
+          table_name: 'invoices',
+          record_id: id,
+          company_id: companyId,
+          old_values: {
+            invoice_number: invoiceToDelete.invoice_number,
+            type: invoiceToDelete.type,
+            status: invoiceToDelete.status,
+            total_amount: invoiceToDelete.total_amount,
+            third_party_id: invoiceToDelete.third_party_id
+          },
+          security_level: 'high',
+          compliance_tags: ['SOC2', 'ISO27001']
+        });
+      }
     } catch (error) {
-      console.error('Error in deleteInvoice:', error);
+      logger.error('InvoicingService: Error in deleteInvoice:', error);
       throw error;
     }
   }
@@ -471,7 +537,7 @@ class InvoicingService {
         .select('id')
         .eq('company_id', companyId)
         .eq('type', 'quote');
-      if (quotesError) console.warn('Quotes table might not exist:', quotesError);
+      if (quotesError) logger.warn('InvoicingService: Quotes table might not exist', quotesError);
       
       const invoicesList = invoices || [];
       const clientsList = clients || [];

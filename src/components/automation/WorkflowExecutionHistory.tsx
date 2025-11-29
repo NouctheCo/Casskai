@@ -108,7 +108,7 @@ export function WorkflowExecutionHistory({ workflowId, onClose }: WorkflowExecut
                   Total Exécutions
                 </p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {workflow.run_count}
+                  {executions.length}
                 </p>
               </div>
               <Activity className="h-8 w-8 text-blue-600" />
@@ -124,7 +124,7 @@ export function WorkflowExecutionHistory({ workflowId, onClose }: WorkflowExecut
                   Succès
                 </p>
                 <p className="text-2xl font-bold text-green-600">
-                  {workflow.success_count}
+                  {executions.filter(e => e.status === 'completed').length}
                 </p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-600" />
@@ -140,7 +140,7 @@ export function WorkflowExecutionHistory({ workflowId, onClose }: WorkflowExecut
                   Échecs
                 </p>
                 <p className="text-2xl font-bold text-red-600">
-                  {workflow.error_count}
+                  {executions.filter(e => e.status === 'failed').length}
                 </p>
               </div>
               <XCircle className="h-8 w-8 text-red-600" />
@@ -156,7 +156,7 @@ export function WorkflowExecutionHistory({ workflowId, onClose }: WorkflowExecut
                   Taux de Réussite
                 </p>
                 <p className="text-2xl font-bold text-blue-600">
-                  {workflow.run_count > 0 ? ((workflow.success_count / workflow.run_count) * 100).toFixed(1) : 0}%
+                  {executions.length > 0 ? ((executions.filter(e => e.status === 'completed').length / executions.length) * 100).toFixed(1) : 0}%
                 </p>
               </div>
               <BarChart3 className="h-8 w-8 text-blue-600" />
@@ -233,7 +233,7 @@ export function WorkflowExecutionHistory({ workflowId, onClose }: WorkflowExecut
                                 Résultats des actions:
                               </h4>
                               <div className="grid gap-2">
-                                {execution.results.map((result, index) => (
+                                {execution.result && Array.isArray(execution.result) && execution.result.map((result: any, index: number) => (
                                   <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded text-sm">
                                     <div className="flex items-center space-x-2">
                                       {result.status === 'success' ? (

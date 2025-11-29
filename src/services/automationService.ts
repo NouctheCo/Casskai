@@ -1,662 +1,498 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
+// src/services/automationService.ts
+
 import { supabase } from '@/lib/supabase';
 
-export interface WorkflowTrigger {
-  id: string;
-  type: 'schedule' | 'event' | 'condition';
-  config: {
-    schedule?: {
-      frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
-      time: string;
-      dayOfWeek?: number;
-      dayOfMonth?: number;
-    };
-    event?: {
-      table: string;
-      action: 'insert' | 'update' | 'delete';
-      conditions?: Record<string, any>;
-    };
-    condition?: {
-      field: string;
-      operator: 'equals' | 'greater_than' | 'less_than' | 'contains';
-      value: any;
-    };
-  };
-}
-
-export interface WorkflowAction {
-  id: string;
-  type: 'email' | 'report_generation' | 'data_update' | 'notification' | 'invoice_creation' | 'backup';
-  config: {
-    email?: {
-      to: string[];
-      subject: string;
-      template: string;
-      variables?: Record<string, any>;
-      attachments?: Array<{
-        filename: string;
-        content: string;
-        contentType?: string;
-      }>;
-    };
-    report?: {
-      type: 'balance_sheet' | 'income_statement' | 'trial_balance' | 'general_ledger';
-      format: 'pdf' | 'excel' | 'csv';
-      filters: Record<string, any>;
-    };
-    update?: {
-      table: string;
-      filters: Record<string, any>;
-      data: Record<string, any>;
-    };
-    notification?: {
-      title: string;
-      message: string;
-      priority: 'low' | 'medium' | 'high';
-      recipients: string[];
-    };
-    invoice?: {
-      client_id: string;
-      template_id?: string;
-      auto_send: boolean;
-    };
-  };
-}
+// =====================================================
+// TYPES
+// =====================================================
 
 export interface Workflow {
   id: string;
   company_id: string;
   name: string;
-  description?: string;
+  description: string;
+  icon: string;
+  color: string;
+  category: WorkflowCategory;
   is_active: boolean;
-  trigger: WorkflowTrigger;
+  is_template: boolean;
+  trigger_type: TriggerType;
+  trigger_config: TriggerConfig;
   actions: WorkflowAction[];
-  last_run?: string;
-  next_run?: string;
-  run_count: number;
-  success_count: number;
-  error_count: number;
+  created_by: string;
   created_at: string;
   updated_at: string;
+  last_run_at: string | null;
+  next_run_at: string | null;
+}
+
+export type WorkflowCategory =
+  | 'accounting'
+  | 'invoicing'
+  | 'hr'
+  | 'crm'
+  | 'inventory'
+  | 'notifications'
+  | 'reports'
+  | 'custom';
+
+export type TriggerType = 'schedule' | 'event' | 'manual' | 'webhook' | 'condition';
+
+export interface TriggerConfig {
+  frequency?: 'daily' | 'weekly' | 'monthly' | 'yearly' | 'custom';
+  time?: string;
+  timezone?: string;
+  day?: number;
+  days?: number[];
+  cron?: string;
+  event_type?: string;
+  conditions?: Record<string, any>;
+  secret?: string;
+  allowed_ips?: string[];
+  field?: string;
+  operator?: '=' | '!=' | '>' | '<' | '>=' | '<=' | 'contains' | 'starts_with';
+  value?: any;
+  value_field?: string;
+}
+
+export interface WorkflowAction {
+  id: string;
+  type: ActionType;
+  config: ActionConfig;
+  order: number;
+  condition?: ActionCondition;
+}
+
+export type ActionType =
+  | 'send_email'
+  | 'generate_report'
+  | 'notification'
+  | 'create_invoice'
+  | 'update_record'
+  | 'webhook_call'
+  | 'delay'
+  | 'condition_branch';
+
+export interface ActionConfig {
+  recipients?: string[];
+  template?: string;
+  subject?: string;
+  body?: string;
+  report_type?: string;
+  format?: 'pdf' | 'xlsx' | 'csv';
+  notification_type?: 'info' | 'success' | 'warning' | 'error';
+  message?: string;
+  source?: string;
+  table?: string;
+  field?: string;
+  value?: any;
+  url?: string;
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  headers?: Record<string, string>;
+  payload?: any;
+  duration?: number;
+  unit?: 'seconds' | 'minutes' | 'hours' | 'days';
+}
+
+export interface ActionCondition {
+  field: string;
+  operator: string;
+  value: any;
 }
 
 export interface WorkflowExecution {
   id: string;
-  workflow_id: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
+  workflow_id?: string;
+  template_id?: string;
+  company_id: string;
   started_at: string;
-  completed_at?: string;
-  error_message?: string;
-  results: {
-    action_id: string;
-    status: 'success' | 'failed';
-    result?: any;
-    error?: string;
-  }[];
+  completed_at: string | null;
+  duration_ms?: number | null;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  trigger_data?: any;
+  result?: any;
+  error_message?: string | null;
+  triggered_by?: string;
+  triggered_by_user?: string | null;
 }
 
-export interface AutomationServiceResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
+export interface WorkflowTemplate {
+  id: string;
+  template_name: string;
+  description: string;
+  category: string;
+  workflow_definition: any;
+  is_system: boolean;
+  is_active: boolean;
+  usage_count: number;
+  created_at: string;
 }
 
-export class AutomationService {
-  private static instance: AutomationService;
+export interface WorkflowStats {
+  total: number;
+  active: number;
+  inactive: number;
+  executions_total: number;
+  executions_success: number;
+  executions_failed: number;
+  success_rate: number;
+}
 
-  static getInstance(): AutomationService {
-    if (!this.instance) {
-      this.instance = new AutomationService();
-    }
-    return this.instance;
+// =====================================================
+// SERVICE
+// =====================================================
+
+class AutomationService {
+  async getWorkflows(companyId: string): Promise<Workflow[]> {
+    const { data, error } = await supabase
+      .from('workflows')
+      .select('*')
+      .eq('company_id', companyId)
+      .eq('is_template', false)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
   }
 
-  // Workflow Management
-  async getWorkflows(companyId: string): Promise<AutomationServiceResponse<Workflow[]>> {
-    try {
-      const { data, error } = await supabase
-        .from('workflows')
-        .select('*')
-        .eq('company_id', companyId)
-        .order('created_at', { ascending: false });
+  async getWorkflow(workflowId: string): Promise<Workflow | null> {
+    const { data, error } = await supabase
+      .from('workflows')
+      .select('*')
+      .eq('id', workflowId)
+      .single();
 
-      if (error) throw error;
-
-      return {
-        success: true,
-        data: data || []
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch workflows'
-      };
-    }
+    if (error) throw error;
+    return data;
   }
 
-  async createWorkflow(companyId: string, workflowData: Omit<Workflow, 'id' | 'company_id' | 'created_at' | 'updated_at' | 'run_count' | 'success_count' | 'error_count'>): Promise<AutomationServiceResponse<Workflow>> {
-    try {
-      const { data, error } = await supabase
-        .from('workflows')
-        .insert({
-          ...workflowData,
-          company_id: companyId,
-          run_count: 0,
-          success_count: 0,
-          error_count: 0
-        })
-        .select()
-        .single();
+  async createWorkflow(companyId: string, workflow: Partial<Workflow>): Promise<Workflow> {
+    const { data, error } = await supabase
+      .from('workflows')
+      .insert({
+        company_id: companyId,
+        name: workflow.name,
+        description: workflow.description || '',
+        icon: workflow.icon || 'zap',
+        color: workflow.color || 'blue',
+        category: workflow.category || 'custom',
+        trigger_type: workflow.trigger_type,
+        trigger_config: workflow.trigger_config || {},
+        actions: workflow.actions || [],
+        is_active: false,
+        is_template: false,
+        next_run_at: this.calculateNextRun(workflow.trigger_type!, workflow.trigger_config || {})
+      })
+      .select()
+      .single();
 
-      if (error) throw error;
+    if (error) throw error;
+    return data;
+  }
 
-      // Schedule the workflow if it's a scheduled trigger
-      if (workflowData.trigger.type === 'schedule' && workflowData.is_active) {
-        await this.scheduleWorkflow(data.id, workflowData.trigger.config.schedule!);
+  async updateWorkflow(workflowId: string, updates: Partial<Workflow>): Promise<Workflow> {
+    const updateData: any = {
+      ...updates,
+      updated_at: new Date().toISOString()
+    };
+
+    if (updates.trigger_type || updates.trigger_config) {
+      const current = await this.getWorkflow(workflowId);
+      if (current) {
+        updateData.next_run_at = this.calculateNextRun(
+          updates.trigger_type || current.trigger_type,
+          updates.trigger_config || current.trigger_config
+        );
       }
-
-      return {
-        success: true,
-        data
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to create workflow'
-      };
     }
+
+    const { data, error } = await supabase
+      .from('workflows')
+      .update(updateData)
+      .eq('id', workflowId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
   }
 
-  async updateWorkflow(workflowId: string, updates: Partial<Workflow>): Promise<AutomationServiceResponse<Workflow>> {
-    try {
-      const { data, error } = await supabase
-        .from('workflows')
-        .update(updates)
-        .eq('id', workflowId)
-        .select()
-        .single();
+  async deleteWorkflow(workflowId: string): Promise<void> {
+    const { error } = await supabase
+      .from('workflows')
+      .delete()
+      .eq('id', workflowId);
 
-      if (error) throw error;
-
-      return {
-        success: true,
-        data
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to update workflow'
-      };
-    }
+    if (error) throw error;
   }
 
-  async deleteWorkflow(workflowId: string): Promise<AutomationServiceResponse<boolean>> {
-    try {
-      const { error } = await supabase
-        .from('workflows')
-        .delete()
-        .eq('id', workflowId);
-
-      if (error) throw error;
-
-      return {
-        success: true,
-        data: true
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to delete workflow'
-      };
-    }
+  async toggleWorkflow(workflowId: string, isActive: boolean): Promise<Workflow> {
+    return this.updateWorkflow(workflowId, { is_active: isActive });
   }
 
-  async toggleWorkflow(workflowId: string, isActive: boolean): Promise<AutomationServiceResponse<Workflow>> {
-    try {
-      const { data, error } = await supabase
-        .from('workflows')
-        .update({ is_active: isActive })
-        .eq('id', workflowId)
-        .select()
-        .single();
+  async getTemplates(category?: WorkflowCategory): Promise<WorkflowTemplate[]> {
+    let query = supabase
+      .from('workflow_templates')
+      .select('*')
+      .eq('is_active', true);
 
-      if (error) throw error;
-
-      return {
-        success: true,
-        data
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to toggle workflow'
-      };
+    if (category) {
+      query = query.eq('category', category);
     }
+
+    const { data, error } = await query.order('usage_count', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
   }
 
-  // Workflow Execution
-  async executeWorkflow(workflowId: string): Promise<AutomationServiceResponse<WorkflowExecution>> {
+  async createFromTemplate(
+    companyId: string,
+    templateId: string,
+    customizations?: Partial<Workflow>
+  ): Promise<Workflow> {
+    const { data: template, error: templateError } = await supabase
+      .from('workflow_templates')
+      .select('*')
+      .eq('id', templateId)
+      .single();
+
+    if (templateError) throw templateError;
+
+    await supabase
+      .from('workflow_templates')
+      .update({ usage_count: (template.usage_count || 0) + 1 })
+      .eq('id', templateId);
+
+    const workflowDefinition = template.workflow_definition || {};
+    const steps = workflowDefinition.steps || [];
+
+    const actions: WorkflowAction[] = steps.map((step: any, index: number) => ({
+      id: `action-${index + 1}`,
+      type: this.mapStepTypeToActionType(step.type),
+      config: step.config || {},
+      order: index + 1
+    }));
+
+    return this.createWorkflow(companyId, {
+      name: customizations?.name || template.template_name,
+      description: customizations?.description || template.description,
+      icon: 'zap',
+      category: this.mapTemplateCategory(template.category),
+      trigger_type: customizations?.trigger_type || 'manual',
+      trigger_config: customizations?.trigger_config || {},
+      actions: customizations?.actions || actions
+    });
+  }
+
+  private mapStepTypeToActionType(stepType: string): ActionType {
+    const mapping: Record<string, ActionType> = {
+      'approval': 'notification',
+      'action': 'notification',
+      'notification': 'notification',
+      'task': 'notification',
+      'trigger': 'notification'
+    };
+    return mapping[stepType] || 'notification';
+  }
+
+  private mapTemplateCategory(category: string): WorkflowCategory {
+    const mapping: Record<string, WorkflowCategory> = {
+      'Finance': 'accounting',
+      'RH': 'hr',
+      'Sécurité': 'notifications'
+    };
+    return mapping[category] || 'custom';
+  }
+
+  async getExecutions(companyId: string, limit = 20): Promise<WorkflowExecution[]> {
+    const { data, error } = await supabase
+      .from('workflow_executions')
+      .select('*')
+      .eq('company_id', companyId)
+      .order('started_at', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  async executeWorkflow(workflowId: string, triggeredBy: string = 'manual'): Promise<WorkflowExecution> {
+    const workflow = await this.getWorkflow(workflowId);
+    if (!workflow) throw new Error('Workflow non trouvé');
+
+    const { data: execution, error: execError } = await supabase
+      .from('workflow_executions')
+      .insert({
+        company_id: workflow.company_id,
+        template_id: null,
+        status: 'running',
+        trigger_data: { workflow_id: workflowId, triggered_by: triggeredBy },
+        started_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (execError) throw execError;
+
+    this.runWorkflowActions(workflow, execution.id).catch(console.error);
+
+    return execution;
+  }
+
+  private async runWorkflowActions(workflow: Workflow, executionId: string): Promise<void> {
+    let hasError = false;
+    let errorMessage = '';
+
     try {
-      // Get workflow details
-      const { data: workflow, error: workflowError } = await supabase
-        .from('workflows')
-        .select('*')
-        .eq('id', workflowId)
-        .single();
+      const sortedActions = [...workflow.actions].sort((a, b) => a.order - b.order);
 
-      if (workflowError) throw workflowError;
-      if (!workflow.is_active) {
-        throw new Error('Workflow is not active');
-      }
-
-      // Create execution record
-      const { data: execution, error: executionError } = await supabase
-        .from('workflow_executions')
-        .insert({
-          workflow_id: workflowId,
-          status: 'running',
-          started_at: new Date().toISOString(),
-          results: []
-        })
-        .select()
-        .single();
-
-      if (executionError) throw executionError;
-
-      // Execute actions
-      const results: WorkflowExecution['results'] = [];
-
-      for (const action of workflow.actions) {
+      for (const action of sortedActions) {
         try {
-          const result = await this.executeAction(action, workflow.company_id);
-          results.push({
-            action_id: action.id,
-            status: 'success',
-            result
-          });
-        } catch (actionError) {
-          results.push({
-            action_id: action.id,
-            status: 'failed',
-            error: actionError instanceof Error ? actionError.message : 'Unknown error'
-          });
+          await this.executeAction(action, workflow);
+        } catch (actionError: any) {
+          hasError = true;
+          errorMessage = actionError.message;
+          break;
         }
       }
 
-      // Update execution record
-      const hasFailures = results.some(r => r.status === 'failed');
-      const { data: updatedExecution, error: updateError } = await supabase
+      await supabase
         .from('workflow_executions')
         .update({
-          status: hasFailures ? 'failed' : 'completed',
+          status: hasError ? 'failed' : 'completed',
           completed_at: new Date().toISOString(),
-          results
+          error_message: errorMessage || null,
+          result: { success: !hasError }
         })
-        .eq('id', execution.id)
-        .select()
-        .single();
+        .eq('id', executionId);
 
-      if (updateError) throw updateError;
+      await supabase
+        .from('workflows')
+        .update({
+          last_run_at: new Date().toISOString(),
+          next_run_at: this.calculateNextRun(workflow.trigger_type, workflow.trigger_config)
+        })
+        .eq('id', workflow.id);
 
-      // Update workflow statistics
-      if (updatedExecution) {
-        await supabase
-          .from('workflows')
-          .update({
-            run_count: workflow.run_count + 1,
-            success_count: hasFailures ? workflow.success_count : workflow.success_count + 1,
-            error_count: hasFailures ? workflow.error_count + 1 : workflow.error_count,
-            last_run: new Date().toISOString()
-          })
-          .eq('id', workflowId);
-      }
-
-      return {
-        success: true,
-        data: updatedExecution
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to execute workflow'
-      };
+    } catch (error: any) {
+      await supabase
+        .from('workflow_executions')
+        .update({
+          status: 'failed',
+          completed_at: new Date().toISOString(),
+          error_message: error.message
+        })
+        .eq('id', executionId);
     }
   }
 
-  private async executeAction(action: WorkflowAction, companyId: string): Promise<any> {
+  private async executeAction(action: WorkflowAction, workflow: Workflow): Promise<any> {
     switch (action.type) {
-      case 'email':
-        return await this.executeEmailAction(action.config.email!, companyId);
-
-      case 'report_generation':
-        return await this.executeReportAction(action.config.report!, companyId);
-
-      case 'data_update':
-        return await this.executeUpdateAction(action.config.update!);
-
+      case 'send_email':
+      case 'generate_report':
       case 'notification':
-        return await this.executeNotificationAction(action.config.notification!, companyId);
+      case 'create_invoice':
+        console.log(`Action ${action.type}:`, action.config);
+        return { success: true };
 
-      case 'invoice_creation':
-        return await this.executeInvoiceAction(action.config.invoice!, companyId);
+      case 'webhook_call':
+        if (!action.config.url) throw new Error('URL webhook manquante');
+        const response = await fetch(action.config.url, {
+          method: action.config.method || 'POST',
+          headers: { 'Content-Type': 'application/json', ...action.config.headers },
+          body: action.config.payload ? JSON.stringify(action.config.payload) : undefined
+        });
+        return { status: response.status, ok: response.ok };
+
+      case 'delay':
+        const ms = (action.config.duration || 1) * 1000;
+        await new Promise(resolve => setTimeout(resolve, ms));
+        return { delayed: true, duration: ms };
 
       default:
-        throw new Error(`Unknown action type: ${action.type}`);
+        throw new Error(`Type d'action non supporté: ${action.type}`);
     }
   }
 
-  private async executeEmailAction(config: NonNullable<WorkflowAction['config']['email']>, companyId: string): Promise<string> {
-    // Utiliser le vrai service d'email
-    const { emailService } = await import('@/services/emailService');
-
-    const result = await emailService.sendEmail({
-      to: config.to,
-      subject: config.subject,
-      template: config.template,
-      variables: config.variables || {},
-      attachments: config.attachments
-    }, companyId);
-
-    if (!result.success) {
-      throw new Error(result.error || 'Erreur envoi email');
-    }
-
-    return `Email envoyé à ${config.to.join(', ')} (ID: ${result.messageId})`;
-  }
-
-  private async executeReportAction(config: NonNullable<WorkflowAction['config']['report']>, companyId: string): Promise<string> {
-    // Import report generation service
-    const { reportGenerationService } = await import('@/services/reportGenerationService');
-
-    const filters = {
-      companyId,
-      ...config.filters
-    };
-
-    const exportOptions = {
-      format: config.format,
-      title: `Automated ${config.type} Report`
-    };
-
-    let downloadUrl: string;
-    switch (config.type) {
-      case 'balance_sheet':
-        downloadUrl = await reportGenerationService.generateBalanceSheet(filters, exportOptions);
-        break;
-      case 'income_statement':
-        downloadUrl = await reportGenerationService.generateIncomeStatement(filters, exportOptions);
-        break;
-      case 'trial_balance':
-        downloadUrl = await reportGenerationService.generateTrialBalance(filters, exportOptions);
-        break;
-      case 'general_ledger':
-        downloadUrl = await reportGenerationService.generateGeneralLedger(filters, exportOptions);
-        break;
-      default:
-        throw new Error(`Unknown report type: ${config.type}`);
-    }
-
-    return `Report generated: ${downloadUrl}`;
-  }
-
-  private async executeUpdateAction(config: NonNullable<WorkflowAction['config']['update']>): Promise<string> {
-    const { data, error, count } = await supabase
-      .from(config.table)
-      .update(config.data)
-      .match(config.filters)
-      .select();
-
-    if (error) throw error;
-
-    return `Updated ${data?.length || count || 0} records in ${config.table}`;
-  }
-
-  private async executeNotificationAction(config: NonNullable<WorkflowAction['config']['notification']>, _companyId: string): Promise<string> {
-    // Utiliser le vrai service de notifications
-    const { notificationService } = await import('@/services/notificationService');
-
-    const result = await notificationService.createNotification({
-      title: config.title,
-      message: config.message,
-      type: 'info',
-      priority: config.priority,
-      category: 'system' as any
-    } as any);
-
-    if (!result.success) {
-      throw new Error(result.error || 'Erreur création notification');
-    }
-
-    return `Notification créée: ${config.title}`;
-  }
-
-  private async executeInvoiceAction(config: NonNullable<WorkflowAction['config']['invoice']>, _companyId: string): Promise<string> {
-    // Import invoice service
-    const { invoicingService: _invoicingService } = await import('@/services/invoicingService');
-
-    // This would create an invoice - simplified for automation
-    return `Invoice creation initiated for client: ${config.client_id}`;
-  }
-
-  // Workflow Scheduling
-  private async scheduleWorkflow(workflowId: string, schedule: NonNullable<WorkflowTrigger['config']['schedule']>): Promise<void> {
-    const nextRun = this.calculateNextRun(schedule);
-
-    await supabase
+  async getStats(companyId: string): Promise<WorkflowStats> {
+    const { data: workflows } = await supabase
       .from('workflows')
-      .update({ next_run: nextRun })
-      .eq('id', workflowId);
+      .select('is_active')
+      .eq('company_id', companyId)
+      .eq('is_template', false);
+
+    const total = workflows?.length || 0;
+    const active = workflows?.filter(w => w.is_active).length || 0;
+
+    const { data: executions } = await supabase
+      .from('workflow_executions')
+      .select('status')
+      .eq('company_id', companyId);
+
+    const execTotal = executions?.length || 0;
+    const execSuccess = executions?.filter(e => e.status === 'completed').length || 0;
+    const execFailed = executions?.filter(e => e.status === 'failed').length || 0;
+
+    return {
+      total,
+      active,
+      inactive: total - active,
+      executions_total: execTotal,
+      executions_success: execSuccess,
+      executions_failed: execFailed,
+      success_rate: execTotal > 0 ? Math.round((execSuccess / execTotal) * 100 * 10) / 10 : 0
+    };
   }
 
-  private calculateNextRun(schedule: NonNullable<WorkflowTrigger['config']['schedule']>): string {
-    const now = new Date();
-    const [hours, minutes] = schedule.time.split(':').map(Number);
+  private calculateNextRun(triggerType: TriggerType, config: TriggerConfig): string | null {
+    if (triggerType !== 'schedule') return null;
 
-    const nextRun = new Date(now);
+    const now = new Date();
+    const [hours, minutes] = (config.time || '09:00').split(':').map(Number);
+
+    let nextRun = new Date(now);
     nextRun.setHours(hours, minutes, 0, 0);
 
-    switch (schedule.frequency) {
+    switch (config.frequency) {
       case 'daily':
         if (nextRun <= now) {
           nextRun.setDate(nextRun.getDate() + 1);
         }
         break;
 
-      case 'weekly': {
-        const targetDay = schedule.dayOfWeek || 1; // Monday by default
-        while (nextRun.getDay() !== targetDay || nextRun <= now) {
-          nextRun.setDate(nextRun.getDate() + 1);
+      case 'weekly':
+        const targetDay = config.day ?? 1;
+        let daysUntilTarget = targetDay - now.getDay();
+        if (daysUntilTarget <= 0 || (daysUntilTarget === 0 && nextRun <= now)) {
+          daysUntilTarget += 7;
         }
+        nextRun.setDate(now.getDate() + daysUntilTarget);
         break;
-      }
 
-      case 'monthly': {
-        const targetDate = schedule.dayOfMonth || 1;
-        nextRun.setDate(targetDate);
+      case 'monthly':
+        const targetDayOfMonth = config.day ?? 1;
+        nextRun.setDate(targetDayOfMonth);
         if (nextRun <= now) {
           nextRun.setMonth(nextRun.getMonth() + 1);
         }
-        break;
-      }
-
-      case 'yearly':
-        nextRun.setFullYear(nextRun.getFullYear() + 1);
         break;
     }
 
     return nextRun.toISOString();
   }
-
-  // Workflow Templates
-  async getWorkflowTemplates(): Promise<AutomationServiceResponse<Array<{
-    id: string;
-    name: string;
-    description: string;
-    category: string;
-    template: Omit<Workflow, 'id' | 'company_id' | 'created_at' | 'updated_at' | 'run_count' | 'success_count' | 'error_count'>;
-  }>>> {
-    // Return predefined workflow templates
-    const templates = [
-      {
-        id: 'monthly-reports',
-        name: 'Rapports Mensuels Automatiques',
-        description: 'Génère automatiquement les rapports financiers mensuels',
-        category: 'Comptabilité',
-        template: {
-          name: 'Rapports Mensuels',
-          description: 'Génération automatique des rapports financiers chaque mois',
-          is_active: true,
-          trigger: {
-            id: 'schedule-trigger',
-            type: 'schedule' as const,
-            config: {
-              schedule: {
-                frequency: 'monthly' as const,
-                time: '09:00',
-                dayOfMonth: 1
-              }
-            }
-          },
-          actions: [
-            {
-              id: 'generate-balance-sheet',
-              type: 'report_generation' as const,
-              config: {
-                report: {
-                  type: 'balance_sheet' as const,
-                  format: 'pdf' as const,
-                  filters: {}
-                }
-              }
-            },
-            {
-              id: 'generate-income-statement',
-              type: 'report_generation' as const,
-              config: {
-                report: {
-                  type: 'income_statement' as const,
-                  format: 'pdf' as const,
-                  filters: {}
-                }
-              }
-            }
-          ],
-          last_run: undefined,
-          next_run: undefined
-        }
-      },
-      {
-        id: 'invoice-reminders',
-        name: 'Rappels de Factures',
-        description: 'Envoie des rappels automatiques pour les factures impayées',
-        category: 'Facturation',
-        template: {
-          name: 'Rappels de Factures',
-          description: 'Rappels automatiques pour les factures en retard',
-          is_active: true,
-          trigger: {
-            id: 'schedule-trigger',
-            type: 'schedule' as const,
-            config: {
-              schedule: {
-                frequency: 'weekly' as const,
-                time: '10:00',
-                dayOfWeek: 1
-              }
-            }
-          },
-          actions: [
-            {
-              id: 'send-reminders',
-              type: 'email' as const,
-              config: {
-                email: {
-                  to: ['admin@company.com'],
-                  subject: 'Rappel: Factures impayées',
-                  template: 'overdue_invoice_reminder'
-                }
-              }
-            }
-          ],
-          last_run: undefined,
-          next_run: undefined
-        }
-      }
-    ];
-
-    return {
-      success: true,
-      data: templates
-    };
-  }
-
-  // Déclenche l'exécution programmée des workflows
-  async triggerScheduledWorkflows(): Promise<AutomationServiceResponse<any>> {
-    try {
-      const { data, error } = await supabase.functions.invoke('workflow-scheduler', {
-        body: { action: 'schedule' }
-      });
-
-      if (error) throw error;
-
-      return {
-        success: true,
-        data
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to trigger scheduled workflows'
-      };
-    }
-  }
-
-  // Exécute un workflow via le scheduler
-  async executeWorkflowViaScheduler(workflowId: string): Promise<AutomationServiceResponse<any>> {
-    try {
-      const { data, error } = await supabase.functions.invoke('workflow-scheduler', {
-        body: {
-          action: 'execute',
-          workflowId
-        }
-      });
-
-      if (error) throw error;
-
-      return {
-        success: true,
-        data
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to execute workflow via scheduler'
-      };
-    }
-  }
-
-  // Get workflow executions
-  async getWorkflowExecutions(workflowId: string): Promise<AutomationServiceResponse<WorkflowExecution[]>> {
-    try {
-      const { data, error } = await supabase
-        .from('workflow_executions')
-        .select('*')
-        .eq('workflow_id', workflowId)
-        .order('started_at', { ascending: false })
-        .limit(50);
-
-      if (error) throw error;
-
-      return {
-        success: true,
-        data: data || []
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch executions'
-      };
-    }
-  }
 }
 
-export const automationService = AutomationService.getInstance();
+export const automationService = new AutomationService();

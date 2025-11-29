@@ -1,4 +1,16 @@
 /**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
+/**
  * Sidebar "Floating Cards" - Design moderne avec glassmorphism
  * Support des favoris, récents, badges de notification et recherche
  */
@@ -12,7 +24,7 @@ import {
   LayoutDashboard, Calculator, Receipt, Landmark, TrendingUp, Scale,
   Handshake, FileSignature, ShoppingCart, Package, FolderKanban,
   Building, UserCog, BarChart3, Zap, Search, Pin, PinOff,
-  ChevronDown, Sparkles
+  ChevronDown, Sparkles, Shield
 } from 'lucide-react';
 
 interface MenuItem {
@@ -167,6 +179,17 @@ export const Sidebar: React.FC = () => {
         { id: 'reports', label: t('sidebar.reports', 'Rapports'), icon: <BarChart3 size={20} />, path: '/reports' },
         { id: 'automation', label: t('sidebar.automation', 'Automatisation'), icon: <Zap size={20} />, path: '/automation' },
       ]
+    },
+    {
+      id: 'admin',
+      label: t('sidebar.admin', 'Administration'),
+      emoji: '🔒',
+      gradient: 'from-red-400 to-rose-500',
+      bgLight: 'bg-red-50 dark:bg-red-900/20',
+      bgLightHover: 'hover:bg-red-50 dark:hover:bg-red-900/10',
+      items: [
+        { id: 'audit-logs', label: t('sidebar.audit_logs', 'Logs d\'Audit'), icon: <Shield size={20} />, path: '/admin/audit-logs' },
+      ]
     }
   ];
 
@@ -211,8 +234,16 @@ export const Sidebar: React.FC = () => {
       {/* Logo */}
       <div className="p-6 pb-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
-            <span className="text-white font-bold text-2xl">C</span>
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center overflow-hidden">
+            <img
+              src="/icons/icon-512.png"
+              alt="CassKai Logo"
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                // Fallback vers icon-192 si icon-512 échoue
+                e.currentTarget.src = '/icons/icon-192.png';
+              }}
+            />
           </div>
           <div>
             <h1 className="font-bold text-xl text-gray-800 dark:text-white">CassKai</h1>
@@ -379,7 +410,7 @@ export const Sidebar: React.FC = () => {
       <div className="p-4 border-t border-gray-100 dark:border-gray-700/50 bg-white/50 dark:bg-gray-900/50">
         <button
           type="button"
-          onClick={() => navigate('/settings/billing')}
+          onClick={() => navigate('/billing')}
           className="w-full py-3.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white rounded-2xl font-semibold shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
         >
           <Sparkles className="h-5 w-5" />

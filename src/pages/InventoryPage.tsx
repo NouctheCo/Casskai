@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import InventoryHeader from '@/components/inventory/InventoryHeader';
@@ -35,11 +47,11 @@ export default function InventoryPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="products">Produits</TabsTrigger>
-          <TabsTrigger value="movements">Mouvements</TabsTrigger>
-          <TabsTrigger value="production">Production</TabsTrigger>
-          <TabsTrigger value="suppliers">Fournisseurs</TabsTrigger>
-          <TabsTrigger value="alerts">Alertes</TabsTrigger>
+          <TabsTrigger value="products">t("inventorypage.produits")</TabsTrigger>
+          <TabsTrigger value="movements">t("inventorypage.mouvements")</TabsTrigger>
+          <TabsTrigger value="production">t("inventorypage.production")</TabsTrigger>
+          <TabsTrigger value="suppliers">t("inventorypage.fournisseurs")</TabsTrigger>
+          <TabsTrigger value="alerts">t("inventorypage.alertes")</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard">
@@ -71,3 +83,4 @@ export default function InventoryPage() {
     </div>
   );
 }
+

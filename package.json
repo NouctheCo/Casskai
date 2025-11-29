@@ -4,12 +4,16 @@
   "version": "1.0.0",
   "type": "module",
   "description": "CassKai® - Plateforme de gestion financière tout-en-un pour PME et indépendants",
-  "author": "Noutche Conseil SAS <contact@casskai.fr>",
-  "license": "MIT",
+  "author": {
+    "name": "NOUTCHE CONSEIL",
+    "email": "contact@casskai.app",
+    "url": "https://casskai.app"
+  },
+  "license": "UNLICENSED",
   "homepage": "https://casskai.app",
   "repository": {
     "type": "git",
-    "url": "https://github.com/votre-username/casskai.git"
+    "url": "private"
   },
   "engines": {
     "node": ">=18.0.0",

@@ -395,19 +395,19 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
       <div className="grid grid-cols-4 gap-4">
         <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
           <div className="text-2xl font-bold text-yellow-600">{pendingCount}</div>
-          <div className="text-sm text-yellow-700">{t('pending', 'En attente')}</div>
+          <div className="text-sm text-yellow-700">{t('common.pending', 'En attente')}</div>
         </div>
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
           <div className="text-2xl font-bold text-blue-600">{suggestedCount}</div>
-          <div className="text-sm text-blue-700">{t('suggested', 'Suggestions')}</div>
+          <div className="text-sm text-blue-700">{t('common.suggested', 'Suggestions')}</div>
         </div>
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
           <div className="text-2xl font-bold text-green-600">{categorizedCount}</div>
-          <div className="text-sm text-green-700">{t('categorized', 'Catégorisées')}</div>
+          <div className="text-sm text-green-700">{t('common.categorized', 'Catégorisées')}</div>
         </div>
         <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
           <div className="text-2xl font-bold text-purple-600">{rules.length}</div>
-          <div className="text-sm text-purple-700">{t('rules', 'Règles actives')}</div>
+          <div className="text-sm text-purple-700">{t('common.rules', 'Règles actives')}</div>
         </div>
       </div>
 

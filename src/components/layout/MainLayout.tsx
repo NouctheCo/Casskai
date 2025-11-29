@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import React, { useState, useEffect, useContext } from 'react';
 
 import { Outlet, useLocation } from 'react-router-dom';
@@ -31,6 +43,8 @@ import { NotificationProvider } from '@/components/notifications/NotificationSys
 import { Sidebar } from '@/components/layout/Sidebar';
 
 import { useContextualTheme } from '@/hooks/useContextualTheme';
+
+import { AIAssistant } from '@/components/ai/AIAssistant';
 
 
 
@@ -272,6 +286,9 @@ export function MainLayout() {
               </div>
             </main>
           </div>
+
+          {/* Assistant IA - Floating button accessible partout */}
+          {showSidebar && <AIAssistant />}
         </div>
       </NotificationProvider>
     </AnalyticsProvider>

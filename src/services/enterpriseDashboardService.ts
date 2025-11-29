@@ -1,7 +1,20 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 // Service corrigé pour le dashboard enterprise de CassKai
 // Utilise des calculs dynamiques au lieu de fonctions RPC inexistantes
 import { supabase } from '@/lib/supabase';
 import { financialHealthService } from './financialHealthService';
+import { logger } from '@/utils/logger';
 import type {
   EnterpriseDashboardData,
   BudgetData,
@@ -12,15 +25,15 @@ import type {
   RealTimeUpdate
 } from '@/types/enterprise-dashboard.types';
 
-export class EnterpriseDashboardServiceFixed {
-  private static instance: EnterpriseDashboardServiceFixed;
+export class EnterpriseDashboardService {
+  private static instance: EnterpriseDashboardService;
   private subscriptions: Map<string, { unsubscribe: () => void }> = new Map();
 
-  static getInstance(): EnterpriseDashboardServiceFixed {
-    if (!EnterpriseDashboardServiceFixed.instance) {
-      EnterpriseDashboardServiceFixed.instance = new EnterpriseDashboardServiceFixed();
+  static getInstance(): EnterpriseDashboardService {
+    if (!EnterpriseDashboardService.instance) {
+      EnterpriseDashboardService.instance = new EnterpriseDashboardService();
     }
-    return EnterpriseDashboardServiceFixed.instance;
+    return EnterpriseDashboardService.instance;
   }
 
   /**
@@ -36,7 +49,7 @@ export class EnterpriseDashboardServiceFixed {
 
       // Si pas de santé financière calculée, cela signifie qu'il n'y a pas de données
       if (!financialHealth) {
-        console.log('No financial data available for company:', companyId);
+        logger.debug('EnterpriseDashboard: No financial data available', { companyId });
         return { data: null, error: 'No financial data available' };
       }
 
@@ -83,7 +96,7 @@ export class EnterpriseDashboardServiceFixed {
       return { data: dashboardData, error: null };
 
     } catch (error) {
-      console.error('Error in getDashboardData:', error instanceof Error ? error.message : String(error));
+      logger.error('EnterpriseDashboard: Error in getDashboardData', error, { companyId, filters });
       return { data: null, error };
     }
   }
@@ -96,7 +109,7 @@ export class EnterpriseDashboardServiceFixed {
       const healthScore = await financialHealthService.calculateHealthScore(companyId);
       return { data: healthScore, error: null };
     } catch (error) {
-      console.error('Error calculating financial health:', error instanceof Error ? error.message : String(error));
+      logger.error('EnterpriseDashboard: Error calculating financial health', error, { companyId });
       return { data: null, error };
     }
   }
@@ -141,4 +154,4 @@ export class EnterpriseDashboardServiceFixed {
 }
 
 // Export de l'instance singleton
-export const enterpriseDashboardServiceFixed = EnterpriseDashboardServiceFixed.getInstance();
+export const enterpriseDashboardService = EnterpriseDashboardService.getInstance();

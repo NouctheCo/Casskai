@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import React, { useState, useEffect } from 'react';
 
 import { useTranslation } from 'react-i18next';
@@ -154,7 +166,7 @@ export default function PurchasesPage() {
 
       console.error('Error loading purchases:', error);
 
-      toastError(error instanceof Error ? error.message : 'Erreur lors du chargement des achats');
+      toastError(error instanceof Error ? error.message : t('purchases.notifications.loadError'));
 
     } finally {
 
@@ -244,13 +256,13 @@ export default function PurchasesPage() {
 
       
 
-      toastSuccess('Rapport PDF généré avec succès');
+      toastSuccess(t('purchases.notifications.generateReportSuccess'));
 
     } catch (error) {
 
       console.error('Error generating PDF:', error);
 
-      toastError('Erreur lors de la génération du PDF');
+      toastError(t('purchases.notifications.generateReportError'));
 
     }
 
@@ -518,7 +530,7 @@ export default function PurchasesPage() {
 
             <p className="text-sm text-gray-500">
 
-              Veuillez sélectionner une entreprise pour accéder à la gestion des achats.
+              t('purchases.noCompanySelectedDescription')
 
             </p>
 
@@ -584,7 +596,7 @@ export default function PurchasesPage() {
 
             <Badge variant="secondary" className="text-xs">
 
-              En temps réel
+              t('purchases.status.realTime')
 
             </Badge>
 
@@ -610,7 +622,7 @@ export default function PurchasesPage() {
 
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
 
-            Actualiser
+            t('purchases.actions.refresh')
 
           </Button>
 
@@ -787,3 +799,4 @@ export default function PurchasesPage() {
   );
 
 }
+

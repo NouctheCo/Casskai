@@ -21,7 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs as _Tabs, TabsContent as _TabsContent, TabsList as _TabsList, TabsTrigger as _TabsTrigger } from '@/components/ui/tabs';
 import { useEnterprise } from '@/contexts/EnterpriseContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { enterpriseDashboardServiceFixed as enterpriseDashboardService } from '@/services/enterpriseDashboardServiceFixed';
+import { enterpriseDashboardService } from '@/services/enterpriseDashboardService';
 import { useNavigate } from 'react-router-dom';
 import type {
   EnterpriseDashboardData,

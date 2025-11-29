@@ -1,4 +1,17 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 /**
  * Types d'actions pour l'audit trail
@@ -160,11 +173,11 @@ class AuditService {
         .insert(enrichedEntry);
 
       if (error) {
-        console.error('[AuditService] Failed to log audit entry:', error);
+        logger.error('AuditService: Failed to log audit entry', error, { enrichedEntry });
       }
     } catch (error) {
       // Ne jamais bloquer l'opération principale
-      console.error('[AuditService] Exception during audit logging:', error);
+      logger.error('AuditService: Exception during audit logging', error);
     }
   }
 
@@ -232,13 +245,13 @@ class AuditService {
       const { data, error } = await query;
 
       if (error) {
-        console.error('[AuditService] Error fetching company logs:', error);
+        logger.error('AuditService: Error fetching company logs', error, { companyId, options });
         throw error;
       }
 
       return data || [];
     } catch (error) {
-      console.error('[AuditService] Exception fetching company logs:', error);
+      logger.error('AuditService: Exception fetching company logs', error, { companyId });
       throw error;
     }
   }
@@ -260,13 +273,13 @@ class AuditService {
         .limit(limit);
 
       if (error) {
-        console.error('[AuditService] Error fetching user logs:', error);
+        logger.error('AuditService: Error fetching user logs', error, { userId, limit });
         throw error;
       }
 
       return data || [];
     } catch (error) {
-      console.error('[AuditService] Exception fetching user logs:', error);
+      logger.error('AuditService: Exception fetching user logs', error, { userId });
       throw error;
     }
   }
@@ -292,13 +305,13 @@ class AuditService {
         .order('event_timestamp', { ascending: false });
 
       if (error) {
-        console.error('[AuditService] Error fetching sensitive logs:', error);
+        logger.error('AuditService: Error fetching sensitive logs', error, { companyId, options });
         throw error;
       }
 
       return data || [];
     } catch (error) {
-      console.error('[AuditService] Exception fetching sensitive logs:', error);
+      logger.error('AuditService: Exception fetching sensitive logs', error, { companyId });
       throw error;
     }
   }
@@ -356,7 +369,7 @@ class AuditService {
         sensitive_count: sensitiveCount
       };
     } catch (error) {
-      console.error('[AuditService] Exception fetching audit stats:', error);
+      logger.error('AuditService: Exception fetching audit stats', error, { companyId });
       throw error;
     }
   }

@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import React, { useState, useCallback, useMemo } from 'react';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -868,7 +880,7 @@ export default function ProjectsPage() {
 
                   <option>{t('projectspage.en_prparation', { defaultValue: 'En préparation' })}</option>
 
-                  <option>{t('projectspage.en_cours', { defaultValue: 'En cours' })}</option>
+                  <option>{t('projectspage.en_cours', { defaultValue: t('projectspage.status.inProgress') })}</option>
 
                   <option>{t('projectspage.en_pause', { defaultValue: 'En pause' })}</option>
 
@@ -902,21 +914,21 @@ export default function ProjectsPage() {
 
           <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
 
-            <TabsTrigger value="dashboard">Tableau de bord</TabsTrigger>
+            <TabsTrigger value="dashboard">{t("projectspage.tabs.dashboard")}</TabsTrigger>
 
-            <TabsTrigger value="projects">Projets</TabsTrigger>
+            <TabsTrigger value="projects">{t("projectspage.tabs.projects")}</TabsTrigger>
 
-            <TabsTrigger value="tasks">Tâches</TabsTrigger>
+            <TabsTrigger value="tasks">{t("projectspage.tabs.tasks")}</TabsTrigger>
 
-            <TabsTrigger value="resources">Ressources</TabsTrigger>
+            <TabsTrigger value="resources">{t("projectspage.tabs.resources")}</TabsTrigger>
 
-            <TabsTrigger value="timesheets">Temps</TabsTrigger>
+            <TabsTrigger value="timesheets">{t("projectspage.tabs.time")}</TabsTrigger>
 
-            <TabsTrigger value="billing">Facturation</TabsTrigger>
+            <TabsTrigger value="billing">{t("projectspage.tabs.billing")}</TabsTrigger>
 
-            <TabsTrigger value="gantt">Gantt</TabsTrigger>
+            <TabsTrigger value="gantt">{t("projectspage.tabs.gantt")}</TabsTrigger>
 
-            <TabsTrigger value="reports">Rapports</TabsTrigger>
+            <TabsTrigger value="reports">{t("projectspage.tabs.reports")}</TabsTrigger>
 
           </TabsList>
 
@@ -936,7 +948,7 @@ export default function ProjectsPage() {
 
                     <Briefcase className="h-4 w-4 text-blue-500" />
 
-                    <span className="text-sm font-medium">Projets total</span>
+                    <span className="text-sm font-medium">{t("projectspage.metrics.totalProjects")}</span>
 
                   </div>
 
@@ -958,7 +970,7 @@ export default function ProjectsPage() {
 
                     <DollarSign className="h-4 w-4 text-green-500" />
 
-                    <span className="text-sm font-medium">Revenus</span>
+                    <span className="text-sm font-medium">{t("projectspage.metrics.revenue")}</span>
 
                   </div>
 
@@ -980,7 +992,7 @@ export default function ProjectsPage() {
 
                     <Target className="h-4 w-4 text-orange-500" />
 
-                    <span className="text-sm font-medium">Progression</span>
+                    <span className="text-sm font-medium">{t("projectspage.metrics.progress")}</span>
 
                   </div>
 
@@ -1002,7 +1014,7 @@ export default function ProjectsPage() {
 
                     <Calculator className="h-4 w-4 text-purple-500" />
 
-                    <span className="text-sm font-medium">Budget utilisé</span>
+                    <span className="text-sm font-medium">{t("projectspage.metrics.budgetUsed")}</span>
 
                   </div>
 
@@ -1036,7 +1048,7 @@ export default function ProjectsPage() {
 
                     {[
 
-                      { status: 'En cours', count: computedMetrics.activeProjects, color: 'bg-blue-500' },
+                      { status: t('projectspage.status.inProgress'), count: computedMetrics.activeProjects, color: 'bg-blue-500' },
 
                       { status: 'Terminés', count: computedMetrics.completedProjects, color: 'bg-green-500' },
 
@@ -1114,7 +1126,7 @@ export default function ProjectsPage() {
 
                         <Badge variant={project.status === 'in_progress' ? 'default' : project.status === 'completed' ? 'secondary' : 'outline'}>
 
-                          {project.status === 'in_progress' ? 'En cours' :
+                          {project.status === 'in_progress' ? t('projectspage.status.inProgress') :
 
                            project.status === 'completed' ? 'Terminé' :
 
@@ -1316,7 +1328,7 @@ export default function ProjectsPage() {
 
                           <Badge variant={project.status === 'in_progress' ? 'default' : project.status === 'completed' ? 'secondary' : 'outline'}>
 
-                            {project.status === 'in_progress' ? 'En cours' :
+                            {project.status === 'in_progress' ? t('projectspage.status.inProgress') :
 
                              project.status === 'completed' ? 'Terminé' :
 
@@ -1886,7 +1898,7 @@ export default function ProjectsPage() {
 
                             <Badge variant={project.status === 'completed' ? 'default' : 'outline'}>
 
-                              {project.status === 'completed' ? 'Facturable' : 'En cours'}
+                              {project.status === 'completed' ? 'Facturable' : t('projectspage.status.inProgress')}
 
                             </Badge>
 
@@ -2416,7 +2428,7 @@ export default function ProjectsPage() {
 
                                 <Badge variant={project.status === 'completed' ? 'default' : 'outline'}>
 
-                                  {project.status === 'completed' ? 'Terminé' : 'En cours'}
+                                  {project.status === 'completed' ? 'Terminé' : t('projectspage.status.inProgress')}
 
                                 </Badge>
 
@@ -2630,7 +2642,7 @@ export default function ProjectsPage() {
 
                       <Badge variant={selectedProject.status === 'in_progress' ? 'default' : selectedProject.status === 'completed' ? 'secondary' : 'outline'}>
 
-                        {selectedProject.status === 'in_progress' ? 'En cours' :
+                        {selectedProject.status === 'in_progress' ? t('projectspage.status.inProgress') :
 
                          selectedProject.status === 'completed' ? 'Terminé' :
 
@@ -2833,3 +2845,5 @@ export default function ProjectsPage() {
   );
 
 }
+
+

@@ -436,556 +436,78 @@
   "createAccountDescription": "Créer un nouveau compte dans votre plan comptable",
   "credit": "Crédit",
   "crm": {
-    "action": {
-      "created": "Action créée avec succès",
-      "errors": {
-        "createFailed": "Échec de la création de l'action"
-      },
-      "fields": {
-        "client": "Client",
-        "dueDate": "Date d'échéance",
-        "dueTime": "Heure d'échéance",
-        "notes": "Notes",
-        "opportunity": "Opportunité",
-        "priority": "Priorité",
-        "subject": "Sujet",
-        "type": "Type"
-      },
-      "new": "Nouvelle action",
-      "noClient": "Aucun client",
-      "noOpportunity": "Aucune opportunité",
-      "placeholders": {
-        "notes": "Notes additionnelles",
-        "selectClient": "Sélectionner un client",
-        "selectOpportunity": "Sélectionner une opportunité",
-        "subject": "Objet de l'action"
-      },
-      "sections": {
-        "relations": "Relations",
-        "schedule": "Planification"
-      },
-      "selectClientFirst": "Sélectionnez d'abord un client",
-      "validation": {
-        "subjectRequired": "Le sujet est obligatoire"
-      }
-    },
-    "actionForm": {
-      "assignedTo": "Assigné à",
-      "client": "Client",
-      "contact": "Contact",
-      "createTitle": "Créer une nouvelle action",
-      "description": "Description",
-      "dueDate": "Date d'échéance",
-      "editTitle": "Modifier l'action",
-      "noClient": "Aucun client",
-      "noContact": "Aucun contact",
-      "noOpportunity": "Aucune opportunité",
-      "opportunity": "Opportunité",
-      "outcome": "Résultat",
-      "priority": "Priorité",
-      "selectClient": "Sélectionner un client",
-      "selectContact": "Sélectionner un contact",
-      "selectOpportunity": "Sélectionner une opportunité",
-      "status": "Statut",
-      "title": "Titre",
-      "type": "Type"
-    },
-    "actions": {
-      "addAction": "Nouvelle action",
-      "count": "{count} actions",
-      "create": "Créer une action",
-      "deleteAction": "Supprimer l'action",
-      "description": "Gérez vos activités commerciales",
-      "editAction": "Modifier l'action",
-      "fields": {
-        "assignedTo": "Assigné à",
-        "client": "Client",
-        "dueDate": "Date d'échéance",
-        "dueTime": "Heure",
-        "notes": "Notes",
-        "opportunity": "Opportunité",
-        "priority": "Priorité",
-        "result": "Résultat",
-        "status": "Statut",
-        "subject": "Sujet",
-        "type": "Type"
-      },
-      "noActions": "Aucune action",
-      "noActionsDesc": "Planifiez vos prochaines actions commerciales",
-      "openActions": "Ouvrir les Actions",
-      "overdue": "En retard",
-      "priorities": {
-        "high": "Haute",
-        "low": "Basse",
-        "medium": "Moyenne",
-        "urgent": "Urgente"
-      },
-      "search": "Rechercher une action...",
-      "stats": {
-        "completed": "Terminées",
-        "overdue": "En retard",
-        "planned": "Planifiées",
-        "total": "Total"
-      },
-      "statuses": {
-        "cancelled": "Annulée",
-        "completed": "Terminée",
-        "inProgress": "En cours",
-        "overdue": "En retard",
-        "planned": "Planifiée"
-      },
-      "subtitle": "actions",
-      "title": "Actions Commerciales",
-      "types": {
-        "call": "Appel",
-        "demo": "Démonstration",
-        "email": "Email",
-        "followup": "Relance",
-        "meeting": "Rendez-vous",
-        "proposal": "Envoi proposition",
-        "task": "Tâche"
-      }
-    },
-    "actionsTable": {
-      "assigned": "Assigné",
-      "client": "Client",
-      "contact": "Contact",
-      "dueDate": "Date d'échéance",
-      "priority": "Priorité",
-      "status": "Statut",
-      "title": "Titre",
-      "type": "Type"
-    },
-    "actionStatus": {
-      "cancelled": "Annulée",
-      "completed": "Terminée",
-      "planned": "Planifiée"
-    },
-    "actionTypes": {
-      "call": "Appel",
-      "demo": "Démo",
-      "email": "Email",
-      "meeting": "Réunion",
-      "note": "Note",
-      "proposal": "Proposition",
-      "task": "Tâche"
-    },
-    "client": {
-      "created": "Client créé avec succès",
-      "errors": {
-        "createFailed": "Échec de la création du client"
-      },
-      "fields": {
-        "address": "Adresse",
-        "city": "Ville",
-        "companyName": "Nom de l'entreprise",
-        "country": "Pays",
-        "email": "Email",
-        "notes": "Notes",
-        "phone": "Téléphone",
-        "postalCode": "Code postal",
-        "siret": "SIRET",
-        "type": "Type",
-        "vatNumber": "Numéro de TVA"
-      },
-      "new": "Nouveau client",
-      "placeholders": {
-        "address": "Entrez l'adresse complète",
-        "city": "Entrez la ville",
-        "companyName": "Entrez le nom de l'entreprise",
-        "country": "Entrez le pays",
-        "email": "exemple@email.com",
-        "notes": "Notes supplémentaires",
-        "phone": "+33 1 23 45 67 89",
-        "postalCode": "Ex: 75001",
-        "siret": "Ex: 123 456 789 00010",
-        "vatNumber": "Ex: FR12345678901"
-      },
-      "sections": {
-        "address": "Adresse",
-        "basicInfo": "Informations de base",
-        "contact": "Contact",
-        "legal": "Informations légales"
-      },
-      "types": {
-        "client": "Client",
-        "other": "Autre",
-        "prospect": "Prospect",
-        "supplier": "Fournisseur"
-      },
-      "validation": {
-        "nameRequired": "Le nom est obligatoire"
-      }
-    },
-    "clientForm": {
-      "address": "Adresse",
-      "city": "Ville",
-      "companyName": "Nom de l'entreprise",
-      "companyNamePlaceholder": "Entrez le nom de l'entreprise",
-      "createTitle": "Créer un nouveau client",
-      "editTitle": "Modifier le client",
-      "industry": "Secteur d'activité",
-      "notes": "Notes",
-      "size": "Taille",
-      "status": "Statut",
-      "website": "Site web"
-    },
-    "clients": {
-      "addClient": "Ajouter un client",
-      "count": "{count} clients",
-      "deleteClient": "Supprimer le client",
-      "editClient": "Modifier le client",
-      "fields": {
-        "address": "Adresse",
-        "city": "Ville",
-        "company": "Société",
-        "country": "Pays",
-        "createdAt": "Créé le",
-        "email": "Email",
-        "lastContact": "Dernier contact",
-        "name": "Nom",
-        "phone": "Téléphone",
-        "status": "Statut",
-        "totalRevenue": "CA Total",
-        "type": "Type"
-      },
-      "noClients": "Aucun client",
-      "noClientsDesc": "Commencez par ajouter votre premier client",
-      "openModule": "Ouvrir la Gestion des Clients",
-      "search": "Rechercher un client...",
-      "statuses": {
-        "active": "Actif",
-        "blocked": "Bloqué",
-        "inactive": "Inactif"
-      },
-      "subtitle": "clients",
-      "title": "Gestion des Clients",
-      "types": {
-        "client": "Client",
-        "former": "Ancien client",
-        "lead": "Lead",
-        "prospect": "Prospect"
-      },
-      "viewClient": "Voir le client"
-    },
-    "clientSize": {
-      "large": "Grande",
-      "medium": "Moyenne",
-      "small": "Petite"
-    },
-    "clientsManagement": {
-      "addClient": "Ajouter un client",
-      "addContact": "Ajouter un contact",
-      "clients": "Clients",
-      "contacts": "Contacts",
-      "title": "Gestion des clients"
-    },
-    "clientsTable": {
-      "company": "Entreprise",
-      "contacts": "Contacts",
-      "industry": "Secteur",
-      "location": "Localisation",
-      "revenue": "CA",
-      "size": "Taille",
-      "status": "Statut"
-    },
-    "clientStatus": {
-      "active": "Actif",
-      "inactive": "Inactif",
-      "lost": "Perdu",
-      "prospect": "Prospect"
-    },
-    "contactForm": {
-      "client": "Client",
-      "createTitle": "Créer un nouveau contact",
-      "email": "Email",
-      "firstName": "Prénom",
-      "lastName": "Nom",
-      "phone": "Téléphone",
-      "position": "Poste",
-      "selectClient": "Sélectionner un client"
-    },
-    "contactsTable": {
-      "company": "Entreprise",
-      "created": "Créé le",
-      "email": "Email",
-      "name": "Nom",
-      "phone": "Téléphone",
-      "position": "Poste"
-    },
-    "crmDashboard": {
-      "actions": {
-        "newAction": "Nouvelle action",
-        "newClient": "Nouveau client",
-        "newOpportunity": "Nouvelle opportunité"
-      },
-      "overdue": "en retard",
-      "pending": "en attente",
-      "pipeline": {
-        "avgDeal": "Affaire moy.",
-        "deals": "affaires",
-        "title": "Pipeline des ventes"
-      },
-      "quickActions": "Actions rapides",
-      "recentAct": "Activités récentes",
-      "recentActions": {
-        "title": "Actions récentes"
-      },
-      "recentOp": "Opportunités récentes",
-      "recentOpportunities": {
-        "title": "Opportunités récentes"
-      },
-      "revenue": {
-        "title": "Évolution du chiffre d'affaires",
-        "total": "Total ce mois"
-      },
-      "stats": {
-        "activeOpportunities": "Opportunités actives",
-        "conversionRate": "Taux de conversion",
-        "pipelineValue": "Valeur du pipeline",
-        "totalClients": "Total clients"
-      },
-      "title": "Tableau de bord CRM",
-      "topClients": {
-        "noClients": "Aucun client pour le moment",
-        "t": "Meilleurs clients",
-        "title": "Meilleurs clients"
-      }
-    },
-    "dashboard": {
-      "actions": {
-        "newAction": "Nouvelle Action",
-        "newClient": "Nouveau Client",
-        "newOpportunity": "Nouvelle Opportunité",
-        "newTask": "Nouvelle Tâche"
-      },
-      "completed": "terminées",
-      "overdue": "en retard",
-      "pending": "en attente",
-      "pipeline": {
-        "avgDeal": "Valeur moyenne",
-        "deal": "affaire",
-        "deals": "affaires",
-        "stages": {
-          "closing": "Finalisation",
-          "lost": "Perdue",
-          "negotiation": "Négociation",
-          "proposal": "Proposition",
-          "prospection": "Prospection",
-          "qualification": "Qualification",
-          "won": "Gagnée"
-        },
-        "title": "Pipeline de Ventes",
-        "totalValue": "Valeur totale"
-      },
-      "quickActions": "Actions Rapides",
-      "recentActions": {
-        "noActions": "Aucune action récente",
-        "title": "Actions Récentes",
-        "viewAll": "Voir toutes"
-      },
-      "recentOpportunities": {
-        "noOpportunities": "Aucune opportunité récente",
-        "title": "Opportunités Récentes",
-        "viewAll": "Voir toutes"
-      },
-      "revenue": {
-        "cumulative": "CA Cumulé",
-        "monthly": "CA Mensuel",
-        "title": "Évolution du Chiffre d'Affaires",
-        "total": "Total"
-      },
-      "stats": {
-        "activeOpportunities": "Opportunités Actives",
-        "conversionRate": "Taux de Conversion",
-        "lostThisMonth": "Perdues ce mois",
-        "pipelineValue": "Valeur Pipeline",
-        "totalClients": "Total Clients",
-        "vsLastMonth": "vs mois dernier",
-        "wonThisMonth": "Gagnées ce mois"
-      },
-      "title": "Tableau de bord CRM",
-      "topClients": {
-        "noClients": "Aucun client",
-        "revenue": "CA",
-        "t": "Meilleurs Clients",
-        "title": "Meilleurs Clients",
-        "viewAll": "Voir tous"
-      }
-    },
-    "exportReport": "Rapport Complet",
-    "filters": {
-      "allIndustries": "Tous les secteurs",
-      "allPriorities": "Toutes les priorités",
-      "allSizes": "Toutes les tailles",
-      "allStatuses": "Tous les statuts",
-      "allTypes": "Tous les types",
-      "clear": "Effacer les filtres",
-      "dateFrom": "Date de début",
-      "dateTo": "Date de fin",
-      "industry": "Secteur",
-      "priority": "Priorité",
-      "search": "Recherche",
-      "searchActions": "Rechercher des actions...",
-      "searchPlaceholder": "Rechercher...",
-      "size": "Taille",
-      "status": "Statut",
-      "title": "Filtres",
-      "type": "Type"
-    },
-    "integratedWithSupabase": "Intégré Supabase",
-    "opportunities": {
-      "add": "Ajouter",
-      "addOpportunity": "Nouvelle opportunité",
-      "count": "{count} opportunités",
-      "create": "Créer une opportunité",
-      "deleteOpportunity": "Supprimer l'opportunité",
-      "description": "Suivez vos opportunités commerciales",
-      "editOpportunity": "Modifier l'opportunité",
-      "fields": {
-        "assignedTo": "Assigné à",
-        "client": "Client",
-        "expectedCloseDate": "Date de closing prévue",
-        "name": "Nom de l'opportunité",
-        "notes": "Notes",
-        "probability": "Probabilité",
-        "source": "Source",
-        "stage": "Étape",
-        "value": "Valeur"
-      },
-      "nextAction": "Prochaine action",
-      "noOpportunities": "Aucune opportunité",
-      "noOpportunitiesDesc": "Créez votre première opportunité commerciale",
-      "openPipeline": "Ouvrir le Pipeline",
-      "pipelineValue": "Pipeline: {value}",
-      "search": "Rechercher une opportunité...",
-      "sources": {
-        "coldCall": "Appel à froid",
-        "event": "Événement",
-        "linkedin": "LinkedIn",
-        "other": "Autre",
-        "referral": "Recommandation",
-        "website": "Site web"
-      },
-      "stages": {
-        "closing": "Finalisation",
-        "lead": "Lead",
-        "lost": "Perdue",
-        "negotiation": "Négociation",
-        "proposal": "Proposition",
-        "prospection": "Prospection",
-        "qualification": "Qualification",
-        "qualified": "Qualifié",
-        "won": "Gagnée"
-      },
-      "subtitle": "opportunités",
-      "title": "Gestion des Opportunités"
-    },
-    "opportunity": {
-      "created": "Opportunité créée avec succès",
-      "errors": {
-        "createFailed": "Échec de la création de l'opportunité",
-        "loadClientsFailed": "Échec du chargement des clients"
-      },
-      "fields": {
-        "amount": "Montant",
-        "client": "Client",
-        "expectedCloseDate": "Date de clôture prévue",
-        "notes": "Notes",
-        "priority": "Priorité",
-        "probability": "Probabilité",
-        "stage": "Étape",
-        "title": "Titre",
-        "weightedAmount": "Montant pondéré"
-      },
-      "new": "Nouvelle opportunité",
-      "noClients": "Aucun client disponible",
-      "placeholders": {
-        "amount": "0.00",
-        "notes": "Notes supplémentaires",
-        "selectClient": "Sélectionner un client",
-        "title": "Titre de l'opportunité"
-      },
-      "sections": {
-        "financial": "Informations financières",
-        "pipeline": "Pipeline",
-        "timeline": "Calendrier"
-      },
-      "validation": {
-        "clientRequired": "Le client est obligatoire",
-        "titleRequired": "Le titre est obligatoire"
-      }
-    },
-    "opportunityForm": {
-      "assignedTo": "Assigné à",
-      "client": "Client",
-      "contact": "Contact",
-      "createTitle": "Créer une nouvelle opportunité",
-      "description": "Description",
-      "editTitle": "Modifier l'opportunité",
-      "expectedCloseDate": "Date de clôture prévue",
-      "nextAction": "Prochaine action",
-      "nextActionDate": "Date de la prochaine action",
-      "priority": "Priorité",
-      "probability": "Probabilité",
-      "selectClient": "Sélectionner un client",
-      "selectContact": "Sélectionner un contact",
-      "source": "Source",
-      "stage": "Étape",
-      "title": "Titre",
-      "value": "Valeur"
-    },
-    "priority": {
-      "high": "Élevée",
-      "low": "Faible",
-      "medium": "Moyenne"
-    },
-    "refresh": "Actualiser",
-    "reports": {
-      "download": "Télécharger",
-      "error": "Erreur lors de la génération",
-      "generated": "Rapport généré avec succès",
-      "generating": "Génération en cours...",
-      "metrics": {
-        "avgDealSize": "Taille moyenne des affaires",
-        "lostDeals": "Affaires perdues",
-        "newClients": "Nouveaux clients",
-        "opportunities": "Opportunités créées",
-        "salesCycle": "Cycle de vente moyen",
-        "totalRevenue": "Chiffre d'affaires",
-        "winRate": "Taux de succès",
-        "wonDeals": "Affaires gagnées"
-      },
-      "period": "Période",
-      "sections": {
-        "actions": "Analyse Actions",
-        "clients": "Analyse Clients",
-        "forecast": "Prévisions",
-        "overview": "Vue d'ensemble",
-        "pipeline": "Analyse Pipeline"
-      },
-      "summary": "Résumé",
-      "title": "Rapport CRM Complet"
-    },
-    "stages": {
-      "closing": "Finalisation",
-      "lead": "Prospect",
-      "lost": "Perdue",
-      "negotiation": "Négociation",
-      "proposal": "Proposition",
-      "prospecting": "Prospection",
-      "qualification": "Qualification",
-      "qualified": "Qualifié",
-      "won": "Gagnée"
-    },
+    "title": "Ventes & CRM",
     "subtitle": "Gérez vos clients, opportunités et actions commerciales",
-    "tabs": {
-      "actions": "Actions",
-      "clients": "Clients",
-      "dashboard": "Tableau de bord",
-      "opportunities": "Opportunités"
+    "noCompanySelected": "Aucune entreprise sélectionnée. Veuillez sélectionner une entreprise pour accéder au CRM.",
+    "buttons": {
+      "fullReport": "Rapport Complet",
+      "refresh": "Actualiser",
+      "export": "Exporter",
+      "openClients": "Ouvrir la Gestion des Clients",
+      "openPipeline": "Ouvrir le Pipeline",
+      "openActions": "Ouvrir les Actions",
+      "csv": "CSV",
+      "excel": "Excel",
+      "pipelineReport": "Rapport Pipeline",
+      "exportCsv": "Exporter CSV"
     },
-    "title": "Ventes & CRM"
+    "badges": {
+      "supabaseIntegrated": "Intégré Supabase"
+    },
+    "tabs": {
+      "dashboard": "Tableau de bord",
+      "clients": "Clients",
+      "opportunities": "Opportunités",
+      "actions": "Actions"
+    },
+    "metrics": {
+      "conversionRate": "Taux de Conversion",
+      "salesCycle": "Cycle de Vente",
+      "weightedPipeline": "Pipeline Pondéré",
+      "averageDealSize": "Taille Moyenne",
+      "conversionRateDesc": "{{won}} gagnées / {{total}} total",
+      "salesCycleDesc": "Médiane: {{median}} jours",
+      "weightedPipelineDesc": "Total: €{{total}}",
+      "averageDealSizeDesc": "Par opportunité gagnée"
+    },
+    "sections": {
+      "crmDashboard": "Tableau de Bord CRM",
+      "salesForecast": "Prévisions des Ventes",
+      "salesForecastDesc": "Prochains 3 mois",
+      "clientsManagement": "Gestion des Clients",
+      "opportunitiesManagement": "Gestion des Opportunités",
+      "commercialActions": "Actions Commerciales",
+      "clientsCount": "{{count}} clients",
+      "opportunitiesCount": "{{count}} opportunités - Pipeline: €{{pipeline}}",
+      "actionsCount": "{{count}} actions"
+    },
+    "loading": {
+      "data": "Chargement des données...",
+      "crmData": "Chargement des données CRM..."
+    },
+    "modules": {
+      "clients": {
+        "title": "Module Clients",
+        "description": "Fonctionnalité complètement intégrée avec Supabase"
+      },
+      "opportunities": {
+        "title": "Pipeline de Ventes",
+        "description": "Suivi des opportunités intégré avec Supabase"
+      },
+      "actions": {
+        "title": "Actions Commerciales",
+        "description": "Historique et planification des actions"
+      }
+    },
+    "forecast": {
+      "confidence": "Confiance: {{level}}",
+      "forecasted": "Prévu",
+      "revenue": "€{{amount}}"
+    },
+    "messages": {
+      "actionSuccess": "Action réussie",
+      "error": "Erreur"
+    }
   },
   "currencies_extended": {
     "CAD": {
@@ -1767,6 +1289,7 @@
     "matriel_informatique": "Matériel informatique",
     "mtre": "Mètre",
     "mtres": "Mètres",
+    "mouvements": "Mouvements",
     "nom_de_larticle": "Nom de l'article",
     "nouvel_article": "Nouvel article",
     "ordinateur_portable_dell": "Ordinateur portable Dell",
@@ -1774,6 +1297,7 @@
     "pices": "Pièces",
     "prix_dachat_": "Prix d'achat (€)",
     "prix_de_vente_": "Prix de vente (€)",
+    "produits": "Produits",
     "produits_finis": "Produits finis",
     "ref001": "REF001",
     "rfrence": "Référence",
@@ -2417,36 +1941,122 @@
   },
   "projects": "Projets",
   "projectspage": {
-    "annul": "Annulé",
-    "annuler": "Annuler",
-    "aucun_projet": "Aucun projet",
-    "budget_": "Budget (€)",
-    "chef_de_projet": "Chef de projet",
-    "client": "Client",
-    "crer_le_projet": "Créer le projet",
+    "title": "Gestion des Projets",
+    "subtitle": "Suivez et gérez vos projets internes et clients",
+    "tabs": {
+      "dashboard": "Tableau de bord",
+      "projects": "Projets",
+      "tasks": "Tâches",
+      "resources": "Ressources",
+      "time": "Temps",
+      "billing": "Facturation",
+      "gantt": "Gantt",
+      "reports": "Rapports"
+    },
+    "metrics": {
+      "totalProjects": "Projets total",
+      "revenue": "Revenus",
+      "progress": "Progression",
+      "budgetUsed": "Budget utilisé",
+      "overdueTasks": "Tâches en retard",
+      "completedTasks": "Tâches terminées",
+      "activeProjects": "Projets actifs",
+      "teamUtilization": "Utilisation équipe"
+    },
+    "status": {
+      "inProgress": "En cours",
+      "completed": "Terminés",
+      "onHold": "En pause",
+      "planned": "Planifiés",
+      "high": "Haute",
+      "medium": "Moyenne",
+      "low": "Basse"
+    },
+    "actions": {
+      "newProject": "Nouveau Projet",
+      "createProject": "Créer le projet",
+      "cancel": "Annuler",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "view": "Voir",
+      "assign": "Assigner",
+      "start": "Démarrer",
+      "pause": "Mettre en pause",
+      "complete": "Marquer terminé"
+    },
+    "form": {
+      "projectName": "Nom du projet",
+      "client": "Client",
+      "description": "Description",
+      "startDate": "Date de début",
+      "endDate": "Date de fin prévue",
+      "budget": "Budget (€)",
+      "priority": "Priorité",
+      "manager": "Chef de projet",
+      "team": "Équipe",
+      "selectClient": "Sélectionner un client",
+      "selectManager": "Sélectionner un responsable",
+      "selectDate": "Sélectionnez une date"
+    },
+    "filters": {
+      "search": "Rechercher projet...",
+      "status": "Statut",
+      "client": "Client",
+      "priority": "Priorité",
+      "allStatuses": "Tous les statuts",
+      "allClients": "Tous les clients",
+      "allPriorities": "Toutes les priorités"
+    },
+    "messages": {
+      "noProjects": "Aucun projet pour le moment",
+      "noProjectsDesc": "Créez votre premier projet pour commencer",
+      "loading": "Chargement des projets...",
+      "createSuccess": "Projet créé avec succès",
+      "updateSuccess": "Projet mis à jour avec succès",
+      "deleteSuccess": "Projet supprimé avec succès",
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce projet ?",
+      "deleteConfirmDesc": "Cette action ne peut pas être annulée."
+    },
+    "table": {
+      "name": "Nom",
+      "client": "Client",
+      "status": "Statut",
+      "progress": "Progression",
+      "budget": "Budget",
+      "startDate": "Début",
+      "endDate": "Fin",
+      "actions": "Actions"
+    },
+    "details": {
+      "overview": "Aperçu",
+      "tasks": "Tâches",
+      "team": "Équipe",
+      "timeline": "Chronologie",
+      "budget": "Budget",
+      "documents": "Documents"
+    },
+    "suivez_vos_projets_internes_et_clients": "Suivez vos projets internes et clients.",
+    "nouveau_projet": "Nouveau Projet",
     "crez_un_nouveau_projet": "Créez un nouveau projet",
+    "crer_le_projet": "Créer le projet",
+    "annuler": "Annuler",
+    "annul": "Annulé",
+    "nom_du_projet": "Nom du projet",
+    "refonte_site_web_client_abc": "Refonte site web client ABC",
+    "client": "Client",
+    "slectionner_un_client": "Sélectionner un client",
+    "description": "Description",
     "date_de_dbut": "Date de début",
     "date_de_fin_prvue": "Date de fin prévue",
-    "description": "Description",
-    "en_attente": "En attente",
+    "slectionnez_une_date": "Sélectionnez une date",
+    "budget_": "Budget (€)",
+    "chef_de_projet": "Chef de projet",
+    "slectionner_un_responsable": "Sélectionner un responsable",
+    "statut": "Statut",
+    "en_prparation": "En préparation",
     "en_cours": "En cours",
     "en_pause": "En pause",
-    "en_prparation": "En préparation",
-    "modifier": "Modifier",
-    "nom_du_projet": "Nom du projet",
-    "nouveau_projet": "Nouveau projet",
-    "planifi": "Planifié",
-    "premier_projet": "Premier projet",
-    "projets": "Projets",
-    "refonte_site_web_client_abc": "Refonte site web client ABC",
-    "slectionner_un_client": "Sélectionner un client",
-    "slectionner_un_responsable": "Sélectionner un responsable",
-    "slectionnez_une_date": "Sélectionnez une date",
-    "statut": "Statut",
-    "suivez_vos_projets_internes_et_clients": "Suivez vos projets internes et clients",
-    "supprimer": "Supprimer",
-    "termin": "Terminé",
-    "voir_projet": "Voir projet"
+    "termin": "Terminé"
   },
   "purchases": {
     "actions": {
@@ -2455,7 +2065,7 @@
       "markAsPaid": "Marquer comme payé"
     },
     "createPurchase": "Nouvel achat",
-    "description": "Gérez vos achats, factures fournisseurs et paiements",
+    "description": "Description",
     "filters": {
       "activeFilters": "Filtres actifs",
       "allStatuses": "Tous les statuts",
@@ -2525,11 +2135,7 @@
       "totalPurchasesDescription": "Nombre total d'achats",
       "urgent": "Urgent"
     },
-    "status": {
-      "overdue": "En retard",
-      "paid": "Payé",
-      "pending": "En attente"
-    },
+    "status": "Statut",
     "table": {
       "amountHT": "Montant HT",
       "amountTTC": "Montant TTC",
@@ -2540,7 +2146,11 @@
       "status": "Statut",
       "supplier": "Fournisseur"
     },
-    "title": "Gestion des Achats"
+    "title": "Gestion des Achats",
+    "add_purchase": "Ajouter un achat",
+    "supplier": "Fournisseur",
+    "amount": "Montant",
+    "date": "Date"
   },
   "reconcileTransactions": "Rapprocher les transactions",
   "reference": "Référence",
@@ -3207,20 +2817,14 @@
   "sidebar": {
     "accounting": "Comptabilité",
     "accountingImport": "Import/Export Comptable",
+    "admin": "Administration",
     "analytics": "Analyse",
+    "audit_logs": "Logs d'Audit",
     "automation": "Automatisation",
     "bank": "Banque",
     "banking": "Banques",
     "banques": "Banques",
-    "budget": {
-      "title": "Budgets & Prévisions",
-      "subtitle": "Gérez vos budgets annuels et prévisions financières",
-      "noCompanySelected": {
-        "title": "Aucune entreprise sélectionnée",
-        "description": "Veuillez sélectionner une entreprise pour accéder à la gestion des budgets annuels et prévisions financières."
-      },
-      "backToList": "Retour à la liste"
-    },
+    "budget": "Budget & Prévisions",
     "commercial": "Commercial",
     "contracts": "Contrats & RFA",
     "crm": "CRM Ventes",
@@ -3298,7 +2902,127 @@
   "success": "Succès",
   "supplier": "Fournisseur",
   "system": "Système",
-  "tax": "Taxes",
+  "tax": {
+    "loading": "Chargement des données fiscales...",
+    "title": "Gestion Fiscale",
+    "subtitle": "Gérez vos déclarations, obligations et calendrier fiscal",
+    "realTime": "En temps réel",
+    "export": "Exporter",
+    "newDeclaration": {
+      "title": "Créer une Nouvelle Déclaration",
+      "description": "Ajoutez une nouvelle déclaration fiscale",
+      "type": "Type de déclaration *",
+      "selectType": "Sélectionner un type",
+      "name": "Nom *",
+      "namePlaceholder": "Ex: TVA T1 2024",
+      "periodStart": "Début de période *",
+      "periodEnd": "Fin de période *",
+      "dueDate": "Date d'échéance *",
+      "amount": "Montant (€)",
+      "descriptionField": "Description",
+      "descriptionPlaceholder": "Notes ou détails supplémentaires",
+      "cancel": "Annuler",
+      "creating": "Création...",
+      "create": "Créer la Déclaration"
+    },
+    "tabs": {
+      "dashboard": "Tableau de Bord",
+      "compliance": "Conformité Fiscale",
+      "declarations": "Déclarations",
+      "calendar": "Calendrier",
+      "alerts": "Alertes",
+      "obligations": "Obligations",
+      "new": "Nouvelle"
+    },
+    "dashboard": {
+      "metrics": {
+        "totalDeclarations": "Total Déclarations",
+        "pending": "En Attente",
+        "overdue": "En Retard",
+        "activeAlerts": "Alertes Actives"
+      },
+      "financialOverview": {
+        "title": "Aperçu Financier",
+        "taxesDue": "Taxes Dues",
+        "taxesPaid": "Taxes Payées"
+      },
+      "complianceScore": {
+        "title": "Score de Conformité"
+      },
+      "breakdownByType": {
+        "title": "Répartition par Type de Déclaration",
+        "declarations": "déclarations",
+        "amountDue": "Montant dû:",
+        "amountPaid": "Montant payé:"
+      },
+      "recentDeclarations": {
+        "title": "Déclarations Récentes",
+        "dueDate": "Échéance:"
+      },
+      "upcomingObligations": {
+        "title": "Obligations à Venir"
+      }
+    },
+    "filters": {
+      "searchPlaceholder": "Rechercher une déclaration...",
+      "type": "Type",
+      "all": "Tous",
+      "status": "Statut",
+      "draft": "Brouillon",
+      "pending": "En attente",
+      "submitted": "Soumise",
+      "completed": "Terminée",
+      "overdue": "En retard"
+    },
+    "declarations": {
+      "dueDate": "Échéance:",
+      "period": "Période:",
+      "viewDetails": "Voir les détails",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "amount": "Montant de la déclaration",
+      "notes": "Notes:",
+      "attachments": "Pièces jointes:",
+      "noDeclarations": "Aucune déclaration trouvée",
+      "noDeclarationsDesc": "Aucune déclaration ne correspond aux critères de recherche actuels.",
+      "resetFilters": "Réinitialiser les filtres"
+    },
+    "alerts": {
+      "actionRequired": "Action requise:",
+      "dueDate": "Échéance:",
+      "acknowledge": "Confirmer",
+      "noAlerts": "Aucune alerte active",
+      "noAlertsDesc": "Tout est en ordre ! Aucune alerte fiscale en cours."
+    },
+    "obligations": {
+      "frequency": "Fréquence:",
+      "dueDay": "Jour d'échéance:",
+      "advanceNotice": "Préavis:",
+      "nextDueDate": "Prochaine échéance:",
+      "autoGenerate": "Génération automatique",
+      "requiresApproval": "Approbation requise",
+      "emailNotifications": "Notifications email",
+      "notificationEmails": "Emails de notification:",
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "errors": {
+      "loadDashboard": "Impossible de charger les données du tableau de bord",
+      "loadDeclarations": "Impossible de charger les déclarations",
+      "exportSuccess": "Déclarations exportées en CSV avec succès",
+      "createSuccess": "Déclaration créée avec succès",
+      "createError": "Impossible de créer la déclaration",
+      "createGenericError": "Une erreur est survenue lors de la création",
+      "acknowledgeAlert": "Alerte marquée comme prise en compte",
+      "acknowledgeError": "Impossible de confirmer l'alerte",
+      "editDeclaration": "Édition de {{name}}",
+      "deleteConfirmation": "Êtes-vous sûr de vouloir supprimer la déclaration \"{{name}}\" ?",
+      "deleteError": "Impossible de supprimer la déclaration",
+      "editObligation": "Édition de {{name}}",
+      "deleteObligationConfirmation": "Êtes-vous sûr de vouloir supprimer l'obligation \"{{name}}\" ?",
+      "deleteObligationError": "Impossible de supprimer l'obligation"
+    }
+  },
   "taxes": {
     "actions": "Actions",
     "active": "Actif",
@@ -3782,126 +3506,10 @@
     "skip": "Passer",
     "stepCounter": "Étape {{current}} sur {{total}}"
   },
-  "tax": {
-    "loading": "Chargement des données fiscales...",
-    "title": "Gestion Fiscale",
-    "subtitle": "Gérez vos déclarations, obligations et calendrier fiscal",
-    "realTime": "En temps réel",
-    "export": "Exporter",
-    "newDeclaration": "Nouvelle Déclaration",
-    "tabs": {
-      "dashboard": "Tableau de Bord",
-      "compliance": "Conformité Fiscale",
-      "declarations": "Déclarations",
-      "calendar": "Calendrier",
-      "alerts": "Alertes",
-      "obligations": "Obligations",
-      "new": "Nouvelle"
-    },
-    "dashboard": {
-      "metrics": {
-        "totalDeclarations": "Total Déclarations",
-        "pending": "En Attente",
-        "overdue": "En Retard",
-        "activeAlerts": "Alertes Actives"
-      },
-      "financialOverview": {
-        "title": "Aperçu Financier",
-        "taxesDue": "Taxes Dues",
-        "taxesPaid": "Taxes Payées"
-      },
-      "complianceScore": {
-        "title": "Score de Conformité"
-      },
-      "breakdownByType": {
-        "title": "Répartition par Type de Déclaration",
-        "declarations": "déclarations",
-        "amountDue": "Montant dû:",
-        "amountPaid": "Montant payé:"
-      },
-      "recentDeclarations": {
-        "title": "Déclarations Récentes",
-        "dueDate": "Échéance:"
-      },
-      "upcomingObligations": {
-        "title": "Obligations à Venir"
-      }
-    },
-    "filters": {
-      "searchPlaceholder": "Rechercher une déclaration...",
-      "type": "Type",
-      "all": "Tous",
-      "status": "Statut",
-      "draft": "Brouillon",
-      "pending": "En attente",
-      "submitted": "Soumise",
-      "completed": "Terminée",
-      "overdue": "En retard"
-    },
-    "declarations": {
-      "dueDate": "Échéance:",
-      "period": "Période:",
-      "viewDetails": "Voir les détails",
-      "edit": "Modifier",
-      "delete": "Supprimer",
-      "amount": "Montant de la déclaration",
-      "notes": "Notes:",
-      "attachments": "Pièces jointes:",
-      "noDeclarations": "Aucune déclaration trouvée",
-      "noDeclarationsDesc": "Aucune déclaration ne correspond aux critères de recherche actuels.",
-      "resetFilters": "Réinitialiser les filtres"
-    },
-    "alerts": {
-      "actionRequired": "Action requise:",
-      "dueDate": "Échéance:",
-      "acknowledge": "Confirmer",
-      "noAlerts": "Aucune alerte active",
-      "noAlertsDesc": "Tout est en ordre ! Aucune alerte fiscale en cours."
-    },
-    "obligations": {
-      "frequency": "Fréquence:",
-      "dueDay": "Jour d'échéance:",
-      "advanceNotice": "Préavis:",
-      "nextDueDate": "Prochaine échéance:",
-      "autoGenerate": "Génération automatique",
-      "requiresApproval": "Approbation requise",
-      "emailNotifications": "Notifications email",
-      "notificationEmails": "Emails de notification:",
-      "active": "Actif",
-      "inactive": "Inactif"
-    },
-    "newDeclaration": {
-      "title": "Créer une Nouvelle Déclaration",
-      "description": "Ajoutez une nouvelle déclaration fiscale",
-      "type": "Type de déclaration *",
-      "selectType": "Sélectionner un type",
-      "name": "Nom *",
-      "namePlaceholder": "Ex: TVA T1 2024",
-      "periodStart": "Début de période *",
-      "periodEnd": "Fin de période *",
-      "dueDate": "Date d'échéance *",
-      "amount": "Montant (€)",
-      "descriptionField": "Description",
-      "descriptionPlaceholder": "Notes ou détails supplémentaires",
-      "cancel": "Annuler",
-      "creating": "Création...",
-      "create": "Créer la Déclaration"
-    },
-    "errors": {
-      "loadDashboard": "Impossible de charger les données du tableau de bord",
-      "loadDeclarations": "Impossible de charger les déclarations",
-      "exportSuccess": "Déclarations exportées en CSV avec succès",
-      "createSuccess": "Déclaration créée avec succès",
-      "createError": "Impossible de créer la déclaration",
-      "createGenericError": "Une erreur est survenue lors de la création",
-      "acknowledgeAlert": "Alerte marquée comme prise en compte",
-      "acknowledgeError": "Impossible de confirmer l'alerte",
-      "editDeclaration": "Édition de {{name}}",
-      "deleteConfirmation": "Êtes-vous sûr de vouloir supprimer la déclaration \"{{name}}\" ?",
-      "deleteError": "Impossible de supprimer la déclaration",
-      "editObligation": "Édition de {{name}}",
-      "deleteObligationConfirmation": "Êtes-vous sûr de vouloir supprimer l'obligation \"{{name}}\" ?",
-      "deleteObligationError": "Impossible de supprimer l'obligation"
-    }
-  }
+  "sales": {
+    "add_lead": "Ajouter un prospect",
+    "convert_to_customer": "Convertir en client",
+    "pipeline_value": "Valeur du pipeline"
+  },
+  "third_parties": "Tiers"
 }

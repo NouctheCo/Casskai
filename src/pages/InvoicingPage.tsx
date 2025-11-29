@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence as _AnimatePresence } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,6 +22,7 @@ import { toastError, toastSuccess, toastCreated } from '@/lib/toast-helpers';
 import { PageContainer } from '@/components/ui/PageContainer';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/contexts/SubscriptionContext';
+import { useTranslation } from 'react-i18next';
 import { invoicingService } from '@/services/invoicingService';
 import { 
   FileText,
@@ -91,32 +104,32 @@ const InvoicingKPICard = ({ title, value, icon, trend, color = 'blue', descripti
 };
 
 // Quick Actions Component
-const QuickInvoicingActions = ({ onNewInvoice, onNewQuote, onNewPayment, onViewClients }) => {
+const QuickInvoicingActions = ({ onNewInvoice, onNewQuote, onNewPayment, onViewClients, t }) => {
   const quickActions = [
     {
-      title: 'Nouvelle facture',
-      description: 'Créer une facture client',
+      title: t('invoicing.quickActions.newInvoice', 'Nouvelle facture'),
+      description: t('invoicing.quickActions.newInvoiceDesc', 'Créer une facture client'),
       icon: Plus,
       color: 'blue',
       onClick: onNewInvoice
     },
     {
-      title: 'Nouveau devis',
-      description: 'Créer un devis',
+      title: t('invoicing.quickActions.newQuote', 'Nouveau devis'),
+      description: t('invoicing.quickActions.newQuoteDesc', 'Créer un devis'),
       icon: FileText,
       color: 'green',
       onClick: onNewQuote
     },
     {
-      title: 'Nouveau paiement',
-      description: 'Enregistrer un paiement',
+      title: t('invoicing.quickActions.newPayment', 'Nouveau paiement'),
+      description: t('invoicing.quickActions.newPaymentDesc', 'Enregistrer un paiement'),
       icon: CreditCard,
       color: 'orange',
       onClick: onNewPayment
     },
     {
-      title: 'Gérer les clients',
-      description: 'Voir la liste des clients',
+      title: t('invoicing.quickActions.viewClients', 'Gérer les clients'),
+      description: t('invoicing.quickActions.viewClientsDesc', 'Voir la liste des clients'),
       icon: Users,
       color: 'purple',
       onClick: onViewClients
@@ -161,7 +174,7 @@ const QuickInvoicingActions = ({ onNewInvoice, onNewQuote, onNewPayment, onViewC
 };
 
 // Recent Invoicing Activities Component
-const RecentInvoicingActivities = () => {
+const RecentInvoicingActivities = ({ t }) => {
   type ActivityItem = {
     icon: React.ComponentType<{ className?: string }>;
     color: 'blue' | 'green' | 'purple' | 'orange';
@@ -175,14 +188,14 @@ const RecentInvoicingActivities = () => {
       <CardHeader>
         <CardTitle className="text-lg flex items-center space-x-2">
           <Activity className="w-5 h-5 text-blue-500" />
-          <span>Activité récente</span>
+          <span>{t('invoicing.recentActivity.title', 'Activité récente')}</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
           {activities.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              <p>Aucune activité récente</p>
+              <p>{t('invoicing.recentActivity.noActivity', 'Aucune activité récente')}</p>
             </div>
           ) : (
             activities.map((activity, index) => (
@@ -226,6 +239,7 @@ const RecentInvoicingActivities = () => {
 export default function InvoicingPageOptimized() {
   const { user: _user } = useAuth();
   const { canAccessFeature } = useSubscription();
+  const { t } = useTranslation();
   
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedPeriod, setSelectedPeriod] = useState('current-month');
@@ -397,10 +411,10 @@ export default function InvoicingPageOptimized() {
                   </div>
                   <div>
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                      Facturation & Devis
+                      {t('invoicing.title', 'Facturation & Devis')}
                     </h1>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Gestion professionnelle des factures et devis
+                      {t('invoicing.subtitle', 'Gestion professionnelle des factures et devis')}
                     </p>
                   </div>
                 </div>
@@ -412,18 +426,18 @@ export default function InvoicingPageOptimized() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="current-month">Mois en cours</SelectItem>
-                    <SelectItem value="current-quarter">Trimestre en cours</SelectItem>
-                    <SelectItem value="current-year">Année en cours</SelectItem>
-                    <SelectItem value="last-month">Mois dernier</SelectItem>
-                    <SelectItem value="custom">Période personnalisée</SelectItem>
+                    <SelectItem value="current-month">{t('invoicing.periods.currentMonth', 'Mois en cours')}</SelectItem>
+                    <SelectItem value="current-quarter">{t('invoicing.periods.currentQuarter', 'Trimestre en cours')}</SelectItem>
+                    <SelectItem value="current-year">{t('invoicing.periods.currentYear', 'Année en cours')}</SelectItem>
+                    <SelectItem value="last-month">{t('invoicing.periods.lastMonth', 'Mois dernier')}</SelectItem>
+                    <SelectItem value="custom">{t('invoicing.periods.custom', 'Période personnalisée')}</SelectItem>
                   </SelectContent>
                 </Select>
                 
                 {selectedPeriod === 'custom' && (
                   <div className="flex items-center space-x-2">
                     <div className="flex flex-col">
-                      <label className="text-xs text-gray-500 dark:text-gray-400 mb-1">Du</label>
+                      <label className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('common.from', 'Du')}</label>
                       <input
                         type="date"
                         value={customStartDate}
@@ -432,7 +446,7 @@ export default function InvoicingPageOptimized() {
                       />
                     </div>
                     <div className="flex flex-col">
-                      <label className="text-xs text-gray-500 dark:text-gray-400 mb-1">Au</label>
+                      <label className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('common.to', 'Au')}</label>
                       <input
                         type="date"
                         value={customEndDate}
@@ -448,7 +462,7 @@ export default function InvoicingPageOptimized() {
                   disabled={isLoading}
                 >
                   <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                  Actualiser
+                  {t('common.refresh', 'Actualiser')}
                 </Button>
                 <Button 
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg"
@@ -456,7 +470,7 @@ export default function InvoicingPageOptimized() {
                   disabled={isLoading}
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Nouvelle facture
+                  {t('invoicing.newInvoice', 'Nouvelle facture')}
                 </Button>
               </div>
             </div>
@@ -471,42 +485,42 @@ export default function InvoicingPageOptimized() {
           transition={{ duration: 0.6, delay: 0.1 }}
         >
           <InvoicingKPICard
-            title="Chiffre d'affaires"
+            title={t('invoicing.kpis.revenue', 'Chiffre d\'affaires')}
             value={`${invoicingData.totalRevenue.toLocaleString('fr-FR')} €`}
             icon={Euro}
             color="blue"
             trend={invoicingData.totalRevenueTrend}
-            description="CA total ce mois"
+            description={t('invoicing.kpis.revenueDesc', 'CA total ce mois')}
             onClick={() => setActiveTab('invoices')}
           />
 
           <InvoicingKPICard
-            title="Factures payées"
+            title={t('invoicing.kpis.paidInvoices', 'Factures payées')}
             value={`${invoicingData.paidInvoices.toLocaleString('fr-FR')} €`}
             icon={CheckCircle}
             color="green"
             trend={invoicingData.paidInvoicesTrend}
-            description="Paiements reçus"
+            description={t('invoicing.kpis.paidInvoicesDesc', 'Paiements reçus')}
             onClick={() => setActiveTab('payments')}
           />
 
           <InvoicingKPICard
-            title="En attente"
+            title={t('invoicing.kpis.pendingInvoices', 'En attente')}
             value={`${invoicingData.pendingInvoices.toLocaleString('fr-FR')} €`}
             icon={Clock}
             color="orange"
             trend={invoicingData.pendingInvoicesTrend}
-            description="Factures en attente"
+            description={t('invoicing.kpis.pendingInvoicesDesc', 'Factures en attente')}
             onClick={() => setActiveTab('invoices')}
           />
 
           <InvoicingKPICard
-            title="En retard"
+            title={t('invoicing.kpis.overdueInvoices', 'En retard')}
             value={`${invoicingData.overdueInvoices.toLocaleString('fr-FR')} €`}
             icon={AlertTriangle}
             color="red"
             trend={invoicingData.overdueInvoicesTrend}
-            description="Factures en retard"
+            description={t('invoicing.kpis.overdueInvoicesDesc', 'Factures en retard')}
             onClick={() => setActiveTab('invoices')}
           />
         </motion.div>
@@ -520,35 +534,35 @@ export default function InvoicingPageOptimized() {
                 className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white"
               >
                 <Eye className="h-4 w-4" />
-                Vue d'ensemble
+                {t('invoicing.tabs.overview', 'Vue d\'ensemble')}
               </TabsTrigger>
               <TabsTrigger 
                 value="invoices" 
                 className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white"
               >
                 <FileText className="h-4 w-4" />
-                Factures
+                {t('invoicing.tabs.invoices', 'Factures')}
               </TabsTrigger>
               <TabsTrigger 
                 value="quotes" 
                 className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white"
               >
                 <Receipt className="h-4 w-4" />
-                Devis
+                {t('invoicing.tabs.quotes', 'Devis')}
               </TabsTrigger>
               <TabsTrigger 
                 value="clients" 
                 className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white"
               >
                 <Users className="h-4 w-4" />
-                Clients
+                {t('invoicing.tabs.clients', 'Clients')}
               </TabsTrigger>
               <TabsTrigger 
                 value="payments" 
                 className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white"
               >
                 <CreditCard className="h-4 w-4" />
-                Paiements
+                {t('invoicing.tabs.payments', 'Paiements')}
               </TabsTrigger>
             </TabsList>
           </div>
@@ -566,6 +580,7 @@ export default function InvoicingPageOptimized() {
                 onNewQuote={handleNewQuote}
                 onNewPayment={handleNewPayment}
                 onViewClients={handleViewClients}
+                t={t}
               />
               
               <div className="grid gap-6 lg:grid-cols-3">
@@ -574,7 +589,7 @@ export default function InvoicingPageOptimized() {
                     <CardHeader>
                       <CardTitle className="flex items-center space-x-2">
                         <PieChart className="w-5 h-5 text-purple-500" />
-                        <span>Répartition des revenus</span>
+                        <span>{t('invoicing.revenueBreakdown.title', 'Répartition des revenus')}</span>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -583,19 +598,19 @@ export default function InvoicingPageOptimized() {
                           const totalAmount = invoicingData.totalRevenue;
                           const revenueBreakdown = [
                             { 
-                              name: 'Factures payées', 
+                              name: t('invoicing.revenueBreakdown.paidInvoices', 'Factures payées'), 
                               amount: invoicingData.paidInvoices, 
                               percentage: totalAmount > 0 ? Math.round((invoicingData.paidInvoices / totalAmount) * 100) : 0, 
                               color: 'green' 
                             },
                             { 
-                              name: 'En attente de paiement', 
+                              name: t('invoicing.revenueBreakdown.pendingInvoices', 'En attente de paiement'), 
                               amount: invoicingData.pendingInvoices, 
                               percentage: totalAmount > 0 ? Math.round((invoicingData.pendingInvoices / totalAmount) * 100) : 0, 
                               color: 'orange' 
                             },
                             { 
-                              name: 'Factures en retard', 
+                              name: t('invoicing.revenueBreakdown.overdueInvoices', 'Factures en retard'), 
                               amount: invoicingData.overdueInvoices, 
                               percentage: totalAmount > 0 ? Math.round((invoicingData.overdueInvoices / totalAmount) * 100) : 0, 
                               color: 'red' 
@@ -605,7 +620,7 @@ export default function InvoicingPageOptimized() {
                           if (totalAmount === 0) {
                             return (
                               <div className="text-center py-8 text-gray-500">
-                                <p>Aucune donnée de revenus disponible pour la période sélectionnée</p>
+                                <p>{t('invoicing.revenueBreakdown.noData', 'Aucune donnée de revenus disponible pour la période sélectionnée')}</p>
                               </div>
                             );
                           }
@@ -625,7 +640,7 @@ export default function InvoicingPageOptimized() {
                   </Card>
                 </div>
                 
-                <RecentInvoicingActivities />
+                <RecentInvoicingActivities t={t} />
               </div>
 
               {/* Additional Stats */}
@@ -637,9 +652,9 @@ export default function InvoicingPageOptimized() {
                         <FileText className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Factures créées</p>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('invoicing.stats.invoicesCreated', 'Factures créées')}</p>
                         <p className="text-2xl font-bold">{invoicingData.invoicesCount}</p>
-                        <p className="text-xs text-gray-500">Ce mois</p>
+                        <p className="text-xs text-gray-500">{t('invoicing.stats.thisMonth', 'Ce mois')}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -652,9 +667,9 @@ export default function InvoicingPageOptimized() {
                         <Users className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Clients actifs</p>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('invoicing.stats.activeClients', 'Clients actifs')}</p>
                         <p className="text-2xl font-bold">{invoicingData.clientsCount}</p>
-                        <p className="text-xs text-gray-500">Total</p>
+                        <p className="text-xs text-gray-500">{t('invoicing.stats.total', 'Total')}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -667,9 +682,9 @@ export default function InvoicingPageOptimized() {
                         <Target className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Valeur moyenne</p>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('invoicing.stats.averageValue', 'Valeur moyenne')}</p>
                         <p className="text-xl font-bold">{invoicingData.averageInvoiceValue.toLocaleString('fr-FR')} €</p>
-                        <p className="text-xs text-gray-500">Par facture</p>
+                        <p className="text-xs text-gray-500">{t('invoicing.stats.perInvoice', 'Par facture')}</p>
                       </div>
                     </div>
                   </CardContent>

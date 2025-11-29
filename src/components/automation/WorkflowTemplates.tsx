@@ -47,9 +47,9 @@ export function WorkflowTemplates() {
   const getActionIcons = (actions: any[]) => {
     return actions.map((action, index) => {
       switch (action.type) {
-        case 'email':
+        case 'send_email':
           return <Mail key={index} className="h-4 w-4 text-blue-600" />;
-        case 'report_generation':
+        case 'generate_report':
           return <FileText key={index} className="h-4 w-4 text-green-600" />;
         case 'notification':
           return <Bell key={index} className="h-4 w-4 text-yellow-600" />;
@@ -97,7 +97,7 @@ export function WorkflowTemplates() {
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <CardTitle className="text-lg">{template.name}</CardTitle>
+                  <CardTitle className="text-lg">{template.template_name}</CardTitle>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     {template.description}
                   </p>
@@ -114,9 +114,9 @@ export function WorkflowTemplates() {
                 <div className="flex items-center space-x-2 text-sm">
                   <Clock className="h-4 w-4 text-gray-500" />
                   <span className="text-gray-600 dark:text-gray-400">
-                    Déclencheur: {getFrequencyText(template.template.trigger.config.schedule?.frequency || '')}
-                    {template.template.trigger.config.schedule?.time &&
-                      ` à ${template.template.trigger.config.schedule.time}`
+                    Déclencheur: {getFrequencyText(template.workflow_definition?.trigger_config?.frequency || '')}
+                    {template.workflow_definition?.trigger_config?.time &&
+                      ` à ${template.workflow_definition.trigger_config.time}`
                     }
                   </span>
                 </div>
@@ -124,24 +124,24 @@ export function WorkflowTemplates() {
                 {/* Actions */}
                 <div className="flex items-center space-x-2 text-sm">
                   <div className="flex items-center space-x-1">
-                    {getActionIcons(template.template.actions)}
+                    {getActionIcons(template.workflow_definition?.actions || [])}
                   </div>
                   <span className="text-gray-600 dark:text-gray-400">
-                    {template.template.actions.length} action{template.template.actions.length > 1 ? 's' : ''}
+                    {(template.workflow_definition?.actions?.length || 0)} action{(template.workflow_definition?.actions?.length || 0) > 1 ? 's' : ''}
                   </span>
                 </div>
 
                 {/* Action Details */}
                 <div className="space-y-2">
-                  {template.template.actions.map((action, index) => (
+                  {(template.workflow_definition?.actions || []).map((action, index) => (
                     <div key={index} className="flex items-center space-x-2 text-sm p-2 bg-gray-50 dark:bg-gray-800 rounded">
                       <div className="w-2 h-2 rounded-full bg-blue-500" />
                       <span className="text-gray-700 dark:text-gray-300">
-                        {action.type === 'email' && 'Envoi d\'email automatique'}
-                        {action.type === 'report_generation' && `Génération de rapport ${action.config.report?.type || ''}`}
+                        {action.type === 'send_email' && 'Envoi d\'email automatique'}
+                        {action.type === 'generate_report' && `Génération de rapport ${action.config.report_type || ''}`}
                         {action.type === 'notification' && 'Notification système'}
-                        {action.type === 'data_update' && 'Mise à jour de données'}
-                        {action.type === 'invoice_creation' && 'Création de facture'}
+                        {action.type === 'update_record' && 'Mise à jour de données'}
+                        {action.type === 'create_invoice' && 'Création de facture'}
                       </span>
                     </div>
                   ))}

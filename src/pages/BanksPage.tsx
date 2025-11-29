@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,6 +18,7 @@ import { toastError, toastSuccess } from '@/lib/toast-helpers';
 import { useAuth } from '@/contexts/AuthContext';
 import { bankStorageAdapter, BankStorageTransaction } from '@/services/bankStorageAdapter';
 import { TransactionCategorization } from '@/components/banking/TransactionCategorization';
+import { useTranslation } from 'react-i18next';
 import {
   Upload,
   RefreshCw,
@@ -20,6 +33,7 @@ import {
 
 const BanksPageNew: React.FC = () => {
   const { user, currentCompany } = useAuth();
+  const { t } = useTranslation();
 
   // State
   const [bankAccounts, setBankAccounts] = useState<any[]>([]);
@@ -186,7 +200,7 @@ const BanksPageNew: React.FC = () => {
       <div className="container mx-auto p-6">
         <Card>
           <CardContent className="pt-6">
-            <p className="text-center text-gray-500">Veuillez vous connecter</p>
+            <p className="text-center text-gray-500">{t('auth.pleaseLogin')}</p>
           </CardContent>
         </Card>
       </div>
@@ -197,9 +211,9 @@ const BanksPageNew: React.FC = () => {
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">Banque & Trésorerie</h1>
+        <h1 className="text-3xl font-bold">{t('banking.title')}</h1>
         <p className="text-gray-600 mt-2">
-          Importez vos relevés bancaires et gérez vos transactions
+          {t('banking.subtitle')}
         </p>
       </div>
 
@@ -215,7 +229,7 @@ const BanksPageNew: React.FC = () => {
             }`}
           >
             <Upload className="h-4 w-4" />
-            Import
+            {t('banking.tabs.import')}
           </button>
           <button
             onClick={() => setActiveTab('categorization')}
@@ -226,7 +240,7 @@ const BanksPageNew: React.FC = () => {
             }`}
           >
             <Tag className="h-4 w-4" />
-            Catégorisation
+            {t('banking.tabs.categorization')}
             {metrics.pendingReconciliation > 0 && (
               <span className="bg-yellow-500 text-white text-xs rounded-full px-2 py-0.5">
                 {metrics.pendingReconciliation}
@@ -242,7 +256,7 @@ const BanksPageNew: React.FC = () => {
             }`}
           >
             <FileText className="h-4 w-4" />
-            Historique
+            {t('banking.tabs.history')}
           </button>
         </div>
       </div>
@@ -253,7 +267,7 @@ const BanksPageNew: React.FC = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Transactions</p>
+                <p className="text-sm text-gray-600">{t('banking.metrics.totalTransactions')}</p>
                 <p className="text-2xl font-bold">{metrics.totalTransactions}</p>
               </div>
               <FileText className="h-8 w-8 text-blue-500" />
@@ -265,7 +279,7 @@ const BanksPageNew: React.FC = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Réconciliées</p>
+                <p className="text-sm text-gray-600">{t('banking.metrics.reconciled')}</p>
                 <p className="text-2xl font-bold text-green-600">{metrics.reconciledTransactions}</p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-500" />
@@ -277,7 +291,7 @@ const BanksPageNew: React.FC = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">En attente</p>
+                <p className="text-sm text-gray-600">{t('banking.metrics.pending')}</p>
                 <p className="text-2xl font-bold text-yellow-600">{metrics.pendingReconciliation}</p>
               </div>
               <AlertCircle className="h-8 w-8 text-yellow-500" />
@@ -289,7 +303,7 @@ const BanksPageNew: React.FC = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Taux auto-match</p>
+                <p className="text-sm text-gray-600">{t('banking.metrics.autoMatchRate')}</p>
                 <p className="text-2xl font-bold">{(metrics.autoMatchRate * 100).toFixed(0)}%</p>
               </div>
               <DollarSign className="h-8 w-8 text-purple-500" />
@@ -302,15 +316,15 @@ const BanksPageNew: React.FC = () => {
       {activeTab === 'import' && (
         <Card>
           <CardHeader>
-            <CardTitle>Import de relevé bancaire</CardTitle>
+            <CardTitle>{t('banking.import.title')}</CardTitle>
             <CardDescription>
-              Formats supportés: CSV, OFX, QIF
+              {t('banking.import.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
-              Compte bancaire
+              {t('banking.import.accountLabel')}
             </label>
             <select
               className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
@@ -319,7 +333,7 @@ const BanksPageNew: React.FC = () => {
               disabled={loading}
             >
               {bankAccounts.length === 0 ? (
-                <option value="">Aucun compte (un compte sera créé automatiquement)</option>
+                <option value="">{t('banking.import.noAccount')}</option>
               ) : (
                 bankAccounts.map((account) => (
                   <option key={account.id} value={account.id}>
@@ -332,7 +346,7 @@ const BanksPageNew: React.FC = () => {
 
           <div>
             <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
-              Fichier de relevé
+              {t('banking.import.fileLabel')}
             </label>
             <Input
               type="file"
@@ -346,7 +360,7 @@ const BanksPageNew: React.FC = () => {
           {uploading && (
             <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
               <RefreshCw className="h-4 w-4 animate-spin" />
-              <span>Import en cours...</span>
+              <span>{t('banking.import.uploading')}</span>
             </div>
           )}
         </CardContent>
@@ -366,23 +380,23 @@ const BanksPageNew: React.FC = () => {
       {activeTab === 'history' && (
       <Card>
         <CardHeader>
-          <CardTitle>Transactions ({transactions.length})</CardTitle>
+          <CardTitle>{t('banking.history.title', { count: transactions.length })}</CardTitle>
           <CardDescription>
-            Liste des transactions importées
+            {t('banking.history.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="text-center py-8">
               <RefreshCw className="h-8 w-8 animate-spin mx-auto text-gray-400" />
-              <p className="text-gray-500 mt-2">Chargement...</p>
+              <p className="text-gray-500 mt-2">{t('common.loading')}</p>
             </div>
           ) : transactions.length === 0 ? (
             <div className="text-center py-8">
               <Upload className="h-12 w-12 mx-auto text-gray-300 mb-2" />
-              <p className="text-gray-500">Aucune transaction</p>
+              <p className="text-gray-500">{t('banking.history.noTransactions')}</p>
               <p className="text-sm text-gray-400 mt-1">
-                Importez un relevé bancaire pour commencer
+                {t('banking.history.importPrompt')}
               </p>
             </div>
           ) : (
@@ -390,12 +404,12 @@ const BanksPageNew: React.FC = () => {
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Catégorie</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Montant</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Statut</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('banking.history.table.date')}</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('banking.history.table.description')}</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('banking.history.table.category')}</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{t('banking.history.table.amount')}</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{t('banking.history.table.status')}</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -425,11 +439,11 @@ const BanksPageNew: React.FC = () => {
                       <td className="px-4 py-3 text-center">
                         {transaction.status === 'reconciled' ? (
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Réconcilié
+                            {t('banking.history.status.reconciled')}
                           </span>
                         ) : (
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                            En attente
+                            {t('banking.history.status.pending')}
                           </span>
                         )}
                       </td>
@@ -440,7 +454,7 @@ const BanksPageNew: React.FC = () => {
                             variant="outline"
                             onClick={() => handleReconcile(transaction.id)}
                           >
-                            Réconcilier
+                            {t('banking.history.actions.reconcile')}
                           </Button>
                         )}
                       </td>
@@ -451,7 +465,7 @@ const BanksPageNew: React.FC = () => {
 
               {transactions.length > 100 && (
                 <div className="mt-4 text-center text-sm text-gray-500">
-                  Affichage des 100 premières transactions sur {transactions.length}
+                  {t('banking.history.pagination', { shown: 100, total: transactions.length })}
                 </div>
               )}
             </div>

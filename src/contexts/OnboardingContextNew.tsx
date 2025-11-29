@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 /* eslint-disable */
 import React, { createContext, useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { devLogger } from '@/utils/devLogger';
@@ -770,7 +782,24 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         devLogger.info('🔗 Relation user_companies mise à jour pour rester cohérente.');
       }
 
+      // ============================================
+      // MARQUER L'ONBOARDING COMME TERMINÉ DANS LA BDD
+      // ============================================
       const completionTimestamp = new Date().toISOString();
+
+      // Mettre à jour onboarding_completed_at dans la table companies
+      const { error: updateCompanyError } = await supabase
+        .from('companies')
+        .update({ onboarding_completed_at: completionTimestamp })
+        .eq('id', companyId);
+
+      if (updateCompanyError) {
+        devLogger.error('❌ Erreur mise à jour onboarding_completed_at:', updateCompanyError);
+        // Ne pas bloquer pour cette erreur, continuer
+      } else {
+        devLogger.info('✅ onboarding_completed_at mis à jour dans companies');
+      }
+
       const completedSteps = Array.from(new Set([...(state.data.completedSteps || []), 'complete']));
       const completedData = {
         ...state.data,
@@ -879,8 +908,16 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         data: completedData
       }));
 
+      // ============================================
+      // NETTOYAGE COMPLET DU CACHE ONBOARDING
+      // ============================================
       // Marquer dans localStorage pour éviter les reprises d'onboarding
       localStorage.setItem('onboarding_just_completed', 'true');
+      localStorage.setItem(`onboarding_completed_${user.id}`, 'true');
+      localStorage.setItem(`onboarding_completed_at_${user.id}`, completionTimestamp);
+
+      // Nettoyer TOUS les anciens flags de bannières
+      localStorage.removeItem(`tour-banner-dismissed-${user.id}`);
       localStorage.removeItem('onboarding_current_step');
       localStorage.removeItem('onboarding_company_data');
       localStorage.removeItem('onboarding_modules');

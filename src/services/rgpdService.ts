@@ -1,18 +1,40 @@
 /**
- * 🔒 SERVICE RGPD COMPLIANCE
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
  * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
+/**
+ * 🔒 SERVICE RGPD COMPLIANCE - Opérations Techniques
+ *
  * Conforme au Règlement Général sur la Protection des Données (UE) 2016/679
- * 
+ *
+ * Ce service gère les OPÉRATIONS TECHNIQUES RGPD (exécution réelle des droits).
+ *
  * Fonctionnalités:
  * - ✅ Droit d'accès (Article 15) - Export données utilisateur
  * - ✅ Droit à l'effacement (Article 17) - Suppression compte
  * - ✅ Droit à la portabilité (Article 20) - Export JSON structuré
  * - ✅ Anonymisation données légales (comptabilité)
- * - ✅ Traçabilité opérations RGPD
+ * - ✅ Traçabilité opérations RGPD (intégration auditService)
+ * - ✅ Rate limiting (1 export/24h)
+ *
+ * ⚠️ À NE PAS CONFONDRE AVEC:
+ * - gdprRequestsService.ts : Gestion administrative des demandes/tickets RGPD
+ *
+ * Ce service = Exécution technique des droits RGPD
+ * gdprRequestsService = Workflow administratif des demandes
  */
 
 import { supabase } from '@/lib/supabase';
 import { auditService } from './auditService';
+import { logger } from '@/utils/logger';
 
 // ========================================
 // TYPES
@@ -166,7 +188,7 @@ export async function canExportData(userId: string): Promise<{ allowed: boolean;
 
     return { allowed: true };
   } catch (error) {
-    console.error('Erreur vérification rate limit:', error);
+    logger.error('RGPD: Error checking rate limit', error, { userId });
     // En cas d'erreur, autoriser l'export (fail-open pour droits RGPD)
     return { allowed: true };
   }
@@ -535,7 +557,7 @@ export async function revokeCookieConsent(userId: string): Promise<boolean> {
 
     return true;
   } catch (error) {
-    console.error('Erreur révocation consentement:', error);
+    logger.error('RGPD: Error revoking consent', error, { userId });
     return false;
   }
 }
@@ -565,13 +587,13 @@ async function getUserConsents(_userId: string): Promise<Array<{ type: string; g
 async function logRGPDOperation(log: RGPDLog): Promise<void> {
   try {
     // TODO: Créer table rgpd_logs en base
-    console.warn('[RGPD LOG]', log);
+    logger.debug('RGPD operation logged', log);
     
     // Sauvegarder en base (à implémenter)
     // await supabase.from('rgpd_logs').insert(log);
     
   } catch (error) {
-    console.error('Erreur logging RGPD:', error);
+    logger.error('RGPD: Error logging operation', error);
   }
 }
 

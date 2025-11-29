@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -144,11 +156,11 @@ const TaxPage: React.FC = () => {
         setDashboardData(response.data);
       }
       if (response.error) {
-        toastError('Impossible de charger les données du tableau de bord');
+        toastError(t('tax.errors.loadDashboardData'));
       }
     } catch (error) {
       console.error('Error loading dashboard data:', error instanceof Error ? error.message : String(error));
-      toastError('Impossible de charger les données du tableau de bord');
+      toastError(t('tax.errors.loadDashboardData'));
     }
   };
 
@@ -159,11 +171,11 @@ const TaxPage: React.FC = () => {
         setDeclarations(response.data);
       }
       if (response.error) {
-        toastError('Impossible de charger les déclarations');
+        toastError(t('tax.errors.loadDeclarations'));
       }
     } catch (error) {
       console.error('Error loading declarations:', error instanceof Error ? error.message : String(error));
-      toastError('Impossible de charger les déclarations');
+      toastError(t('tax.errors.loadDeclarations'));
     }
   };
 
@@ -251,7 +263,7 @@ const TaxPage: React.FC = () => {
 
   const handleExportDeclarations = () => {
     (taxService as any).exportDeclarationsToCSV(filteredDeclarations, 'declarations_fiscales');
-    toastSuccess('Déclarations exportées en CSV avec succès');
+    toastSuccess(t('tax.success.exportDeclarations'));
   };
 
   const handleCreateDeclaration = async (e: React.FormEvent) => {
@@ -280,7 +292,7 @@ const TaxPage: React.FC = () => {
       const response = await taxService.createTaxDeclaration(currentEnterprise.id, declarationData);
 
       if (response.data) {
-        toastSuccess('Déclaration créée avec succès');
+        toastSuccess(t('tax.success.declarationCreated'));
 
         // Reset form
         setNewDeclaration({
@@ -300,11 +312,11 @@ const TaxPage: React.FC = () => {
         // Switch to declarations tab
         setActiveTab('declarations');
       } else if (response.error) {
-        toastError(response.error.message || 'Impossible de créer la déclaration');
+        toastError(response.error.message || t('tax.errors.createDeclaration'));
       }
     } catch (error) {
       console.error('Error creating declaration:', error);
-      toastError('Une erreur est survenue lors de la création');
+      toastError(t('tax.errors.createDeclarationGeneric'));
     } finally {
       setIsSubmitting(false);
     }
@@ -317,10 +329,10 @@ const TaxPage: React.FC = () => {
         setAlerts(prev => prev.map(alert => 
           alert.id === alertId ? response.data : alert
         ));
-        toastSuccess('Alerte marquée comme prise en compte');
+        toastSuccess(t('tax.success.alertAcknowledged'));
       }
     } catch (error) {
-      toastError('Impossible de confirmer l\'alerte');
+      toastError(t('tax.errors.acknowledgeAlert'));
     }
   };
 
@@ -332,17 +344,17 @@ const TaxPage: React.FC = () => {
   };
 
   const handleViewDeclaration = (declaration: TaxDeclaration) => {
-    toastSuccess(`Affichage des détails de ${declaration.name}`);
+    toastSuccess(t('tax.success.viewDeclaration', { name: declaration.name }));
     // TODO: Open modal or navigate to detail view
   };
 
   const handleEditDeclaration = (declaration: TaxDeclaration) => {
-    toastUpdated(`Édition de ${declaration.name}`);
+    toastUpdated(t('tax.success.editDeclaration', { name: declaration.name }));
     // TODO: Open edit modal or navigate to edit form
   };
 
   const handleDeleteDeclaration = async (declarationId: string, declarationName: string) => {
-    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer la déclaration "${declarationName}" ?`)) {
+    if (!window.confirm(t('tax.confirm.deleteDeclaration', { name: declarationName }))) {
       return;
     }
     
@@ -353,17 +365,17 @@ const TaxPage: React.FC = () => {
       toastDeleted('La déclaration');
     } catch (error) {
       console.error('Error deleting declaration:', error instanceof Error ? error.message : String(error));
-      toastError('Impossible de supprimer la déclaration');
+      toastError(t('tax.errors.deleteDeclaration'));
     }
   };
 
   const handleEditObligation = (obligation: TaxObligation) => {
-    toastUpdated(`Édition de ${(obligation as any).name}`);
+    toastUpdated(t('tax.success.editObligation', { name: (obligation as any).name }));
     // TODO: Open edit modal or navigate to edit form
   };
 
   const handleDeleteObligation = async (obligationId: string, obligationName: string) => {
-    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer l'obligation "${obligationName}" ?`)) {
+    if (!window.confirm(t('tax.confirm.deleteObligation', { name: obligationName }))) {
       return;
     }
     
@@ -374,7 +386,7 @@ const TaxPage: React.FC = () => {
       toastDeleted('L\'obligation');
     } catch (error) {
       console.error('Error deleting obligation:', error instanceof Error ? error.message : String(error));
-      toastError('Impossible de supprimer l\'obligation');
+      toastError(t('tax.errors.deleteObligation'));
     }
   };
 
@@ -426,7 +438,7 @@ const TaxPage: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement des données fiscales...</p>
+          <p className="text-gray-600">{t('tax.loading')}</p>
         </div>
       </div>
     );
@@ -447,17 +459,17 @@ const TaxPage: React.FC = () => {
         <div className="space-y-2">
           <div className="flex items-center space-x-2">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Gestion Fiscale
+              {t('tax.title')}
             </h1>
             <Sparkles className="h-6 w-6 text-yellow-500" />
           </div>
           <div className="flex items-center space-x-2">
             <p className="text-gray-600 dark:text-gray-400">
               {currentEnterprise ? `${currentEnterprise.name} - ` : ''}
-              Gérez vos déclarations, obligations et calendrier fiscal
+              {t('tax.subtitle')}
             </p>
             <Badge variant="secondary" className="text-xs">
-              En temps réel
+              {t('tax.realtime')}
             </Badge>
           </div>
         </div>
@@ -469,14 +481,14 @@ const TaxPage: React.FC = () => {
             className="flex items-center gap-2"
           >
             <FileDown className="h-4 w-4" />
-            Exporter
+            {t('tax.export')}
           </Button>
           <Button 
             className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 flex items-center gap-2"
             onClick={() => setActiveTab('new-declaration')}
           >
             <Plus className="h-4 w-4" />
-            Nouvelle Déclaration
+            {t('tax.newDeclaration')}
           </Button>
         </div>
       </motion.div>
@@ -485,13 +497,13 @@ const TaxPage: React.FC = () => {
       <motion.div variants={itemVariants}>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-7">
-            <TabsTrigger value="dashboard">Tableau de Bord</TabsTrigger>
-            <TabsTrigger value="compliance">Conformité Fiscale</TabsTrigger>
-            <TabsTrigger value="declarations">Déclarations</TabsTrigger>
-            <TabsTrigger value="calendar">Calendrier</TabsTrigger>
-            <TabsTrigger value="alerts">Alertes</TabsTrigger>
-            <TabsTrigger value="obligations">Obligations</TabsTrigger>
-            <TabsTrigger value="new-declaration">Nouvelle</TabsTrigger>
+            <TabsTrigger value="dashboard">{t('tax.tabs.dashboard')}</TabsTrigger>
+            <TabsTrigger value="compliance">{t('tax.tabs.compliance')}</TabsTrigger>
+            <TabsTrigger value="declarations">{t('tax.tabs.declarations')}</TabsTrigger>
+            <TabsTrigger value="calendar">{t('tax.tabs.calendar')}</TabsTrigger>
+            <TabsTrigger value="alerts">{t('tax.tabs.alerts')}</TabsTrigger>
+            <TabsTrigger value="obligations">{t('tax.tabs.obligations')}</TabsTrigger>
+            <TabsTrigger value="new-declaration">{t('tax.tabs.new')}</TabsTrigger>
           </TabsList>
 
           {/* Dashboard Tab */}
@@ -504,7 +516,7 @@ const TaxPage: React.FC = () => {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-600">Total Déclarations</p>
+                          <p className="text-sm font-medium text-gray-600">{t('tax.metrics.totalDeclarations')}</p>
                           <p className="text-2xl font-bold text-gray-900">
                             {dashboardData.stats.total_declarations}
                           </p>
@@ -520,7 +532,7 @@ const TaxPage: React.FC = () => {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-600">En Attente</p>
+                          <p className="text-sm font-medium text-gray-600">{t('tax.metrics.pendingDeclarations')}</p>
                           <p className="text-2xl font-bold text-gray-900">
                             {dashboardData.stats.pending_declarations}
                           </p>
@@ -536,7 +548,7 @@ const TaxPage: React.FC = () => {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-600">En Retard</p>
+                          <p className="text-sm font-medium text-gray-600">{t('tax.metrics.overdueDeclarations')}</p>
                           <p className="text-2xl font-bold text-gray-900">
                             {dashboardData.stats.overdue_declarations}
                           </p>
@@ -552,7 +564,7 @@ const TaxPage: React.FC = () => {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-600">Alertes Actives</p>
+                          <p className="text-sm font-medium text-gray-600">{t('tax.metrics.activeAlerts')}</p>
                           <p className="text-2xl font-bold text-gray-900">
                             {dashboardData.stats.active_alerts}
                           </p>
@@ -569,13 +581,13 @@ const TaxPage: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Aperçu Financier</CardTitle>
+                      <CardTitle>{t('tax.financialOverview.title')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
                         <div className="flex justify-between items-center p-4 bg-red-50 rounded-lg">
                           <div>
-                            <p className="text-sm text-gray-600">Taxes Dues</p>
+                            <p className="text-sm text-gray-600">{t('tax.financialOverview.taxesDue')}</p>
                             <p className="text-xl font-bold text-red-600">
                               {formatCurrency(dashboardData.stats.total_tax_due)}
                             </p>
@@ -584,7 +596,7 @@ const TaxPage: React.FC = () => {
                         </div>
                         <div className="flex justify-between items-center p-4 bg-green-50 rounded-lg">
                           <div>
-                            <p className="text-sm text-gray-600">Taxes Payées</p>
+                            <p className="text-sm text-gray-600">{t('tax.financialOverview.taxesPaid')}</p>
                             <p className="text-xl font-bold text-green-600">
                               {formatCurrency(dashboardData.stats.total_tax_paid)}
                             </p>
@@ -598,7 +610,7 @@ const TaxPage: React.FC = () => {
 {dashboardData.compliance_score && (
                   <Card>
                     <CardHeader>
-                      <CardTitle>Score de Conformité</CardTitle>
+                      <CardTitle>{t('tax.complianceScore.title')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="text-center mb-4">
@@ -639,7 +651,7 @@ const TaxPage: React.FC = () => {
                 {/* Breakdown by Type */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Répartition par Type de Déclaration</CardTitle>
+                    <CardTitle>{t('tax.breakdownByType.title')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -655,13 +667,13 @@ const TaxPage: React.FC = () => {
                           </div>
                           <div className="space-y-2">
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">Montant dû:</span>
+                              <span className="text-gray-600">{t('tax.breakdownByType.amountDue')}:</span>
                               <span className="font-medium text-red-600">
                                 {formatCurrency(typeData.amount_due)}
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">Montant payé:</span>
+                              <span className="text-gray-600">{t('tax.breakdownByType.amountPaid')}:</span>
                               <span className="font-medium text-green-600">
                                 {formatCurrency(typeData.amount_paid)}
                               </span>
@@ -677,7 +689,7 @@ const TaxPage: React.FC = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Déclarations Récentes</CardTitle>
+                      <CardTitle>{t('tax.recentDeclarations.title')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
@@ -691,7 +703,7 @@ const TaxPage: React.FC = () => {
                                 <span className="font-medium text-sm">{declaration.name}</span>
                               </div>
                               <p className="text-xs text-gray-600">
-                                Échéance: {declaration.dueDate.toLocaleDateString('fr-FR')}
+                                {t('tax.recentDeclarations.dueDate')}: {declaration.dueDate.toLocaleDateString('fr-FR')}
                               </p>
                             </div>
                             <div className="text-right">
@@ -712,7 +724,7 @@ const TaxPage: React.FC = () => {
 
                   <Card>
                     <CardHeader>
-                      <CardTitle>Obligations à Venir</CardTitle>
+                      <CardTitle>{t('tax.upcomingObligations.title')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
@@ -766,7 +778,7 @@ const TaxPage: React.FC = () => {
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                       <Input
-                        placeholder="Rechercher une déclaration..."
+                        placeholder={t('tax.declarations.searchPlaceholder')}
                         value={filters.search}
                         onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
                         className="pl-10"
@@ -779,7 +791,7 @@ const TaxPage: React.FC = () => {
                       onValueChange={(value) => setFilters(prev => ({ ...prev, type: value === 'all' ? '' : value }))}
                     >
                       <SelectTrigger className="w-32">
-                        <SelectValue placeholder="Type" />
+                        <SelectValue placeholder={t('tax.declarations.filters.type')} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Tous</SelectItem>
@@ -796,7 +808,7 @@ const TaxPage: React.FC = () => {
                       onValueChange={(value) => setFilters(prev => ({ ...prev, status: value === 'all' ? '' : value }))}
                     >
                       <SelectTrigger className="w-32">
-                        <SelectValue placeholder="Statut" />
+                        <SelectValue placeholder={t('tax.declarations.filters.status')} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Tous</SelectItem>
@@ -834,11 +846,11 @@ const TaxPage: React.FC = () => {
                         <div className="flex items-center gap-4 text-sm text-gray-600">
                           <div className="flex items-center gap-1">
                             <CalendarIcon className="h-3 w-3" />
-                            Échéance: {declaration.dueDate.toLocaleDateString('fr-FR')}
+                            {t('tax.declarations.dueDate')}: {declaration.dueDate.toLocaleDateString('fr-FR')}
                           </div>
                           {declaration.period && (
                             <div>
-                              Période: {declaration.period.start.toLocaleDateString('fr-FR')} - {declaration.period.end.toLocaleDateString('fr-FR')}
+                              {t('tax.declarations.period')}: {declaration.period.start.toLocaleDateString('fr-FR')} - {declaration.period.end.toLocaleDateString('fr-FR')}
                             </div>
                           )}
                         </div>
@@ -874,7 +886,7 @@ const TaxPage: React.FC = () => {
                     {declaration.amount && (
                       <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
                         <div>
-                          <p className="text-sm text-gray-600">Montant de la déclaration</p>
+                          <p className="text-sm text-gray-600">{t('tax.declarations.declarationAmount')}</p>
                           <p className="text-xl font-bold text-gray-900">
                             {formatCurrency(declaration.amount)}
                           </p>
@@ -886,14 +898,14 @@ const TaxPage: React.FC = () => {
                     {declaration.notes && (
                       <div className="mt-4 p-3 bg-blue-50 rounded-lg">
                         <p className="text-sm text-blue-800">
-                          <strong>Notes:</strong> {declaration.notes}
+                          <strong>{t('tax.declarations.notes')}:</strong> {declaration.notes}
                         </p>
                       </div>
                     )}
 
                     {declaration.attachments && declaration.attachments.length > 0 && (
                       <div className="mt-4">
-                        <p className="text-sm font-medium text-gray-700 mb-2">Pièces jointes:</p>
+                        <p className="text-sm font-medium text-gray-700 mb-2">{t('tax.declarations.attachments')}:</p>
                         <div className="flex flex-wrap gap-2">
                           {declaration.attachments.map((attachment, index) => (
                             <Badge key={index} variant="outline" className="text-xs">
@@ -912,12 +924,12 @@ const TaxPage: React.FC = () => {
               <Card>
                 <CardContent className="p-8 text-center">
                   <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune déclaration trouvée</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">{t('tax.declarations.noDeclarationsFound.title')}</h3>
                   <p className="text-gray-600 mb-4">
-                    Aucune déclaration ne correspond aux critères de recherche actuels.
+                    {t('tax.declarations.noDeclarationsFound.message')}
                   </p>
                   <Button onClick={() => setFilters({ search: '', type: '', status: '', due_date_from: '', due_date_to: '' })}>
-                    Réinitialiser les filtres
+                    {t('tax.declarations.noDeclarationsFound.resetFilters')}
                   </Button>
                 </CardContent>
               </Card>
@@ -962,12 +974,12 @@ const TaxPage: React.FC = () => {
                           <p className="text-sm text-gray-600 mb-2">{alert.message}</p>
                           {alert.action_required && (
                             <p className="text-sm font-medium text-gray-800">
-                              Action requise: {alert.action_required}
+                              {t('tax.alerts.actionRequired')}: {alert.action_required}
                             </p>
                           )}
                           {alert.due_date && (
                             <p className="text-xs text-gray-500 mt-2">
-                              Échéance: {new Date(alert.due_date).toLocaleDateString('fr-FR')}
+                              {t('tax.alerts.dueDate')}: {new Date(alert.due_date).toLocaleDateString('fr-FR')}
                             </p>
                           )}
                         </div>
@@ -979,7 +991,7 @@ const TaxPage: React.FC = () => {
                             variant="outline"
                             onClick={() => handleAcknowledgeAlert(alert.id)}
                           >
-                            Confirmer
+                            {t('tax.alerts.confirm')}
                           </Button>
                         )}
                         <Badge className={
@@ -1000,9 +1012,9 @@ const TaxPage: React.FC = () => {
               <Card>
                 <CardContent className="p-8 text-center">
                   <Shield className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune alerte active</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">{t('tax.alerts.noActiveAlerts.title')}</h3>
                   <p className="text-gray-600">
-                    Tout est en ordre ! Aucune alerte fiscale en cours.
+                    {t('tax.alerts.noActiveAlerts.message')}
                   </p>
                 </CardContent>
               </Card>
@@ -1023,21 +1035,21 @@ const TaxPage: React.FC = () => {
                             {obligation.tax_type_name}
                           </Badge>
                           <Badge className={obligation.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
-                            {obligation.is_active ? 'Actif' : 'Inactif'}
+                            {obligation.is_active ? t('tax.obligations.status.active') : t('tax.obligations.status.inactive')}
                           </Badge>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
                           <div>
-                            <span className="font-medium">Fréquence:</span> {obligation.frequency}
+                            <span className="font-medium">{t('tax.obligations.frequency')}:</span> {obligation.frequency}
                           </div>
                           <div>
-                            <span className="font-medium">Jour d'échéance:</span> {obligation.due_day}
+                            <span className="font-medium">{t('tax.obligations.dueDay')}:</span> {obligation.due_day}
                           </div>
                           <div>
-                            <span className="font-medium">Préavis:</span> {obligation.advance_notice_days} jours
+                            <span className="font-medium">{t('tax.obligations.advanceNotice')}:</span> {obligation.advance_notice_days} jours
                           </div>
                           <div>
-                            <span className="font-medium">Prochaine échéance:</span> {new Date(obligation.next_due_date).toLocaleDateString('fr-FR')}
+                            <span className="font-medium">{t('tax.obligations.nextDueDate')}:</span> {new Date(obligation.next_due_date).toLocaleDateString('fr-FR')}
                           </div>
                         </div>
                       </div>
@@ -1068,9 +1080,9 @@ const TaxPage: React.FC = () => {
                           checked={obligation.auto_generate}
                           readOnly
                           className="h-4 w-4"
-                          aria-label="Génération automatique"
+                          aria-label={t('tax.obligations.autoGenerate')}
                         />
-                        <span className="text-sm">Génération automatique</span>
+                        <span className="text-sm">{t('tax.obligations.autoGenerate')}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <input
@@ -1078,9 +1090,9 @@ const TaxPage: React.FC = () => {
                           checked={obligation.requires_approval}
                           readOnly
                           className="h-4 w-4"
-                          aria-label="Approbation requise"
+                          aria-label={t('tax.obligations.requiresApproval')}
                         />
-                        <span className="text-sm">Approbation requise</span>
+                        <span className="text-sm">{t('tax.obligations.requiresApproval')}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <input
@@ -1088,15 +1100,15 @@ const TaxPage: React.FC = () => {
                           checked={obligation.email_notifications}
                           readOnly
                           className="h-4 w-4"
-                          aria-label="Notifications email"
+                          aria-label={t('tax.obligations.emailNotifications')}
                         />
-                        <span className="text-sm">Notifications email</span>
+                        <span className="text-sm">{t('tax.obligations.emailNotifications')}</span>
                       </div>
                     </div>
 
                     {obligation.notification_emails && obligation.notification_emails.length > 0 && (
                       <div className="mt-4">
-                        <p className="text-sm font-medium text-gray-700 mb-2">Emails de notification:</p>
+                        <p className="text-sm font-medium text-gray-700 mb-2">{t('tax.obligations.notificationEmails')}:</p>
                         <div className="flex flex-wrap gap-2">
                           {(obligation.notification_emails || []).map((email, index) => (
                             <Badge key={index} variant="outline" className="text-xs">
@@ -1116,9 +1128,9 @@ const TaxPage: React.FC = () => {
           <TabsContent value="new-declaration" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Créer une Nouvelle Déclaration</CardTitle>
+                <CardTitle>{t('tax.newDeclaration.title')}</CardTitle>
                 <p className="text-sm text-gray-600">
-                  Ajoutez une nouvelle déclaration fiscale
+                  {t('tax.newDeclaration.subtitle')}
                 </p>
               </CardHeader>
               <CardContent>
@@ -1126,43 +1138,43 @@ const TaxPage: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label htmlFor="type" className="text-sm font-medium">
-                        Type de déclaration *
+                        {t('tax.newDeclaration.form.type')} *
                       </label>
                       <Select
                         value={newDeclaration.type}
                         onValueChange={(value) => setNewDeclaration({ ...newDeclaration, type: value as any })}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner un type" />
+                          <SelectValue placeholder={t('tax.newDeclaration.form.selectType')} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="TVA">TVA</SelectItem>
-                          <SelectItem value="IS">Impôt sur les Sociétés</SelectItem>
-                          <SelectItem value="Liasse">Liasse Fiscale</SelectItem>
-                          <SelectItem value="IR">Impôt sur le Revenu</SelectItem>
-                          <SelectItem value="CFE">CFE</SelectItem>
-                          <SelectItem value="CVAE">CVAE</SelectItem>
+                          <SelectItem value="TVA">{t('tax.newDeclaration.form.types.tva')}</SelectItem>
+                          <SelectItem value="IS">{t('tax.newDeclaration.form.types.is')}</SelectItem>
+                          <SelectItem value="Liasse">{t('tax.newDeclaration.form.types.liasse')}</SelectItem>
+                          <SelectItem value="IR">{t('tax.newDeclaration.form.types.ir')}</SelectItem>
+                          <SelectItem value="CFE">{t('tax.newDeclaration.form.types.cfe')}</SelectItem>
+                          <SelectItem value="CVAE">{t('tax.newDeclaration.form.types.cvae')}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div className="space-y-2">
                       <label htmlFor="name" className="text-sm font-medium">
-                        Nom *
+                        {t('tax.newDeclaration.form.name')} *
                       </label>
                       <Input
                         id="name"
                         type="text"
                         value={newDeclaration.name}
                         onChange={(e) => setNewDeclaration({ ...newDeclaration, name: e.target.value })}
-                        placeholder="Ex: TVA T1 2024"
+                        placeholder={t('tax.newDeclaration.form.namePlaceholder')}
                         required
                       />
                     </div>
 
                     <div className="space-y-2">
                       <label htmlFor="period_start" className="text-sm font-medium">
-                        Début de période *
+                        {t('tax.newDeclaration.form.periodStart')} *
                       </label>
                       <Input
                         id="period_start"
@@ -1175,7 +1187,7 @@ const TaxPage: React.FC = () => {
 
                     <div className="space-y-2">
                       <label htmlFor="period_end" className="text-sm font-medium">
-                        Fin de période *
+                        {t('tax.newDeclaration.form.periodEnd')} *
                       </label>
                       <Input
                         id="period_end"
@@ -1188,7 +1200,7 @@ const TaxPage: React.FC = () => {
 
                     <div className="space-y-2">
                       <label htmlFor="due_date" className="text-sm font-medium">
-                        Date d'échéance *
+                        {t('tax.newDeclaration.form.dueDate')} *
                       </label>
                       <Input
                         id="due_date"
@@ -1201,7 +1213,7 @@ const TaxPage: React.FC = () => {
 
                     <div className="space-y-2">
                       <label htmlFor="amount" className="text-sm font-medium">
-                        Montant (€)
+                        {t('tax.newDeclaration.form.amount')}
                       </label>
                       <Input
                         id="amount"
@@ -1209,21 +1221,21 @@ const TaxPage: React.FC = () => {
                         step="0.01"
                         value={newDeclaration.amount}
                         onChange={(e) => setNewDeclaration({ ...newDeclaration, amount: e.target.value })}
-                        placeholder="0.00"
+                        placeholder={t('tax.newDeclaration.form.amountPlaceholder')}
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <label htmlFor="description" className="text-sm font-medium">
-                      Description
+                      {t('tax.newDeclaration.form.description')}
                     </label>
                     <Input
                       id="description"
                       type="text"
                       value={newDeclaration.description}
                       onChange={(e) => setNewDeclaration({ ...newDeclaration, description: e.target.value })}
-                      placeholder="Notes ou détails supplémentaires"
+                      placeholder={t('tax.newDeclaration.form.descriptionPlaceholder')}
                     />
                   </div>
 
@@ -1233,14 +1245,14 @@ const TaxPage: React.FC = () => {
                       variant="outline"
                       onClick={() => setActiveTab('dashboard')}
                     >
-                      Annuler
+                      {t('tax.newDeclaration.form.cancel')}
                     </Button>
                     <Button
                       type="submit"
                       disabled={isSubmitting || !newDeclaration.name || !newDeclaration.period_start || !newDeclaration.period_end || !newDeclaration.due_date}
                       className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
                     >
-                      {isSubmitting ? 'Création...' : 'Créer la Déclaration'}
+                      {isSubmitting ? t('tax.newDeclaration.form.creating') : t('tax.newDeclaration.form.create')}
                     </Button>
                   </div>
                 </form>

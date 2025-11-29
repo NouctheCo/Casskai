@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 /* eslint-disable react-refresh/only-export-components */
 
 /* eslint-disable max-lines-per-function */
@@ -409,7 +421,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (companies && companies.length > 0) {
 
-        setOnboardingCompleted(true);
+        // ✅ VÉRIFICATION RÉELLE: Vérification hybride pour compatibilité rétroactive
+        // 1. Vérifier le flag localStorage (utilisateurs qui viennent de terminer)
+        const localOnboardingFlag = localStorage.getItem(`onboarding_completed_${currentUser.id}`);
+
+        // 2. Vérifier si onboarding_completed_at est défini dans la BDD
+        const hasOnboardingCompletedInDB = companies.some(c => (c as any).onboarding_completed_at !== null);
+
+        // 3. Fallback : Si l'entreprise existe et que l'utilisateur en est propriétaire, considérer l'onboarding terminé
+        //    (pour compatibilité avec les anciennes données avant la migration)
+        const hasCompanyAsOwner = companies.some(c => c.owner_id === currentUser.id);
+
+        const hasCompletedOnboarding = localOnboardingFlag === 'true' ||
+                                       hasOnboardingCompletedInDB ||
+                                       hasCompanyAsOwner;
+
+        setOnboardingCompleted(hasCompletedOnboarding);
 
         localStorage.removeItem('onboarding_just_completed'); // Clean up the flag
 

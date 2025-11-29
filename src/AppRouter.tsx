@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import React, { Suspense, useMemo } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -47,6 +59,10 @@ const LazyBudgetPage = React.lazy(() => import('@/pages/BudgetPage'));
 const LazyAutomationPage = React.lazy(() => import('@/pages/AutomationPage'));
 const LazyThirdPartiesPage = React.lazy(() => import('@/pages/ThirdPartiesPage'));
 const LazyRGPDAdminDashboard = React.lazy(() => import('@/pages/admin/RGPDAdminDashboard'));
+const LazyAuditLogsPage = React.lazy(() => import('@/pages/AuditLogsPage'));
+const LazyDocumentationPage = React.lazy(() => import('@/pages/public/DocumentationPage'));
+const LazyTutorialsPage = React.lazy(() => import('@/pages/public/TutorialsPage'));
+const LazyMentionsLegalesPage = React.lazy(() => import('@/pages/MentionsLegalesPage'));
 
 const AppRouter: React.FC = () => {
   const { isAuthenticated, loading, onboardingCompleted, isCheckingOnboarding } = useAuth();
@@ -157,6 +173,16 @@ const AppRouter: React.FC = () => {
                 <LazySystemStatusPage />
               </Suspense>
             } />
+            <Route path="docs" element={
+              <Suspense fallback={<LoadingFallback />}>
+                <LazyDocumentationPage />
+              </Suspense>
+            } />
+            <Route path="docs/:articleId" element={
+              <Suspense fallback={<LoadingFallback />}>
+                <LazyDocumentationArticlePage />
+              </Suspense>
+            } />
             <Route path="docs/:category" element={
               <Suspense fallback={<LoadingFallback />}>
                 <LazyDocumentationCategoryPage />
@@ -165,6 +191,16 @@ const AppRouter: React.FC = () => {
             <Route path="docs/:category/:article" element={
               <Suspense fallback={<LoadingFallback />}>
                 <LazyDocumentationArticlePage />
+              </Suspense>
+            } />
+            <Route path="tutorials" element={
+              <Suspense fallback={<LoadingFallback />}>
+                <LazyTutorialsPage />
+              </Suspense>
+            } />
+            <Route path="mentions-legales" element={
+              <Suspense fallback={<LoadingFallback />}>
+                <LazyMentionsLegalesPage />
               </Suspense>
             } />
             <Route path="*" element={<Navigate to="/" replace />} />
@@ -300,6 +336,13 @@ const AppRouter: React.FC = () => {
               <ProtectedRoute>
                 <Suspense fallback={<LoadingFallback />}>
                   <LazyRGPDAdminDashboard />
+                </Suspense>
+              </ProtectedRoute>
+            } />
+            <Route path="admin/audit-logs" element={
+              <ProtectedRoute>
+                <Suspense fallback={<LoadingFallback />}>
+                  <LazyAuditLogsPage />
                 </Suspense>
               </ProtectedRoute>
             } />

@@ -91,8 +91,7 @@ export function AutomationDashboard() {
   };
 
   const getSuccessRate = (workflow: any) => {
-    if (workflow.run_count === 0) return 0;
-    return (workflow.success_count / workflow.run_count) * 100;
+    return 0;
   };
 
   if (showWorkflowBuilder) {
@@ -246,8 +245,8 @@ export function AutomationDashboard() {
                         <div>
                           <p className="font-medium">{workflow.name}</p>
                           <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {workflow.last_run
-                              ? `Dernière exécution: ${format(new Date(workflow.last_run), 'dd/MM/yyyy à HH:mm', { locale: fr })}`
+                            {workflow.last_run_at
+                              ? `Dernière exécution: ${format(new Date(workflow.last_run_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}`
                               : 'Jamais exécuté'
                             }
                           </p>
@@ -306,11 +305,8 @@ export function AutomationDashboard() {
                           {workflow.description}
                         </p>
                         <div className="flex items-center space-x-4 text-sm text-gray-500">
-                          <span>Exécutions: {workflow.run_count}</span>
-                          <span>Succès: {workflow.success_count}</span>
-                          <span>Échecs: {workflow.error_count}</span>
-                          {workflow.next_run && (
-                            <span>Prochaine exécution: {format(new Date(workflow.next_run), 'dd/MM/yyyy à HH:mm', { locale: fr })}</span>
+                          {workflow.next_run_at && (
+                            <span>Prochaine exécution: {format(new Date(workflow.next_run_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}</span>
                           )}
                         </div>
                       </div>
@@ -362,11 +358,11 @@ export function AutomationDashboard() {
                   <div className="flex flex-wrap gap-2">
                     {workflow.actions.map((action, index) => (
                       <Badge key={index} variant="outline" className="text-xs">
-                        {action.type === 'email' && '📧 Email'}
-                        {action.type === 'report_generation' && '📊 Rapport'}
-                        {action.type === 'data_update' && '📝 Mise à jour'}
+                        {action.type === 'send_email' && '📧 Email'}
+                        {action.type === 'generate_report' && '📊 Rapport'}
+                        {action.type === 'update_record' && '📝 Mise à jour'}
                         {action.type === 'notification' && '🔔 Notification'}
-                        {action.type === 'invoice_creation' && '🧾 Facture'}
+                        {action.type === 'create_invoice' && '🧾 Facture'}
                       </Badge>
                     ))}
                   </div>
@@ -395,8 +391,7 @@ export function AutomationDashboard() {
                           {workflow.description}
                         </p>
                         <div className="flex items-center space-x-4 text-sm text-gray-500">
-                          <span>Exécutions: {workflow.run_count}</span>
-                          <span>Dernière exécution: {workflow.last_run ? format(new Date(workflow.last_run), 'dd/MM/yyyy', { locale: fr }) : 'Jamais'}</span>
+                          <span>Dernière exécution: {workflow.last_run_at ? format(new Date(workflow.last_run_at), 'dd/MM/yyyy', { locale: fr }) : 'Jamais'}</span>
                         </div>
                       </div>
                     </div>

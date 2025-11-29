@@ -1,3 +1,35 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
+/**
+ * 📋 SERVICE DE GESTION DES DEMANDES RGPD (Requests/Tickets)
+ *
+ * Ce service gère les DEMANDES/TICKETS RGPD soumis par les utilisateurs
+ * via la page publique (/gdpr).
+ *
+ * Fonctionnalités:
+ * - Création de tickets de demande RGPD
+ * - Validation des demandes
+ * - Calcul de priorité automatique
+ * - Envoi d'emails de confirmation
+ * - Gestion des délais légaux de réponse
+ *
+ * ⚠️ À NE PAS CONFONDRE AVEC:
+ * - rgpdService.ts : Opérations RGPD techniques (export/suppression réelle des données)
+ *
+ * Ce service = Workflow administratif des demandes
+ * rgpdService = Exécution technique des droits RGPD
+ */
+
 import { supabase } from '@/lib/supabase';
 
 // Types pour les demandes RGPD
