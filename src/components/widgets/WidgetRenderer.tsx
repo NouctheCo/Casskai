@@ -2,6 +2,8 @@ import React, { Suspense, lazy, useState, useEffect } from 'react';
 
 import { motion } from 'framer-motion';
 
+import { createSafeHTML } from '@/utils/sanitize';
+
 import { 
 
   TrendingUp, 
@@ -1024,7 +1026,7 @@ const TextWidget: React.FC<{ config: TextWidgetConfig }> = ({ config }) => {
 
       }}
 
-      dangerouslySetInnerHTML={{ __html: content }}
+      dangerouslySetInnerHTML={createSafeHTML(content)}
 
     />
 

@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { X, Save, Eye, Send } from 'lucide-react';
 import { hrDocumentTemplatesService } from '@/services/hrDocumentTemplatesService';
 import type { DocumentTemplate, GenerateDocumentRequest } from '@/types/hr-document-templates.types';
+import { createSafeHTML } from '@/utils/sanitize';
 type Employee = any; // Employee type not yet defined
 
 interface GenerateDocumentModalProps {
@@ -262,7 +263,7 @@ export function GenerateDocumentModal({
               ) : (
                 <div className="bg-white p-8 rounded-lg shadow-sm border max-h-[60vh] overflow-y-auto">
                   <div
-                    dangerouslySetInnerHTML={{ __html: previewHtml }}
+                    dangerouslySetInnerHTML={createSafeHTML(previewHtml)}
                     className="prose prose-sm max-w-none"
                   />
                 </div>

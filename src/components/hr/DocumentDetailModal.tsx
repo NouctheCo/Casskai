@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { X, Send, FileSignature, Archive, Download } from 'lucide-react';
 import { DOCUMENT_TYPE_LABELS } from '@/data/hr-document-templates-defaults';
 import type { GeneratedDocument, GeneratedDocumentStatus } from '@/types/hr-document-templates.types';
+import { createSafeHTML } from '@/utils/sanitize';
 
 interface DocumentDetailModalProps {
   isOpen: boolean;
@@ -125,7 +126,7 @@ export function DocumentDetailModal({
           {/* Document Content */}
           <div className="border rounded-lg p-8 bg-white">
             <div
-              dangerouslySetInnerHTML={{ __html: document.generated_content }}
+              dangerouslySetInnerHTML={createSafeHTML(document.generated_content)}
               className="prose prose-sm max-w-none"
             />
           </div>

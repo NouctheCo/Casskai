@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { X, Eye } from 'lucide-react';
 import { hrDocumentTemplatesService } from '@/services/hrDocumentTemplatesService';
 import type { DocumentTemplate } from '@/types/hr-document-templates.types';
+import { createSafeHTML } from '@/utils/sanitize';
 
 interface TemplatePreviewModalProps {
   isOpen: boolean;
@@ -195,7 +196,7 @@ export function TemplatePreviewModal({ isOpen, onClose, template }: TemplatePrev
               ) : (
                 <div className="bg-white p-8 rounded-lg shadow-sm border max-h-[60vh] overflow-y-auto">
                   <div
-                    dangerouslySetInnerHTML={{ __html: previewHtml }}
+                    dangerouslySetInnerHTML={createSafeHTML(previewHtml)}
                     className="prose prose-sm max-w-none"
                   />
                 </div>

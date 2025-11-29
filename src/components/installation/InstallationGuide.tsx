@@ -1,6 +1,7 @@
 // components/InstallationGuide.tsx
 import { useState } from 'react';
 import { Button } from '../ui/button';
+import { createSafeHTML } from '@/utils/sanitize';
 
 export function InstallationGuide() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -178,9 +179,9 @@ L'assistant vous guidera pour:
 
       <div className="bg-white rounded-lg shadow p-6">
         <div className="prose prose-blue max-w-none">
-          <div dangerouslySetInnerHTML={{ 
-            __html: steps[currentStep - 1].content.replace(/\n/g, '<br>') 
-          }} />
+          <div dangerouslySetInnerHTML={createSafeHTML(
+            steps[currentStep - 1].content.replace(/\n/g, '<br>')
+          )} />
         </div>
         
         <div className="flex justify-between mt-8">
