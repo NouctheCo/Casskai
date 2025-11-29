@@ -11,6 +11,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import InventoryHeader from '@/components/inventory/InventoryHeader';
 import InventoryStats from '@/components/inventory/InventoryStats';
@@ -24,6 +25,7 @@ import InventoryDialogs from '@/components/inventory/InventoryDialogs';
 import { useInventoryPageController } from '@/hooks/useInventoryPageController';
 
 export default function InventoryPage() {
+  const { t } = useTranslation();
   const {
     activeTab,
     setActiveTab,
@@ -46,12 +48,12 @@ export default function InventoryPage() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="products">t("inventorypage.produits")</TabsTrigger>
-          <TabsTrigger value="movements">t("inventorypage.mouvements")</TabsTrigger>
-          <TabsTrigger value="production">t("inventorypage.production")</TabsTrigger>
-          <TabsTrigger value="suppliers">t("inventorypage.fournisseurs")</TabsTrigger>
-          <TabsTrigger value="alerts">t("inventorypage.alertes")</TabsTrigger>
+          <TabsTrigger value="dashboard">{t("common.dashboard", "Dashboard")}</TabsTrigger>
+          <TabsTrigger value="products">{t("inventorypage.produits", "Produits")}</TabsTrigger>
+          <TabsTrigger value="movements">{t("inventorypage.mouvements", "Mouvements")}</TabsTrigger>
+          <TabsTrigger value="production">{t("inventorypage.production", "Production")}</TabsTrigger>
+          <TabsTrigger value="suppliers">{t("inventorypage.fournisseurs", "Fournisseurs")}</TabsTrigger>
+          <TabsTrigger value="alerts">{t("inventorypage.alertes", "Alertes")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard">

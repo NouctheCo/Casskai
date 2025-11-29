@@ -3525,5 +3525,49 @@
     "convert_to_customer": "Convert to customer",
     "pipeline_value": "Pipeline value"
   },
-  "third_parties": "Third parties"
+  "third_parties": "Third parties",
+  "banking": {
+    "title": "Banking & Cash",
+    "subtitle": "Import your bank statements and manage your transactions",
+    "tabs": {
+      "import": "Import",
+      "categorization": "Categorization",
+      "history": "History"
+    },
+    "metrics": {
+      "totalTransactions": "Total Transactions",
+      "reconciled": "Reconciled",
+      "pending": "Pending",
+      "autoMatchRate": "Auto-match Rate"
+    },
+    "import": {
+      "title": "Import bank statement",
+      "description": "Supported formats: CSV, OFX, QIF",
+      "accountLabel": "Bank account",
+      "noAccount": "No account (an account will be created automatically)",
+      "fileLabel": "Statement file",
+      "uploading": "Importing..."
+    },
+    "history": {
+      "title": "Transactions ({{count}})",
+      "description": "List of imported transactions",
+      "noTransactions": "No transactions",
+      "importPrompt": "Import a bank statement to get started",
+      "table": {
+        "date": "Date",
+        "description": "Description",
+        "category": "Category",
+        "amount": "Amount",
+        "status": "Status"
+      },
+      "status": {
+        "reconciled": "Reconciled",
+        "pending": "Pending"
+      },
+      "actions": {
+        "reconcile": "Reconcile"
+      },
+      "pagination": "Showing first {{shown}} transactions out of {{total}}"
+    }
+  }
 }

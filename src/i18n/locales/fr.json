@@ -432,6 +432,50 @@
     },
     "title": "🍪 Nous utilisons des cookies"
   },
+  "banking": {
+    "title": "Banque & Trésorerie",
+    "subtitle": "Importez vos relevés bancaires et gérez vos transactions",
+    "tabs": {
+      "import": "Import",
+      "categorization": "Catégorisation",
+      "history": "Historique"
+    },
+    "metrics": {
+      "totalTransactions": "Total Transactions",
+      "reconciled": "Réconciliées",
+      "pending": "En attente",
+      "autoMatchRate": "Taux auto-match"
+    },
+    "import": {
+      "title": "Import de relevé bancaire",
+      "description": "Formats supportés: CSV, OFX, QIF",
+      "accountLabel": "Compte bancaire",
+      "noAccount": "Aucun compte (un compte sera créé automatiquement)",
+      "fileLabel": "Fichier de relevé",
+      "uploading": "Import en cours..."
+    },
+    "history": {
+      "title": "Transactions ({{count}})",
+      "description": "Liste des transactions importées",
+      "noTransactions": "Aucune transaction",
+      "importPrompt": "Importez un relevé bancaire pour commencer",
+      "table": {
+        "date": "Date",
+        "description": "Description",
+        "category": "Catégorie",
+        "amount": "Montant",
+        "status": "Statut"
+      },
+      "status": {
+        "reconciled": "Réconcilié",
+        "pending": "En attente"
+      },
+      "actions": {
+        "reconcile": "Réconcilier"
+      },
+      "pagination": "Affichage des {{shown}} premières transactions sur {{total}}"
+    }
+  },
   "copySuffix": "(copie)",
   "createAccountDescription": "Créer un nouveau compte dans votre plan comptable",
   "credit": "Crédit",
@@ -1262,6 +1306,65 @@
   "interval_week": "semaine",
   "interval_year": "année",
   "inventory": "Inventaire",
+  "invoicing": {
+    "title": "Facturation",
+    "subtitle": "Gestion professionnelle des factures et devis",
+    "periods": {
+      "currentMonth": "Mois en cours",
+      "currentQuarter": "Trimestre en cours",
+      "currentYear": "Année en cours",
+      "lastMonth": "Mois dernier",
+      "custom": "Période personnalisée"
+    },
+    "newInvoice": "Nouvelle facture",
+    "refresh": "Actualiser",
+    "kpis": {
+      "revenue": "Chiffre d'affaires",
+      "revenueDesc": "CA total ce mois",
+      "paidInvoices": "Factures payées",
+      "paidInvoicesDesc": "Paiements reçus",
+      "pendingInvoices": "En attente",
+      "pendingInvoicesDesc": "Factures en attente",
+      "overdueInvoices": "En retard",
+      "overdueInvoicesDesc": "Factures en retard"
+    },
+    "tabs": {
+      "overview": "Vue d'ensemble",
+      "invoices": "Factures",
+      "quotes": "Devis",
+      "clients": "Clients",
+      "payments": "Paiements"
+    },
+    "quickActions": {
+      "newInvoice": "Nouvelle facture",
+      "newInvoiceDesc": "Créer une facture client",
+      "newQuote": "Nouveau devis",
+      "newQuoteDesc": "Créer un devis",
+      "newPayment": "Nouveau paiement",
+      "newPaymentDesc": "Enregistrer un paiement",
+      "viewClients": "Gérer les clients",
+      "viewClientsDesc": "Voir la liste des clients"
+    },
+    "revenueBreakdown": {
+      "title": "Répartition des revenus",
+      "paidInvoices": "Factures payées",
+      "pendingInvoices": "En attente de paiement",
+      "overdueInvoices": "Factures en retard",
+      "noData": "Aucune donnée de revenus disponible pour la période sélectionnée"
+    },
+    "recentActivity": {
+      "title": "Activité récente",
+      "noActivity": "Aucune activité récente"
+    },
+    "stats": {
+      "invoicesCreated": "Factures créées",
+      "thisMonth": "Ce mois",
+      "activeClients": "Clients actifs",
+      "total": "Total",
+      "averageValue": "Valeur moyenne",
+      "perInvoice": "Par facture"
+    }
+  },
   "inventorypage": {
     "80000": "80 000",
     "120000": "120 000",

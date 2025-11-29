@@ -3537,5 +3537,49 @@
     "convert_to_customer": "Convertir en cliente",
     "pipeline_value": "Valor del pipeline"
   },
-  "third_parties": "Terceros"
+  "third_parties": "Terceros",
+  "banking": {
+    "title": "Banca y Tesorería",
+    "subtitle": "Importe sus extractos bancarios y gestione sus transacciones",
+    "tabs": {
+      "import": "Importar",
+      "categorization": "Categorización",
+      "history": "Historial"
+    },
+    "metrics": {
+      "totalTransactions": "Transacciones Totales",
+      "reconciled": "Reconciliadas",
+      "pending": "Pendientes",
+      "autoMatchRate": "Tasa de coincidencia automática"
+    },
+    "import": {
+      "title": "Importar extracto bancario",
+      "description": "Formatos soportados: CSV, OFX, QIF",
+      "accountLabel": "Cuenta bancaria",
+      "noAccount": "Sin cuenta (se creará una cuenta automáticamente)",
+      "fileLabel": "Archivo de extracto",
+      "uploading": "Importando..."
+    },
+    "history": {
+      "title": "Transacciones ({{count}})",
+      "description": "Lista de transacciones importadas",
+      "noTransactions": "Sin transacciones",
+      "importPrompt": "Importe un extracto bancario para comenzar",
+      "table": {
+        "date": "Fecha",
+        "description": "Descripción",
+        "category": "Categoría",
+        "amount": "Importe",
+        "status": "Estado"
+      },
+      "status": {
+        "reconciled": "Reconciliado",
+        "pending": "Pendiente"
+      },
+      "actions": {
+        "reconcile": "Reconciliar"
+      },
+      "pagination": "Mostrando las primeras {{shown}} transacciones de {{total}}"
+    }
+  }
 }

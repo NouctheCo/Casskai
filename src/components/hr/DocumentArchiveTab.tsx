@@ -98,7 +98,7 @@ export function DocumentArchiveTab({ companyId }: DocumentArchiveTabProps) {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement des archives...</p>
+          <p className="text-gray-600 dark:text-gray-300">Chargement des archives...</p>
         </div>
       </div>
     );
@@ -113,7 +113,7 @@ export function DocumentArchiveTab({ companyId }: DocumentArchiveTabProps) {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Documents</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Documents</p>
                   <p className="text-2xl font-bold">{stats.total_documents}</p>
                 </div>
                 <Archive className="w-8 h-8 text-blue-600" />
@@ -125,7 +125,7 @@ export function DocumentArchiveTab({ companyId }: DocumentArchiveTabProps) {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Espace Utilisé</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Espace Utilisé</p>
                   <p className="text-2xl font-bold">{stats.total_size_mb.toFixed(2)} MB</p>
                 </div>
                 <HardDrive className="w-8 h-8 text-purple-600" />
@@ -137,7 +137,7 @@ export function DocumentArchiveTab({ companyId }: DocumentArchiveTabProps) {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Contrats</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Contrats</p>
                   <p className="text-2xl font-bold text-blue-600">{stats.by_type.contract || 0}</p>
                 </div>
                 <FileText className="w-8 h-8 text-blue-600" />
@@ -149,7 +149,7 @@ export function DocumentArchiveTab({ companyId }: DocumentArchiveTabProps) {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Expire Bientôt</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Expire Bientôt</p>
                   <p className="text-2xl font-bold text-orange-600">{stats.expiring_soon}</p>
                 </div>
                 <AlertCircle className="w-8 h-8 text-orange-600" />
@@ -161,7 +161,7 @@ export function DocumentArchiveTab({ companyId }: DocumentArchiveTabProps) {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">À Détruire</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">À Détruire</p>
                   <p className="text-2xl font-bold text-red-600">{stats.can_be_destroyed}</p>
                 </div>
                 <AlertCircle className="w-8 h-8 text-red-600" />
@@ -253,7 +253,7 @@ export function DocumentArchiveTab({ companyId }: DocumentArchiveTabProps) {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                       <div>
-                        <p className="text-gray-600 mb-1">Date du document</p>
+                        <p className="text-gray-600 dark:text-gray-300 mb-1">Date du document</p>
                         <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4 text-blue-600" />
                           <span className="font-medium">
@@ -263,7 +263,7 @@ export function DocumentArchiveTab({ companyId }: DocumentArchiveTabProps) {
                       </div>
 
                       <div>
-                        <p className="text-gray-600 mb-1">Archivé le</p>
+                        <p className="text-gray-600 dark:text-gray-300 mb-1">Archivé le</p>
                         <div className="flex items-center gap-2">
                           <Archive className="w-4 h-4 text-purple-600" />
                           <span className="font-medium">
@@ -273,7 +273,7 @@ export function DocumentArchiveTab({ companyId }: DocumentArchiveTabProps) {
                       </div>
 
                       <div>
-                        <p className="text-gray-600 mb-1">Conservation</p>
+                        <p className="text-gray-600 dark:text-gray-300 mb-1">Conservation</p>
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4 text-green-600" />
                           <span className="font-medium">{archive.retention_years} ans</span>
@@ -314,7 +314,7 @@ export function DocumentArchiveTab({ companyId }: DocumentArchiveTabProps) {
 
                     {archive.notes && (
                       <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                        <p className="text-sm text-gray-700">{archive.notes}</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-200">{archive.notes}</p>
                       </div>
                     )}
                   </div>
@@ -340,8 +340,8 @@ export function DocumentArchiveTab({ companyId }: DocumentArchiveTabProps) {
         <Card>
           <CardContent className="py-12 text-center">
             <Archive className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">Aucune archive</h3>
-            <p className="text-gray-600">
+            <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">Aucune archive</h3>
+            <p className="text-gray-600 dark:text-gray-300">
               Les documents signés seront automatiquement archivés ici
             </p>
           </CardContent>

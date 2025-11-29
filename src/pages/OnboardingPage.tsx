@@ -21,6 +21,12 @@ import { useOnboarding } from '@/hooks/useOnboarding';
 export default function OnboardingPage() {
   const { state } = useOnboarding();
 
+  // ✅ HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
+  // This effect tracks step changes - empty on purpose, could be used for analytics
+  useEffect(() => {
+    // Placeholder for step tracking logic
+  }, [state.currentStep]);
+
   // Loading fallback to prevent blank screen during initialization
   if (!state.isInitialized || state.isLoading || !state.currentStep) {
     return (
@@ -35,9 +41,6 @@ export default function OnboardingPage() {
       </div>
     );
   }
-
-  useEffect(() => {
-  }, [state.currentStep]);
 
   const steps = [
     <WelcomeStep key="welcome" />,
