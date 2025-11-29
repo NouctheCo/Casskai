@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import { motion } from 'framer-motion';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -213,14 +215,15 @@ const AccountingKPICard: React.FC<AccountingKPICardProps> = ({ title, value, ico
 
 
 const QuickActions: React.FC<QuickActionsProps> = ({ onNewEntry, onViewReports, onExportData }) => {
+  const { t } = useTranslation();
 
   const quickActions = [
 
     {
 
-      title: 'Nouvelle écriture',
+      title: t('accounting.quickActions.newEntry', 'Nouvelle écriture'),
 
-      description: 'Créer une écriture comptable',
+      description: t('accounting.quickActions.newEntryDesc', 'Créer une écriture comptable'),
 
       icon: Plus,
 
@@ -232,9 +235,9 @@ const QuickActions: React.FC<QuickActionsProps> = ({ onNewEntry, onViewReports, 
 
     {
 
-      title: 'Voir les rapports',
+      title: t('accounting.quickActions.viewReports', 'Voir les rapports'),
 
-      description: 'Consulter les états financiers',
+      description: t('accounting.quickActions.viewReportsDesc', 'Consulter les états financiers'),
 
       icon: BarChart3,
 
@@ -246,9 +249,9 @@ const QuickActions: React.FC<QuickActionsProps> = ({ onNewEntry, onViewReports, 
 
     {
 
-      title: 'Exporter les données',
+      title: t('accounting.quickActions.exportData', 'Exporter les données'),
 
-      description: 'Télécharger les écritures FEC',
+      description: t('accounting.quickActions.exportDataDesc', 'Télécharger les écritures FEC'),
 
       icon: Download,
 
@@ -337,6 +340,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({ onNewEntry, onViewReports, 
 
 
 const RecentAccountingActivities = () => {
+  const { t } = useTranslation();
 
   // Remplacé : Plus de données mockées
   // À l'avenir, ces activités seront chargées depuis une table d'audit dans Supabase
@@ -360,7 +364,7 @@ const RecentAccountingActivities = () => {
 
           <Activity className="w-5 h-5 text-blue-500" />
 
-          <span>Activité récente</span>
+          <span>{t('accounting.recentActivity.title', 'Activité récente')}</span>
 
         </CardTitle>
 
@@ -376,7 +380,7 @@ const RecentAccountingActivities = () => {
 
               <Activity className="w-12 h-12 mx-auto mb-3 opacity-30" />
 
-              <p className="text-sm">Aucune activité récente</p>
+              <p className="text-sm">{t('accounting.recentActivity.noActivity', 'Aucune activité récente')}</p>
 
             </div>
 
@@ -459,6 +463,7 @@ const RecentAccountingActivities = () => {
 export default function AccountingPageOptimized() {
 
   const { canAccessFeature } = useSubscription();
+  const { t } = useTranslation();
 
   
 
@@ -684,13 +689,13 @@ export default function AccountingPageOptimized() {
 
             <Calculator className="w-8 h-8 text-blue-500" />
 
-            <span>Comptabilité & Finances</span>
+            <span>{t('accounting.title', 'Comptabilité & Finances')}</span>
 
           </h1>
 
           <p className="text-gray-600 dark:text-gray-400 mt-2">
 
-            Gérez vos écritures comptables et analyses financières
+            {t('accounting.subtitle', 'Gérez vos écritures comptables et analyses financières')}
 
           </p>
 
@@ -740,7 +745,7 @@ export default function AccountingPageOptimized() {
 
             <RefreshCw className="w-4 h-4 mr-2" />
 
-            Actualiser
+            {t('accounting.refresh', 'Actualiser')}
 
           </Button>
 
@@ -750,7 +755,7 @@ export default function AccountingPageOptimized() {
 
             <Plus className="w-4 h-4 mr-2" />
 
-            Nouvelle écriture
+            {t('accounting.newEntry', 'Nouvelle écriture')}
 
           </Button>
 
@@ -764,7 +769,7 @@ export default function AccountingPageOptimized() {
 
         <AccountingKPICard
 
-          title="Solde total"
+          title={t('accounting.stats.totalBalance', 'Solde total')}
 
           value={`${accountingData.totalBalance.toLocaleString('fr-FR')} €`}
 
@@ -774,7 +779,7 @@ export default function AccountingPageOptimized() {
 
           trend={accountingData.totalBalanceTrend}
 
-          description="Balance générale"
+          description={t('accounting.stats.totalBalanceDesc', 'Balance générale')}
 
         />
 
@@ -782,7 +787,7 @@ export default function AccountingPageOptimized() {
 
         <AccountingKPICard
 
-          title="Total débit"
+          title={t('accounting.stats.totalDebit', 'Total débit')}
 
           value={`${accountingData.totalDebit.toLocaleString('fr-FR')} €`}
 
@@ -792,7 +797,7 @@ export default function AccountingPageOptimized() {
 
           trend={accountingData.totalDebitTrend}
 
-          description="Débits ce mois"
+          description={t('accounting.stats.totalDebitDesc', 'Débits ce mois')}
 
         />
 
@@ -800,7 +805,7 @@ export default function AccountingPageOptimized() {
 
         <AccountingKPICard
 
-          title="Total crédit"
+          title={t('accounting.stats.totalCredit', 'Total crédit')}
 
           value={`${accountingData.totalCredit.toLocaleString('fr-FR')} €`}
 
@@ -810,7 +815,7 @@ export default function AccountingPageOptimized() {
 
           trend={accountingData.totalCreditTrend}
 
-          description="Crédits ce mois"
+          description={t('accounting.stats.totalCreditDesc', 'Crédits ce mois')}
 
         />
 
@@ -818,7 +823,7 @@ export default function AccountingPageOptimized() {
 
         <AccountingKPICard
 
-          title="Écritures"
+          title={t('accounting.stats.entries', 'Écritures')}
 
           value={accountingData.entriesCount}
 
@@ -828,7 +833,7 @@ export default function AccountingPageOptimized() {
 
           trend={accountingData.entriesCountTrend}
 
-          description="Écritures saisies"
+          description={t('accounting.stats.entriesDesc', 'Écritures saisies')}
 
         />
 
@@ -844,7 +849,7 @@ export default function AccountingPageOptimized() {
 
             <Eye className="w-4 h-4" />
 
-            <span>Vue d'ensemble</span>
+            <span>{t('accounting.tabs.overview', 'Vue d\'ensemble')}</span>
 
           </TabsTrigger>
 
@@ -852,7 +857,7 @@ export default function AccountingPageOptimized() {
 
             <FileText className="w-4 h-4" />
 
-            <span>Écritures</span>
+            <span>{t('accounting.tabs.entries', 'Écritures')}</span>
 
           </TabsTrigger>
 
@@ -860,7 +865,7 @@ export default function AccountingPageOptimized() {
 
             <BookOpen className="w-4 h-4" />
 
-            <span>Plan comptable</span>
+            <span>{t('accounting.tabs.accounts', 'Plan comptable')}</span>
 
           </TabsTrigger>
 
@@ -868,7 +873,7 @@ export default function AccountingPageOptimized() {
 
             <Upload className="w-4 h-4" />
 
-            <span>📥 Import FEC</span>
+            <span>{t('accounting.tabs.fecImport', '📥 Import FEC')}</span>
 
           </TabsTrigger>
 
@@ -876,7 +881,7 @@ export default function AccountingPageOptimized() {
 
             <BarChart3 className="w-4 h-4" />
 
-            <span>Journaux</span>
+            <span>{t('accounting.tabs.journals', 'Journaux')}</span>
 
           </TabsTrigger>
 
@@ -884,7 +889,7 @@ export default function AccountingPageOptimized() {
 
             <TrendingUp className="w-4 h-4" />
 
-            <span>Rapports</span>
+            <span>{t('accounting.tabs.reports', 'Rapports')}</span>
 
           </TabsTrigger>
 

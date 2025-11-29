@@ -12,6 +12,7 @@
  */
 
 import { supabase } from '@/lib/supabase';
+import { auditService } from './auditService';
 
 // ========================================
 // TYPES
@@ -358,6 +359,14 @@ export async function exportUserData(userId: string): Promise<UserDataExport> {
       timestamp: new Date().toISOString()
     });
 
+    // 12. Audit trail pour traçabilité
+    auditService.logRGPD('RGPD_EXPORT', userId, {
+      invoices_count: invoices.length,
+      entries_count: journalEntries.length,
+      documents_count: documents.length,
+      companies_count: companies?.length || 0
+    });
+
     return exportData;
 
   } catch (error) {
@@ -465,6 +474,14 @@ export async function deleteUserAccount(userId: string): Promise<AccountDeletion
       status: 'SUCCESS',
       details: `Compte supprimé - ${result.anonymized_items.journal_entries} écritures anonymisées`,
       timestamp: new Date().toISOString()
+    });
+
+    // 8. Audit trail pour traçabilité
+    auditService.logRGPD('RGPD_DELETE_ACCOUNT', userId, {
+      anonymized_journal_entries: result.anonymized_items.journal_entries,
+      anonymized_invoices: result.anonymized_items.invoices,
+      anonymized_documents: result.anonymized_items.documents,
+      deleted_items: result.deleted_items
     });
 
     result.success = true;

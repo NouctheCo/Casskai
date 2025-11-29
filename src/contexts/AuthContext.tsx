@@ -14,6 +14,8 @@ import { trialService } from '../services/trialService';
 
 import { trialExpirationService } from '../services/trialExpirationService';
 
+import { auditService } from '../services/auditService';
+
 
 
 interface Company {
@@ -154,6 +156,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signOut = useCallback(async (): Promise<{ error: AuthError | null }> => {
 
+    // Récupérer l'ID utilisateur avant déconnexion pour l'audit
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    const userId = currentUser?.id;
+
     // Arrêter le service de vérification des essais
 
     trialExpirationService.stopPeriodicCheck();
@@ -161,6 +167,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 
     const { error } = await supabase.auth.signOut();
+
+    // Audit trail - Logout
+    if (userId) {
+      auditService.logAuth('LOGOUT', userId, !error);
+    }
 
     // State cleanup is handled by onAuthStateChange which triggers fetchUserSession(null)
 
@@ -683,7 +694,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signIn = async (credentials: { email: string; password: string }): Promise<AuthResponse> => {
 
-    return supabase.auth.signInWithPassword(credentials);
+    const response = await supabase.auth.signInWithPassword(credentials);
+
+    // Audit trail - Login
+    if (response.data.user) {
+      auditService.logAuth('LOGIN', response.data.user.id, !response.error);
+    }
+
+    return response;
 
   };
 
@@ -691,7 +709,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signUp = async (credentials: { email: string; password: string; options?: { [key: string]: unknown } }): Promise<AuthResponse> => {
 
-    return supabase.auth.signUp(credentials);
+    const response = await supabase.auth.signUp(credentials);
+
+    // Audit trail - Signup
+    if (response.data.user) {
+      auditService.logAuth('SIGNUP', response.data.user.id, !response.error);
+    }
+
+    return response;
 
   };
 

@@ -80,7 +80,7 @@ export const sanitizeHTML = (dirty: string | undefined | null): string => {
   if (!dirty) return '';
 
   // DOMPurify.sanitize retourne un string sécurisé
-  return DOMPurify.sanitize(dirty, SANITIZE_CONFIG as any);
+  return DOMPurify.sanitize(dirty, SANITIZE_CONFIG as any) as string;
 };
 
 /**
