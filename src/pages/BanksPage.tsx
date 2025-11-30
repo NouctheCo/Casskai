@@ -28,8 +28,12 @@ import {
   TrendingUp,
   TrendingDown,
   DollarSign,
-  Tag
+  Tag,
+  CreditCard,
+  Banknote
 } from 'lucide-react';
+import { BankAccountsTab } from '@/components/banking/BankAccountsTab';
+import { SepaPaymentGenerator } from '@/components/banking/SepaPaymentGenerator';
 
 const BanksPageNew: React.FC = () => {
   const { user, currentCompany } = useAuth();
@@ -41,7 +45,7 @@ const BanksPageNew: React.FC = () => {
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'import' | 'categorization' | 'history'>('import');
+  const [activeTab, setActiveTab] = useState<'import' | 'categorization' | 'history' | 'accounts' | 'sepa-transfers'>('import');
   const [metrics, setMetrics] = useState({
     totalTransactions: 0,
     reconciledTransactions: 0,
@@ -258,6 +262,28 @@ const BanksPageNew: React.FC = () => {
             <FileText className="h-4 w-4" />
             {t('banking.tabs.history')}
           </button>
+          <button
+            onClick={() => setActiveTab('accounts')}
+            className={`flex items-center gap-2 px-6 py-3 font-medium transition ${
+              activeTab === 'accounts'
+                ? 'border-b-2 border-primary text-primary'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <CreditCard className="h-4 w-4" />
+            Comptes bancaires
+          </button>
+          <button
+            onClick={() => setActiveTab('sepa-transfers')}
+            className={`flex items-center gap-2 px-6 py-3 font-medium transition ${
+              activeTab === 'sepa-transfers'
+                ? 'border-b-2 border-primary text-primary'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <Banknote className="h-4 w-4" />
+            Virements SEPA
+          </button>
         </div>
       </div>
 
@@ -472,6 +498,20 @@ const BanksPageNew: React.FC = () => {
           )}
         </CardContent>
       </Card>
+      )}
+
+      {/* Tab Content: Bank Accounts */}
+      {activeTab === 'accounts' && (
+        <BankAccountsTab
+          companyId={currentCompany?.id || ''}
+          accounts={bankAccounts}
+          onRefresh={loadData}
+        />
+      )}
+
+      {/* Tab Content: SEPA Transfers */}
+      {activeTab === 'sepa-transfers' && (
+        <SepaPaymentGenerator />
       )}
     </div>
   );
