@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { openAIService } from '@/services/ai/OpenAIService';
 
 interface AIMessage {
   role: 'user' | 'assistant' | 'system';
@@ -60,17 +61,37 @@ export const AIAssistant: React.FC = () => {
 
     setIsLoading(true);
 
-    // Simuler une réponse (en attendant l'intégration OpenAI)
-    setTimeout(() => {
-      const assistantMsg: AIMessage = {
+    try {
+      // Appel réel à OpenAI via Edge Function
+      const response = await openAIService.chat({
+        query: userMessage,
+        context_type: 'general',
+        company_id: currentCompany?.id
+      });
+
+      if (response.success && response.data) {
+        const assistantMsg: AIMessage = {
+          role: 'assistant',
+          content: response.data.response,
+          timestamp: new Date().toISOString(),
+          type: 'text'
+        };
+        setMessages(prev => [...prev, assistantMsg]);
+      } else {
+        throw new Error(response.error || 'Erreur lors de la communication avec l\'IA');
+      }
+    } catch (error) {
+      const errorMsg: AIMessage = {
         role: 'assistant',
-        content: `Je vous aide avec: "${userMessage}". Cette fonctionnalité sera bientôt disponible avec l'intégration OpenAI complète.`,
+        content: 'Désolé, je rencontre une difficulté technique. Veuillez vérifier que la clé API OpenAI est configurée dans les Secrets Supabase.',
         timestamp: new Date().toISOString(),
         type: 'text'
       };
-      setMessages(prev => [...prev, assistantMsg]);
+      setMessages(prev => [...prev, errorMsg]);
+      console.error('Erreur AI Assistant:', error);
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const handleNewConversation = () => {

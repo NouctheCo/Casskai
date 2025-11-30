@@ -3044,108 +3044,134 @@
   "supplier": "Proveedor",
   "system": "Système",
   "tax": {
+    "title": "Fiscalidad y Cumplimiento",
+    "subtitle": "Gestión de declaraciones fiscales y cumplimiento normativo",
+    "realtime": "Tiempo real",
     "loading": "Cargando datos fiscales...",
-    "title": "Gestión Fiscal",
-    "subtitle": "Gestiona tus declaraciones, obligaciones y calendario fiscal",
-    "realTime": "En tiempo real",
-    "export": "Exportar",
-    "newDeclaration": "Nueva declaración",
+    "export": "Exportar CSV",
     "tabs": {
-      "dashboard": "Panel de Control",
-      "compliance": "Cumplimiento Fiscal",
+      "dashboard": "Panel",
+      "compliance": "Cumplimiento",
       "declarations": "Declaraciones",
       "calendar": "Calendario",
       "alerts": "Alertas",
       "obligations": "Obligaciones",
       "new": "Nueva"
     },
-    "dashboard": {
-      "metrics": {
-        "totalDeclarations": "Total Declaraciones",
-        "pending": "Pendientes",
-        "overdue": "Vencidas",
-        "activeAlerts": "Alertas Activas"
-      },
-      "financialOverview": {
-        "title": "Resumen Financiero",
-        "taxesDue": "Impuestos Adeudados",
-        "taxesPaid": "Impuestos Pagados"
-      },
-      "complianceScore": {
-        "title": "Puntuación de Cumplimiento"
-      },
-      "breakdownByType": {
-        "title": "Desglose por Tipo de Declaración",
-        "declarations": "declaraciones",
-        "amountDue": "Importe adeudado:",
-        "amountPaid": "Importe pagado:"
-      },
-      "recentDeclarations": {
-        "title": "Declaraciones Recientes",
-        "dueDate": "Fecha límite:"
-      },
-      "upcomingObligations": {
-        "title": "Obligaciones Próximas"
-      }
+    "metrics": {
+      "totalDeclarations": "Total declaraciones",
+      "pendingDeclarations": "Pendientes",
+      "overdueDeclarations": "Atrasadas",
+      "activeAlerts": "Alertas activas"
     },
-    "filters": {
-      "searchPlaceholder": "Buscar una declaración...",
-      "type": "Tipo",
-      "all": "Todos",
-      "status": "Estado",
-      "draft": "Borrador",
-      "pending": "Pendiente",
-      "submitted": "Presentada",
-      "completed": "Completada",
-      "overdue": "Vencida"
+    "financialOverview": {
+      "title": "Resumen financiero",
+      "taxesDue": "Impuestos por pagar",
+      "taxesPaid": "Impuestos pagados"
+    },
+    "complianceScore": {
+      "title": "Puntuación de cumplimiento"
+    },
+    "breakdownByType": {
+      "title": "Desglose por tipo",
+      "amountDue": "Monto adeudado",
+      "amountPaid": "Monto pagado"
+    },
+    "recentDeclarations": {
+      "title": "Declaraciones recientes",
+      "dueDate": "Vencimiento"
+    },
+    "upcomingObligations": {
+      "title": "Obligaciones próximas"
     },
     "declarations": {
-      "dueDate": "Fecha límite:",
-      "period": "Período:",
-      "viewDetails": "Ver detalles",
-      "edit": "Editar",
-      "delete": "Eliminar",
-      "amount": "Importe de la declaración",
-      "notes": "Notas:",
-      "attachments": "Adjuntos:",
-      "noDeclarations": "No se encontraron declaraciones",
-      "noDeclarationsDesc": "Ninguna declaración coincide con los criterios de búsqueda actuales.",
-      "resetFilters": "Restablecer filtros"
+      "searchPlaceholder": "Buscar una declaración...",
+      "filters": {
+        "type": "Tipo",
+        "status": "Estado"
+      },
+      "dueDate": "Vencimiento",
+      "period": "Período",
+      "declarationAmount": "Monto de la declaración",
+      "notes": "Notas",
+      "attachments": "Adjuntos",
+      "noDeclarationsFound": {
+        "title": "No se encontraron declaraciones",
+        "message": "No hay declaraciones que coincidan con sus criterios de búsqueda.",
+        "resetFilters": "Restablecer filtros"
+      }
     },
     "alerts": {
-      "actionRequired": "Acción requerida:",
-      "dueDate": "Fecha límite:",
-      "acknowledge": "Confirmar",
-      "noAlerts": "No hay alertas activas",
-      "noAlertsDesc": "¡Todo está en orden! No hay alertas fiscales activas."
+      "actionRequired": "Acción requerida",
+      "dueDate": "Vencimiento",
+      "confirm": "Confirmar",
+      "noActiveAlerts": {
+        "title": "No hay alertas activas",
+        "message": "Todas sus obligaciones fiscales están al día."
+      }
     },
     "obligations": {
-      "frequency": "Frecuencia:",
-      "dueDay": "Día de vencimiento:",
-      "advanceNotice": "Aviso anticipado:",
-      "nextDueDate": "Próxima fecha de vencimiento:",
+      "status": {
+        "active": "Activa",
+        "inactive": "Inactiva"
+      },
+      "frequency": "Frecuencia",
+      "dueDay": "Día de vencimiento",
+      "advanceNotice": "Aviso anticipado",
+      "nextDueDate": "Próximo vencimiento",
       "autoGenerate": "Generación automática",
       "requiresApproval": "Requiere aprobación",
-      "emailNotifications": "Notificaciones por email",
-      "notificationEmails": "Emails de notificación:",
-      "active": "Activo",
-      "inactive": "Inactivo"
+      "emailNotifications": "Notificaciones por correo",
+      "notificationEmails": "Correos de notificación"
     },
     "errors": {
-      "loadDashboard": "No se pudieron cargar los datos del panel",
-      "loadDeclarations": "No se pudieron cargar las declaraciones",
-      "exportSuccess": "Declaraciones exportadas a CSV exitosamente",
-      "createSuccess": "Declaración creada exitosamente",
-      "createError": "No se pudo crear la declaración",
-      "createGenericError": "Ocurrió un error durante la creación",
-      "acknowledgeAlert": "Alerta marcada como confirmada",
-      "acknowledgeError": "No se pudo confirmar la alerta",
+      "loadDashboardData": "Error al cargar el panel",
+      "loadDeclarations": "Error al cargar las declaraciones",
+      "createDeclaration": "Error al crear la declaración",
+      "createDeclarationGeneric": "No se pudo crear la declaración",
+      "acknowledgeAlert": "Error al confirmar la alerta",
+      "deleteDeclaration": "Error al eliminar la declaración",
+      "deleteObligation": "Error al eliminar la obligación"
+    },
+    "success": {
+      "exportDeclarations": "Declaraciones exportadas con éxito",
+      "declarationCreated": "Declaración creada con éxito",
+      "alertAcknowledged": "Alerta confirmada",
+      "viewDeclaration": "Consultando {{name}}",
       "editDeclaration": "Editando {{name}}",
-      "deleteConfirmation": "¿Está seguro de que desea eliminar la declaración \"{{name}}\"?",
-      "deleteError": "No se pudo eliminar la declaración",
-      "editObligation": "Editando {{name}}",
-      "deleteObligationConfirmation": "¿Está seguro de que desea eliminar la obligación \"{{name}}\"?",
-      "deleteObligationError": "No se pudo eliminar la obligación"
+      "editObligation": "Editando {{name}}"
+    },
+    "confirm": {
+      "deleteDeclaration": "¿Está seguro de que desea eliminar la declaración {{name}}?",
+      "deleteObligation": "¿Está seguro de que desea eliminar la obligación {{name}}?"
+    },
+    "newDeclaration": {
+      "title": "Crear una Nueva Declaración Fiscal",
+      "subtitle": "Complete la información de su declaración fiscal",
+      "form": {
+        "type": "Tipo de Declaración",
+        "selectType": "Seleccione un tipo",
+        "types": {
+          "tva": "IVA",
+          "is": "Impuesto de Sociedades",
+          "liasse": "Paquete de Declaración",
+          "ir": "Impuesto sobre la Renta",
+          "cfe": "CFE",
+          "cvae": "CVAE"
+        },
+        "name": "Nombre de la Declaración",
+        "namePlaceholder": "Ej: IVA T1 2025",
+        "periodStart": "Inicio del Período",
+        "periodEnd": "Fin del Período",
+        "dueDate": "Fecha Límite",
+        "amount": "Cantidad",
+        "amountPlaceholder": "0.00",
+        "description": "Descripción",
+        "descriptionPlaceholder": "Notas o comentarios...",
+        "cancel": "Cancelar",
+        "create": "Crear Declaración",
+        "creating": "Creando..."
+      }
     }
   },
   "taxes": {
@@ -3747,109 +3773,6 @@
         "reconcile": "Reconciliar"
       },
       "pagination": "Mostrando las primeras {{shown}} transacciones de {{total}}"
-    }
-  },
-  "tax": {
-    "title": "Fiscalidad y Cumplimiento",
-    "subtitle": "Gestión de declaraciones fiscales y cumplimiento normativo",
-    "realtime": "Tiempo real",
-    "loading": "Cargando datos fiscales...",
-    "export": "Exportar CSV",
-    "tabs": {
-      "dashboard": "Panel",
-      "compliance": "Cumplimiento",
-      "declarations": "Declaraciones",
-      "calendar": "Calendario",
-      "alerts": "Alertas",
-      "obligations": "Obligaciones",
-      "new": "Nueva"
-    },
-    "metrics": {
-      "totalDeclarations": "Total declaraciones",
-      "pendingDeclarations": "Pendientes",
-      "overdueDeclarations": "Atrasadas",
-      "activeAlerts": "Alertas activas"
-    },
-    "financialOverview": {
-      "title": "Resumen financiero",
-      "taxesDue": "Impuestos por pagar",
-      "taxesPaid": "Impuestos pagados"
-    },
-    "complianceScore": {
-      "title": "Puntuación de cumplimiento"
-    },
-    "breakdownByType": {
-      "title": "Desglose por tipo",
-      "amountDue": "Monto adeudado",
-      "amountPaid": "Monto pagado"
-    },
-    "recentDeclarations": {
-      "title": "Declaraciones recientes",
-      "dueDate": "Vencimiento"
-    },
-    "upcomingObligations": {
-      "title": "Obligaciones próximas"
-    },
-    "declarations": {
-      "searchPlaceholder": "Buscar una declaración...",
-      "filters": {
-        "type": "Tipo",
-        "status": "Estado"
-      },
-      "dueDate": "Vencimiento",
-      "period": "Período",
-      "declarationAmount": "Monto de la declaración",
-      "notes": "Notas",
-      "attachments": "Adjuntos",
-      "noDeclarationsFound": {
-        "title": "No se encontraron declaraciones",
-        "message": "No hay declaraciones que coincidan con sus criterios de búsqueda.",
-        "resetFilters": "Restablecer filtros"
-      }
-    },
-    "alerts": {
-      "actionRequired": "Acción requerida",
-      "dueDate": "Vencimiento",
-      "confirm": "Confirmar",
-      "noActiveAlerts": {
-        "title": "No hay alertas activas",
-        "message": "Todas sus obligaciones fiscales están al día."
-      }
-    },
-    "obligations": {
-      "status": {
-        "active": "Activa",
-        "inactive": "Inactiva"
-      },
-      "frequency": "Frecuencia",
-      "dueDay": "Día de vencimiento",
-      "advanceNotice": "Aviso anticipado",
-      "nextDueDate": "Próximo vencimiento",
-      "autoGenerate": "Generación automática",
-      "requiresApproval": "Requiere aprobación",
-      "emailNotifications": "Notificaciones por correo",
-      "notificationEmails": "Correos de notificación"
-    },
-    "errors": {
-      "loadDashboardData": "Error al cargar el panel",
-      "loadDeclarations": "Error al cargar las declaraciones",
-      "createDeclaration": "Error al crear la declaración",
-      "createDeclarationGeneric": "No se pudo crear la declaración",
-      "acknowledgeAlert": "Error al confirmar la alerta",
-      "deleteDeclaration": "Error al eliminar la declaración",
-      "deleteObligation": "Error al eliminar la obligación"
-    },
-    "success": {
-      "exportDeclarations": "Declaraciones exportadas con éxito",
-      "declarationCreated": "Declaración creada con éxito",
-      "alertAcknowledged": "Alerta confirmada",
-      "viewDeclaration": "Consultando {{name}}",
-      "editDeclaration": "Editando {{name}}",
-      "editObligation": "Editando {{name}}"
-    },
-    "confirm": {
-      "deleteDeclaration": "¿Está seguro de que desea eliminar la declaración {{name}}?",
-      "deleteObligation": "¿Está seguro de que desea eliminar la obligación {{name}}?"
     }
   }
 }

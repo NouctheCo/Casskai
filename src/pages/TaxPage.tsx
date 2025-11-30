@@ -262,7 +262,7 @@ const TaxPage: React.FC = () => {
   };
 
   const handleExportDeclarations = () => {
-    (taxService as any).exportDeclarationsToCSV(filteredDeclarations, 'declarations_fiscales');
+    taxService.exportDeclarationsToCSV(filteredDeclarations, 'declarations_fiscales');
     toastSuccess(t('tax.success.exportDeclarations'));
   };
 

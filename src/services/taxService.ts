@@ -954,5 +954,62 @@ export const taxService = {
   getDeclarations: TaxImpl.getDeclarations,
   getCalendarEvents: TaxImpl.getCalendarEvents,
   getAlerts: TaxImpl.getAlerts,
-  getObligations: TaxImpl.getObligations
+  getObligations: TaxImpl.getObligations,
+
+  /**
+   * Export declarations to CSV format
+   */
+  exportDeclarationsToCSV(declarations: TaxDeclaration[], filename: string = 'declarations_fiscales'): void {
+    if (!declarations || declarations.length === 0) {
+      console.warn('No declarations to export');
+      return;
+    }
+
+    // Define CSV headers
+    const headers = [
+      'Type',
+      'Nom',
+      'Période Début',
+      'Période Fin',
+      'Date Limite',
+      'Montant',
+      'Statut',
+      'Description'
+    ];
+
+    // Convert declarations to CSV rows
+    const rows = declarations.map(decl => [
+      decl.type || '',
+      decl.name || '',
+      decl.periodStart || '',
+      decl.periodEnd || '',
+      decl.dueDate || '',
+      decl.amount?.toString() || '0',
+      decl.status || '',
+      decl.description || ''
+    ]);
+
+    // Build CSV content
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row =>
+        row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+      )
+    ].join('\n');
+
+    // Create and download file
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${filename}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+  }
 };
