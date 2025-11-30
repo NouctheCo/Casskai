@@ -554,11 +554,14 @@
       }
     },
     "stages": {
+      "prospecting": "Prospección",
       "prospect": "Prospecto",
       "qualification": "Calificación",
       "proposal": "Propuesta",
       "negotiation": "Negociación",
-      "closing": "Cierre"
+      "closing": "Cierre",
+      "won": "Ganado",
+      "lost": "Perdido"
     },
     "priority": {
       "high": "Alta",
@@ -3703,6 +3706,138 @@
         "reconcile": "Reconciliar"
       },
       "pagination": "Mostrando las primeras {{shown}} transacciones de {{total}}"
+    }
+  },
+  "tax": {
+    "title": "Fiscalidad y Cumplimiento",
+    "subtitle": "Gestión de declaraciones fiscales y cumplimiento normativo",
+    "realtime": "Tiempo real",
+    "loading": "Cargando datos fiscales...",
+    "export": "Exportar CSV",
+    "newDeclaration": "Nueva declaración",
+    "tabs": {
+      "dashboard": "Panel",
+      "compliance": "Cumplimiento",
+      "declarations": "Declaraciones",
+      "calendar": "Calendario",
+      "alerts": "Alertas",
+      "obligations": "Obligaciones",
+      "new": "Nueva"
+    },
+    "metrics": {
+      "totalDeclarations": "Total declaraciones",
+      "pendingDeclarations": "Pendientes",
+      "overdueDeclarations": "Atrasadas",
+      "activeAlerts": "Alertas activas"
+    },
+    "financialOverview": {
+      "title": "Resumen financiero",
+      "taxesDue": "Impuestos por pagar",
+      "taxesPaid": "Impuestos pagados"
+    },
+    "complianceScore": {
+      "title": "Puntuación de cumplimiento"
+    },
+    "breakdownByType": {
+      "title": "Desglose por tipo",
+      "amountDue": "Monto adeudado",
+      "amountPaid": "Monto pagado"
+    },
+    "recentDeclarations": {
+      "title": "Declaraciones recientes",
+      "dueDate": "Vencimiento"
+    },
+    "upcomingObligations": {
+      "title": "Obligaciones próximas"
+    },
+    "declarations": {
+      "searchPlaceholder": "Buscar una declaración...",
+      "filters": {
+        "type": "Tipo",
+        "status": "Estado"
+      },
+      "dueDate": "Vencimiento",
+      "period": "Período",
+      "declarationAmount": "Monto de la declaración",
+      "notes": "Notas",
+      "attachments": "Adjuntos",
+      "noDeclarationsFound": {
+        "title": "No se encontraron declaraciones",
+        "message": "No hay declaraciones que coincidan con sus criterios de búsqueda.",
+        "resetFilters": "Restablecer filtros"
+      }
+    },
+    "alerts": {
+      "actionRequired": "Acción requerida",
+      "dueDate": "Vencimiento",
+      "confirm": "Confirmar",
+      "noActiveAlerts": {
+        "title": "No hay alertas activas",
+        "message": "Todas sus obligaciones fiscales están al día."
+      }
+    },
+    "obligations": {
+      "status": {
+        "active": "Activa",
+        "inactive": "Inactiva"
+      },
+      "frequency": "Frecuencia",
+      "dueDay": "Día de vencimiento",
+      "advanceNotice": "Aviso anticipado",
+      "nextDueDate": "Próximo vencimiento",
+      "autoGenerate": "Generación automática",
+      "requiresApproval": "Requiere aprobación",
+      "emailNotifications": "Notificaciones por correo",
+      "notificationEmails": "Correos de notificación"
+    },
+    "newDeclaration": {
+      "title": "Nueva declaración fiscal",
+      "subtitle": "Cree una nueva declaración fiscal para su empresa",
+      "form": {
+        "type": "Tipo de declaración",
+        "selectType": "Seleccione un tipo",
+        "types": {
+          "tva": "IVA - Impuesto al valor agregado",
+          "is": "Impuesto de sociedades",
+          "liasse": "Paquete de declaración fiscal",
+          "ir": "Impuesto sobre la renta",
+          "cfe": "Impuesto sobre propiedades comerciales",
+          "cvae": "Contribución sobre el valor agregado"
+        },
+        "name": "Nombre de la declaración",
+        "namePlaceholder": "Ej: IVA T1 2025",
+        "periodStart": "Inicio del período",
+        "periodEnd": "Fin del período",
+        "dueDate": "Fecha de vencimiento",
+        "amount": "Monto (opcional)",
+        "amountPlaceholder": "0.00",
+        "description": "Descripción (opcional)",
+        "descriptionPlaceholder": "Notas o información adicional",
+        "cancel": "Cancelar",
+        "create": "Crear declaración",
+        "creating": "Creando..."
+      }
+    },
+    "errors": {
+      "loadDashboardData": "Error al cargar el panel",
+      "loadDeclarations": "Error al cargar las declaraciones",
+      "createDeclaration": "Error al crear la declaración",
+      "createDeclarationGeneric": "No se pudo crear la declaración",
+      "acknowledgeAlert": "Error al confirmar la alerta",
+      "deleteDeclaration": "Error al eliminar la declaración",
+      "deleteObligation": "Error al eliminar la obligación"
+    },
+    "success": {
+      "exportDeclarations": "Declaraciones exportadas con éxito",
+      "declarationCreated": "Declaración creada con éxito",
+      "alertAcknowledged": "Alerta confirmada",
+      "viewDeclaration": "Consultando {{name}}",
+      "editDeclaration": "Editando {{name}}",
+      "editObligation": "Editando {{name}}"
+    },
+    "confirm": {
+      "deleteDeclaration": "¿Está seguro de que desea eliminar la declaración {{name}}?",
+      "deleteObligation": "¿Está seguro de que desea eliminar la obligación {{name}}?"
     }
   }
 }

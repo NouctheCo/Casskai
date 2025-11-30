@@ -547,11 +547,14 @@
       }
     },
     "stages": {
+      "prospecting": "Prospecting",
       "prospect": "Prospect",
       "qualification": "Qualification",
       "proposal": "Proposal",
       "negotiation": "Negotiation",
-      "closing": "Closing"
+      "closing": "Closing",
+      "won": "Won",
+      "lost": "Lost"
     },
     "priority": {
       "high": "High",
@@ -3691,6 +3694,138 @@
         "reconcile": "Reconcile"
       },
       "pagination": "Showing first {{shown}} transactions out of {{total}}"
+    }
+  },
+  "tax": {
+    "title": "Tax & Compliance",
+    "subtitle": "Tax declaration management and regulatory compliance",
+    "realtime": "Real-time",
+    "loading": "Loading tax data...",
+    "export": "Export CSV",
+    "newDeclaration": "New declaration",
+    "tabs": {
+      "dashboard": "Dashboard",
+      "compliance": "Compliance",
+      "declarations": "Declarations",
+      "calendar": "Calendar",
+      "alerts": "Alerts",
+      "obligations": "Obligations",
+      "new": "New"
+    },
+    "metrics": {
+      "totalDeclarations": "Total declarations",
+      "pendingDeclarations": "Pending",
+      "overdueDeclarations": "Overdue",
+      "activeAlerts": "Active alerts"
+    },
+    "financialOverview": {
+      "title": "Financial overview",
+      "taxesDue": "Taxes due",
+      "taxesPaid": "Taxes paid"
+    },
+    "complianceScore": {
+      "title": "Compliance score"
+    },
+    "breakdownByType": {
+      "title": "Breakdown by type",
+      "amountDue": "Amount due",
+      "amountPaid": "Amount paid"
+    },
+    "recentDeclarations": {
+      "title": "Recent declarations",
+      "dueDate": "Due date"
+    },
+    "upcomingObligations": {
+      "title": "Upcoming obligations"
+    },
+    "declarations": {
+      "searchPlaceholder": "Search for a declaration...",
+      "filters": {
+        "type": "Type",
+        "status": "Status"
+      },
+      "dueDate": "Due date",
+      "period": "Period",
+      "declarationAmount": "Declaration amount",
+      "notes": "Notes",
+      "attachments": "Attachments",
+      "noDeclarationsFound": {
+        "title": "No declarations found",
+        "message": "No declarations match your search criteria.",
+        "resetFilters": "Reset filters"
+      }
+    },
+    "alerts": {
+      "actionRequired": "Action required",
+      "dueDate": "Due date",
+      "confirm": "Confirm",
+      "noActiveAlerts": {
+        "title": "No active alerts",
+        "message": "All your tax obligations are up to date."
+      }
+    },
+    "obligations": {
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "frequency": "Frequency",
+      "dueDay": "Due day",
+      "advanceNotice": "Advance notice",
+      "nextDueDate": "Next due date",
+      "autoGenerate": "Auto-generate",
+      "requiresApproval": "Requires approval",
+      "emailNotifications": "Email notifications",
+      "notificationEmails": "Notification emails"
+    },
+    "newDeclaration": {
+      "title": "New tax declaration",
+      "subtitle": "Create a new tax declaration for your company",
+      "form": {
+        "type": "Declaration type",
+        "selectType": "Select a type",
+        "types": {
+          "tva": "VAT - Value-added tax",
+          "is": "Corporate tax",
+          "liasse": "Tax return package",
+          "ir": "Income tax",
+          "cfe": "Business property tax",
+          "cvae": "Value-added contribution"
+        },
+        "name": "Declaration name",
+        "namePlaceholder": "Ex: VAT Q1 2025",
+        "periodStart": "Period start",
+        "periodEnd": "Period end",
+        "dueDate": "Due date",
+        "amount": "Amount (optional)",
+        "amountPlaceholder": "0.00",
+        "description": "Description (optional)",
+        "descriptionPlaceholder": "Notes or additional information",
+        "cancel": "Cancel",
+        "create": "Create declaration",
+        "creating": "Creating..."
+      }
+    },
+    "errors": {
+      "loadDashboardData": "Error loading dashboard",
+      "loadDeclarations": "Error loading declarations",
+      "createDeclaration": "Error creating declaration",
+      "createDeclarationGeneric": "Unable to create declaration",
+      "acknowledgeAlert": "Error confirming alert",
+      "deleteDeclaration": "Error deleting declaration",
+      "deleteObligation": "Error deleting obligation"
+    },
+    "success": {
+      "exportDeclarations": "Declarations exported successfully",
+      "declarationCreated": "Declaration created successfully",
+      "alertAcknowledged": "Alert confirmed",
+      "viewDeclaration": "Viewing {{name}}",
+      "editDeclaration": "Editing {{name}}",
+      "editObligation": "Editing {{name}}"
+    },
+    "confirm": {
+      "deleteDeclaration": "Are you sure you want to delete the declaration {{name}}?",
+      "deleteObligation": "Are you sure you want to delete the obligation {{name}}?"
     }
   }
 }

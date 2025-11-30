@@ -587,11 +587,14 @@
       }
     },
     "stages": {
+      "prospecting": "Prospection",
       "prospect": "Prospect",
       "qualification": "Qualification",
       "proposal": "Proposition",
       "negotiation": "Négociation",
-      "closing": "Clôture"
+      "closing": "Clôture",
+      "won": "Gagné",
+      "lost": "Perdu"
     },
     "priority": {
       "high": "Haute",
@@ -3738,6 +3741,138 @@
     "compliance": {
       "title": "Note de conformité",
       "description": "Les logs d'audit sont conservés pendant au moins 2 ans conformément aux exigences RGPD (Article 5), SOC2 et ISO27001. Ces logs sont utilisés uniquement à des fins de traçabilité, sécurité et conformité."
+    }
+  },
+  "tax": {
+    "title": "Fiscalité & Conformité",
+    "subtitle": "Gestion des déclarations fiscales et conformité réglementaire",
+    "realtime": "Temps réel",
+    "loading": "Chargement des données fiscales...",
+    "export": "Exporter CSV",
+    "newDeclaration": "Nouvelle déclaration",
+    "tabs": {
+      "dashboard": "Tableau de bord",
+      "compliance": "Conformité",
+      "declarations": "Déclarations",
+      "calendar": "Calendrier",
+      "alerts": "Alertes",
+      "obligations": "Obligations",
+      "new": "Nouvelle"
+    },
+    "metrics": {
+      "totalDeclarations": "Total déclarations",
+      "pendingDeclarations": "En attente",
+      "overdueDeclarations": "En retard",
+      "activeAlerts": "Alertes actives"
+    },
+    "financialOverview": {
+      "title": "Vue d'ensemble financière",
+      "taxesDue": "Taxes à payer",
+      "taxesPaid": "Taxes payées"
+    },
+    "complianceScore": {
+      "title": "Score de conformité"
+    },
+    "breakdownByType": {
+      "title": "Répartition par type",
+      "amountDue": "Montant dû",
+      "amountPaid": "Montant payé"
+    },
+    "recentDeclarations": {
+      "title": "Déclarations récentes",
+      "dueDate": "Échéance"
+    },
+    "upcomingObligations": {
+      "title": "Obligations à venir"
+    },
+    "declarations": {
+      "searchPlaceholder": "Rechercher une déclaration...",
+      "filters": {
+        "type": "Type",
+        "status": "Statut"
+      },
+      "dueDate": "Échéance",
+      "period": "Période",
+      "declarationAmount": "Montant de la déclaration",
+      "notes": "Notes",
+      "attachments": "Pièces jointes",
+      "noDeclarationsFound": {
+        "title": "Aucune déclaration trouvée",
+        "message": "Aucune déclaration ne correspond à vos critères de recherche.",
+        "resetFilters": "Réinitialiser les filtres"
+      }
+    },
+    "alerts": {
+      "actionRequired": "Action requise",
+      "dueDate": "Échéance",
+      "confirm": "Confirmer",
+      "noActiveAlerts": {
+        "title": "Aucune alerte active",
+        "message": "Toutes vos obligations fiscales sont à jour."
+      }
+    },
+    "obligations": {
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "frequency": "Fréquence",
+      "dueDay": "Jour d'échéance",
+      "advanceNotice": "Préavis",
+      "nextDueDate": "Prochaine échéance",
+      "autoGenerate": "Génération automatique",
+      "requiresApproval": "Nécessite approbation",
+      "emailNotifications": "Notifications par email",
+      "notificationEmails": "Emails de notification"
+    },
+    "newDeclaration": {
+      "title": "Nouvelle déclaration fiscale",
+      "subtitle": "Créez une nouvelle déclaration fiscale pour votre entreprise",
+      "form": {
+        "type": "Type de déclaration",
+        "selectType": "Sélectionner un type",
+        "types": {
+          "tva": "TVA - Taxe sur la valeur ajoutée",
+          "is": "IS - Impôt sur les sociétés",
+          "liasse": "Liasse fiscale",
+          "ir": "IR - Impôt sur le revenu",
+          "cfe": "CFE - Cotisation foncière des entreprises",
+          "cvae": "CVAE - Cotisation sur la valeur ajoutée"
+        },
+        "name": "Nom de la déclaration",
+        "namePlaceholder": "Ex: TVA Q1 2025",
+        "periodStart": "Début de période",
+        "periodEnd": "Fin de période",
+        "dueDate": "Date d'échéance",
+        "amount": "Montant (optionnel)",
+        "amountPlaceholder": "0.00",
+        "description": "Description (optionnel)",
+        "descriptionPlaceholder": "Notes ou informations complémentaires",
+        "cancel": "Annuler",
+        "create": "Créer la déclaration",
+        "creating": "Création en cours..."
+      }
+    },
+    "errors": {
+      "loadDashboardData": "Erreur lors du chargement du tableau de bord",
+      "loadDeclarations": "Erreur lors du chargement des déclarations",
+      "createDeclaration": "Erreur lors de la création de la déclaration",
+      "createDeclarationGeneric": "Impossible de créer la déclaration",
+      "acknowledgeAlert": "Erreur lors de la confirmation de l'alerte",
+      "deleteDeclaration": "Erreur lors de la suppression de la déclaration",
+      "deleteObligation": "Erreur lors de la suppression de l'obligation"
+    },
+    "success": {
+      "exportDeclarations": "Déclarations exportées avec succès",
+      "declarationCreated": "Déclaration créée avec succès",
+      "alertAcknowledged": "Alerte confirmée",
+      "viewDeclaration": "Consultation de {{name}}",
+      "editDeclaration": "Édition de {{name}}",
+      "editObligation": "Édition de {{name}}"
+    },
+    "confirm": {
+      "deleteDeclaration": "Êtes-vous sûr de vouloir supprimer la déclaration {{name}} ?",
+      "deleteObligation": "Êtes-vous sûr de vouloir supprimer l'obligation {{name}} ?"
     }
   }
 }
