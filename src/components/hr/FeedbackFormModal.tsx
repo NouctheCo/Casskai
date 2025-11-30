@@ -81,7 +81,7 @@ export function FeedbackFormModal({
           <h2 className="text-xl font-semibold">Nouveau feedback</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 transition-colors"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 transition-colors dark:text-gray-300"
           >
             <X className="w-5 h-5" />
           </button>
@@ -126,7 +126,7 @@ export function FeedbackFormModal({
               />
               <span className="text-sm font-medium">Feedback anonyme</span>
             </label>
-            <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 ml-6">
+            <p className="text-xs text-gray-500 dark:text-gray-300 ml-6">
               Votre identité ne sera pas révélée à l'employé
             </p>
           </div>
@@ -204,7 +204,7 @@ export function FeedbackFormModal({
               <option value="both">Employé et manager</option>
               <option value="team">Toute l'équipe</option>
             </select>
-            <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-300 mt-1">
               Qui peut voir ce feedback
             </p>
           </div>
@@ -220,7 +220,7 @@ export function FeedbackFormModal({
               />
               <span className="text-sm font-medium">Feedback privé</span>
             </label>
-            <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 ml-6">
+            <p className="text-xs text-gray-500 dark:text-gray-300 ml-6">
               Visible uniquement par les RH et managers
             </p>
           </div>

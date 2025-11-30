@@ -146,7 +146,7 @@ export function ObjectiveFormModal({
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 transition-colors"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 transition-colors dark:text-gray-300"
           >
             <X className="w-5 h-5" />
           </button>
@@ -251,7 +251,7 @@ export function ObjectiveFormModal({
 
           {/* OKR - Key Results */}
           {formData.type === 'okr' && (
-            <div className="border rounded-lg p-4 bg-gray-50">
+            <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-900/30">
               <div className="flex items-center justify-between mb-4">
                 <Label>Key Results *</Label>
                 <Button type="button" onClick={addKeyResult} size="sm" variant="outline">
@@ -261,7 +261,7 @@ export function ObjectiveFormModal({
               </div>
 
               {formData.key_results.length === 0 ? (
-                <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 text-center py-4">
+                <p className="text-sm text-gray-500 dark:text-gray-300 text-center py-4">
                   Aucun Key Result. Cliquez sur "Ajouter" pour en créer.
                 </p>
               ) : (
@@ -356,7 +356,7 @@ export function ObjectiveFormModal({
               value={formData.weight}
               onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
             />
-            <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-300 mt-1">
               Importance relative de cet objectif (0-100%)
             </p>
           </div>

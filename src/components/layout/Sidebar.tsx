@@ -249,7 +249,7 @@ export const Sidebar: React.FC = () => {
           </div>
           <div>
             <h1 className="font-bold text-xl text-gray-800 dark:text-white">CassKai</h1>
-            <p className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 truncate max-w-[140px]">
+            <p className="text-xs text-gray-400 dark:text-gray-300 truncate max-w-[140px]">
               {currentCompany?.name || 'Finance Platform'}
             </p>
           </div>
@@ -298,10 +298,10 @@ export const Sidebar: React.FC = () => {
                       : 'bg-white/60 dark:bg-gray-800/60 text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 hover:shadow-sm'
                     }`}
                 >
-                  <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{item.icon}</span>
+                  <span className="text-gray-500 dark:text-gray-300 dark:text-gray-300">{item.icon}</span>
                   <span>{item.label}</span>
                   {item.badge && item.badge > 0 && (
-                    <span className="w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                    <span className="w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium dark:bg-red-900/20">
                       {item.badge}
                     </span>
                   )}

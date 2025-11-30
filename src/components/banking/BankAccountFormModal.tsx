@@ -169,7 +169,7 @@ export function BankAccountFormModal({
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            className="text-gray-400 dark:text-gray-300 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -231,7 +231,7 @@ export function BankAccountFormModal({
             {errors.iban && (
               <p className="text-red-500 text-sm mt-1">{errors.iban}</p>
             )}
-            <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-300 mt-1">
               Format: 2 lettres pays + 2 chiffres + code bancaire (espaces automatiques)
             </p>
           </div>
@@ -250,7 +250,7 @@ export function BankAccountFormModal({
             {errors.bic && (
               <p className="text-red-500 text-sm mt-1">{errors.bic}</p>
             )}
-            <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-300 mt-1">
               8 ou 11 caractères (ex: BNPAFRPP ou BNPAFRPPXXX)
             </p>
           </div>

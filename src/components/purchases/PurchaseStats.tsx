@@ -104,7 +104,7 @@ const PurchaseStatsComponent: React.FC<PurchaseStatsProps> = ({ stats, loading }
                       </Badge>
                     )}
                     {stat.badge === 'danger' && (
-                      <Badge variant="outline" className="text-red-700 border-red-300 bg-red-50">
+                      <Badge variant="outline" className="text-red-700 border-red-300 bg-red-50 dark:bg-red-900/20">
                         {t('purchases.stats.urgent')}
                       </Badge>
                     )}

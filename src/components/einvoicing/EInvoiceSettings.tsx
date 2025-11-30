@@ -149,10 +149,10 @@ export const EInvoiceSettings: React.FC<EInvoiceSettingsProps> = ({
               <Separator />
 
               {/* Disable Module */}
-              <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg border border-red-200">
+              <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg border border-red-200 dark:bg-red-900/20">
                 <div>
                   <h5 className="font-medium text-red-800">Désactiver le module</h5>
-                  <p className="text-sm text-red-600">
+                  <p className="text-sm text-red-600 dark:text-red-400">
                     Cette action désactivera complètement la facturation électronique.
                     Les documents existants resteront archivés.
                   </p>
@@ -253,11 +253,11 @@ export const EInvoiceSettings: React.FC<EInvoiceSettingsProps> = ({
 
           <Separator />
 
-          <div className="bg-blue-50 p-4 rounded-lg">
+          <div className="bg-blue-50 p-4 rounded-lg dark:bg-blue-900/20">
             <h5 className="font-medium text-blue-800 mb-2">
               Obligation légale française
             </h5>
-            <p className="text-sm text-blue-700 mb-3">
+            <p className="text-sm text-blue-700 mb-3 dark:text-blue-400">
               La facturation électronique devient obligatoire pour toutes les entreprises 
               françaises de manière progressive entre 2024 et 2026.
             </p>

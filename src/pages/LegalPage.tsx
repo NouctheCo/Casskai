@@ -152,7 +152,7 @@ export default function LegalPage() {
                   <a
                     href={doc.pdfUrl}
                     download
-                    className="inline-flex items-center justify-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 dark:text-gray-200 rounded-lg transition-colors font-medium"
+                    className="inline-flex items-center justify-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg transition-colors font-medium"
                   >
                     <Download className="w-4 h-4 mr-2" />
                     PDF
@@ -180,26 +180,26 @@ export default function LegalPage() {
               </p>
               <ul className="grid md:grid-cols-2 gap-3 text-gray-700 dark:text-gray-300 dark:text-gray-300">
                 <li className="flex items-center">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                  <span className="w-2 h-2 bg-green-500 rounded-full mr-3 dark:bg-green-900/20"></span>
                   Droit d'accès à vos données
                 </li>
                 <li className="flex items-center">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                  <span className="w-2 h-2 bg-green-500 rounded-full mr-3 dark:bg-green-900/20"></span>
                   Droit de rectification
                 </li>
                 <li className="flex items-center">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                  <span className="w-2 h-2 bg-green-500 rounded-full mr-3 dark:bg-green-900/20"></span>
                   Droit à l'effacement
                 </li>
                 <li className="flex items-center">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                  <span className="w-2 h-2 bg-green-500 rounded-full mr-3 dark:bg-green-900/20"></span>
                   Droit à la portabilité
                 </li>
               </ul>
               <div className="mt-4">
                 <a
                   href="/gdpr"
-                  className="inline-flex items-center text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium"
+                  className="inline-flex items-center text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium dark:text-green-400"
                 >
                   Gérer mes données personnelles →
                 </a>

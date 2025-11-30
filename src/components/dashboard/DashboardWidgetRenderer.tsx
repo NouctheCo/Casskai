@@ -470,7 +470,7 @@ export function DashboardWidgetRenderer({ widget, data = {}, isLoading = false, 
 
                   transition={{ repeat: Infinity, duration: 2 }}
 
-                  className="w-2 h-2 bg-blue-500 rounded-full"
+                  className="w-2 h-2 bg-blue-500 rounded-full dark:bg-blue-900/20"
 
                 />
 
@@ -580,7 +580,7 @@ export function DashboardWidgetRenderer({ widget, data = {}, isLoading = false, 
 
                     size="icon"
 
-                    className="h-6 w-6 hover:bg-red-100 dark:hover:bg-red-900/20 hover:text-red-600"
+                    className="h-6 w-6 hover:bg-red-100 dark:hover:bg-red-900/20 hover:text-red-600 dark:text-red-400"
 
                     onClick={handleRemove}
 
@@ -596,7 +596,7 @@ export function DashboardWidgetRenderer({ widget, data = {}, isLoading = false, 
 
                   <div
 
-                    className="cursor-move p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
+                    className="cursor-move p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors dark:bg-gray-900/50"
 
                     title="Déplacer ce widget"
 
@@ -852,7 +852,7 @@ export function TableWidget({ widget, data }: { widget: DashboardWidget; data: T
 
       {invoices.map((facture, index: number) => (
 
-        <div key={index} className="flex justify-between items-center p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+        <div key={index} className="flex justify-between items-center p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors dark:bg-gray-900/50">
 
           <div className="flex-grow min-w-0">
 

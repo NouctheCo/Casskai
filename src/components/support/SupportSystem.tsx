@@ -73,7 +73,7 @@ export function SupportSystem() {
         {supportType === 'chat' && (
           <div>
             <div className="space-y-4 mb-4">
-              <div className="bg-gray-100 p-3 rounded">
+              <div className="bg-gray-100 p-3 rounded dark:bg-gray-900/50">
                 <p className="text-sm">👋 Bonjour ! Comment puis-je vous aider ?</p>
               </div>
             </div>

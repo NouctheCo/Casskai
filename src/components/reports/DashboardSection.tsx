@@ -123,7 +123,7 @@ const FinancialMetrics: React.FC<{ data: ReportsDashboardData | null }> = ({ dat
     <MetricsCard
       title="Dépenses Totales"
       value={data?.key_metrics?.total_expenses_ytd || 0}
-      icon={<TrendingDown className="h-8 w-8 text-red-600" />}
+      icon={<TrendingDown className="h-8 w-8 text-red-600 dark:text-red-400" />}
       trend="+8.2%"
       color="text-red-600"
     />

@@ -277,12 +277,12 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
 
             {/* Weighted Amount Display */}
             {formData.amount && (
-              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 dark:bg-blue-900/20">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-blue-700">
+                  <span className="text-sm font-medium text-blue-700 dark:text-blue-400">
                     {t('crm.opportunity.fields.weightedAmount')}:
                   </span>
-                  <span className="text-lg font-bold text-blue-900">
+                  <span className="text-lg font-bold text-blue-900 dark:text-blue-100">
                     {new Intl.NumberFormat('fr-FR', {
                       style: 'currency',
                       currency: 'EUR',

@@ -362,7 +362,7 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
 
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">Pipeline des Ventes</h2>
 
-          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+          <p className="text-gray-600 dark:text-gray-300 dark:text-gray-300">
 
             Glissez-déposez les opportunités entre les étapes
 
@@ -396,7 +396,7 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">
 
                   Total opportunités
 
@@ -424,7 +424,7 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">
 
                   Valeur totale
 
@@ -456,7 +456,7 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">
 
                   Taux de conversion
 
@@ -492,7 +492,7 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">
 
                   En cours
 

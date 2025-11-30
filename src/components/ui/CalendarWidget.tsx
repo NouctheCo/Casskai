@@ -164,13 +164,13 @@ const CalendarWidget: React.FC<CalendarWidgetProps> = ({
         <div className="flex items-center space-x-1">
           <button
             onClick={() => navigateMonth('prev')}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
+            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded dark:bg-gray-900/50"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={() => navigateMonth('next')}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
+            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded dark:bg-gray-900/50"
           >
             <ChevronRight className="w-4 h-4" />
           </button>

@@ -162,7 +162,7 @@ const SecurityPage = () => {
             <Button
               onClick={() => navigate('/register')}
               size="lg"
-              className="bg-white dark:bg-gray-800 text-blue-900 hover:bg-gray-100"
+              className="bg-white dark:bg-gray-800 text-blue-900 hover:bg-gray-100 dark:bg-gray-900/50 dark:text-blue-100"
             >
               <Shield className="w-5 h-5 mr-2" />
               Commencer en toute sécurité
@@ -336,7 +336,7 @@ const SecurityPage = () => {
             <Button
               onClick={() => navigate('/register')}
               size="lg"
-              className="bg-white dark:bg-gray-800 text-blue-600 hover:bg-gray-100"
+              className="bg-white dark:bg-gray-800 text-blue-600 hover:bg-gray-100 dark:bg-gray-900/50"
             >
               Essai gratuit 14 jours
             </Button>
@@ -344,7 +344,7 @@ const SecurityPage = () => {
               onClick={() => navigate('/contact')}
               size="lg"
               variant="outline"
-              className="border-white text-white hover:bg-white/10"
+              className="border-white text-white hover:bg-white/10 dark:bg-gray-800"
             >
               Parler à un expert
             </Button>

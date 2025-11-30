@@ -103,7 +103,7 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 transition-colors"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 transition-colors dark:text-gray-300"
           >
             <X className="h-6 w-6" />
           </button>
@@ -241,14 +241,14 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
               <div className="mt-2 flex items-center justify-center w-full">
                 <label
                   htmlFor="receipt"
-                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors"
+                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors dark:bg-gray-900/30"
                 >
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     <Upload className="w-10 h-10 mb-3 text-gray-400 dark:text-gray-500" />
-                    <p className="mb-2 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                    <p className="mb-2 text-sm text-gray-500 dark:text-gray-300">
                       <span className="font-semibold">Cliquez pour télécharger</span> ou glissez-déposez
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">PDF, PNG, JPG (MAX. 10MB)</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-300">PDF, PNG, JPG (MAX. 10MB)</p>
                   </div>
                   <input
                     id="receipt"
@@ -258,7 +258,7 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
                   />
                 </label>
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-2">
+              <p className="text-sm text-gray-500 dark:text-gray-300 mt-2">
                 📎 Le justificatif sera disponible dans une prochaine version
               </p>
             </div>
@@ -276,8 +276,8 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
             </div>
 
             {/* Info */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-900">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 dark:bg-blue-900/20">
+              <p className="text-sm text-blue-900 dark:text-blue-100">
                 💡 <span className="font-semibold">Rappel :</span> Pensez à joindre le justificatif de la dépense pour faciliter le traitement de votre demande de remboursement.
               </p>
             </div>

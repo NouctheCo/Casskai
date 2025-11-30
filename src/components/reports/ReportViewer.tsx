@@ -144,7 +144,7 @@ export function ReportViewer() {
     return (
       <Card className="max-w-2xl mx-auto">
         <CardContent className="pt-6">
-          <div className="text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">
+          <div className="text-center text-gray-500 dark:text-gray-300">
             Veuillez sélectionner une entreprise pour générer des rapports.
           </div>
         </CardContent>
@@ -185,7 +185,7 @@ export function ReportViewer() {
                         }`} />
                         <div>
                           <h3 className="font-medium">{report.label}</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                          <p className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">
                             {report.description}
                           </p>
                         </div>

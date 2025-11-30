@@ -155,7 +155,7 @@ export const AuditLogsPage: React.FC = () => {
   if (!user) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500">{t('auditLogs.loginRequired')}</p>
+        <p className="text-gray-500 dark:text-gray-300">{t('auditLogs.loginRequired')}</p>
       </div>
     );
   }
@@ -170,7 +170,7 @@ export const AuditLogsPage: React.FC = () => {
               <Shield className="w-8 h-8 text-blue-600" />
               {t('auditLogs.title')}
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 mt-2">
+            <p className="text-gray-600 dark:text-gray-300 mt-2">
               {t('auditLogs.subtitle', { company: currentCompany?.name || t('common.yourCompany', 'votre entreprise') })}
             </p>
           </div>
@@ -179,7 +179,7 @@ export const AuditLogsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 transition-colors dark:bg-gray-900/50"
             >
               <Filter size={16} />
               {t('auditLogs.filters')}
@@ -207,7 +207,7 @@ export const AuditLogsPage: React.FC = () => {
 
         {/* Filtres */}
         {showFilters && (
-          <div className="mt-6 p-6 bg-gray-50 rounded-lg border border-gray-200 dark:border-gray-600">
+          <div className="mt-6 p-6 bg-gray-50 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-900/30">
             <h3 className="text-lg font-semibold mb-4">{t('auditLogs.searchFilters')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
@@ -320,8 +320,8 @@ export const AuditLogsPage: React.FC = () => {
 
       {/* Erreur */}
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3 dark:bg-red-900/20">
+          <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5 dark:text-red-400" />
           <div>
             <h3 className="font-semibold text-red-900">{t('auditLogs.error')}</h3>
             <p className="text-red-700 text-sm">{error}</p>
@@ -334,7 +334,7 @@ export const AuditLogsPage: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('auditLogs.stats.total')}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">{t('auditLogs.stats.total')}</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{logs.length}</p>
             </div>
             <Database className="w-8 h-8 text-blue-600" />
@@ -344,19 +344,19 @@ export const AuditLogsPage: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('auditLogs.stats.critical')}</p>
-              <p className="text-2xl font-bold text-red-600">
+              <p className="text-sm text-gray-600 dark:text-gray-300">{t('auditLogs.stats.critical')}</p>
+              <p className="text-2xl font-bold text-red-600 dark:text-red-400">
                 {logs.filter(l => l.security_level === 'critical' || l.security_level === 'high').length}
               </p>
             </div>
-            <Shield className="w-8 h-8 text-red-600" />
+            <Shield className="w-8 h-8 text-red-600 dark:text-red-400" />
           </div>
         </div>
 
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('auditLogs.stats.uniqueUsers')}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">{t('auditLogs.stats.uniqueUsers')}</p>
               <p className="text-2xl font-bold text-purple-600">
                 {new Set(logs.map(l => l.user_id).filter(Boolean)).size}
               </p>
@@ -368,7 +368,7 @@ export const AuditLogsPage: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('auditLogs.stats.today')}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">{t('auditLogs.stats.today')}</p>
               <p className="text-2xl font-bold text-green-600">
                 {logs.filter(l => {
                   const logDate = new Date(l.event_timestamp);
@@ -391,7 +391,7 @@ export const AuditLogsPage: React.FC = () => {
         ) : logs.length === 0 ? (
           <div className="text-center py-12">
             <Database className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-            <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500">{t('auditLogs.noLogs')}</p>
+            <p className="text-gray-500 dark:text-gray-300">{t('auditLogs.noLogs')}</p>
             <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
               {t('auditLogs.noLogsDesc')}
             </p>
@@ -399,31 +399,31 @@ export const AuditLogsPage: React.FC = () => {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200 dark:border-gray-600">
+              <thead className="bg-gray-50 border-b border-gray-200 dark:border-gray-600 dark:bg-gray-900/30">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     {t('auditLogs.columns.datetime')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     {t('auditLogs.columns.action')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     {t('auditLogs.columns.table')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     {t('auditLogs.columns.user')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     {t('auditLogs.columns.level')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     {t('auditLogs.columns.details')}
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200">
                 {logs.map((log) => (
-                  <tr key={log.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={log.id} className="hover:bg-gray-50 transition-colors dark:bg-gray-900/30">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                       {new Date(log.event_timestamp).toLocaleString('fr-FR', {
                         day: '2-digit',
@@ -440,18 +440,18 @@ export const AuditLogsPage: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                       {log.table_name || '-'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
                       {log.user_email || log.user_id?.substring(0, 8) || t('auditLogs.detailsPanel.system')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <SecurityBadge level={log.security_level} />
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 max-w-md">
+                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 max-w-md">
                       <details className="cursor-pointer">
                         <summary className="text-blue-600 hover:text-blue-800">
                           {t('auditLogs.columns.viewDetails')}
                         </summary>
-                        <div className="mt-2 p-3 bg-gray-50 rounded border border-gray-200 dark:border-gray-600">
+                        <div className="mt-2 p-3 bg-gray-50 rounded border border-gray-200 dark:border-gray-600 dark:bg-gray-900/30">
                           {log.changed_fields && log.changed_fields.length > 0 && (
                             <div className="mb-2">
                               <strong>{t('auditLogs.detailsPanel.changedFields')}</strong> {log.changed_fields.join(', ')}
@@ -474,7 +474,7 @@ export const AuditLogsPage: React.FC = () => {
                             </div>
                           )}
                           {log.ip_address && (
-                            <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                            <div className="mt-2 text-xs text-gray-500 dark:text-gray-300">
                               {t('auditLogs.detailsPanel.ip')} {log.ip_address}
                             </div>
                           )}
@@ -505,11 +505,11 @@ export const AuditLogsPage: React.FC = () => {
       </div>
 
       {/* Note de conformité */}
-      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <h3 className="text-sm font-semibold text-blue-900 mb-2">
+      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg dark:bg-blue-900/20">
+        <h3 className="text-sm font-semibold text-blue-900 mb-2 dark:text-blue-100">
           📋 {t('auditLogs.compliance.title')}
         </h3>
-        <p className="text-sm text-blue-700">
+        <p className="text-sm text-blue-700 dark:text-blue-400">
           {t('auditLogs.compliance.description')}
         </p>
       </div>

@@ -182,7 +182,7 @@ const SubscriptionWidget: React.FC = () => {
           {subscription.cancelAtPeriodEnd && (
             <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
               <div className="flex items-center space-x-2">
-                <AlertCircle className="w-4 h-4 text-red-600" />
+                <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
                 <p className="text-sm text-red-800 dark:text-red-400">
                   Annulation programmée le {subscription.currentPeriodEnd.toLocaleDateString('fr-FR')}
                 </p>

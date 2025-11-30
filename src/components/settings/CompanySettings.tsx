@@ -1080,7 +1080,7 @@ export function CompanySettings() {
 
           {settings.fiscalYear === 'custom' && (
 
-            <Card className="bg-blue-50 border-blue-200">
+            <Card className="bg-blue-50 border-blue-200 dark:bg-blue-900/20">
 
               <CardHeader>
 
@@ -1276,7 +1276,7 @@ export function CompanySettings() {
 
         <CardHeader>
 
-          <CardTitle className="flex items-center gap-2 text-red-600">
+          <CardTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
 
             <AlertTriangle className="h-5 w-5" />
 
@@ -1294,7 +1294,7 @@ export function CompanySettings() {
 
         <CardContent className="space-y-4">
 
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 dark:bg-red-900/20">
 
             <div className="flex items-start justify-between">
 
@@ -1402,7 +1402,7 @@ export function CompanySettings() {
 
             <CardHeader>
 
-              <CardTitle className="text-red-600">Suppression d'entreprise</CardTitle>
+              <CardTitle className="text-red-600 dark:text-red-400">Suppression d'entreprise</CardTitle>
 
               <CardDescription>
 

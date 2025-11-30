@@ -94,12 +94,12 @@ export function TemplatePreviewModal({ isOpen, onClose, template }: TemplatePrev
         <div className="flex items-center justify-between p-6 border-b">
           <div>
             <h2 className="text-2xl font-bold">Prévisualisation du Template</h2>
-            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">{template.name}</p>
+            <p className="text-gray-600 dark:text-gray-300">{template.name}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:text-gray-500"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300"
           >
             <X className="w-6 h-6" />
           </button>
@@ -167,7 +167,7 @@ export function TemplatePreviewModal({ isOpen, onClose, template }: TemplatePrev
                       />
                     )}
                     {variable.description && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">{variable.description}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-300 mt-1">{variable.description}</p>
                     )}
                   </div>
                 ))}
@@ -183,11 +183,11 @@ export function TemplatePreviewModal({ isOpen, onClose, template }: TemplatePrev
             </div>
 
             {/* Preview */}
-            <div className="p-6 bg-gray-50">
+            <div className="p-6 bg-gray-50 dark:bg-gray-900/30">
               <h3 className="text-lg font-semibold mb-4">Aperçu du Document</h3>
 
               {!showPreview ? (
-                <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-300">
                   <div className="text-center">
                     <Eye className="w-12 h-12 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
                     <p>Remplissez les variables et cliquez sur "Générer la prévisualisation"</p>
@@ -206,7 +206,7 @@ export function TemplatePreviewModal({ isOpen, onClose, template }: TemplatePrev
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t bg-gray-50">
+        <div className="flex items-center justify-end gap-3 p-6 border-t bg-gray-50 dark:bg-gray-900/30">
           <Button variant="outline" onClick={onClose}>
             Fermer
           </Button>

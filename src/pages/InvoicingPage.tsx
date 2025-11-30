@@ -204,7 +204,7 @@ const RecentInvoicingActivities = ({ t }) => {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 dark:bg-gray-900/30"
               >
                 <div className={`w-8 h-8 rounded-lg ${
                   activity.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/20' :
@@ -462,7 +462,7 @@ export default function InvoicingPageOptimized() {
                 )}
                 <Button 
                   variant="outline" 
-                  className="bg-white dark:bg-gray-800 dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                  className="bg-white dark:bg-gray-800 dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 dark:bg-gray-900/30"
                   disabled={isLoading}
                 >
                   <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />

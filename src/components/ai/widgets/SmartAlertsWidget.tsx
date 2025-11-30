@@ -268,7 +268,7 @@ export const SmartAlertsWidget: React.FC<SmartAlertsWidgetProps> = ({
               {/* Indicateur non lu */}
               {!alert.isRead && (
                 <div className="absolute top-2 right-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                  <div className="w-2 h-2 bg-blue-500 rounded-full dark:bg-blue-900/20" />
                 </div>
               )}
 

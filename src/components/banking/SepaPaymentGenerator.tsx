@@ -398,7 +398,7 @@ export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onCl
       )}
 
       {/* Informations */}
-      <Card className="bg-blue-50 border-blue-200">
+      <Card className="bg-blue-50 border-blue-200 dark:bg-blue-900/20">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
             <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />

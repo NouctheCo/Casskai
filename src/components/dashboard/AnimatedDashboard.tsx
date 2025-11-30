@@ -429,7 +429,7 @@ export const AnimatedDashboard: React.FC<AnimatedDashboardProps> = ({
         <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
           Aucune donnée disponible
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 max-w-md">
+        <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 max-w-md">
           Commencez par saisir vos premières écritures comptables pour voir apparaître vos statistiques.
         </p>
       </div>
@@ -462,7 +462,7 @@ export const AnimatedDashboard: React.FC<AnimatedDashboardProps> = ({
 
             </h1>
 
-            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mt-2">
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mt-2">
 
               Vue d'ensemble de votre activité
 
@@ -482,7 +482,7 @@ export const AnimatedDashboard: React.FC<AnimatedDashboardProps> = ({
 
               transition={{ delay: 0.3, duration: 0.4 }}
 
-              className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded-lg"
+              className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded-lg"
 
             >
 

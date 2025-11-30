@@ -463,7 +463,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <TrendingDown className="h-4 w-4 text-red-600" />
+              <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
               <span className="text-2xl font-bold">{totals.payablesTotal.toFixed(2)} €</span>
             </div>
           </CardContent>
@@ -493,8 +493,8 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-red-600" />
-              <span className="text-2xl font-bold text-red-600">
+              <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+              <span className="text-2xl font-bold text-red-600 dark:text-red-400">
                 {totals.overduePayables.toFixed(2)} €
               </span>
             </div>
@@ -671,7 +671,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
                         {transaction.due_date ? (
                           <div className="flex items-center gap-1">
                             {transaction.days_overdue && transaction.days_overdue > 0 && (
-                              <Clock className="h-3 w-3 text-red-600" />
+                              <Clock className="h-3 w-3 text-red-600 dark:text-red-400" />
                             )}
                             {new Date(transaction.due_date).toLocaleDateString('fr-FR')}
                           </div>

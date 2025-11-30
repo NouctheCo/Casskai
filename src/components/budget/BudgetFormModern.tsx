@@ -248,7 +248,7 @@ export const BudgetFormModern: React.FC<BudgetFormModernProps> = ({
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-gray-100">
             {budgetId ? 'Modifier le budget' : 'Nouveau budget'} {formData.year}
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mt-1">
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mt-1">
             Définissez vos objectifs financiers par catégorie
           </p>
         </div>
@@ -295,15 +295,15 @@ export const BudgetFormModern: React.FC<BudgetFormModernProps> = ({
               <TrendingUp className="w-5 h-5 text-green-600" />
               <span className="text-sm font-medium text-green-600">Revenus</span>
             </div>
-            <p className="text-2xl font-bold text-green-700">{formatCurrency(totals.revenue)}</p>
+            <p className="text-2xl font-bold text-green-700 dark:text-green-400">{formatCurrency(totals.revenue)}</p>
           </CardContent>
         </Card>
 
         <Card className="bg-red-50 dark:bg-red-900/20 border-red-200">
           <CardContent className="p-4">
             <div className="flex items-center space-x-2 mb-2">
-              <BarChart3 className="w-5 h-5 text-red-600" />
-              <span className="text-sm font-medium text-red-600">Charges</span>
+              <BarChart3 className="w-5 h-5 text-red-600 dark:text-red-400" />
+              <span className="text-sm font-medium text-red-600 dark:text-red-400">Charges</span>
             </div>
             <p className="text-2xl font-bold text-red-700">{formatCurrency(totals.expenses)}</p>
           </CardContent>
@@ -315,7 +315,7 @@ export const BudgetFormModern: React.FC<BudgetFormModernProps> = ({
               <DollarSign className="w-5 h-5 text-blue-600" />
               <span className="text-sm font-medium text-blue-600">Bénéfice</span>
             </div>
-            <p className="text-2xl font-bold text-blue-700">{formatCurrency(totals.profit)}</p>
+            <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">{formatCurrency(totals.profit)}</p>
           </CardContent>
         </Card>
 
@@ -387,7 +387,7 @@ export const BudgetFormModern: React.FC<BudgetFormModernProps> = ({
                       variant="ghost"
                       size="sm"
                       onClick={() => removeCategory(index)}
-                      className="text-red-600 hover:bg-red-50"
+                      className="text-red-600 hover:bg-red-50 dark:bg-red-900/20 dark:text-red-400"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -436,7 +436,7 @@ export const BudgetFormModern: React.FC<BudgetFormModernProps> = ({
             <Card className="border-dashed border-2">
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <Calculator className="w-16 h-16 text-gray-400 dark:text-gray-500 mb-4" />
-                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-4">
+                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-4">
                   Aucune catégorie budgétaire
                 </p>
                 <Button onClick={addCategory} size="sm">

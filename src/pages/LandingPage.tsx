@@ -293,7 +293,7 @@ const HeroSection = () => {
 
             {/* Description */}
 
-            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 dark:text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
 
               {t('landing.hero.description', 'CassKai révolutionne la gestion d\'entreprise avec une suite complète : comptabilité, facturation, CRM, projets, RH et bien plus. Tout en un, simple et puissant.')}
 
@@ -375,7 +375,7 @@ const HeroSection = () => {
 
                 onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
 
-                className="px-10 py-6 text-lg font-semibold border-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl"
+                className="px-10 py-6 text-lg font-semibold border-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl dark:bg-gray-900/30"
 
               >
 
@@ -441,7 +441,7 @@ const HeroSection = () => {
 
                 </div>
 
-                <div className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 font-medium">
+                <div className="text-gray-600 dark:text-gray-300 dark:text-gray-300 font-medium">
 
                   {stat.label}
 
@@ -729,7 +729,7 @@ const AdvantagesSection = () => {
 
                 size="lg"
 
-                className="bg-white dark:bg-gray-800 text-green-600 hover:bg-gray-100 px-8 py-3 font-semibold"
+                className="bg-white dark:bg-gray-800 text-green-600 hover:bg-gray-100 px-8 py-3 font-semibold dark:bg-gray-900/50"
 
               >
 
@@ -899,7 +899,7 @@ const FeaturesSection = () => {
 
           
 
-          <p className="text-xl text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-300 dark:text-gray-300 max-w-3xl mx-auto">
 
             {t('landing.features.description', 'CassKai réunit tous les outils essentiels à la gestion de votre entreprise dans une interface moderne et intuitive.')}
 
@@ -959,7 +959,7 @@ const FeaturesSection = () => {
 
                   <CardContent>
 
-                    <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 mb-6 leading-relaxed">
+                    <p className="text-gray-600 dark:text-gray-300 dark:text-gray-300 mb-6 leading-relaxed">
 
                       {feature.description}
 
@@ -969,7 +969,7 @@ const FeaturesSection = () => {
 
                       {feature.details.map((detail, idx) => (
 
-                        <li key={idx} className="flex items-center text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">
+                        <li key={idx} className="flex items-center text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">
 
                           <CheckCircle className="w-4 h-4 text-green-500 mr-3 flex-shrink-0" />
 
@@ -1061,7 +1061,7 @@ const FeaturesSection = () => {
 
                 </h3>
 
-                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">
+                <p className="text-gray-600 dark:text-gray-300 dark:text-gray-300">
 
                   {benefit.description}
 
@@ -1331,7 +1331,7 @@ const PricingSection = () => {
 
           
 
-          <p className="text-xl text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 max-w-3xl mx-auto mb-8">
+          <p className="text-xl text-gray-600 dark:text-gray-300 dark:text-gray-300 max-w-3xl mx-auto mb-8">
 
             {t('landing.pricing.description', 'Tous nos plans incluent un essai gratuit de 30 jours, sans engagement et sans carte bancaire.')}
 
@@ -1465,7 +1465,7 @@ const PricingSection = () => {
 
                     
 
-                    <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 mb-6">
+                    <p className="text-gray-600 dark:text-gray-300 dark:text-gray-300 mb-6">
 
                       {plan.description}
 
@@ -1483,7 +1483,7 @@ const PricingSection = () => {
 
                           <div className="flex items-center justify-center mb-1">
 
-                            <span className="text-lg text-gray-500 dark:text-gray-400 dark:text-gray-500 mr-2">{plan.countryFlag}</span>
+                            <span className="text-lg text-gray-500 dark:text-gray-300 mr-2">{plan.countryFlag}</span>
 
                           </div>
 
@@ -1495,7 +1495,7 @@ const PricingSection = () => {
 
                             </span>
 
-                            <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 ml-2">
+                            <span className="text-gray-600 dark:text-gray-300 dark:text-gray-300 ml-2">
 
                               /mois
 
@@ -1503,7 +1503,7 @@ const PricingSection = () => {
 
                           </div>
 
-                          <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
+                          <div className="text-sm text-gray-500 dark:text-gray-300 mt-1">
 
                             Facturé {formatPriceWithCurrency(plan.price, plan.currency)} annuellement
 
@@ -1511,7 +1511,7 @@ const PricingSection = () => {
 
                           <div className="flex items-center justify-center mt-2">
 
-                            <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 line-through mr-2">
+                            <span className="text-sm text-gray-500 dark:text-gray-300 line-through mr-2">
 
                               {formatPriceWithCurrency(plan.displayMonthlyOriginalPrice, plan.currency)}/mois
 
@@ -1535,7 +1535,7 @@ const PricingSection = () => {
 
                           <div className="flex items-center justify-center mb-1">
 
-                            <span className="text-lg text-gray-500 dark:text-gray-400 dark:text-gray-500 mr-2">{plan.countryFlag}</span>
+                            <span className="text-lg text-gray-500 dark:text-gray-300 mr-2">{plan.countryFlag}</span>
 
                           </div>
 
@@ -1547,7 +1547,7 @@ const PricingSection = () => {
 
                             </span>
 
-                            <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 ml-2">
+                            <span className="text-gray-600 dark:text-gray-300 dark:text-gray-300 ml-2">
 
                               {plan.period}
 
@@ -1557,7 +1557,7 @@ const PricingSection = () => {
 
                           <div className="flex items-center justify-center mt-2">
 
-                            <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 line-through mr-2">
+                            <span className="text-sm text-gray-500 dark:text-gray-300 line-through mr-2">
 
                               {formatPriceWithCurrency(plan.originalPrice, plan.currency)}
 
@@ -1707,7 +1707,7 @@ const PricingSection = () => {
 
                 </h3>
 
-                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">
+                <p className="text-gray-600 dark:text-gray-300 dark:text-gray-300">
 
                   {guarantee.description}
 
@@ -1827,7 +1827,7 @@ const TestimonialsSection = () => {
 
 
 
-          <p className="text-xl text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-300 dark:text-gray-300 max-w-3xl mx-auto">
 
             {t('landing.testimonials.description', 'Retours honnêtes de nos premiers utilisateurs et des professionnels qui testent CassKai.')}
 
@@ -1913,13 +1913,13 @@ const TestimonialsSection = () => {
 
                         </div>
 
-                        <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">
+                        <div className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">
 
                           {testimonial.position}
 
                         </div>
 
-                        <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                        <div className="text-sm text-gray-500 dark:text-gray-300 dark:text-gray-300">
 
                           {testimonial.company}
 
@@ -1993,7 +1993,7 @@ const ContactSection = () => {
 
           
 
-          <p className="text-xl text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-300 dark:text-gray-300 max-w-3xl mx-auto">
 
             {t('landing.contact.description', 'Notre équipe d\'experts est disponible pour répondre à toutes vos questions et vous accompagner dans votre réussite.')}
 
@@ -2081,7 +2081,7 @@ const ContactSection = () => {
 
                 </p>
 
-                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                <p className="text-gray-600 dark:text-gray-300 dark:text-gray-300">
 
                   {contact.description}
 
@@ -2425,7 +2425,7 @@ const Footer = () => {
 
               <p>© {new Date().getFullYear()} CassKai - Édité par Noutche Conseil SAS. {t('landing.footer.copyright', 'Tous droits réservés.')}</p>
 
-              <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">{t('landing.footer.legalNotice')}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-300 mt-1">{t('landing.footer.legalNotice')}</p>
 
             </div>
 
@@ -2528,7 +2528,7 @@ const LandingPage = () => {
 
                 transition={{ delay: 0.1 }}
 
-                className="text-xl text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 max-w-3xl mx-auto"
+                className="text-xl text-gray-600 dark:text-gray-300 dark:text-gray-300 max-w-3xl mx-auto"
 
               >
 
@@ -2566,7 +2566,7 @@ const LandingPage = () => {
 
                     <h3 className="font-bold text-lg">PCG</h3>
 
-                    <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Plan Comptable Général</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-300">Plan Comptable Général</p>
 
                   </div>
 
@@ -2600,7 +2600,7 @@ const LandingPage = () => {
 
                 </div>
 
-                <div className="mt-4 pt-4 border-t text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                <div className="mt-4 pt-4 border-t text-xs text-gray-500 dark:text-gray-300">
 
                   Classes 1-7 • TVA européenne • Normes ANC
 
@@ -2634,7 +2634,7 @@ const LandingPage = () => {
 
                     <h3 className="font-bold text-lg">SYSCOHADA</h3>
 
-                    <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">17 pays OHADA</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-300">17 pays OHADA</p>
 
                   </div>
 
@@ -2656,7 +2656,7 @@ const LandingPage = () => {
 
                 </div>
 
-                <div className="mt-4 pt-4 border-t text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                <div className="mt-4 pt-4 border-t text-xs text-gray-500 dark:text-gray-300">
 
                   Classes 1-9 • Classe 8 HAO • XOF/XAF
 
@@ -2690,7 +2690,7 @@ const LandingPage = () => {
 
                     <h3 className="font-bold text-lg">SCF / PCG Adapté</h3>
 
-                    <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Maghreb</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-300">Maghreb</p>
 
                   </div>
 
@@ -2724,7 +2724,7 @@ const LandingPage = () => {
 
                 </div>
 
-                <div className="mt-4 pt-4 border-t text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                <div className="mt-4 pt-4 border-t text-xs text-gray-500 dark:text-gray-300">
 
                   Inspiré IFRS • DZD/MAD/TND
 
@@ -2758,7 +2758,7 @@ const LandingPage = () => {
 
                     <h3 className="font-bold text-lg">IFRS</h3>
 
-                    <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Afrique anglophone</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-300">Afrique anglophone</p>
 
                   </div>
 
@@ -2780,7 +2780,7 @@ const LandingPage = () => {
 
                 </div>
 
-                <div className="mt-4 pt-4 border-t text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                <div className="mt-4 pt-4 border-t text-xs text-gray-500 dark:text-gray-300">
 
                   Standards internationaux • Multi-devises
 

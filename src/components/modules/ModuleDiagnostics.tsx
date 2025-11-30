@@ -236,7 +236,7 @@ const ModuleDiagnostics: React.FC = () => {
   const getStatusIcon = (status: TestResult['status']) => {
     switch (status) {
       case 'passed': return <CheckCircle className="w-5 h-5 text-green-600" />;
-      case 'failed': return <XCircle className="w-5 h-5 text-red-600" />;
+      case 'failed': return <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />;
       case 'running': return <RefreshCw className="w-5 h-5 text-blue-600 animate-spin" />;
       case 'pending': return <Clock className="w-5 h-5 text-gray-400 dark:text-gray-500" />;
     }
@@ -265,7 +265,7 @@ const ModuleDiagnostics: React.FC = () => {
       <div className="p-6">
         <div className="flex items-center justify-center h-64">
           <RefreshCw className="w-8 h-8 animate-spin text-gray-400 dark:text-gray-500" />
-          <span className="ml-2 text-gray-600 dark:text-gray-400 dark:text-gray-500">Chargement des diagnostics...</span>
+          <span className="ml-2 text-gray-600 dark:text-gray-300">Chargement des diagnostics...</span>
         </div>
       </div>
     );
@@ -277,7 +277,7 @@ const ModuleDiagnostics: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Diagnostics Modulaires</h1>
-          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 mt-1">
+          <p className="text-gray-600 dark:text-gray-300 mt-1">
             État de santé et tests du système modulaire
           </p>
         </div>
@@ -380,7 +380,7 @@ const ModuleDiagnostics: React.FC = () => {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 mt-1">{test.message}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{test.message}</p>
                   </div>
                 </div>
               ))}
@@ -388,8 +388,8 @@ const ModuleDiagnostics: React.FC = () => {
               {tests.length === 0 && (
                 <div className="text-center py-8">
                   <Activity className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-                  <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Aucun test exécuté</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
+                  <p className="text-gray-600 dark:text-gray-300">Aucun test exécuté</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-300 mt-1">
                     Cliquez sur "Lancer les tests" pour commencer les diagnostics
                   </p>
                 </div>
@@ -411,13 +411,13 @@ const ModuleDiagnostics: React.FC = () => {
               <CardContent>
                 <div className="space-y-2">
                   {activeModules.map((module) => (
-                    <div key={module.id} className="flex items-center justify-between p-2 bg-green-50 rounded">
+                    <div key={module.id} className="flex items-center justify-between p-2 bg-green-50 rounded dark:bg-green-900/20">
                       <span className="font-medium">{module.name}</span>
                       <Badge className="bg-green-100 text-green-800">v{module.version}</Badge>
                     </div>
                   ))}
                   {activeModules.length === 0 && (
-                    <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500 text-center py-4">Aucun module actif</p>
+                    <p className="text-gray-500 dark:text-gray-300 text-center py-4">Aucun module actif</p>
                   )}
                 </div>
               </CardContent>
@@ -433,7 +433,7 @@ const ModuleDiagnostics: React.FC = () => {
               <CardContent>
                 <div className="space-y-2">
                   {availableModules.filter(m => !activeModules.find(a => a.id === m.id)).map((module) => (
-                    <div key={module.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                    <div key={module.id} className="flex items-center justify-between p-2 bg-gray-50 rounded dark:bg-gray-900/30">
                       <span className="font-medium">{module.name}</span>
                       <Badge variant="outline">v{module.version}</Badge>
                     </div>
@@ -457,7 +457,7 @@ const ModuleDiagnostics: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold">{performanceMetrics.loadTime}ms</div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
                     {performanceMetrics.loadTime < 1000 ? 'Excellent' : 
                      performanceMetrics.loadTime < 2000 ? 'Bon' : 'À améliorer'}
                   </p>
@@ -494,8 +494,8 @@ const ModuleDiagnostics: React.FC = () => {
             <Card>
               <CardContent className="text-center py-8">
                 <Activity className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Aucune donnée de performance disponible</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
+                <p className="text-gray-600 dark:text-gray-300">Aucune donnée de performance disponible</p>
+                <p className="text-sm text-gray-500 dark:text-gray-300 mt-1">
                   Lancez les tests pour générer des métriques de performance
                 </p>
               </CardContent>

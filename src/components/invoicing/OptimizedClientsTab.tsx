@@ -422,7 +422,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
             <div>
 
-              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Nom complet</Label>
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">Nom complet</Label>
 
               <p className="text-lg font-semibold">{client.name}</p>
 
@@ -430,7 +430,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
             <div>
 
-              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Entreprise</Label>
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">Entreprise</Label>
 
               <p className="text-base">{client.company || 'N/A'}</p>
 
@@ -454,7 +454,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
                 <div>
 
-                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Email</Label>
+                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">Email</Label>
 
                   <p className="text-base">{client.email}</p>
 
@@ -472,7 +472,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
                   <div>
 
-                    <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Téléphone</Label>
+                    <Label className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">Téléphone</Label>
 
                     <p className="text-base">{client.phone}</p>
 
@@ -506,7 +506,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
                   {(client.city || client.postalCode || client.country) && (
 
-                    <p className="text-base text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                    <p className="text-base text-gray-600 dark:text-gray-300 dark:text-gray-300">
 
                       {[client.postalCode, client.city].filter(Boolean).join(' ')}
 
@@ -538,7 +538,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
                 <FileText className="w-6 h-6 text-blue-500 mx-auto mb-2" />
 
-                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Factures</Label>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">Factures</Label>
 
                 <p className="text-xl font-bold">{client.invoicesCount}</p>
 
@@ -550,7 +550,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
                 <Euro className="w-6 h-6 text-green-500 mx-auto mb-2" />
 
-                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">CA total</Label>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">CA total</Label>
 
                 <p className="text-xl font-bold">{client.totalAmount.toFixed(2)} €</p>
 
@@ -562,7 +562,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
                 <Building className="w-6 h-6 text-purple-500 mx-auto mb-2" />
 
-                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">CA moyen</Label>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">CA moyen</Label>
 
                 <p className="text-xl font-bold">
 
@@ -602,13 +602,13 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
           <div className="border-t pt-4">
 
-            <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Historique</Label>
+            <Label className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">Historique</Label>
 
             <div className="mt-2 space-y-2">
 
               <div className="flex items-center space-x-3 text-sm">
 
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full dark:bg-blue-900/20"></div>
 
                 <span>Client créé le {new Date(client.createdAt).toLocaleDateString('fr-FR')}</span>
 
@@ -618,7 +618,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
                 <div className="flex items-center space-x-3 text-sm">
 
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div className="w-2 h-2 bg-green-500 rounded-full dark:bg-green-900/20"></div>
 
                   <span>{client.invoicesCount} facture{client.invoicesCount > 1 ? 's' : ''} émise{client.invoicesCount > 1 ? 's' : ''}</span>
 
@@ -660,7 +660,7 @@ const ClientRow = ({ client, onEdit, onDelete, onView }) => {
 
   return (
 
-    <TableRow className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+    <TableRow className="hover:bg-gray-50 dark:hover:bg-gray-800/50 dark:bg-gray-900/30">
 
       <TableCell>
 
@@ -670,7 +670,7 @@ const ClientRow = ({ client, onEdit, onDelete, onView }) => {
 
           {client.company && (
 
-            <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{client.company}</div>
+            <div className="text-sm text-gray-500 dark:text-gray-300 dark:text-gray-300">{client.company}</div>
 
           )}
 
@@ -692,7 +692,7 @@ const ClientRow = ({ client, onEdit, onDelete, onView }) => {
 
           {client.phone && (
 
-            <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+            <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-300 dark:text-gray-300">
 
               <Phone className="w-3 h-3 text-gray-400 dark:text-gray-500" />
 
@@ -1102,7 +1102,7 @@ export default function OptimizedClientsTab() {
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Total clients</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">Total clients</p>
 
                 <p className="text-2xl font-bold">{summary.totalClients}</p>
 
@@ -1126,7 +1126,7 @@ export default function OptimizedClientsTab() {
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Clients actifs</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">Clients actifs</p>
 
                 <p className="text-2xl font-bold">{summary.activeClients}</p>
 
@@ -1150,7 +1150,7 @@ export default function OptimizedClientsTab() {
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">CA total</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">CA total</p>
 
                 <p className="text-xl font-bold">{summary.totalRevenue.toFixed(2)} €</p>
 
@@ -1174,7 +1174,7 @@ export default function OptimizedClientsTab() {
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">CA moyen</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">CA moyen</p>
 
                 <p className="text-xl font-bold">{summary.averageRevenue.toFixed(2)} €</p>
 
@@ -1300,7 +1300,7 @@ export default function OptimizedClientsTab() {
 
                       <Users className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 mb-2" />
 
-                      <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                      <p className="text-gray-600 dark:text-gray-300 dark:text-gray-300">
 
                         {searchTerm ? 'Aucun client trouvé' : 'Aucun client. Commencez par en créer un !'}
 

@@ -138,7 +138,7 @@ export function Header({
 
                 onClick={onMenuClick}
 
-                className="md:hidden hover:bg-white/20 dark:hover:bg-gray-800/20"
+                className="md:hidden hover:bg-white/20 dark:hover:bg-gray-800/20 dark:bg-gray-800"
 
               >
 
@@ -169,7 +169,7 @@ export function Header({
 
               >
 
-                <span className="text-sm text-gray-700 dark:text-gray-300 dark:text-gray-200 font-semibold">
+                <span className="text-sm text-gray-700 dark:text-gray-200 font-semibold">
 
                   {displayCompany.name}
 
@@ -220,7 +220,7 @@ export function Header({
 
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
 
-              <kbd className="hidden sm:inline-block px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 dark:text-gray-400 dark:text-gray-500 rounded border border-gray-200 dark:border-gray-600 dark:border-gray-600">
+              <kbd className="hidden sm:inline-block px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 dark:text-gray-300 rounded border border-gray-200 dark:border-gray-600 dark:border-gray-600">
 
                 ⌘K
 
@@ -276,7 +276,7 @@ export function Header({
 
             >
 
-              <Button variant="ghost" size="icon" className="hover:bg-white/20 dark:hover:bg-gray-800/20 min-h-[44px] min-w-[44px] touch-manipulation">
+              <Button variant="ghost" size="icon" className="hover:bg-white/20 dark:hover:bg-gray-800/20 min-h-[44px] min-w-[44px] touch-manipulation dark:bg-gray-800">
 
                 <Search className="h-5 w-5" />
 
@@ -304,7 +304,7 @@ export function Header({
 
               size="icon"
 
-              className="relative hover:bg-white/20 dark:hover:bg-gray-800/20 min-h-[44px] min-w-[44px] touch-manipulation"
+              className="relative hover:bg-white/20 dark:hover:bg-gray-800/20 min-h-[44px] min-w-[44px] touch-manipulation dark:bg-gray-800"
 
               onClick={() => setNotificationOpen(!isNotificationOpen)}
 
@@ -316,7 +316,7 @@ export function Header({
 
                 <motion.span
 
-                  className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full text-xs text-white flex items-center justify-center font-medium"
+                  className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full text-xs text-white flex items-center justify-center font-medium dark:bg-red-900/20"
 
                   initial={{ scale: 0 }}
 
@@ -354,7 +354,7 @@ export function Header({
 
               size="icon" 
 
-              className="hover:bg-white/20 dark:hover:bg-gray-800/20"
+              className="hover:bg-white/20 dark:hover:bg-gray-800/20 dark:bg-gray-800"
 
               asChild
 
@@ -418,7 +418,7 @@ export function Header({
 
               >
 
-                <Button variant="ghost" className="flex items-center space-x-2 hover:bg-white/20 dark:hover:bg-gray-800/20 px-3">
+                <Button variant="ghost" className="flex items-center space-x-2 hover:bg-white/20 dark:hover:bg-gray-800/20 px-3 dark:bg-gray-800">
 
                   <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center">
 
@@ -426,7 +426,7 @@ export function Header({
 
                   </div>
 
-                  <ChevronDown className="h-4 w-4 text-gray-500 dark:text-gray-400 dark:text-gray-500" />
+                  <ChevronDown className="h-4 w-4 text-gray-500 dark:text-gray-300" />
 
                 </Button>
 
@@ -454,7 +454,7 @@ export function Header({
 
                   </p>
 
-                  <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                  <p className="text-xs text-gray-500 dark:text-gray-300 dark:text-gray-300">
 
                     {user?.email || t('header.noEmail', { defaultValue: 'pas d\'email' })}
 
@@ -464,7 +464,7 @@ export function Header({
 
                 <DropdownMenuItem 
 
-                  className="hover:bg-white/20 dark:hover:bg-gray-800/20"
+                  className="hover:bg-white/20 dark:hover:bg-gray-800/20 dark:bg-gray-800"
 
                   asChild
 
@@ -480,7 +480,7 @@ export function Header({
 
                 <DropdownMenuItem 
 
-                  className="hover:bg-white/20 dark:hover:bg-gray-800/20 flex items-center gap-2"
+                  className="hover:bg-white/20 dark:hover:bg-gray-800/20 flex items-center gap-2 dark:bg-gray-800"
 
                   asChild
 
@@ -498,7 +498,7 @@ export function Header({
 
                 <DropdownMenuItem 
 
-                  className="hover:bg-white/20 dark:hover:bg-gray-800/20"
+                  className="hover:bg-white/20 dark:hover:bg-gray-800/20 dark:bg-gray-800"
 
                   asChild
 
@@ -516,7 +516,7 @@ export function Header({
 
                 <DropdownMenuItem 
 
-                  className="hover:bg-white/20 dark:hover:bg-gray-800/20"
+                  className="hover:bg-white/20 dark:hover:bg-gray-800/20 dark:bg-gray-800"
 
                   asChild
 
@@ -534,7 +534,7 @@ export function Header({
 
                 <DropdownMenuItem 
 
-                  className="hover:bg-white/20 dark:hover:bg-gray-800/20 text-red-600 dark:text-red-400"
+                  className="hover:bg-white/20 dark:hover:bg-gray-800/20 text-red-600 dark:text-red-400 dark:bg-gray-800"
 
                   onClick={async () => {
 

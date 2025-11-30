@@ -119,7 +119,7 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 transition-colors"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 transition-colors dark:text-gray-300"
           >
             <X className="h-6 w-6" />
           </button>
@@ -204,8 +204,8 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
 
             {/* Durée calculée */}
             {daysCount > 0 && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm font-medium text-blue-900">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 dark:bg-blue-900/20">
+                <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
                   Durée : <span className="text-lg font-bold">{daysCount}</span> jour{daysCount > 1 ? 's' : ''}
                 </p>
               </div>
@@ -236,8 +236,8 @@ export const LeaveFormModal: React.FC<LeaveFormModalProps> = ({
             </div>
 
             {/* Info */}
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-              <p className="text-sm text-amber-900">
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 dark:bg-amber-900/20">
+              <p className="text-sm text-amber-900 dark:text-amber-100">
                 ℹ️ La demande sera soumise pour approbation au responsable RH.
               </p>
             </div>

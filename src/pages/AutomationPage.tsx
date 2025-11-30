@@ -27,7 +27,7 @@ export default function AutomationPage() {
             <div className="text-center space-y-4">
               <Lock className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto" />
               <h2 className="text-xl font-semibold">Accès requis</h2>
-              <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+              <p className="text-gray-600 dark:text-gray-300 dark:text-gray-300">
                 Veuillez vous connecter et sélectionner une entreprise pour accéder aux workflows d'automatisation.
               </p>
             </div>

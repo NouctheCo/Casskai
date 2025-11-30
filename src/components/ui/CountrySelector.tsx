@@ -106,7 +106,7 @@ const CountrySelectItem: React.FC<{ country: CountryPricing }> = ({ country }) =
   return (
     <SelectItem
       value={country.countryCode}
-      className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+      className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900/30"
     >
       <motion.div
         className="flex items-center justify-between w-full"

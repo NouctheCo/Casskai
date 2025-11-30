@@ -162,9 +162,9 @@ const ForecastChartView: React.FC<ForecastChartViewProps> = ({
       </div>
 
       <div className="mt-4 grid grid-cols-3 gap-4">
-        <div className="text-center p-3 bg-green-50 rounded-lg">
+        <div className="text-center p-3 bg-green-50 rounded-lg dark:bg-green-900/20">
           <div className="flex items-center justify-center mb-1">
-            <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+            <div className="w-3 h-3 bg-green-500 rounded-full mr-2 dark:bg-green-900/20"></div>
             <span className="text-sm font-medium text-green-800">Revenus Annuels</span>
           </div>
           <p className="text-lg font-bold text-green-600">
@@ -172,19 +172,19 @@ const ForecastChartView: React.FC<ForecastChartViewProps> = ({
           </p>
         </div>
         
-        <div className="text-center p-3 bg-red-50 rounded-lg">
+        <div className="text-center p-3 bg-red-50 rounded-lg dark:bg-red-900/20">
           <div className="flex items-center justify-center mb-1">
-            <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+            <div className="w-3 h-3 bg-red-500 rounded-full mr-2 dark:bg-red-900/20"></div>
             <span className="text-sm font-medium text-red-800">Dépenses Annuelles</span>
           </div>
-          <p className="text-lg font-bold text-red-600">
+          <p className="text-lg font-bold text-red-600 dark:text-red-400">
             {formatCurrency(forecast.total_expenses)}
           </p>
         </div>
         
-        <div className="text-center p-3 bg-blue-50 rounded-lg">
+        <div className="text-center p-3 bg-blue-50 rounded-lg dark:bg-blue-900/20">
           <div className="flex items-center justify-center mb-1">
-            <div className="w-3 h-0.5 bg-blue-500 mr-2 border-dashed border"></div>
+            <div className="w-3 h-0.5 bg-blue-500 mr-2 border-dashed border dark:bg-blue-900/20"></div>
             <span className="text-sm font-medium text-blue-800">Bénéfice Net</span>
           </div>
           <p className="text-lg font-bold text-blue-600">

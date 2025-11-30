@@ -412,7 +412,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
 
           <RefreshCw className="w-12 h-12 text-blue-600 dark:text-blue-400 animate-spin" />
 
-          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Chargement des budgets...</p>
+          <p className="text-gray-600 dark:text-gray-300 dark:text-gray-300">Chargement des budgets...</p>
 
         </div>
 
@@ -440,7 +440,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
 
           </h1>
 
-          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mt-1">
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mt-1">
 
             Créez et gérez vos budgets annuels avec suivi en temps réel
 
@@ -548,7 +548,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
 
             <DialogTitle className="text-gray-900 dark:text-gray-100 dark:text-gray-100">Créer un nouveau budget</DialogTitle>
 
-            <DialogDescription className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+            <DialogDescription className="text-gray-600 dark:text-gray-300 dark:text-gray-300">
 
               Choisissez comment créer votre budget
 
@@ -580,7 +580,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
 
                 <div className="font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">Partir de zéro</div>
 
-                <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Créer un budget vierge</div>
+                <div className="text-sm text-gray-500 dark:text-gray-300 dark:text-gray-300">Créer un budget vierge</div>
 
               </div>
 
@@ -600,7 +600,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
 
                 <div className="font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">Utiliser un modèle</div>
 
-                <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Basé sur des templates sectoriels</div>
+                <div className="text-sm text-gray-500 dark:text-gray-300 dark:text-gray-300">Basé sur des templates sectoriels</div>
 
               </div>
 
@@ -620,7 +620,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
 
                 <div className="font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">Dupliquer budget existant</div>
 
-                <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Reprendre un budget précédent</div>
+                <div className="text-sm text-gray-500 dark:text-gray-300 dark:text-gray-300">Reprendre un budget précédent</div>
 
               </div>
 
@@ -662,7 +662,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
 
             </DialogTitle>
 
-            <DialogDescription className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+            <DialogDescription className="text-gray-600 dark:text-gray-300 dark:text-gray-300">
 
               Êtes-vous sûr de vouloir supprimer le budget {budgetToDelete?.year} ?
 
@@ -706,7 +706,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
 
             <DialogTitle className="text-gray-900 dark:text-gray-100 dark:text-gray-100">Importer un budget</DialogTitle>
 
-            <DialogDescription className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+            <DialogDescription className="text-gray-600 dark:text-gray-300 dark:text-gray-300">
 
               Importez un budget depuis un fichier Excel
 
@@ -720,9 +720,9 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
 
             <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg p-6 text-center">
 
-              <Upload className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-3" />
+              <Upload className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-300 mb-3" />
 
-              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-2">
+              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-2">
 
                 Glissez-déposez votre fichier Excel ou
 

@@ -105,13 +105,13 @@ const HeroSection: React.FC<{
               {content.greeting}
             </h1>
           </div>
-          <p className="text-lg text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">
+          <p className="text-lg text-gray-600 dark:text-gray-300 dark:text-gray-300">
             {content.subtitle}
           </p>
-          <p className="text-lg text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">
+          <p className="text-lg text-gray-600 dark:text-gray-300 dark:text-gray-300">
             {content.companyReady}
           </p>
-          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-300 dark:text-gray-300">
             <CheckCircle2 className="w-4 h-4 text-green-600" />
             <span>{content.accountReady}</span>
             <span className="mx-2">•</span>
@@ -121,7 +121,7 @@ const HeroSection: React.FC<{
       </div>
 
       <div className="mt-6" data-tour="progress-bar">
-        <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-2">
+        <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-2">
           <span>{content.progressLabel}</span>
           <span>{progressPercent}%</span>
         </div>
@@ -175,7 +175,7 @@ const QuickStartGrid: React.FC<{
                       {step.description}
                     </CardDescription>
                     <div className="flex items-center gap-2 mt-2">
-                      <span className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                      <span className="text-xs text-gray-500 dark:text-gray-300 dark:text-gray-300">
                         {step.estimatedTime}
                       </span>
                       <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
@@ -224,13 +224,13 @@ const StatsGrid: React.FC<{
     {stats.map((stat) => (
       <Card key={stat.id}>
         <CardContent className="pt-6">
-          <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-1">
+          <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-1">
             {stat.icon} {stat.label}
           </div>
           <div className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
             {stat.value}
           </div>
-          <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mt-1">
+          <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-300 mt-1">
             {emptyLabel}
           </div>
         </CardContent>

@@ -188,11 +188,11 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
                 <Shield className="h-6 w-6 text-blue-600" />
               </div>
               <div>
-                <CardTitle className="text-2xl text-blue-900 flex items-center gap-2">
+                <CardTitle className="text-2xl text-blue-900 flex items-center gap-2 dark:text-blue-100">
                   <span className="text-2xl">{getCountryFlag(countryCode)}</span>
                   Conformité Fiscale - {countryName}
                 </CardTitle>
-                <p className="text-blue-700 mt-1 flex items-center gap-2">
+                <p className="text-blue-700 mt-1 flex items-center gap-2 dark:text-blue-400">
                   <Globe className="h-4 w-4" />
                   Système adapté aux réglementations de {countryName}
                   <span className="mx-2">•</span>
@@ -211,7 +211,7 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold text-blue-900">Score de Conformité</h3>
+                  <h3 className="font-semibold text-blue-900 dark:text-blue-100">Score de Conformité</h3>
                   <span className="text-2xl font-bold text-blue-600">
                     {complianceScore.score}/{complianceScore.maxScore}
                   </span>
@@ -234,7 +234,7 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
                   {vatRates && (
                     <div className="flex items-center gap-2 text-sm">
                       <CheckCircle className="h-4 w-4 text-green-500" />
-                      <span className="text-green-700">
+                      <span className="text-green-700 dark:text-green-400">
                         TVA: Taux {vatRates.standard}% (standard)
                         {vatRates.reduced.length > 0 && ` + réduits (${vatRates.reduced.join(', ')}%)`}
                       </span>
@@ -242,20 +242,20 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
                   )}
                   <div className="flex items-center gap-2 text-sm">
                     <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span className="text-green-700">
+                    <span className="text-green-700 dark:text-green-400">
                       IS: Taux {corporateTaxRate}%
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span className="text-green-700">
+                    <span className="text-green-700 dark:text-green-400">
                       Export: Formats {countryCode === 'FR' ? 'FEC' : 'comptables'} disponibles
                     </span>
                   </div>
                 </div>
               </div>
               <div className="space-y-3">
-                <h3 className="font-semibold text-blue-900 mb-3">Actions Rapides</h3>
+                <h3 className="font-semibold text-blue-900 mb-3 dark:text-blue-100">Actions Rapides</h3>
                 <div className="grid grid-cols-2 gap-2">
                   <Button
                     onClick={handleCalculateVAT}
@@ -470,7 +470,7 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
                       {declaration.status}
                     </Badge>
                     {declaration.validationErrors && declaration.validationErrors.length > 0 && (
-                      <Badge variant="outline" className="text-red-600 border-red-600">
+                      <Badge variant="outline" className="text-red-600 border-red-600 dark:text-red-400">
                         {declaration.validationErrors.length} erreur(s)
                       </Badge>
                     )}

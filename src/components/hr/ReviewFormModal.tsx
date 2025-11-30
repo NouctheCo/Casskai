@@ -169,7 +169,7 @@ export function ReviewFormModal({
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 transition-colors"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 transition-colors dark:text-gray-300"
           >
             <X className="w-5 h-5" />
           </button>
@@ -273,7 +273,7 @@ export function ReviewFormModal({
           </div>
 
           {/* Compétences */}
-          <div className="border rounded-lg p-4 bg-gray-50">
+          <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-900/30">
             <Label className="mb-3 block">Évaluation par compétence</Label>
             <div className="grid grid-cols-2 gap-4">
               {COMPETENCIES.map((competency) => (
@@ -367,7 +367,7 @@ export function ReviewFormModal({
           </div>
 
           {/* Recommandations RH */}
-          <div className="border rounded-lg p-4 bg-blue-50">
+          <div className="border rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
             <Label className="mb-3 block">Recommandations RH</Label>
             <div className="space-y-2">
               <label className="flex items-center gap-2 cursor-pointer">

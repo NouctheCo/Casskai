@@ -121,7 +121,7 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Chargement des formations...</p>
+          <p className="text-gray-600 dark:text-gray-300">Chargement des formations...</p>
         </div>
       </div>
     );
@@ -136,7 +136,7 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
             <div className="text-center">
               <BookOpen className="w-8 h-8 text-blue-600 mx-auto mb-2" />
               <p className="text-2xl font-bold text-blue-600">{stats.total_trainings}</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Formations</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Formations</p>
             </div>
           </CardContent>
         </Card>
@@ -146,7 +146,7 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
             <div className="text-center">
               <Calendar className="w-8 h-8 text-purple-600 mx-auto mb-2" />
               <p className="text-2xl font-bold text-purple-600">{stats.total_sessions}</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Sessions</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Sessions</p>
             </div>
           </CardContent>
         </Card>
@@ -156,7 +156,7 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
             <div className="text-center">
               <Users className="w-8 h-8 text-green-600 mx-auto mb-2" />
               <p className="text-2xl font-bold text-green-600">{stats.total_enrollments}</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Inscriptions</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Inscriptions</p>
             </div>
           </CardContent>
         </Card>
@@ -166,7 +166,7 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
             <div className="text-center">
               <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
               <p className="text-2xl font-bold text-green-600">{stats.completion_rate}%</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Taux de complétion</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Taux de complétion</p>
             </div>
           </CardContent>
         </Card>
@@ -176,7 +176,7 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
             <div className="text-center">
               <Award className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
               <p className="text-2xl font-bold text-yellow-600">{stats.active_certifications}</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Certifications</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Certifications</p>
             </div>
           </CardContent>
         </Card>
@@ -223,7 +223,7 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                       Aucune formation trouvée
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-4">
+                    <p className="text-gray-600 dark:text-gray-300 mb-4">
                       Commencez par ajouter des formations au catalogue
                     </p>
                     <Button>
@@ -267,7 +267,7 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
                     </div>
 
                     {training.prerequisites && (
-                      <div className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-2">
+                      <div className="text-xs text-gray-600 dark:text-gray-300 mb-2">
                         <span className="font-semibold">Prérequis: </span>
                         {training.prerequisites}
                       </div>
@@ -301,7 +301,7 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                       Aucune session trouvée
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-4">
+                    <p className="text-gray-600 dark:text-gray-300 mb-4">
                       Planifiez votre première session de formation
                     </p>
                     <Button>
@@ -323,7 +323,7 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
                           </Badge>
                         </div>
                         <CardTitle className="text-lg">{session.session_name || 'Session'}</CardTitle>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
                           {new Date(session.start_date).toLocaleDateString('fr-FR')}
                           {session.end_date && ` - ${new Date(session.end_date).toLocaleDateString('fr-FR')}`}
                         </p>
@@ -344,14 +344,14 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
                     )}
 
                     <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div className="bg-blue-50 p-3 rounded-lg">
-                        <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-1">Inscrits</p>
+                      <div className="bg-blue-50 p-3 rounded-lg dark:bg-blue-900/20">
+                        <p className="text-xs text-gray-600 dark:text-gray-300 mb-1">Inscrits</p>
                         <p className="text-lg font-semibold text-blue-600">
                           {session.registered_count || 0}/{session.max_participants}
                         </p>
                       </div>
-                      <div className="bg-green-50 p-3 rounded-lg">
-                        <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-1">Présents</p>
+                      <div className="bg-green-50 p-3 rounded-lg dark:bg-green-900/20">
+                        <p className="text-xs text-gray-600 dark:text-gray-300 mb-1">Présents</p>
                         <p className="text-lg font-semibold text-green-600">
                           {session.attended_count || 0}
                         </p>
@@ -361,7 +361,7 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
                     {session.max_participants && session.registered_count !== undefined && (
                       <div className="mb-4">
                         <div className="flex justify-between text-sm mb-1">
-                          <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Capacité</span>
+                          <span className="text-gray-600 dark:text-gray-300">Capacité</span>
                           <span className="font-semibold">
                             {Math.round((session.registered_count / session.max_participants) * 100)}%
                           </span>
@@ -406,7 +406,7 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                       Aucune certification trouvée
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-4">
+                    <p className="text-gray-600 dark:text-gray-300 mb-4">
                       Enregistrez les certifications des employés
                     </p>
                     <Button>
@@ -439,7 +439,7 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
                             )}
                           </div>
                           <CardTitle className="text-lg">{cert.certification_name}</CardTitle>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">{cert.employee_name}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">{cert.employee_name}</p>
                         </div>
                         <Award className="w-8 h-8 text-yellow-500" />
                       </div>
@@ -459,14 +459,14 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
 
                       <div className="grid grid-cols-2 gap-2 text-sm">
                         <div>
-                          <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Obtenue: </span>
+                          <span className="text-gray-600 dark:text-gray-300">Obtenue: </span>
                           <span className="font-semibold">
                             {new Date(cert.issue_date).toLocaleDateString('fr-FR')}
                           </span>
                         </div>
                         {cert.expiry_date && (
                           <div>
-                            <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Expire: </span>
+                            <span className="text-gray-600 dark:text-gray-300">Expire: </span>
                             <span className={`font-semibold ${isExpired ? 'text-red-600' : ''}`}>
                               {new Date(cert.expiry_date).toLocaleDateString('fr-FR')}
                             </span>

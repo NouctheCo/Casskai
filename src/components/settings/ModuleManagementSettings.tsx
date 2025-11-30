@@ -241,7 +241,7 @@ export function ModuleManagementSettings() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <div className="h-5 w-5 bg-green-500 rounded-full flex items-center justify-center">
+              <div className="h-5 w-5 bg-green-500 rounded-full flex items-center justify-center dark:bg-green-900/20">
                 <span className="text-xs text-white font-bold">S</span>
               </div>
               <div>
@@ -436,7 +436,7 @@ export function ModuleManagementSettings() {
         <CardContent>
           <div className="space-y-4">
             <div className="flex items-start gap-3">
-              <div className="h-5 w-5 bg-green-500 rounded-full flex items-center justify-center mt-0.5">
+              <div className="h-5 w-5 bg-green-500 rounded-full flex items-center justify-center mt-0.5 dark:bg-green-900/20">
                 <span className="text-xs text-white font-bold">S</span>
               </div>
               <div>

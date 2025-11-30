@@ -191,7 +191,7 @@ export const EInvoiceSubmissionForm: React.FC<EInvoiceSubmissionFormProps> = ({
 
             {/* Selected Invoice Preview */}
             {selectedInvoice && (
-              <div className="bg-blue-50 p-4 rounded-lg">
+              <div className="bg-blue-50 p-4 rounded-lg dark:bg-blue-900/20">
                 <h4 className="font-medium mb-2">Facture sélectionnée</h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
@@ -351,7 +351,7 @@ export const EInvoiceSubmissionForm: React.FC<EInvoiceSubmissionFormProps> = ({
               {submissionResult.success ? (
                 <CheckCircle className="h-5 w-5 text-green-600" />
               ) : (
-                <AlertTriangle className="h-5 w-5 text-red-600" />
+                <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
               )}
               Résultat de la soumission
             </CardTitle>
@@ -428,7 +428,7 @@ export const EInvoiceSubmissionForm: React.FC<EInvoiceSubmissionFormProps> = ({
                 {submissionResult.errors && submissionResult.errors.length > 0 && (
                   <div>
                     <h5 className="font-medium mb-2">Erreurs:</h5>
-                    <ul className="text-sm text-red-600 space-y-1">
+                    <ul className="text-sm text-red-600 space-y-1 dark:text-red-400">
                       {submissionResult.errors.map((error, index) => (
                         <li key={index}>• {error}</li>
                       ))}

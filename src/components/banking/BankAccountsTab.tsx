@@ -134,7 +134,7 @@ export const BankAccountsTab: React.FC<BankAccountsTabProps> = ({
               {accounts.map((account) => (
                 <div
                   key={account.id}
-                  className="border border-gray-200 dark:border-gray-600 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  className="border border-gray-200 dark:border-gray-600 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors dark:bg-gray-900/30"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4 flex-1">
@@ -200,7 +200,7 @@ export const BankAccountsTab: React.FC<BankAccountsTabProps> = ({
                         variant="outline"
                         size="sm"
                         onClick={() => handleDelete(account.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 dark:bg-red-900/20 dark:text-red-400"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

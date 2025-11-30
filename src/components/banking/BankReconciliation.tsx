@@ -319,7 +319,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
   const getConfidenceIcon = (confidence) => {
     if (confidence >= 0.9) return <CheckCircle className="h-4 w-4 text-green-600" />;
     if (confidence >= 0.7) return <AlertCircle className="h-4 w-4 text-orange-600" />;
-    return <XCircle className="h-4 w-4 text-red-600" />;
+    return <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />;
   };
 
   return (
@@ -352,7 +352,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
       >
         <Card className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+            <CardTitle className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">
               <Target className="h-4 w-4 text-blue-600" />
               Taux de réconciliation
             </CardTitle>
@@ -368,7 +368,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                 {reconciliationStats.reconciliationRate.toFixed(1)}%
               </motion.div>
               <Progress value={reconciliationStats.reconciliationRate} className="h-2" />
-              <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-300 dark:text-gray-300">
                 {reconciliationStats.reconciledTransactions}/{reconciliationStats.totalBankTransactions} transactions
               </p>
             </div>
@@ -377,7 +377,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
 
         <Card className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+            <CardTitle className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">
               <CheckCircle className="h-4 w-4 text-green-600" />
               Réconciliées
             </CardTitle>
@@ -387,7 +387,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
               <div className="text-2xl font-bold text-green-600">
                 {reconciliationStats.reconciledTransactions}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+              <div className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">
                 {formatAmount(reconciliationStats.reconciledAmount)}
               </div>
             </div>
@@ -396,7 +396,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
 
         <Card className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+            <CardTitle className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">
               <Clock className="h-4 w-4 text-orange-600" />
               En attente
             </CardTitle>
@@ -406,7 +406,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
               <div className="text-2xl font-bold text-orange-600">
                 {reconciliationStats.pendingTransactions}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+              <div className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">
                 {formatAmount(reconciliationStats.pendingAmount)}
               </div>
             </div>
@@ -415,7 +415,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
 
         <Card className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+            <CardTitle className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">
               <BarChart3 className="h-4 w-4 text-purple-600" />
               Suggestions
             </CardTitle>
@@ -425,7 +425,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
               <div className="text-2xl font-bold text-purple-600">
                 {autoMatches.length}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+              <div className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">
                 Correspondances trouvées
               </div>
             </div>
@@ -561,7 +561,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                         description: `${autoMatches.length} correspondances disponibles`,
                       });
                     }}
-                    className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                    className="border-blue-300 text-blue-700 hover:bg-blue-100 dark:text-blue-400"
                   >
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Recharger détails
@@ -644,7 +644,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 dark:bg-red-900/20 dark:text-red-400"
                               >
                                 <XCircle className="h-4 w-4 mr-2" />
                                 Rejeter
@@ -669,21 +669,21 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                               </h4>
                               <div className="space-y-2 text-sm">
                                 <div className="flex justify-between">
-                                  <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Date:</span>
+                                  <span className="text-gray-600 dark:text-gray-300 dark:text-gray-300">Date:</span>
                                   <span>{bankTx?.date}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Montant:</span>
+                                  <span className="text-gray-600 dark:text-gray-300 dark:text-gray-300">Montant:</span>
                                   <span className={`font-medium ${bankTx?.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                     {formatAmount(bankTx?.amount || 0)}
                                   </span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Description:</span>
+                                  <span className="text-gray-600 dark:text-gray-300 dark:text-gray-300">Description:</span>
                                   <span className="truncate ml-2">{bankTx?.description}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Référence:</span>
+                                  <span className="text-gray-600 dark:text-gray-300 dark:text-gray-300">Référence:</span>
                                   <span className="font-mono text-xs">{bankTx?.reference}</span>
                                 </div>
                               </div>
@@ -697,21 +697,21 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                               </h4>
                               <div className="space-y-2 text-sm">
                                 <div className="flex justify-between">
-                                  <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Date:</span>
+                                  <span className="text-gray-600 dark:text-gray-300 dark:text-gray-300">Date:</span>
                                   <span>{accountingEntry?.date}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Montant:</span>
+                                  <span className="text-gray-600 dark:text-gray-300 dark:text-gray-300">Montant:</span>
                                   <span className={`font-medium ${accountingEntry?.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                     {formatAmount(accountingEntry?.amount || 0)}
                                   </span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Description:</span>
+                                  <span className="text-gray-600 dark:text-gray-300 dark:text-gray-300">Description:</span>
                                   <span className="truncate ml-2">{accountingEntry?.description}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Compte:</span>
+                                  <span className="text-gray-600 dark:text-gray-300 dark:text-gray-300">Compte:</span>
                                   <span className="text-xs">{accountingEntry?.account}</span>
                                 </div>
                               </div>
@@ -741,7 +741,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
                       Aucune correspondance trouvée
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                    <p className="text-gray-600 dark:text-gray-300 dark:text-gray-300">
                       Lancez une réconciliation automatique pour détecter les correspondances.
                     </p>
                   </div>
@@ -803,7 +803,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
-                      className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                      className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors dark:bg-gray-900/50"
                     >
                       <div className="flex items-center space-x-4 flex-1">
                         <div className={`w-3 h-3 rounded-full ${transaction.reconciled ? 'bg-green-500' : 'bg-orange-500'}`} />
@@ -818,7 +818,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                             </span>
                           </div>
                           
-                          <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                          <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">
                             <span className="flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
                               {transaction.date}
@@ -856,7 +856,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
                       Aucune transaction trouvée
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                    <p className="text-gray-600 dark:text-gray-300 dark:text-gray-300">
                       Aucune transaction ne correspond aux critères de recherche.
                     </p>
                   </div>
@@ -891,7 +891,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
                     Interface de réconciliation manuelle
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-4">
+                  <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-4">
                     Fonctionnalité en cours de développement
                   </p>
                   <Button variant="outline">

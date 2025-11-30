@@ -197,7 +197,7 @@ export default function OptimizedJournalsTab() {
 
       case 'bank': return <FileText className="w-4 h-4 text-green-500" />;
 
-      default: return <FileText className="w-4 h-4 text-gray-500 dark:text-gray-400 dark:text-gray-500" />;
+      default: return <FileText className="w-4 h-4 text-gray-500 dark:text-gray-300" />;
 
     }
 
@@ -282,7 +282,7 @@ export default function OptimizedJournalsTab() {
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{t('journals.totalJournals')}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">{t('journals.totalJournals')}</p>
 
                 <p className="text-2xl font-bold">{summary.totalJournals}</p>
 
@@ -306,7 +306,7 @@ export default function OptimizedJournalsTab() {
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{t('journals.activeJournals')}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">{t('journals.activeJournals')}</p>
 
                 <p className="text-2xl font-bold">{summary.activeJournals}</p>
 
@@ -330,7 +330,7 @@ export default function OptimizedJournalsTab() {
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{t('journals.totalEntries')}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">{t('journals.totalEntries')}</p>
 
                 <p className="text-2xl font-bold">{summary.totalEntries}</p>
 
@@ -354,7 +354,7 @@ export default function OptimizedJournalsTab() {
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{t('journals.totalAmount')}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">{t('journals.totalAmount')}</p>
 
                 <p className="text-xl font-bold">{summary.totalDebit.toFixed(2)} €</p>
 
@@ -422,7 +422,7 @@ export default function OptimizedJournalsTab() {
 
                 {journals.map((journal) => (
 
-                  <TableRow key={journal.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                  <TableRow key={journal.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 dark:bg-gray-900/30">
 
                     <TableCell className="font-mono font-medium">{journal.code}</TableCell>
 
@@ -534,19 +534,19 @@ export default function OptimizedJournalsTab() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500">{t('journals.code')}</label>
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-300">{t('journals.code')}</label>
                   <p className="font-mono text-lg">{selectedJournal.code}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500">{t('journals.name')}</label>
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-300">{t('journals.name')}</label>
                   <p className="text-lg">{selectedJournal.name}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500">{t('journals.type')}</label>
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-300">{t('journals.type')}</label>
                   <p>{t(`accounting.journalTypes.${selectedJournal.type}`, { defaultValue: selectedJournal.type })}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500">{t('journals.status')}</label>
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-300">{t('journals.status')}</label>
                   <div>
                     {selectedJournal.isActive ? (
                       <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
@@ -567,15 +567,15 @@ export default function OptimizedJournalsTab() {
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
                     <p className="text-2xl font-bold">{selectedJournal.entriesCount || 0}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{t('journals.entries')}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-300 dark:text-gray-300">{t('journals.entries')}</p>
                   </div>
                   <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
                     <p className="text-2xl font-bold">{selectedJournal.totalDebit.toFixed(2)} €</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{t('journals.totalDebit')}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-300 dark:text-gray-300">{t('journals.totalDebit')}</p>
                   </div>
                   <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
                     <p className="text-2xl font-bold">{selectedJournal.totalCredit.toFixed(2)} €</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{t('journals.totalCredit')}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-300 dark:text-gray-300">{t('journals.totalCredit')}</p>
                   </div>
                 </div>
               </div>

@@ -210,7 +210,7 @@ const ModulesSummary: React.FC<{
               variant="outline"
               size="sm"
               onClick={onSelectAll}
-              className="border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900"
+              className="border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900 dark:bg-blue-900/20"
             >
               Tout sélectionner
             </Button>

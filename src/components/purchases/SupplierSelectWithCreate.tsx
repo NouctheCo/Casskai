@@ -46,7 +46,7 @@ export const SupplierSelectWithCreate: React.FC<SupplierSelectWithCreateProps> =
         className={error ? 'border-red-500' : ''}
       />
       {error && (
-        <p className="text-sm text-red-600">{error}</p>
+        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
       )}
     </div>
   );

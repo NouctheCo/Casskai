@@ -136,7 +136,7 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({
       >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center dark:bg-gray-800">
               <Brain className="w-6 h-6" />
             </div>
             <div>
@@ -151,7 +151,7 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white/10 rounded-lg p-4">
+          <div className="bg-white/10 rounded-lg p-4 dark:bg-gray-800">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-blue-100">Santé Financière</p>
@@ -161,7 +161,7 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({
             </div>
           </div>
 
-          <div className="bg-white/10 rounded-lg p-4">
+          <div className="bg-white/10 rounded-lg p-4 dark:bg-gray-800">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-blue-100">Tendance Trésorerie</p>
@@ -179,7 +179,7 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({
             </div>
           </div>
 
-          <div className="bg-white/10 rounded-lg p-4">
+          <div className="bg-white/10 rounded-lg p-4 dark:bg-gray-800">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-blue-100">Niveau de Risque</p>
@@ -193,7 +193,7 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({
             </div>
           </div>
 
-          <div className="bg-white/10 rounded-lg p-4">
+          <div className="bg-white/10 rounded-lg p-4 dark:bg-gray-800">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-blue-100">Alertes Actives</p>
@@ -250,7 +250,7 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({
                           {new Date(alert.timestamp).toLocaleDateString('fr-FR')}
                         </span>
                         {alert.actions && alert.actions.length > 0 && (
-                          <button className="text-xs bg-white dark:bg-gray-800 px-2 py-1 rounded border hover:bg-gray-50">
+                          <button className="text-xs bg-white dark:bg-gray-800 px-2 py-1 rounded border hover:bg-gray-50 dark:bg-gray-900/30">
                             {alert.actions[0].label}
                           </button>
                         )}
@@ -281,7 +281,7 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({
               <motion.div
                 key={prediction.id}
                 whileHover={{ scale: 1.02 }}
-                className="p-3 bg-gray-50 rounded-lg"
+                className="p-3 bg-gray-50 rounded-lg dark:bg-gray-900/30"
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium">{prediction.month}</span>
@@ -306,7 +306,7 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-red-600">Dépenses prévues</span>
+                    <span className="text-red-600 dark:text-red-400">Dépenses prévues</span>
                     <span className="font-medium">
                       {prediction.predictedExpenses.toLocaleString()}€
                     </span>
@@ -383,7 +383,7 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({
               <motion.div
                 key={tax.id}
                 whileHover={{ scale: 1.02 }}
-                className="p-3 rounded-lg border border-green-200 bg-green-50"
+                className="p-3 rounded-lg border border-green-200 bg-green-50 dark:bg-green-900/20"
               >
                 <div className="flex items-start gap-2">
                   <DollarSign className="w-5 h-5 text-green-600 mt-0.5" />
@@ -391,7 +391,7 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({
                     <h4 className="font-medium text-sm mb-1">{tax.title}</h4>
                     <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">{tax.description}</p>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-green-700">
+                      <span className="text-xs font-medium text-green-700 dark:text-green-400">
                         Économie: {tax.potentialSavings.toLocaleString()}€
                       </span>
                       <span className="text-xs bg-white dark:bg-gray-800 px-2 py-0.5 rounded border">

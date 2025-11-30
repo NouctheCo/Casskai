@@ -118,23 +118,23 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
       </div>
 
       {/* Configuration du plan comptable */}
-      <div className="bg-blue-50 rounded-lg p-4 mb-6">
+      <div className="bg-blue-50 rounded-lg p-4 mb-6 dark:bg-blue-900/20">
         <div className="flex items-start gap-3">
           <Info className="text-blue-600 mt-0.5" size={20} />
           <div>
-            <h4 className="font-medium text-blue-900 mb-2">Configuration Actuelle</h4>
+            <h4 className="font-medium text-blue-900 mb-2 dark:text-blue-100">Configuration Actuelle</h4>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="text-blue-700 font-medium">Pays:</span> {chartOfAccountsConfig.country}
+                <span className="text-blue-700 font-medium dark:text-blue-400">Pays:</span> {chartOfAccountsConfig.country}
               </div>
               <div>
-                <span className="text-blue-700 font-medium">Standard:</span> {chartOfAccountsConfig.standard}
+                <span className="text-blue-700 font-medium dark:text-blue-400">Standard:</span> {chartOfAccountsConfig.standard}
               </div>
               <div>
-                <span className="text-blue-700 font-medium">Devise:</span> {chartOfAccountsConfig.currency}
+                <span className="text-blue-700 font-medium dark:text-blue-400">Devise:</span> {chartOfAccountsConfig.currency}
               </div>
               <div>
-                <span className="text-blue-700 font-medium">Exercice se terminant:</span> {chartOfAccountsConfig.fiscalYearEnd}
+                <span className="text-blue-700 font-medium dark:text-blue-400">Exercice se terminant:</span> {chartOfAccountsConfig.fiscalYearEnd}
               </div>
             </div>
           </div>
@@ -177,7 +177,7 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
             {lastOperation.success ? (
               <CheckCircle className="text-green-600 mt-0.5" size={20} />
             ) : (
-              <AlertTriangle className="text-red-600 mt-0.5" size={20} />
+              <AlertTriangle className="text-red-600 mt-0.5 dark:text-red-400" size={20} />
             )}
             <div>
               <h4 className={`font-medium mb-2 ${
@@ -189,7 +189,7 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
               </h4>
 
               {lastOperation.success && lastOperation.results && (
-                <div className="text-sm text-green-700 space-y-1">
+                <div className="text-sm text-green-700 space-y-1 dark:text-green-400">
                   <p>• {lastOperation.results.accounts} comptes créés</p>
                   <p>• {lastOperation.results.customers} clients créés</p>
                   <p>• {lastOperation.results.suppliers} fournisseurs créés</p>
@@ -307,7 +307,7 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
               <div className="flex justify-end gap-3 mt-6 pt-6 border-t">
                 <button
                   onClick={() => setShowSampleDataConfig(false)}
-                  className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800"
+                  className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:text-gray-100"
                 >
                   Annuler
                 </button>
@@ -334,7 +334,7 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
           >
             <div className="p-6">
               <div className="flex items-center gap-3 mb-4">
-                <AlertTriangle className="text-red-600" size={24} />
+                <AlertTriangle className="text-red-600 dark:text-red-400" size={24} />
                 <h3 className="text-lg font-semibold text-red-900">Confirmer la Suppression</h3>
               </div>
 
@@ -359,7 +359,7 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
               <div className="flex justify-end gap-3">
                 <button
                   onClick={() => setShowConfirmReset(false)}
-                  className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800"
+                  className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:text-gray-100"
                 >
                   Annuler
                 </button>

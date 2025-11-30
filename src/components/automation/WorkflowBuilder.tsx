@@ -419,7 +419,7 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
             <h1 className="text-2xl font-bold">
               {workflowId ? 'Modifier le Workflow' : 'Nouveau Workflow'}
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+            <p className="text-gray-600 dark:text-gray-300 dark:text-gray-300">
               Configurez les déclencheurs et actions de votre workflow
             </p>
           </div>
@@ -532,7 +532,7 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
               {formData.actions.length === 0 ? (
                 <div className="text-center py-8">
                   <Play className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
-                  <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                  <p className="text-gray-600 dark:text-gray-300 dark:text-gray-300">
                     Aucune action configurée. Ajoutez une action pour que ce workflow soit fonctionnel.
                   </p>
                 </div>
@@ -550,7 +550,7 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
                               </div>
                               <div>
                                 <h3 className="font-semibold">Action {index + 1}</h3>
-                                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                                <p className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">
                                   {getActionTitle(action.type)}
                                 </p>
                               </div>

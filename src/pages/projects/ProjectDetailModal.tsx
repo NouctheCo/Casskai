@@ -143,7 +143,7 @@ export function ProjectDetailModal({ project, onClose }: ProjectDetailModalProps
               <CardContent>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold dark:bg-blue-900/20">
                       {project.manager.split(' ').map(n => n.charAt(0)).join('')}
                     </div>
                     <div>
@@ -153,7 +153,7 @@ export function ProjectDetailModal({ project, onClose }: ProjectDetailModalProps
                   </div>
                   {project.team.map((member, index) => (
                     <div key={index} className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                      <div className="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center text-white text-xs font-bold dark:bg-gray-900/30">
                         {member.split(' ').map(n => n.charAt(0)).join('')}
                       </div>
                       <div>

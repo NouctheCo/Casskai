@@ -27,7 +27,7 @@ export function TenantGuard({ children, fallback }: TenantGuardProps) {
     return fallback || (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600">Erreur de Configuration</h1>
+          <h1 className="text-2xl font-bold text-red-600 dark:text-red-400">Erreur de Configuration</h1>
           <p className="mt-2 text-gray-600 dark:text-gray-400">{error || 'Tenant non configuré'}</p>
           <button 
             onClick={() => window.location.reload()}

@@ -58,7 +58,7 @@ export const TrialExpirationNotification: React.FC<TrialExpirationNotificationPr
         <Card className="max-w-md w-full">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-              <AlertTriangle className="h-6 w-6 text-red-600" />
+              <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
             </div>
             <CardTitle className="text-xl font-bold">Période d'essai expirée</CardTitle>
             <CardDescription>
@@ -107,7 +107,7 @@ export const TrialExpirationNotification: React.FC<TrialExpirationNotificationPr
           <AlertTitle className="text-orange-800">
             Votre période d'essai expire dans {daysRemaining} jour{daysRemaining > 1 ? 's' : ''}
           </AlertTitle>
-          <AlertDescription className="text-orange-700">
+          <AlertDescription className="text-orange-700 dark:text-orange-400">
             Choisissez un plan maintenant pour continuer à profiter de tous les modules de CassKai sans interruption.
           </AlertDescription>
         </div>

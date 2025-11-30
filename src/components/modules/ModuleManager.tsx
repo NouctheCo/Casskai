@@ -456,7 +456,7 @@ const ModuleManager: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Gestion des Modules</h1>
-          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">
+          <p className="text-gray-600 dark:text-gray-300">
             {activeModulesCount} module{activeModulesCount > 1 ? 's' : ''} activé{activeModulesCount > 1 ? 's' : ''} sur {modules.length}
           </p>
         </div>
@@ -475,7 +475,7 @@ const ModuleManager: React.FC = () => {
                 <CheckCircle className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Modules actifs</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Modules actifs</p>
                 <p className="text-xl font-bold">{activeModulesCount}</p>
               </div>
             </div>
@@ -489,7 +489,7 @@ const ModuleManager: React.FC = () => {
                 <Package className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Total disponible</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Total disponible</p>
                 <p className="text-xl font-bold">{modules.length}</p>
               </div>
             </div>
@@ -503,7 +503,7 @@ const ModuleManager: React.FC = () => {
                 <Clock className="w-5 h-5 text-orange-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">En bêta</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">En bêta</p>
                 <p className="text-xl font-bold">{modules.filter(m => m.status === 'beta').length}</p>
               </div>
             </div>
@@ -517,7 +517,7 @@ const ModuleManager: React.FC = () => {
                 <Star className="w-5 h-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Premium</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Premium</p>
                 <p className="text-xl font-bold">{modules.filter(m => m.isPremium).length}</p>
               </div>
             </div>
@@ -556,7 +556,7 @@ const ModuleManager: React.FC = () => {
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gray-100 rounded">
+                    <div className="p-2 bg-gray-100 rounded dark:bg-gray-900/50">
                       {getModuleIcon(module.icon)}
                     </div>
                     <div>
@@ -567,7 +567,7 @@ const ModuleManager: React.FC = () => {
                           <Badge className="bg-purple-100 text-purple-800">Premium</Badge>
                         )}
                         {module.isCore && (
-                          <Badge className="bg-gray-100 text-gray-800">Core</Badge>
+                          <Badge className="bg-gray-100 text-gray-800 dark:text-gray-100 dark:bg-gray-900/50">Core</Badge>
                         )}
                       </div>
                     </div>
@@ -592,21 +592,21 @@ const ModuleManager: React.FC = () => {
                 {/* Informations du module */}
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Version</p>
+                    <p className="text-gray-600 dark:text-gray-300">Version</p>
                     <p className="font-medium">{module.version}</p>
                   </div>
                   <div>
-                    <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Prix</p>
+                    <p className="text-gray-600 dark:text-gray-300">Prix</p>
                     <p className="font-medium">{formatPrice(module.pricing)}</p>
                   </div>
                   {module.downloads && (
                     <div>
-                      <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Téléchargements</p>
+                      <p className="text-gray-600 dark:text-gray-300">Téléchargements</p>
                       <p className="font-medium">{module.downloads.toLocaleString()}</p>
                     </div>
                   )}
                   <div>
-                    <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Auteur</p>
+                    <p className="text-gray-600 dark:text-gray-300">Auteur</p>
                     <p className="font-medium">{module.author}</p>
                   </div>
                 </div>
@@ -614,7 +614,7 @@ const ModuleManager: React.FC = () => {
                 {/* Dépendances */}
                 {module.dependencies.length > 0 && (
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-1">Dépendances:</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Dépendances:</p>
                     <div className="flex flex-wrap gap-1">
                       {module.dependencies.map(dep => (
                         <Badge key={dep} variant="outline" className="text-xs">
@@ -638,8 +638,8 @@ const ModuleManager: React.FC = () => {
 
                 {/* Erreur d'activation */}
                 {activationStatus?.error && (
-                  <Alert className="border-red-200 bg-red-50">
-                    <AlertCircle className="h-4 w-4 text-red-600" />
+                  <Alert className="border-red-200 bg-red-50 dark:bg-red-900/20">
+                    <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
                     <AlertDescription className="text-red-800">
                       {activationStatus.error}
                     </AlertDescription>
@@ -694,7 +694,7 @@ const ModuleManager: React.FC = () => {
 
                 {/* Essai gratuit */}
                 {module.pricing?.trialDays && !module.isActive && (
-                  <div className="bg-blue-50 p-3 rounded-lg">
+                  <div className="bg-blue-50 p-3 rounded-lg dark:bg-blue-900/20">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-blue-600" />
                       <span className="text-sm text-blue-800">
@@ -715,7 +715,7 @@ const ModuleManager: React.FC = () => {
           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
             Aucun module trouvé
           </h3>
-          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">
+          <p className="text-gray-600 dark:text-gray-300">
             Aucun module ne correspond à vos critères de recherche.
           </p>
         </div>

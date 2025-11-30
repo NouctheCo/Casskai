@@ -293,7 +293,7 @@ export default function PricingPage() {
                 }`}
               >
                 Annuel
-                <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded-full dark:bg-green-900/20">
                   -20%
                 </span>
               </button>
@@ -309,7 +309,7 @@ export default function PricingPage() {
             <Card key={plan.id} className={plan.popular ? 'border-2 border-blue-500 relative' : ''}>
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                  <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium dark:bg-blue-900/20">
                     Plus populaire
                   </span>
                 </div>

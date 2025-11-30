@@ -215,7 +215,7 @@ export const PublicNavigation: React.FC<PublicNavigationProps> = ({ variant = 'l
 
               onClick={() => navigate('/login')}
 
-              className="hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="hover:bg-gray-100 dark:hover:bg-gray-800 dark:bg-gray-900/50"
 
             >
 
@@ -253,7 +253,7 @@ export const PublicNavigation: React.FC<PublicNavigationProps> = ({ variant = 'l
 
               onClick={() => setIsMenuOpen(!isMenuOpen)}
 
-              className="text-gray-700 dark:text-gray-300 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="text-gray-700 dark:text-gray-300 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors dark:bg-gray-900/50"
 
               whileTap={{ scale: 0.95 }}
 
@@ -295,7 +295,7 @@ export const PublicNavigation: React.FC<PublicNavigationProps> = ({ variant = 'l
 
                   onClick={() => scrollToSection(item.key)}
 
-                  className="block w-full text-left px-4 py-3 text-gray-700 dark:text-gray-300 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg mx-2 transition-colors font-medium"
+                  className="block w-full text-left px-4 py-3 text-gray-700 dark:text-gray-300 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg mx-2 transition-colors font-medium dark:bg-gray-900/30"
 
                 >
 

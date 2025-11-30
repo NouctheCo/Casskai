@@ -418,11 +418,11 @@ export function ReportGenerationTab({ companyId, refreshTrigger, onReportGenerat
       <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
         <CardContent className="p-6">
           <div className="flex items-start space-x-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center dark:bg-blue-900/20">
               <AlertCircle className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-blue-900 mb-2">
+              <h3 className="font-semibold text-blue-900 mb-2 dark:text-blue-100">
                 Archivage automatique et conformité légale
               </h3>
               <p className="text-blue-800 text-sm leading-relaxed">

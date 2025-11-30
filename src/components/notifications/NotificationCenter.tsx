@@ -326,7 +326,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
                             `}>
                               {notification.title}
                               {!notification.read && (
-                                <div className="inline-block w-2 h-2 bg-blue-500 rounded-full ml-2" />
+                                <div className="inline-block w-2 h-2 bg-blue-500 rounded-full ml-2 dark:bg-blue-900/20" />
                               )}
                             </h4>
                             <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 mt-1 line-clamp-2">
@@ -355,7 +355,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
                                 e.stopPropagation();
                                 deleteNotification(notification.id);
                               }}
-                              className="h-6 w-6 p-0 text-red-500 hover:text-red-600"
+                              className="h-6 w-6 p-0 text-red-500 hover:text-red-600 dark:text-red-400"
                             >
                               <X className="h-3 w-3" />
                             </Button>
@@ -380,7 +380,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
                                 e.stopPropagation();
                                 handleAction(notification);
                               }}
-                              className="text-xs flex items-center gap-1 text-blue-600 hover:text-blue-700"
+                              className="text-xs flex items-center gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400"
                             >
                               {(notification as any).action_label || 'Voir'}
                               <ExternalLink className="h-3 w-3" />

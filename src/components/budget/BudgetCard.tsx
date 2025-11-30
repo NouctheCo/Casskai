@@ -200,7 +200,7 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
 
                 title="Supprimer"
 
-                className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20 dark:bg-red-900/20"
 
               >
 
@@ -324,7 +324,7 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
 
                 onClick={() => onViewForecast(budget.id, budget.year)}
 
-                className="text-blue-600 border-blue-300 hover:bg-blue-50 dark:text-blue-400 dark:border-blue-600 dark:hover:bg-blue-900/20"
+                className="text-blue-600 border-blue-300 hover:bg-blue-50 dark:text-blue-400 dark:border-blue-600 dark:hover:bg-blue-900/20 dark:bg-blue-900/20"
 
               >
 
@@ -372,7 +372,7 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
 
                 onClick={() => onActivate(budget)}
 
-                className="text-green-600 border-green-300 hover:bg-green-50 dark:text-green-400 dark:border-green-600 dark:hover:bg-green-900/20"
+                className="text-green-600 border-green-300 hover:bg-green-50 dark:text-green-400 dark:border-green-600 dark:hover:bg-green-900/20 dark:bg-green-900/20"
 
               >
 

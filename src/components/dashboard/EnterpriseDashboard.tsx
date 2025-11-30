@@ -118,7 +118,7 @@ const EnterpriseKPICard: React.FC<{
                 {isPositiveTrend ? (
                   <ArrowUpRight className="h-4 w-4 text-green-600" />
                 ) : (
-                  <ArrowDownRight className="h-4 w-4 text-red-600" />
+                  <ArrowDownRight className="h-4 w-4 text-red-600 dark:text-red-400" />
                 )}
                 <span className={`text-sm font-medium ${trendColor}`}>
                   {Math.abs(metric.trend_percentage).toFixed(1)}%
@@ -176,7 +176,7 @@ const EnterpriseChart: React.FC<{
           </div>
         </CardHeader>
         <CardContent>
-          <div className="h-80 bg-gray-100 rounded animate-pulse"></div>
+          <div className="h-80 bg-gray-100 rounded animate-pulse dark:bg-gray-900/50"></div>
         </CardContent>
       </Card>
     );
@@ -414,7 +414,7 @@ const EnterpriseChart: React.FC<{
 
           {/* Métriques du graphique */}
           {chart.metrics ? (
-            <div className="grid grid-cols-4 gap-4 mt-4 p-4 bg-gray-50/50 rounded-lg">
+            <div className="grid grid-cols-4 gap-4 mt-4 p-4 bg-gray-50/50 rounded-lg dark:bg-gray-900/30">
               <div className="text-center">
                 <p className="text-xs text-gray-600 dark:text-gray-400">Total</p>
                 <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
@@ -450,7 +450,7 @@ const EnterpriseChart: React.FC<{
               </div>
             </div>
           ) : (
-            <div className="mt-4 p-4 bg-gray-50/50 rounded-lg">
+            <div className="mt-4 p-4 bg-gray-50/50 rounded-lg dark:bg-gray-900/30">
               <p className="text-center text-gray-500 dark:text-gray-400">Données des métriques en cours de chargement...</p>
             </div>
           )}
@@ -511,7 +511,7 @@ const FinancialHealthCard: React.FC<{
   const getScoreIcon = (score: number) => {
     if (score >= 80) return <CheckCircle2 className="h-5 w-5 text-green-600" />;
     if (score >= 60) return <AlertTriangle className="h-5 w-5 text-yellow-600" />;
-    return <AlertCircle className="h-5 w-5 text-red-600" />;
+    return <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />;
   };
 
   return (
@@ -580,9 +580,9 @@ const FinancialHealthCard: React.FC<{
                 Recommandations prioritaires
               </h4>
               {healthScore.recommendations.slice(0, 3).map((rec, index) => (
-                <div key={index} className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
-                  <p className="text-sm font-medium text-blue-900">{rec.title}</p>
-                  <p className="text-xs text-blue-700 mt-1">{rec.description}</p>
+                <div key={index} className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400 dark:bg-blue-900/20">
+                  <p className="text-sm font-medium text-blue-900 dark:text-blue-100">{rec.title}</p>
+                  <p className="text-xs text-blue-700 mt-1 dark:text-blue-400">{rec.description}</p>
                   <div className="flex items-center justify-between mt-2">
                     <Badge variant={rec.priority === 'high' ? 'destructive' : rec.priority === 'medium' ? 'secondary' : 'outline'}>
                       {rec.priority}
@@ -602,7 +602,7 @@ const FinancialHealthCard: React.FC<{
                 Alertes critiques
               </h4>
               {healthScore.critical_alerts.map((alert, index) => (
-                <div key={index} className="p-2 bg-red-50 rounded-lg border-l-4 border-red-400">
+                <div key={index} className="p-2 bg-red-50 rounded-lg border-l-4 border-red-400 dark:bg-red-900/20">
                   <p className="text-sm text-red-800">{alert}</p>
                 </div>
               ))}
@@ -932,7 +932,7 @@ export const EnterpriseDashboard: React.FC = () => {
                   <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">
                     Aucune donnée financière disponible pour le moment.
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-gray-500 dark:text-gray-300 dark:text-gray-400">
                     Commencez à enregistrer vos écritures comptables pour voir votre score de santé financière.
                   </p>
                 </div>

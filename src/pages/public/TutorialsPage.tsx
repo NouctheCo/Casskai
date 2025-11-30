@@ -188,7 +188,7 @@ const TutorialsPage: React.FC = () => {
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
                 Tutoriels Vidéo
               </h1>
-              <p className="text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mt-1">
+              <p className="text-gray-500 dark:text-gray-400 dark:text-gray-300 mt-1">
                 Apprenez à maîtriser CassKai avec nos tutoriels pas-à-pas
               </p>
             </div>
@@ -237,7 +237,7 @@ const TutorialsPage: React.FC = () => {
                 <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 dark:text-white">
                   Abonnez-vous à notre chaîne YouTube
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                <p className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">
                   Ne manquez aucun tutoriel et restez informé des nouveautés
                 </p>
               </div>
@@ -259,7 +259,7 @@ const TutorialsPage: React.FC = () => {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
               Aucun tutoriel trouvé
             </h3>
-            <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+            <p className="text-gray-500 dark:text-gray-300 dark:text-gray-300">
               Essayez avec d'autres mots-clés ou catégories
             </p>
           </div>
@@ -298,26 +298,26 @@ const TutorialsPage: React.FC = () => {
                     <span className={`px-2 py-1 text-xs font-medium rounded-lg ${getLevelColor(tutorial.level)}`}>
                       {tutorial.level}
                     </span>
-                    <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 text-xs rounded-lg">
+                    <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 dark:text-gray-300 text-xs rounded-lg">
                       {tutorial.category}
                     </span>
                   </div>
 
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors dark:text-red-400">
                     {tutorial.title}
                   </h3>
 
-                  <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-4 line-clamp-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-4 line-clamp-2">
                     {tutorial.description}
                   </p>
 
-                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-300 dark:text-gray-300">
                     <div className="flex items-center gap-1">
                       <Eye className="h-3.5 w-3.5" />
                       {tutorial.views.toLocaleString()} vues
                     </div>
                     {tutorial.status === 'available' && (
-                      <Button size="sm" variant="ghost" className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30">
+                      <Button size="sm" variant="ghost" className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 dark:bg-red-900/20 dark:text-red-400">
                         <Play className="h-3.5 w-3.5 mr-1" />
                         Regarder
                       </Button>
@@ -338,7 +338,7 @@ const TutorialsPage: React.FC = () => {
             <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
               Soyez notifié des nouveaux tutoriels
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-6">
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-6">
               Recevez un email chaque fois qu'un nouveau tutoriel est publié
             </p>
 
@@ -367,7 +367,7 @@ const TutorialsPage: React.FC = () => {
 
         {/* Help Links */}
         <div className="mt-8 text-center">
-          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-4">
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-4">
             Vous préférez la documentation écrite ?
           </p>
           <div className="flex items-center justify-center gap-4">

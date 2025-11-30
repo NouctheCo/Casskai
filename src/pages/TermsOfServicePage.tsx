@@ -396,7 +396,7 @@ const TermsOfServicePage = () => {
 
               <CardTitle className="flex items-center">
 
-                <Lock className="w-6 h-6 mr-3 text-red-600" />
+                <Lock className="w-6 h-6 mr-3 text-red-600 dark:text-red-400" />
 
                 Conditions d'accès et d'utilisation
 

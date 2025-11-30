@@ -405,7 +405,7 @@ export const BudgetForecastView: React.FC<BudgetForecastViewProps> = ({
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 dark:bg-gray-800/50 divide-y divide-gray-200 dark:divide-gray-700">
                   {by_category.map((cat) => (
-                    <tr key={cat.category_id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                    <tr key={cat.category_id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:bg-gray-900/30">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mr-3 ${

@@ -203,7 +203,7 @@ export const CompanyValidationWizard: React.FC<CompanyValidationWizardProps> = (
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-6 p-4 bg-gray-50 rounded-lg"
+                    className="mt-6 p-4 bg-gray-50 rounded-lg dark:bg-gray-900/30"
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium">Score de qualité</span>
@@ -272,7 +272,7 @@ export const CompanyValidationWizard: React.FC<CompanyValidationWizardProps> = (
                           key={duplicate.id}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          className="border rounded-lg p-3 bg-red-50"
+                          className="border rounded-lg p-3 bg-red-50 dark:bg-red-900/20"
                         >
                           <div className="flex items-center justify-between mb-2">
                             <h4 className="font-medium">{duplicate.name}</h4>
@@ -329,7 +329,7 @@ export const CompanyValidationWizard: React.FC<CompanyValidationWizardProps> = (
 
               {/* Validation OK */}
               {hasValidated && validation.isValid && validation.duplicates.length === 0 && (
-                <Card className="border-green-200 bg-green-50">
+                <Card className="border-green-200 bg-green-50 dark:bg-green-900/20">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-3">
                       <CheckCircle className="h-5 w-5 text-green-600" />
@@ -337,7 +337,7 @@ export const CompanyValidationWizard: React.FC<CompanyValidationWizardProps> = (
                         <h3 className="font-medium text-green-900">
                           Validation réussie
                         </h3>
-                        <p className="text-sm text-green-700">
+                        <p className="text-sm text-green-700 dark:text-green-400">
                           Aucun doublon détecté. L'entreprise peut être créée.
                         </p>
                       </div>

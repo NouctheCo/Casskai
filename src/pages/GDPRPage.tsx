@@ -932,7 +932,7 @@ const GDPRPage = () => {
 
                 <div className="flex">
 
-                  <AlertTriangle className="h-5 w-5 text-red-600 mr-2 mt-0.5" />
+                  <AlertTriangle className="h-5 w-5 text-red-600 mr-2 mt-0.5 dark:text-red-400" />
 
                   <div>
 
@@ -1320,7 +1320,7 @@ const GDPRPage = () => {
 
             <CardTitle className="flex items-center">
 
-              <Lock className="w-6 h-6 mr-3 text-red-600" />
+              <Lock className="w-6 h-6 mr-3 text-red-600 dark:text-red-400" />
 
               Mesures de protection
 

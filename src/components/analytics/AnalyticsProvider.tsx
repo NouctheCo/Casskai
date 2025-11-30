@@ -490,7 +490,7 @@ const AnalyticsSettingsModal: React.FC<{
 
           
 
-          <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 space-y-2">
+          <div className="text-sm text-gray-600 dark:text-gray-300 space-y-2">
 
             <p>
 
@@ -536,13 +536,13 @@ const AnalyticsSettingsModal: React.FC<{
 
           
 
-          <div className="bg-blue-50 p-3 rounded-lg">
+          <div className="bg-blue-50 p-3 rounded-lg dark:bg-blue-900/20">
 
             <div className="flex items-start gap-2">
 
               <Shield className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
 
-              <div className="text-xs text-blue-700">
+              <div className="text-xs text-blue-700 dark:text-blue-400">
 
                 <strong>Plausible Analytics</strong> est conforme au RGPD, 
 

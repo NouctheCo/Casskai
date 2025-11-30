@@ -840,7 +840,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">Factures</h2>
 
-          <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Gérez vos factures clients</p>
+          <p className="text-sm text-gray-500 dark:text-gray-300">Gérez vos factures clients</p>
 
         </div>
 
@@ -958,7 +958,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
             <span>Liste des factures</span>
 
-            <span className="text-sm font-normal text-gray-500 dark:text-gray-400 dark:text-gray-500">
+            <span className="text-sm font-normal text-gray-500 dark:text-gray-300">
 
               {filteredInvoices.length} facture(s)
 
@@ -1002,7 +1002,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
                   {filteredInvoices.map((invoice) => (
 
-                    <TableRow key={invoice.id as string} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <TableRow key={invoice.id as string} className="hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-900/30">
 
                       <TableCell className="font-medium">
 
@@ -1012,7 +1012,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
                           {invoice.type === 'credit_note' && (
 
-                            <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+                            <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 dark:text-orange-400">
 
                               Avoir
 
@@ -1032,7 +1032,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
                           {((invoice.third_party || invoice.client) as { email?: string })?.email && (
 
-                            <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">{((invoice.third_party || invoice.client) as { email?: string })?.email}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-300">{((invoice.third_party || invoice.client) as { email?: string })?.email}</p>
 
                           )}
 
@@ -1192,7 +1192,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
                                 onClick={() => handleDeleteInvoice(invoice.id as string)}
 
-                                className="text-red-600 focus:text-red-600"
+                                className="text-red-600 focus:text-red-600 dark:text-red-400"
 
                               >
 
@@ -1232,7 +1232,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
               </h3>
 
-              <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-6">
+              <p className="text-gray-500 dark:text-gray-300 mb-6">
 
                 {searchTerm || statusFilter !== 'all' 
 
@@ -1888,7 +1888,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
 
                     onClick={() => setShowNewClientForm(true)}
 
-                    className="text-blue-600 hover:text-blue-700"
+                    className="text-blue-600 hover:text-blue-700 dark:text-blue-400"
 
                   >
 
@@ -1924,7 +1924,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
 
                           <span className="font-medium">{client.name}</span>
 
-                          {client.primary_email && <span className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">{client.primary_email}</span>}
+                          {client.primary_email && <span className="text-xs text-gray-500 dark:text-gray-300">{client.primary_email}</span>}
 
                         </div>
 
@@ -2249,7 +2249,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
             <CardContent>
 
               {/* En-têtes de colonnes */}
-              <div className="grid grid-cols-12 gap-4 items-center px-4 pb-2 mb-2 text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+              <div className="grid grid-cols-12 gap-4 items-center px-4 pb-2 mb-2 text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">
                 <div className="col-span-4">Description</div>
                 <div className="col-span-2 text-center">Quantité</div>
                 <div className="col-span-2 text-center">Prix HT</div>

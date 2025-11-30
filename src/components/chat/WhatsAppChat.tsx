@@ -87,7 +87,7 @@ export function WhatsAppChat({
       </span>
 
       {isHovered && (
-        <div className="absolute inset-0 bg-white/20 animate-pulse" />
+        <div className="absolute inset-0 bg-white/20 animate-pulse dark:bg-gray-800" />
       )}
     </Button>
   );
@@ -255,7 +255,7 @@ export function WhatsAppFloatingButton({
 
         {/* Badge de notification discret */}
         {!isLoading && (
-          <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center border-2 border-white dark:border-gray-800 shadow-sm">
+          <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center border-2 border-white dark:border-gray-800 shadow-sm dark:bg-red-900/20">
             <span className="text-[10px] text-white font-bold">!</span>
           </div>
         )}
@@ -283,7 +283,7 @@ export function WhatsAppSupportCard({
             <MessageCircle className="w-5 h-5 mr-2" />
             Support WhatsApp
           </CardTitle>
-          <Badge variant="outline" className="border-green-300 text-green-700">
+          <Badge variant="outline" className="border-green-300 text-green-700 dark:text-green-400">
             <Zap className="w-3 h-3 mr-1" />
             Agent IA
           </Badge>

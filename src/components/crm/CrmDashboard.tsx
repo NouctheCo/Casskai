@@ -162,7 +162,7 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
           <CardContent>
             <div className="space-y-4">
               {pipeline_stats.map((stage, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg dark:bg-gray-900/30">
                   <div className="flex items-center gap-3">
                     <Badge variant="outline" className={getStageColor(stage.stage)}>
                       {t(`crm.stages.${stage.stage}`)}
@@ -236,7 +236,7 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
           </CardHeader>
           <CardContent className="space-y-3">
             {recent_opportunities.slice(0, 5).map((opportunity) => (
-              <div key={opportunity.id} className="flex items-start justify-between p-3 bg-gray-50 rounded-lg">
+              <div key={opportunity.id} className="flex items-start justify-between p-3 bg-gray-50 rounded-lg dark:bg-gray-900/30">
                 <div className="flex-1">
                   <h4 className="text-sm font-medium truncate">{opportunity.title}</h4>
                   <p className="text-xs text-gray-600 dark:text-gray-400">{opportunity.client_name}</p>
@@ -269,7 +269,7 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
           </CardHeader>
           <CardContent className="space-y-3">
             {recent_actions.slice(0, 5).map((action) => (
-              <div key={action.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+              <div key={action.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg dark:bg-gray-900/30">
                 <div className={`p-1 rounded-full ${
                   action.type === 'meeting' ? 'bg-blue-100' :
                   action.type === 'call' ? 'bg-green-100' :
@@ -310,7 +310,7 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
           </CardHeader>
           <CardContent className="space-y-3">
             {top_clients.slice(0, 5).map((client, index) => (
-              <div key={client.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div key={client.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg dark:bg-gray-900/30">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                     <span className="text-sm font-medium text-blue-600">#{index + 1}</span>
@@ -344,7 +344,7 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
                 {t('crm.dashboard.quickActions')}:
               </span>
               <div className="flex gap-2">
-                <Badge variant="outline" className="bg-red-50 text-red-700">
+                <Badge variant="outline" className="bg-red-50 text-red-700 dark:bg-red-900/20">
                   {stats.overdue_actions} {t('crm.dashboard.overdue')}
                 </Badge>
                 <Badge variant="outline" className="bg-yellow-50 text-yellow-700">

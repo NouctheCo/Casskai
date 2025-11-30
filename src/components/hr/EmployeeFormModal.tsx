@@ -129,7 +129,7 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 transition-colors"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 transition-colors dark:text-gray-300"
             aria-label="Fermer"
           >
             <X className="h-6 w-6" aria-hidden="true" />

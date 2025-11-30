@@ -274,7 +274,7 @@ export const DataGovernanceDashboard: React.FC = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="border-r pr-4">
-                      <h4 className="font-medium text-green-700">Entreprise principale</h4>
+                      <h4 className="font-medium text-green-700 dark:text-green-400">Entreprise principale</h4>
                       <p className="font-semibold">{duplicate.primary_company.name}</p>
                       {duplicate.primary_company.siret && (
                         <p className="text-sm text-muted-foreground">
@@ -287,7 +287,7 @@ export const DataGovernanceDashboard: React.FC = () => {
                     </div>
 
                     <div className="pl-4">
-                      <h4 className="font-medium text-orange-700">Doublon potentiel</h4>
+                      <h4 className="font-medium text-orange-700 dark:text-orange-400">Doublon potentiel</h4>
                       <p className="font-semibold">{duplicate.duplicate_company.name}</p>
                       {duplicate.duplicate_company.siret && (
                         <p className="text-sm text-muted-foreground">

@@ -28,14 +28,14 @@ const PurchasesTable: React.FC<PurchasesTableProps> = ({
     switch (status) {
       case 'paid':
         return (
-          <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50">
+          <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50 dark:bg-green-900/20 dark:text-green-400">
             <CheckCircle className="w-3 h-3 mr-1" />
             {t('purchases.status.paid')}
           </Badge>
         );
       case 'overdue':
         return (
-          <Badge variant="outline" className="text-red-700 border-red-300 bg-red-50">
+          <Badge variant="outline" className="text-red-700 border-red-300 bg-red-50 dark:bg-red-900/20">
             <AlertTriangle className="w-3 h-3 mr-1" />
             {t('purchases.status.overdue')}
           </Badge>
@@ -111,7 +111,7 @@ const PurchasesTable: React.FC<PurchasesTableProps> = ({
             </TableHeader>
             <TableBody>
               {purchases.map((purchase) => (
-                <TableRow key={purchase.id} className="hover:bg-gray-50">
+                <TableRow key={purchase.id} className="hover:bg-gray-50 dark:bg-gray-900/30">
                   <TableCell className="font-medium">
                     {purchase.invoice_number}
                   </TableCell>
@@ -153,7 +153,7 @@ const PurchasesTable: React.FC<PurchasesTableProps> = ({
                           variant="outline"
                           size="sm"
                           onClick={() => onMarkAsPaid(purchase.id)}
-                          className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                          className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:bg-green-900/20 dark:text-green-400"
                           title={t('purchases.actions.markAsPaid')}
                         >
                           <CheckCircle className="w-4 h-4" />
@@ -163,7 +163,7 @@ const PurchasesTable: React.FC<PurchasesTableProps> = ({
                         variant="outline"
                         size="sm"
                         onClick={() => onEdit(purchase)}
-                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400"
                         title={t('common.edit')}
                       >
                         <Edit2 className="w-4 h-4" />
@@ -172,7 +172,7 @@ const PurchasesTable: React.FC<PurchasesTableProps> = ({
                         variant="outline"
                         size="sm"
                         onClick={() => onDelete(purchase.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:bg-red-900/20 dark:text-red-400"
                         title={t('common.delete')}
                       >
                         <Trash2 className="w-4 h-4" />

@@ -139,14 +139,14 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
                 {opportunity.title}
               </h3>
               {opportunity.description && (
-                <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mt-1 line-clamp-2">
+                <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-300 mt-1 line-clamp-2">
                   {opportunity.description}
                 </p>
               )}
             </div>
             <div className="flex items-center space-x-1 ml-2">
               {getPriorityIcon(opportunity.priority)}
-              <div {...listeners} className="p-1 hover:bg-gray-100 rounded cursor-grab">
+              <div {...listeners} className="p-1 hover:bg-gray-100 rounded cursor-grab dark:bg-gray-900/50">
                 <GripVertical className="w-3 h-3 text-gray-400 dark:text-gray-500" />
               </div>
             </div>
@@ -171,7 +171,7 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
             {opportunity.client_id && (
               <div className="flex items-center space-x-1">
                 <Building className="w-3 h-3 text-gray-400 dark:text-gray-500" />
-                <span className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 truncate">
+                <span className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-300 truncate">
                   Client ID: {opportunity.client_id}
                 </span>
               </div>
@@ -181,7 +181,7 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
             {opportunity.contact_id && (
               <div className="flex items-center space-x-1">
                 <User className="w-3 h-3 text-gray-400 dark:text-gray-500" />
-                <span className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 truncate">
+                <span className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-300 truncate">
                   Contact ID: {opportunity.contact_id}
                 </span>
               </div>
@@ -192,7 +192,7 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-1">
                   <Calendar className="w-3 h-3 text-gray-400 dark:text-gray-500" />
-                  <span className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                  <span className="text-xs text-gray-600 dark:text-gray-300 dark:text-gray-300">
                     {new Date(opportunity.expected_close_date).toLocaleDateString('fr-FR')}
                   </span>
                 </div>

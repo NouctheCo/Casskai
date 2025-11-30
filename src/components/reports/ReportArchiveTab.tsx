@@ -131,7 +131,7 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <RefreshCw className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Chargement des archives...</p>
+          <p className="text-gray-600 dark:text-gray-300">Chargement des archives...</p>
         </div>
       </div>
     );
@@ -146,7 +146,7 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Total Archives</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Archives</p>
                   <p className="text-2xl font-bold">{stats.total_archives}</p>
                 </div>
                 <Archive className="w-8 h-8 text-blue-600" />
@@ -157,7 +157,7 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Espace Utilisé</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Espace Utilisé</p>
                   <p className="text-2xl font-bold">{stats.total_size_mb.toFixed(2)} MB</p>
                 </div>
                 <HardDrive className="w-8 h-8 text-purple-600" />
@@ -168,10 +168,10 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Obligatoires</p>
-                  <p className="text-2xl font-bold text-red-600">{stats.obligatoires}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Obligatoires</p>
+                  <p className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.obligatoires}</p>
                 </div>
-                <Scale className="w-8 h-8 text-red-600" />
+                <Scale className="w-8 h-8 text-red-600 dark:text-red-400" />
               </div>
             </CardContent>
           </Card>
@@ -179,7 +179,7 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Expire Bientôt</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Expire Bientôt</p>
                   <p className="text-2xl font-bold text-orange-600">{stats.expiring_soon}</p>
                 </div>
                 <AlertCircle className="w-8 h-8 text-orange-600" />
@@ -190,10 +190,10 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">À Détruire</p>
-                  <p className="text-2xl font-bold text-gray-600 dark:text-gray-400 dark:text-gray-500">{stats.can_be_destroyed}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">À Détruire</p>
+                  <p className="text-2xl font-bold text-gray-600 dark:text-gray-300">{stats.can_be_destroyed}</p>
                 </div>
-                <AlertCircle className="w-8 h-8 text-gray-600 dark:text-gray-400 dark:text-gray-500" />
+                <AlertCircle className="w-8 h-8 text-gray-600 dark:text-gray-300" />
               </div>
             </CardContent>
           </Card>
@@ -280,7 +280,7 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
-                      <Badge className="bg-gray-100 text-gray-800 font-mono">
+                      <Badge className="bg-gray-100 text-gray-800 font-mono dark:text-gray-100 dark:bg-gray-900/50">
                         {archive.archive_reference}
                       </Badge>
                       <h3 className="font-semibold text-lg">{archive.report_name}</h3>
@@ -309,7 +309,7 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm mb-3">
                       <div>
-                        <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-1">Date du rapport</p>
+                        <p className="text-gray-600 dark:text-gray-300 mb-1">Date du rapport</p>
                         <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4 text-blue-600" />
                           <span className="font-medium">
@@ -318,7 +318,7 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
                         </div>
                       </div>
                       <div>
-                        <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-1">Archivé le</p>
+                        <p className="text-gray-600 dark:text-gray-300 mb-1">Archivé le</p>
                         <div className="flex items-center gap-2">
                           <Archive className="w-4 h-4 text-purple-600" />
                           <span className="font-medium">
@@ -327,7 +327,7 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
                         </div>
                       </div>
                       <div>
-                        <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-1">Conservation</p>
+                        <p className="text-gray-600 dark:text-gray-300 mb-1">Conservation</p>
                         <div className="flex items-center gap-2">
                           <Shield className="w-4 h-4 text-green-600" />
                           <span className="font-medium">{archive.retention_years} ans</span>
@@ -336,7 +336,7 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
                     </div>
 
                     {/* Statut de rétention */}
-                    <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                    <div className="mt-4 p-3 bg-gray-50 rounded-lg dark:bg-gray-900/30">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium">
                           Conservation jusqu'au {format(new Date(archive.retention_until), 'dd/MM/yyyy', { locale: fr })}
@@ -364,14 +364,14 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
                     </div>
 
                     {archive.legal_requirement && (
-                      <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                        <p className="text-xs font-medium text-blue-900 mb-1">Base légale</p>
+                      <div className="mt-3 p-3 bg-blue-50 rounded-lg dark:bg-blue-900/20">
+                        <p className="text-xs font-medium text-blue-900 mb-1 dark:text-blue-100">Base légale</p>
                         <p className="text-sm text-blue-800">{archive.legal_requirement}</p>
                       </div>
                     )}
 
                     {archive.notes && (
-                      <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                      <div className="mt-3 p-3 bg-gray-50 rounded-lg dark:bg-gray-900/30">
                         <p className="text-sm text-gray-700 dark:text-gray-300">{archive.notes}</p>
                       </div>
                     )}
@@ -403,7 +403,7 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
           <CardContent className="py-12 text-center">
             <Archive className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Aucune archive</h3>
-            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">
+            <p className="text-gray-600 dark:text-gray-300">
               {searchTerm || typeFilter !== 'all' || fiscalYearFilter !== 'all'
                 ? 'Aucune archive ne correspond à vos critères'
                 : 'Les rapports approuvés seront automatiquement archivés ici'}
@@ -416,11 +416,11 @@ export function ReportArchiveTab({ companyId, refreshTrigger }: ReportArchiveTab
       <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
         <CardContent className="p-6">
           <div className="flex items-start space-x-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center dark:bg-blue-900/20">
               <Scale className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-blue-900 mb-2">
+              <h3 className="font-semibold text-blue-900 mb-2 dark:text-blue-100">
                 Conservation légale et conformité
               </h3>
               <p className="text-blue-800 text-sm leading-relaxed mb-2">

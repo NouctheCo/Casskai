@@ -135,7 +135,7 @@ const SystemStatusPage: React.FC = () => {
     switch (status) {
       case 'operational': return <CheckCircle className="w-5 h-5 text-green-600" />;
       case 'degraded': return <AlertCircle className="w-5 h-5 text-yellow-600" />;
-      case 'down': return <XCircle className="w-5 h-5 text-red-600" />;
+      case 'down': return <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />;
       default: return <AlertCircle className="w-5 h-5 text-gray-600 dark:text-gray-400" />;
     }
   };

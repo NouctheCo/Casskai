@@ -154,7 +154,7 @@ export const AnomalyDetectionWidget: React.FC<AnomalyDetectionWidgetProps> = ({
         {/* Statistiques rapides */}
         <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">
           <div className="flex items-center space-x-1">
-            <div className="w-2 h-2 bg-red-500 rounded-full" />
+            <div className="w-2 h-2 bg-red-500 rounded-full dark:bg-red-900/20" />
             <span>{stats.critical} critiques</span>
           </div>
           <div className="flex items-center space-x-1">
@@ -162,7 +162,7 @@ export const AnomalyDetectionWidget: React.FC<AnomalyDetectionWidgetProps> = ({
             <span>{stats.high} élevées</span>
           </div>
           <div className="flex items-center space-x-1">
-            <div className="w-2 h-2 bg-green-500 rounded-full" />
+            <div className="w-2 h-2 bg-green-500 rounded-full dark:bg-green-900/20" />
             <span>{stats.resolved} résolues</span>
           </div>
         </div>

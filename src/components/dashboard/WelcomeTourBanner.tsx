@@ -140,7 +140,7 @@ export const WelcomeTourBanner: React.FC = () => {
 
           <div className="flex items-start gap-4">
             {/* Icône */}
-            <div className="flex-shrink-0 w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+            <div className="flex-shrink-0 w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center dark:bg-gray-800">
               {isOnboardingComplete ? (
                 <CheckCircle2 className="w-6 h-6 text-white" />
               ) : (
@@ -168,7 +168,7 @@ export const WelcomeTourBanner: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleStartTour}
-                  className="flex items-center gap-2 bg-white dark:bg-gray-800 text-blue-600 px-4 py-2 rounded-md font-medium hover:bg-blue-50 transition-colors"
+                  className="flex items-center gap-2 bg-white dark:bg-gray-800 text-blue-600 px-4 py-2 rounded-md font-medium hover:bg-blue-50 transition-colors dark:bg-blue-900/20"
                 >
                   <PlayCircle size={16} />
                   Commencer la visite guidée
@@ -177,7 +177,7 @@ export const WelcomeTourBanner: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => window.location.href = '/settings/sample-data'}
-                  className="flex items-center gap-2 bg-white/20 text-white px-4 py-2 rounded-md font-medium hover:bg-white/30 transition-colors"
+                  className="flex items-center gap-2 bg-white/20 text-white px-4 py-2 rounded-md font-medium hover:bg-white/30 transition-colors dark:bg-gray-800"
                 >
                   <Database size={16} />
                   Ajouter des données d'exemple
@@ -186,7 +186,7 @@ export const WelcomeTourBanner: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => window.location.href = '/docs/getting-started'}
-                  className="flex items-center gap-2 bg-white/10 text-white px-4 py-2 rounded-md font-medium hover:bg-white/20 transition-colors"
+                  className="flex items-center gap-2 bg-white/10 text-white px-4 py-2 rounded-md font-medium hover:bg-white/20 transition-colors dark:bg-gray-800"
                 >
                   <BookOpen size={16} />
                   Documentation
@@ -211,7 +211,7 @@ export const WelcomeTourBanner: React.FC = () => {
             </div>
 
             {/* Barre de progression */}
-            <div className="w-full bg-white/20 rounded-full h-2 overflow-hidden">
+            <div className="w-full bg-white/20 rounded-full h-2 overflow-hidden dark:bg-gray-800">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPercent}%` }}

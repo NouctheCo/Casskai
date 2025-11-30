@@ -130,7 +130,7 @@ export const ClientSelector: React.FC<ClientSelectorProps> = ({
           variant="ghost"
           size="sm"
           onClick={() => setShowNewClientForm(true)}
-          className="text-blue-600 hover:text-blue-700"
+          className="text-blue-600 hover:text-blue-700 dark:text-blue-400"
         >
           <Plus className="w-4 h-4 mr-1" />
           Nouveau client

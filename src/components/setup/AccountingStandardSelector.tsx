@@ -106,7 +106,7 @@ export const AccountingStandardSelector: React.FC<AccountingStandardSelectorProp
         )}
 
         {currentStandard !== recommendedStandard && (
-          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg dark:bg-amber-900/20">
             <div className="flex items-start gap-2">
               <Info className="h-4 w-4 text-amber-600 mt-0.5" />
               <div className="text-sm">
@@ -120,12 +120,12 @@ export const AccountingStandardSelector: React.FC<AccountingStandardSelectorProp
           </div>
         )}
 
-        <div className="text-xs text-slate-500 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+        <div className="text-xs text-slate-500 p-3 bg-blue-50 border border-blue-200 rounded-lg dark:bg-blue-900/20">
           <div className="flex items-start gap-2">
             <Info className="h-3 w-3 text-blue-600 mt-0.5 flex-shrink-0" />
             <div>
               <p className="font-medium text-blue-800 mb-1">À savoir</p>
-              <p className="text-blue-700">
+              <p className="text-blue-700 dark:text-blue-400">
                 Le plan comptable sera automatiquement créé avec les comptes essentiels du standard choisi. 
                 Vous pourrez toujours ajouter, modifier ou désactiver des comptes par la suite, 
                 et importer un fichier FEC pour récupérer votre plan comptable existant.

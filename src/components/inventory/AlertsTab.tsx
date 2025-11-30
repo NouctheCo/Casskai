@@ -64,7 +64,7 @@ export default function AlertsTab({
           </div>
 
           <div className="space-y-3">
-            <h3 className="font-semibold text-red-600">Rupture de stock</h3>
+            <h3 className="font-semibold text-red-600 dark:text-red-400">Rupture de stock</h3>
             {outOfStockItems.map((item) => (
               <motion.div
                 key={item.id}
@@ -80,7 +80,7 @@ export default function AlertsTab({
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-red-600">0</p>
+                  <p className="text-lg font-bold text-red-600 dark:text-red-400">0</p>
                   <Button size="sm" onClick={() => onReplenish(item.id, item.minStock * 2)}>
                     Réapprovisionner
                   </Button>

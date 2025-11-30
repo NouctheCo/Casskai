@@ -1964,7 +1964,7 @@ export default function ProjectsPage() {
 
                                   return (
 
-                                    <div key={i} className="h-6 bg-gray-100 rounded relative overflow-hidden">
+                                    <div key={i} className="h-6 bg-gray-100 rounded relative overflow-hidden dark:bg-gray-900/50">
 
                                       {isInRange && (
 
@@ -2016,7 +2016,7 @@ export default function ProjectsPage() {
 
                     <div className="flex items-center gap-2">
 
-                      <div className="w-4 h-4 bg-blue-500 rounded" />
+                      <div className="w-4 h-4 bg-blue-500 rounded dark:bg-blue-900/20" />
 
                       <span>En cours</span>
 
@@ -2024,7 +2024,7 @@ export default function ProjectsPage() {
 
                     <div className="flex items-center gap-2">
 
-                      <div className="w-4 h-4 bg-green-500 rounded" />
+                      <div className="w-4 h-4 bg-green-500 rounded dark:bg-green-900/20" />
 
                       <span>Terminé</span>
 
@@ -2662,7 +2662,7 @@ export default function ProjectsPage() {
 
                       <div className="flex items-center gap-2">
 
-                        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold dark:bg-blue-900/20">
 
                           {selectedProject.manager.split(' ').map(n => n.charAt(0)).join('')}
 
@@ -2682,7 +2682,7 @@ export default function ProjectsPage() {
 
                         <div key={index} className="flex items-center gap-2">
 
-                          <div className="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                          <div className="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center text-white text-xs font-bold dark:bg-gray-900/30">
 
                             {member.split(' ').map(n => n.charAt(0)).join('')}
 

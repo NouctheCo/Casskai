@@ -300,7 +300,7 @@ export function AlertsTab({ inventoryItems, onStockMovement }: { inventoryItems:
 
           {/* Alertes de rupture */}
           <div className="space-y-3">
-            <h3 className="font-semibold text-red-600">Rupture de stock</h3>
+            <h3 className="font-semibold text-red-600 dark:text-red-400">Rupture de stock</h3>
             {inventoryItems.filter(item => item.status === 'out_of_stock').map((item) => (
               <motion.div
                 key={item.id}
@@ -316,7 +316,7 @@ export function AlertsTab({ inventoryItems, onStockMovement }: { inventoryItems:
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-red-600">0</p>
+                  <p className="text-lg font-bold text-red-600 dark:text-red-400">0</p>
                   <Button size="sm" onClick={() => onStockMovement(item.id, 'entry', item.minStock * 2, 'Réapprovisionnement')}>
                     Réapprovisionner
                   </Button>
@@ -446,7 +446,7 @@ export function ReportsTab({ computedMetrics, inventoryItems, stockMovements }: 
                 {[15000, 18000, 16500, 19200, 17800, 20100, 19270].map((value, i) => (
                   <div key={i} className="flex flex-col items-center">
                     <div
-                      className="w-8 bg-blue-500 rounded-t"
+                      className="w-8 bg-blue-500 rounded-t dark:bg-blue-900/20"
                       style={{ height: `${(value / 25000) * 150}px` }}
                     />
                     <span className="text-xs mt-1">S{i + 1}</span>

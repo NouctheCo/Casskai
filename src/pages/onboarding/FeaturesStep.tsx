@@ -154,7 +154,7 @@ export default function FeaturesStep() {
               defaultValue: 'Choisissez vos fonctionnalités'
             })}
           </CardTitle>
-          <CardDescription className="text-lg text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 max-w-2xl mx-auto">
+          <CardDescription className="text-lg text-gray-600 dark:text-gray-400 dark:text-gray-300 max-w-2xl mx-auto">
             {t('onboarding.features.subtitle', {
               defaultValue: 'Sélectionnez les modules qui correspondent à vos besoins. Vous pourrez toujours les modifier plus tard.'
             })}
@@ -222,17 +222,17 @@ export default function FeaturesStep() {
                   <Switch
                     checked={(state.data?.selectedModules || []).includes(module.key)}
                     onCheckedChange={() => toggleModule(module.key)}
-                    className="data-[state=checked]:bg-blue-500"
+                    className="data-[state=checked]:bg-blue-500 dark:bg-blue-900/20"
                   />
                 </div>
                 
-                <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-3 leading-relaxed">
+                <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-3 leading-relaxed">
                   {module.description}
                 </p>
                 
                 <div className="space-y-1">
                   {module.features.slice(0, 2).map((feature, idx) => (
-                    <div key={idx} className="flex items-center text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                    <div key={idx} className="flex items-center text-xs text-gray-500 dark:text-gray-300 dark:text-gray-300">
                       <div className="w-1 h-1 bg-gray-400 rounded-full mr-2 flex-shrink-0" />
                       {feature}
                     </div>
@@ -255,7 +255,7 @@ export default function FeaturesStep() {
             className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-4 mb-6 border border-green-200 dark:border-green-800"
           >
             <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0 dark:bg-green-900/20">
                 <Zap className="w-4 h-4 text-white" />
               </div>
               <div>

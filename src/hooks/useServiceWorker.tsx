@@ -250,7 +250,7 @@ export const UpdateNotification = () => {
   if (!showNotification) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 bg-blue-500 text-white p-4 rounded-lg shadow-lg z-50 max-w-sm">
+    <div className="fixed bottom-4 right-4 bg-blue-500 text-white p-4 rounded-lg shadow-lg z-50 max-w-sm dark:bg-blue-900/20">
       <div className="flex items-start space-x-3">
         <div className="flex-shrink-0">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

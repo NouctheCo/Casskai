@@ -135,7 +135,7 @@ export const TrialManager: React.FC = () => {
           )}
 
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded p-3">
+            <div className="bg-red-50 border border-red-200 rounded p-3 dark:bg-red-900/20">
               <p className="text-red-800 text-sm">{error}</p>
             </div>
           )}
@@ -166,7 +166,7 @@ export const TrialStatistics: React.FC = () => {
       </CardHeader>
       <CardContent>
         {error ? (
-          <div className="bg-red-50 border border-red-200 rounded p-3">
+          <div className="bg-red-50 border border-red-200 rounded p-3 dark:bg-red-900/20">
             <p className="text-red-800 text-sm">{error}</p>
           </div>
         ) : (

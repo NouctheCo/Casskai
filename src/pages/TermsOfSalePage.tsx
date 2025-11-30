@@ -301,7 +301,7 @@ const TermsOfSalePage = () => {
           <Card className="mb-8">
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Calendar className="w-6 h-6 mr-3 text-red-600" />
+                <Calendar className="w-6 h-6 mr-3 text-red-600 dark:text-red-400" />
                 5. Renouvellement et résiliation
               </CardTitle>
             </CardHeader>
@@ -494,7 +494,7 @@ const TermsOfSalePage = () => {
           <Card className="mb-8">
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Scale className="w-6 h-6 mr-3 text-red-600" />
+                <Scale className="w-6 h-6 mr-3 text-red-600 dark:text-red-400" />
                 10. Litiges, médiation et droit applicable
               </CardTitle>
             </CardHeader>

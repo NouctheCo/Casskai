@@ -163,7 +163,7 @@ export const EInvoiceStatistics: React.FC<EInvoiceStatisticsProps> = ({
                 <p className="text-2xl font-bold">{statistics.by_status.REJECTED || 0}</p>
               </div>
               <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                <AlertTriangle className="h-4 w-4 text-red-600" />
+                <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
               </div>
             </div>
           </CardContent>
@@ -297,7 +297,7 @@ export const EInvoiceStatistics: React.FC<EInvoiceStatisticsProps> = ({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm">Échecs</span>
-                  <span className="font-medium text-red-600">{statistics.by_status.REJECTED || 0}</span>
+                  <span className="font-medium text-red-600 dark:text-red-400">{statistics.by_status.REJECTED || 0}</span>
                 </div>
               </div>
             </div>

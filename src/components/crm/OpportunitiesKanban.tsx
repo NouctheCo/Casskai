@@ -311,7 +311,7 @@ const OpportunitiesKanban: React.FC<OpportunitiesKanbanProps> = ({
 
                         {/* Next Action */}
                         {opportunity.next_action && (
-                          <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
+                          <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded dark:bg-blue-900/20">
                             <div className="font-medium">{t('crm.opportunities.nextAction')}:</div>
                             <div className="truncate">{opportunity.next_action}</div>
                             {opportunity.next_action_date && (
@@ -345,7 +345,7 @@ const OpportunitiesKanban: React.FC<OpportunitiesKanbanProps> = ({
                               variant="ghost"
                               size="sm"
                               onClick={() => handleEditOpportunity(opportunity)}
-                              className="text-blue-600 hover:text-blue-700 p-1"
+                              className="text-blue-600 hover:text-blue-700 p-1 dark:text-blue-400"
                             >
                               <Edit2 className="w-3 h-3" />
                             </Button>
@@ -353,7 +353,7 @@ const OpportunitiesKanban: React.FC<OpportunitiesKanbanProps> = ({
                               variant="ghost"
                               size="sm"
                               onClick={() => onDeleteOpportunity(opportunity.id)}
-                              className="text-red-600 hover:text-red-700 p-1"
+                              className="text-red-600 hover:text-red-700 p-1 dark:text-red-400"
                             >
                               <Trash2 className="w-3 h-3" />
                             </Button>

@@ -71,7 +71,7 @@ export function DocumentDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300"
+            className="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:text-gray-300"
           >
             <X className="w-6 h-6" />
           </button>
@@ -80,16 +80,16 @@ export function DocumentDetailModal({
         {/* Body */}
         <div className="flex-1 overflow-y-auto p-6">
           {/* Metadata */}
-          <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+          <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-lg dark:bg-gray-900/30">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">Généré le</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">Généré le</p>
               <p className="text-sm">
                 {new Date(document.generated_at).toLocaleString('fr-FR')}
               </p>
             </div>
             {document.sent_date && (
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">Envoyé le</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">Envoyé le</p>
                 <p className="text-sm">
                   {new Date(document.sent_date).toLocaleString('fr-FR')}
                 </p>
@@ -97,7 +97,7 @@ export function DocumentDetailModal({
             )}
             {document.signed_date && (
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">Signé le</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">Signé le</p>
                 <p className="text-sm">
                   {new Date(document.signed_date).toLocaleString('fr-FR')}
                 </p>
@@ -105,7 +105,7 @@ export function DocumentDetailModal({
             )}
             {document.requires_signature && (
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">Signature</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">Signature</p>
                 <Badge className="mt-1 bg-purple-100 text-purple-800">
                   <FileSignature className="w-3 h-3 mr-1" />
                   Requise
@@ -114,7 +114,7 @@ export function DocumentDetailModal({
             )}
             {document.is_archived && (
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">Archive</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">Archive</p>
                 <Badge className="mt-1">
                   <Archive className="w-3 h-3 mr-1" />
                   {document.archive_reference || 'Archivé'}
@@ -133,7 +133,7 @@ export function DocumentDetailModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t bg-gray-50">
+        <div className="flex items-center justify-between p-6 border-t bg-gray-50 dark:bg-gray-900/30">
           <div className="flex gap-2">
             {document.status === 'generated' && (
               <Button

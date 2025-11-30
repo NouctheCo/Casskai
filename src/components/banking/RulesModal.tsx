@@ -150,7 +150,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
           </div>
           <button
             onClick={handleClose}
-            className="p-1 hover:bg-white/20 rounded text-white transition"
+            className="p-1 hover:bg-white/20 rounded text-white transition dark:bg-gray-800"
           >
             <X className="h-5 w-5" />
           </button>
@@ -268,7 +268,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                         {/* Actions */}
                         <button
                           onClick={() => handleDeleteRule(rule.id)}
-                          className="mt-6 p-2 text-red-500 hover:bg-red-50 rounded transition"
+                          className="mt-6 p-2 text-red-500 hover:bg-red-50 rounded transition dark:bg-red-900/20"
                           title="Supprimer"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -318,7 +318,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                     </h3>
                     <button
                       onClick={() => setShowNewRuleForm(false)}
-                      className="text-gray-500 dark:text-gray-400 hover:text-gray-700"
+                      className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -400,7 +400,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                   <div className="flex justify-end gap-2 mt-4">
                     <button
                       onClick={() => setShowNewRuleForm(false)}
-                      className="px-4 py-2 border rounded hover:bg-gray-50 transition"
+                      className="px-4 py-2 border rounded hover:bg-gray-50 transition dark:bg-gray-900/30"
                     >
                       Annuler
                     </button>

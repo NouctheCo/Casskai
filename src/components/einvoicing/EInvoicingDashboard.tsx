@@ -243,7 +243,7 @@ export const EInvoicingDashboard: React.FC<EInvoicingDashboardProps> = ({
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                <XCircle className="h-4 w-4 text-red-600" />
+                <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{statistics?.by_status?.REJECTED || 0}</p>

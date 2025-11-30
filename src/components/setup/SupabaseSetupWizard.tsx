@@ -186,8 +186,8 @@ const SupabaseSetupWizard = () => {
         </div>
       </Alert>
 
-      <div className="bg-blue-50 p-4 rounded-lg">
-        <h3 className="font-semibold text-blue-900 mb-2">Comment obtenir vos credentials Supabase ?</h3>
+      <div className="bg-blue-50 p-4 rounded-lg dark:bg-blue-900/20">
+        <h3 className="font-semibold text-blue-900 mb-2 dark:text-blue-100">Comment obtenir vos credentials Supabase ?</h3>
         <ol className="text-sm text-blue-800 space-y-1">
           <li>1. Créez un compte sur <a href="https://supabase.com" target="_blank" className="underline">supabase.com</a></li>
           <li>2. Créez un nouveau projet</li>
@@ -241,7 +241,7 @@ const SupabaseSetupWizard = () => {
               id="currency"
               value={companyConfig.currency}
               disabled
-              className="mt-1 bg-gray-50"
+              className="mt-1 bg-gray-50 dark:bg-gray-900/30"
             />
           </div>
           <div>
@@ -250,13 +250,13 @@ const SupabaseSetupWizard = () => {
               id="timezone"
               value={companyConfig.timezone}
               disabled
-              className="mt-1 bg-gray-50"
+              className="mt-1 bg-gray-50 dark:bg-gray-900/30"
             />
           </div>
         </div>
       </div>
 
-      <Alert className="border-blue-200 bg-blue-50">
+      <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-900/20">
         <Globe className="h-4 w-4 text-blue-600" />
         <AlertDescription className="ml-2">
           La devise et le fuseau horaire sont automatiquement définis selon le pays sélectionné.
@@ -273,7 +273,7 @@ const SupabaseSetupWizard = () => {
         <p className="text-gray-600 dark:text-gray-400">Récapitulatif de votre configuration</p>
       </div>
 
-      <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+      <div className="bg-gray-50 p-4 rounded-lg space-y-3 dark:bg-gray-900/30">
         <h3 className="font-semibold">Configuration Supabase</h3>
         <p className="text-sm"><strong>URL:</strong> {supabaseConfig.url}</p>
         <p className="text-sm"><strong>Status:</strong> ✅ Validé</p>
@@ -319,14 +319,14 @@ const SupabaseSetupWizard = () => {
         
         <CardContent>
           {error && (
-            <Alert className="mb-4 border-red-200 bg-red-50">
-              <AlertCircle className="h-4 w-4 text-red-600" />
+            <Alert className="mb-4 border-red-200 bg-red-50 dark:bg-red-900/20">
+              <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
               <AlertDescription className="ml-2 text-red-800">{error}</AlertDescription>
             </Alert>
           )}
           
           {success && (
-            <Alert className="mb-4 border-green-200 bg-green-50">
+            <Alert className="mb-4 border-green-200 bg-green-50 dark:bg-green-900/20">
               <CheckCircle className="h-4 w-4 text-green-600" />
               <AlertDescription className="ml-2 text-green-800">{success}</AlertDescription>
             </Alert>

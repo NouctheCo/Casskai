@@ -105,19 +105,19 @@ export const AccountDeletionWizard: React.FC<DeletionWizardProps> = ({
         <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
           Suppression de compte
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 max-w-md mx-auto">
+        <p className="text-gray-600 dark:text-gray-300 max-w-md mx-auto">
           Nous sommes désolés de vous voir partir. Ce processus vous guidera de manière sécurisée
           dans la suppression de votre compte CassKai.
         </p>
       </div>
 
-      <Card className="bg-blue-50 border-blue-200">
+      <Card className="bg-blue-50 border-blue-200 dark:bg-blue-900/20">
         <CardContent className="p-4">
           <div className="flex items-start space-x-3">
             <Shield className="h-5 w-5 text-blue-600 mt-0.5" />
             <div className="text-left">
-              <h3 className="font-medium text-blue-900">Suppression sécurisée</h3>
-              <p className="text-sm text-blue-700">
+              <h3 className="font-medium text-blue-900 dark:text-blue-100">Suppression sécurisée</h3>
+              <p className="text-sm text-blue-700 dark:text-blue-400">
                 • Période de grâce de 30 jours<br/>
                 • Export automatique de vos données<br/>
                 • Transfert de propriété assisté<br/>
@@ -151,7 +151,7 @@ export const AccountDeletionWizard: React.FC<DeletionWizardProps> = ({
         <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
           Analyse de votre compte
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">
+        <p className="text-gray-600 dark:text-gray-300">
           Nous analysons l'impact de la suppression sur vos entreprises...
         </p>
       </div>
@@ -184,17 +184,17 @@ export const AccountDeletionWizard: React.FC<DeletionWizardProps> = ({
         <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
           Impact sur vos entreprises
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">
+        <p className="text-gray-600 dark:text-gray-300">
           Votre suppression affectera {analysis?.companiesAsSoleOwner?.length || 0} entreprise(s)
         </p>
       </div>
 
       {analysis?.companiesAsSoleOwner?.map((company: any, index: number) => (
-        <Card key={index} className="border-amber-200 bg-amber-50">
+        <Card key={index} className="border-amber-200 bg-amber-50 dark:bg-amber-900/20">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-medium text-amber-900">{company.company_name}</h3>
+                <h3 className="font-medium text-amber-900 dark:text-amber-100">{company.company_name}</h3>
                 <p className="text-sm text-amber-700">
                   Vous êtes le seul propriétaire
                 </p>
@@ -231,18 +231,18 @@ export const AccountDeletionWizard: React.FC<DeletionWizardProps> = ({
         <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
           Export de vos données
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">
+        <p className="text-gray-600 dark:text-gray-300">
           Récupérez vos données avant la suppression
         </p>
       </div>
 
-      <Card className="bg-blue-50 border-blue-200">
+      <Card className="bg-blue-50 border-blue-200 dark:bg-blue-900/20">
         <CardContent className="p-4">
           <div className="flex items-start space-x-3">
             <FileText className="h-5 w-5 text-blue-600 mt-0.5" />
             <div>
-              <h3 className="font-medium text-blue-900">Export FEC inclus</h3>
-              <p className="text-sm text-blue-700">
+              <h3 className="font-medium text-blue-900 dark:text-blue-100">Export FEC inclus</h3>
+              <p className="text-sm text-blue-700 dark:text-blue-400">
                 • Fichier des Écritures Comptables conforme DGFiP<br/>
                 • Toutes vos données comptables<br/>
                 • Documents justificatifs<br/>
@@ -288,12 +288,12 @@ export const AccountDeletionWizard: React.FC<DeletionWizardProps> = ({
         <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
           Confirmation finale
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">
+        <p className="text-gray-600 dark:text-gray-300">
           Cette action sera effective dans 30 jours
         </p>
       </div>
 
-      <Card className="border-red-200 bg-red-50">
+      <Card className="border-red-200 bg-red-50 dark:bg-red-900/20">
         <CardContent className="p-4">
           <h3 className="font-medium text-red-900 mb-2">Récapitulatif :</h3>
           <ul className="text-sm text-red-700 space-y-1">
@@ -350,7 +350,7 @@ export const AccountDeletionWizard: React.FC<DeletionWizardProps> = ({
         <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
           Transfert de propriété
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">
+        <p className="text-gray-600 dark:text-gray-300">
           Choisissez les nouveaux propriétaires pour vos entreprises
         </p>
       </div>
@@ -399,7 +399,7 @@ export const AccountDeletionWizard: React.FC<DeletionWizardProps> = ({
                   </SelectContent>
                 </Select>
 
-                <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-gray-300">
                   Seuls les administrateurs actifs peuvent recevoir la propriété
                 </p>
               </div>
@@ -408,12 +408,12 @@ export const AccountDeletionWizard: React.FC<DeletionWizardProps> = ({
         ))}
       </div>
 
-      <Card className="bg-amber-50 border-amber-200">
+      <Card className="bg-amber-50 border-amber-200 dark:bg-amber-900/20">
         <CardContent className="p-4">
           <div className="flex items-start space-x-3">
             <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
             <div>
-              <h3 className="font-medium text-amber-900">Important</h3>
+              <h3 className="font-medium text-amber-900 dark:text-amber-100">Important</h3>
               <p className="text-sm text-amber-700">
                 Les nouveaux propriétaires recevront un email de notification et
                 auront accès complet à l'entreprise. Cette action est irréversible.
@@ -454,7 +454,7 @@ export const AccountDeletionWizard: React.FC<DeletionWizardProps> = ({
         <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
           Traitement en cours...
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">
+        <p className="text-gray-600 dark:text-gray-300">
           Nous préparons votre suppression de compte
         </p>
       </div>
@@ -485,7 +485,7 @@ export const AccountDeletionWizard: React.FC<DeletionWizardProps> = ({
         </div>
       </div>
 
-      <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
+      <div className="text-xs text-gray-500 dark:text-gray-300">
         Cette opération peut prendre quelques minutes
       </div>
     </motion.div>
@@ -504,7 +504,7 @@ export const AccountDeletionWizard: React.FC<DeletionWizardProps> = ({
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             Au revoir et merci ! 👋
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 max-w-md mx-auto">
+          <p className="text-gray-600 dark:text-gray-300 max-w-md mx-auto">
             Votre demande de suppression a été enregistrée. Nous espérons vous revoir un jour sur CassKai.
           </p>
         </div>
@@ -533,11 +533,11 @@ export const AccountDeletionWizard: React.FC<DeletionWizardProps> = ({
         </CardContent>
       </Card>
 
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 dark:bg-amber-900/20">
         <div className="flex items-start space-x-3">
           <Star className="h-5 w-5 text-amber-600 mt-0.5" />
           <div className="text-left">
-            <h3 className="font-medium text-amber-900">Vous changez d'avis ?</h3>
+            <h3 className="font-medium text-amber-900 dark:text-amber-100">Vous changez d'avis ?</h3>
             <p className="text-sm text-amber-700">
               Vous avez 30 jours pour annuler cette demande. Connectez-vous simplement
               à votre compte et annulez depuis vos paramètres.
@@ -552,7 +552,7 @@ export const AccountDeletionWizard: React.FC<DeletionWizardProps> = ({
           Terminé
         </Button>
 
-        <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
+        <div className="text-xs text-gray-500 dark:text-gray-300">
           Merci d'avoir fait confiance à CassKai pour votre comptabilité ❤️
         </div>
       </div>
@@ -573,7 +573,7 @@ export const AccountDeletionWizard: React.FC<DeletionWizardProps> = ({
           {/* Progress bar */}
           {currentStep !== 'farewell' && (
             <div className="mb-6">
-              <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-2">
+              <div className="flex justify-between text-xs text-gray-500 dark:text-gray-300 mb-2">
                 <span>Étape {['welcome', 'analysis', 'impact', 'transfer', 'export', 'confirmation', 'processing'].indexOf(currentStep) + 1} sur 7</span>
                 <span>{Math.round(((['welcome', 'analysis', 'impact', 'transfer', 'export', 'confirmation', 'processing'].indexOf(currentStep) + 1) / 7) * 100)}%</span>
               </div>

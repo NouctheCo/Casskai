@@ -265,7 +265,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
             <Activity className="w-6 h-6" />
             {t('crm.actions.title')}
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 mt-1">{t('crm.actions.description')}</p>
+          <p className="text-gray-600 dark:text-gray-300 mt-1">{t('crm.actions.description')}</p>
         </div>
         <Button onClick={handleCreateAction}>
           <Plus className="w-4 h-4 mr-2" />
@@ -279,7 +279,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('crm.actions.stats.total')}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('crm.actions.stats.total')}</p>
                 <p className="text-2xl font-bold text-blue-600">{totalActions}</p>
               </div>
               <Activity className="w-8 h-8 text-blue-600" />
@@ -290,7 +290,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('crm.actions.stats.completed')}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('crm.actions.stats.completed')}</p>
                 <p className="text-2xl font-bold text-green-600">{completedActions}</p>
               </div>
               <CheckCircle className="w-8 h-8 text-green-600" />
@@ -301,7 +301,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('crm.actions.stats.planned')}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('crm.actions.stats.planned')}</p>
                 <p className="text-2xl font-bold text-yellow-600">{plannedActions}</p>
               </div>
               <Clock className="w-8 h-8 text-yellow-600" />
@@ -312,10 +312,10 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('crm.actions.stats.overdue')}</p>
-                <p className="text-2xl font-bold text-red-600">{overdueActions}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('crm.actions.stats.overdue')}</p>
+                <p className="text-2xl font-bold text-red-600 dark:text-red-400">{overdueActions}</p>
               </div>
-              <XCircle className="w-8 h-8 text-red-600" />
+              <XCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
             </div>
           </CardContent>
         </Card>
@@ -326,7 +326,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
         <CardContent className="p-6">
           <div className="flex items-center gap-4 mb-4">
             <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-gray-500 dark:text-gray-400 dark:text-gray-500" />
+              <Filter className="w-4 h-4 text-gray-500 dark:text-gray-300" />
               <h3 className="font-medium text-gray-900 dark:text-gray-100">{t('crm.filters.title')}</h3>
             </div>
             {hasActiveFilters && (
@@ -334,7 +334,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
                 variant="outline"
                 size="sm"
                 onClick={() => onFiltersChange({})}
-                className="flex items-center gap-2 text-gray-600 dark:text-gray-400 dark:text-gray-500"
+                className="flex items-center gap-2 text-gray-600 dark:text-gray-300"
               >
                 <X className="w-4 h-4" />
                 {t('crm.filters.clear')}
@@ -469,7 +469,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
                         <div>
                           <p className="font-medium text-sm">{action.title}</p>
                           {action.description && (
-                            <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 truncate max-w-xs">
+                            <p className="text-xs text-gray-500 dark:text-gray-300 truncate max-w-xs">
                               {action.description}
                             </p>
                           )}
@@ -518,7 +518,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
                         )}
                       </TableCell>
                       <TableCell>
-                        <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">{action.assigned_to || '-'}</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">{action.assigned_to || '-'}</span>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
@@ -527,7 +527,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
                               variant="outline"
                               size="sm"
                               onClick={() => handleMarkAsCompleted(action.id)}
-                              className="text-green-600 hover:text-green-700"
+                              className="text-green-600 hover:text-green-700 dark:text-green-400"
                             >
                               <CheckCircle className="w-4 h-4" />
                             </Button>
@@ -536,7 +536,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
                             variant="outline"
                             size="sm"
                             onClick={() => handleEditAction(action)}
-                            className="text-blue-600 hover:text-blue-700"
+                            className="text-blue-600 hover:text-blue-700 dark:text-blue-400"
                           >
                             <Edit2 className="w-4 h-4" />
                           </Button>
@@ -544,7 +544,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
                             variant="outline"
                             size="sm"
                             onClick={() => onDeleteAction(action.id)}
-                            className="text-red-600 hover:text-red-700"
+                            className="text-red-600 hover:text-red-700 dark:text-red-400"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>

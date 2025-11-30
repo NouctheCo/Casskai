@@ -195,7 +195,7 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
                 className={errors.invoice_number ? 'border-red-500' : ''}
               />
               {errors.invoice_number && (
-                <p className="text-sm text-red-600">{errors.invoice_number}</p>
+                <p className="text-sm text-red-600 dark:text-red-400">{errors.invoice_number}</p>
               )}
             </div>
 
@@ -212,7 +212,7 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
                 className={errors.purchase_date ? 'border-red-500' : ''}
               />
               {errors.purchase_date && (
-                <p className="text-sm text-red-600">{errors.purchase_date}</p>
+                <p className="text-sm text-red-600 dark:text-red-400">{errors.purchase_date}</p>
               )}
             </div>
 
@@ -237,7 +237,7 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
                 </SelectContent>
               </Select>
               {errors.supplier_id && (
-                <p className="text-sm text-red-600">{errors.supplier_id}</p>
+                <p className="text-sm text-red-600 dark:text-red-400">{errors.supplier_id}</p>
               )}
             </div>
 
@@ -254,7 +254,7 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
                 className={errors.due_date ? 'border-red-500' : ''}
               />
               {errors.due_date && (
-                <p className="text-sm text-red-600">{errors.due_date}</p>
+                <p className="text-sm text-red-600 dark:text-red-400">{errors.due_date}</p>
               )}
             </div>
           </div>
@@ -273,7 +273,7 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
               className={errors.description ? 'border-red-500' : ''}
             />
             {errors.description && (
-              <p className="text-sm text-red-600">{errors.description}</p>
+              <p className="text-sm text-red-600 dark:text-red-400">{errors.description}</p>
             )}
           </div>
 
@@ -299,7 +299,7 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
                     className={errors.amount_ht ? 'border-red-500' : ''}
                   />
                   {errors.amount_ht && (
-                    <p className="text-sm text-red-600">{errors.amount_ht}</p>
+                    <p className="text-sm text-red-600 dark:text-red-400">{errors.amount_ht}</p>
                   )}
                 </div>
 
@@ -362,7 +362,7 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
                       className="hidden"
                     />
                   </label>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 dark:text-gray-300 mt-1">
                     {t('purchases.form.acceptedFormats')}
                   </p>
                 </div>
@@ -372,11 +372,11 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
               {formData.attachments && formData.attachments.length > 0 && (
                 <div className="mt-4 space-y-2">
                   {formData.attachments.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                    <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded dark:bg-gray-900/30">
                       <div className="flex items-center space-x-2">
-                        <FileText className="w-4 h-4 text-gray-500 dark:text-gray-400 dark:text-gray-500" />
+                        <FileText className="w-4 h-4 text-gray-500 dark:text-gray-300" />
                         <span className="text-sm text-gray-700 dark:text-gray-300">{file.name}</span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                        <span className="text-xs text-gray-500 dark:text-gray-300">
                           ({(file.size / 1024).toFixed(1)} KB)
                         </span>
                       </div>

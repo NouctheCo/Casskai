@@ -171,15 +171,15 @@ export const ModernReportsIntegration: React.FC = () => {
                 </p>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-green-500 rounded-full dark:bg-green-900/20"></div>
                     <span>Hooks existants préservés</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-green-500 rounded-full dark:bg-green-900/20"></div>
                     <span>Interfaces backwards compatible</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-green-500 rounded-full dark:bg-green-900/20"></div>
                     <span>Migration progressive possible</span>
                   </div>
                 </div>
@@ -190,7 +190,7 @@ export const ModernReportsIntegration: React.FC = () => {
           <div className="flex items-center justify-between pt-4 border-t border-blue-200 dark:border-blue-800">
             <div className="flex items-center space-x-4 text-sm text-slate-600 dark:text-slate-400">
               <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse dark:bg-green-900/20"></div>
                 <span>Système prêt</span>
               </div>
               <div className="flex items-center space-x-1">

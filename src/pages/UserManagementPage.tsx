@@ -779,7 +779,7 @@ const UserManagementPage = () => {
 
                           </div>
 
-                          <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                          <div className="text-sm text-gray-500 dark:text-gray-300">
 
                             {user.email}
 
@@ -801,7 +801,7 @@ const UserManagementPage = () => {
 
                           <div className="font-medium">{user.department}</div>
 
-                          <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">{user.position}</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-300">{user.position}</div>
 
                         </div>
 
@@ -879,7 +879,7 @@ const UserManagementPage = () => {
 
                             onClick={() => openDeleteUser(user)}
 
-                            className="text-red-600 hover:text-red-900"
+                            className="text-red-600 hover:text-red-900 dark:text-red-400"
 
                           >
 
@@ -983,7 +983,7 @@ const UserManagementPage = () => {
 
                     <CardContent>
 
-                      <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
+                      <div className="text-sm text-gray-600 dark:text-gray-300">
 
                         <strong>Permissions:</strong>
 
@@ -1185,13 +1185,13 @@ const UserManagementPage = () => {
 
                         </div>
 
-                        <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                        <div className="text-sm text-gray-500 dark:text-gray-300">
 
                           {activity.action} sur {activity.resource}
 
                           {activity.metadata && (
 
-                            <span className="ml-2 text-xs bg-gray-100 px-2 py-1 rounded">
+                            <span className="ml-2 text-xs bg-gray-100 px-2 py-1 rounded dark:bg-gray-900/50">
 
                               {JSON.stringify(activity.metadata, null, 0)}
 

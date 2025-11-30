@@ -494,7 +494,7 @@ const KPICard: React.FC<{ config: KPICardConfig }> = ({ config }) => {
 
         <div className="space-y-1">
 
-          <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
+          <div className="flex justify-between text-xs text-gray-500 dark:text-gray-300">
 
             <span>Objectif</span>
 
@@ -568,7 +568,7 @@ const GaugeWidget: React.FC<{ config: GaugeWidgetConfig }> = ({ config }) => {
 
             fill="none"
 
-            className="text-gray-200 dark:text-gray-700"
+            className="text-gray-200 dark:text-gray-700 dark:text-gray-200"
 
           />
 
@@ -610,7 +610,7 @@ const GaugeWidget: React.FC<{ config: GaugeWidgetConfig }> = ({ config }) => {
 
             <div className="text-lg font-bold">{value}</div>
 
-            <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">{unit}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-300">{unit}</div>
 
           </div>
 
@@ -620,7 +620,7 @@ const GaugeWidget: React.FC<{ config: GaugeWidgetConfig }> = ({ config }) => {
 
       
 
-      <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 text-center">
+      <div className="text-xs text-gray-500 dark:text-gray-300 text-center">
 
         {min} - {max} {unit}
 
@@ -652,7 +652,7 @@ const ProgressTracker: React.FC<{ config: ProgressTrackerConfig }> = ({ config }
 
         <span className="font-medium">Progression</span>
 
-        <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">
+        <span className="text-gray-500 dark:text-gray-300">
 
           {currentStep + 1} / {steps.length}
 
@@ -738,7 +738,7 @@ const QuickActions: React.FC<{ config: QuickActionsConfig }> = ({ config }) => {
 
           key={index}
 
-          className="p-2 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-sm"
+          className="p-2 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-sm dark:bg-gray-900/50"
 
           whileHover={{ scale: 1.02 }}
 
@@ -822,7 +822,7 @@ const RecentActivities: React.FC<{ config: RecentActivitiesConfig }> = ({ config
 
             </p>
 
-            <p className="text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 text-xs">
+            <p className="text-gray-500 dark:text-gray-400 dark:text-gray-300 text-xs">
 
               il y a {activity.time}
 
@@ -910,7 +910,7 @@ const NotificationCenter: React.FC<{ config: NotificationCenterConfig }> = ({ co
 
             </p>
 
-            <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 truncate">
+            <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-300 truncate">
 
               {notification.message}
 
@@ -956,7 +956,7 @@ const WeatherWidget: React.FC<{ config: WeatherConfig }> = ({ config }) => {
 
         <Thermometer className="w-5 h-5 text-blue-500" />
 
-        <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+        <span className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">
 
           {weather.location}
 
@@ -984,7 +984,7 @@ const WeatherWidget: React.FC<{ config: WeatherConfig }> = ({ config }) => {
 
       
 
-      <div className="space-y-1 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+      <div className="space-y-1 text-sm text-gray-500 dark:text-gray-300 dark:text-gray-300">
 
         <p>{weather.condition}</p>
 
@@ -1315,7 +1315,7 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
 
               </div>
 
-              <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+              <div className="text-sm text-gray-500 dark:text-gray-300 dark:text-gray-300">
 
                 Widget "{widget.type}"
 
@@ -1345,7 +1345,7 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
 
             <AlertTriangle className="w-8 h-8 text-red-500 mx-auto" />
 
-            <p className="text-sm text-red-600">
+            <p className="text-sm text-red-600 dark:text-red-400">
 
               Erreur de chargement du widget
 

@@ -70,7 +70,7 @@ const ConfigGuard: React.FC<ConfigGuardProps> = ({ children, fallback }) => {
         <Card className="w-full max-w-2xl">
           <CardContent className="p-8">
             <div className="text-center mb-6">
-              <AlertTriangle className="mx-auto h-12 w-12 text-red-600 mb-4" />
+              <AlertTriangle className="mx-auto h-12 w-12 text-red-600 mb-4 dark:text-red-400" />
               <h2 className="text-2xl font-bold text-red-900 mb-2">
                 Erreur de Configuration
               </h2>
@@ -79,8 +79,8 @@ const ConfigGuard: React.FC<ConfigGuardProps> = ({ children, fallback }) => {
               </p>
             </div>
 
-            <Alert className="border-red-200 bg-red-50 mb-6">
-              <AlertTriangle className="h-4 w-4 text-red-600" />
+            <Alert className="border-red-200 bg-red-50 mb-6 dark:bg-red-900/20">
+              <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
               <AlertDescription className="text-red-800">
                 <strong>Erreur :</strong> {config.error?.message || 'Erreur inconnue'}
               </AlertDescription>
@@ -89,7 +89,7 @@ const ConfigGuard: React.FC<ConfigGuardProps> = ({ children, fallback }) => {
             {showDetails && config.error && (
               <div className="mb-6">
                 <h3 className="font-semibold mb-2">Détails techniques :</h3>
-                <div className="bg-gray-100 p-3 rounded text-sm font-mono">
+                <div className="bg-gray-100 p-3 rounded text-sm font-mono dark:bg-gray-900/50">
                   <p><strong>Code :</strong> {config.error.code}</p>
                   <p><strong>Timestamp :</strong> {config.error.timestamp}</p>
                   {config.error.details && (
@@ -129,8 +129,8 @@ const ConfigGuard: React.FC<ConfigGuardProps> = ({ children, fallback }) => {
               </Button>
             </div>
 
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              <h3 className="font-semibold text-blue-900 mb-2">Besoin d'aide ?</h3>
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg dark:bg-blue-900/20">
+              <h3 className="font-semibold text-blue-900 mb-2 dark:text-blue-100">Besoin d'aide ?</h3>
               <ul className="text-sm text-blue-800 space-y-1">
                 <li>• Vérifiez votre connexion internet</li>
                 <li>• Assurez-vous que vos credentials Supabase sont corrects</li>

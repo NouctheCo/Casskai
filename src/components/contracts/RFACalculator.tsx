@@ -221,7 +221,7 @@ export const RFACalculator: React.FC<RFACalculatorProps> = ({ contract, onClose 
 
           {breakdown.map((tier, index) => (
 
-            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg dark:bg-gray-900/30">
 
               <div className="flex-1">
 
@@ -241,7 +241,7 @@ export const RFACalculator: React.FC<RFACalculatorProps> = ({ contract, onClose 
 
                 </div>
 
-                <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
+                <div className="text-xs text-gray-500 dark:text-gray-300 mt-1">
 
                   {formatAmount(tier.tier_amount)} × {(tier.tier_rate * 100).toFixed(1)}%
 
@@ -447,7 +447,7 @@ export const RFACalculator: React.FC<RFACalculatorProps> = ({ contract, onClose 
 
           </h2>
 
-          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 mt-1">
+          <p className="text-gray-600 dark:text-gray-300 mt-1">
 
             {contract.contract_name} - {contract.client_name}
 
@@ -545,7 +545,7 @@ export const RFACalculator: React.FC<RFACalculatorProps> = ({ contract, onClose 
 
                       {contract.discount_config.tiers.map((tier, index) => (
 
-                        <div key={index} className="text-sm p-2 bg-gray-50 rounded">
+                        <div key={index} className="text-sm p-2 bg-gray-50 rounded dark:bg-gray-900/30">
 
                           {formatAmount(tier.min)} - {tier.max ? formatAmount(tier.max) : '∞'} 
 
@@ -651,7 +651,7 @@ export const RFACalculator: React.FC<RFACalculatorProps> = ({ contract, onClose 
 
                   <div className="space-y-4">
 
-                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 dark:bg-blue-900/20">
 
                       <div className="flex items-center justify-between">
 
@@ -665,7 +665,7 @@ export const RFACalculator: React.FC<RFACalculatorProps> = ({ contract, onClose 
 
                       </div>
 
-                      <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 mt-2">
+                      <div className="text-sm text-gray-600 dark:text-gray-300 mt-2">
 
                         Taux effectif : {((calculationResult.amount / turnoverAmount) * 100).toFixed(2)}%
 
@@ -831,7 +831,7 @@ export const RFACalculator: React.FC<RFACalculatorProps> = ({ contract, onClose 
 
                         {simulationResults.map((result, index) => (
 
-                          <div key={index} className="p-4 border rounded-lg hover:bg-gray-50">
+                          <div key={index} className="p-4 border rounded-lg hover:bg-gray-50 dark:bg-gray-900/30">
 
                             <div className="flex items-center justify-between">
 
@@ -849,7 +849,7 @@ export const RFACalculator: React.FC<RFACalculatorProps> = ({ contract, onClose 
 
                                 </Badge>
 
-                                <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
+                                <div className="text-sm text-gray-600 dark:text-gray-300">
 
                                   CA: <AmountDisplay amount={result.turnover_amount} currency={contract.currency} />
 
@@ -865,7 +865,7 @@ export const RFACalculator: React.FC<RFACalculatorProps> = ({ contract, onClose 
 
                                 </div>
 
-                                <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                                <div className="text-sm text-gray-500 dark:text-gray-300">
 
                                   {(result.effective_rate * 100).toFixed(2)}%
 
@@ -901,7 +901,7 @@ export const RFACalculator: React.FC<RFACalculatorProps> = ({ contract, onClose 
 
                     <BarChart3 className="h-12 w-12 mx-auto text-gray-400 dark:text-gray-500 mb-4" />
 
-                    <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                    <p className="text-gray-500 dark:text-gray-300">
 
                       Cliquez sur "Lancer la simulation" pour voir les résultats
 

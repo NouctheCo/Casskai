@@ -149,12 +149,12 @@ const ForecastReportView: React.FC<ForecastReportViewProps> = ({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Dépenses Totales</p>
-                <p className="text-2xl font-bold text-red-600">
+                <p className="text-2xl font-bold text-red-600 dark:text-red-400">
                   {formatCurrency(forecast.total_expenses)}
                 </p>
               </div>
               <div className="p-3 bg-red-100 rounded-full">
-                <TrendingDown className="h-6 w-6 text-red-600" />
+                <TrendingDown className="h-6 w-6 text-red-600 dark:text-red-400" />
               </div>
             </div>
           </CardContent>
@@ -230,12 +230,12 @@ const ForecastReportView: React.FC<ForecastReportViewProps> = ({
         {/* Revenue Items */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg text-green-700">Lignes de Revenus</CardTitle>
+            <CardTitle className="text-lg text-green-700 dark:text-green-400">Lignes de Revenus</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {forecast.revenue_items.map((item) => (
-                <div key={item.id} className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                <div key={item.id} className="flex justify-between items-center p-3 bg-green-50 rounded-lg dark:bg-green-900/20">
                   <div>
                     <p className="font-medium text-gray-900 dark:text-gray-100">{item.description}</p>
                     <div className="flex items-center space-x-2 mt-1">
@@ -274,7 +274,7 @@ const ForecastReportView: React.FC<ForecastReportViewProps> = ({
           <CardContent>
             <div className="space-y-3">
               {forecast.expense_items.map((item) => (
-                <div key={item.id} className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                <div key={item.id} className="flex justify-between items-center p-3 bg-red-50 rounded-lg dark:bg-red-900/20">
                   <div>
                     <p className="font-medium text-gray-900 dark:text-gray-100">{item.description}</p>
                     <div className="flex items-center space-x-2 mt-1">
@@ -297,7 +297,7 @@ const ForecastReportView: React.FC<ForecastReportViewProps> = ({
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-red-600">
+                    <p className="font-semibold text-red-600 dark:text-red-400">
                       {formatCurrency(item.amount)}
                     </p>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
@@ -317,7 +317,7 @@ const ForecastReportView: React.FC<ForecastReportViewProps> = ({
         {forecast.key_assumptions && forecast.key_assumptions.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-blue-700">
+              <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
                 <Target className="h-5 w-5" />
                 Hypothèses Clés
               </CardTitle>
@@ -361,7 +361,7 @@ const ForecastReportView: React.FC<ForecastReportViewProps> = ({
         {forecast.opportunities && forecast.opportunities.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-green-700">
+              <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-400">
                 <TrendingUp className="h-5 w-5" />
                 Opportunités
               </CardTitle>

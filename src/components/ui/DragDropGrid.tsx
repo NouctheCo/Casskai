@@ -140,7 +140,7 @@ export const DraggableDashboard: React.FC<{
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white">
           Dashboard
         </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+        <p className="text-sm text-gray-500 dark:text-gray-300 dark:text-gray-300">
           Glissez-déposez pour réorganiser
         </p>
       </div>
@@ -201,7 +201,7 @@ export const SortableList: React.FC<{
                 {item.label}
               </p>
               {item.description && (
-                <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-300 dark:text-gray-300">
                   {item.description}
                 </p>
               )}
@@ -283,7 +283,7 @@ export const DropZone: React.FC<{
               Déposez vos fichiers ici
             </p>
             {acceptedTypes.length > 0 && (
-              <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mt-1">
+              <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-300 mt-1">
                 Types acceptés: {acceptedTypes.join(', ')}
               </p>
             )}

@@ -92,7 +92,7 @@ export const LoadingFallback: React.FC<LoadingFallbackProps> = ({ message }) => 
 
               key={i}
 
-              className="w-2 h-2 bg-blue-500 rounded-full"
+              className="w-2 h-2 bg-blue-500 rounded-full dark:bg-blue-900/20"
 
               animate={{ 
 

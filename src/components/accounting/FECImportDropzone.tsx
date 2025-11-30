@@ -73,10 +73,10 @@ const FECImportDropzone = ({ onFileSelected, isProcessing }) => {
         onDrop={handleDrop}
       >
         <FileUp className="h-16 w-16 text-gray-400 dark:text-gray-500 mb-4" />
-        <p className="mb-2 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+        <p className="mb-2 text-sm text-gray-500 dark:text-gray-300 dark:text-gray-300">
           <span className="font-semibold">{t('fecImport.dropzone.clickToUpload', { defaultValue: 'Click to upload' })}</span> {t('fecImport.dropzone.orDragAndDrop', { defaultValue: 'or drag and drop' })}
         </p>
-        <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+        <p className="text-xs text-gray-500 dark:text-gray-300 dark:text-gray-300">
           {t('fecImport.dropzone.fileTypes', { defaultValue: 'FEC file (.txt or .csv)' })}
         </p>
         <input

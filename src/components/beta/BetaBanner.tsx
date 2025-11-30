@@ -36,7 +36,7 @@ export function BetaBanner() {
           </div>
           <button
             onClick={() => setIsVisible(false)}
-            className="flex-shrink-0 hover:bg-white/20 rounded-full p-1 transition-colors"
+            className="flex-shrink-0 hover:bg-white/20 rounded-full p-1 transition-colors dark:bg-gray-800"
             aria-label="Fermer la bannière"
           >
             <X className="h-5 w-5" />

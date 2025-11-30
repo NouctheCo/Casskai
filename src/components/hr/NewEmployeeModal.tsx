@@ -150,7 +150,7 @@ export const NewEmployeeModal: React.FC<NewEmployeeModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors dark:bg-gray-900/50"
             aria-label="Fermer"
           >
             <X className="h-5 w-5" />

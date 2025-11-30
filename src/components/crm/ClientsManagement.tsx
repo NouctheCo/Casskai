@@ -239,7 +239,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
         <CardContent className="p-6">
           <div className="flex items-center gap-4 mb-4">
             <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-gray-500 dark:text-gray-400 dark:text-gray-500" />
+              <Filter className="w-4 h-4 text-gray-500 dark:text-gray-300" />
               <h3 className="font-medium text-gray-900 dark:text-gray-100">{t('crm.filters.title')}</h3>
             </div>
             {hasActiveFilters && (
@@ -247,7 +247,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
                 variant="outline"
                 size="sm"
                 onClick={() => onFiltersChange({})}
-                className="flex items-center gap-2 text-gray-600 dark:text-gray-400 dark:text-gray-500"
+                className="flex items-center gap-2 text-gray-600 dark:text-gray-300"
               >
                 <X className="w-4 h-4" />
                 {t('crm.filters.clear')}
@@ -356,7 +356,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
                   {clients.map((client) => {
                     const clientContacts = getClientContacts(client.id);
                     return (
-                      <TableRow key={client.id} className="hover:bg-gray-50">
+                      <TableRow key={client.id} className="hover:bg-gray-50 dark:bg-gray-900/30">
                         <TableCell>
                           <div>
                             <div className="font-medium flex items-center gap-2">
@@ -364,7 +364,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
                               {client.company_name}
                             </div>
                             {client.website && (
-                              <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
+                              <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-300 mt-1">
                                 <Globe className="w-3 h-3" />
                                 <a href={client.website} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">
                                   {client.website}
@@ -374,7 +374,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">{client.industry || '-'}</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-300">{client.industry || '-'}</span>
                         </TableCell>
                         <TableCell>
                           {client.size && (
@@ -390,7 +390,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
                         </TableCell>
                         <TableCell>
                           {client.city && (
-                            <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
+                            <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300">
                               <MapPin className="w-3 h-3" />
                               {client.city}
                             </div>
@@ -403,7 +403,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
                               variant="ghost"
                               size="sm"
                               onClick={() => handleCreateContact(client.id)}
-                              className="text-blue-600 hover:text-blue-700"
+                              className="text-blue-600 hover:text-blue-700 dark:text-blue-400"
                             >
                               <Plus className="w-3 h-3" />
                             </Button>
@@ -420,7 +420,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
                               variant="outline"
                               size="sm"
                               onClick={() => handleEditClient(client)}
-                              className="text-blue-600 hover:text-blue-700"
+                              className="text-blue-600 hover:text-blue-700 dark:text-blue-400"
                             >
                               <Edit2 className="w-4 h-4" />
                             </Button>
@@ -428,7 +428,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
                               variant="outline"
                               size="sm"
                               onClick={() => onDeleteClient(client.id)}
-                              className="text-red-600 hover:text-red-700"
+                              className="text-red-600 hover:text-red-700 dark:text-red-400"
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
@@ -464,7 +464,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
                   {contacts.map((contact) => {
                     const client = clients.find(c => c.id === contact.client_id);
                     return (
-                      <TableRow key={contact.id} className="hover:bg-gray-50">
+                      <TableRow key={contact.id} className="hover:bg-gray-50 dark:bg-gray-900/30">
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <User className="w-4 h-4 text-gray-400 dark:text-gray-500" />
@@ -474,16 +474,16 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">{client?.company_name || '-'}</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-300">{client?.company_name || '-'}</span>
                         </TableCell>
                         <TableCell>
-                          <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">{contact.position || '-'}</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-300">{contact.position || '-'}</span>
                         </TableCell>
                         <TableCell>
                           {contact.email && (
                             <div className="flex items-center gap-1">
                               <Mail className="w-3 h-3 text-gray-400 dark:text-gray-500" />
-                              <a href={`mailto:${contact.email}`} className="text-sm text-blue-600 hover:text-blue-700">
+                              <a href={`mailto:${contact.email}`} className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400">
                                 {contact.email}
                               </a>
                             </div>
@@ -493,12 +493,12 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
                           {contact.phone && (
                             <div className="flex items-center gap-1">
                               <Phone className="w-3 h-3 text-gray-400 dark:text-gray-500" />
-                              <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">{contact.phone}</span>
+                              <span className="text-sm text-gray-600 dark:text-gray-300">{contact.phone}</span>
                             </div>
                           )}
                         </TableCell>
                         <TableCell>
-                          <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">{formatDate(contact.created_at)}</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-300">{formatDate(contact.created_at)}</span>
                         </TableCell>
                       </TableRow>
                     );

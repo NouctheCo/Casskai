@@ -493,7 +493,7 @@ export function UserProfileSettings() {
       {/* Actions dangereuses */}
       <Card className="border-red-200">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-red-600">
+          <CardTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
             <AlertTriangle className="h-5 w-5" />
             Zone de danger
           </CardTitle>
@@ -502,7 +502,7 @@ export function UserProfileSettings() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 dark:bg-red-900/20">
             <div className="flex items-start justify-between">
               <div className="space-y-1">
                 <h3 className="font-medium text-red-900">

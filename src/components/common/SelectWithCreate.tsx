@@ -128,11 +128,11 @@ export const SelectWithCreate: React.FC<SelectWithCreateProps> = ({
           {/* Liste des options */}
           <div className="max-h-48 overflow-y-auto">
             {isLoading ? (
-              <div className="p-4 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500 text-sm">
+              <div className="p-4 text-center text-gray-500 dark:text-gray-300 text-sm">
                 Chargement...
               </div>
             ) : filteredOptions.length === 0 ? (
-              <div className="p-4 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500 text-sm">
+              <div className="p-4 text-center text-gray-500 dark:text-gray-300 text-sm">
                 Aucun résultat pour "{search}"
               </div>
             ) : (
@@ -152,7 +152,7 @@ export const SelectWithCreate: React.FC<SelectWithCreateProps> = ({
                   <div className="flex-1">
                     <div className="font-medium text-sm">{option.label}</div>
                     {option.sublabel && (
-                      <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-0.5">{option.sublabel}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-300 mt-0.5">{option.sublabel}</div>
                     )}
                   </div>
                   {option.value === value && <Check className="h-4 w-4 text-primary flex-shrink-0" />}
@@ -197,7 +197,7 @@ export const SelectWithCreate: React.FC<SelectWithCreateProps> = ({
                     setIsCreating(false);
                     setNewItemName('');
                   }}
-                  className="px-3 py-2 border rounded-lg hover:bg-gray-50 transition-colors"
+                  className="px-3 py-2 border rounded-lg hover:bg-gray-50 transition-colors dark:bg-gray-900/30"
                 >
                   <X className="h-4 w-4" />
                 </button>

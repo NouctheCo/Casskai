@@ -240,13 +240,13 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
             </div>
 
             <div className="grid grid-cols-3 gap-3">
-              <div className="bg-green-50 p-3 rounded-lg text-center">
+              <div className="bg-green-50 p-3 rounded-lg text-center dark:bg-green-900/20">
                 <CheckCircle className="w-6 h-6 text-green-600 mx-auto mb-1" />
                 <p className="text-2xl font-bold text-green-600">{stats.objectives.completed}</p>
                 <p className="text-xs text-gray-600 dark:text-gray-400">Complétés</p>
               </div>
 
-              <div className="bg-blue-50 p-3 rounded-lg text-center">
+              <div className="bg-blue-50 p-3 rounded-lg text-center dark:bg-blue-900/20">
                 <Clock className="w-6 h-6 text-blue-600 mx-auto mb-1" />
                 <p className="text-2xl font-bold text-blue-600">
                   {stats.objectives.total - stats.objectives.completed - stats.objectives.at_risk}
@@ -290,12 +290,12 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-3 gap-3">
-              <div className="bg-blue-50 p-3 rounded-lg text-center">
+              <div className="bg-blue-50 p-3 rounded-lg text-center dark:bg-blue-900/20">
                 <p className="text-2xl font-bold text-blue-600">{stats.feedback.total}</p>
                 <p className="text-xs text-gray-600 dark:text-gray-400">Total</p>
               </div>
 
-              <div className="bg-green-50 p-3 rounded-lg text-center">
+              <div className="bg-green-50 p-3 rounded-lg text-center dark:bg-green-900/20">
                 <p className="text-2xl font-bold text-green-600">{stats.feedback.praise}</p>
                 <p className="text-xs text-gray-600 dark:text-gray-400">Éloges</p>
               </div>
@@ -364,7 +364,7 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div className="bg-blue-50 p-4 rounded-lg text-center">
+            <div className="bg-blue-50 p-4 rounded-lg text-center dark:bg-blue-900/20">
               <BookOpen className="w-8 h-8 text-blue-600 mx-auto mb-2" />
               <p className="text-2xl font-bold text-blue-600">{stats.training.total_trainings}</p>
               <p className="text-sm text-gray-600 dark:text-gray-400">Formations</p>
@@ -376,7 +376,7 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
               <p className="text-sm text-gray-600 dark:text-gray-400">Sessions</p>
             </div>
 
-            <div className="bg-green-50 p-4 rounded-lg text-center">
+            <div className="bg-green-50 p-4 rounded-lg text-center dark:bg-green-900/20">
               <Users className="w-8 h-8 text-green-600 mx-auto mb-2" />
               <p className="text-2xl font-bold text-green-600">{stats.training.total_enrollments}</p>
               <p className="text-sm text-gray-600 dark:text-gray-400">Inscriptions</p>

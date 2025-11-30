@@ -611,7 +611,7 @@ const ThirdPartiesPage: React.FC = () => {
 
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
 
-          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Chargement des tiers...</p>
+          <p className="text-gray-600 dark:text-gray-300">Chargement des tiers...</p>
 
         </div>
 
@@ -663,7 +663,7 @@ const ThirdPartiesPage: React.FC = () => {
 
           <div className="flex items-center space-x-2">
 
-            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+            <p className="text-gray-600 dark:text-gray-300 dark:text-gray-300">
 
               {currentEnterprise ? `${currentEnterprise.name} - ` : ''}
 
@@ -763,7 +763,7 @@ const ThirdPartiesPage: React.FC = () => {
 
                         <div>
 
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Total Tiers</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Tiers</p>
 
                           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
 
@@ -795,7 +795,7 @@ const ThirdPartiesPage: React.FC = () => {
 
                         <div>
 
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Clients Actifs</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Clients Actifs</p>
 
                           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
 
@@ -827,7 +827,7 @@ const ThirdPartiesPage: React.FC = () => {
 
                         <div>
 
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Fournisseurs Actifs</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Fournisseurs Actifs</p>
 
                           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
 
@@ -859,7 +859,7 @@ const ThirdPartiesPage: React.FC = () => {
 
                         <div>
 
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Nouveaux ce mois</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Nouveaux ce mois</p>
 
                           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
 
@@ -897,7 +897,7 @@ const ThirdPartiesPage: React.FC = () => {
 
                         <div>
 
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Total Créances</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Créances</p>
 
                           <p className="text-2xl font-bold text-green-600">
 
@@ -925,9 +925,9 @@ const ThirdPartiesPage: React.FC = () => {
 
                         <div>
 
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Total Dettes</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Dettes</p>
 
-                          <p className="text-2xl font-bold text-red-600">
+                          <p className="text-2xl font-bold text-red-600 dark:text-red-400">
 
                             {formatCurrency(dashboardData.stats.total_payables)}
 
@@ -953,7 +953,7 @@ const ThirdPartiesPage: React.FC = () => {
 
                         <div>
 
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Créances Échues</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Créances Échues</p>
 
                           <p className="text-2xl font-bold text-orange-600">
 
@@ -981,9 +981,9 @@ const ThirdPartiesPage: React.FC = () => {
 
                         <div>
 
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Dettes Échues</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Dettes Échues</p>
 
-                          <p className="text-2xl font-bold text-red-600">
+                          <p className="text-2xl font-bold text-red-600 dark:text-red-400">
 
                             {formatCurrency(dashboardData.stats.overdue_payables)}
 
@@ -1021,7 +1021,7 @@ const ThirdPartiesPage: React.FC = () => {
 
                         {dashboardData.stats.top_clients_by_revenue.map((client) => (
 
-                          <div key={client.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div key={client.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg dark:bg-gray-900/30">
 
                             <div className="flex items-center gap-3">
 
@@ -1067,7 +1067,7 @@ const ThirdPartiesPage: React.FC = () => {
 
                         {dashboardData.stats.top_suppliers_by_spending.map((supplier) => (
 
-                          <div key={supplier.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div key={supplier.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg dark:bg-gray-900/30">
 
                             <div className="flex items-center gap-3">
 
@@ -1129,7 +1129,7 @@ const ThirdPartiesPage: React.FC = () => {
 
                       </div>
 
-                      <div className="flex items-center gap-3 p-4 bg-red-50 rounded-lg">
+                      <div className="flex items-center gap-3 p-4 bg-red-50 rounded-lg dark:bg-red-900/20">
 
                         <CreditCard className="h-5 w-5 text-red-500" />
 
@@ -1137,13 +1137,13 @@ const ThirdPartiesPage: React.FC = () => {
 
                           <p className="font-medium text-red-800">Limites de crédit dépassées</p>
 
-                          <p className="text-sm text-red-600">{dashboardData.alerts.credit_limit_exceeded} tiers</p>
+                          <p className="text-sm text-red-600 dark:text-red-400">{dashboardData.alerts.credit_limit_exceeded} tiers</p>
 
                         </div>
 
                       </div>
 
-                      <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
+                      <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg dark:bg-blue-900/20">
 
                         <AlertCircle className="h-5 w-5 text-blue-500" />
 
@@ -1411,15 +1411,15 @@ const ThirdPartiesPage: React.FC = () => {
 
                       <div className="flex items-start gap-4">
 
-                        <div className="p-3 bg-gray-100 rounded-full">
+                        <div className="p-3 bg-gray-100 rounded-full dark:bg-gray-900/50">
 
                           {thirdParty.category === 'company' ? (
 
-                            <Building2 className="h-6 w-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" />
+                            <Building2 className="h-6 w-6 text-gray-600 dark:text-gray-300" />
 
                           ) : (
 
-                            <Users className="h-6 w-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" />
+                            <Users className="h-6 w-6 text-gray-600 dark:text-gray-300" />
 
                           )}
 
@@ -1445,9 +1445,9 @@ const ThirdPartiesPage: React.FC = () => {
 
                           </div>
 
-                          <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-1">Code: {thirdParty.code}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Code: {thirdParty.code}</p>
 
-                          <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
+                          <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
 
                             <div className="flex items-center gap-1">
 
@@ -1539,9 +1539,9 @@ const ThirdPartiesPage: React.FC = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 
-                      <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <div className="text-center p-3 bg-gray-50 rounded-lg dark:bg-gray-900/30">
 
-                        <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-500">Solde Actuel</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-300">Solde Actuel</p>
 
                         <p className={`font-semibold ${
 
@@ -1557,9 +1557,9 @@ const ThirdPartiesPage: React.FC = () => {
 
                       </div>
 
-                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                      <div className="text-center p-3 bg-green-50 rounded-lg dark:bg-green-900/20">
 
-                        <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-500">Créances</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-300">Créances</p>
 
                         <p className="font-semibold text-green-600">
 
@@ -1569,11 +1569,11 @@ const ThirdPartiesPage: React.FC = () => {
 
                       </div>
 
-                      <div className="text-center p-3 bg-red-50 rounded-lg">
+                      <div className="text-center p-3 bg-red-50 rounded-lg dark:bg-red-900/20">
 
-                        <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-500">Dettes</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-300">Dettes</p>
 
-                        <p className="font-semibold text-red-600">
+                        <p className="font-semibold text-red-600 dark:text-red-400">
 
                           {formatCurrency(thirdParty.total_payables)}
 
@@ -1581,9 +1581,9 @@ const ThirdPartiesPage: React.FC = () => {
 
                       </div>
 
-                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                      <div className="text-center p-3 bg-blue-50 rounded-lg dark:bg-blue-900/20">
 
-                        <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-500">Limite de Crédit</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-300">Limite de Crédit</p>
 
                         <p className="font-semibold text-blue-600">
 
@@ -1623,7 +1623,7 @@ const ThirdPartiesPage: React.FC = () => {
 
                     {thirdParty.last_interaction && (
 
-                      <div className="mt-4 text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                      <div className="mt-4 text-xs text-gray-500 dark:text-gray-300">
 
                         Dernière interaction: {new Date(thirdParty.last_interaction).toLocaleDateString('fr-FR')}
 

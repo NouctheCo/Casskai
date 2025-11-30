@@ -310,7 +310,7 @@ export const CashFlowPredictionWidget: React.FC<CashFlowPredictionWidgetProps> =
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800"
+                        className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-900/30"
                       >
                         <div className="grid grid-cols-4 gap-4 items-center text-sm">
                           <span className="font-mono text-xs">

@@ -244,7 +244,7 @@ export const TrialActionsCard: React.FC = () => {
         <Button
           onClick={handleCancelTrial}
           variant="outline"
-          className="w-full text-red-600 hover:text-red-700"
+          className="w-full text-red-600 hover:text-red-700 dark:text-red-400"
         >
           Annuler l'essai
         </Button>

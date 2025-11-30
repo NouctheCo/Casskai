@@ -1656,7 +1656,7 @@ export default function OptimizedReportsTab() {
 
               {recentReports.map((report) => (
 
-                <div key={report.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <div key={report.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors dark:bg-gray-900/50">
 
                   <div className="flex items-center space-x-3">
 
@@ -1756,7 +1756,7 @@ export default function OptimizedReportsTab() {
 
           <div className="flex items-start space-x-4">
 
-            <div className="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center dark:bg-blue-900/20">
 
               <AlertCircle className="w-6 h-6 text-white" />
 
@@ -1780,7 +1780,7 @@ export default function OptimizedReportsTab() {
 
               <div className="flex items-center space-x-4">
 
-                <Button variant="outline" size="sm" className="border-blue-300 text-blue-700 hover:bg-blue-100">
+                <Button variant="outline" size="sm" className="border-blue-300 text-blue-700 hover:bg-blue-100 dark:text-blue-400">
 
                   <FileText className="w-4 h-4 mr-2" />
 
@@ -1788,7 +1788,7 @@ export default function OptimizedReportsTab() {
 
                 </Button>
 
-                <Button variant="outline" size="sm" className="border-blue-300 text-blue-700 hover:bg-blue-100">
+                <Button variant="outline" size="sm" className="border-blue-300 text-blue-700 hover:bg-blue-100 dark:text-blue-400">
 
                   <Settings className="w-4 h-4 mr-2" />
 

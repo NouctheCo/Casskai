@@ -27,7 +27,7 @@ const LanguageSwitcher = ({ className = "" }) => {
 
   return (
     <div className={`flex items-center space-x-2 ${className}`}>
-      <Languages className="w-4 h-4 text-gray-600 dark:text-gray-400 dark:text-gray-500" />
+      <Languages className="w-4 h-4 text-gray-600 dark:text-gray-300" />
       <select 
         value={i18n.language} 
         onChange={(e) => handleLanguageChange(e.target.value)}
@@ -226,7 +226,7 @@ const UniversalSetupWizard = () => {
     return (
       <div className="space-y-6">
         {detectedMarket && (
-          <Alert className="border-blue-200 bg-blue-50">
+          <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-900/20">
             <MapPin className="h-4 w-4 text-blue-600" />
             <AlertDescription className="text-blue-800">
               {t('setup.market.detected', { 
@@ -299,7 +299,7 @@ const UniversalSetupWizard = () => {
 
   const renderSupabaseConfig = () => (
     <div className="space-y-6">
-      <Alert className="border-amber-200 bg-amber-50">
+      <Alert className="border-amber-200 bg-amber-50 dark:bg-amber-900/20">
         <AlertCircle className="h-4 w-4 text-amber-600" />
         <AlertDescription className="text-amber-800">
           {t('setup.supabase.info')}
@@ -338,7 +338,7 @@ const UniversalSetupWizard = () => {
       </Button>
 
       {connectionStatus === 'success' && (
-        <Alert className="border-green-200 bg-green-50">
+        <Alert className="border-green-200 bg-green-50 dark:bg-green-900/20">
           <CheckCircle className="h-4 w-4 text-green-600" />
           <AlertDescription className="text-green-800">
             {t('setup.supabase.success')}
@@ -347,8 +347,8 @@ const UniversalSetupWizard = () => {
       )}
 
       {connectionStatus === 'error' && (
-        <Alert className="border-red-200 bg-red-50">
-          <AlertCircle className="h-4 w-4 text-red-600" />
+        <Alert className="border-red-200 bg-red-50 dark:bg-red-900/20">
+          <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
           <AlertDescription className="text-red-800">
             {t('setup.supabase.error')}
           </AlertDescription>
@@ -364,22 +364,22 @@ const UniversalSetupWizard = () => {
     
     return (
       <div className="space-y-6">
-        <div className="bg-gray-50 p-4 rounded-lg">
+        <div className="bg-gray-50 p-4 rounded-lg dark:bg-gray-900/30">
           <h3 className="font-medium mb-2">
             {t('setup.company.config_for', { country: selectedMarket?.name })}
           </h3>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('currency')}:</span> {selectedMarket?.currency}
+              <span className="text-gray-600 dark:text-gray-300">{t('currency')}:</span> {selectedMarket?.currency}
             </div>
             <div>
-              <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('setup.standards.pcg')}:</span> {selectedMarket?.standard}
+              <span className="text-gray-600 dark:text-gray-300">{t('setup.standards.pcg')}:</span> {selectedMarket?.standard}
             </div>
           </div>
         </div>
 
         {isAfricanMarket && (
-          <Alert className="border-green-200 bg-green-50">
+          <Alert className="border-green-200 bg-green-50 dark:bg-green-900/20">
             <AlertCircle className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-800">
               <strong>{t('setup.company.ohada_activated')}</strong><br/>
@@ -461,7 +461,7 @@ const UniversalSetupWizard = () => {
               onChange={(e) => setConfig(prev => ({ ...prev, capital: e.target.value }))}
               className="mt-2"
             />
-            <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
+            <p className="text-sm text-gray-500 dark:text-gray-300 mt-1">
               {t('setup.company.capital_minimum')}
             </p>
           </div>
@@ -500,10 +500,10 @@ const UniversalSetupWizard = () => {
       return (
         <div className="text-center py-8">
           <Globe className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-500 mb-4" />
-          <h3 className="text-lg font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-2">
+          <h3 className="text-lg font-medium text-gray-600 dark:text-gray-300 mb-2">
             {t('setup.mobile_money.not_applicable')}
           </h3>
-          <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500">
+          <p className="text-gray-500 dark:text-gray-300">
             {t('setup.mobile_money.not_applicable_description')}
           </p>
         </div>
@@ -523,7 +523,7 @@ const UniversalSetupWizard = () => {
 
     return (
       <div className="space-y-6">
-        <Alert className="border-blue-200 bg-blue-50">
+        <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-900/20">
           <AlertCircle className="h-4 w-4 text-blue-600" />
           <AlertDescription className="text-blue-800">
             <strong>{t('setup.mobile_money.title')}</strong><br/>
@@ -598,9 +598,9 @@ const UniversalSetupWizard = () => {
         />
       </div>
 
-      <div className="bg-blue-50 p-4 rounded-lg">
+      <div className="bg-blue-50 p-4 rounded-lg dark:bg-blue-900/20">
         <h3 className="font-medium mb-2">{t('setup.admin.final_config')}</h3>
-        <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
+        <div className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
           <div>• {t('setup.admin.tasks.database')}</div>
           <div>• {t('setup.admin.tasks.accounting_plan', { standard: config.accountingStandard })}</div>
           <div>• {t('setup.admin.tasks.currencies')}</div>
@@ -662,7 +662,7 @@ const UniversalSetupWizard = () => {
           <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             {t('setup.wizard.title')}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">
+          <p className="text-gray-600 dark:text-gray-300">
             {t('setup.wizard.subtitle')}
           </p>
         </div>

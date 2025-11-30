@@ -115,7 +115,7 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 transition-colors"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 transition-colors dark:text-gray-300"
           >
             <X className="h-6 w-6" />
           </button>
@@ -214,7 +214,7 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
                   value={formData.expiry_date}
                   onChange={e => setFormData({ ...formData, expiry_date: e.target.value })}
                 />
-                <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">Optionnel - pour documents temporaires</p>
+                <p className="text-xs text-gray-500 dark:text-gray-300 mt-1">Optionnel - pour documents temporaires</p>
               </div>
             </div>
 
@@ -235,17 +235,17 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
                         <p className="mb-2 text-sm text-green-600 font-semibold">
                           {file.name}
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                        <p className="text-xs text-gray-500 dark:text-gray-300">
                           {(file.size / 1024).toFixed(1)} KB
                         </p>
                       </>
                     ) : (
                       <>
                         <Upload className="w-10 h-10 mb-3 text-gray-400 dark:text-gray-500" />
-                        <p className="mb-2 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                        <p className="mb-2 text-sm text-gray-500 dark:text-gray-300">
                           <span className="font-semibold">Cliquez pour télécharger</span> ou glissez-déposez
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">PDF, DOC, DOCX, PNG, JPG (MAX. 10MB)</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-300">PDF, DOC, DOCX, PNG, JPG (MAX. 10MB)</p>
                       </>
                     )}
                   </div>
@@ -322,8 +322,8 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
             </div>
 
             {/* Info */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-900">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 dark:bg-blue-900/20">
+              <p className="text-sm text-blue-900 dark:text-blue-100">
                 Le document sera stocké de manière sécurisée et accessible uniquement aux personnes autorisées.
               </p>
             </div>

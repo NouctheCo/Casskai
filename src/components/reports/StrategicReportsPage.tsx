@@ -144,7 +144,7 @@ export const StrategicReportsPage: React.FC = () => {
         <Card>
           <CardContent className="p-6 text-center">
             <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
-            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Veuillez sélectionner une entreprise pour accéder aux rapports stratégiques</p>
+            <p className="text-gray-600 dark:text-gray-300">Veuillez sélectionner une entreprise pour accéder aux rapports stratégiques</p>
           </CardContent>
         </Card>
       </div>
@@ -156,7 +156,7 @@ export const StrategicReportsPage: React.FC = () => {
       {/* En-tête */}
       <div>
         <h1 className="text-3xl font-bold">Rapports Stratégiques & Gestion</h1>
-        <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Analyses, KPI et outils de pilotage pour la prise de décision</p>
+        <p className="text-gray-600 dark:text-gray-300">Analyses, KPI et outils de pilotage pour la prise de décision</p>
       </div>
 
       {/* Info card - Rapports comptables */}
@@ -165,14 +165,14 @@ export const StrategicReportsPage: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <Card className="border-blue-200 bg-blue-50">
+        <Card className="border-blue-200 bg-blue-50 dark:bg-blue-900/20">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <BarChart3 className="h-5 w-5 text-blue-600" />
                 <div>
-                  <p className="font-medium text-blue-900">Besoin de rapports comptables ?</p>
-                  <p className="text-sm text-blue-700">
+                  <p className="font-medium text-blue-900 dark:text-blue-100">Besoin de rapports comptables ?</p>
+                  <p className="text-sm text-blue-700 dark:text-blue-400">
                     Les rapports comptables (Bilan, Compte de résultat, Balance) sont disponibles dans le module Comptabilité
                   </p>
                 </div>
@@ -181,7 +181,7 @@ export const StrategicReportsPage: React.FC = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => window.location.href = '/accounting?tab=reports'}
-                className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                className="border-blue-300 text-blue-700 hover:bg-blue-100 dark:text-blue-400"
               >
                 Accéder aux rapports comptables
                 <ArrowRight className="h-4 w-4 ml-2" />
@@ -215,7 +215,7 @@ export const StrategicReportsPage: React.FC = () => {
             </Select>
 
             <div>
-              <label className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Date de début</label>
+              <label className="text-sm text-gray-600 dark:text-gray-300">Date de début</label>
               <input
                 type="date"
                 value={dateRange.start}
@@ -225,7 +225,7 @@ export const StrategicReportsPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Date de fin</label>
+              <label className="text-sm text-gray-600 dark:text-gray-300">Date de fin</label>
               <input
                 type="date"
                 value={dateRange.end}

@@ -248,7 +248,7 @@ export default function FAQPage() {
             <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-4">
               Centre d'aide CassKai
             </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 dark:text-gray-300 max-w-3xl mx-auto">
               Trouvez rapidement des réponses à vos questions. Utilisez la recherche ou parcourez par catégorie.
             </p>
           </div>
@@ -307,7 +307,7 @@ export default function FAQPage() {
         {/* Results Count */}
         {searchQuery && (
           <div className="mb-6 text-center">
-            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+            <p className="text-gray-600 dark:text-gray-300 dark:text-gray-300">
               {filteredFAQ.length} résultat{filteredFAQ.length !== 1 ? 's' : ''} pour "{searchQuery}"
             </p>
           </div>
@@ -380,7 +380,7 @@ export default function FAQPage() {
 
           <div className="grid md:grid-cols-3 gap-6">
             {/* Chat */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 hover:bg-white/20 transition-all">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 hover:bg-white/20 transition-all dark:bg-gray-800">
               <MessageCircle className="h-10 w-10 mb-4 text-blue-200" />
               <h3 className="text-xl font-semibold mb-2">Chat en direct</h3>
               <p className="text-blue-100 mb-4 text-sm">Réponse en moins de 5 minutes</p>
@@ -388,7 +388,7 @@ export default function FAQPage() {
             </div>
 
             {/* Email */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 hover:bg-white/20 transition-all">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 hover:bg-white/20 transition-all dark:bg-gray-800">
               <Mail className="h-10 w-10 mb-4 text-blue-200" />
               <h3 className="text-xl font-semibold mb-2">Email</h3>
               <a
@@ -401,7 +401,7 @@ export default function FAQPage() {
             </div>
 
             {/* Phone */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 hover:bg-white/20 transition-all">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 hover:bg-white/20 transition-all dark:bg-gray-800">
               <Phone className="h-10 w-10 mb-4 text-blue-200" />
               <h3 className="text-xl font-semibold mb-2">Téléphone</h3>
               <a
@@ -430,7 +430,7 @@ export default function FAQPage() {
           >
             <FileCheck className="h-8 w-8 text-blue-600 dark:text-blue-400 mb-3 group-hover:scale-110 transition-transform" />
             <h3 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-1">Documents légaux</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">CGU, CGV, Confidentialité</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">CGU, CGV, Confidentialité</p>
           </a>
 
           <a
@@ -439,7 +439,7 @@ export default function FAQPage() {
           >
             <BarChart3 className="h-8 w-8 text-purple-600 dark:text-purple-400 mb-3 group-hover:scale-110 transition-transform" />
             <h3 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-1">Roadmap</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Prochaines fonctionnalités</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">Prochaines fonctionnalités</p>
           </a>
 
           <a
@@ -448,7 +448,7 @@ export default function FAQPage() {
           >
             <Shield className="h-8 w-8 text-green-600 dark:text-green-400 mb-3 group-hover:scale-110 transition-transform" />
             <h3 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-1">Mes données RGPD</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Exporter, supprimer</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">Exporter, supprimer</p>
           </a>
 
           <a
@@ -457,7 +457,7 @@ export default function FAQPage() {
           >
             <CreditCard className="h-8 w-8 text-orange-600 dark:text-orange-400 mb-3 group-hover:scale-110 transition-transform" />
             <h3 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-1">Tarifs</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Voir tous les plans</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">Voir tous les plans</p>
           </a>
         </div>
       </div>

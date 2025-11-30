@@ -432,7 +432,7 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
           <CardContent>
             <div className="space-y-2">
               {csvMapping.map((mapping, index) => (
-                <div key={index} className="flex items-center gap-4 p-2 bg-gray-50 rounded">
+                <div key={index} className="flex items-center gap-4 p-2 bg-gray-50 rounded dark:bg-gray-900/30">
                   <div className="w-1/3">
                     <span className="font-medium">{mapping.columnName}</span>
                   </div>
@@ -485,7 +485,7 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
                 </div>
                 <div>
                   <div className="text-gray-600 dark:text-gray-400">Erreurs</div>
-                  <div className="font-medium text-red-600">{importSession.errors}</div>
+                  <div className="font-medium text-red-600 dark:text-red-400">{importSession.errors}</div>
                 </div>
               </div>
 

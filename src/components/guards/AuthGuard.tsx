@@ -169,7 +169,7 @@ export const AuthForm: React.FC = () => {
 
           {error && <Alert variant="destructive" className="mb-4"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
 
-          {success && <Alert className="border-green-500 text-green-700 mb-4"><CheckCircle className="h-4 w-4" /><AlertDescription>{success}</AlertDescription></Alert>}
+          {success && <Alert className="border-green-500 text-green-700 mb-4 dark:text-green-400"><CheckCircle className="h-4 w-4" /><AlertDescription>{success}</AlertDescription></Alert>}
 
           
 

@@ -31,19 +31,19 @@ const TranslationTest: React.FC = () => {
       <div className="mt-4">
         <button
           onClick={() => i18n.changeLanguage('fr')}
-          className="mr-2 px-3 py-1 bg-blue-500 text-white rounded"
+          className="mr-2 px-3 py-1 bg-blue-500 text-white rounded dark:bg-blue-900/20"
         >
           FR
         </button>
         <button
           onClick={() => i18n.changeLanguage('en')}
-          className="mr-2 px-3 py-1 bg-green-500 text-white rounded"
+          className="mr-2 px-3 py-1 bg-green-500 text-white rounded dark:bg-green-900/20"
         >
           EN
         </button>
         <button
           onClick={() => i18n.changeLanguage('es')}
-          className="px-3 py-1 bg-red-500 text-white rounded"
+          className="px-3 py-1 bg-red-500 text-white rounded dark:bg-red-900/20"
         >
           ES
         </button>

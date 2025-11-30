@@ -111,7 +111,7 @@ export const AIAssistant: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center dark:bg-gray-800">
             <Sparkles className="h-5 w-5" />
           </div>
           <div>
@@ -123,7 +123,7 @@ export const AIAssistant: React.FC = () => {
           <button
             type="button"
             onClick={handleNewConversation}
-            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+            className="p-2 hover:bg-white/20 rounded-lg transition-colors dark:bg-gray-800"
             title="Nouvelle conversation"
           >
             <Plus className="h-4 w-4" />
@@ -131,14 +131,14 @@ export const AIAssistant: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsMinimized(!isMinimized)}
-            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+            className="p-2 hover:bg-white/20 rounded-lg transition-colors dark:bg-gray-800"
           >
             <ChevronDown className={`h-4 w-4 transition-transform ${isMinimized ? 'rotate-180' : ''}`} />
           </button>
           <button
             type="button"
             onClick={() => setIsOpen(false)}
-            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+            className="p-2 hover:bg-white/20 rounded-lg transition-colors dark:bg-gray-800"
           >
             <X className="h-4 w-4" />
           </button>
@@ -170,7 +170,7 @@ export const AIAssistant: React.FC = () => {
                         key={idx}
                         type="button"
                         onClick={() => setInputValue(suggestion.label)}
-                        className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl text-left transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl text-left transition-colors dark:bg-gray-900/50"
                       >
                         <Icon className="h-4 w-4 text-indigo-500" />
                         <span className="text-sm text-gray-700 dark:text-gray-300 dark:text-gray-300">{suggestion.label}</span>

@@ -54,7 +54,7 @@ export const HealthScoreWidget: React.FC<HealthScoreWidgetProps> = ({
       case 'declining':
         return <TrendingDown className="w-4 h-4 text-red-500" />;
       default:
-        return <Minus className="w-4 h-4 text-gray-500 dark:text-gray-400 dark:text-gray-500" />;
+        return <Minus className="w-4 h-4 text-gray-500 dark:text-gray-300" />;
     }
   };
 
@@ -110,7 +110,7 @@ export const HealthScoreWidget: React.FC<HealthScoreWidgetProps> = ({
         <CardContent className="flex items-center justify-center py-12">
           <div className="text-center space-y-3">
             <Shield className="w-12 h-12 text-gray-300 mx-auto" />
-            <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Données insuffisantes pour le calcul</p>
+            <p className="text-gray-500 dark:text-gray-300">Données insuffisantes pour le calcul</p>
             {onRefresh && (
               <Button variant="outline" size="sm" onClick={onRefresh}>
                 <RefreshCw className="w-4 h-4 mr-2" />
@@ -193,7 +193,7 @@ export const HealthScoreWidget: React.FC<HealthScoreWidgetProps> = ({
                 >
                   {healthScore.overall}
                 </motion.div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">/ 100</div>
+                <div className="text-xs text-gray-500 dark:text-gray-300">/ 100</div>
               </div>
             </div>
           </motion.div>
@@ -201,7 +201,7 @@ export const HealthScoreWidget: React.FC<HealthScoreWidgetProps> = ({
           {/* Tendance */}
           <div className="flex items-center justify-center space-x-2">
             {getTrendIcon(healthScore.trend)}
-            <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+            <span className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">
               {getTrendLabel(healthScore.trend)}
             </span>
           </div>
@@ -268,7 +268,7 @@ export const HealthScoreWidget: React.FC<HealthScoreWidgetProps> = ({
 
         {/* Dernière mise à jour */}
         <div className="pt-4 border-t border-gray-200 dark:border-gray-600 dark:border-gray-800">
-          <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 text-center">
+          <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-300 text-center">
             Dernière analyse: {new Date(healthScore.lastUpdated).toLocaleString('fr-FR')}
           </p>
         </div>

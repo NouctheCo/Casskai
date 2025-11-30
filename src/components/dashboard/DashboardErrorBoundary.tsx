@@ -59,7 +59,7 @@ export class DashboardErrorBoundary extends Component<Props, State> {
       return (
         <Card className="w-full max-w-2xl mx-auto mt-8">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-red-600">
+            <CardTitle className="flex items-center space-x-2 text-red-600 dark:text-red-400">
               <AlertTriangle className="w-6 h-6" />
               <span>Erreur du Dashboard</span>
             </CardTitle>

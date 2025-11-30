@@ -14,7 +14,7 @@ export default function ThirdPartiesManagement() {
         <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 mb-4">
           Cette fonctionnalité est en cours de développement
         </p>
-        <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400">
+        <div className="text-sm text-gray-500 dark:text-gray-300 dark:text-gray-400">
           Bientôt disponible dans une prochaine version
         </div>
       </CardContent>

@@ -518,7 +518,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
 
           <div className="flex justify-center">
 
-            <Command className="h-6 w-6 text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500" />
+            <Command className="h-6 w-6 text-gray-600 dark:text-gray-300 dark:text-gray-300" />
 
           </div>
 
@@ -538,7 +538,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
 
             <div className="mb-4">
 
-              <div className="flex items-center gap-2 px-2 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wide">
+              <div className="flex items-center gap-2 px-2 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wide">
 
                 <Star className="h-3 w-3" />
 
@@ -620,7 +620,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
 
             <div className="mb-4">
 
-              <div className="flex items-center gap-2 px-2 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wide">
+              <div className="flex items-center gap-2 px-2 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wide">
 
                 <Clock className="h-3 w-3" />
 
@@ -954,7 +954,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
 
           
 
-          <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 space-y-1">
+          <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-300 space-y-1">
 
             <div className="flex items-center gap-2">
 

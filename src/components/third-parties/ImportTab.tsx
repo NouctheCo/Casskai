@@ -298,8 +298,8 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
                   </div>
                   {invalidCount > 0 && (
                     <div className="flex items-center gap-2 text-sm">
-                      <XCircle className="h-4 w-4 text-red-600" />
-                      <span className="font-medium text-red-600">
+                      <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                      <span className="font-medium text-red-600 dark:text-red-400">
                         {invalidCount} ligne(s) invalide(s)
                       </span>
                     </div>
@@ -412,7 +412,7 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
                         {row.isValid ? (
                           <CheckCircle className="h-4 w-4 text-green-600" />
                         ) : (
-                          <AlertCircle className="h-4 w-4 text-red-600" />
+                          <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
                         )}
                       </td>
                       <td className="py-2 px-3 font-medium">{row.name}</td>
@@ -426,7 +426,7 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
                         {row.errors.length > 0 ? (
                           <div className="space-y-1">
                             {row.errors.map((error, i) => (
-                              <p key={i} className="text-xs text-red-600">
+                              <p key={i} className="text-xs text-red-600 dark:text-red-400">
                                 {error}
                               </p>
                             ))}

@@ -399,11 +399,11 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
         </div>
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
           <div className="text-2xl font-bold text-blue-600">{suggestedCount}</div>
-          <div className="text-sm text-blue-700">{t('common.suggested', 'Suggestions')}</div>
+          <div className="text-sm text-blue-700 dark:text-blue-400">{t('common.suggested', 'Suggestions')}</div>
         </div>
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
           <div className="text-2xl font-bold text-green-600">{categorizedCount}</div>
-          <div className="text-sm text-green-700">{t('common.categorized', 'Catégorisées')}</div>
+          <div className="text-sm text-green-700 dark:text-green-400">{t('common.categorized', 'Catégorisées')}</div>
         </div>
         <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
           <div className="text-2xl font-bold text-purple-600">{rules.length}</div>
@@ -460,7 +460,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
         {/* Actions en masse */}
         {selectedTransactions.size > 0 && (
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
+            <span className="text-sm text-gray-500 dark:text-gray-300">
               {selectedTransactions.size} sélectionnée(s)
             </span>
             <select
@@ -492,7 +492,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
         {/* Bouton règles */}
         <button
           onClick={() => setShowRuleModal(true)}
-          className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-50"
+          className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-50 dark:bg-gray-900/30"
         >
           <Zap className="h-4 w-4" />
           Règles auto
@@ -527,19 +527,19 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
                   }
                 />
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                 Date
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                 Description
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                 Montant
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                 Compte comptable
               </th>
-              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">
+              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                 Actions
               </th>
             </tr>
@@ -571,7 +571,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
         </table>
 
         {filteredTransactions.length === 0 && (
-          <div className="text-center py-12 text-gray-500 dark:text-gray-400 dark:text-gray-500">
+          <div className="text-center py-12 text-gray-500 dark:text-gray-300">
             <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-green-500" />
             <p className="text-lg font-medium">
               {filter === 'pending'

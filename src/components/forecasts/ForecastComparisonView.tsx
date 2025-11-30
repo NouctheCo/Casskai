@@ -65,7 +65,7 @@ const ForecastComparisonView: React.FC<ForecastComparisonViewProps> = ({
   const getVarianceIcon = (variance: number) => {
     if (variance > 5) return <TrendingUp className="h-4 w-4 text-green-500" />;
     if (variance < -5) return <TrendingDown className="h-4 w-4 text-red-500" />;
-    return <Target className="h-4 w-4 text-gray-500 dark:text-gray-400 dark:text-gray-500" />;
+    return <Target className="h-4 w-4 text-gray-500 dark:text-gray-300" />;
   };
 
   const getVarianceColor = (variance: number) => {
@@ -113,7 +113,7 @@ const ForecastComparisonView: React.FC<ForecastComparisonViewProps> = ({
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
               Comparaison insuffisante
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">
+            <p className="text-gray-600 dark:text-gray-300">
               Veuillez sélectionner au moins 2 prévisions pour effectuer une comparaison.
             </p>
           </CardContent>
@@ -139,7 +139,7 @@ const ForecastComparisonView: React.FC<ForecastComparisonViewProps> = ({
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
               Comparaison de Scénarios
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 mt-1">
+            <p className="text-gray-600 dark:text-gray-300 mt-1">
               Analyse comparative de {forecasts.length} prévisions sélectionnées
             </p>
           </div>
@@ -151,7 +151,7 @@ const ForecastComparisonView: React.FC<ForecastComparisonViewProps> = ({
         <Card>
           <CardContent className="p-6 text-center">
             <BarChart3 className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Revenus Moyens</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300">Revenus Moyens</p>
             <p className="text-2xl font-bold text-blue-600">
               {formatCurrency(stats.avgRevenue)}
             </p>
@@ -161,8 +161,8 @@ const ForecastComparisonView: React.FC<ForecastComparisonViewProps> = ({
         <Card>
           <CardContent className="p-6 text-center">
             <TrendingDown className="h-8 w-8 text-red-500 mx-auto mb-2" />
-            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Dépenses Moyennes</p>
-            <p className="text-2xl font-bold text-red-600">
+            <p className="text-sm text-gray-600 dark:text-gray-300">Dépenses Moyennes</p>
+            <p className="text-2xl font-bold text-red-600 dark:text-red-400">
               {formatCurrency(stats.avgExpenses)}
             </p>
           </CardContent>
@@ -171,7 +171,7 @@ const ForecastComparisonView: React.FC<ForecastComparisonViewProps> = ({
         <Card>
           <CardContent className="p-6 text-center">
             <Target className="h-8 w-8 text-green-500 mx-auto mb-2" />
-            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Marge Brute Moyenne</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300">Marge Brute Moyenne</p>
             <p className="text-2xl font-bold text-green-600">
               {formatPercentage(stats.avgMargin)}
             </p>
@@ -243,7 +243,7 @@ const ForecastComparisonView: React.FC<ForecastComparisonViewProps> = ({
                   <td className="py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Dépenses Totales</td>
                   {forecasts.map((forecast) => (
                     <td key={`expenses-${forecast.id}`} className="text-center py-3 px-4">
-                      <span className="font-semibold text-red-600">
+                      <span className="font-semibold text-red-600 dark:text-red-400">
                         {formatCurrency(forecast.total_expenses)}
                       </span>
                     </td>
@@ -312,7 +312,7 @@ const ForecastComparisonView: React.FC<ForecastComparisonViewProps> = ({
                   ))}
                   <td className="text-center py-3 px-4">
                     {forecasts.length >= 2 && (
-                      <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
+                      <span className="text-sm text-gray-600 dark:text-gray-300">
                         ±{formatPercentage(Math.abs(
                           Math.max(...forecasts.map(f => f.gross_margin)) - 
                           Math.min(...forecasts.map(f => f.gross_margin))
@@ -334,7 +334,7 @@ const ForecastComparisonView: React.FC<ForecastComparisonViewProps> = ({
                   ))}
                   <td className="text-center py-3 px-4">
                     {forecasts.length >= 2 && (
-                      <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
+                      <span className="text-sm text-gray-600 dark:text-gray-300">
                         ±{formatPercentage(Math.abs(
                           Math.max(...forecasts.map(f => f.net_margin)) - 
                           Math.min(...forecasts.map(f => f.net_margin))
@@ -387,8 +387,8 @@ const ForecastComparisonView: React.FC<ForecastComparisonViewProps> = ({
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="p-4 bg-blue-50 rounded-lg">
-              <h4 className="font-medium text-blue-900 mb-2">Scénario le Plus Optimiste</h4>
+            <div className="p-4 bg-blue-50 rounded-lg dark:bg-blue-900/20">
+              <h4 className="font-medium text-blue-900 mb-2 dark:text-blue-100">Scénario le Plus Optimiste</h4>
               <p className="text-sm text-blue-800">
                 {(() => {
                   const maxRevenue = Math.max(...forecasts.map(f => f.total_revenue));
@@ -398,7 +398,7 @@ const ForecastComparisonView: React.FC<ForecastComparisonViewProps> = ({
               </p>
             </div>
             
-            <div className="p-4 bg-red-50 rounded-lg">
+            <div className="p-4 bg-red-50 rounded-lg dark:bg-red-900/20">
               <h4 className="font-medium text-red-900 mb-2">Scénario le Plus Conservateur</h4>
               <p className="text-sm text-red-800">
                 {(() => {
@@ -409,7 +409,7 @@ const ForecastComparisonView: React.FC<ForecastComparisonViewProps> = ({
               </p>
             </div>
             
-            <div className="p-4 bg-green-50 rounded-lg">
+            <div className="p-4 bg-green-50 rounded-lg dark:bg-green-900/20">
               <h4 className="font-medium text-green-900 mb-2">Meilleure Marge</h4>
               <p className="text-sm text-green-800">
                 {(() => {

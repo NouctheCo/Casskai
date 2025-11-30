@@ -404,7 +404,7 @@ const DocumentationPage: React.FC = () => {
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
                 Documentation CassKai
               </h1>
-              <p className="text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mt-1">
+              <p className="text-gray-500 dark:text-gray-400 dark:text-gray-300 mt-1">
                 Tout ce dont vous avez besoin pour maîtriser CassKai
               </p>
             </div>
@@ -429,7 +429,7 @@ const DocumentationPage: React.FC = () => {
           {/* Sidebar - Sections */}
           <div className="col-span-12 lg:col-span-3">
             <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-2xl p-4 border border-gray-200 dark:border-gray-600 dark:border-gray-700 sticky top-4">
-              <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-4">
+              <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wide mb-4">
                 Sections
               </h2>
               <nav className="space-y-1">
@@ -475,7 +475,7 @@ const DocumentationPage: React.FC = () => {
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
                   Aucun résultat trouvé
                 </h3>
-                <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                <p className="text-gray-500 dark:text-gray-300 dark:text-gray-300">
                   Essayez avec d'autres mots-clés
                 </p>
               </div>
@@ -512,11 +512,11 @@ const DocumentationPage: React.FC = () => {
                               </h3>
                               <ChevronRight className="h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex-shrink-0" />
                             </div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-4">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-4">
                               {article.description}
                             </p>
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-300 dark:text-gray-300">
                                 <Clock className="h-3.5 w-3.5" />
                                 {article.readTime}
                               </div>
@@ -524,7 +524,7 @@ const DocumentationPage: React.FC = () => {
                                 {article.tags.slice(0, 2).map((tag) => (
                                   <span
                                     key={tag}
-                                    className="flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 text-xs rounded-lg"
+                                    className="flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 dark:text-gray-300 text-xs rounded-lg"
                                   >
                                     <Tag className="h-3 w-3" />
                                     {tag}
@@ -548,7 +548,7 @@ const DocumentationPage: React.FC = () => {
                   <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
                     Besoin d'aide supplémentaire ?
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-4">
+                  <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-4">
                     Consultez nos tutoriels vidéo ou contactez notre équipe de support.
                   </p>
                   <div className="flex items-center gap-3">

@@ -609,7 +609,7 @@ const ContractsPage: React.FC = () => {
 
               {dashboardData?.recent_calculations.map((calc) => (
 
-                <div key={calc.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/70">
+                <div key={calc.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/70 dark:bg-gray-900/30">
 
                   <div>
 
@@ -1079,7 +1079,7 @@ const ContractsPage: React.FC = () => {
 
           <CardContent className="p-6">
 
-            <div className="flex items-center text-red-600">
+            <div className="flex items-center text-red-600 dark:text-red-400">
 
               <AlertTriangle className="h-5 w-5 mr-2" />
 

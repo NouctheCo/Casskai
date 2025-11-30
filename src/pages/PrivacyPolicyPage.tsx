@@ -440,7 +440,7 @@ const PrivacyPolicyPage = () => {
 
               <CardTitle className="flex items-center">
 
-                <Lock className="w-6 h-6 mr-3 text-red-600" />
+                <Lock className="w-6 h-6 mr-3 text-red-600 dark:text-red-400" />
 
                 Sécurité des données
 
@@ -524,7 +524,7 @@ const PrivacyPolicyPage = () => {
 
                 </p>
 
-                <Link to="/gdpr" className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-700">
+                <Link to="/gdpr" className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400">
 
                   Accéder à l'export de données →
 
@@ -552,7 +552,7 @@ const PrivacyPolicyPage = () => {
 
                 </p>
 
-                <Link to="/settings" className="inline-flex items-center text-sm font-medium text-green-600 hover:text-green-700">
+                <Link to="/settings" className="inline-flex items-center text-sm font-medium text-green-600 hover:text-green-700 dark:text-green-400">
 
                   Modifier mes informations →
 
@@ -596,7 +596,7 @@ const PrivacyPolicyPage = () => {
 
                 </Alert>
 
-                <Link to="/gdpr" className="inline-flex items-center text-sm font-medium text-red-600 hover:text-red-700">
+                <Link to="/gdpr" className="inline-flex items-center text-sm font-medium text-red-600 hover:text-red-700 dark:text-red-400">
 
                   Supprimer mon compte →
 

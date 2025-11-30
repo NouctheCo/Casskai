@@ -391,7 +391,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
             <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-gray-100">
               {budgetId ? 'Modifier le budget' : 'Nouveau budget'} {formData.year}
             </h2>
-            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 text-sm mt-1">
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 text-sm mt-1">
               Définissez vos objectifs financiers par catégorie et mois
             </p>
           </div>
@@ -399,7 +399,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
           <div className="flex items-center space-x-3">
             <button
               onClick={onCancel}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-100 transition-colors"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-100 transition-colors dark:bg-gray-900/30"
             >
               <X className="h-4 w-4 mr-2 inline" />
               Annuler
@@ -423,7 +423,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
         {validation && (
           <div className="mt-4 space-y-2">
             {validation.errors.map((error, index) => (
-              <div key={index} className="flex items-center space-x-2 text-red-600 text-sm">
+              <div key={index} className="flex items-center space-x-2 text-red-600 text-sm dark:text-red-400">
                 <AlertTriangle className="h-4 w-4" />
                 <span>{error.message}</span>
               </div>
@@ -499,11 +499,11 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
 
             {formData.categories.length === 0 ? (
               <div className="text-center py-12 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                <Calculator className="h-16 w-16 text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+                <Calculator className="h-16 w-16 text-gray-400 dark:text-gray-300 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100 mb-2">
                   Aucune catégorie budgétaire
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-4">
+                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-4">
                   Commencez par ajouter vos premières catégories de revenus et charges
                 </p>
                 <button
@@ -563,7 +563,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
 
                       <button
                         onClick={() => removeCategory(index)}
-                        className="ml-4 p-2 text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        className="ml-4 p-2 text-gray-400 dark:text-gray-300 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors dark:bg-red-900/20 dark:text-red-400"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -585,7 +585,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                           />
                           <button
                             onClick={() => distributeEqually(index)}
-                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400"
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
                             title="Répartir équitablement sur 12 mois"
                           >
                             <Calculator className="h-4 w-4" />
@@ -615,7 +615,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                       <div className="grid grid-cols-4 md:grid-cols-12 gap-2">
                         {monthNames.map((month, monthIndex) => (
                           <div key={month} className="text-center">
-                            <div className="text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-1">{month}</div>
+                            <div className="text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-300 mb-1">{month}</div>
                             <input
                               type="number"
                               value={category.monthly_amounts[monthIndex]}
@@ -654,7 +654,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                 <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">
                   Hypothèses Budgétaires
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 text-sm mt-1">
+                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 text-sm mt-1">
                   Définissez les principales hypothèses qui sous-tendent votre budget
                 </p>
               </div>
@@ -755,7 +755,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                     <div className="flex items-end">
                       <button
                         onClick={() => removeAssumption(index)}
-                        className="p-2 text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        className="p-2 text-gray-400 dark:text-gray-300 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors dark:bg-red-900/20 dark:text-red-400"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -779,11 +779,11 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
 
               {formData.assumptions.length === 0 && (
                 <div className="text-center py-12 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  <TrendingUp className="h-16 w-16 text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+                  <TrendingUp className="h-16 w-16 text-gray-400 dark:text-gray-300 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100 mb-2">
                     Aucune hypothèse définie
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-4">
+                  <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-4">
                     Les hypothèses permettent de documenter les bases de votre budget
                   </p>
                   <button
@@ -855,16 +855,16 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                   <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead className="bg-gray-50 dark:bg-gray-700/50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wider">
                           Catégorie
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wider">
                           Type
                         </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wider">
                           Montant Annuel
                         </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wider">
                           % du Total
                         </th>
                       </tr>
@@ -883,7 +883,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                                   {category.category}
                                 </div>
                                 {category.subcategory && (
-                                  <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                                  <div className="text-sm text-gray-500 dark:text-gray-300 dark:text-gray-300">
                                     {category.subcategory}
                                   </div>
                                 )}
@@ -902,7 +902,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                             <td className="px-6 py-4 whitespace-nowrap text-right font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">
                               {formatCurrency(category.annual_amount)}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                            <td className="px-6 py-4 whitespace-nowrap text-right text-gray-500 dark:text-gray-300 dark:text-gray-300">
                               {percentage}%
                             </td>
                           </tr>
@@ -931,7 +931,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                           <div className="text-lg font-semibold text-blue-600 dark:text-blue-400">
                             {assumption.value} {assumption.unit}
                           </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                          <div className="text-sm text-gray-500 dark:text-gray-300 dark:text-gray-300">
                             Confiance: {assumption.confidence_level}%
                           </div>
                         </div>

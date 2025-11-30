@@ -166,10 +166,10 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
                 <Shield className="h-6 w-6 text-blue-600" />
               </div>
               <div>
-                <CardTitle className="text-2xl text-blue-900">
+                <CardTitle className="text-2xl text-blue-900 dark:text-blue-100">
                   Conformité Fiscale Française
                 </CardTitle>
-                <p className="text-blue-700 mt-1">
+                <p className="text-blue-700 mt-1 dark:text-blue-400">
                   Système certifié conforme aux obligations fiscales françaises
                 </p>
               </div>
@@ -182,7 +182,7 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold text-blue-900">Score de Conformité</h3>
+                  <h3 className="font-semibold text-blue-900 dark:text-blue-100">Score de Conformité</h3>
                   <span className="text-2xl font-bold text-blue-600">
                     {complianceScore.score}/{complianceScore.maxScore}
                   </span>
@@ -204,20 +204,20 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span className="text-green-700">TVA: Calculs certifiés conformes</span>
+                    <span className="text-green-700 dark:text-green-400">TVA: Calculs certifiés conformes</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span className="text-green-700">FEC: Format officiel respecté</span>
+                    <span className="text-green-700 dark:text-green-400">FEC: Format officiel respecté</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span className="text-green-700">Liasse: Normes DGFiP appliquées</span>
+                    <span className="text-green-700 dark:text-green-400">Liasse: Normes DGFiP appliquées</span>
                   </div>
                 </div>
               </div>
               <div className="space-y-3">
-                <h3 className="font-semibold text-blue-900 mb-3">Actions Rapides</h3>
+                <h3 className="font-semibold text-blue-900 mb-3 dark:text-blue-100">Actions Rapides</h3>
                 <div className="grid grid-cols-2 gap-2">
                   <Button
                     onClick={handleGenerateCA3}
@@ -565,11 +565,11 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="p-4 bg-blue-50 rounded-lg">
-                  <h4 className="font-semibold text-blue-900 mb-2">
+                <div className="p-4 bg-blue-50 rounded-lg dark:bg-blue-900/20">
+                  <h4 className="font-semibold text-blue-900 mb-2 dark:text-blue-100">
                     Format FEC Certifié Conforme
                   </h4>
-                  <ul className="text-sm text-blue-700 space-y-1">
+                  <ul className="text-sm text-blue-700 space-y-1 dark:text-blue-400">
                     <li>• 18 champs obligatoires selon la norme</li>
                     <li>• Encodage UTF-8 avec séparateurs TAB</li>
                     <li>• Validation automatique de la cohérence</li>
@@ -615,7 +615,7 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
                       {declaration.status}
                     </Badge>
                     {declaration.validationErrors.length > 0 && (
-                      <Badge variant="outline" className="text-red-600 border-red-600">
+                      <Badge variant="outline" className="text-red-600 border-red-600 dark:text-red-400">
                         {declaration.validationErrors.length} erreur(s)
                       </Badge>
                     )}

@@ -124,7 +124,7 @@ export function TemplateFormModal({
             <button
               type="button"
               onClick={onClose}
-              className="text-gray-400 dark:text-gray-500 hover:text-gray-600"
+              className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-300"
             >
               <X className="w-6 h-6" />
             </button>
@@ -177,7 +177,7 @@ export function TemplateFormModal({
                 required
                 placeholder="Ex: cdi, cdd, stage, avenant_salaire, certificat_travail..."
               />
-              <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
+              <p className="text-sm text-gray-500 dark:text-gray-300 mt-1">
                 Types courants: cdi, cdd, stage, apprentissage, avenant_salaire, certificat_travail, promesse_embauche
               </p>
             </div>
@@ -208,7 +208,7 @@ export function TemplateFormModal({
                 required
                 placeholder="<div>Contenu du document avec {{variables}}...</div>"
               />
-              <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
+              <p className="text-sm text-gray-500 dark:text-gray-300 mt-1">
                 Utilisez la syntaxe {`{{variable_name}}`} pour insérer des variables
               </p>
             </div>
@@ -231,9 +231,9 @@ export function TemplateFormModal({
                 </Button>
               </div>
 
-              <div className="border rounded-lg p-4 bg-gray-50">
+              <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-900/30">
                 {formData.variables.length === 0 ? (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 text-center py-4">
+                  <p className="text-sm text-gray-500 dark:text-gray-300 text-center py-4">
                     Aucune variable. Ajoutez les variables standard ou créez vos propres variables.
                   </p>
                 ) : (
@@ -252,7 +252,7 @@ export function TemplateFormModal({
                             )}
                           </div>
                           {variable.description && (
-                            <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">{variable.description}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-300 mt-1">{variable.description}</p>
                           )}
                         </div>
                         <Button
@@ -260,7 +260,7 @@ export function TemplateFormModal({
                           size="sm"
                           variant="ghost"
                           onClick={() => handleRemoveVariable(variable.name)}
-                          className="text-red-600 hover:text-red-700"
+                          className="text-red-600 hover:text-red-700 dark:text-red-400"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -316,7 +316,7 @@ export function TemplateFormModal({
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-end gap-3 p-6 border-t bg-gray-50">
+          <div className="flex items-center justify-end gap-3 p-6 border-t bg-gray-50 dark:bg-gray-900/30">
             <Button type="button" variant="outline" onClick={onClose}>
               Annuler
             </Button>

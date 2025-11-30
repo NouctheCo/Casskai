@@ -1160,7 +1160,7 @@ const renderHeader = (t: (key: string, options?: { defaultValue?: string }) => s
 
     </CardTitle>
 
-    <CardDescription className="text-lg text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 max-w-2xl mx-auto">
+    <CardDescription className="text-lg text-gray-600 dark:text-gray-400 dark:text-gray-300 max-w-2xl mx-auto">
 
       {t('onboarding.company.subtitle', {
 
@@ -1358,7 +1358,7 @@ export default function CompanyStep() {
 
               <Loader2 className="w-6 h-6 animate-spin text-orange-600 mr-2" />
 
-              <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Chargement des référentiels...</span>
+              <span className="text-gray-600 dark:text-gray-300 dark:text-gray-300">Chargement des référentiels...</span>
 
             </div>
 

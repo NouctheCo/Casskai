@@ -732,7 +732,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
 
                     <DropdownMenuItem 
 
-                      className="text-red-600"
+                      className="text-red-600 dark:text-red-400"
 
                       onClick={() => handleRemoveWidget(widgetId)}
 
@@ -798,7 +798,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
 
             {widget.description && (
 
-              <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 line-clamp-2">
+              <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-300 line-clamp-2">
 
                 {widget.description}
 
@@ -862,7 +862,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
 
       <div className="text-center py-12">
 
-        <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+        <p className="text-gray-500 dark:text-gray-300 dark:text-gray-300">
 
           Aucun dashboard sélectionné
 
@@ -896,7 +896,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
 
           {currentDashboard.description && (
 
-            <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-300 dark:text-gray-300">
 
               {currentDashboard.description}
 
@@ -1104,7 +1104,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
 
             </h3>
 
-            <p className="text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-4 max-w-md">
+            <p className="text-gray-500 dark:text-gray-400 dark:text-gray-300 mb-4 max-w-md">
 
               Commencez par ajouter des widgets à votre dashboard pour visualiser vos données.
 

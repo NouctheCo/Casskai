@@ -37,7 +37,7 @@ export const CacheDebugPanel: React.FC = () => {
           onClick={() => setIsExpanded(true)}
           variant="outline"
           size="sm"
-          className="bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
+          className="bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100 dark:text-orange-400"
         >
           <AlertTriangle className="h-4 w-4 mr-2" />
           Debug Cache
@@ -100,7 +100,7 @@ export const CacheDebugPanel: React.FC = () => {
               </span>
             </div>
             {!validation.isValid && (
-              <ul className="text-xs text-red-600 space-y-1">
+              <ul className="text-xs text-red-600 space-y-1 dark:text-red-400">
                 {validation.issues.map((issue, i) => (
                   <li key={i}>• {issue}</li>
                 ))}
@@ -115,7 +115,7 @@ export const CacheDebugPanel: React.FC = () => {
                 <Info className="h-4 w-4 text-orange-600 mt-0.5" />
                 <div className="text-xs">
                   <p className="font-medium text-orange-800">Problème détecté</p>
-                  <p className="text-orange-700">
+                  <p className="text-orange-700 dark:text-orange-400">
                     Données en cache alors que la base est vide. Cela peut causer l'erreur "entreprise créée récemment".
                   </p>
                 </div>
@@ -149,7 +149,7 @@ export const CacheDebugPanel: React.FC = () => {
               onClick={handleSmartClean}
               variant="outline"
               size="sm"
-              className="text-xs bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+              className="text-xs bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400"
             >
               <Trash2 className="h-3 w-3 mr-1" />
               Nettoyage intelligent
@@ -167,7 +167,7 @@ export const CacheDebugPanel: React.FC = () => {
           </div>
 
           {/* Instructions */}
-          <div className="text-xs text-gray-600 dark:text-gray-400 bg-gray-50 p-2 rounded">
+          <div className="text-xs text-gray-600 dark:text-gray-400 bg-gray-50 p-2 rounded dark:bg-gray-900/30">
             <p className="font-medium">Résolution du problème:</p>
             <ol className="list-decimal list-inside space-y-1 mt-1">
               <li>Cliquez "Nettoyage intelligent"</li>
