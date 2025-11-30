@@ -465,63 +465,33 @@ const HeroSection = () => {
 
 
 
-// Section ROI avec chiffres concrets
+// Section Avantages - Honnête et sans chiffres inventés
 
-const ROISection = () => {
+const AdvantagesSection = () => {
 
   const { t } = useTranslation();
 
 
 
-  const roiStats = [
-
-    {
-
-      icon: Calculator,
-
-      title: t('landing.roi.accounting.title', 'Économies comptabilité'),
-
-      value: "2,500€",
-
-      period: "/ an",
-
-      description: t('landing.roi.accounting.description', 'vs expert-comptable traditionnel'),
-
-      details: [
-
-        "Expert-comptable: 300-400€/mois",
-
-        "CassKai Pro: 49€/mois",
-
-        "Économies: ~250€/mois"
-
-      ],
-
-      color: 'from-green-500 to-emerald-600',
-
-      bgColor: 'bg-green-50 dark:bg-green-900/20'
-
-    },
+  const advantages = [
 
     {
 
       icon: Clock,
 
-      title: t('landing.roi.time.title', 'Temps gagné'),
+      title: "Gain de temps considérable",
 
-      value: "15h",
+      description: "Automatisation des tâches répétitives et tableaux de bord en temps réel",
 
-      period: "/ semaine",
+      benefits: [
 
-      description: t('landing.roi.time.description', 'sur les tâches administratives'),
+        "Saisie comptable simplifiée et guidée",
 
-      details: [
+        "Génération automatique de rapports",
 
-        "Saisie manuelle: 8h → 2h",
+        "Synchronisation bancaire en temps réel",
 
-        "Rapports: 4h → 30min",
-
-        "Relances clients: 3h → automatique"
+        "Notifications intelligentes"
 
       ],
 
@@ -533,29 +503,79 @@ const ROISection = () => {
 
     {
 
-      icon: PieChart,
+      icon: Globe,
 
-      title: t('landing.roi.productivity.title', 'Productivité'),
+      title: "Vision en temps réel",
 
-      value: "+40%",
+      description: "Pilotez votre entreprise avec des données à jour en permanence",
 
-      period: "",
+      benefits: [
 
-      description: t('landing.roi.productivity.description', 'amélioration globale'),
+        "Tableaux de bord interactifs",
 
-      details: [
+        "Suivi de trésorerie instantané",
 
-        "Moins d'erreurs de saisie",
+        "Alertes et prévisions",
 
-        "Tableaux de bord temps réel",
+        "Accès mobile et bureau"
 
-        "Décisions plus rapides"
+      ],
+
+      color: 'from-green-500 to-emerald-600',
+
+      bgColor: 'bg-green-50 dark:bg-green-900/20'
+
+    },
+
+    {
+
+      icon: Globe,
+
+      title: "Multi-pays & Multi-devises",
+
+      description: "Support natif de 33 pays avec plans comptables conformes",
+
+      benefits: [
+
+        "France, Allemagne, UK, Espagne...",
+
+        "Conversion automatique des devises",
+
+        "Conformité locale garantie",
+
+        "Interface multilingue (FR/EN/ES)"
 
       ],
 
       color: 'from-purple-500 to-violet-600',
 
       bgColor: 'bg-purple-50 dark:bg-purple-900/20'
+
+    },
+
+    {
+
+      icon: Shield,
+
+      title: "Conformité & Sécurité",
+
+      description: "Respect des normes comptables et protection des données",
+
+      benefits: [
+
+        "Export FEC pour administration fiscale",
+
+        "Chiffrement AES-256",
+
+        "RGPD natif",
+
+        "Sauvegardes automatiques"
+
+      ],
+
+      color: 'from-red-500 to-pink-600',
+
+      bgColor: 'bg-red-50 dark:bg-red-900/20'
 
     }
 
@@ -573,9 +593,9 @@ const ROISection = () => {
 
           <Badge className="mb-6 px-4 py-2 bg-gradient-to-r from-green-100 to-blue-100 dark:from-green-900/30 dark:to-blue-900/30 text-green-800 dark:text-blue-200 border-green-200/50 dark:border-blue-700/50">
 
-            <Calculator className="w-4 h-4 mr-2" />
+            <Star className="w-4 h-4 mr-2" />
 
-            {t('landing.roi.badge', 'Retour sur investissement')}
+            Les avantages de CassKai
 
           </Badge>
 
@@ -583,13 +603,13 @@ const ROISection = () => {
 
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-6">
 
-            {t('landing.roi.title', 'Pourquoi choisir CassKai ?')}
+            Pourquoi choisir CassKai ?
 
             <br />
 
             <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
 
-              {t('landing.roi.subtitle', 'Le ROI est immédiat')}
+              Une solution conçue pour vous
 
             </span>
 
@@ -597,9 +617,9 @@ const ROISection = () => {
 
 
 
-          <p className="text-xl text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-400 dark:text-gray-300 max-w-3xl mx-auto">
 
-            {t('landing.roi.description', 'Calculé sur la base de nos utilisateurs actuels, découvrez les économies réelles que vous pouvez réaliser.')}
+            Découvrez les avantages concrets d'une plateforme de gestion moderne, pensée pour les TPE/PME
 
           </p>
 
@@ -607,77 +627,63 @@ const ROISection = () => {
 
 
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
 
-          {roiStats.map((stat, index) => (
+          {advantages.map((advantage, index) => (
 
             <AnimatedSection key={index}>
 
               <motion.div
 
-                className="group"
+                className="group h-full"
 
-                whileHover={{ y: -8, scale: 1.02 }}
+                whileHover={{ y: -4, scale: 1.01 }}
 
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
 
               >
 
-                <Card className={`h-full border-0 shadow-lg hover:shadow-2xl transition-all duration-300 ${stat.bgColor} border-l-4 border-l-green-500`}>
+                <Card className={`h-full border-0 shadow-lg hover:shadow-2xl transition-all duration-300 ${advantage.bgColor}`}>
 
-                  <CardContent className="p-8 text-center">
+                  <CardContent className="p-8">
 
-                    <div className={`w-16 h-16 bg-gradient-to-r ${stat.color} rounded-xl mx-auto mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                    <div className={`w-16 h-16 bg-gradient-to-r ${advantage.color} rounded-xl mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
 
-                      <stat.icon className="w-8 h-8 text-white" />
-
-                    </div>
-
-
-
-                    <div className="mb-4">
-
-                      <span className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
-
-                        {stat.value}
-
-                      </span>
-
-                      <span className="text-xl text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 ml-1">
-
-                        {stat.period}
-
-                      </span>
+                      <advantage.icon className="w-8 h-8 text-white" />
 
                     </div>
 
 
 
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-3">
 
-                      {stat.title}
+                      {advantage.title}
 
                     </h3>
 
 
 
-                    <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-6">
+                    <p className="text-gray-600 dark:text-gray-400 mb-6 text-lg">
 
-                      {stat.description}
+                      {advantage.description}
 
                     </p>
 
 
 
-                    <div className="space-y-2">
+                    <div className="space-y-3">
 
-                      {stat.details.map((detail, i) => (
+                      {advantage.benefits.map((benefit, i) => (
 
-                        <div key={i} className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 flex items-center justify-center">
+                        <div key={i} className="flex items-start">
 
-                          <CheckCircle className="w-3 h-3 text-green-500 mr-2 flex-shrink-0" />
+                          <CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" />
 
-                          {detail}
+                          <span className="text-gray-700 dark:text-gray-300">
+
+                            {benefit}
+
+                          </span>
 
                         </div>
 
@@ -699,7 +705,7 @@ const ROISection = () => {
 
 
 
-        {/* Call-to-action ROI */}
+        {/* Call-to-action */}
 
         <AnimatedSection>
 
@@ -707,13 +713,13 @@ const ROISection = () => {
 
             <h3 className="text-2xl md:text-3xl font-bold mb-4">
 
-              Votre ROI se calcule en semaines, pas en mois
+              Essayez CassKai gratuitement pendant 30 jours
 
             </h3>
 
             <p className="text-lg opacity-90 mb-6 max-w-2xl mx-auto">
 
-              La plupart de nos utilisateurs rentabilisent CassKai dès le 2ème mois d'utilisation
+              Aucune carte bancaire requise • Accès complet à toutes les fonctionnalités
 
             </p>
 
@@ -727,7 +733,7 @@ const ROISection = () => {
 
               >
 
-                Démarrer l'essai gratuit 30 jours
+                Démarrer l'essai gratuit
 
               </Button>
 
@@ -2842,7 +2848,7 @@ const LandingPage = () => {
 
         <FeaturesSection />
 
-        <ROISection />
+        <AdvantagesSection />
 
         <PricingSection />
 
