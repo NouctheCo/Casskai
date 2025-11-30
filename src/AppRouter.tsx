@@ -63,6 +63,8 @@ const LazyAuditLogsPage = React.lazy(() => import('@/pages/AuditLogsPage'));
 const LazyDocumentationPage = React.lazy(() => import('@/pages/public/DocumentationPage'));
 const LazyTutorialsPage = React.lazy(() => import('@/pages/public/TutorialsPage'));
 const LazyMentionsLegalesPage = React.lazy(() => import('@/pages/MentionsLegalesPage'));
+const LazySecurityPage = React.lazy(() => import('@/pages/SecurityPage'));
+const LazyHelpCenterPage = React.lazy(() => import('@/pages/HelpCenterPage'));
 
 const AppRouter: React.FC = () => {
   const { isAuthenticated, loading, onboardingCompleted, isCheckingOnboarding, currentCompany } = useAuth();
@@ -372,6 +374,20 @@ const AppRouter: React.FC = () => {
               <ProtectedRoute>
                 <Suspense fallback={<LoadingFallback />}>
                   <LazySettingsPage />
+                </Suspense>
+              </ProtectedRoute>
+            } />
+            <Route path="security" element={
+              <ProtectedRoute>
+                <Suspense fallback={<LoadingFallback />}>
+                  <LazySecurityPage />
+                </Suspense>
+              </ProtectedRoute>
+            } />
+            <Route path="help" element={
+              <ProtectedRoute>
+                <Suspense fallback={<LoadingFallback />}>
+                  <LazyHelpCenterPage />
                 </Suspense>
               </ProtectedRoute>
             } />
