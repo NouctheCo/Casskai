@@ -13,6 +13,7 @@
 import { supabase } from '@/lib/supabase';
 import { auditService } from './auditService';
 import { logger } from '@/utils/logger';
+import { generateInvoiceJournalEntry } from './invoiceJournalEntryService';
 
 export interface Invoice {
   id: string;
@@ -314,6 +315,17 @@ class InvoicingService {
         security_level: 'standard',
         compliance_tags: ['SOC2', 'ISO27001']
       });
+
+      // 5. Générer automatiquement l'écriture comptable (fire-and-forget)
+      // Ne bloque pas la création de la facture si l'écriture échoue
+      try {
+        await generateInvoiceJournalEntry(createdInvoice, createdInvoice.invoice_lines || []);
+        logger.info(`InvoicingService: Journal entry created for invoice ${invoice_number}`);
+      } catch (journalError) {
+        // Log l'erreur mais ne bloque pas la création
+        logger.error('InvoicingService: Failed to generate journal entry for invoice:', journalError);
+        // L'utilisateur peut régénérer l'écriture manuellement depuis la compta
+      }
 
       return createdInvoice;
     } catch (error) {

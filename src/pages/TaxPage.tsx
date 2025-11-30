@@ -29,6 +29,8 @@ import { useEnterprise } from '../contexts/EnterpriseContext';
 import { taxService } from '../services/taxService';
 import { TaxCompliancePanel } from '../components/fiscal/TaxCompliancePanel';
 import { FiscalCalendarTab } from '../components/fiscal/FiscalCalendarTab';
+import { AutoVATDeclarationButton } from '../components/fiscal/AutoVATDeclarationButton';
+import { FECExportButton } from '../components/fiscal/FECExportButton';
 import {
   TaxDeclaration,
   TaxCalendarEvent,
@@ -770,6 +772,21 @@ const TaxPage: React.FC = () => {
 
           {/* Declarations Tab */}
           <TabsContent value="declarations" className="space-y-6">
+            {/* Actions rapides : Génération TVA auto + Export FEC */}
+            <div className="flex justify-end gap-2">
+              <FECExportButton
+                companyId={currentEnterprise?.id || ''}
+                companyName={currentEnterprise?.name || 'Entreprise'}
+              />
+              <AutoVATDeclarationButton
+                companyId={currentEnterprise?.id || ''}
+                onSuccess={() => {
+                  loadDeclarations();
+                  loadDashboardData();
+                }}
+              />
+            </div>
+
             {/* Search and Filters */}
             <Card>
               <CardContent className="p-6">
