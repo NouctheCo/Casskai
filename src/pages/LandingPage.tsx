@@ -29,7 +29,7 @@ import { Badge } from '@/components/ui/badge';
 
 import { CountrySelector } from '@/components/ui/CountrySelector';
 
-import { getMarketPricing, formatMarketPrice, getDefaultCountryCode } from '@/services/marketPricingService';
+import { generateCountryPricing, formatPriceWithCurrency, getDefaultCountry } from '@/services/pricingMultiCurrency';
 
 import { changeLanguageAndDetectCountry } from '@/i18n/i18n';
 
@@ -591,7 +591,7 @@ const AdvantagesSection = () => {
 
         <AnimatedSection className="text-center mb-20">
 
-          <Badge className="mb-6 px-4 py-2 bg-gradient-to-r from-green-100 to-blue-100 dark:from-green-900/30 dark:to-blue-900/30 text-green-800 dark:text-blue-200 border-green-200/50 dark:border-blue-700/50">
+          <Badge className="mb-6 px-4 py-2 bg-gradient-to-r from-green-100 to-blue-100 dark:from-green-900/40 dark:to-blue-900/40 text-green-800 dark:text-green-200 border-green-200/50 dark:border-green-700/50">
 
             <Star className="w-4 h-4 mr-2" />
 
@@ -873,7 +873,7 @@ const FeaturesSection = () => {
 
         <AnimatedSection className="text-center mb-20">
 
-          <Badge className="mb-6 px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 text-blue-800 dark:text-blue-200 border-blue-200/50 dark:border-blue-700/50">
+          <Badge className="mb-6 px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/40 dark:to-purple-900/40 text-blue-800 dark:text-blue-200 border-blue-200/50 dark:border-blue-700/50">
 
             <Star className="w-4 h-4 mr-2" />
 
@@ -1095,37 +1095,19 @@ const PricingSection = () => {
 
   const [isAnnual, setIsAnnual] = useState(false);
 
-  const [selectedCountry, setSelectedCountry] = useState(() => 
-
-    getDefaultCountryCode(navigator.language)
-
+  const [selectedCountry, setSelectedCountry] = useState(() =>
+    getDefaultCountry()
   );
 
 
 
   // Gérer le changement de pays
-
   const handleCountryChange = async (countryCode: string) => {
-
     setSelectedCountry(countryCode);
-
-    // Changer la langue de l'application si nécessaire
-
-    const marketPricing = getMarketPricing(countryCode);
-
-    if (marketPricing && i18n.language !== marketPricing.language) {
-
-      await changeLanguageAndDetectCountry(countryCode);
-
-    }
-
   };
 
-
-
-  // Obtenir les données de tarification du marché actuel
-
-  const currentMarket = getMarketPricing(selectedCountry);
+  // Obtenir les données de tarification du pays actuel
+  const currentMarket = generateCountryPricing(selectedCountry);
 
   
 
@@ -1323,7 +1305,7 @@ const PricingSection = () => {
 
         <AnimatedSection className="text-center mb-20">
 
-          <Badge className="mb-6 px-4 py-2 bg-gradient-to-r from-green-100 to-blue-100 dark:from-green-900/30 dark:to-blue-900/30 text-green-800 dark:text-green-200 border-green-200/50 dark:border-green-700/50">
+          <Badge className="mb-6 px-4 py-2 bg-gradient-to-r from-green-100 to-blue-100 dark:from-green-900/40 dark:to-blue-900/40 text-green-800 dark:text-green-200 border-green-200/50 dark:border-green-700/50">
 
             <DollarSign className="w-4 h-4 mr-2" />
 
@@ -1509,7 +1491,7 @@ const PricingSection = () => {
 
                             <span className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
 
-                              {formatMarketPrice(plan.displayMonthlyPrice, plan.currency, plan.currencySymbol)}
+                              {formatPriceWithCurrency(plan.displayMonthlyPrice, plan.currency)}
 
                             </span>
 
@@ -1523,7 +1505,7 @@ const PricingSection = () => {
 
                           <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
 
-                            Facturé {formatMarketPrice(plan.price, plan.currency, plan.currencySymbol)} annuellement
+                            Facturé {formatPriceWithCurrency(plan.price, plan.currency)} annuellement
 
                           </div>
 
@@ -1531,7 +1513,7 @@ const PricingSection = () => {
 
                             <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 line-through mr-2">
 
-                              {formatMarketPrice(plan.displayMonthlyOriginalPrice, plan.currency, plan.currencySymbol)}/mois
+                              {formatPriceWithCurrency(plan.displayMonthlyOriginalPrice, plan.currency)}/mois
 
                             </span>
 
@@ -1561,7 +1543,7 @@ const PricingSection = () => {
 
                             <span className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
 
-                              {formatMarketPrice(plan.price, plan.currency, plan.currencySymbol)}
+                              {formatPriceWithCurrency(plan.price, plan.currency)}
 
                             </span>
 
@@ -1577,7 +1559,7 @@ const PricingSection = () => {
 
                             <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 line-through mr-2">
 
-                              {formatMarketPrice(plan.originalPrice, plan.currency, plan.currencySymbol)}
+                              {formatPriceWithCurrency(plan.originalPrice, plan.currency)}
 
                             </span>
 
@@ -1985,7 +1967,7 @@ const ContactSection = () => {
 
         <AnimatedSection className="text-center mb-20">
 
-          <Badge className="mb-6 px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 text-blue-800 dark:text-blue-200 border-blue-200/50 dark:border-blue-700/50">
+          <Badge className="mb-6 px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/40 dark:to-purple-900/40 text-blue-800 dark:text-blue-200 border-blue-200/50 dark:border-blue-700/50">
 
             <MessageCircle className="w-4 h-4 mr-2" />
 
