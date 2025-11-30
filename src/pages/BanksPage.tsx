@@ -200,7 +200,7 @@ const BanksPageNew: React.FC = () => {
       <div className="container mx-auto p-6">
         <Card>
           <CardContent className="pt-6">
-            <p className="text-center text-gray-500">{t('auth.pleaseLogin')}</p>
+            <p className="text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">{t('auth.pleaseLogin')}</p>
           </CardContent>
         </Card>
       </div>
@@ -212,13 +212,13 @@ const BanksPageNew: React.FC = () => {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold">{t('banking.title')}</h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 mt-2">
           {t('banking.subtitle')}
         </p>
       </div>
 
       {/* Tabs Navigation */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow mb-6">
+      <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-lg shadow mb-6">
         <div className="flex border-b">
           <button
             onClick={() => setActiveTab('import')}
@@ -267,7 +267,7 @@ const BanksPageNew: React.FC = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">{t('banking.metrics.totalTransactions')}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('banking.metrics.totalTransactions')}</p>
                 <p className="text-2xl font-bold">{metrics.totalTransactions}</p>
               </div>
               <FileText className="h-8 w-8 text-blue-500" />
@@ -279,7 +279,7 @@ const BanksPageNew: React.FC = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">{t('banking.metrics.reconciled')}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('banking.metrics.reconciled')}</p>
                 <p className="text-2xl font-bold text-green-600">{metrics.reconciledTransactions}</p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-500" />
@@ -291,7 +291,7 @@ const BanksPageNew: React.FC = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">{t('banking.metrics.pending')}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('banking.metrics.pending')}</p>
                 <p className="text-2xl font-bold text-yellow-600">{metrics.pendingReconciliation}</p>
               </div>
               <AlertCircle className="h-8 w-8 text-yellow-500" />
@@ -303,7 +303,7 @@ const BanksPageNew: React.FC = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">{t('banking.metrics.autoMatchRate')}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('banking.metrics.autoMatchRate')}</p>
                 <p className="text-2xl font-bold">{(metrics.autoMatchRate * 100).toFixed(0)}%</p>
               </div>
               <DollarSign className="h-8 w-8 text-purple-500" />
@@ -323,11 +323,11 @@ const BanksPageNew: React.FC = () => {
           </CardHeader>
           <CardContent className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
+            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300 dark:text-gray-200">
               {t('banking.import.accountLabel')}
             </label>
             <select
-              className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+              className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-800 text-gray-900 dark:text-gray-100 dark:text-gray-100 border-gray-300 dark:border-gray-600 dark:border-gray-600"
               value={selectedAccountId}
               onChange={(e) => setSelectedAccountId(e.target.value)}
               disabled={loading}
@@ -345,7 +345,7 @@ const BanksPageNew: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
+            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300 dark:text-gray-200">
               {t('banking.import.fileLabel')}
             </label>
             <Input
@@ -388,14 +388,14 @@ const BanksPageNew: React.FC = () => {
         <CardContent>
           {loading ? (
             <div className="text-center py-8">
-              <RefreshCw className="h-8 w-8 animate-spin mx-auto text-gray-400" />
-              <p className="text-gray-500 mt-2">{t('common.loading')}</p>
+              <RefreshCw className="h-8 w-8 animate-spin mx-auto text-gray-400 dark:text-gray-500" />
+              <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-2">{t('common.loading')}</p>
             </div>
           ) : transactions.length === 0 ? (
             <div className="text-center py-8">
               <Upload className="h-12 w-12 mx-auto text-gray-300 mb-2" />
-              <p className="text-gray-500">{t('banking.history.noTransactions')}</p>
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500">{t('banking.history.noTransactions')}</p>
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
                 {t('banking.history.importPrompt')}
               </p>
             </div>
@@ -404,12 +404,12 @@ const BanksPageNew: React.FC = () => {
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('banking.history.table.date')}</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('banking.history.table.description')}</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('banking.history.table.category')}</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{t('banking.history.table.amount')}</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{t('banking.history.table.status')}</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{t('common.actions')}</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">{t('banking.history.table.date')}</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">{t('banking.history.table.description')}</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">{t('banking.history.table.category')}</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">{t('banking.history.table.amount')}</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">{t('banking.history.table.status')}</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -464,7 +464,7 @@ const BanksPageNew: React.FC = () => {
               </table>
 
               {transactions.length > 100 && (
-                <div className="mt-4 text-center text-sm text-gray-500">
+                <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
                   {t('banking.history.pagination', { shown: 100, total: transactions.length })}
                 </div>
               )}

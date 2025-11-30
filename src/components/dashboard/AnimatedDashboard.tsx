@@ -261,9 +261,9 @@ export const AnimatedDashboard: React.FC<AnimatedDashboardProps> = ({
 
           content: (
 
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 dark:border-gray-700 p-6">
 
-              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100 dark:text-white">
 
                 Évolution du CA
 
@@ -345,9 +345,9 @@ export const AnimatedDashboard: React.FC<AnimatedDashboardProps> = ({
 
           content: (
 
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 dark:border-gray-700 p-6">
 
-              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100 dark:text-white">
 
                 Nouveaux clients
 
@@ -425,11 +425,11 @@ export const AnimatedDashboard: React.FC<AnimatedDashboardProps> = ({
   if (!dashboardData) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-8">
-        <BarChart3 className="w-16 h-16 text-gray-400 mb-4" />
-        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+        <BarChart3 className="w-16 h-16 text-gray-400 dark:text-gray-500 mb-4" />
+        <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
           Aucune donnée disponible
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 max-w-md">
+        <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 max-w-md">
           Commencez par saisir vos premières écritures comptables pour voir apparaître vos statistiques.
         </p>
       </div>
@@ -456,13 +456,13 @@ export const AnimatedDashboard: React.FC<AnimatedDashboardProps> = ({
 
           <div>
 
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
 
               Tableau de bord
 
             </h1>
 
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mt-2">
 
               Vue d'ensemble de votre activité
 
@@ -482,7 +482,7 @@ export const AnimatedDashboard: React.FC<AnimatedDashboardProps> = ({
 
               transition={{ delay: 0.3, duration: 0.4 }}
 
-              className="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded-lg"
+              className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded-lg"
 
             >
 

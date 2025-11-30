@@ -134,7 +134,7 @@ const SupabaseSetupWizard = () => {
       <div className="text-center">
         <Database className="mx-auto h-12 w-12 text-blue-500 mb-4" />
         <h2 className="text-2xl font-bold mb-2">Configuration Supabase</h2>
-        <p className="text-gray-600">Connectez votre instance Supabase personnelle</p>
+        <p className="text-gray-600 dark:text-gray-400">Connectez votre instance Supabase personnelle</p>
       </div>
 
       <div className="space-y-4">
@@ -203,7 +203,7 @@ const SupabaseSetupWizard = () => {
       <div className="text-center">
         <Building2 className="mx-auto h-12 w-12 text-green-500 mb-4" />
         <h2 className="text-2xl font-bold mb-2">Configuration de l'Entreprise</h2>
-        <p className="text-gray-600">Configurez votre première entreprise</p>
+        <p className="text-gray-600 dark:text-gray-400">Configurez votre première entreprise</p>
       </div>
 
       <div className="space-y-4">
@@ -224,7 +224,7 @@ const SupabaseSetupWizard = () => {
             id="country"
             value={companyConfig.country}
             onChange={(e) => handleCountryChange(e.target.value)}
-            className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {countries.map(country => (
               <option key={country.code} value={country.code}>
@@ -270,7 +270,7 @@ const SupabaseSetupWizard = () => {
       <div className="text-center">
         <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-4" />
         <h2 className="text-2xl font-bold mb-2">Finalisation</h2>
-        <p className="text-gray-600">Récapitulatif de votre configuration</p>
+        <p className="text-gray-600 dark:text-gray-400">Récapitulatif de votre configuration</p>
       </div>
 
       <div className="bg-gray-50 p-4 rounded-lg space-y-3">
@@ -303,7 +303,7 @@ const SupabaseSetupWizard = () => {
               <CardTitle className="text-2xl">Assistant de Configuration CassKai</CardTitle>
               <CardDescription>Configuration initiale de votre application</CardDescription>
             </div>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
               Étape {currentStep} sur 3
             </div>
           </div>

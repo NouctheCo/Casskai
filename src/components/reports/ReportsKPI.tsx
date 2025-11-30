@@ -30,14 +30,14 @@ const ReportsKPI: React.FC<ReportsKPIProps> = ({
 
   return (
     <motion.div
-      className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-xl transition-all duration-300"
+      className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700 p-6 hover:shadow-xl transition-all duration-300"
       whileHover={{ scale: 1.02 }}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</h3>
+        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-400">{title}</h3>
         <div className={`p-2 rounded-lg bg-${color}-100 dark:bg-${color}-900/50`}>
           <span role="img" aria-hidden="true">
             <Icon className={`h-5 w-5 text-${color}-600 dark:text-${color}-400`} />
@@ -47,7 +47,7 @@ const ReportsKPI: React.FC<ReportsKPIProps> = ({
       
       <div className="space-y-2">
         <motion.div 
-          className="text-2xl font-bold text-gray-900 dark:text-white"
+          className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
@@ -68,7 +68,7 @@ const ReportsKPI: React.FC<ReportsKPIProps> = ({
         )}
         
         {trend && (
-          <div className="text-xs text-gray-500 dark:text-gray-400">{trend}</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400">{trend}</div>
         )}
       </div>
     </motion.div>

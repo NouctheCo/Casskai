@@ -194,11 +194,11 @@ export const FinancialReportsPage: React.FC = () => {
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-sm text-gray-500">Total Actif</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Total Actif</p>
               <p className="text-2xl font-bold">{formatCurrency(data.totalAssets)}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Total Passif + Capitaux</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Total Passif + Capitaux</p>
               <p className="text-2xl font-bold">{formatCurrency(data.totalLiabilitiesAndEquity)}</p>
             </div>
           </div>
@@ -224,13 +224,13 @@ export const FinancialReportsPage: React.FC = () => {
                     </div>
                   ))}
                   {data.assets.fixed.length > 5 && (
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
                       ... et {data.assets.fixed.length - 5} autres comptes
                     </p>
                   )}
                 </div>
               ) : (
-                <p className="text-sm text-gray-500">Aucun actif immobilisé</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Aucun actif immobilisé</p>
               )}
             </div>
 
@@ -246,13 +246,13 @@ export const FinancialReportsPage: React.FC = () => {
                     </div>
                   ))}
                   {data.assets.current.length > 5 && (
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
                       ... et {data.assets.current.length - 5} autres comptes
                     </p>
                   )}
                 </div>
               ) : (
-                <p className="text-sm text-gray-500">Aucun actif circulant</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Aucun actif circulant</p>
               )}
             </div>
 
@@ -284,7 +284,7 @@ export const FinancialReportsPage: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-gray-500">Aucun capitaux propres</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Aucun capitaux propres</p>
               )}
             </div>
 
@@ -301,7 +301,7 @@ export const FinancialReportsPage: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-gray-500">Aucune dette</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Aucune dette</p>
               )}
             </div>
 
@@ -353,7 +353,7 @@ export const FinancialReportsPage: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-gray-500">Aucun produit enregistré</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Aucun produit enregistré</p>
             )}
           </CardContent>
         </Card>
@@ -380,7 +380,7 @@ export const FinancialReportsPage: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-gray-500">Aucune charge enregistrée</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Aucune charge enregistrée</p>
             )}
           </CardContent>
         </Card>
@@ -444,8 +444,8 @@ export const FinancialReportsPage: React.FC = () => {
       <div className="container mx-auto p-6">
         <Card>
           <CardContent className="p-6 text-center">
-            <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-            <p className="text-gray-600">Veuillez sélectionner une entreprise pour accéder aux rapports</p>
+            <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Veuillez sélectionner une entreprise pour accéder aux rapports</p>
           </CardContent>
         </Card>
       </div>
@@ -457,7 +457,7 @@ export const FinancialReportsPage: React.FC = () => {
       {/* En-tête */}
       <div>
         <h1 className="text-3xl font-bold">Rapports Financiers</h1>
-        <p className="text-gray-600">Générez et consultez vos rapports comptables</p>
+        <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Générez et consultez vos rapports comptables</p>
       </div>
 
       {/* Sélecteur de période */}
@@ -484,7 +484,7 @@ export const FinancialReportsPage: React.FC = () => {
             </Select>
 
             <div>
-              <label className="text-sm text-gray-600">Date de début</label>
+              <label className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Date de début</label>
               <input
                 type="date"
                 value={dateRange.start}
@@ -494,7 +494,7 @@ export const FinancialReportsPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-sm text-gray-600">Date de fin</label>
+              <label className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Date de fin</label>
               <input
                 type="date"
                 value={dateRange.end}
@@ -565,8 +565,8 @@ export const FinancialReportsPage: React.FC = () => {
           ) : savedReports.length === 0 ? (
             <Card>
               <CardContent className="p-6 text-center">
-                <FileText className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <p className="text-gray-600">Aucun rapport généré pour le moment</p>
+                <FileText className="h-12 w-12 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
+                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Aucun rapport généré pour le moment</p>
                 <Button onClick={() => document.querySelector<HTMLButtonElement>('[value="generate"]')?.click()} className="mt-4">
                   Générer votre premier rapport
                 </Button>

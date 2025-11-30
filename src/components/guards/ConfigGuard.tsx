@@ -54,7 +54,7 @@ const ConfigGuard: React.FC<ConfigGuardProps> = ({ children, fallback }) => {
           <CardContent className="p-8 text-center">
             <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-600 mb-4" />
             <h2 className="text-xl font-semibold mb-2">Chargement de CassKai</h2>
-            <p className="text-gray-600 text-sm">
+            <p className="text-gray-600 dark:text-gray-400 text-sm">
               Initialisation de l'application...
             </p>
           </CardContent>
@@ -152,7 +152,7 @@ const ConfigGuard: React.FC<ConfigGuardProps> = ({ children, fallback }) => {
           <CardContent className="p-8 text-center">
             <Loader2 className="mx-auto h-8 w-8 animate-spin text-yellow-600 mb-4" />
             <h2 className="text-xl font-semibold mb-2">Connexion à la base de données</h2>
-            <p className="text-gray-600 text-sm mb-4">
+            <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
               Initialisation de la connexion Supabase...
             </p>
             <Button variant="outline" onClick={handleRetry} size="sm">
@@ -175,9 +175,9 @@ const ConfigGuard: React.FC<ConfigGuardProps> = ({ children, fallback }) => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardContent className="p-8 text-center">
-          <Loader2 className="mx-auto h-8 w-8 animate-spin text-gray-600 mb-4" />
+          <Loader2 className="mx-auto h-8 w-8 animate-spin text-gray-600 dark:text-gray-400 mb-4" />
           <h2 className="text-xl font-semibold mb-2">Préparation en cours</h2>
-          <p className="text-gray-600 text-sm">
+          <p className="text-gray-600 dark:text-gray-400 text-sm">
             Veuillez patienter...
           </p>
         </CardContent>

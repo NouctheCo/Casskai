@@ -42,7 +42,7 @@ export function SupportSystem() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 w-96 h-[600px] bg-white rounded-lg shadow-xl border z-50">
+    <div className="fixed bottom-4 right-4 w-96 h-[600px] bg-white dark:bg-gray-800 rounded-lg shadow-xl border z-50">
       <div className="flex items-center justify-between p-4 border-b">
         <h3 className="font-semibold">Support Casskai</h3>
         <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>

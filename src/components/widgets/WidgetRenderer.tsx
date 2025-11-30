@@ -432,7 +432,7 @@ const KPICard: React.FC<{ config: KPICardConfig }> = ({ config }) => {
 
       <motion.div
 
-        className="text-2xl font-bold text-gray-900 dark:text-white"
+        className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white"
 
         initial={{ scale: 0.5, opacity: 0 }}
 
@@ -494,7 +494,7 @@ const KPICard: React.FC<{ config: KPICardConfig }> = ({ config }) => {
 
         <div className="space-y-1">
 
-          <div className="flex justify-between text-xs text-gray-500">
+          <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
             <span>Objectif</span>
 
@@ -610,7 +610,7 @@ const GaugeWidget: React.FC<{ config: GaugeWidgetConfig }> = ({ config }) => {
 
             <div className="text-lg font-bold">{value}</div>
 
-            <div className="text-xs text-gray-500">{unit}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">{unit}</div>
 
           </div>
 
@@ -620,7 +620,7 @@ const GaugeWidget: React.FC<{ config: GaugeWidgetConfig }> = ({ config }) => {
 
       
 
-      <div className="text-xs text-gray-500 text-center">
+      <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 text-center">
 
         {min} - {max} {unit}
 
@@ -652,7 +652,7 @@ const ProgressTracker: React.FC<{ config: ProgressTrackerConfig }> = ({ config }
 
         <span className="font-medium">Progression</span>
 
-        <span className="text-gray-500">
+        <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
           {currentStep + 1} / {steps.length}
 
@@ -816,13 +816,13 @@ const RecentActivities: React.FC<{ config: RecentActivitiesConfig }> = ({ config
 
           <div className="flex-1 min-w-0">
 
-            <p className="text-gray-900 dark:text-white">
+            <p className="text-gray-900 dark:text-gray-100 dark:text-white">
 
               <span className="font-medium">{activity.user}</span> {activity.action}
 
             </p>
 
-            <p className="text-gray-500 dark:text-gray-400 text-xs">
+            <p className="text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 text-xs">
 
               il y a {activity.time}
 
@@ -904,13 +904,13 @@ const NotificationCenter: React.FC<{ config: NotificationCenterConfig }> = ({ co
 
           <div className="flex-1 min-w-0">
 
-            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 dark:text-white truncate">
 
               {notification.title}
 
             </p>
 
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+            <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 truncate">
 
               {notification.message}
 
@@ -956,7 +956,7 @@ const WeatherWidget: React.FC<{ config: WeatherConfig }> = ({ config }) => {
 
         <Thermometer className="w-5 h-5 text-blue-500" />
 
-        <span className="text-sm text-gray-600 dark:text-gray-400">
+        <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
           {weather.location}
 
@@ -968,7 +968,7 @@ const WeatherWidget: React.FC<{ config: WeatherConfig }> = ({ config }) => {
 
       <motion.div
 
-        className="text-3xl font-bold text-gray-900 dark:text-white"
+        className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white"
 
         initial={{ scale: 0.5 }}
 
@@ -984,7 +984,7 @@ const WeatherWidget: React.FC<{ config: WeatherConfig }> = ({ config }) => {
 
       
 
-      <div className="space-y-1 text-sm text-gray-500 dark:text-gray-400">
+      <div className="space-y-1 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
         <p>{weather.condition}</p>
 
@@ -1054,7 +1054,7 @@ const ImageWidget: React.FC<{ config: ImageWidgetConfig }> = ({ config }) => {
 
       <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-800 rounded">
 
-        <ImageIcon className="w-8 h-8 text-gray-400" />
+        <ImageIcon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
 
       </div>
 
@@ -1311,11 +1311,11 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
 
               <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
 
-                <Settings className="w-6 h-6 text-gray-400" />
+                <Settings className="w-6 h-6 text-gray-400 dark:text-gray-500" />
 
               </div>
 
-              <div className="text-sm text-gray-500 dark:text-gray-400">
+              <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                 Widget "{widget.type}"
 

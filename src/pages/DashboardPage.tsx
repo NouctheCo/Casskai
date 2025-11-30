@@ -28,10 +28,10 @@ const DashboardPage = () => {
           <div className="mb-6">
             <Building className="h-20 w-20 text-blue-400 mx-auto" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
             Aucune entreprise configurée
           </h2>
-          <p className="text-gray-600 mb-6 leading-relaxed">
+          <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
             Pour accéder au dashboard, vous devez d'abord créer votre entreprise via le processus d'onboarding.
           </p>
           <button
@@ -41,7 +41,7 @@ const DashboardPage = () => {
             <Building className="h-5 w-5 mr-2" />
             Créer mon entreprise
           </button>
-          <p className="text-xs text-gray-500 mt-4">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">
             L'onboarding vous guidera dans la configuration de votre première entreprise
           </p>
         </div>

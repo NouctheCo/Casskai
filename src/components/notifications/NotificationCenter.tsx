@@ -230,7 +230,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
       exit={{ opacity: 0, y: -20 }}
       className="fixed top-16 right-4 w-96 z-50"
     >
-      <Card className="shadow-lg border-0 bg-white dark:bg-gray-900">
+      <Card className="shadow-lg border-0 bg-white dark:bg-gray-800 dark:bg-gray-900">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
@@ -289,11 +289,11 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
           <ScrollArea className="h-96">
             <AnimatePresence>
               {loading ? (
-                <div className="p-4 text-center text-gray-500">
+                <div className="p-4 text-center text-gray-500 dark:text-gray-400">
                   Chargement...
                 </div>
               ) : filteredNotifications.length === 0 ? (
-                <div className="p-4 text-center text-gray-500">
+                <div className="p-4 text-center text-gray-500 dark:text-gray-400">
                   <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   Aucune notification
                 </div>
@@ -329,7 +329,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
                                 <div className="inline-block w-2 h-2 bg-blue-500 rounded-full ml-2" />
                               )}
                             </h4>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 mt-1 line-clamp-2">
                               {notification.message}
                             </p>
                           </div>
@@ -367,7 +367,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
                             <Badge variant="outline" className="text-xs">
                               {notification.category}
                             </Badge>
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
                               {formatDate(notification.created_at)}
                             </span>
                           </div>

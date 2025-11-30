@@ -170,7 +170,7 @@ export const FiscalCalendarTab: React.FC<FiscalCalendarTabProps> = ({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Total</p>
                 <p className="text-2xl font-bold">{stats.totalEvents}</p>
               </div>
               <CalendarIcon className="h-8 w-8 text-blue-500" />
@@ -182,7 +182,7 @@ export const FiscalCalendarTab: React.FC<FiscalCalendarTabProps> = ({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">En retard</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">En retard</p>
                 <p className="text-2xl font-bold text-red-600">{stats.overdueEvents}</p>
               </div>
               <AlertCircle className="h-8 w-8 text-red-500" />
@@ -194,7 +194,7 @@ export const FiscalCalendarTab: React.FC<FiscalCalendarTabProps> = ({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">À venir bientôt</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">À venir bientôt</p>
                 <p className="text-2xl font-bold text-yellow-600">{stats.dueSoonEvents}</p>
               </div>
               <Clock className="h-8 w-8 text-yellow-500" />
@@ -206,7 +206,7 @@ export const FiscalCalendarTab: React.FC<FiscalCalendarTabProps> = ({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Prochains</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Prochains</p>
                 <p className="text-2xl font-bold text-blue-600">{stats.upcomingEvents}</p>
               </div>
               <TrendingUp className="h-8 w-8 text-blue-500" />
@@ -218,7 +218,7 @@ export const FiscalCalendarTab: React.FC<FiscalCalendarTabProps> = ({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Complétés</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Complétés</p>
                 <p className="text-2xl font-bold text-green-600">{stats.completedEvents}</p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-500" />
@@ -333,7 +333,7 @@ export const FiscalCalendarTab: React.FC<FiscalCalendarTabProps> = ({
                       <CardContent>
                         <div className="space-y-2 max-h-48 overflow-y-auto">
                           {monthEvents.length === 0 ? (
-                            <p className="text-sm text-gray-500 italic">Aucune échéance</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 italic">Aucune échéance</p>
                           ) : (
                             monthEvents.map(event => (
                               <div
@@ -348,7 +348,7 @@ export const FiscalCalendarTab: React.FC<FiscalCalendarTabProps> = ({
                                         {event.title}
                                       </p>
                                     </div>
-                                    <p className="text-xs text-gray-600 mt-1">
+                                    <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-500 mt-1">
                                       {event.dueDate.toLocaleDateString('fr-FR', {
                                         day: 'numeric',
                                         month: 'short'
@@ -374,11 +374,11 @@ export const FiscalCalendarTab: React.FC<FiscalCalendarTabProps> = ({
             <div className="space-y-3">
               {filteredEvents.length === 0 ? (
                 <div className="text-center py-12">
-                  <CalendarIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <CalendarIcon className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
                     Aucune échéance trouvée
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">
                     Aucune échéance ne correspond aux filtres sélectionnés.
                   </p>
                 </div>
@@ -403,10 +403,10 @@ export const FiscalCalendarTab: React.FC<FiscalCalendarTabProps> = ({
                               {getCategoryLabel(event.category)}
                             </Badge>
                           </div>
-                          <p className="text-sm text-gray-600 mb-2">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-2">
                             {event.description}
                           </p>
-                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                          <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
                             <div className="flex items-center gap-1">
                               <CalendarIcon className="h-4 w-4" />
                               <span>

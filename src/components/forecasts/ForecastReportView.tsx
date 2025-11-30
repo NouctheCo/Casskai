@@ -98,7 +98,7 @@ const ForecastReportView: React.FC<ForecastReportViewProps> = ({
             Retour
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{forecast.name}</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{forecast.name}</h1>
             <div className="flex items-center space-x-2 mt-1">
               <Badge className={getStatusColor(forecast.status)}>
                 {forecast.status}
@@ -109,7 +109,7 @@ const ForecastReportView: React.FC<ForecastReportViewProps> = ({
                 </Badge>
               )}
               {period && (
-                <span className="text-sm text-gray-600 flex items-center">
+                <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
                   <Calendar className="h-4 w-4 mr-1" />
                   {period.name}
                 </span>
@@ -132,7 +132,7 @@ const ForecastReportView: React.FC<ForecastReportViewProps> = ({
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Revenus Totaux</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Revenus Totaux</p>
                 <p className="text-2xl font-bold text-green-600">
                   {formatCurrency(forecast.total_revenue)}
                 </p>
@@ -148,7 +148,7 @@ const ForecastReportView: React.FC<ForecastReportViewProps> = ({
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Dépenses Totales</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Dépenses Totales</p>
                 <p className="text-2xl font-bold text-red-600">
                   {formatCurrency(forecast.total_expenses)}
                 </p>
@@ -164,7 +164,7 @@ const ForecastReportView: React.FC<ForecastReportViewProps> = ({
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Flux de Trésorerie</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Flux de Trésorerie</p>
                 <p className="text-2xl font-bold text-blue-600">
                   {formatCurrency(forecast.net_cash_flow)}
                 </p>
@@ -180,7 +180,7 @@ const ForecastReportView: React.FC<ForecastReportViewProps> = ({
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Seuil de Rentabilité</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Seuil de Rentabilité</p>
                 <p className="text-2xl font-bold text-purple-600">
                   {formatCurrency(forecast.break_even_point)}
                 </p>
@@ -208,7 +208,7 @@ const ForecastReportView: React.FC<ForecastReportViewProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-700">Marge Brute</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Marge Brute</span>
                 <span className="text-sm font-bold">{formatPercentage(forecast.gross_margin)}</span>
               </div>
               <Progress value={forecast.gross_margin} className="h-2" />
@@ -216,7 +216,7 @@ const ForecastReportView: React.FC<ForecastReportViewProps> = ({
             
             <div>
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-700">Marge Nette</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Marge Nette</span>
                 <span className="text-sm font-bold">{formatPercentage(forecast.net_margin)}</span>
               </div>
               <Progress value={forecast.net_margin} className="h-2" />
@@ -237,9 +237,9 @@ const ForecastReportView: React.FC<ForecastReportViewProps> = ({
               {forecast.revenue_items.map((item) => (
                 <div key={item.id} className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
                   <div>
-                    <p className="font-medium text-gray-900">{item.description}</p>
+                    <p className="font-medium text-gray-900 dark:text-gray-100">{item.description}</p>
                     <div className="flex items-center space-x-2 mt-1">
-                      <p className="text-xs text-gray-600">{item.category}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">{item.category}</p>
                       <Badge 
                         variant="outline" 
                         className={`text-xs ${
@@ -256,7 +256,7 @@ const ForecastReportView: React.FC<ForecastReportViewProps> = ({
                     <p className="font-semibold text-green-600">
                       {formatCurrency(item.amount)}
                     </p>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
                       +{item.growth_rate}% croissance
                     </p>
                   </div>
@@ -276,9 +276,9 @@ const ForecastReportView: React.FC<ForecastReportViewProps> = ({
               {forecast.expense_items.map((item) => (
                 <div key={item.id} className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
                   <div>
-                    <p className="font-medium text-gray-900">{item.description}</p>
+                    <p className="font-medium text-gray-900 dark:text-gray-100">{item.description}</p>
                     <div className="flex items-center space-x-2 mt-1">
-                      <p className="text-xs text-gray-600">{item.category}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">{item.category}</p>
                       <Badge 
                         variant="outline" 
                         className={`text-xs ${
@@ -300,7 +300,7 @@ const ForecastReportView: React.FC<ForecastReportViewProps> = ({
                     <p className="font-semibold text-red-600">
                       {formatCurrency(item.amount)}
                     </p>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
                       +{item.growth_rate}% croissance
                     </p>
                   </div>
@@ -388,20 +388,20 @@ const ForecastReportView: React.FC<ForecastReportViewProps> = ({
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-              <p className="text-gray-600">Créée le:</p>
+              <p className="text-gray-600 dark:text-gray-400">Créée le:</p>
               <p className="font-medium">{new Date(forecast.created_at).toLocaleDateString('fr-FR')}</p>
             </div>
             <div>
-              <p className="text-gray-600">Dernière mise à jour:</p>
+              <p className="text-gray-600 dark:text-gray-400">Dernière mise à jour:</p>
               <p className="font-medium">{new Date(forecast.updated_at).toLocaleDateString('fr-FR')}</p>
             </div>
             <div>
-              <p className="text-gray-600">Créée par:</p>
+              <p className="text-gray-600 dark:text-gray-400">Créée par:</p>
               <p className="font-medium">{forecast.created_by}</p>
             </div>
             {forecast.approved_by && (
               <div>
-                <p className="text-gray-600">Approuvée par:</p>
+                <p className="text-gray-600 dark:text-gray-400">Approuvée par:</p>
                 <p className="font-medium">{forecast.approved_by}</p>
               </div>
             )}

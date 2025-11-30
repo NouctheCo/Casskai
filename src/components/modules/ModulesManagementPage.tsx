@@ -278,7 +278,7 @@ const ModuleCard: React.FC<ModuleCardProps> = ({
                     Actif
                   </Badge>
                 ) : (
-                  <Badge variant="outline" className="border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400">
+                  <Badge variant="outline" className="border-gray-300 dark:border-gray-600 dark:border-gray-600 text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                     Inactif
                   </Badge>
                 )}
@@ -336,7 +336,7 @@ const ModuleCard: React.FC<ModuleCardProps> = ({
                   {isActive ? 'Activé' : 'Désactivé'}
                 </div>
                 {module.type === 'core' && (
-                  <div className="text-xs text-gray-500">Module essentiel</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">Module essentiel</div>
                 )}
               </div>
             </div>
@@ -523,8 +523,8 @@ export default function ModulesManagementPage() {
       >
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Gestion des Modules</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-gray-100">Gestion des Modules</h1>
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mt-1">
               Gérez l'activation et l'accès à vos modules CassKai
             </p>
           </div>
@@ -556,8 +556,8 @@ export default function ModulesManagementPage() {
                   <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Modules Actifs</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.active}/{stats.total}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Modules Actifs</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-gray-100">{stats.active}/{stats.total}</p>
                 </div>
               </div>
             </CardContent>
@@ -570,8 +570,8 @@ export default function ModulesManagementPage() {
                   <CheckCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Accessibles</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.accessible}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Accessibles</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-gray-100">{stats.accessible}</p>
                 </div>
               </div>
             </CardContent>
@@ -584,8 +584,8 @@ export default function ModulesManagementPage() {
                   <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Core</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.core}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Core</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-gray-100">{stats.core}</p>
                 </div>
               </div>
             </CardContent>
@@ -598,8 +598,8 @@ export default function ModulesManagementPage() {
                   <Settings className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.total}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Total</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-gray-100">{stats.total}</p>
                 </div>
               </div>
             </CardContent>
@@ -607,11 +607,11 @@ export default function ModulesManagementPage() {
         </div>
 
         {/* Filtres et recherche */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 p-4 space-y-4">
+        <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-lg border dark:border-gray-700 p-4 space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
                 <Input
                   placeholder="Rechercher un module..."
                   value={searchQuery}
@@ -624,7 +624,7 @@ export default function ModulesManagementPage() {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 border dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 dark:text-gray-200 min-w-[200px]"
+              className="px-3 py-2 border dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-800 dark:bg-gray-700 dark:text-gray-200 min-w-[200px]"
             >
               <option value="all">Toutes catégories</option>
               {categories.map(cat => (
@@ -651,7 +651,7 @@ export default function ModulesManagementPage() {
             className="space-y-4"
           >
             <div className="flex items-center gap-3">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{category}</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-gray-100">{category}</h2>
               <Badge variant="outline" className="font-normal">
                 {categoryModules.length} module{categoryModules.length > 1 ? 's' : ''}
               </Badge>
@@ -686,11 +686,11 @@ export default function ModulesManagementPage() {
       {/* Message si aucun résultat */}
       {filteredModules.length === 0 && (
         <div className="text-center py-12">
-          <Search className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+          <Search className="w-12 h-12 text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100 mb-2">
             Aucun module trouvé
           </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-4">
             Aucun module ne correspond à vos critères de recherche.
           </p>
           <Button variant="outline" onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}>

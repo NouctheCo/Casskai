@@ -53,7 +53,7 @@ function PlanCard({ plan, isCurrentPlan, isPopular, isLoading, onSubscribe, onMa
         </CardTitle>
         <div className="text-3xl font-bold">
           {plan.price}€
-          <span className="text-sm font-normal text-gray-600 dark:text-gray-400">
+          <span className="text-sm font-normal text-gray-600 dark:text-gray-400 dark:text-gray-400">
             /{plan.interval === 'month' ? 'mois' : 'an'}
           </span>
           {plan.savings && plan.interval === 'year' && (
@@ -69,7 +69,7 @@ function PlanCard({ plan, isCurrentPlan, isPopular, isLoading, onSubscribe, onMa
           {plan.features.map((feature, index) => (
             <li key={index} className="flex items-center space-x-2">
               <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">
+              <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">
                 {feature}
               </span>
             </li>
@@ -158,7 +158,7 @@ function UsageQuotas({ quotas }: UsageQuotasProps) {
         {Object.entries(quotas).map(([key, quota]) => (
           <div key={key} className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="capitalize text-gray-600 dark:text-gray-400">
+              <span className="capitalize text-gray-600 dark:text-gray-400 dark:text-gray-400">
                 {key.replace('_', ' ')}
               </span>
               <span className="font-medium">
@@ -276,10 +276,10 @@ export function SubscriptionManager({ enterpriseId, className }: SubscriptionMan
   return (
     <div className={cn("space-y-6", className)}>
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
           Gestion de l'abonnement
         </h2>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400">
           Choisissez le plan qui correspond à vos besoins
         </p>
       </div>

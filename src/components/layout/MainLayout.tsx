@@ -180,7 +180,7 @@ export function MainLayout() {
 
           <img src="/logo.png" alt="CassKai" className="w-16 h-16 animate-pulse" />
 
-          <span className="text-sm text-gray-600 dark:text-gray-300">
+          <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300">
 
             {t('common.loading', { defaultValue: 'Chargement...' })}
 

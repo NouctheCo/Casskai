@@ -92,7 +92,7 @@ const RegionalConfigurationSection: React.FC<RegionalConfigurationProps> = ({
   >
     <div className="flex items-center space-x-2 mb-4">
       <Globe className="w-5 h-5 text-blue-600" />
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white">
         Configuration régionale
       </h3>
     </div>
@@ -152,7 +152,7 @@ const AccountingConfigurationSection: React.FC<AccountingConfigurationProps> = (
   >
     <div className="flex items-center space-x-2 mb-4">
       <DollarSign className="w-5 h-5 text-green-600" />
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white">
         Configuration comptable
       </h3>
     </div>
@@ -209,7 +209,7 @@ const NotificationsSection: React.FC<NotificationsProps> = ({ preferences, updat
   >
     <div className="flex items-center space-x-2 mb-4">
       <Bell className="w-5 h-5 text-purple-600" />
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white">
         Notifications
       </h3>
     </div>
@@ -251,7 +251,7 @@ const NotificationsSection: React.FC<NotificationsProps> = ({ preferences, updat
       </div>
       
       <div className="space-y-3">
-        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Types de notifications</h4>
+        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300">Types de notifications</h4>
         <div className="space-y-2">
           {[
             { key: 'invoiceReminders', label: 'Rappels de factures impayées', icon: '📄' },
@@ -261,7 +261,7 @@ const NotificationsSection: React.FC<NotificationsProps> = ({ preferences, updat
             <div key={notif.key} className="flex items-center justify-between p-2">
               <div className="flex items-center space-x-2">
                 <span className="text-sm">{notif.icon}</span>
-                <span className="text-sm text-gray-700 dark:text-gray-300">{notif.label}</span>
+                <span className="text-sm text-gray-700 dark:text-gray-300 dark:text-gray-300">{notif.label}</span>
               </div>
               <Switch
                 checked={preferences.notifications[notif.key as keyof typeof preferences.notifications]}
@@ -421,7 +421,7 @@ export default function PreferencesStep() {
               defaultValue: 'Configurez vos préférences'
             })}
           </CardTitle>
-          <CardDescription className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <CardDescription className="text-lg text-gray-600 dark:text-gray-400 dark:text-gray-400 max-w-2xl mx-auto">
             {t('onboarding.preferences.subtitle', {
               defaultValue: 'Personnalisez CassKai selon vos besoins et habitudes de travail.'
             })}
@@ -432,7 +432,7 @@ export default function PreferencesStep() {
           {referentialsLoading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-6 h-6 animate-spin text-green-600 mr-2" />
-              <span className="text-gray-600 dark:text-gray-400">Chargement des préférences...</span>
+              <span className="text-gray-600 dark:text-gray-400 dark:text-gray-400">Chargement des préférences...</span>
             </div>
           ) : (
             <>

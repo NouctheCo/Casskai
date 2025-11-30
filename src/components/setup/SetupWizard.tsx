@@ -27,11 +27,11 @@ const LanguageSwitcher = ({ className = "" }) => {
 
   return (
     <div className={`flex items-center space-x-2 ${className}`}>
-      <Languages className="w-4 h-4 text-gray-600" />
+      <Languages className="w-4 h-4 text-gray-600 dark:text-gray-400 dark:text-gray-500" />
       <select 
         value={i18n.language} 
         onChange={(e) => handleLanguageChange(e.target.value)}
-        className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+        className="text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800"
       >
         <option value="fr">🇫🇷 Français</option>
         <option value="en">🇺🇸 English</option>
@@ -247,7 +247,7 @@ const UniversalSetupWizard = () => {
               
               return (
                 <div key={region}>
-                  <h3 className="font-medium text-gray-700 mb-2">{region}</h3>
+                  <h3 className="font-medium text-gray-700 dark:text-gray-300 mb-2">{region}</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {regionMarkets.map(market => (
                       <Card 
@@ -370,10 +370,10 @@ const UniversalSetupWizard = () => {
           </h3>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="text-gray-600">{t('currency')}:</span> {selectedMarket?.currency}
+              <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('currency')}:</span> {selectedMarket?.currency}
             </div>
             <div>
-              <span className="text-gray-600">{t('setup.standards.pcg')}:</span> {selectedMarket?.standard}
+              <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('setup.standards.pcg')}:</span> {selectedMarket?.standard}
             </div>
           </div>
         </div>
@@ -409,7 +409,7 @@ const UniversalSetupWizard = () => {
               id="legalForm"
               value={config.legalForm || ''}
               onChange={(e) => setConfig(prev => ({ ...prev, legalForm: e.target.value }))}
-              className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full mt-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">{t('setup.company.legal_forms.select')}</option>
               <option value="SARL">{t('setup.company.legal_forms.sarl')}</option>
@@ -461,7 +461,7 @@ const UniversalSetupWizard = () => {
               onChange={(e) => setConfig(prev => ({ ...prev, capital: e.target.value }))}
               className="mt-2"
             />
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
               {t('setup.company.capital_minimum')}
             </p>
           </div>
@@ -473,7 +473,7 @@ const UniversalSetupWizard = () => {
             id="sector"
             value={config.sector || ''}
             onChange={(e) => setConfig(prev => ({ ...prev, sector: e.target.value }))}
-            className="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full mt-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="">{t('setup.company.sectors.select')}</option>
             {isAfricanMarket ? (
@@ -499,11 +499,11 @@ const UniversalSetupWizard = () => {
     if (!isAfricanMarket) {
       return (
         <div className="text-center py-8">
-          <Globe className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-600 mb-2">
+          <Globe className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-500 mb-4" />
+          <h3 className="text-lg font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-2">
             {t('setup.mobile_money.not_applicable')}
           </h3>
-          <p className="text-gray-500">
+          <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500">
             {t('setup.mobile_money.not_applicable_description')}
           </p>
         </div>
@@ -550,7 +550,7 @@ const UniversalSetupWizard = () => {
                       : current.filter(p => p !== provider);
                     setConfig(prev => ({ ...prev, mobileMoneyProviders: updated }));
                   }}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                 />
                 <label htmlFor={provider} className="font-medium">
                   {provider}
@@ -600,7 +600,7 @@ const UniversalSetupWizard = () => {
 
       <div className="bg-blue-50 p-4 rounded-lg">
         <h3 className="font-medium mb-2">{t('setup.admin.final_config')}</h3>
-        <div className="space-y-1 text-sm text-gray-600">
+        <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
           <div>• {t('setup.admin.tasks.database')}</div>
           <div>• {t('setup.admin.tasks.accounting_plan', { standard: config.accountingStandard })}</div>
           <div>• {t('setup.admin.tasks.currencies')}</div>
@@ -659,10 +659,10 @@ const UniversalSetupWizard = () => {
             <div></div>
             <LanguageSwitcher />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             {t('setup.wizard.title')}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">
             {t('setup.wizard.subtitle')}
           </p>
         </div>

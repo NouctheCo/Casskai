@@ -140,7 +140,7 @@ export const ClientSelector: React.FC<ClientSelectorProps> = ({
       {loading ? (
         <div className="flex items-center justify-center py-2">
           <Loader2 className="w-4 h-4 animate-spin mr-2" />
-          <span className="text-sm text-gray-500">Chargement des clients...</span>
+          <span className="text-sm text-gray-500 dark:text-gray-400">Chargement des clients...</span>
         </div>
       ) : (
         <Select value={value} onValueChange={onChange}>
@@ -149,7 +149,7 @@ export const ClientSelector: React.FC<ClientSelectorProps> = ({
           </SelectTrigger>
           <SelectContent>
             {clients.length === 0 ? (
-              <div className="p-2 text-sm text-gray-500 text-center">
+              <div className="p-2 text-sm text-gray-500 dark:text-gray-400 text-center">
                 Aucun client disponible
               </div>
             ) : (
@@ -157,7 +157,7 @@ export const ClientSelector: React.FC<ClientSelectorProps> = ({
                 <SelectItem key={client.id} value={client.id}>
                   <div className="flex flex-col">
                     <span className="font-medium">{client.name}</span>
-                    {client.primary_email && <span className="text-xs text-gray-500">{client.primary_email}</span>}
+                    {client.primary_email && <span className="text-xs text-gray-500 dark:text-gray-400">{client.primary_email}</span>}
                   </div>
                 </SelectItem>
               ))

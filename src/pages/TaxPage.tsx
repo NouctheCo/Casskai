@@ -419,7 +419,7 @@ const TaxPage: React.FC = () => {
       case 'error': return <AlertCircle className="h-5 w-5 text-red-500" />;
       case 'warning': return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
       case 'info': return <Info className="h-5 w-5 text-blue-500" />;
-      default: return <Bell className="h-5 w-5 text-gray-500" />;
+      default: return <Bell className="h-5 w-5 text-gray-500 dark:text-gray-400 dark:text-gray-500" />;
     }
   };
 
@@ -438,7 +438,7 @@ const TaxPage: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">{t('tax.loading')}</p>
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('tax.loading')}</p>
         </div>
       </div>
     );
@@ -458,13 +458,13 @@ const TaxPage: React.FC = () => {
       >
         <div className="space-y-2">
           <div className="flex items-center space-x-2">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
               {t('tax.title')}
             </h1>
             <Sparkles className="h-6 w-6 text-yellow-500" />
           </div>
           <div className="flex items-center space-x-2">
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
               {currentEnterprise ? `${currentEnterprise.name} - ` : ''}
               {t('tax.subtitle')}
             </p>
@@ -516,8 +516,8 @@ const TaxPage: React.FC = () => {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-600">{t('tax.metrics.totalDeclarations')}</p>
-                          <p className="text-2xl font-bold text-gray-900">
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('tax.metrics.totalDeclarations')}</p>
+                          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                             {dashboardData.stats.total_declarations}
                           </p>
                         </div>
@@ -532,8 +532,8 @@ const TaxPage: React.FC = () => {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-600">{t('tax.metrics.pendingDeclarations')}</p>
-                          <p className="text-2xl font-bold text-gray-900">
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('tax.metrics.pendingDeclarations')}</p>
+                          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                             {dashboardData.stats.pending_declarations}
                           </p>
                         </div>
@@ -548,8 +548,8 @@ const TaxPage: React.FC = () => {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-600">{t('tax.metrics.overdueDeclarations')}</p>
-                          <p className="text-2xl font-bold text-gray-900">
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('tax.metrics.overdueDeclarations')}</p>
+                          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                             {dashboardData.stats.overdue_declarations}
                           </p>
                         </div>
@@ -564,8 +564,8 @@ const TaxPage: React.FC = () => {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-600">{t('tax.metrics.activeAlerts')}</p>
-                          <p className="text-2xl font-bold text-gray-900">
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('tax.metrics.activeAlerts')}</p>
+                          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                             {dashboardData.stats.active_alerts}
                           </p>
                         </div>
@@ -587,7 +587,7 @@ const TaxPage: React.FC = () => {
                       <div className="space-y-4">
                         <div className="flex justify-between items-center p-4 bg-red-50 rounded-lg">
                           <div>
-                            <p className="text-sm text-gray-600">{t('tax.financialOverview.taxesDue')}</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('tax.financialOverview.taxesDue')}</p>
                             <p className="text-xl font-bold text-red-600">
                               {formatCurrency(dashboardData.stats.total_tax_due)}
                             </p>
@@ -596,7 +596,7 @@ const TaxPage: React.FC = () => {
                         </div>
                         <div className="flex justify-between items-center p-4 bg-green-50 rounded-lg">
                           <div>
-                            <p className="text-sm text-gray-600">{t('tax.financialOverview.taxesPaid')}</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('tax.financialOverview.taxesPaid')}</p>
                             <p className="text-xl font-bold text-green-600">
                               {formatCurrency(dashboardData.stats.total_tax_paid)}
                             </p>
@@ -667,13 +667,13 @@ const TaxPage: React.FC = () => {
                           </div>
                           <div className="space-y-2">
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">{t('tax.breakdownByType.amountDue')}:</span>
+                              <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('tax.breakdownByType.amountDue')}:</span>
                               <span className="font-medium text-red-600">
                                 {formatCurrency(typeData.amount_due)}
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">{t('tax.breakdownByType.amountPaid')}:</span>
+                              <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('tax.breakdownByType.amountPaid')}:</span>
                               <span className="font-medium text-green-600">
                                 {formatCurrency(typeData.amount_paid)}
                               </span>
@@ -702,7 +702,7 @@ const TaxPage: React.FC = () => {
                                 </Badge>
                                 <span className="font-medium text-sm">{declaration.name}</span>
                               </div>
-                              <p className="text-xs text-gray-600">
+                              <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-500">
                                 {t('tax.recentDeclarations.dueDate')}: {declaration.dueDate.toLocaleDateString('fr-FR')}
                               </p>
                             </div>
@@ -737,7 +737,7 @@ const TaxPage: React.FC = () => {
                                 </Badge>
                                 <span className="font-medium text-sm">{obligation.title}</span>
                               </div>
-                              <p className="text-xs text-gray-600">
+                              <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-500">
                                 {new Date(obligation.start_date).toLocaleDateString('fr-FR')}
                               </p>
                             </div>
@@ -776,7 +776,7 @@ const TaxPage: React.FC = () => {
                 <div className="flex flex-col md:flex-row gap-4">
                   <div className="flex-1">
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
                       <Input
                         placeholder={t('tax.declarations.searchPlaceholder')}
                         value={filters.search}
@@ -840,10 +840,10 @@ const TaxPage: React.FC = () => {
                             {declaration.status}
                           </Badge>
                         </div>
-                        <p className="text-sm text-gray-600 mb-1">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-1">
                           {declaration.description}
                         </p>
-                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                        <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
                           <div className="flex items-center gap-1">
                             <CalendarIcon className="h-3 w-3" />
                             {t('tax.declarations.dueDate')}: {declaration.dueDate.toLocaleDateString('fr-FR')}
@@ -886,12 +886,12 @@ const TaxPage: React.FC = () => {
                     {declaration.amount && (
                       <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
                         <div>
-                          <p className="text-sm text-gray-600">{t('tax.declarations.declarationAmount')}</p>
-                          <p className="text-xl font-bold text-gray-900">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">{t('tax.declarations.declarationAmount')}</p>
+                          <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
                             {formatCurrency(declaration.amount)}
                           </p>
                         </div>
-                        <DollarSign className="h-6 w-6 text-gray-400" />
+                        <DollarSign className="h-6 w-6 text-gray-400 dark:text-gray-500" />
                       </div>
                     )}
 
@@ -905,7 +905,7 @@ const TaxPage: React.FC = () => {
 
                     {declaration.attachments && declaration.attachments.length > 0 && (
                       <div className="mt-4">
-                        <p className="text-sm font-medium text-gray-700 mb-2">{t('tax.declarations.attachments')}:</p>
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('tax.declarations.attachments')}:</p>
                         <div className="flex flex-wrap gap-2">
                           {declaration.attachments.map((attachment, index) => (
                             <Badge key={index} variant="outline" className="text-xs">
@@ -923,9 +923,9 @@ const TaxPage: React.FC = () => {
             {filteredDeclarations.length === 0 && (
               <Card>
                 <CardContent className="p-8 text-center">
-                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">{t('tax.declarations.noDeclarationsFound.title')}</h3>
-                  <p className="text-gray-600 mb-4">
+                  <FileText className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">{t('tax.declarations.noDeclarationsFound.title')}</h3>
+                  <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-4">
                     {t('tax.declarations.noDeclarationsFound.message')}
                   </p>
                   <Button onClick={() => setFilters({ search: '', type: '', status: '', due_date_from: '', due_date_to: '' })}>
@@ -971,14 +971,14 @@ const TaxPage: React.FC = () => {
                               {alert.severity}
                             </Badge>
                           </div>
-                          <p className="text-sm text-gray-600 mb-2">{alert.message}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-2">{alert.message}</p>
                           {alert.action_required && (
                             <p className="text-sm font-medium text-gray-800">
                               {t('tax.alerts.actionRequired')}: {alert.action_required}
                             </p>
                           )}
                           {alert.due_date && (
-                            <p className="text-xs text-gray-500 mt-2">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-2">
                               {t('tax.alerts.dueDate')}: {new Date(alert.due_date).toLocaleDateString('fr-FR')}
                             </p>
                           )}
@@ -1012,8 +1012,8 @@ const TaxPage: React.FC = () => {
               <Card>
                 <CardContent className="p-8 text-center">
                   <Shield className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">{t('tax.alerts.noActiveAlerts.title')}</h3>
-                  <p className="text-gray-600">
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">{t('tax.alerts.noActiveAlerts.title')}</h3>
+                  <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">
                     {t('tax.alerts.noActiveAlerts.message')}
                   </p>
                 </CardContent>
@@ -1038,7 +1038,7 @@ const TaxPage: React.FC = () => {
                             {obligation.is_active ? t('tax.obligations.status.active') : t('tax.obligations.status.inactive')}
                           </Badge>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
                           <div>
                             <span className="font-medium">{t('tax.obligations.frequency')}:</span> {obligation.frequency}
                           </div>
@@ -1108,7 +1108,7 @@ const TaxPage: React.FC = () => {
 
                     {obligation.notification_emails && obligation.notification_emails.length > 0 && (
                       <div className="mt-4">
-                        <p className="text-sm font-medium text-gray-700 mb-2">{t('tax.obligations.notificationEmails')}:</p>
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('tax.obligations.notificationEmails')}:</p>
                         <div className="flex flex-wrap gap-2">
                           {(obligation.notification_emails || []).map((email, index) => (
                             <Badge key={index} variant="outline" className="text-xs">
@@ -1129,7 +1129,7 @@ const TaxPage: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle>{t('tax.newDeclaration.title')}</CardTitle>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
                   {t('tax.newDeclaration.subtitle')}
                 </p>
               </CardHeader>

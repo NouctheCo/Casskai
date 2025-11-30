@@ -644,7 +644,7 @@ const GDPRPage = () => {
 
                 <h4 className="font-semibold text-sm mb-1">{safeT('gdpr.protectionTitle', 'Protection renforcée', 'Enhanced protection', 'Protección reforzada')}</h4>
 
-                <p className="text-xs text-gray-600 dark:text-gray-300">
+                <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-300">
 
                   {safeT('gdpr.protectionDesc', 'Vos données sont protégées par des standards stricts', 'Your data is protected by strict standards', 'Sus datos están protegidos por estándares estrictos')}
 
@@ -658,7 +658,7 @@ const GDPRPage = () => {
 
                 <h4 className="font-semibold text-sm mb-1">{safeT('gdpr.rightsTitle', 'Droits étendus', 'Extended rights', 'Derechos extendidos')}</h4>
 
-                <p className="text-xs text-gray-600 dark:text-gray-300">
+                <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-300">
 
                   {safeT('gdpr.rightsDesc', '6 droits fondamentaux à votre disposition', '6 fundamental rights at your disposal', '6 derechos fundamentales a su disposición')}
 
@@ -672,7 +672,7 @@ const GDPRPage = () => {
 
                 <h4 className="font-semibold text-sm mb-1">{safeT('gdpr.europeTitle', 'Norme européenne', 'European standard', 'Norma europea')}</h4>
 
-                <p className="text-xs text-gray-600 dark:text-gray-300">
+                <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-300">
 
                   {safeT('gdpr.europeDesc', 'Applicable dans toute l\'Union Européenne', 'Applicable throughout the European Union', 'Aplicable en toda la Unión Europea')}
 
@@ -734,13 +734,13 @@ const GDPRPage = () => {
 
                     <div>
 
-                      <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300 mb-1">
 
                         Données collectées :
 
                       </h4>
 
-                      <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                      <ul className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 space-y-1">
 
                         {type.data.map((item, idx) => (
 
@@ -760,9 +760,9 @@ const GDPRPage = () => {
 
                     
 
-                    <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                    <div className="pt-2 border-t border-gray-200 dark:border-gray-600 dark:border-gray-700">
 
-                      <div className="text-xs text-gray-500 space-y-1">
+                      <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
 
                         <p><strong>Conservation :</strong> {type.retention}</p>
 
@@ -840,7 +840,7 @@ const GDPRPage = () => {
 
                   
 
-                  <p className="text-xs text-gray-600 dark:text-gray-300 mb-3">
+                  <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-3">
 
                     {right.description}
 
@@ -868,7 +868,7 @@ const GDPRPage = () => {
 
                   <div className="flex items-center justify-between text-xs">
 
-                    <span className="text-gray-500">
+                    <span className="text-gray-500 dark:text-gray-400">
 
                       <Clock className="w-3 h-3 inline mr-1" />
 
@@ -1170,7 +1170,7 @@ const GDPRPage = () => {
 
                   <p className="font-semibold mb-1">Information importante :</p>
 
-                  <ul className="space-y-1 text-gray-600 dark:text-gray-300">
+                  <ul className="space-y-1 text-gray-600 dark:text-gray-400 dark:text-gray-300">
 
                     <li>• Nous vous répondrons sous 72 heures maximum</li>
 
@@ -1290,7 +1290,7 @@ const GDPRPage = () => {
 
                   <p className="font-semibold mb-1">Droit de réclamation :</p>
 
-                  <p className="text-gray-600 dark:text-gray-300">
+                  <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300">
 
                     Si vous estimez que nous ne respectons pas vos droits, 
 
@@ -1448,7 +1448,7 @@ const GDPRPage = () => {
 
                   <div className={`font-semibold ${cert.color}`}>{cert.label}</div>
 
-                  <div className="text-xs text-gray-600 dark:text-gray-300">{cert.desc}</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-300">{cert.desc}</div>
 
                 </div>
 
@@ -1464,11 +1464,11 @@ const GDPRPage = () => {
 
         {/* Footer légal */}
 
-        <div className="text-center py-8 border-t border-gray-200 dark:border-gray-700">
+        <div className="text-center py-8 border-t border-gray-200 dark:border-gray-600 dark:border-gray-700">
 
           <h3 className="text-lg font-semibold mb-4">Responsable du traitement</h3>
 
-          <div className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+          <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300 space-y-1">
 
             <p><strong>Noutche Conseil SAS</strong></p>
 
@@ -1478,7 +1478,7 @@ const GDPRPage = () => {
 
             <p>Société par Actions Simplifiée Unipersonnelle au capital de 1 500,00 €</p>
 
-            <p className="mt-4 text-xs text-gray-500">
+            <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">
 
               Cette page respecte les exigences de transparence du RGPD (articles 12, 13 et 14)
 

@@ -722,7 +722,7 @@ const PrivacyPolicyPage = () => {
 
                 </p>
 
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 mt-3">
 
                   En cas de litige, vous pouvez introduire une réclamation auprès de la <strong>CNIL</strong> 
 
@@ -816,7 +816,7 @@ const PrivacyPolicyPage = () => {
 
               </ul>
 
-              <p className="text-sm text-gray-600 dark:text-gray-300">
+              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300">
 
                 Vous pouvez gérer vos préférences cookies dans les paramètres de votre compte 
 
@@ -940,7 +940,7 @@ const PrivacyPolicyPage = () => {
 
               <CardTitle className="flex items-center">
 
-                <FileText className="w-6 h-6 mr-3 text-gray-600" />
+                <FileText className="w-6 h-6 mr-3 text-gray-600 dark:text-gray-400" />
 
                 Modifications de cette politique
 
@@ -984,9 +984,9 @@ const PrivacyPolicyPage = () => {
 
           {/* Footer légal */}
 
-          <div className="text-center py-8 border-t border-gray-200 dark:border-gray-700">
+          <div className="text-center py-8 border-t border-gray-200 dark:border-gray-600 dark:border-gray-700">
 
-            <p className="text-sm text-gray-600 dark:text-gray-300">
+            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300">
 
               Cette politique de confidentialité est régie par le droit français. 
 

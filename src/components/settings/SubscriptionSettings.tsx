@@ -95,7 +95,7 @@ const SubscriptionSettings: React.FC = () => {
                   {getPlanIcon(currentPlan || '')}
                   <div>
                     <h3 className="font-semibold">{('displayName' in currentPlanInfo ? (currentPlanInfo as any).displayName : currentPlanInfo.name)}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">
                       {isTrialUser ? `${trialDaysRemaining} jours d'essai restants` : 'Plan actuel'}
                     </p>
                   </div>
@@ -104,7 +104,7 @@ const SubscriptionSettings: React.FC = () => {
                   <p className="text-2xl font-bold">
                     {isTrialUser ? 'Gratuit' : formatPrice(currentPlanInfo.price)}
                   </p>
-                  <p className="text-sm text-gray-500">{isTrialUser ? 'Essai' : '/ mois'}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{isTrialUser ? 'Essai' : '/ mois'}</p>
                 </div>
               </div>
 
@@ -192,12 +192,12 @@ const SubscriptionSettings: React.FC = () => {
                       {getPlanIcon(plan.id)}
                     </div>
                     <h3 className="text-xl font-bold">{('displayName' in plan ? (plan as any).displayName : plan.name)}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 mb-3">
                       {plan.description}
                     </p>
                     <div className="text-3xl font-bold">
                       {formatPrice(plan.price)}
-                      <span className="text-sm font-normal text-gray-500">
+                      <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
                         / {plan.interval === 'year' ? 'an' : 'mois'}
                       </span>
                     </div>
@@ -273,7 +273,7 @@ const SubscriptionSettings: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>Aucune facture disponible</p>
             <p className="text-sm">Les factures apparaîtront ici après votre premier paiement</p>

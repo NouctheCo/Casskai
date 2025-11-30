@@ -414,7 +414,7 @@ const PaymentFormDialog = ({ open, onClose, onSave }) => {
 
           />
 
-          {formData.clientId && <p className="text-xs text-gray-500">Client sélectionné</p>}
+          {formData.clientId && <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">Client sélectionné</p>}
 
           
 
@@ -720,7 +720,7 @@ const PaymentPreviewDialog = ({ open, onClose, payment }) => {
 
             <div>
 
-              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Référence</Label>
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Référence</Label>
 
               <p className="text-lg font-semibold">{payment.reference}</p>
 
@@ -728,7 +728,7 @@ const PaymentPreviewDialog = ({ open, onClose, payment }) => {
 
             <div>
 
-              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Statut</Label>
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Statut</Label>
 
               <div className="mt-1">{getStatusBadge(payment.status)}</div>
 
@@ -746,7 +746,7 @@ const PaymentPreviewDialog = ({ open, onClose, payment }) => {
 
               <div>
 
-                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Client</Label>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Client</Label>
 
                 <p className="text-base font-medium">{payment.clientName}</p>
 
@@ -756,7 +756,7 @@ const PaymentPreviewDialog = ({ open, onClose, payment }) => {
 
               <div>
 
-                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Numéro de facture</Label>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Numéro de facture</Label>
 
                 <p className="text-base">{payment.invoiceNumber || 'N/A'}</p>
 
@@ -766,7 +766,7 @@ const PaymentPreviewDialog = ({ open, onClose, payment }) => {
 
               <div>
 
-                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Date</Label>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Date</Label>
 
                 <p className="text-base">{new Date(payment.date).toLocaleDateString('fr-FR')}</p>
 
@@ -780,7 +780,7 @@ const PaymentPreviewDialog = ({ open, onClose, payment }) => {
 
               <div>
 
-                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Montant</Label>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Montant</Label>
 
                 <p className={`text-2xl font-bold ${payment.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
 
@@ -794,7 +794,7 @@ const PaymentPreviewDialog = ({ open, onClose, payment }) => {
 
               <div>
 
-                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Méthode de paiement</Label>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Méthode de paiement</Label>
 
                 <div className="mt-1">{getMethodBadge(payment.method)}</div>
 
@@ -804,7 +804,7 @@ const PaymentPreviewDialog = ({ open, onClose, payment }) => {
 
               <div>
 
-                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Type</Label>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Type</Label>
 
                 <p className="text-base flex items-center space-x-2">
 
@@ -828,7 +828,7 @@ const PaymentPreviewDialog = ({ open, onClose, payment }) => {
 
             <div>
 
-              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Description</Label>
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Description</Label>
 
               <p className="text-base mt-1 p-3 bg-gray-50 dark:bg-gray-800 rounded-md">{payment.description}</p>
 
@@ -842,7 +842,7 @@ const PaymentPreviewDialog = ({ open, onClose, payment }) => {
 
           <div className="border-t pt-4">
 
-            <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Historique</Label>
+            <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Historique</Label>
 
             <div className="mt-2 space-y-2">
 
@@ -1108,7 +1108,7 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total paiements</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Total paiements</p>
 
                 <p className="text-2xl font-bold">{summary.totalPayments}</p>
 
@@ -1132,7 +1132,7 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Encaissements</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Encaissements</p>
 
                 <p className="text-xl font-bold text-green-600">{summary.totalIncome.toFixed(2)} €</p>
 
@@ -1156,7 +1156,7 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Décaissements</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Décaissements</p>
 
                 <p className="text-xl font-bold text-red-600">{summary.totalExpenses.toFixed(2)} €</p>
 
@@ -1180,7 +1180,7 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Résultat net</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Résultat net</p>
 
                 <p className={`text-xl font-bold ${netIncome >= 0 ? 'text-green-600' : 'text-red-600'}`}>
 
@@ -1208,7 +1208,7 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">En attente</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">En attente</p>
 
                 <p className="text-2xl font-bold">{summary.pendingPayments}</p>
 
@@ -1310,7 +1310,7 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
 
               <div className="relative">
 
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
 
                 <Input
 
@@ -1442,8 +1442,8 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
                 ) : filteredPayments.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-8">
-                      <CreditCard className="w-12 h-12 mx-auto text-gray-400 mb-2" />
-                      <p className="text-gray-600 dark:text-gray-400">
+                      <CreditCard className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 mb-2" />
+                      <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                         {searchTerm || statusFilter !== 'all' || typeFilter !== 'all'
                           ? 'Aucun paiement trouvé'
                           : 'Aucun paiement. Commencez par en enregistrer un !'}

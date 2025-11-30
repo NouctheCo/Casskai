@@ -36,7 +36,7 @@ function SubscriptionStatus({ plan }: { plan: ReturnType<typeof useEnterprisePla
         {/* Indicateurs de quota */}
         {plan.quotas && Object.keys(plan.quotas).length > 0 && (
           <div className="space-y-3">
-            <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 dark:text-white">
               Utilisation des ressources
             </h4>
             {Object.keys(plan.quotas).map((quotaKey) => (
@@ -85,7 +85,7 @@ function AvailableFeatures({ capabilities }: { capabilities: Set<PlanCapability>
             </div>
           ))}
           {capabilities.size === 0 && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 col-span-3">
+            <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-400 col-span-3">
               Aucune fonctionnalité premium activée
             </p>
           )}

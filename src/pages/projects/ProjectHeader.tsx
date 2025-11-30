@@ -32,13 +32,13 @@ export function ProjectHeader({ onNewProject, itemVariants }: ProjectHeaderProps
     >
       <div className="space-y-2">
         <div className="flex items-center space-x-2">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
             {t('projects')}
           </h1>
           <Sparkles className="h-6 w-6 text-yellow-500" />
         </div>
         <div className="flex items-center space-x-2">
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400">
             {t('projectspage.suivez_vos_projets_internes_et_clients', { defaultValue: 'Suivez vos projets internes et clients.' })}
           </p>
           <Badge variant="secondary" className="text-xs">

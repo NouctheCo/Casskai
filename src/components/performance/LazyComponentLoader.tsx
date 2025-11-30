@@ -44,7 +44,7 @@ const LoadingSkeleton = ({ delay = 200 }: { delay?: number }) => {
         >
           <Loader2 className="h-8 w-8 text-blue-500" />
         </motion.div>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
           Chargement du composant...
         </p>
         <div className="flex space-x-1">
@@ -139,7 +139,7 @@ class LazyErrorBoundary extends React.Component<
             </Button>
           )}
           {this.state.retryCount >= 3 && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+            <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mt-2">
               Nombre maximum de tentatives atteint
             </p>
           )}
@@ -307,7 +307,7 @@ export function LazySectionLoader<T = {}>({
           className="flex items-center justify-center h-full bg-gray-50 dark:bg-gray-800 rounded-lg animate-pulse"
           style={{ height }}
         >
-          <div className="text-gray-400 dark:text-gray-500 text-sm">
+          <div className="text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 text-sm">
             Scroll pour charger...
           </div>
         </div>

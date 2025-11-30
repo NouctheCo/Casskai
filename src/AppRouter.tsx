@@ -65,22 +65,23 @@ const LazyTutorialsPage = React.lazy(() => import('@/pages/public/TutorialsPage'
 const LazyMentionsLegalesPage = React.lazy(() => import('@/pages/MentionsLegalesPage'));
 
 const AppRouter: React.FC = () => {
-  const { isAuthenticated, loading, onboardingCompleted, isCheckingOnboarding } = useAuth();
+  const { isAuthenticated, loading, onboardingCompleted, isCheckingOnboarding, currentCompany } = useAuth();
 
   // Memoize the routing logic to prevent infinite re-renders
   const routingState = useMemo(() => {
     // Show loading during authentication checks
     if (loading || isCheckingOnboarding) return 'loading';
-    
+
     // If not authenticated, show public routes
     if (!isAuthenticated) return 'unauthenticated';
-    
+
     // If authenticated but no companies (needs onboarding)
-    if (isAuthenticated && !onboardingCompleted) return 'needs-onboarding';
-    
+    // Ne rediriger que si VRAIMENT pas d'entreprise (pas juste onboardingCompleted false)
+    if (isAuthenticated && !onboardingCompleted && !currentCompany) return 'needs-onboarding';
+
     // Fully authenticated with company
     return 'authenticated';
-  }, [loading, isAuthenticated, onboardingCompleted, isCheckingOnboarding]);
+  }, [loading, isAuthenticated, onboardingCompleted, isCheckingOnboarding, currentCompany]);
 
   if (routingState === 'loading') {
     const loadingMessage = isCheckingOnboarding 

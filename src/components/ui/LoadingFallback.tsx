@@ -128,7 +128,7 @@ export const LoadingFallback: React.FC<LoadingFallbackProps> = ({ message }) => 
 
           <motion.p
 
-            className="text-gray-600 dark:text-gray-400 text-sm mt-4 text-center max-w-xs"
+            className="text-gray-600 dark:text-gray-400 dark:text-gray-400 text-sm mt-4 text-center max-w-xs"
 
             initial={{ opacity: 0, y: 10 }}
 
@@ -150,7 +150,7 @@ export const LoadingFallback: React.FC<LoadingFallbackProps> = ({ message }) => 
 
         <motion.p
 
-          className="text-gray-500 dark:text-gray-500 text-xs mt-2 text-center"
+          className="text-gray-500 dark:text-gray-500 dark:text-gray-400 text-xs mt-2 text-center"
 
           initial={{ opacity: 0 }}
 

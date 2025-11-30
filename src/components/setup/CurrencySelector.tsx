@@ -26,7 +26,7 @@ export function CurrencySelector({ value, onValueChange, showAfricanOnly = false
             <div className="flex items-center gap-2">
               <span className="font-mono text-sm">{currency.symbol}</span>
               <span>{currency.name}</span>
-              <span className="text-gray-500">({currency.code})</span>
+              <span className="text-gray-500 dark:text-gray-400">({currency.code})</span>
             </div>
           </SelectItem>
         ))}

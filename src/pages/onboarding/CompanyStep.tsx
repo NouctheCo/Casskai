@@ -196,7 +196,7 @@ const GeneralInfoSection: React.FC<{
 
       <Building className="w-5 h-5 text-orange-600" />
 
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white">
 
         Informations générales
 
@@ -396,7 +396,7 @@ const AddressSection: React.FC<{
 
       <MapPin className="w-5 h-5 text-green-600" />
 
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white">
 
         Coordonnées
 
@@ -568,7 +568,7 @@ const ContactSection: React.FC<{
 
       <Phone className="w-5 h-5 text-purple-600" />
 
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white">
 
         Contact
 
@@ -590,7 +590,7 @@ const ContactSection: React.FC<{
 
         <div className="relative">
 
-          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
 
           <Input
 
@@ -636,7 +636,7 @@ const ContactSection: React.FC<{
 
         <div className="relative">
 
-          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
 
           <Input
 
@@ -672,7 +672,7 @@ const ContactSection: React.FC<{
 
       <div className="relative">
 
-        <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+        <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
 
         <Input
 
@@ -730,7 +730,7 @@ const CeoSection: React.FC<{
 
       <Users className="w-5 h-5 text-blue-600" />
 
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white">
 
         Dirigeant
 
@@ -884,7 +884,7 @@ const FiscalYearSection: React.FC<{
 
       <Calendar className="w-5 h-5 text-indigo-600" />
 
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white">
 
         Exercice fiscal
 
@@ -1160,7 +1160,7 @@ const renderHeader = (t: (key: string, options?: { defaultValue?: string }) => s
 
     </CardTitle>
 
-    <CardDescription className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+    <CardDescription className="text-lg text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 max-w-2xl mx-auto">
 
       {t('onboarding.company.subtitle', {
 
@@ -1358,7 +1358,7 @@ export default function CompanyStep() {
 
               <Loader2 className="w-6 h-6 animate-spin text-orange-600 mr-2" />
 
-              <span className="text-gray-600 dark:text-gray-400">Chargement des référentiels...</span>
+              <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Chargement des référentiels...</span>
 
             </div>
 

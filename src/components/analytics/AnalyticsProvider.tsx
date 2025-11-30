@@ -470,7 +470,7 @@ const AnalyticsSettingsModal: React.FC<{
 
               ) : (
 
-                <EyeOff className="w-4 h-4 text-gray-400" />
+                <EyeOff className="w-4 h-4 text-gray-400 dark:text-gray-500" />
 
               )}
 
@@ -490,7 +490,7 @@ const AnalyticsSettingsModal: React.FC<{
 
           
 
-          <div className="text-sm text-gray-600 space-y-2">
+          <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 space-y-2">
 
             <p>
 

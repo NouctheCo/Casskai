@@ -70,7 +70,7 @@ export const AnomalyDetectionWidget: React.FC<AnomalyDetectionWidgetProps> = ({
       case 'low':
         return <AlertTriangle className="w-4 h-4 text-blue-500" />;
       default:
-        return <AlertTriangle className="w-4 h-4 text-gray-500" />;
+        return <AlertTriangle className="w-4 h-4 text-gray-500 dark:text-gray-400" />;
     }
   };
 
@@ -152,7 +152,7 @@ export const AnomalyDetectionWidget: React.FC<AnomalyDetectionWidgetProps> = ({
         </div>
 
         {/* Statistiques rapides */}
-        <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+        <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">
           <div className="flex items-center space-x-1">
             <div className="w-2 h-2 bg-red-500 rounded-full" />
             <span>{stats.critical} critiques</span>
@@ -174,7 +174,7 @@ export const AnomalyDetectionWidget: React.FC<AnomalyDetectionWidgetProps> = ({
             <Shield className="w-12 h-12 text-green-500 mx-auto" />
             <div>
               <p className="text-lg font-medium text-green-600">Aucune anomalie détectée</p>
-              <p className="text-sm text-gray-500">Vos transactions semblent normales</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Vos transactions semblent normales</p>
             </div>
           </div>
         ) : (
@@ -200,7 +200,7 @@ export const AnomalyDetectionWidget: React.FC<AnomalyDetectionWidgetProps> = ({
                       
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center space-x-2">
-                          <p className="font-medium text-gray-900 dark:text-white">
+                          <p className="font-medium text-gray-900 dark:text-gray-100 dark:text-white">
                             {anomaly.transaction.description}
                           </p>
                           <Badge className={cn("text-xs border", getSeverityColor(anomaly.severity))}>
@@ -213,7 +213,7 @@ export const AnomalyDetectionWidget: React.FC<AnomalyDetectionWidgetProps> = ({
                           )}
                         </div>
 
-                        <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+                        <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">
                           <div className="flex items-center space-x-1">
                             <DollarSign className="w-3 h-3" />
                             <span>{formatCurrency(anomaly.transaction.amount)}</span>
@@ -236,7 +236,7 @@ export const AnomalyDetectionWidget: React.FC<AnomalyDetectionWidgetProps> = ({
 
                         {/* Score d'anomalie */}
                         <div className="flex items-center space-x-2">
-                          <span className="text-xs text-gray-500">Score d'anomalie:</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">Score d'anomalie:</span>
                           <div className="flex-1 max-w-32">
                             <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                               <div 
@@ -278,18 +278,18 @@ export const AnomalyDetectionWidget: React.FC<AnomalyDetectionWidgetProps> = ({
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="border-t border-gray-200 dark:border-gray-700 pt-3 space-y-3"
+                        className="border-t border-gray-200 dark:border-gray-600 dark:border-gray-700 pt-3 space-y-3"
                       >
                         {/* Raisons de l'anomalie */}
                         <div>
-                          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300 mb-2">
                             Raisons détectées:
                           </h4>
                           <div className="space-y-1">
                             {anomaly.reasons.map((reason, reasonIndex) => (
                               <div 
                                 key={reasonIndex}
-                                className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400"
+                                className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400"
                               >
                                 <div className="w-1 h-1 bg-orange-400 rounded-full" />
                                 <span>{reason}</span>
@@ -301,14 +301,14 @@ export const AnomalyDetectionWidget: React.FC<AnomalyDetectionWidgetProps> = ({
                         {/* Informations supplémentaires */}
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
-                            <span className="text-gray-500">Détecté le:</span>
+                            <span className="text-gray-500 dark:text-gray-400">Détecté le:</span>
                             <p className="font-mono">
                               {new Date(anomaly.timestamp).toLocaleString('fr-FR')}
                             </p>
                           </div>
                           {anomaly.transaction.category && (
                             <div>
-                              <span className="text-gray-500">Catégorie:</span>
+                              <span className="text-gray-500 dark:text-gray-400">Catégorie:</span>
                               <p>{anomaly.transaction.category}</p>
                             </div>
                           )}

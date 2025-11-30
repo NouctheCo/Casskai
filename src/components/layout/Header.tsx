@@ -169,7 +169,7 @@ export function Header({
 
               >
 
-                <span className="text-sm text-gray-700 dark:text-gray-200 font-semibold">
+                <span className="text-sm text-gray-700 dark:text-gray-300 dark:text-gray-200 font-semibold">
 
                   {displayCompany.name}
 
@@ -200,7 +200,7 @@ export function Header({
 
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
 
-              <Search className="h-4 w-4 text-gray-400" />
+              <Search className="h-4 w-4 text-gray-400 dark:text-gray-500" />
 
             </div>
 
@@ -220,7 +220,7 @@ export function Header({
 
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
 
-              <kbd className="hidden sm:inline-block px-2 py-1 text-xs font-medium text-gray-500 bg-gray-100 dark:bg-gray-700 dark:text-gray-400 rounded border border-gray-200 dark:border-gray-600">
+              <kbd className="hidden sm:inline-block px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 dark:text-gray-400 dark:text-gray-500 rounded border border-gray-200 dark:border-gray-600 dark:border-gray-600">
 
                 ⌘K
 
@@ -426,7 +426,7 @@ export function Header({
 
                   </div>
 
-                  <ChevronDown className="h-4 w-4 text-gray-500" />
+                  <ChevronDown className="h-4 w-4 text-gray-500 dark:text-gray-400 dark:text-gray-500" />
 
                 </Button>
 
@@ -448,13 +448,13 @@ export function Header({
 
                 <div className="px-3 py-2 border-b border-white/20 dark:border-gray-800/20">
 
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 dark:text-white">
 
                     {user?.user_metadata?.name || user?.email?.split('@')[0] || t('header.guestUser', { defaultValue: 'Utilisateur' })}
 
                   </p>
 
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                     {user?.email || t('header.noEmail', { defaultValue: 'pas d\'email' })}
 

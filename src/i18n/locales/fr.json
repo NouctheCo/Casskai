@@ -3071,23 +3071,6 @@
     "realtime": "En temps réel",
     "newDeclaration": "Nouvelle déclaration",
     "export": "Exporter",
-    "newDeclaration": {
-      "title": "Créer une Nouvelle Déclaration",
-      "description": "Ajoutez une nouvelle déclaration fiscale",
-      "type": "Type de déclaration *",
-      "selectType": "Sélectionner un type",
-      "name": "Nom *",
-      "namePlaceholder": "Ex: TVA T1 2024",
-      "periodStart": "Début de période *",
-      "periodEnd": "Fin de période *",
-      "dueDate": "Date d'échéance *",
-      "amount": "Montant (€)",
-      "descriptionField": "Description",
-      "descriptionPlaceholder": "Notes ou détails supplémentaires",
-      "cancel": "Annuler",
-      "creating": "Création...",
-      "create": "Créer la Déclaration"
-    },
     "tabs": {
       "dashboard": "Tableau de Bord",
       "compliance": "Conformité Fiscale",
@@ -3749,7 +3732,6 @@
     "realtime": "Temps réel",
     "loading": "Chargement des données fiscales...",
     "export": "Exporter CSV",
-    "newDeclaration": "Nouvelle déclaration",
     "tabs": {
       "dashboard": "Tableau de bord",
       "compliance": "Conformité",
@@ -3824,34 +3806,6 @@
       "requiresApproval": "Nécessite approbation",
       "emailNotifications": "Notifications par email",
       "notificationEmails": "Emails de notification"
-    },
-    "newDeclaration": {
-      "title": "Nouvelle déclaration fiscale",
-      "subtitle": "Créez une nouvelle déclaration fiscale pour votre entreprise",
-      "form": {
-        "type": "Type de déclaration",
-        "selectType": "Sélectionner un type",
-        "types": {
-          "tva": "TVA - Taxe sur la valeur ajoutée",
-          "is": "IS - Impôt sur les sociétés",
-          "liasse": "Liasse fiscale",
-          "ir": "IR - Impôt sur le revenu",
-          "cfe": "CFE - Cotisation foncière des entreprises",
-          "cvae": "CVAE - Cotisation sur la valeur ajoutée"
-        },
-        "name": "Nom de la déclaration",
-        "namePlaceholder": "Ex: TVA Q1 2025",
-        "periodStart": "Début de période",
-        "periodEnd": "Fin de période",
-        "dueDate": "Date d'échéance",
-        "amount": "Montant (optionnel)",
-        "amountPlaceholder": "0.00",
-        "description": "Description (optionnel)",
-        "descriptionPlaceholder": "Notes ou informations complémentaires",
-        "cancel": "Annuler",
-        "create": "Créer la déclaration",
-        "creating": "Création en cours..."
-      }
     },
     "errors": {
       "loadDashboardData": "Erreur lors du chargement du tableau de bord",

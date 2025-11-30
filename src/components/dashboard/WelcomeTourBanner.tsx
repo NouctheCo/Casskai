@@ -168,7 +168,7 @@ export const WelcomeTourBanner: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleStartTour}
-                  className="flex items-center gap-2 bg-white text-blue-600 px-4 py-2 rounded-md font-medium hover:bg-blue-50 transition-colors"
+                  className="flex items-center gap-2 bg-white dark:bg-gray-800 text-blue-600 px-4 py-2 rounded-md font-medium hover:bg-blue-50 transition-colors"
                 >
                   <PlayCircle size={16} />
                   Commencer la visite guidée
@@ -216,7 +216,7 @@ export const WelcomeTourBanner: React.FC = () => {
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPercent}%` }}
                 transition={{ duration: 0.5 }}
-                className="h-full bg-white rounded-full"
+                className="h-full bg-white dark:bg-gray-800 rounded-full"
               />
             </div>
           </div>

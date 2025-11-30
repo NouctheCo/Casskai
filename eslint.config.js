@@ -22,6 +22,18 @@ export default [
       'playwright-report/**/*',
       // Fichier UI orphelin avec imports manquants
       'src/components/accounting/CreateAccountDialog.tsx',
+      // Scripts de migration et utilitaires à la racine
+      '*.js',
+      '*.cjs',
+      '*.mjs',
+      '!eslint.config.js',
+      '!vite.config.ts',
+      '!vitest.config.ts',
+      '!playwright.config.ts',
+      '!tailwind.config.cjs',
+      '!postcss.config.js',
+      '!commitlint.config.js',
+      '!lintstagedrc.js',
     ]
   },
 

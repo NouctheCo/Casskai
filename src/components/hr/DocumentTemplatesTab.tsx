@@ -151,7 +151,7 @@ export function DocumentTemplatesTab({ companyId }: DocumentTemplatesTabProps) {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement des templates...</p>
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Chargement des templates...</p>
         </div>
       </div>
     );
@@ -165,7 +165,7 @@ export function DocumentTemplatesTab({ companyId }: DocumentTemplatesTabProps) {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Templates</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Total Templates</p>
                 <p className="text-2xl font-bold">{stats.total}</p>
               </div>
               <FileText className="w-8 h-8 text-blue-600" />
@@ -177,7 +177,7 @@ export function DocumentTemplatesTab({ companyId }: DocumentTemplatesTabProps) {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Actifs</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Actifs</p>
                 <p className="text-2xl font-bold text-green-600">{stats.active}</p>
               </div>
               <CheckCircle className="w-8 h-8 text-green-600" />
@@ -189,7 +189,7 @@ export function DocumentTemplatesTab({ companyId }: DocumentTemplatesTabProps) {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Contrats</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Contrats</p>
                 <p className="text-2xl font-bold text-blue-600">{stats.contracts}</p>
               </div>
               <FileSignature className="w-8 h-8 text-blue-600" />
@@ -201,7 +201,7 @@ export function DocumentTemplatesTab({ companyId }: DocumentTemplatesTabProps) {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Certificats</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Certificats</p>
                 <p className="text-2xl font-bold text-green-600">{stats.certificates}</p>
               </div>
               <CheckCircle className="w-8 h-8 text-green-600" />
@@ -233,7 +233,7 @@ export function DocumentTemplatesTab({ companyId }: DocumentTemplatesTabProps) {
         <CardContent>
           <div className="flex gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
               <Input
                 placeholder="Rechercher un template..."
                 value={searchTerm}
@@ -307,7 +307,7 @@ export function DocumentTemplatesTab({ companyId }: DocumentTemplatesTabProps) {
 
                 {/* Status */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">Statut:</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Statut:</span>
                   {template.is_active ? (
                     <Badge className="bg-green-100 text-green-800">
                       <CheckCircle className="w-3 h-3 mr-1" />
@@ -323,7 +323,7 @@ export function DocumentTemplatesTab({ companyId }: DocumentTemplatesTabProps) {
 
                 {/* Variables */}
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-1">
                     Variables: {template.variables.length}
                   </p>
                   <div className="flex flex-wrap gap-1">
@@ -397,9 +397,9 @@ export function DocumentTemplatesTab({ companyId }: DocumentTemplatesTabProps) {
       {filteredTemplates.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center">
-            <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">Aucun template</h3>
-            <p className="text-gray-600 mb-4">
+            <FileText className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Aucun template</h3>
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-4">
               Commencez par créer un template ou importer les templates par défaut
             </p>
             <div className="flex gap-2 justify-center">

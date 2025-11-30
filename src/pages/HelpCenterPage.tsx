@@ -260,13 +260,13 @@ const HelpCenterPage = () => {
             {/* Barre de recherche */}
             <div className="max-w-2xl mx-auto">
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
                 <Input
                   type="text"
                   placeholder="Rechercher dans l'aide..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 pr-4 py-4 text-lg bg-white/10 border-white/20 text-white placeholder-white/70 rounded-xl focus:bg-white focus:text-gray-900 transition-colors"
+                  className="pl-12 pr-4 py-4 text-lg bg-white/10 border-white/20 text-white placeholder-white/70 rounded-xl focus:bg-white dark:bg-gray-800 focus:text-gray-900 dark:text-gray-100 transition-colors"
                 />
               </div>
             </div>
@@ -275,7 +275,7 @@ const HelpCenterPage = () => {
       </div>
 
       {/* Statistiques d'aide */}
-      <div className="py-12 bg-white dark:bg-gray-900">
+      <div className="py-12 bg-white dark:bg-gray-800 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {[
@@ -292,10 +292,10 @@ const HelpCenterPage = () => {
                 className="text-center p-6 bg-gray-50 dark:bg-gray-800 rounded-xl"
               >
                 <stat.icon className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                <div className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
                   {stat.number}
                 </div>
-                <div className="text-gray-600 dark:text-gray-300">
+                <div className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">
                   {stat.label}
                 </div>
               </motion.div>
@@ -308,10 +308,10 @@ const HelpCenterPage = () => {
       <div className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-6">
               Parcourir par catégorie
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 max-w-3xl mx-auto">
               Trouvez l'aide dont vous avez besoin en explorant nos catégories organisées.
             </p>
           </div>
@@ -341,20 +341,20 @@ const HelpCenterPage = () => {
                     <CardTitle className="text-xl font-bold group-hover:text-blue-600 transition-colors">
                       {category.title}
                     </CardTitle>
-                    <p className="text-gray-600 dark:text-gray-300">
+                    <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">
                       {category.description}
                     </p>
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center justify-between mb-4">
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
                         {category.articles} articles
                       </span>
-                      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors" />
+                      <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 transition-colors" />
                     </div>
                     <ul className="space-y-2">
                       {category.topics.slice(0, 3).map((topic, idx) => (
-                        <li key={idx} className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 cursor-pointer">
+                        <li key={idx} className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 hover:text-blue-600 cursor-pointer">
                           • {topic}
                         </li>
                       ))}
@@ -368,14 +368,14 @@ const HelpCenterPage = () => {
       </div>
 
       {/* Articles populaires */}
-      <div className="py-16 bg-white dark:bg-gray-900">
+      <div className="py-16 bg-white dark:bg-gray-800 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <Badge className="mb-4 px-4 py-2 bg-yellow-100 text-yellow-800 border-yellow-200">
               <Star className="w-4 h-4 mr-2" />
               Populaires
             </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-6">
               Articles les plus consultés
             </h2>
           </div>
@@ -393,13 +393,13 @@ const HelpCenterPage = () => {
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors mb-2">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-white group-hover:text-blue-600 transition-colors mb-2">
                           {article.title}
                         </h3>
-                        <p className="text-gray-600 dark:text-gray-300 mb-4">
+                        <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 mb-4">
                           {article.description}
                         </p>
-                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                        <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
                           <div className="flex items-center">
                             <Clock className="w-4 h-4 mr-1" />
                             {article.readTime}
@@ -414,7 +414,7 @@ const HelpCenterPage = () => {
                           )}
                         </div>
                       </div>
-                      <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors ml-4 flex-shrink-0" />
+                      <ArrowRight className="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 transition-colors ml-4 flex-shrink-0" />
                     </div>
                   </CardContent>
                 </Card>
@@ -439,10 +439,10 @@ const HelpCenterPage = () => {
       <div className="py-16 bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-800 dark:to-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-6">
               Besoin d'aide personnalisée ?
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 max-w-3xl mx-auto">
               Notre équipe d'experts est là pour vous accompagner à chaque étape.
             </p>
           </div>
@@ -460,13 +460,13 @@ const HelpCenterPage = () => {
                     <div className={`w-16 h-16 ${option.color} rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform`}>
                       <option.icon className="w-8 h-8 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-3">
                       {option.title}
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4">
+                    <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 mb-4">
                       {option.description}
                     </p>
-                    <div className="text-sm text-gray-500 mb-6">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-6">
                       {option.availability}
                     </div>
                     <Button 
@@ -485,10 +485,10 @@ const HelpCenterPage = () => {
       </div>
 
       {/* Section ressources supplémentaires */}
-      <div className="py-16 bg-white dark:bg-gray-900">
+      <div className="py-16 bg-white dark:bg-gray-800 dark:bg-gray-900">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-6">
               Ressources supplémentaires
             </h2>
           </div>
@@ -498,7 +498,7 @@ const HelpCenterPage = () => {
               <CardContent className="p-6 text-center">
                 <Video className="w-12 h-12 text-blue-600 mx-auto mb-4" />
                 <h3 className="text-lg font-bold mb-3">Webinaires</h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 mb-4 text-sm">
                   Sessions de formation en direct sur les nouvelles fonctionnalités.
                 </p>
                 <Button 
@@ -517,7 +517,7 @@ const HelpCenterPage = () => {
               <CardContent className="p-6 text-center">
                 <Download className="w-12 h-12 text-green-600 mx-auto mb-4" />
                 <h3 className="text-lg font-bold mb-3">Guides PDF</h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 mb-4 text-sm">
                   Téléchargez nos guides détaillés pour une utilisation hors-ligne.
                 </p>
                 <Button 
@@ -536,7 +536,7 @@ const HelpCenterPage = () => {
               <CardContent className="p-6 text-center">
                 <Users className="w-12 h-12 text-purple-600 mx-auto mb-4" />
                 <h3 className="text-lg font-bold mb-3">Communauté</h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 mb-4 text-sm">
                   Échangez avec d'autres utilisateurs et partagez vos conseils.
                 </p>
                 <Button 
@@ -566,7 +566,7 @@ const HelpCenterPage = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               size="lg"
-              className="bg-white text-blue-600 hover:bg-gray-100"
+              className="bg-white dark:bg-gray-800 text-blue-600 hover:bg-gray-100"
               onClick={handleContactSupport}
             >
               <MessageCircle className="w-5 h-5 mr-2" />

@@ -150,7 +150,7 @@ export const RFACalculationsPanel: React.FC = () => {
         </CardHeader>
         <CardContent className="p-0">
           {contractsData.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">
               <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>Aucun contrat actif avec calcul RFA</p>
             </div>
@@ -215,14 +215,14 @@ const ContractRFARow: React.FC<{
             </button>
             <div>
               <div className="font-medium">{data.contract.name}</div>
-              <div className="text-sm text-gray-500">{data.contract.client_name}</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">{data.contract.client_name}</div>
             </div>
           </div>
 
           <div className="flex items-center gap-8">
             {/* Progression */}
             <div className="text-center">
-              <div className="text-xs text-gray-500 mb-1">Avancement</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-1">Avancement</div>
               <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-primary rounded-full transition-all"
@@ -234,13 +234,13 @@ const ContractRFARow: React.FC<{
 
             {/* CA Actuel */}
             <div className="text-center min-w-[100px]">
-              <div className="text-xs text-gray-500">CA Actuel</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">CA Actuel</div>
               <div className="font-semibold">{formatCurrency(data.currentRevenue)}</div>
             </div>
 
             {/* CA Projeté */}
             <div className="text-center min-w-[100px]">
-              <div className="text-xs text-gray-500">CA Projeté</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">CA Projeté</div>
               <div className="font-semibold text-purple-600">
                 {formatCurrency(data.projectedRevenue.endOfYear)}
               </div>
@@ -248,7 +248,7 @@ const ContractRFARow: React.FC<{
 
             {/* RFA Actuelle */}
             <div className="text-center min-w-[100px]">
-              <div className="text-xs text-gray-500">RFA à Date</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">RFA à Date</div>
               <div className="font-semibold text-green-600">
                 {formatCurrency(data.rfa.current)}
               </div>
@@ -256,7 +256,7 @@ const ContractRFARow: React.FC<{
 
             {/* RFA Projetée */}
             <div className="text-center min-w-[100px]">
-              <div className="text-xs text-gray-500">RFA Projetée</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">RFA Projetée</div>
               <div className="font-semibold text-orange-600">
                 {formatCurrency(data.rfa.projectedEndOfYear)}
               </div>
@@ -271,26 +271,26 @@ const ContractRFARow: React.FC<{
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Colonne 1 : Données actuelles */}
             <div className="space-y-3">
-              <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
+              <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-300 dark:text-gray-300 flex items-center gap-2">
                 <DollarSign className="h-4 w-4" />
                 Chiffre d'Affaires
               </h4>
 
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-3 space-y-2">
+              <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-lg p-3 space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">CA Facturé</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">CA Facturé</span>
                   <span className="font-medium">{formatCurrency(data.invoicedAmount)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">CA Encaissé</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">CA Encaissé</span>
                   <span className="font-medium">{formatCurrency(data.paidAmount)}</span>
                 </div>
                 <div className="border-t pt-2 flex justify-between">
-                  <span className="text-sm text-gray-500">Devis en attente</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Devis en attente</span>
                   <span className="font-medium">{formatCurrency(data.pendingQuotes.total)}</span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-400">
+                  <span className="text-gray-400 dark:text-gray-500">
                     ({data.pendingQuotes.count} devis × {formatPercent(data.pendingQuotes.conversionRate * 100)} conversion)
                   </span>
                   <span className="text-purple-600">
@@ -302,18 +302,18 @@ const ContractRFARow: React.FC<{
 
             {/* Colonne 2 : Projections */}
             <div className="space-y-3">
-              <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
+              <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-300 dark:text-gray-300 flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
                 Projections
               </h4>
 
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-3 space-y-2">
+              <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-lg p-3 space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Prorata temporis</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Prorata temporis</span>
                   <span className="font-medium">{formatCurrency(data.projectedRevenue.prorata)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">+ Devis pondérés</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">+ Devis pondérés</span>
                   <span className="font-medium">{formatCurrency(data.projectedRevenue.withQuotes)}</span>
                 </div>
                 <div className="border-t pt-2 flex justify-between">
@@ -333,15 +333,15 @@ const ContractRFARow: React.FC<{
 
             {/* Colonne 3 : Barème RFA */}
             <div className="space-y-3">
-              <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
+              <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-300 dark:text-gray-300 flex items-center gap-2">
                 <Calculator className="h-4 w-4" />
                 Calcul RFA
               </h4>
 
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-3">
+              <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-lg p-3">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="text-gray-500">
+                    <tr className="text-gray-500 dark:text-gray-400 dark:text-gray-500">
                       <th className="text-left pb-2">Tranche</th>
                       <th className="text-right pb-2">Taux</th>
                       <th className="text-right pb-2">RFA</th>
@@ -387,28 +387,28 @@ const ContractRFARow: React.FC<{
           <div className="mt-4 pt-4 border-t">
             <div className="flex items-center gap-4 text-sm flex-wrap">
               <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-gray-400" />
-                <span className="text-gray-500">Début:</span>
+                <Calendar className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Début:</span>
                 <span className="font-medium">
                   {data.contract.start_date.toLocaleDateString('fr-FR')}
                 </span>
               </div>
               <ArrowRight className="h-4 w-4 text-gray-300" />
               <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-gray-400" />
-                <span className="text-gray-500">Aujourd'hui:</span>
+                <Clock className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Aujourd'hui:</span>
                 <span className="font-medium">
                   {data.periodProgress.daysElapsed} jours écoulés
                 </span>
               </div>
               <ArrowRight className="h-4 w-4 text-gray-300" />
               <div className="flex items-center gap-2">
-                <Target className="h-4 w-4 text-gray-400" />
-                <span className="text-gray-500">Fin:</span>
+                <Target className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Fin:</span>
                 <span className="font-medium">
                   {data.contract.end_date.toLocaleDateString('fr-FR')}
                 </span>
-                <span className="text-gray-400">
+                <span className="text-gray-400 dark:text-gray-500">
                   ({data.periodProgress.totalDays - data.periodProgress.daysElapsed} jours restants)
                 </span>
               </div>

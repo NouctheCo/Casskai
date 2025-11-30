@@ -87,7 +87,7 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({
         />
       )}
       
-      <Card className="relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+      <Card className="relative bg-white dark:bg-gray-800 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 dark:border-gray-700">
         {children}
       </Card>
     </motion.div>
@@ -154,12 +154,12 @@ export const KPICard: React.FC<{
         transition={{ duration: 0.3 }}
       />
       
-      <Card className="relative bg-white dark:bg-gray-800 border-0 shadow-lg">
+      <Card className="relative bg-white dark:bg-gray-800 dark:bg-gray-800 border-0 shadow-lg">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div className="space-y-2">
               <motion.p 
-                className="text-sm font-medium text-gray-600 dark:text-gray-400"
+                className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-400"
                 animate={isHovered ? { x: 2 } : { x: 0 }}
                 transition={{ duration: 0.2 }}
               >
@@ -167,7 +167,7 @@ export const KPICard: React.FC<{
               </motion.p>
               
               <motion.div 
-                className="text-2xl font-bold text-gray-900 dark:text-white"
+                className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white"
                 animate={isHovered ? { scale: 1.05 } : { scale: 1 }}
                 transition={{ duration: 0.2 }}
               >

@@ -868,7 +868,7 @@ const UserManagementPage = () => {
 
         <div className="flex items-center gap-4">
 
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100 dark:text-gray-100">
 
             {t('userManagement.title', { defaultValue: 'Gestion des Utilisateurs' })}
 
@@ -968,7 +968,7 @@ const UserManagementPage = () => {
 
                   <div className="relative">
 
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
 
                     <Input
 
@@ -1108,7 +1108,7 @@ const UserManagementPage = () => {
 
                           </div>
 
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                             {user.email}
 
@@ -1130,7 +1130,7 @@ const UserManagementPage = () => {
 
                           <div className="font-medium">{user.department}</div>
 
-                          <div className="text-sm text-gray-500">{user.position}</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">{user.position}</div>
 
                         </div>
 
@@ -1154,7 +1154,7 @@ const UserManagementPage = () => {
 
                         ) : (
 
-                          <span className="text-gray-400">Jamais</span>
+                          <span className="text-gray-400 dark:text-gray-500">Jamais</span>
 
                         )}
 
@@ -1312,7 +1312,7 @@ const UserManagementPage = () => {
 
                     <CardContent>
 
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
 
                         <strong>Permissions:</strong>
 
@@ -1508,13 +1508,13 @@ const UserManagementPage = () => {
 
                       <div className="flex-1 min-w-0">
 
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
 
                           {user ? `${user.firstName} ${user.lastName}` : 'Utilisateur inconnu'}
 
                         </div>
 
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                           {activity.action} sur {activity.resource}
 
@@ -1530,7 +1530,7 @@ const UserManagementPage = () => {
 
                         </div>
 
-                        <div className="text-xs text-gray-400 mt-1">
+                        <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
 
                           {format(new Date(activity.timestamp), 'dd/MM/yyyy HH:mm', { locale: fr })}
 

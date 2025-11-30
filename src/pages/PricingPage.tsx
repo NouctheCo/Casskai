@@ -297,7 +297,7 @@ export default function PricingPage() {
 
           <h1 className="text-3xl font-bold">Abonnements et tarifs</h1>
 
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 mt-2">
 
             Choisissez le plan qui correspond à vos besoins
 
@@ -409,7 +409,7 @@ export default function PricingPage() {
 
                     }
 
-                    <span className="text-sm font-normal text-gray-500">
+                    <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
 
                       / mois{plan.interval === 'year' ? ' (facturé annuellement)' : ''}
 

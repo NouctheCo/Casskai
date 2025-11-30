@@ -521,7 +521,7 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
         ) : !accounts || accounts.length === 0 ? (
           <div className="text-center py-10">
             <ListTree className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">Aucun compte</h3>
+            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">Aucun compte</h3>
             <p className="mt-1 text-sm text-muted-foreground">
               Commencez par initialiser le plan comptable standard de votre pays
             </p>
@@ -583,7 +583,7 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="none">
-                                <span className="flex items-center text-gray-500">
+                                <span className="flex items-center text-gray-500 dark:text-gray-400">
                                   <Unlink className="w-3 h-3 mr-2" />
                                   Aucune catégorie
                                 </span>
@@ -591,7 +591,7 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
 
                               {Object.entries(categoriesByType).map(([type, cats]) => (
                                 <React.Fragment key={type}>
-                                  <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 uppercase">
+                                  <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
                                     {type === 'revenue' ? '💰 Revenus' : type === 'expense' ? '📉 Charges' : '🏗️ Investissements'}
                                   </div>
                                   {cats.map(cat => (
@@ -626,7 +626,7 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
           onClick={() => setShowAddAccountModal(false)}
         >
           <div
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-6 w-full max-w-md my-8 max-h-[85vh] overflow-y-auto"
+            className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-lg shadow-2xl p-6 w-full max-w-md my-8 max-h-[85vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold mb-4">Nouveau compte</h3>

@@ -140,7 +140,7 @@ export const NewEmployeeModal: React.FC<NewEmployeeModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b shrink-0">
           <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -162,7 +162,7 @@ export const NewEmployeeModal: React.FC<NewEmployeeModalProps> = ({
           <div className="space-y-6">
             {/* Identité */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">
+              <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-400 mb-3">
                 Identité
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -228,7 +228,7 @@ export const NewEmployeeModal: React.FC<NewEmployeeModalProps> = ({
 
             {/* Emploi */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">
+              <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-400 mb-3">
                 Emploi
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -307,7 +307,7 @@ export const NewEmployeeModal: React.FC<NewEmployeeModalProps> = ({
 
             {/* Rémunération */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">
+              <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-400 mb-3">
                 Rémunération
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -302,7 +302,7 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
 
       {/* Sélection de période */}
       <div className="flex items-center gap-4">
-        <Calendar className="h-5 w-5 text-gray-500" />
+        <Calendar className="h-5 w-5 text-gray-500 dark:text-gray-400" />
         <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
           <SelectTrigger className="w-40">
             <SelectValue placeholder="Période" />
@@ -327,14 +327,14 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
             <FileText className="h-5 w-5" />
             Déclarations Obligatoires - {countryName}
           </CardTitle>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             Déclarations fiscales requises selon la réglementation de {countryName}
           </p>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {availableDeclarations.map((declaration) => (
-              <Card key={declaration.id} className="border border-gray-200">
+              <Card key={declaration.id} className="border border-gray-200 dark:border-gray-600">
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-2">
                     {getTypeIcon(declaration.id)}
@@ -342,12 +342,12 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-gray-600 mb-3">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                     {declaration.description}
                   </p>
                   <div className="space-y-2">
                     <div className="text-sm">
-                      <span className="text-gray-500">Fréquence:</span>
+                      <span className="text-gray-500 dark:text-gray-400">Fréquence:</span>
                       <span className="ml-2 font-medium">
                         {declaration.frequency === 'monthly' ? 'Mensuelle' :
                          declaration.frequency === 'quarterly' ? 'Trimestrielle' :
@@ -355,7 +355,7 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
                       </span>
                     </div>
                     <div className="text-sm">
-                      <span className="text-gray-500">Échéance:</span>
+                      <span className="text-gray-500 dark:text-gray-400">Échéance:</span>
                       <span className="ml-2 font-medium">{declaration.deadline}</span>
                     </div>
                   </div>
@@ -378,7 +378,7 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
       <Card>
         <CardHeader>
           <CardTitle>Intégration Modules</CardTitle>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             Statut de synchronisation avec les autres modules CassKai
           </p>
         </CardHeader>
@@ -408,7 +408,7 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
             <Download className="h-5 w-5" />
             Exports et Rapports
           </CardTitle>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             Exportation des données fiscales selon les standards {countryName.toLowerCase()}
           </p>
         </CardHeader>
@@ -459,7 +459,7 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
                     {getTypeIcon(declaration.type)}
                     <div>
                       <div className="font-medium">{declaration.type}</div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
                         Période: {declaration.period} •
                         Échéance: {declaration.dueDate.toLocaleDateString('fr-FR')}
                       </div>

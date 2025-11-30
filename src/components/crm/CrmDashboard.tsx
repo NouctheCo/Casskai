@@ -129,7 +129,7 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
           return (
             <Card key={index} className="relative overflow-hidden">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
                   {stat.title}
                 </CardTitle>
                 <div className={`${stat.bgColor} p-2 rounded-lg`}>
@@ -167,13 +167,13 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
                     <Badge variant="outline" className={getStageColor(stage.stage)}>
                       {t(`crm.stages.${stage.stage}`)}
                     </Badge>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
                       {stage.count} {t('crm.dashboard.pipeline.deals')}
                     </span>
                   </div>
                   <div className="text-right">
                     <div className="font-medium">{formatCurrency(stage.value)}</div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
                       {t('crm.dashboard.pipeline.avgDeal')}: {formatCurrency(stage.avg_deal_size)}
                     </div>
                   </div>
@@ -194,7 +194,7 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
             <div className="space-y-4">
               {revenue_data.slice(-6).map((month, index) => (
                 <div key={index} className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">{month.month}</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">{month.month}</span>
                   <div className="flex items-center gap-2">
                     <div className="w-32 bg-gray-200 rounded-full h-2">
                       <div 
@@ -211,9 +211,9 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
                 </div>
               ))}
             </div>
-            <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">{t('crm.dashboard.revenue.total')}</span>
+                <span className="text-gray-600 dark:text-gray-400">{t('crm.dashboard.revenue.total')}</span>
                 <span className="font-medium">
                   {formatCurrency(stats.monthly_revenue)}
                 </span>
@@ -239,7 +239,7 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
               <div key={opportunity.id} className="flex items-start justify-between p-3 bg-gray-50 rounded-lg">
                 <div className="flex-1">
                   <h4 className="text-sm font-medium truncate">{opportunity.title}</h4>
-                  <p className="text-xs text-gray-600">{opportunity.client_name}</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">{opportunity.client_name}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <Badge variant="outline" className={getStageColor(opportunity.stage)} size="sm">
                       {t(`crm.stages.${opportunity.stage}`)}
@@ -251,7 +251,7 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
                 </div>
                 <div className="text-right ml-2">
                   <div className="text-sm font-medium">{formatCurrency(opportunity.value)}</div>
-                  <div className="text-xs text-gray-500">{opportunity.probability}%</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">{opportunity.probability}%</div>
                 </div>
               </div>
             ))}
@@ -280,7 +280,7 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
                 </div>
                 <div className="flex-1">
                   <h4 className="text-sm font-medium">{action.title}</h4>
-                  <p className="text-xs text-gray-600">{action.client_name}</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">{action.client_name}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <Badge 
                       variant="outline" 
@@ -289,7 +289,7 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
                     >
                       {t(`crm.actionStatus.${action.status}`)}
                     </Badge>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       {action.due_date ? formatDate(action.due_date) : ''}
                     </span>
                   </div>
@@ -317,7 +317,7 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
                   </div>
                   <div>
                     <h4 className="text-sm font-medium">{client.company_name}</h4>
-                    <p className="text-xs text-gray-600">{client.industry}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">{client.industry}</p>
                   </div>
                 </div>
                 <div className="text-right">
@@ -340,7 +340,7 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <span className="text-sm font-medium text-gray-600">
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
                 {t('crm.dashboard.quickActions')}:
               </span>
               <div className="flex gap-2">

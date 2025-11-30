@@ -92,10 +92,10 @@ class RouteErrorBoundaryClass extends Component<Props & { navigate: (path: strin
               
               {import.meta.env.DEV && this.state.error && (
                 <details className="mt-4 rounded-lg bg-gray-100 p-4">
-                  <summary className="cursor-pointer text-sm font-medium text-gray-700">
+                  <summary className="cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300">
                     Détails techniques (Développement uniquement)
                   </summary>
-                  <div className="mt-2 text-xs text-gray-600">
+                  <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
                     <p className="font-semibold">Route:</p>
                     <p className="mb-2">{this.props.routeName || 'Inconnue'}</p>
                     <p className="font-semibold">Erreur:</p>

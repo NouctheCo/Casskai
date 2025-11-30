@@ -1414,7 +1414,7 @@ export function CompanySettings() {
 
             <CardContent className="space-y-4">
 
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
 
                 La suppression d'entreprise nécessite l'accord de tous les propriétaires
 

@@ -90,20 +90,20 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <DollarSign className="h-6 w-6 text-green-600" />
-            <h2 className="text-2xl font-bold text-gray-900">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
               {expense ? 'Modifier la note de frais' : 'Nouvelle Note de Frais'}
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 transition-colors"
           >
             <X className="h-6 w-6" />
           </button>
@@ -241,14 +241,14 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
               <div className="mt-2 flex items-center justify-center w-full">
                 <label
                   htmlFor="receipt"
-                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors"
+                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors"
                 >
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Upload className="w-10 h-10 mb-3 text-gray-400" />
-                    <p className="mb-2 text-sm text-gray-500">
+                    <Upload className="w-10 h-10 mb-3 text-gray-400 dark:text-gray-500" />
+                    <p className="mb-2 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
                       <span className="font-semibold">Cliquez pour télécharger</span> ou glissez-déposez
                     </p>
-                    <p className="text-xs text-gray-500">PDF, PNG, JPG (MAX. 10MB)</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">PDF, PNG, JPG (MAX. 10MB)</p>
                   </div>
                   <input
                     id="receipt"
@@ -258,7 +258,7 @@ export const ExpenseFormModal: React.FC<ExpenseFormModalProps> = ({
                   />
                 </label>
               </div>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-2">
                 📎 Le justificatif sera disponible dans une prochaine version
               </p>
             </div>

@@ -99,7 +99,7 @@ const DragDropCard: React.FC<DragDropCardProps> = ({
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
         >
-          <GripVertical className="w-4 h-4 text-gray-400" />
+          <GripVertical className="w-4 h-4 text-gray-400 dark:text-gray-500" />
         </motion.div>
       )}
       
@@ -137,10 +137,10 @@ export const DraggableDashboard: React.FC<{
   return (
     <div className={cn("space-y-4", className)}>
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white">
           Dashboard
         </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
           Glissez-déposez pour réorganiser
         </p>
       </div>
@@ -182,7 +182,7 @@ export const SortableList: React.FC<{
           layout
         >
           <motion.div
-            className="flex items-center space-x-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow"
+            className="flex items-center space-x-3 p-3 bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700 cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow"
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
           >
@@ -191,17 +191,17 @@ export const SortableList: React.FC<{
             </div>
             
             {item.icon && (
-              <div className="text-gray-400">
+              <div className="text-gray-400 dark:text-gray-500">
                 {item.icon}
               </div>
             )}
             
             <div className="flex-1">
-              <p className="font-medium text-gray-900 dark:text-white">
+              <p className="font-medium text-gray-900 dark:text-gray-100 dark:text-white">
                 {item.label}
               </p>
               {item.description && (
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                   {item.description}
                 </p>
               )}
@@ -283,7 +283,7 @@ export const DropZone: React.FC<{
               Déposez vos fichiers ici
             </p>
             {acceptedTypes.length > 0 && (
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mt-1">
                 Types acceptés: {acceptedTypes.join(', ')}
               </p>
             )}

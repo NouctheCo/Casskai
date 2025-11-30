@@ -528,7 +528,7 @@ export default function PurchasesPage() {
 
             </p>
 
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
 
               t('purchases.noCompanySelectedDescription')
 
@@ -574,7 +574,7 @@ export default function PurchasesPage() {
 
           <div className="flex items-center space-x-2">
 
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
 
               {t('purchases.title')}
 
@@ -586,7 +586,7 @@ export default function PurchasesPage() {
 
           <div className="flex items-center space-x-2">
 
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400">
 
               {currentEnterprise ? `${currentEnterprise.name} - ` : ''}
 
@@ -728,13 +728,13 @@ export default function PurchasesPage() {
 
             <CardContent className="p-8 text-center">
 
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100 mb-2">
 
                 {t('purchases.noPurchases')}
 
               </h3>
 
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
+              <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-6">
 
                 {t('purchases.noPurchasesDescription')}
 

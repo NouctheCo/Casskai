@@ -241,14 +241,14 @@ export default function FAQPage() {
       <FAQPageSEO />
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-600 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
             <HelpCircle className="h-16 w-16 text-blue-600 dark:text-blue-400 mx-auto mb-4" />
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-4">
               Centre d'aide CassKai
             </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 max-w-3xl mx-auto">
               Trouvez rapidement des réponses à vos questions. Utilisez la recherche ou parcourez par catégorie.
             </p>
           </div>
@@ -256,13 +256,13 @@ export default function FAQPage() {
           {/* Search Bar */}
           <div className="mt-8 max-w-2xl mx-auto">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
               <input
                 type="text"
                 placeholder="Rechercher dans la FAQ... (ex: 'import facture', 'RGPD', 'tarifs')"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+                className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:text-white transition-colors"
               />
             </div>
           </div>
@@ -307,7 +307,7 @@ export default function FAQPage() {
         {/* Results Count */}
         {searchQuery && (
           <div className="mb-6 text-center">
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
               {filteredFAQ.length} résultat{filteredFAQ.length !== 1 ? 's' : ''} pour "{searchQuery}"
             </p>
           </div>
@@ -330,7 +330,7 @@ export default function FAQPage() {
               return (
                 <div
                   key={item.id}
-                  className="bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 transition-all"
+                  className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-600 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 transition-all"
                 >
                   <button
                     onClick={() => toggleItem(item.id)}
@@ -344,21 +344,21 @@ export default function FAQPage() {
                         <span className={`text-xs font-medium px-2 py-1 rounded bg-${categoryInfo.color}-100 dark:bg-${categoryInfo.color}-900/30 text-${categoryInfo.color}-700 dark:text-${categoryInfo.color}-300`}>
                           {categoryInfo.label}
                         </span>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mt-2">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white mt-2">
                           {item.question}
                         </h3>
                       </div>
                     </div>
                     {isExpanded ? (
-                      <ChevronUp className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                      <ChevronUp className="h-5 w-5 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                     ) : (
-                      <ChevronDown className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                      <ChevronDown className="h-5 w-5 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                     )}
                   </button>
 
                   {isExpanded && (
                     <div className="px-6 pb-6 pt-2">
-                      <div className="ml-14 text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+                      <div className="ml-14 text-gray-700 dark:text-gray-300 dark:text-gray-300 leading-relaxed whitespace-pre-line">
                         {item.answer}
                       </div>
                     </div>
@@ -426,38 +426,38 @@ export default function FAQPage() {
         <div className="mt-12 grid md:grid-cols-4 gap-6">
           <a
             href="/legal"
-            className="bg-white dark:bg-gray-800 rounded-xl p-6 hover:shadow-lg transition-all group"
+            className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl p-6 hover:shadow-lg transition-all group"
           >
             <FileCheck className="h-8 w-8 text-blue-600 dark:text-blue-400 mb-3 group-hover:scale-110 transition-transform" />
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Documents légaux</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">CGU, CGV, Confidentialité</p>
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-1">Documents légaux</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">CGU, CGV, Confidentialité</p>
           </a>
 
           <a
             href="/roadmap"
-            className="bg-white dark:bg-gray-800 rounded-xl p-6 hover:shadow-lg transition-all group"
+            className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl p-6 hover:shadow-lg transition-all group"
           >
             <BarChart3 className="h-8 w-8 text-purple-600 dark:text-purple-400 mb-3 group-hover:scale-110 transition-transform" />
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Roadmap</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Prochaines fonctionnalités</p>
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-1">Roadmap</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Prochaines fonctionnalités</p>
           </a>
 
           <a
             href="/gdpr"
-            className="bg-white dark:bg-gray-800 rounded-xl p-6 hover:shadow-lg transition-all group"
+            className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl p-6 hover:shadow-lg transition-all group"
           >
             <Shield className="h-8 w-8 text-green-600 dark:text-green-400 mb-3 group-hover:scale-110 transition-transform" />
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Mes données RGPD</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Exporter, supprimer</p>
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-1">Mes données RGPD</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Exporter, supprimer</p>
           </a>
 
           <a
             href="/pricing"
-            className="bg-white dark:bg-gray-800 rounded-xl p-6 hover:shadow-lg transition-all group"
+            className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl p-6 hover:shadow-lg transition-all group"
           >
             <CreditCard className="h-8 w-8 text-orange-600 dark:text-orange-400 mb-3 group-hover:scale-110 transition-transform" />
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Tarifs</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Voir tous les plans</p>
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-1">Tarifs</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Voir tous les plans</p>
           </a>
         </div>
       </div>

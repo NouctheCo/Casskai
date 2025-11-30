@@ -33,7 +33,7 @@ export function ReportsManagementTabs({ companyId }: ReportsManagementTabsProps)
             <BarChart3 className="w-8 h-8 text-blue-600" />
             Rapports Financiers
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
             Génération, historique et archivage légal des rapports comptables
           </p>
         </div>

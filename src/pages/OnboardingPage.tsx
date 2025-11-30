@@ -34,8 +34,8 @@ export default function OnboardingPage() {
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto"></div>
           <div className="space-y-2">
-            <p className="text-xl font-semibold text-gray-900 dark:text-white">Initialisation en cours...</p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Configuration de votre espace de travail</p>
+            <p className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-white">Initialisation en cours...</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">Configuration de votre espace de travail</p>
           </div>
         </div>
       </div>

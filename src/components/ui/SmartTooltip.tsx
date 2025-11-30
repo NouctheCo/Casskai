@@ -309,7 +309,7 @@ export const RichTooltip: React.FC<{
       
       <div>
         <motion.h4
-          className="font-semibold text-gray-900 dark:text-white"
+          className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
@@ -317,7 +317,7 @@ export const RichTooltip: React.FC<{
           {title}
         </motion.h4>
         <motion.p
-          className="text-sm text-gray-600 dark:text-gray-300 mt-1"
+          className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300 mt-1"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
@@ -328,7 +328,7 @@ export const RichTooltip: React.FC<{
 
       {stats.length > 0 && (
         <motion.div
-          className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-200 dark:border-gray-600"
+          className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-200 dark:border-gray-600 dark:border-gray-600"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
@@ -336,7 +336,7 @@ export const RichTooltip: React.FC<{
           {stats.map((stat, index) => (
             <div key={index} className="text-center">
               <div className="font-semibold text-lg">{stat.value}</div>
-              <div className="text-xs text-gray-500">{stat.label}</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</div>
               {stat.change !== undefined && (
                 <div className={cn(
                   "text-xs",
@@ -352,7 +352,7 @@ export const RichTooltip: React.FC<{
 
       {actions.length > 0 && (
         <motion.div
-          className="flex space-x-2 pt-2 border-t border-gray-200 dark:border-gray-600"
+          className="flex space-x-2 pt-2 border-t border-gray-200 dark:border-gray-600 dark:border-gray-600"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
@@ -410,7 +410,7 @@ export const ChartTooltip: React.FC<{
   const content = (
     <div className="space-y-3 min-w-[200px]">
       <div className="text-center">
-        <h4 className="font-semibold text-gray-900 dark:text-white">
+        <h4 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white">
           {data.title}
         </h4>
         <div className="text-2xl font-bold" style={{ color: data.color }}>

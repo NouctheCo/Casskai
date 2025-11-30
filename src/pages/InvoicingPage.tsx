@@ -90,12 +90,12 @@ const InvoicingKPICard = ({ title, value, icon, trend, color = 'blue', descripti
         </div>
         
         <div className="space-y-2">
-          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</h3>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-400">{title}</h3>
+          <div className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
             {value}
           </div>
           {description && (
-            <p className="text-xs text-gray-500 dark:text-gray-400">{description}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400">{description}</p>
           )}
         </div>
       </div>
@@ -146,7 +146,7 @@ const QuickInvoicingActions = ({ onNewInvoice, onNewQuote, onNewPayment, onViewC
           transition={{ delay: index * 0.1 }}
           onClick={action.onClick}
         >
-          <Card className="cursor-pointer hover:shadow-md transition-all duration-200 border-2 border-transparent hover:border-gray-200 dark:hover:border-gray-700">
+          <Card className="cursor-pointer hover:shadow-md transition-all duration-200 border-2 border-transparent hover:border-gray-200 dark:border-gray-600 dark:hover:border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center space-x-3">
                 <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${
@@ -157,10 +157,10 @@ const QuickInvoicingActions = ({ onNewInvoice, onNewQuote, onNewPayment, onViewC
                   <action.icon className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
+                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white text-sm">
                     {action.title}
                   </h4>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                  <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-400">
                     {action.description}
                   </p>
                 </div>
@@ -194,7 +194,7 @@ const RecentInvoicingActivities = ({ t }) => {
       <CardContent>
         <div className="space-y-3">
           {activities.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               <p>{t('invoicing.recentActivity.noActivity', 'Aucune activité récente')}</p>
             </div>
           ) : (
@@ -220,10 +220,10 @@ const RecentInvoicingActivities = ({ t }) => {
                   }`} />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 dark:text-white">
                     {activity.description}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400">
                     Il y a {activity.time}
                   </p>
                 </div>
@@ -402,7 +402,7 @@ export default function InvoicingPageOptimized() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8">
+          <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-600 dark:border-gray-700 p-8">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
               <div className="space-y-2">
                 <div className="flex items-center space-x-3">
@@ -413,7 +413,7 @@ export default function InvoicingPageOptimized() {
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
                       {t('invoicing.title', 'Facturation & Devis')}
                     </h1>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">
                       {t('invoicing.subtitle', 'Gestion professionnelle des factures et devis')}
                     </p>
                   </div>
@@ -422,7 +422,7 @@ export default function InvoicingPageOptimized() {
               
               <div className="flex items-center space-x-3">
                 <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-                  <SelectTrigger className="w-48 bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+                  <SelectTrigger className="w-48 bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 dark:border-gray-600">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -437,23 +437,23 @@ export default function InvoicingPageOptimized() {
                 {selectedPeriod === 'custom' && (
                   <div className="flex items-center space-x-2">
                     <div className="flex flex-col">
-                      <label className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('common.from', 'Du')}</label>
+                      <label className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 mb-1">{t('common.from', 'Du')}</label>
                       <input
                         type="date"
                         value={customStartDate}
                         onChange={(e) => setCustomStartDate(e.target.value)}
-                        className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Sélectionner une date de début"
                         title="Date de début de la période personnalisée"
                       />
                     </div>
                     <div className="flex flex-col">
-                      <label className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('common.to', 'Au')}</label>
+                      <label className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 mb-1">{t('common.to', 'Au')}</label>
                       <input
                         type="date"
                         value={customEndDate}
                         onChange={(e) => setCustomEndDate(e.target.value)}
-                        className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Sélectionner une date de fin"
                         title="Date de fin de la période personnalisée"
                       />
@@ -462,7 +462,7 @@ export default function InvoicingPageOptimized() {
                 )}
                 <Button 
                   variant="outline" 
-                  className="bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                  className="bg-white dark:bg-gray-800 dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                   disabled={isLoading}
                 >
                   <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
@@ -531,7 +531,7 @@ export default function InvoicingPageOptimized() {
 
         {/* Navigation par onglets */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-2">
+          <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700 p-2">
             <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 gap-1">
               <TabsTrigger 
                 value="overview" 
@@ -589,7 +589,7 @@ export default function InvoicingPageOptimized() {
               
               <div className="grid gap-6 lg:grid-cols-3">
                 <div className="lg:col-span-2">
-                  <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+                  <Card className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
                     <CardHeader>
                       <CardTitle className="flex items-center space-x-2">
                         <PieChart className="w-5 h-5 text-purple-500" />
@@ -623,7 +623,7 @@ export default function InvoicingPageOptimized() {
                           
                           if (totalAmount === 0) {
                             return (
-                              <div className="text-center py-8 text-gray-500">
+                              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                                 <p>{t('invoicing.revenueBreakdown.noData', 'Aucune donnée de revenus disponible pour la période sélectionnée')}</p>
                               </div>
                             );
@@ -649,46 +649,46 @@ export default function InvoicingPageOptimized() {
 
               {/* Additional Stats */}
               <div className="grid gap-6 md:grid-cols-3">
-                <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+                <Card className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
                   <CardContent className="p-6">
                     <div className="flex items-center space-x-3">
                       <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600">
                         <FileText className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('invoicing.stats.invoicesCreated', 'Factures créées')}</p>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-400">{t('invoicing.stats.invoicesCreated', 'Factures créées')}</p>
                         <p className="text-2xl font-bold">{invoicingData.invoicesCount}</p>
-                        <p className="text-xs text-gray-500">{t('invoicing.stats.thisMonth', 'Ce mois')}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{t('invoicing.stats.thisMonth', 'Ce mois')}</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+                <Card className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
                   <CardContent className="p-6">
                     <div className="flex items-center space-x-3">
                       <div className="p-3 rounded-xl bg-gradient-to-r from-green-500 to-green-600">
                         <Users className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('invoicing.stats.activeClients', 'Clients actifs')}</p>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-400">{t('invoicing.stats.activeClients', 'Clients actifs')}</p>
                         <p className="text-2xl font-bold">{invoicingData.clientsCount}</p>
-                        <p className="text-xs text-gray-500">{t('invoicing.stats.total', 'Total')}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{t('invoicing.stats.total', 'Total')}</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+                <Card className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
                   <CardContent className="p-6">
                     <div className="flex items-center space-x-3">
                       <div className="p-3 rounded-xl bg-gradient-to-r from-purple-500 to-purple-600">
                         <Target className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('invoicing.stats.averageValue', 'Valeur moyenne')}</p>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-400">{t('invoicing.stats.averageValue', 'Valeur moyenne')}</p>
                         <p className="text-xl font-bold">{invoicingData.averageInvoiceValue.toLocaleString('fr-FR')} €</p>
-                        <p className="text-xs text-gray-500">{t('invoicing.stats.perInvoice', 'Par facture')}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{t('invoicing.stats.perInvoice', 'Par facture')}</p>
                       </div>
                     </div>
                   </CardContent>

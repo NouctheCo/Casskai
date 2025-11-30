@@ -72,7 +72,7 @@ export function WorkflowExecutionHistory({ workflowId, onClose }: WorkflowExecut
     return (
       <div className="p-6">
         <div className="text-center">
-          <p className="text-gray-600 dark:text-gray-400">Workflow introuvable</p>
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Workflow introuvable</p>
           <Button onClick={onClose} className="mt-4">
             Retour
           </Button>
@@ -91,7 +91,7 @@ export function WorkflowExecutionHistory({ workflowId, onClose }: WorkflowExecut
           </Button>
           <div>
             <h1 className="text-2xl font-bold">{workflow.name}</h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
               Historique d'exécution du workflow
             </p>
           </div>
@@ -104,10 +104,10 @@ export function WorkflowExecutionHistory({ workflowId, onClose }: WorkflowExecut
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                   Total Exécutions
                 </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
                   {executions.length}
                 </p>
               </div>
@@ -120,7 +120,7 @@ export function WorkflowExecutionHistory({ workflowId, onClose }: WorkflowExecut
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                   Succès
                 </p>
                 <p className="text-2xl font-bold text-green-600">
@@ -136,7 +136,7 @@ export function WorkflowExecutionHistory({ workflowId, onClose }: WorkflowExecut
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                   Échecs
                 </p>
                 <p className="text-2xl font-bold text-red-600">
@@ -152,7 +152,7 @@ export function WorkflowExecutionHistory({ workflowId, onClose }: WorkflowExecut
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                   Taux de Réussite
                 </p>
                 <p className="text-2xl font-bold text-blue-600">
@@ -177,12 +177,12 @@ export function WorkflowExecutionHistory({ workflowId, onClose }: WorkflowExecut
           {executionsLoading[workflowId] ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-2 text-gray-600 dark:text-gray-400">Chargement de l'historique...</p>
+              <p className="mt-2 text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Chargement de l'historique...</p>
             </div>
           ) : executions.length === 0 ? (
             <div className="text-center py-8">
-              <Clock className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-              <p className="text-gray-600 dark:text-gray-400">
+              <Clock className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
+              <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                 Aucune exécution trouvée pour ce workflow
               </p>
             </div>
@@ -211,10 +211,10 @@ export function WorkflowExecutionHistory({ workflowId, onClose }: WorkflowExecut
                                 {execution.status === 'running' && 'En cours'}
                                 {execution.status === 'pending' && 'En attente'}
                               </Badge>
-                              <span className="text-sm text-gray-600 dark:text-gray-400">
+                              <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                                 {format(new Date(execution.started_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}
                               </span>
-                              <span className="text-sm text-gray-600 dark:text-gray-400">
+                              <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                                 Durée: {getExecutionDuration(execution)}
                               </span>
                             </div>
@@ -229,7 +229,7 @@ export function WorkflowExecutionHistory({ workflowId, onClose }: WorkflowExecut
 
                             {/* Action Results */}
                             <div className="space-y-2">
-                              <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+                              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 dark:text-white">
                                 Résultats des actions:
                               </h4>
                               <div className="grid gap-2">

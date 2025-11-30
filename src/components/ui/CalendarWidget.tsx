@@ -66,11 +66,11 @@ const CalendarWidget: React.FC<CalendarWidgetProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <CalendarIcon className="w-4 h-4 text-blue-500" />
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
+            <span className="text-sm font-medium text-gray-900 dark:text-gray-100 dark:text-white">
               Prochains événements
             </span>
           </div>
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-gray-500 dark:text-gray-400">
             {upcomingEvents.length} événements
           </span>
         </div>
@@ -158,7 +158,7 @@ const CalendarWidget: React.FC<CalendarWidgetProps> = ({
     <div className="space-y-4">
       {/* En-tête du calendrier */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white">
           {monthNames[currentMonth]} {currentYear}
         </h3>
         <div className="flex items-center space-x-1">
@@ -180,7 +180,7 @@ const CalendarWidget: React.FC<CalendarWidgetProps> = ({
       {/* Grille du calendrier */}
       <div className="grid grid-cols-7 gap-1 text-center">
         {['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'].map(day => (
-          <div key={day} className="text-xs font-medium text-gray-500 py-2">
+          <div key={day} className="text-xs font-medium text-gray-500 dark:text-gray-400 py-2">
             {day}
           </div>
         ))}

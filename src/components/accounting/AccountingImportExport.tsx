@@ -396,11 +396,11 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-              <table className="min-w-full border-collapse border border-gray-300">
+              <table className="min-w-full border-collapse border border-gray-300 dark:border-gray-600">
                 <thead>
                   <tr>
                     {Object.keys(previewData[0] || {}).map(header => (
-                      <th key={header} className="border border-gray-300 px-2 py-1 text-left">
+                      <th key={header} className="border border-gray-300 dark:border-gray-600 px-2 py-1 text-left">
                         {header}
                       </th>
                     ))}
@@ -410,7 +410,7 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
                   {previewData.slice(0, 5).map((row, index) => (
                     <tr key={index}>
                       {Object.values(row).map((cell: any, cellIndex) => (
-                        <td key={cellIndex} className="border border-gray-300 px-2 py-1">
+                        <td key={cellIndex} className="border border-gray-300 dark:border-gray-600 px-2 py-1">
                           {cell != null ? String(cell) : ''}
                         </td>
                       ))}
@@ -441,7 +441,7 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
                       {mapping.fieldName}
                     </Badge>
                   </div>
-                  <div className="w-1/3 text-sm text-gray-600">
+                  <div className="w-1/3 text-sm text-gray-600 dark:text-gray-400">
                     {mapping.dataType}
                   </div>
                 </div>
@@ -472,19 +472,19 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
               
               <div className="grid grid-cols-4 gap-4 text-sm">
                 <div>
-                  <div className="text-gray-600">Statut</div>
+                  <div className="text-gray-600 dark:text-gray-400">Statut</div>
                   <div className="font-medium">{importSession.status}</div>
                 </div>
                 <div>
-                  <div className="text-gray-600">Lignes traitées</div>
+                  <div className="text-gray-600 dark:text-gray-400">Lignes traitées</div>
                   <div className="font-medium">{importSession.totalRows}</div>
                 </div>
                 <div>
-                  <div className="text-gray-600">Valides</div>
+                  <div className="text-gray-600 dark:text-gray-400">Valides</div>
                   <div className="font-medium text-green-600">{importSession.validRows}</div>
                 </div>
                 <div>
-                  <div className="text-gray-600">Erreurs</div>
+                  <div className="text-gray-600 dark:text-gray-400">Erreurs</div>
                   <div className="font-medium text-red-600">{importSession.errors}</div>
                 </div>
               </div>
@@ -583,7 +583,7 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
             {templates.map(template => (
               <div key={template.id} className="p-4 border rounded-lg">
                 <h4 className="font-medium">{template.name}</h4>
-                <p className="text-sm text-gray-600 mt-1">{template.description}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{template.description}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <Badge variant="outline">{template.category}</Badge>
                   {template.isRecurring && (
@@ -609,7 +609,7 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-400">
               Le lettrage automatique permet de rapprocher les écritures débitrices et créditrices 
               des comptes de tiers (clients, fournisseurs).
             </p>
@@ -630,7 +630,7 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
     <div className="w-full max-w-6xl mx-auto p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Import/Export Comptable</h1>
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-400">
           Gestion avancée des imports de fichiers comptables, templates d\'écritures et lettrage automatique.
         </p>
       </div>
@@ -656,7 +656,7 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600">Fonctionnalité d\'export à implémenter...</p>
+              <p className="text-gray-600 dark:text-gray-400">Fonctionnalité d\'export à implémenter...</p>
             </CardContent>
           </Card>
         </TabsContent>

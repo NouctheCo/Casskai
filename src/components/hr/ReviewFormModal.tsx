@@ -162,14 +162,14 @@ export function ReviewFormModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold">
             {review ? 'Modifier l\'évaluation' : 'Nouvelle évaluation'}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -277,7 +277,7 @@ export function ReviewFormModal({
             <Label className="mb-3 block">Évaluation par compétence</Label>
             <div className="grid grid-cols-2 gap-4">
               {COMPETENCIES.map((competency) => (
-                <div key={competency} className="flex items-center justify-between bg-white p-3 rounded-lg">
+                <div key={competency} className="flex items-center justify-between bg-white dark:bg-gray-800 p-3 rounded-lg">
                   <span className="text-sm capitalize">
                     {competency.replace('_', ' ')}
                   </span>

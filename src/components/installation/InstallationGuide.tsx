@@ -177,7 +177,7 @@ L'assistant vous guidera pour:
         ))}
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <div className="prose prose-blue max-w-none">
           <div dangerouslySetInnerHTML={createSafeHTML(
             steps[currentStep - 1].content.replace(/\n/g, '<br>')

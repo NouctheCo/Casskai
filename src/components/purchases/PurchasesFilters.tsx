@@ -41,8 +41,8 @@ const PurchasesFilters: React.FC<PurchasesFiltersProps> = ({
       <CardContent className="p-6">
         <div className="flex items-center gap-4 mb-4">
           <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-gray-500" />
-            <h3 className="font-medium text-gray-900">{t('purchases.filters.title')}</h3>
+            <Filter className="w-4 h-4 text-gray-500 dark:text-gray-400 dark:text-gray-500" />
+            <h3 className="font-medium text-gray-900 dark:text-gray-100">{t('purchases.filters.title')}</h3>
           </div>
           <div className="flex-1" />
           <Button
@@ -60,7 +60,7 @@ const PurchasesFilters: React.FC<PurchasesFiltersProps> = ({
               variant="outline"
               size="sm"
               onClick={onClearFilters}
-              className="flex items-center gap-2 text-gray-600"
+              className="flex items-center gap-2 text-gray-600 dark:text-gray-400 dark:text-gray-500"
             >
               <X className="w-4 h-4" />
               {t('purchases.filters.clear')}
@@ -73,7 +73,7 @@ const PurchasesFilters: React.FC<PurchasesFiltersProps> = ({
           <div className="space-y-2">
             <Label htmlFor="search">{t('purchases.filters.search')}</Label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
               <Input
                 id="search"
                 placeholder={t('purchases.filters.searchPlaceholder')}
@@ -128,7 +128,7 @@ const PurchasesFilters: React.FC<PurchasesFiltersProps> = ({
           <div className="space-y-2">
             <Label htmlFor="dateFrom">{t('purchases.filters.dateFrom')}</Label>
             <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
               <Input
                 id="dateFrom"
                 type="date"
@@ -143,7 +143,7 @@ const PurchasesFilters: React.FC<PurchasesFiltersProps> = ({
           <div className="space-y-2">
             <Label htmlFor="dateTo">{t('purchases.filters.dateTo')}</Label>
             <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
               <Input
                 id="dateTo"
                 type="date"
@@ -157,8 +157,8 @@ const PurchasesFilters: React.FC<PurchasesFiltersProps> = ({
 
         {/* Active Filters Summary */}
         {hasActiveFilters && (
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
               <span>{t('purchases.filters.activeFilters')}:</span>
               <div className="flex items-center gap-2 flex-wrap">
                 {filters.search && (

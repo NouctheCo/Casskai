@@ -280,7 +280,7 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
           {/* Amounts */}
           <Card>
             <CardContent className="p-4 space-y-4">
-              <h4 className="font-medium text-gray-900">{t('purchases.form.amounts')}</h4>
+              <h4 className="font-medium text-gray-900 dark:text-gray-100">{t('purchases.form.amounts')}</h4>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Amount HT */}
@@ -345,9 +345,9 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
           {/* Attachments */}
           <div className="space-y-2">
             <Label>{t('purchases.form.attachments')}</Label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4">
               <div className="text-center">
-                <Upload className="mx-auto h-8 w-8 text-gray-400" />
+                <Upload className="mx-auto h-8 w-8 text-gray-400 dark:text-gray-500" />
                 <div className="mt-2">
                   <label htmlFor="attachments" className="cursor-pointer">
                     <span className="text-sm font-medium text-blue-600 hover:text-blue-500">
@@ -362,7 +362,7 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
                       className="hidden"
                     />
                   </label>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
                     {t('purchases.form.acceptedFormats')}
                   </p>
                 </div>
@@ -374,9 +374,9 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
                   {formData.attachments.map((file, index) => (
                     <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
                       <div className="flex items-center space-x-2">
-                        <FileText className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm text-gray-700">{file.name}</span>
-                        <span className="text-xs text-gray-500">
+                        <FileText className="w-4 h-4 text-gray-500 dark:text-gray-400 dark:text-gray-500" />
+                        <span className="text-sm text-gray-700 dark:text-gray-300">{file.name}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
                           ({(file.size / 1024).toFixed(1)} KB)
                         </span>
                       </div>

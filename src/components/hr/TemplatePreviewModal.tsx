@@ -89,17 +89,17 @@ export function TemplatePreviewModal({ isOpen, onClose, template }: TemplatePrev
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div>
             <h2 className="text-2xl font-bold">Prévisualisation du Template</h2>
-            <p className="text-gray-600">{template.name}</p>
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">{template.name}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:text-gray-500"
           >
             <X className="w-6 h-6" />
           </button>
@@ -120,7 +120,7 @@ export function TemplatePreviewModal({ isOpen, onClose, template }: TemplatePrev
               <div className="space-y-4 max-h-[60vh] overflow-y-auto">
                 {template.variables.map((variable, idx) => (
                   <div key={idx}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       {variable.label}
                       {variable.required && <span className="text-red-500 ml-1">*</span>}
                     </label>
@@ -167,7 +167,7 @@ export function TemplatePreviewModal({ isOpen, onClose, template }: TemplatePrev
                       />
                     )}
                     {variable.description && (
-                      <p className="text-xs text-gray-500 mt-1">{variable.description}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">{variable.description}</p>
                     )}
                   </div>
                 ))}
@@ -187,14 +187,14 @@ export function TemplatePreviewModal({ isOpen, onClose, template }: TemplatePrev
               <h3 className="text-lg font-semibold mb-4">Aperçu du Document</h3>
 
               {!showPreview ? (
-                <div className="flex items-center justify-center h-64 text-gray-500">
+                <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400 dark:text-gray-500">
                   <div className="text-center">
-                    <Eye className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                    <Eye className="w-12 h-12 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
                     <p>Remplissez les variables et cliquez sur "Générer la prévisualisation"</p>
                   </div>
                 </div>
               ) : (
-                <div className="bg-white p-8 rounded-lg shadow-sm border max-h-[60vh] overflow-y-auto">
+                <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-sm border max-h-[60vh] overflow-y-auto">
                   <div
                     dangerouslySetInnerHTML={createSafeHTML(previewHtml)}
                     className="prose prose-sm max-w-none"

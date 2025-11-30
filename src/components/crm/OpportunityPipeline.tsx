@@ -360,9 +360,9 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
 
         <div>
 
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Pipeline des Ventes</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">Pipeline des Ventes</h2>
 
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
             Glissez-déposez les opportunités entre les étapes
 
@@ -396,7 +396,7 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                   Total opportunités
 
@@ -424,7 +424,7 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                   Valeur totale
 
@@ -456,7 +456,7 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                   Taux de conversion
 
@@ -492,7 +492,7 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                   En cours
 
@@ -614,7 +614,7 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
 
                   <div
 
-                    className="flex-1 min-h-[400px] p-2 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-800/30"
+                    className="flex-1 min-h-[400px] p-2 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-600 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-800/30"
 
                     data-stage={stage.id}
 
@@ -642,7 +642,7 @@ export const OpportunityPipeline: React.FC<OpportunityPipelineProps> = ({
 
                     {stageOpportunities.length === 0 && (
 
-                      <div className="flex items-center justify-center h-32 text-gray-400">
+                      <div className="flex items-center justify-center h-32 text-gray-400 dark:text-gray-500">
 
                         <div className="text-center">
 

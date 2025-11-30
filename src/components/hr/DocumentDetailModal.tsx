@@ -49,7 +49,7 @@ export function DocumentDetailModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div>
@@ -71,7 +71,7 @@ export function DocumentDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:text-gray-300"
+            className="text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300"
           >
             <X className="w-6 h-6" />
           </button>
@@ -82,14 +82,14 @@ export function DocumentDetailModal({
           {/* Metadata */}
           <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Généré le</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">Généré le</p>
               <p className="text-sm">
                 {new Date(document.generated_at).toLocaleString('fr-FR')}
               </p>
             </div>
             {document.sent_date && (
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Envoyé le</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">Envoyé le</p>
                 <p className="text-sm">
                   {new Date(document.sent_date).toLocaleString('fr-FR')}
                 </p>
@@ -97,7 +97,7 @@ export function DocumentDetailModal({
             )}
             {document.signed_date && (
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Signé le</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">Signé le</p>
                 <p className="text-sm">
                   {new Date(document.signed_date).toLocaleString('fr-FR')}
                 </p>
@@ -105,7 +105,7 @@ export function DocumentDetailModal({
             )}
             {document.requires_signature && (
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Signature</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">Signature</p>
                 <Badge className="mt-1 bg-purple-100 text-purple-800">
                   <FileSignature className="w-3 h-3 mr-1" />
                   Requise
@@ -114,7 +114,7 @@ export function DocumentDetailModal({
             )}
             {document.is_archived && (
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Archive</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">Archive</p>
                 <Badge className="mt-1">
                   <Archive className="w-3 h-3 mr-1" />
                   {document.archive_reference || 'Archivé'}
@@ -124,7 +124,7 @@ export function DocumentDetailModal({
           </div>
 
           {/* Document Content */}
-          <div className="border rounded-lg p-8 bg-white">
+          <div className="border rounded-lg p-8 bg-white dark:bg-gray-800">
             <div
               dangerouslySetInnerHTML={createSafeHTML(document.generated_content)}
               className="prose prose-sm max-w-none"

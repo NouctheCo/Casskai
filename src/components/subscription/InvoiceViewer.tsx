@@ -162,7 +162,7 @@ export function InvoiceViewer() {
           <div className="text-center py-8">
             <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Erreur de chargement</h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-4">{error}</p>
             <Button onClick={fetchInvoices} variant="outline">
               Réessayer
             </Button>
@@ -183,9 +183,9 @@ export function InvoiceViewer() {
       <CardContent>
         {invoices.length === 0 ? (
           <div className="text-center py-8">
-            <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <Calendar className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Aucune facture</h3>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
               Vous n'avez pas encore de factures. Elles apparaîtront ici une fois votre abonnement activé.
             </p>
           </div>

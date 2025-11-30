@@ -100,7 +100,7 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
 
   return (
 
-    <Card className="hover:shadow-md transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+    <Card className="hover:shadow-md transition-shadow bg-white dark:bg-gray-800 dark:bg-gray-800 border-gray-200 dark:border-gray-600 dark:border-gray-700">
 
       <CardContent className="p-6">
 
@@ -110,7 +110,7 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
 
           <div className="flex items-center space-x-3">
 
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-gray-100">
 
               Budget {budget.year}
 
@@ -118,7 +118,7 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
 
             <BudgetStatusBadge status={budget.status} />
 
-            <span className="text-sm text-gray-500 dark:text-gray-400">
+            <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-400">
 
               Version {budget.version}
 
@@ -296,7 +296,7 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
 
         {/* Footer */}
 
-        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 dark:text-gray-400 pt-4 border-t border-gray-200 dark:border-gray-600 dark:border-gray-700">
 
           <div>
 

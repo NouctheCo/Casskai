@@ -412,7 +412,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
       </div>
 
       {/* Barre d'outils */}
-      <div className="flex items-center justify-between gap-4 bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+      <div className="flex items-center justify-between gap-4 bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-lg p-4 shadow">
         {/* Filtres */}
         <div className="flex gap-2">
           <button
@@ -447,7 +447,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
 
         {/* Recherche */}
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
           <input
             type="text"
             placeholder={t('searchTransactions', 'Rechercher une transaction...')}
@@ -460,7 +460,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
         {/* Actions en masse */}
         {selectedTransactions.size > 0 && (
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
               {selectedTransactions.size} sélectionnée(s)
             </span>
             <select
@@ -500,7 +500,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
       </div>
 
       {/* Liste des transactions */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-lg shadow overflow-hidden">
         <table className="min-w-full">
           <thead className="bg-gray-50 dark:bg-gray-700">
             <tr>
@@ -527,19 +527,19 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
                   }
                 />
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">
                 Date
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">
                 Description
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">
                 Montant
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">
                 Compte comptable
               </th>
-              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">
                 Actions
               </th>
             </tr>
@@ -571,7 +571,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
         </table>
 
         {filteredTransactions.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-gray-500 dark:text-gray-400 dark:text-gray-500">
             <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-green-500" />
             <p className="text-lg font-medium">
               {filter === 'pending'

@@ -452,7 +452,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
 
       {/* Logo Header */}
 
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-600 dark:border-gray-700">
 
         <Link to="/dashboard" className="flex items-center justify-center">
 
@@ -480,13 +480,13 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
 
       {/* Header avec recherche */}
 
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-600 dark:border-gray-700">
 
         {!collapsed && (
 
           <div className="relative">
 
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
 
             <input
 
@@ -518,7 +518,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
 
           <div className="flex justify-center">
 
-            <Command className="h-6 w-6 text-gray-600 dark:text-gray-400" />
+            <Command className="h-6 w-6 text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500" />
 
           </div>
 
@@ -538,7 +538,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
 
             <div className="mb-4">
 
-              <div className="flex items-center gap-2 px-2 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+              <div className="flex items-center gap-2 px-2 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wide">
 
                 <Star className="h-3 w-3" />
 
@@ -620,7 +620,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
 
             <div className="mb-4">
 
-              <div className="flex items-center gap-2 px-2 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+              <div className="flex items-center gap-2 px-2 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wide">
 
                 <Clock className="h-3 w-3" />
 
@@ -938,7 +938,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
 
       {!collapsed && (
 
-        <div className="p-3 border-t border-gray-200 dark:border-gray-700">
+        <div className="p-3 border-t border-gray-200 dark:border-gray-600 dark:border-gray-700">
 
           <Button asChild className="w-full mb-2">
 
@@ -954,7 +954,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
 
           
 
-          <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+          <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 space-y-1">
 
             <div className="flex items-center gap-2">
 

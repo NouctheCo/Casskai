@@ -294,7 +294,7 @@ export const NewActionModal: React.FC<NewActionModalProps> = ({
 
           {/* Relations */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium text-gray-700">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
               {t('crm.action.sections.relations')}
             </h3>
 
@@ -355,7 +355,7 @@ export const NewActionModal: React.FC<NewActionModalProps> = ({
 
           {/* Schedule & Priority */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium text-gray-700">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
               {t('crm.action.sections.schedule')}
             </h3>
 

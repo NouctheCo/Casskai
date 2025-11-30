@@ -154,7 +154,7 @@ export default function FeaturesStep() {
               defaultValue: 'Choisissez vos fonctionnalités'
             })}
           </CardTitle>
-          <CardDescription className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <CardDescription className="text-lg text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 max-w-2xl mx-auto">
             {t('onboarding.features.subtitle', {
               defaultValue: 'Sélectionnez les modules qui correspondent à vos besoins. Vous pourrez toujours les modifier plus tard.'
             })}
@@ -210,7 +210,7 @@ export default function FeaturesStep() {
                       <module.icon className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white text-sm">
                         {module.title}
                       </h3>
                       <Badge variant="outline" className="text-xs mt-1">
@@ -226,19 +226,19 @@ export default function FeaturesStep() {
                   />
                 </div>
                 
-                <p className="text-xs text-gray-600 dark:text-gray-400 mb-3 leading-relaxed">
+                <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-3 leading-relaxed">
                   {module.description}
                 </p>
                 
                 <div className="space-y-1">
                   {module.features.slice(0, 2).map((feature, idx) => (
-                    <div key={idx} className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                    <div key={idx} className="flex items-center text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                       <div className="w-1 h-1 bg-gray-400 rounded-full mr-2 flex-shrink-0" />
                       {feature}
                     </div>
                   ))}
                   {module.features.length > 2 && (
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs text-gray-400 dark:text-gray-500">
                       +{module.features.length - 2} autres fonctionnalités
                     </div>
                   )}

@@ -65,7 +65,7 @@ export class DashboardErrorBoundary extends Component<Props, State> {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="text-gray-700 dark:text-gray-300">
+            <div className="text-gray-700 dark:text-gray-300 dark:text-gray-300">
               <p className="mb-2">Une erreur s'est produite lors du chargement du dashboard.</p>
               {this.state.error && (
                 <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
@@ -91,7 +91,7 @@ export class DashboardErrorBoundary extends Component<Props, State> {
 
             {import.meta.env.DEV && this.state.errorInfo && (
               <details className="mt-4">
-                <summary className="cursor-pointer text-sm font-medium text-gray-600">
+                <summary className="cursor-pointer text-sm font-medium text-gray-600 dark:text-gray-400">
                   Détails de l'erreur (Développement)
                 </summary>
                 <pre className="mt-2 text-xs bg-gray-100 dark:bg-gray-800 p-3 rounded overflow-auto max-h-40">

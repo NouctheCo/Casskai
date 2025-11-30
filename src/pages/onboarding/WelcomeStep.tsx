@@ -85,7 +85,7 @@ export default function WelcomeStep() {
                 defaultValue: 'Bienvenue dans CassKai !' 
               })}
             </CardTitle>
-            <CardDescription className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            <CardDescription className="text-lg text-gray-600 dark:text-gray-400 dark:text-gray-400 max-w-2xl mx-auto">
               {t('onboarding.welcome.subtitle', {
                 defaultValue: 'Nous sommes ravis de vous accompagner dans la gestion de votre entreprise. Configurons ensemble votre plateforme en quelques étapes simples.'
               })}
@@ -101,7 +101,7 @@ export default function WelcomeStep() {
             transition={{ delay: 0.4, duration: 0.6 }}
             className="mb-8"
           >
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 text-center">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-6 text-center">
               {t('onboarding.welcome.whatYouGet', {
                 defaultValue: 'Ce que vous obtenez avec CassKai'
               })}
@@ -114,16 +114,16 @@ export default function WelcomeStep() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.5 + index * 0.1, duration: 0.5 }}
-                  className="flex items-center p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-200"
+                  className="flex items-center p-4 rounded-xl bg-white dark:bg-gray-800 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 dark:border-gray-700 hover:shadow-md transition-all duration-200"
                 >
                   <div className={`w-12 h-12 rounded-lg ${feature.color} flex items-center justify-center mr-4 flex-shrink-0`}>
                     <feature.icon className="w-6 h-6" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
+                    <h4 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white text-sm">
                       {feature.title}
                     </h4>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-400 mt-1">
                       {feature.description}
                     </p>
                   </div>
@@ -139,7 +139,7 @@ export default function WelcomeStep() {
             transition={{ delay: 0.8, duration: 0.6 }}
             className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 mb-8"
           >
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-4 flex items-center">
               <Zap className="w-5 h-5 text-blue-600 mr-2" />
               {t('onboarding.welcome.nextSteps', {
                 defaultValue: 'Les étapes suivantes'
@@ -165,14 +165,14 @@ export default function WelcomeStep() {
                 }
               ].map((item, index) => (
                 <div key={index} className="flex items-center space-x-3">
-                  <div className="w-6 h-6 bg-white dark:bg-gray-800 border-2 border-blue-200 dark:border-blue-700 rounded-full flex items-center justify-center text-xs font-medium text-blue-600 dark:text-blue-400">
+                  <div className="w-6 h-6 bg-white dark:bg-gray-800 dark:bg-gray-800 border-2 border-blue-200 dark:border-blue-700 rounded-full flex items-center justify-center text-xs font-medium text-blue-600 dark:text-blue-400">
                     {item.step}
                   </div>
                   <div>
-                    <span className="font-medium text-gray-900 dark:text-white text-sm">
+                    <span className="font-medium text-gray-900 dark:text-gray-100 dark:text-white text-sm">
                       {item.title}
                     </span>
-                    <span className="text-gray-600 dark:text-gray-400 text-xs ml-2">
+                    <span className="text-gray-600 dark:text-gray-400 dark:text-gray-400 text-xs ml-2">
                       {item.description}
                     </span>
                   </div>
@@ -204,7 +204,7 @@ export default function WelcomeStep() {
               <ArrowRight className="w-5 h-5" />
             </Button>
             
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">
+            <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 mt-4">
               {t('onboarding.welcome.duration', {
                 defaultValue: '⏱️ Configuration estimée : 3-5 minutes'
               })}

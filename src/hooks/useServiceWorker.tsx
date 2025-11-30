@@ -264,14 +264,14 @@ export const UpdateNotification = () => {
             <button
               type="button"
               onClick={acceptUpdate}
-              className="px-3 py-1 bg-white text-blue-500 text-sm rounded hover:bg-opacity-90 transition-colors"
+              className="px-3 py-1 bg-white dark:bg-gray-800 text-blue-500 text-sm rounded hover:bg-opacity-90 transition-colors"
             >
               Mettre à jour
             </button>
             <button
               type="button"
               onClick={dismissUpdate}
-              className="px-3 py-1 text-sm border border-white border-opacity-50 rounded hover:bg-white hover:bg-opacity-10 transition-colors"
+              className="px-3 py-1 text-sm border border-white border-opacity-50 rounded hover:bg-white dark:bg-gray-800 hover:bg-opacity-10 transition-colors"
             >
               Plus tard
             </button>

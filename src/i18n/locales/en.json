@@ -260,7 +260,6 @@
     "humanResources": "Human Resources",
     "inDevelopment": "In Development",
     "inventory": "Inventory",
-    "invoicing": "Invoicing",
     "loading": "Loading...",
     "month": "Mois",
     "newFeatures": "Nouvelles fonctionnalitÃ©s",
@@ -1369,7 +1368,65 @@
     "unit": "UnitÃ©",
     "unit_": "UnitÃ©"
   },
-  "invoicing": "Invoicing",
+  "invoicing": {
+    "title": "Invoicing",
+    "subtitle": "Professional invoice and quote management",
+    "periods": {
+      "currentMonth": "Current month",
+      "currentQuarter": "Current quarter",
+      "currentYear": "Current year",
+      "lastMonth": "Last month",
+      "custom": "Custom period"
+    },
+    "newInvoice": "New invoice",
+    "refresh": "Refresh",
+    "kpis": {
+      "revenue": "Revenue",
+      "revenueDesc": "Total revenue this month",
+      "paidInvoices": "Paid invoices",
+      "paidInvoicesDesc": "Payments received",
+      "pendingInvoices": "Pending",
+      "pendingInvoicesDesc": "Pending invoices",
+      "overdueInvoices": "Overdue",
+      "overdueInvoicesDesc": "Overdue invoices"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "invoices": "Invoices",
+      "quotes": "Quotes",
+      "clients": "Clients",
+      "payments": "Payments"
+    },
+    "quickActions": {
+      "newInvoice": "New invoice",
+      "newInvoiceDesc": "Create a client invoice",
+      "newQuote": "New quote",
+      "newQuoteDesc": "Create a quote",
+      "newPayment": "New payment",
+      "newPaymentDesc": "Record a payment",
+      "viewClients": "Manage clients",
+      "viewClientsDesc": "View client list"
+    },
+    "revenueBreakdown": {
+      "title": "Revenue breakdown",
+      "paidInvoices": "Paid invoices",
+      "pendingInvoices": "Pending payment",
+      "overdueInvoices": "Overdue invoices",
+      "noData": "No revenue data available for the selected period"
+    },
+    "recentActivity": {
+      "title": "Recent activity",
+      "noActivity": "No recent activity"
+    },
+    "stats": {
+      "invoicesCreated": "Invoices created",
+      "thisMonth": "This month",
+      "activeClients": "Active clients",
+      "total": "Total",
+      "averageValue": "Average value",
+      "perInvoice": "Per invoice"
+    }
+  },
   "journal": "Journal",
   "journalEntryDeletedSuccess": "Ã‰criture supprimÃ©e avec succÃ¨s",
   "journal_entries": {
@@ -2898,7 +2955,6 @@
     "humanResources": "Human Resources",
     "inventaire": "Inventory",
     "inventory": "Inventory",
-    "invoicing": "Invoicing",
     "manageSubscription": "Manage Subscription",
     "management": "Management",
     "modules": "modules",
@@ -2980,23 +3036,7 @@
     "subtitle": "Manage your tax declarations, obligations and fiscal calendar",
     "realTime": "Real-time",
     "export": "Export",
-    "newDeclaration": {
-      "title": "Create a New Declaration",
-      "description": "Add a new tax declaration",
-      "type": "Declaration type *",
-      "selectType": "Select a type",
-      "name": "Name *",
-      "namePlaceholder": "Ex: VAT Q1 2024",
-      "periodStart": "Period start *",
-      "periodEnd": "Period end *",
-      "dueDate": "Due date *",
-      "amount": "Amount (â‚¬)",
-      "descriptionField": "Description",
-      "descriptionPlaceholder": "Notes or additional details",
-      "cancel": "Cancel",
-      "creating": "Creating...",
-      "create": "Create Declaration"
-    },
+    "newDeclaration": "New declaration",
     "tabs": {
       "dashboard": "Dashboard",
       "compliance": "Tax Compliance",
@@ -3702,7 +3742,6 @@
     "realtime": "Real-time",
     "loading": "Loading tax data...",
     "export": "Export CSV",
-    "newDeclaration": "New declaration",
     "tabs": {
       "dashboard": "Dashboard",
       "compliance": "Compliance",
@@ -3777,34 +3816,6 @@
       "requiresApproval": "Requires approval",
       "emailNotifications": "Email notifications",
       "notificationEmails": "Notification emails"
-    },
-    "newDeclaration": {
-      "title": "New tax declaration",
-      "subtitle": "Create a new tax declaration for your company",
-      "form": {
-        "type": "Declaration type",
-        "selectType": "Select a type",
-        "types": {
-          "tva": "VAT - Value-added tax",
-          "is": "Corporate tax",
-          "liasse": "Tax return package",
-          "ir": "Income tax",
-          "cfe": "Business property tax",
-          "cvae": "Value-added contribution"
-        },
-        "name": "Declaration name",
-        "namePlaceholder": "Ex: VAT Q1 2025",
-        "periodStart": "Period start",
-        "periodEnd": "Period end",
-        "dueDate": "Due date",
-        "amount": "Amount (optional)",
-        "amountPlaceholder": "0.00",
-        "description": "Description (optional)",
-        "descriptionPlaceholder": "Notes or additional information",
-        "cancel": "Cancel",
-        "create": "Create declaration",
-        "creating": "Creating..."
-      }
     },
     "errors": {
       "loadDashboardData": "Error loading dashboard",

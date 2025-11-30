@@ -68,11 +68,11 @@ export class ComponentErrorBoundary extends Component<Props, State> {
           </button>
           
           {this.props.showError && process.env.NODE_ENV === 'development' && this.state.error && (
-            <details className="mt-3 p-2 bg-white rounded border text-xs">
-              <summary className="cursor-pointer font-medium text-gray-700">
+            <details className="mt-3 p-2 bg-white dark:bg-gray-800 rounded border text-xs">
+              <summary className="cursor-pointer font-medium text-gray-700 dark:text-gray-300">
                 Error Details
               </summary>
-              <div className="mt-2 text-gray-600">
+              <div className="mt-2 text-gray-600 dark:text-gray-400">
                 <p className="font-semibold">Message:</p>
                 <p className="mb-2">{this.state.error.message}</p>
                 <p className="font-semibold">Stack:</p>

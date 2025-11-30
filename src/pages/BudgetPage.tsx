@@ -78,13 +78,13 @@ const BudgetPage: React.FC = () => {
 
               </div>
 
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-gray-100 mb-3">
 
                 {t('budget.noCompanySelected.title')}
 
               </h2>
 
-              <p className="text-gray-600 dark:text-gray-400 text-center max-w-md">
+              <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 text-center max-w-md">
 
                 {t('budget.noCompanySelected.description')}
 
@@ -186,7 +186,7 @@ const BudgetPage: React.FC = () => {
 
         {(viewMode === 'create' || viewMode === 'edit') && (
 
-          <Card className="shadow-lg border-0 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <Card className="shadow-lg border-0 bg-white dark:bg-gray-800 dark:bg-gray-800 border-gray-200 dark:border-gray-600 dark:border-gray-700">
 
             <BudgetForm
 

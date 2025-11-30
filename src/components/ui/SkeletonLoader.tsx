@@ -118,7 +118,7 @@ export const DashboardSkeleton: React.FC = () => (
       {Array.from({ length: 4 }).map((_, i) => (
         <motion.div
           key={i}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border"
+          className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-lg shadow-sm border"
           initial={{ opacity: 0, y: 20 }}
           animate={{ 
             opacity: 1, 
@@ -137,7 +137,7 @@ export const DashboardSkeleton: React.FC = () => (
     {/* Charts */}
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <motion.div
-        className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-6"
+        className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-lg shadow-sm border p-6"
         initial={{ opacity: 0, x: -20 }}
         animate={{ 
           opacity: 1, 
@@ -152,7 +152,7 @@ export const DashboardSkeleton: React.FC = () => (
       </motion.div>
 
       <motion.div
-        className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-6"
+        className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-lg shadow-sm border p-6"
         initial={{ opacity: 0, x: 20 }}
         animate={{ 
           opacity: 1, 
@@ -169,7 +169,7 @@ export const DashboardSkeleton: React.FC = () => (
 
     {/* Table */}
     <motion.div
-      className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-6"
+      className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-lg shadow-sm border p-6"
       initial={{ opacity: 0, y: 20 }}
       animate={{ 
         opacity: 1, 
@@ -243,7 +243,7 @@ export const ImportSkeleton: React.FC = () => (
     </div>
     
     {/* Upload area skeleton */}
-    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8">
+    <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8">
       <div className="text-center space-y-4">
         <Skeleton width={48} height={48} className="mx-auto" rounded />
         <Skeleton height={16} width={180} className="mx-auto" />

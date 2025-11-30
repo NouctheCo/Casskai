@@ -113,26 +113,26 @@ const PricingCard: React.FC<PricingCardProps> = ({
             <PlanIcon className="w-8 h-8 text-white" />
           </div>
           
-          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
+          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
             {plan.name}
           </CardTitle>
           
-          <CardDescription className="text-gray-600 dark:text-gray-400 mt-2">
+          <CardDescription className="text-gray-600 dark:text-gray-400 dark:text-gray-400 mt-2">
             {plan.description}
           </CardDescription>
           
           <div className="mt-4">
             <div className="flex items-baseline justify-center space-x-2">
-              <span className="text-4xl font-bold text-gray-900 dark:text-white">
+              <span className="text-4xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
                 {formatPrice(plan.price, plan.currency)}
               </span>
-              <span className="text-gray-500 dark:text-gray-400 text-lg">
+              <span className="text-gray-500 dark:text-gray-400 dark:text-gray-400 text-lg">
                 /{plan.interval === 'month' ? 'mois' : 'an'}
               </span>
             </div>
             
             {plan.interval === 'month' && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 mt-1">
                 {formatPrice(plan.price * 12 * 0.8, plan.currency)}/an avec facturation annuelle
               </p>
             )}
@@ -144,8 +144,8 @@ const PricingCard: React.FC<PricingCardProps> = ({
           <div className="grid grid-cols-2 gap-3 mb-6 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
             {plan.maxUsers && (
               <div className="flex items-center space-x-2">
-                <Users className="w-4 h-4 text-gray-500" />
-                <span className="text-sm text-gray-600 dark:text-gray-400">
+                <Users className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">
                   {plan.maxUsers} utilisateur{plan.maxUsers > 1 ? 's' : ''}
                 </span>
               </div>
@@ -153,23 +153,23 @@ const PricingCard: React.FC<PricingCardProps> = ({
             
             {plan.maxClients && (
               <div className="flex items-center space-x-2">
-                <Users className="w-4 h-4 text-gray-500" />
-                <span className="text-sm text-gray-600 dark:text-gray-400">
+                <Users className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">
                   {plan.maxClients === null ? 'Clients illimités' : `${plan.maxClients} clients`}
                 </span>
               </div>
             )}
             
             <div className="flex items-center space-x-2">
-              <Database className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">
+              <Database className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+              <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">
                 {plan.storageLimit}
               </span>
             </div>
             
             <div className="flex items-center space-x-2">
-              <HeadphonesIcon className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-600 dark:text-gray-400 capitalize">
+              <HeadphonesIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+              <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 capitalize">
                 Support {plan.supportLevel}
               </span>
             </div>
@@ -192,7 +192,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
                 } flex items-center justify-center flex-shrink-0`}>
                   <Check className="w-3 h-3 text-white" />
                 </div>
-                <span className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                <span className="text-sm text-gray-700 dark:text-gray-300 dark:text-gray-300 leading-relaxed">
                   {feature}
                 </span>
               </motion.div>
@@ -235,7 +235,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
             </Button>
             
             {!isCurrentPlan && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
+              <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 text-center mt-2">
                 Changement immédiat • Annulation à tout moment
               </p>
             )}

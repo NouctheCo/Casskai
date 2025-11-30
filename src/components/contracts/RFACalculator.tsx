@@ -241,7 +241,7 @@ export const RFACalculator: React.FC<RFACalculatorProps> = ({ contract, onClose 
 
                 </div>
 
-                <div className="text-xs text-gray-500 mt-1">
+                <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
 
                   {formatAmount(tier.tier_amount)} × {(tier.tier_rate * 100).toFixed(1)}%
 
@@ -447,7 +447,7 @@ export const RFACalculator: React.FC<RFACalculatorProps> = ({ contract, onClose 
 
           </h2>
 
-          <p className="text-gray-600 mt-1">
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 mt-1">
 
             {contract.contract_name} - {contract.client_name}
 
@@ -665,7 +665,7 @@ export const RFACalculator: React.FC<RFACalculatorProps> = ({ contract, onClose 
 
                       </div>
 
-                      <div className="text-sm text-gray-600 mt-2">
+                      <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 mt-2">
 
                         Taux effectif : {((calculationResult.amount / turnoverAmount) * 100).toFixed(2)}%
 
@@ -849,7 +849,7 @@ export const RFACalculator: React.FC<RFACalculatorProps> = ({ contract, onClose 
 
                                 </Badge>
 
-                                <div className="text-sm text-gray-600">
+                                <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
 
                                   CA: <AmountDisplay amount={result.turnover_amount} currency={contract.currency} />
 
@@ -865,7 +865,7 @@ export const RFACalculator: React.FC<RFACalculatorProps> = ({ contract, onClose 
 
                                 </div>
 
-                                <div className="text-sm text-gray-500">
+                                <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                                   {(result.effective_rate * 100).toFixed(2)}%
 
@@ -899,9 +899,9 @@ export const RFACalculator: React.FC<RFACalculatorProps> = ({ contract, onClose 
 
                   <CardContent className="py-12 text-center">
 
-                    <BarChart3 className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                    <BarChart3 className="h-12 w-12 mx-auto text-gray-400 dark:text-gray-500 mb-4" />
 
-                    <p className="text-gray-500">
+                    <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                       Cliquez sur "Lancer la simulation" pour voir les résultats
 

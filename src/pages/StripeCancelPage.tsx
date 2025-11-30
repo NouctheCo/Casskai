@@ -72,7 +72,7 @@ export default function StripeCancelPage() {
 
             <h2 className="text-2xl font-bold mb-2">Aucun problème !</h2>
 
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 mb-6">
 
               Le paiement a été annulé. Vous pouvez continuer à utiliser CassKai avec le plan gratuit ou revenir choisir un abonnement quand vous le souhaitez.
 

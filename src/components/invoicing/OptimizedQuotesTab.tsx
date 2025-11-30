@@ -224,7 +224,7 @@ function QuotePreviewDialog({ open, onClose, quote }) {
 
                 <h3 className="font-semibold text-lg mb-2">Informations client</h3>
 
-                <p className="text-gray-600 dark:text-gray-400">{quote.clientName}</p>
+                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{quote.clientName}</p>
 
               </div>
 
@@ -232,19 +232,19 @@ function QuotePreviewDialog({ open, onClose, quote }) {
 
                 <h3 className="font-semibold text-lg mb-2">Informations devis</h3>
 
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                   <strong>Numéro:</strong> {quote.quoteNumber}
 
                 </p>
 
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                   <strong>Date:</strong> {new Date(quote.date).toLocaleDateString('fr-FR')}
 
                 </p>
 
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                   <strong>Valide jusqu'au:</strong> {new Date(quote.validUntil).toLocaleDateString('fr-FR')}
 
@@ -284,7 +284,7 @@ function QuotePreviewDialog({ open, onClose, quote }) {
 
                 ) : (
 
-                  <p className="text-gray-500">Aucun article</p>
+                  <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Aucun article</p>
 
                 )}
 
@@ -314,7 +314,7 @@ function QuotePreviewDialog({ open, onClose, quote }) {
 
             <h3 className="font-semibold text-lg mb-2">Notes</h3>
 
-            <p className="text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
 
               {quote.notes || 'Aucune note'}
 
@@ -330,7 +330,7 @@ function QuotePreviewDialog({ open, onClose, quote }) {
 
             <div className="flex items-center space-x-2">
 
-              <span className="text-sm text-gray-600 dark:text-gray-400">Statut:</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Statut:</span>
 
               <div>
 
@@ -556,7 +556,7 @@ const QuoteFormDialog = ({ open, onClose, onSave, editingQuote = null }) => {
 
           />
 
-          {formData.clientId && <p className="text-xs text-gray-500">Client sélectionné</p>}
+          {formData.clientId && <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">Client sélectionné</p>}
 
           
 
@@ -1000,7 +1000,7 @@ export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNe
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total devis</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Total devis</p>
 
                 <p className="text-2xl font-bold">{summary.totalQuotes}</p>
 
@@ -1024,7 +1024,7 @@ export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNe
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Montant total</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Montant total</p>
 
                 <p className="text-xl font-bold">{summary.totalAmount.toFixed(2)} €</p>
 
@@ -1048,7 +1048,7 @@ export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNe
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Acceptés</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Acceptés</p>
 
                 <p className="text-2xl font-bold">{summary.acceptedQuotes}</p>
 
@@ -1072,7 +1072,7 @@ export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNe
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">En attente</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">En attente</p>
 
                 <p className="text-2xl font-bold">{summary.pendingQuotes}</p>
 
@@ -1096,7 +1096,7 @@ export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNe
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Expirés</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Expirés</p>
 
                 <p className="text-2xl font-bold">{summary.expiredQuotes}</p>
 
@@ -1134,7 +1134,7 @@ export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNe
 
               <div className="relative">
 
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
 
                 <Input
 
@@ -1238,8 +1238,8 @@ export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNe
                 ) : filteredQuotes.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-8">
-                      <FileText className="w-12 h-12 mx-auto text-gray-400 mb-2" />
-                      <p className="text-gray-600 dark:text-gray-400">
+                      <FileText className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 mb-2" />
+                      <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                         {searchTerm || statusFilter !== 'all' ? 'Aucun devis trouvé' : 'Aucun devis. Commencez par en créer un !'}
                       </p>
                     </TableCell>

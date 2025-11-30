@@ -44,11 +44,11 @@ export const EmailConfirmationDialog: React.FC<EmailConfirmationDialogProps> = (
             <Mail className="w-8 h-8 text-blue-600 dark:text-blue-400" />
           </motion.div>
           
-          <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white">
+          <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-white">
             Vérifiez votre adresse email
           </DialogTitle>
           
-          <DialogDescription className="text-gray-600 dark:text-gray-400 space-y-2">
+          <DialogDescription className="text-gray-600 dark:text-gray-400 dark:text-gray-400 space-y-2">
             <p>
               Nous avons envoyé un email de confirmation à :
             </p>
@@ -123,7 +123,7 @@ export const EmailConfirmationDialog: React.FC<EmailConfirmationDialogProps> = (
 
           {/* Note en bas */}
           <div className="text-center">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400">
               Vous pourrez vous connecter après avoir confirmé votre email
             </p>
             <Button

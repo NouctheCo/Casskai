@@ -161,7 +161,7 @@ export const PublicNavigation: React.FC<PublicNavigationProps> = ({ variant = 'l
 
               </span>
 
-              <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+              <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 font-medium">
 
                 Business Suite
 
@@ -185,7 +185,7 @@ export const PublicNavigation: React.FC<PublicNavigationProps> = ({ variant = 'l
 
                 onClick={() => scrollToSection(item.key)}
 
-                className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium relative group"
+                className="text-gray-700 dark:text-gray-300 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium relative group"
 
                 whileHover={{ y: -1 }}
 
@@ -253,7 +253,7 @@ export const PublicNavigation: React.FC<PublicNavigationProps> = ({ variant = 'l
 
               onClick={() => setIsMenuOpen(!isMenuOpen)}
 
-              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="text-gray-700 dark:text-gray-300 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
 
               whileTap={{ scale: 0.95 }}
 
@@ -295,7 +295,7 @@ export const PublicNavigation: React.FC<PublicNavigationProps> = ({ variant = 'l
 
                   onClick={() => scrollToSection(item.key)}
 
-                  className="block w-full text-left px-4 py-3 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg mx-2 transition-colors font-medium"
+                  className="block w-full text-left px-4 py-3 text-gray-700 dark:text-gray-300 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg mx-2 transition-colors font-medium"
 
                 >
 
@@ -305,7 +305,7 @@ export const PublicNavigation: React.FC<PublicNavigationProps> = ({ variant = 'l
 
               ))}
 
-              <div className="px-4 py-2 space-y-3 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4">
+              <div className="px-4 py-2 space-y-3 border-t border-gray-200 dark:border-gray-600 dark:border-gray-700 mt-4 pt-4">
 
                 <Button
 

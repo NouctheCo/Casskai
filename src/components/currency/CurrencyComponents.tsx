@@ -31,7 +31,7 @@ export const CurrencySelector = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+        className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
       >
         {currencyOptions.map(option => (
           <option key={option.code} value={option.code}>
@@ -78,11 +78,11 @@ export const AmountDisplay = ({
       <div className={className}>
         <span className="font-medium">{originalAmount}</span>
         {isLoading ? (
-          <span className="text-sm text-gray-500 ml-2">
+          <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 ml-2">
             <RefreshCw className="inline h-3 w-3 animate-spin" />
           </span>
         ) : convertedAmount ? (
-          <span className="text-sm text-gray-500 ml-2">
+          <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 ml-2">
             (≈ {convertedAmount})
           </span>
         ) : null}
@@ -223,13 +223,13 @@ export const CurrencyConverter = () => {
                   {parseFloat(result).toLocaleString()} {toCurrency}
                 </div>
                 {rate && (
-                  <div className="text-sm text-gray-600 mt-1">
+                  <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 mt-1">
                     Taux : 1 {fromCurrency} = {rate.toFixed(6)} {toCurrency}
                   </div>
                 )}
               </div>
             ) : (
-              <div className="text-gray-500">Entrez un montant à convertir</div>
+              <div className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Entrez un montant à convertir</div>
             )}
           </div>
         </div>
@@ -328,7 +328,7 @@ export const ExchangeRateWidget = ({
             <div key={key} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
               <div className="flex items-center space-x-2">
                 <span className="font-medium text-sm">{pair.from}</span>
-                <ArrowRightLeft className="h-3 w-3 text-gray-400" />
+                <ArrowRightLeft className="h-3 w-3 text-gray-400 dark:text-gray-500" />
                 <span className="font-medium text-sm">{pair.to}</span>
               </div>
               
@@ -336,12 +336,12 @@ export const ExchangeRateWidget = ({
                 {rate ? (
                   <div>
                     <span className="font-mono text-sm">{rate.toFixed(4)}</span>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
                       1 {pair.from} = {rate.toFixed(4)} {pair.to}
                     </div>
                   </div>
                 ) : (
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-gray-400 dark:text-gray-500">
                     {isLoading ? 'Chargement...' : 'N/A'}
                   </span>
                 )}
@@ -401,7 +401,7 @@ export const CurrencyInput = ({
             />
           </div>
         ) : (
-          <div className="w-16 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-center text-sm font-medium">
+          <div className="w-16 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 text-center text-sm font-medium">
             {currency}
           </div>
         )}

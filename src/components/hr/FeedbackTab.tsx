@@ -120,7 +120,7 @@ export function FeedbackTab({ companyId, employees, currentUserId }: FeedbackTab
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement du feedback...</p>
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Chargement du feedback...</p>
         </div>
       </div>
     );
@@ -134,7 +134,7 @@ export function FeedbackTab({ companyId, employees, currentUserId }: FeedbackTab
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-2xl font-bold text-blue-600">{stats.total}</p>
-              <p className="text-sm text-gray-600">Total</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Total</p>
             </div>
           </CardContent>
         </Card>
@@ -143,7 +143,7 @@ export function FeedbackTab({ companyId, employees, currentUserId }: FeedbackTab
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-2xl font-bold text-green-600">{stats.praise}</p>
-              <p className="text-sm text-gray-600">Éloges</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Éloges</p>
             </div>
           </CardContent>
         </Card>
@@ -152,7 +152,7 @@ export function FeedbackTab({ companyId, employees, currentUserId }: FeedbackTab
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-2xl font-bold text-orange-600">{stats.constructive}</p>
-              <p className="text-sm text-gray-600">Constructifs</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Constructifs</p>
             </div>
           </CardContent>
         </Card>
@@ -161,7 +161,7 @@ export function FeedbackTab({ companyId, employees, currentUserId }: FeedbackTab
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-2xl font-bold text-purple-600">{stats.recognition}</p>
-              <p className="text-sm text-gray-600">Reconnaissances</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Reconnaissances</p>
             </div>
           </CardContent>
         </Card>
@@ -172,7 +172,7 @@ export function FeedbackTab({ companyId, employees, currentUserId }: FeedbackTab
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
               <Input
                 placeholder="Rechercher..."
                 value={searchTerm}
@@ -184,7 +184,7 @@ export function FeedbackTab({ companyId, employees, currentUserId }: FeedbackTab
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="px-4 py-2 border rounded-lg bg-white text-sm"
+              className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
             >
               <option value="all">Tous les types</option>
               <option value="praise">Éloge</option>
@@ -210,10 +210,10 @@ export function FeedbackTab({ companyId, employees, currentUserId }: FeedbackTab
             <CardContent className="pt-6">
               <div className="text-center py-12">
                 <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                   Aucun feedback trouvé
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-4">
                   {searchTerm || typeFilter !== 'all'
                     ? 'Essayez de modifier vos critères de recherche'
                     : 'Commencez par donner votre premier feedback'}
@@ -252,7 +252,7 @@ export function FeedbackTab({ companyId, employees, currentUserId }: FeedbackTab
                     <CardTitle className="text-lg">
                       Pour: {feedback.employee_name}
                     </CardTitle>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
                       De: {feedback.is_anonymous ? 'Anonyme' : feedback.from_employee_name}
                       {' • '}
                       {new Date(feedback.feedback_date).toLocaleDateString('fr-FR')}
@@ -263,15 +263,15 @@ export function FeedbackTab({ companyId, employees, currentUserId }: FeedbackTab
 
               <CardContent>
                 <div className="bg-gray-50 p-4 rounded-lg mb-4">
-                  <p className="text-gray-700 whitespace-pre-wrap">{feedback.content}</p>
+                  <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{feedback.content}</p>
                 </div>
 
                 {feedback.response && (
                   <div className="border-l-4 border-blue-500 pl-4 py-2">
                     <p className="text-sm font-semibold text-blue-700 mb-1">Réponse:</p>
-                    <p className="text-sm text-gray-700">{feedback.response}</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">{feedback.response}</p>
                     {feedback.response_date && (
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
                         {new Date(feedback.response_date).toLocaleDateString('fr-FR')}
                       </p>
                     )}

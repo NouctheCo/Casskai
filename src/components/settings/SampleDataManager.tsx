@@ -104,14 +104,14 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-6">
       <div className="flex items-center gap-3 mb-6">
         <Database className="text-blue-600" size={24} />
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
             Gestion des Données d'Exemple
           </h3>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             Initialisez votre application avec des données de démonstration ou remettez à zéro
           </p>
         </div>
@@ -212,7 +212,7 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
           >
             <div className="p-6">
               <div className="flex items-center gap-3 mb-4">
@@ -223,7 +223,7 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
               <div className="space-y-6">
                 {/* Types de données à inclure */}
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-3">Types de données à inclure</h4>
+                  <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Types de données à inclure</h4>
                   <div className="space-y-2">
                     {[
                       { key: 'includeCustomers', label: 'Clients d\'exemple' },
@@ -239,9 +239,9 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
                             ...prev,
                             [key]: e.target.checked
                           }))}
-                          className="rounded border-gray-300"
+                          className="rounded border-gray-300 dark:border-gray-600"
                         />
-                        <span className="text-sm text-gray-700">{label}</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
                       </label>
                     ))}
                   </div>
@@ -250,7 +250,7 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
                 {/* Nombre de transactions */}
                 {sampleDataConfig.includeTransactions && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Nombre d'écritures comptables (max: 100)
                     </label>
                     <input
@@ -262,17 +262,17 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
                         ...prev,
                         transactionCount: Math.min(100, Math.max(10, parseInt(e.target.value) || 10))
                       }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                 )}
 
                 {/* Période des données */}
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-3">Période des données</h4>
+                  <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Période des données</h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Date de début
                       </label>
                       <input
@@ -282,11 +282,11 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
                           ...prev,
                           dateRange: { ...prev.dateRange, start: e.target.value }
                         }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Date de fin
                       </label>
                       <input
@@ -296,7 +296,7 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
                           ...prev,
                           dateRange: { ...prev.dateRange, end: e.target.value }
                         }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
                   </div>
@@ -307,7 +307,7 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
               <div className="flex justify-end gap-3 mt-6 pt-6 border-t">
                 <button
                   onClick={() => setShowSampleDataConfig(false)}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                  className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800"
                 >
                   Annuler
                 </button>
@@ -330,7 +330,7 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-lg shadow-xl max-w-md w-full"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full"
           >
             <div className="p-6">
               <div className="flex items-center gap-3 mb-4">
@@ -339,10 +339,10 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
               </div>
 
               <div className="mb-6">
-                <p className="text-gray-700 mb-4">
+                <p className="text-gray-700 dark:text-gray-300 mb-4">
                   Cette action va supprimer <strong>toutes les données</strong> de votre entreprise :
                 </p>
-                <ul className="text-sm text-gray-600 space-y-1 ml-4">
+                <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1 ml-4">
                   <li>• Toutes les écritures comptables</li>
                   <li>• Toutes les factures</li>
                   <li>• Tous les clients et fournisseurs</li>
@@ -359,7 +359,7 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
               <div className="flex justify-end gap-3">
                 <button
                   onClick={() => setShowConfirmReset(false)}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                  className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800"
                 >
                   Annuler
                 </button>

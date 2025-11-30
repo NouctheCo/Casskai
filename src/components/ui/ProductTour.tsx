@@ -214,7 +214,7 @@ const TourTooltip: React.FC<TourTooltipProps> = ({
 
         exit={{ opacity: 0, scale: 0.8 }}
 
-        className="fixed z-[10000] bg-white rounded-lg shadow-2xl border max-w-sm min-w-[300px]"
+        className="fixed z-[10000] bg-white dark:bg-gray-800 rounded-lg shadow-2xl border max-w-sm min-w-[300px]"
 
         style={{ top: tooltipPosition.top, left: tooltipPosition.left }}
 
@@ -224,13 +224,13 @@ const TourTooltip: React.FC<TourTooltipProps> = ({
 
         <div className="flex items-center justify-between p-4 border-b">
 
-          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
 
           <button
 
             onClick={onClose}
 
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:text-gray-500 transition-colors"
 
             aria-label={t('welcomeTour.skip')}
 
@@ -248,7 +248,7 @@ const TourTooltip: React.FC<TourTooltipProps> = ({
 
         <div className="p-4">
 
-          <p className="text-gray-600 mb-4">{content}</p>
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-4">{content}</p>
 
 
 
@@ -280,7 +280,7 @@ const TourTooltip: React.FC<TourTooltipProps> = ({
 
                 disabled={currentStep === 0}
 
-                className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
 
               >
 
@@ -294,7 +294,7 @@ const TourTooltip: React.FC<TourTooltipProps> = ({
 
 
 
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
               {t('welcomeTour.stepCounter', { current: currentStep + 1, total: totalSteps })}
 
@@ -308,7 +308,7 @@ const TourTooltip: React.FC<TourTooltipProps> = ({
 
                 onClick={onSkip}
 
-                className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
+                className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 hover:text-gray-800"
 
               >
 

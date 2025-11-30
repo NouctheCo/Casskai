@@ -93,11 +93,11 @@ export function DocumentGenerationTab({ companyId, employees }: DocumentGenerati
 
   const getStatusIcon = (status: GeneratedDocumentStatus) => {
     switch (status) {
-      case 'draft': return <Clock className="w-4 h-4 text-gray-600 dark:text-gray-300" />;
+      case 'draft': return <Clock className="w-4 h-4 text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300" />;
       case 'generated': return <FileText className="w-4 h-4 text-blue-600" />;
       case 'sent': return <Mail className="w-4 h-4 text-purple-600" />;
       case 'signed': return <FileSignature className="w-4 h-4 text-green-600" />;
-      case 'archived': return <Archive className="w-4 h-4 text-gray-600 dark:text-gray-300" />;
+      case 'archived': return <Archive className="w-4 h-4 text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300" />;
       default: return <FileText className="w-4 h-4" />;
     }
   };
@@ -129,7 +129,7 @@ export function DocumentGenerationTab({ companyId, employees }: DocumentGenerati
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-300">Chargement...</p>
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">Chargement...</p>
         </div>
       </div>
     );
@@ -143,7 +143,7 @@ export function DocumentGenerationTab({ companyId, employees }: DocumentGenerati
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">Total</p>
                 <p className="text-2xl font-bold">{stats.total}</p>
               </div>
               <FileText className="w-8 h-8 text-blue-600" />
@@ -155,10 +155,10 @@ export function DocumentGenerationTab({ companyId, employees }: DocumentGenerati
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Brouillons</p>
-                <p className="text-2xl font-bold text-gray-600 dark:text-gray-300">{stats.draft}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">Brouillons</p>
+                <p className="text-2xl font-bold text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">{stats.draft}</p>
               </div>
-              <Clock className="w-8 h-8 text-gray-600 dark:text-gray-300" />
+              <Clock className="w-8 h-8 text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300" />
             </div>
           </CardContent>
         </Card>
@@ -167,7 +167,7 @@ export function DocumentGenerationTab({ companyId, employees }: DocumentGenerati
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Générés</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">Générés</p>
                 <p className="text-2xl font-bold text-blue-600">{stats.generated}</p>
               </div>
               <FileText className="w-8 h-8 text-blue-600" />
@@ -179,7 +179,7 @@ export function DocumentGenerationTab({ companyId, employees }: DocumentGenerati
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Envoyés</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">Envoyés</p>
                 <p className="text-2xl font-bold text-purple-600">{stats.sent}</p>
               </div>
               <Mail className="w-8 h-8 text-purple-600" />
@@ -191,7 +191,7 @@ export function DocumentGenerationTab({ companyId, employees }: DocumentGenerati
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Signés</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">Signés</p>
                 <p className="text-2xl font-bold text-green-600">{stats.signed}</p>
               </div>
               <FileSignature className="w-8 h-8 text-green-600" />
@@ -247,7 +247,7 @@ export function DocumentGenerationTab({ companyId, employees }: DocumentGenerati
         <CardContent>
           <div className="flex gap-4 mb-6">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
               <Input
                 placeholder="Rechercher un document..."
                 value={searchTerm}
@@ -304,7 +304,7 @@ export function DocumentGenerationTab({ companyId, employees }: DocumentGenerati
                       )}
                     </div>
 
-                    <div className="text-sm text-gray-600 dark:text-gray-300">
+                    <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">
                       <span>Généré le {new Date(document.generated_at).toLocaleDateString('fr-FR')}</span>
                       {document.sent_date && (
                         <span className="ml-4">• Envoyé le {new Date(document.sent_date).toLocaleDateString('fr-FR')}</span>
@@ -355,9 +355,9 @@ export function DocumentGenerationTab({ companyId, employees }: DocumentGenerati
 
           {filteredDocuments.length === 0 && (
             <div className="text-center py-12">
-              <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">Aucun document</h3>
-              <p className="text-gray-600 dark:text-gray-300">Générez votre premier document à partir d'un template</p>
+              <FileText className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 dark:text-gray-200 mb-2">Aucun document</h3>
+              <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">Générez votre premier document à partir d'un template</p>
             </div>
           )}
         </CardContent>

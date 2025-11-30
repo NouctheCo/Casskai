@@ -65,10 +65,10 @@ export const AnimatedProgress: React.FC<AnimatedProgressProps> = ({
     <div className={cn("relative", className)} {...props}>
       {showPercentage && (
         <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300">
             Progress
           </span>
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300">
             {Math.round(percentage)}%
           </span>
         </div>
@@ -170,7 +170,7 @@ export const CircularProgress: React.FC<{
           stroke="currentColor"
           strokeWidth={strokeWidth}
           fill="transparent"
-          className="text-gray-200 dark:text-gray-700"
+          className="text-gray-200 dark:text-gray-700 dark:text-gray-300"
         />
         
         {/* Progress circle */}
@@ -198,7 +198,7 @@ export const CircularProgress: React.FC<{
       
       {showValue && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+          <span className="text-lg font-semibold text-gray-700 dark:text-gray-300 dark:text-gray-300">
             {Math.round(percentage)}%
           </span>
         </div>

@@ -37,11 +37,11 @@ const InventoryHeader: FC<InventoryHeaderProps> = ({
   >
     <div className="space-y-2">
       <div className="flex items-center space-x-2">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{title}</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">{title}</h1>
         <Sparkles className="h-6 w-6 text-yellow-500" />
       </div>
       <div className="flex items-center space-x-2">
-        <p className="text-gray-600 dark:text-gray-400">{description}</p>
+        <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400">{description}</p>
         <Badge variant="secondary" className="text-xs">
           {badgeLabel}
         </Badge>

@@ -580,7 +580,7 @@ const BillingPage: React.FC = () => {
 
         <div>
 
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center space-x-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white flex items-center space-x-2">
 
             <CreditCard className="w-8 h-8 text-blue-500" />
 
@@ -588,7 +588,7 @@ const BillingPage: React.FC = () => {
 
           </h1>
 
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mt-2">
 
             Gérez votre abonnement, moyens de paiement et factures
 
@@ -660,13 +660,13 @@ const BillingPage: React.FC = () => {
 
                 <ArrowUpCircle className="w-8 h-8 text-blue-500 mx-auto mb-3" />
 
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
 
                   Changer de plan
 
                 </h3>
 
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                   Mettez à niveau ou réduisez votre plan
 
@@ -684,13 +684,13 @@ const BillingPage: React.FC = () => {
 
                 <CreditCard className="w-8 h-8 text-green-500 mx-auto mb-3" />
 
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
 
                   Moyens de paiement
 
                 </h3>
 
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                   Gérez vos cartes de crédit
 
@@ -708,13 +708,13 @@ const BillingPage: React.FC = () => {
 
                 <FileText className="w-8 h-8 text-purple-500 mx-auto mb-3" />
 
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
 
                   Historique des factures
 
                 </h3>
 
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                   Téléchargez vos factures
 
@@ -736,7 +736,7 @@ const BillingPage: React.FC = () => {
 
           <div className="flex items-center justify-between">
 
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
 
               Choisissez votre plan
 
@@ -746,7 +746,7 @@ const BillingPage: React.FC = () => {
 
             <div className="flex items-center space-x-4">
 
-              <span className="text-sm text-gray-600 dark:text-gray-400">Facturation :</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Facturation :</span>
 
               <Select value={billingPeriod} onValueChange={(value: 'month' | 'year') => setBillingPeriod(value)}>
 
@@ -804,7 +804,7 @@ const BillingPage: React.FC = () => {
 
           <div className="space-y-6">
 
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
 
               Moyens de paiement
 
@@ -838,13 +838,13 @@ const BillingPage: React.FC = () => {
 
                           <div>
 
-                            <p className="font-medium text-gray-900 dark:text-white">
+                            <p className="font-medium text-gray-900 dark:text-gray-100 dark:text-white">
 
                               •••• •••• •••• {method.last4}
 
                             </p>
 
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                            <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                               Expire {method.expiryMonth}/{method.expiryYear}
 
@@ -916,9 +916,9 @@ const BillingPage: React.FC = () => {
 
                   <CardContent className="p-6 text-center">
 
-                    <CreditCard className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                    <CreditCard className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
 
-                    <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm">
+                    <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-4 text-sm">
 
                       Ajouter une nouvelle méthode de paiement
 
@@ -952,15 +952,15 @@ const BillingPage: React.FC = () => {
 
                 <CardContent className="p-12 text-center">
 
-                  <CreditCard className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <CreditCard className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
 
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
 
                     Aucun moyen de paiement
 
                   </h3>
 
-                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                  <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-6">
 
                     Ajoutez une carte de crédit pour gérer vos paiements
 
@@ -990,7 +990,7 @@ const BillingPage: React.FC = () => {
 
           <div className="flex items-center justify-between">
 
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
 
               Historique des factures
 
@@ -1024,31 +1024,31 @@ const BillingPage: React.FC = () => {
 
                       <tr>
 
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wider">
 
                           Facture
 
                         </th>
 
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wider">
 
                           Statut
 
                         </th>
 
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wider">
 
                           Montant
 
                         </th>
 
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wider">
 
                           Date
 
                         </th>
 
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wider">
 
                           Actions
 
@@ -1066,13 +1066,13 @@ const BillingPage: React.FC = () => {
 
                           <td className="px-6 py-4 whitespace-nowrap">
 
-                            <div className="text-sm font-medium text-gray-900 dark:text-white">
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100 dark:text-white">
 
                               #{invoice.stripeInvoiceId.slice(-8)}
 
                             </div>
 
-                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                            <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                               {invoice.createdAt.toLocaleDateString('fr-FR')}
 
@@ -1086,7 +1086,7 @@ const BillingPage: React.FC = () => {
 
                               {getInvoiceStatusIcon(invoice.status)}
 
-                              <span className="text-sm text-gray-900 dark:text-white">
+                              <span className="text-sm text-gray-900 dark:text-gray-100 dark:text-white">
 
                                 {getInvoiceStatusLabel(invoice.status)}
 
@@ -1096,13 +1096,13 @@ const BillingPage: React.FC = () => {
 
                           </td>
 
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 dark:text-white">
 
                             {formatPrice(invoice.amount, invoice.currency)}
 
                           </td>
 
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                             {invoice.dueDate.toLocaleDateString('fr-FR')}
 
@@ -1176,15 +1176,15 @@ const BillingPage: React.FC = () => {
 
               <CardContent className="p-12 text-center">
 
-                <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <FileText className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
 
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
 
                   Aucune facture
 
                 </h3>
 
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                   Vos factures apparaîtront ici une fois que vous aurez un abonnement actif
 

@@ -178,17 +178,17 @@ const TutorialsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-950">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 bg-gradient-to-br from-red-400 to-red-600 rounded-2xl flex items-center justify-center shadow-lg shadow-red-500/30">
               <Play className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
                 Tutoriels Vidéo
               </h1>
-              <p className="text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mt-1">
                 Apprenez à maîtriser CassKai avec nos tutoriels pas-à-pas
               </p>
             </div>
@@ -197,21 +197,21 @@ const TutorialsPage: React.FC = () => {
           {/* Search & Filter */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
               <Input
                 type="text"
                 placeholder="Rechercher un tutoriel..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 pr-4 py-3 w-full rounded-xl border-2 border-gray-200 dark:border-gray-700"
+                className="pl-12 pr-4 py-3 w-full rounded-xl border-2 border-gray-200 dark:border-gray-600 dark:border-gray-700"
               />
             </div>
             <div className="relative">
-              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="pl-12 pr-8 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium appearance-none cursor-pointer hover:border-blue-500 dark:hover:border-blue-500 transition-colors"
+                className="pl-12 pr-8 py-3 bg-white dark:bg-gray-800 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 dark:border-gray-700 rounded-xl text-sm font-medium appearance-none cursor-pointer hover:border-blue-500 dark:hover:border-blue-500 transition-colors"
               >
                 <option value="all">Toutes les catégories</option>
                 {categories.filter((c) => c !== 'all').map((category) => (
@@ -234,10 +234,10 @@ const TutorialsPage: React.FC = () => {
                 <Youtube className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 dark:text-white">
                   Abonnez-vous à notre chaîne YouTube
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                   Ne manquez aucun tutoriel et restez informé des nouveautés
                 </p>
               </div>
@@ -254,12 +254,12 @@ const TutorialsPage: React.FC = () => {
 
         {/* Tutorials Grid */}
         {filteredTutorials.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center border border-gray-200 dark:border-gray-700">
-            <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+          <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-2xl p-12 text-center border border-gray-200 dark:border-gray-600 dark:border-gray-700">
+            <Search className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
               Aucun tutoriel trouvé
             </h3>
-            <p className="text-gray-500 dark:text-gray-400">
+            <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
               Essayez avec d'autres mots-clés ou catégories
             </p>
           </div>
@@ -268,7 +268,7 @@ const TutorialsPage: React.FC = () => {
             {filteredTutorials.map((tutorial) => (
               <div
                 key={tutorial.id}
-                className="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 hover:border-red-500 dark:hover:border-red-500 hover:shadow-xl transition-all"
+                className="group bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-600 dark:border-gray-700 hover:border-red-500 dark:hover:border-red-500 hover:shadow-xl transition-all"
               >
                 {/* Thumbnail */}
                 <div className="relative aspect-video bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800">
@@ -298,20 +298,20 @@ const TutorialsPage: React.FC = () => {
                     <span className={`px-2 py-1 text-xs font-medium rounded-lg ${getLevelColor(tutorial.level)}`}>
                       {tutorial.level}
                     </span>
-                    <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs rounded-lg">
+                    <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 text-xs rounded-lg">
                       {tutorial.category}
                     </span>
                   </div>
 
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
                     {tutorial.title}
                   </h3>
 
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-4 line-clamp-2">
                     {tutorial.description}
                   </p>
 
-                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-500">
+                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                     <div className="flex items-center gap-1">
                       <Eye className="h-3.5 w-3.5" />
                       {tutorial.views.toLocaleString()} vues
@@ -335,10 +335,10 @@ const TutorialsPage: React.FC = () => {
             <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg mx-auto mb-4">
               <Bell className="h-8 w-8 text-white" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
               Soyez notifié des nouveaux tutoriels
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-6">
               Recevez un email chaque fois qu'un nouveau tutoriel est publié
             </p>
 
@@ -367,7 +367,7 @@ const TutorialsPage: React.FC = () => {
 
         {/* Help Links */}
         <div className="mt-8 text-center">
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-4">
             Vous préférez la documentation écrite ?
           </p>
           <div className="flex items-center justify-center gap-4">

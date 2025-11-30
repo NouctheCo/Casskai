@@ -30,12 +30,12 @@ export const CountrySelector: React.FC<CountrySelectorProps> = ({
 
   return (
     <div className={`flex flex-col items-center ${className}`}>
-      <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+      <label className="text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300 mb-3">
         {t('landing.pricing.selectCountry', 'Sélectionnez votre pays')}
       </label>
       
       <Select value={selectedCountry} onValueChange={onCountryChange}>
-        <SelectTrigger className="w-80 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 transition-colors duration-200">
+        <SelectTrigger className="w-80 bg-white dark:bg-gray-800 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 transition-colors duration-200">
           <SelectValue>
             <motion.div 
               className="flex items-center"
@@ -47,11 +47,11 @@ export const CountrySelector: React.FC<CountrySelectorProps> = ({
                 {selectedCountryData?.flag || '🌍'}
               </span>
               <div className="flex flex-col items-start">
-                <span className="font-medium text-gray-900 dark:text-white">
+                <span className="font-medium text-gray-900 dark:text-gray-100 dark:text-white">
                   {selectedCountryData?.countryName || 'Sélectionner un pays'}
                 </span>
                 {selectedCountryData && (
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                  <span className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                     {t('landing.pricing.pricesIn', 'Prix en')} {selectedCountryData.currencySymbol}
                   </span>
                 )}
@@ -64,12 +64,12 @@ export const CountrySelector: React.FC<CountrySelectorProps> = ({
           {/* Section Afrique */}
           {showAfricanFirst && africanCountries.length > 0 && (
             <>
-              <div className="px-2 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide border-b border-gray-200 dark:border-gray-700">
+              <div className="px-2 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wide border-b border-gray-200 dark:border-gray-600 dark:border-gray-700">
                 🌍 Afrique
               </div>
               
               {/* Afrique de l'Ouest francophone */}
-              <div className="px-2 py-1 text-xs text-gray-400">
+              <div className="px-2 py-1 text-xs text-gray-400 dark:text-gray-500">
                 Afrique de l'Ouest francophone
               </div>
               {africanCountries
@@ -79,7 +79,7 @@ export const CountrySelector: React.FC<CountrySelectorProps> = ({
               ))}
               
               {/* Afrique Centrale francophone */}
-              <div className="px-2 py-1 text-xs text-gray-400 mt-2">
+              <div className="px-2 py-1 text-xs text-gray-400 dark:text-gray-500 mt-2">
                 Afrique Centrale francophone  
               </div>
               {africanCountries
@@ -89,7 +89,7 @@ export const CountrySelector: React.FC<CountrySelectorProps> = ({
               ))}
               
               {/* Afrique anglophone */}
-              <div className="px-2 py-1 text-xs text-gray-400 mt-2">
+              <div className="px-2 py-1 text-xs text-gray-400 dark:text-gray-500 mt-2">
                 Afrique anglophone
               </div>
               {africanCountries
@@ -98,12 +98,12 @@ export const CountrySelector: React.FC<CountrySelectorProps> = ({
                 <CountrySelectItem key={country.countryCode} country={country} />
               ))}
               
-              <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+              <div className="border-t border-gray-200 dark:border-gray-600 dark:border-gray-700 my-2"></div>
             </>
           )}
           
           {/* Section Autres pays */}
-          <div className="px-2 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+          <div className="px-2 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wide">
             🌐 Autres pays
           </div>
           {otherCountries.map((country) => (
@@ -150,17 +150,17 @@ const CountrySelectItem: React.FC<{ country: MarketPricing }> = ({ country }) =>
         <div className="flex items-center">
           <span className="mr-3 text-xl">{country.flag}</span>
           <div className="flex flex-col">
-            <span className="font-medium text-gray-900 dark:text-white">
+            <span className="font-medium text-gray-900 dark:text-gray-100 dark:text-white">
               {country.countryName}
             </span>
-            <span className="text-xs text-gray-500 dark:text-gray-400">
+            <span className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
               {country.currency}
             </span>
           </div>
         </div>
         <Badge 
           variant="outline" 
-          className="text-xs px-2 py-0.5 ml-2 bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+          className="text-xs px-2 py-0.5 ml-2 bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500"
         >
           {country.currencySymbol}
         </Badge>

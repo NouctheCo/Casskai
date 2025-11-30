@@ -838,9 +838,9 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
         <div className="space-y-1">
 
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Factures</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">Factures</h2>
 
-          <p className="text-sm text-gray-500">Gérez vos factures clients</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">Gérez vos factures clients</p>
 
         </div>
 
@@ -898,7 +898,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
             <div className="relative flex-1">
 
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
 
               <Input
 
@@ -958,7 +958,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
             <span>Liste des factures</span>
 
-            <span className="text-sm font-normal text-gray-500">
+            <span className="text-sm font-normal text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
               {filteredInvoices.length} facture(s)
 
@@ -1032,7 +1032,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
                           {((invoice.third_party || invoice.client) as { email?: string })?.email && (
 
-                            <p className="text-xs text-gray-500">{((invoice.third_party || invoice.client) as { email?: string })?.email}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">{((invoice.third_party || invoice.client) as { email?: string })?.email}</p>
 
                           )}
 
@@ -1044,7 +1044,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
                         <div className="flex items-center space-x-2">
 
-                          <Calendar className="w-4 h-4 text-gray-400" />
+                          <Calendar className="w-4 h-4 text-gray-400 dark:text-gray-500" />
 
                           <span>{new Date(invoice.issue_date as any).toLocaleDateString('fr-FR')}</span>
 
@@ -1058,7 +1058,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
                           <div className="flex items-center space-x-2">
 
-                            <Clock className="w-4 h-4 text-gray-400" />
+                            <Clock className="w-4 h-4 text-gray-400 dark:text-gray-500" />
 
                             <span>{new Date(invoice.due_date as any).toLocaleDateString('fr-FR')}</span>
 
@@ -1066,7 +1066,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
                         ) : (
 
-                          <span className="text-gray-400">-</span>
+                          <span className="text-gray-400 dark:text-gray-500">-</span>
 
                         )}
 
@@ -1224,15 +1224,15 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
             <div className="text-center py-12">
 
-              <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <FileText className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
 
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 dark:text-white mb-2">
 
                 Aucune facture trouvée
 
               </h3>
 
-              <p className="text-gray-500 mb-6">
+              <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-6">
 
                 {searchTerm || statusFilter !== 'all' 
 
@@ -1924,7 +1924,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
 
                           <span className="font-medium">{client.name}</span>
 
-                          {client.primary_email && <span className="text-xs text-gray-500">{client.primary_email}</span>}
+                          {client.primary_email && <span className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">{client.primary_email}</span>}
 
                         </div>
 
@@ -2249,7 +2249,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
             <CardContent>
 
               {/* En-têtes de colonnes */}
-              <div className="grid grid-cols-12 gap-4 items-center px-4 pb-2 mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
+              <div className="grid grid-cols-12 gap-4 items-center px-4 pb-2 mb-2 text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                 <div className="col-span-4">Description</div>
                 <div className="col-span-2 text-center">Quantité</div>
                 <div className="col-span-2 text-center">Prix HT</div>

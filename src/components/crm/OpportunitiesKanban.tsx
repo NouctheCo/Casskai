@@ -214,11 +214,11 @@ const OpportunitiesKanban: React.FC<OpportunitiesKanbanProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
             <TrendingUp className="w-6 h-6" />
             {t('crm.opportunities.title')}
           </h2>
-          <p className="text-gray-600 mt-1">{t('crm.opportunities.description')}</p>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">{t('crm.opportunities.description')}</p>
         </div>
         <Button onClick={() => handleCreateOpportunity()}>
           <Plus className="w-4 h-4 mr-2" />
@@ -244,7 +244,7 @@ const OpportunitiesKanban: React.FC<OpportunitiesKanbanProps> = ({
                     {stageStats.count}
                   </Badge>
                 </CardTitle>
-                <div className="text-xs text-gray-600">
+                <div className="text-xs text-gray-600 dark:text-gray-400">
                   {formatCurrency(stageStats.value)}
                 </div>
                 <Button
@@ -275,28 +275,28 @@ const OpportunitiesKanban: React.FC<OpportunitiesKanbanProps> = ({
                             <div className="text-sm font-bold text-green-600">
                               {formatCurrency(opportunity.value)}
                             </div>
-                            <div className="text-xs text-gray-500">
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
                               {opportunity.probability}%
                             </div>
                           </div>
                         </div>
 
                         {/* Client */}
-                        <div className="flex items-center gap-1 text-xs text-gray-600">
+                        <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
                           <Building className="w-3 h-3" />
                           <span className="truncate">{opportunity.client_name}</span>
                         </div>
 
                         {/* Contact */}
                         {opportunity.contact_name && (
-                          <div className="flex items-center gap-1 text-xs text-gray-600">
+                          <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
                             <User className="w-3 h-3" />
                             <span className="truncate">{opportunity.contact_name}</span>
                           </div>
                         )}
 
                         {/* Expected Close Date */}
-                        <div className="flex items-center gap-1 text-xs text-gray-600">
+                        <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
                           <Calendar className="w-3 h-3" />
                           <span>{formatDate(opportunity.expected_close_date)}</span>
                         </div>
@@ -315,7 +315,7 @@ const OpportunitiesKanban: React.FC<OpportunitiesKanbanProps> = ({
                             <div className="font-medium">{t('crm.opportunities.nextAction')}:</div>
                             <div className="truncate">{opportunity.next_action}</div>
                             {opportunity.next_action_date && (
-                              <div className="text-gray-500 mt-1">
+                              <div className="text-gray-500 dark:text-gray-400 mt-1">
                                 {formatDate(opportunity.next_action_date)}
                               </div>
                             )}

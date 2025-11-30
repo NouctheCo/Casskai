@@ -264,7 +264,7 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
 
       {/* Sélection de période */}
       <div className="flex items-center gap-4">
-        <Calendar className="h-5 w-5 text-gray-500" />
+        <Calendar className="h-5 w-5 text-gray-500 dark:text-gray-400" />
         <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
           <SelectTrigger className="w-40">
             <SelectValue placeholder="Période" />
@@ -303,16 +303,16 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                   Déclaration mensuelle de TVA conforme aux exigences DGFiP
                 </p>
                 <div className="space-y-2">
                   <div className="text-sm">
-                    <span className="text-gray-500">Échéance:</span>
+                    <span className="text-gray-500 dark:text-gray-400">Échéance:</span>
                     <span className="ml-2 font-medium">19 du mois suivant</span>
                   </div>
                   <div className="text-sm">
-                    <span className="text-gray-500">Format:</span>
+                    <span className="text-gray-500 dark:text-gray-400">Format:</span>
                     <span className="ml-2">CA3 2024</span>
                   </div>
                 </div>
@@ -335,16 +335,16 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                   Déclaration annuelle pour régime simplifié
                 </p>
                 <div className="space-y-2">
                   <div className="text-sm">
-                    <span className="text-gray-500">Échéance:</span>
+                    <span className="text-gray-500 dark:text-gray-400">Échéance:</span>
                     <span className="ml-2 font-medium">2e jour ouvré de mai</span>
                   </div>
                   <div className="text-sm">
-                    <span className="text-gray-500">Régime:</span>
+                    <span className="text-gray-500 dark:text-gray-400">Régime:</span>
                     <span className="ml-2">Réel simplifié</span>
                   </div>
                 </div>
@@ -362,16 +362,16 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                   Déclarations d'échanges de biens/services intracommunautaires
                 </p>
                 <div className="space-y-2">
                   <div className="text-sm">
-                    <span className="text-gray-500">Échéance:</span>
+                    <span className="text-gray-500 dark:text-gray-400">Échéance:</span>
                     <span className="ml-2 font-medium">10 du mois suivant</span>
                   </div>
                   <div className="text-sm">
-                    <span className="text-gray-500">Seuil:</span>
+                    <span className="text-gray-500 dark:text-gray-400">Seuil:</span>
                     <span className="ml-2">460K€ DEB / 100K€ DES</span>
                   </div>
                 </div>
@@ -394,16 +394,16 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                   Déclarations fiscales annuelles complètes avec tous les imprimés
                 </p>
                 <div className="space-y-2">
                   <div className="text-sm">
-                    <span className="text-gray-500">Échéance:</span>
+                    <span className="text-gray-500 dark:text-gray-400">Échéance:</span>
                     <span className="ml-2 font-medium">15 mai N+1</span>
                   </div>
                   <div className="text-sm">
-                    <span className="text-gray-500">Imprimés:</span>
+                    <span className="text-gray-500 dark:text-gray-400">Imprimés:</span>
                     <span className="ml-2">2050 à 2059 + annexes</span>
                   </div>
                 </div>
@@ -426,16 +426,16 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                   Calcul et déclaration des acomptes trimestriels IS
                 </p>
                 <div className="space-y-2">
                   <div className="text-sm">
-                    <span className="text-gray-500">Périodes:</span>
+                    <span className="text-gray-500 dark:text-gray-400">Périodes:</span>
                     <span className="ml-2 font-medium">15/03, 15/06, 15/09, 15/12</span>
                   </div>
                   <div className="text-sm">
-                    <span className="text-gray-500">Base:</span>
+                    <span className="text-gray-500 dark:text-gray-400">Base:</span>
                     <span className="ml-2">IS N-1 + régularisations</span>
                   </div>
                 </div>
@@ -458,16 +458,16 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                   Cotisation sur la Valeur Ajoutée des Entreprises
                 </p>
                 <div className="space-y-2">
                   <div className="text-sm">
-                    <span className="text-gray-500">Seuil:</span>
+                    <span className="text-gray-500 dark:text-gray-400">Seuil:</span>
                     <span className="ml-2 font-medium">CA &gt; 500K€</span>
                   </div>
                   <div className="text-sm">
-                    <span className="text-gray-500">Échéance:</span>
+                    <span className="text-gray-500 dark:text-gray-400">Échéance:</span>
                     <span className="ml-2 font-medium">15 mai N+1</span>
                   </div>
                 </div>
@@ -490,16 +490,16 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                   Cotisation Foncière des Entreprises
                 </p>
                 <div className="space-y-2">
                   <div className="text-sm">
-                    <span className="text-gray-500">Échéance:</span>
+                    <span className="text-gray-500 dark:text-gray-400">Échéance:</span>
                     <span className="ml-2 font-medium">15 décembre</span>
                   </div>
                   <div className="text-sm">
-                    <span className="text-gray-500">Base:</span>
+                    <span className="text-gray-500 dark:text-gray-400">Base:</span>
                     <span className="ml-2">Valeur locative foncière</span>
                   </div>
                 </div>
@@ -516,7 +516,7 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
           <Card>
             <CardHeader>
               <CardTitle>Déclarations Sociales</CardTitle>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Intégration avec les modules RH pour les déclarations sociales automatisées
               </p>
             </CardHeader>
@@ -527,7 +527,7 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
                     <TrendingUp className="h-4 w-4" />
                     DSN (Déclaration Sociale Nominative)
                   </h4>
-                  <p className="text-sm text-gray-600 mb-3">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                     Transmission mensuelle des données sociales
                   </p>
                   <Button variant="outline" size="sm" disabled>
@@ -539,7 +539,7 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
                     <Receipt className="h-4 w-4" />
                     DUCS (Déclaration Unifiée de Cotisations Sociales)
                   </h4>
-                  <p className="text-sm text-gray-600 mb-3">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                     Déclaration trimestrielle pour les cotisations
                   </p>
                   <Button variant="outline" size="sm" disabled>
@@ -559,7 +559,7 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
                 <Download className="h-5 w-5" />
                 FEC - Fichier des Écritures Comptables
               </CardTitle>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Export conforme à l'article A47 A-1 du Livre des Procédures Fiscales
               </p>
             </CardHeader>
@@ -604,7 +604,7 @@ export const FrenchTaxCompliancePanel: React.FC<{ companyId: string }> = ({ comp
                     {getTypeIcon(declaration.type)}
                     <div>
                       <div className="font-medium">{declaration.type}</div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
                         Période: {declaration.period} •
                         Échéance: {declaration.dueDate.toLocaleDateString('fr-FR')}
                       </div>

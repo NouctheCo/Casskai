@@ -203,8 +203,8 @@ export const TaxOptimizationWidget: React.FC<TaxOptimizationWidgetProps> = ({
           <div className="text-center space-y-3">
             <Target className="w-12 h-12 text-gray-300 mx-auto" />
             <div>
-              <p className="text-lg font-medium text-gray-600">Aucune optimisation détectée</p>
-              <p className="text-sm text-gray-500">L'IA analyse vos données pour identifier des opportunités</p>
+              <p className="text-lg font-medium text-gray-600 dark:text-gray-400">Aucune optimisation détectée</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">L'IA analyse vos données pour identifier des opportunités</p>
             </div>
             {onRefresh && (
               <Button variant="outline" size="sm" onClick={onRefresh}>
@@ -288,11 +288,11 @@ export const TaxOptimizationWidget: React.FC<TaxOptimizationWidgetProps> = ({
         {/* Contrôles de tri */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-500">Trier par:</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">Trier par:</span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="text-sm border rounded px-2 py-1 bg-white dark:bg-gray-800"
+              className="text-sm border rounded px-2 py-1 bg-white dark:bg-gray-800 dark:bg-gray-800"
             >
               <option value="saving">Économies</option>
               <option value="effort">Effort</option>
@@ -300,7 +300,7 @@ export const TaxOptimizationWidget: React.FC<TaxOptimizationWidgetProps> = ({
             </select>
           </div>
 
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-gray-500 dark:text-gray-400">
             {filteredOptimizations.length} optimisation(s)
           </div>
         </div>
@@ -330,7 +330,7 @@ export const TaxOptimizationWidget: React.FC<TaxOptimizationWidgetProps> = ({
 
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center space-x-2">
-                        <h4 className="font-medium text-gray-900 dark:text-white">
+                        <h4 className="font-medium text-gray-900 dark:text-gray-100 dark:text-white">
                           {optimization.title}
                         </h4>
 
@@ -353,7 +353,7 @@ export const TaxOptimizationWidget: React.FC<TaxOptimizationWidgetProps> = ({
                         </div>
                       </div>
 
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">
                         {optimization.description}
                       </p>
 
@@ -364,7 +364,7 @@ export const TaxOptimizationWidget: React.FC<TaxOptimizationWidgetProps> = ({
                           <span className="text-sm font-medium text-green-600">
                             {formatCurrency(optimization.potentialSavings)}
                           </span>
-                          <span className="text-xs text-gray-500">économie</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">économie</span>
                         </div>
 
                         {optimization.deadline && (
@@ -397,8 +397,8 @@ export const TaxOptimizationWidget: React.FC<TaxOptimizationWidgetProps> = ({
                 {optimization.status !== 'suggested' && (
                   <div className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-gray-500">Progression</span>
-                      <span className="text-gray-700 dark:text-gray-300">
+                      <span className="text-gray-500 dark:text-gray-400">Progression</span>
+                      <span className="text-gray-700 dark:text-gray-300 dark:text-gray-300">
                         {optimization.status === 'implemented' ? '100%' : 
                          optimization.status === 'in_progress' ? '50%' : '0%'}
                       </span>
@@ -418,18 +418,18 @@ export const TaxOptimizationWidget: React.FC<TaxOptimizationWidgetProps> = ({
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="border-t border-gray-200 dark:border-gray-700 pt-3 space-y-3"
+                      className="border-t border-gray-200 dark:border-gray-600 dark:border-gray-700 pt-3 space-y-3"
                     >
                       {/* Exigences */}
                       {optimization.requirements && optimization.requirements.length > 0 && (
                         <div className="space-y-2">
-                          <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center space-x-1">
+                          <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300 flex items-center space-x-1">
                             <FileText className="w-4 h-4" />
                             <span>Exigences:</span>
                           </h5>
                           <ul className="space-y-1">
                             {optimization.requirements.map((requirement, reqIndex) => (
-                              <li key={reqIndex} className="flex items-start space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                              <li key={reqIndex} className="flex items-start space-x-2 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">
                                 <div className="w-1 h-1 bg-blue-400 rounded-full mt-2 flex-shrink-0" />
                                 <span>{requirement}</span>
                               </li>
@@ -479,7 +479,7 @@ export const TaxOptimizationWidget: React.FC<TaxOptimizationWidgetProps> = ({
         {filteredOptimizations.length === 0 && (
           <div className="text-center py-8 space-y-2">
             <Target className="w-8 h-8 text-gray-300 mx-auto" />
-            <p className="text-gray-500">Aucune optimisation pour ce filtre</p>
+            <p className="text-gray-500 dark:text-gray-400">Aucune optimisation pour ce filtre</p>
             <Button 
               variant="outline" 
               size="sm"
@@ -492,7 +492,7 @@ export const TaxOptimizationWidget: React.FC<TaxOptimizationWidgetProps> = ({
 
         {/* Information sur l'IA */}
         {optimizations.length > 0 && (
-          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-600 dark:border-gray-700">
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-md p-3">
               <div className="flex items-start space-x-2">
                 <Lightbulb className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />

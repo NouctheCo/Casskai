@@ -154,10 +154,10 @@ export const AIAssistant: React.FC = () => {
                 <div className="w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <Sparkles className="h-8 w-8 text-indigo-500" />
                 </div>
-                <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
+                <h4 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
                   Comment puis-je vous aider ?
                 </h4>
-                <p className="text-sm text-gray-500 mb-6">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
                   Je peux vous guider dans CassKai, créer des documents, ou répondre à vos questions.
                 </p>
 
@@ -173,7 +173,7 @@ export const AIAssistant: React.FC = () => {
                         className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl text-left transition-colors"
                       >
                         <Icon className="h-4 w-4 text-indigo-500" />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">{suggestion.label}</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300 dark:text-gray-300">{suggestion.label}</span>
                       </button>
                     );
                   })}
@@ -242,7 +242,7 @@ export const AIAssistant: React.FC = () => {
                 )}
               </Button>
             </div>
-            <p className="text-xs text-gray-500 mt-2 text-center">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
               Propulsé par l'IA • Les réponses peuvent contenir des erreurs
             </p>
           </div>

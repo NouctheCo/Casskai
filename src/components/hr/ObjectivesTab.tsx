@@ -84,7 +84,7 @@ export function ObjectivesTab({ companyId, employees, currentUserId }: Objective
       case 'cancelled':
         return <XCircle className="w-4 h-4 text-red-600" />;
       default:
-        return <Target className="w-4 h-4 text-gray-600" />;
+        return <Target className="w-4 h-4 text-gray-600 dark:text-gray-400 dark:text-gray-500" />;
     }
   };
 
@@ -138,7 +138,7 @@ export function ObjectivesTab({ companyId, employees, currentUserId }: Objective
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement des objectifs...</p>
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Chargement des objectifs...</p>
         </div>
       </div>
     );
@@ -152,7 +152,7 @@ export function ObjectivesTab({ companyId, employees, currentUserId }: Objective
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-2xl font-bold text-blue-600">{stats.total}</p>
-              <p className="text-sm text-gray-600">Total</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Total</p>
             </div>
           </CardContent>
         </Card>
@@ -161,7 +161,7 @@ export function ObjectivesTab({ companyId, employees, currentUserId }: Objective
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-2xl font-bold text-blue-600">{stats.in_progress}</p>
-              <p className="text-sm text-gray-600">En cours</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">En cours</p>
             </div>
           </CardContent>
         </Card>
@@ -170,7 +170,7 @@ export function ObjectivesTab({ companyId, employees, currentUserId }: Objective
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-2xl font-bold text-green-600">{stats.completed}</p>
-              <p className="text-sm text-gray-600">Complétés</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Complétés</p>
             </div>
           </CardContent>
         </Card>
@@ -179,7 +179,7 @@ export function ObjectivesTab({ companyId, employees, currentUserId }: Objective
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-2xl font-bold text-orange-600">{stats.at_risk}</p>
-              <p className="text-sm text-gray-600">À risque</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">À risque</p>
             </div>
           </CardContent>
         </Card>
@@ -188,7 +188,7 @@ export function ObjectivesTab({ companyId, employees, currentUserId }: Objective
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-2xl font-bold text-purple-600">{stats.avg_progress}%</p>
-              <p className="text-sm text-gray-600">Progression moy.</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Progression moy.</p>
             </div>
           </CardContent>
         </Card>
@@ -199,7 +199,7 @@ export function ObjectivesTab({ companyId, employees, currentUserId }: Objective
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
               <Input
                 placeholder="Rechercher un objectif ou un employé..."
                 value={searchTerm}
@@ -212,7 +212,7 @@ export function ObjectivesTab({ companyId, employees, currentUserId }: Objective
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-4 py-2 border rounded-lg bg-white text-sm"
+                className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
               >
                 <option value="all">Tous les statuts</option>
                 <option value="not_started">Non démarré</option>
@@ -239,10 +239,10 @@ export function ObjectivesTab({ companyId, employees, currentUserId }: Objective
             <CardContent className="pt-6">
               <div className="text-center py-12">
                 <Target className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                   Aucun objectif trouvé
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-4">
                   {searchTerm || statusFilter !== 'all'
                     ? 'Essayez de modifier vos critères de recherche'
                     : 'Commencez par créer votre premier objectif'}
@@ -277,19 +277,19 @@ export function ObjectivesTab({ companyId, employees, currentUserId }: Objective
                       )}
                     </div>
                     <CardTitle className="text-lg mb-1">{objective.title}</CardTitle>
-                    <p className="text-sm text-gray-600">{objective.employee_name}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">{objective.employee_name}</p>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 {objective.description && (
-                  <p className="text-sm text-gray-700 mb-4">{objective.description}</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">{objective.description}</p>
                 )}
 
                 {/* Barre de progression */}
                 <div className="mb-4">
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="text-gray-600">Progression</span>
+                    <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Progression</span>
                     <span className="font-semibold text-blue-600">
                       {objective.progress_percentage}%
                     </span>
@@ -301,13 +301,13 @@ export function ObjectivesTab({ companyId, employees, currentUserId }: Objective
                 {objective.target_value !== null && objective.current_value !== null && (
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div className="bg-gray-50 p-3 rounded-lg">
-                      <p className="text-xs text-gray-600 mb-1">Valeur actuelle</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-1">Valeur actuelle</p>
                       <p className="text-lg font-semibold text-blue-600">
                         {objective.current_value} {objective.unit || ''}
                       </p>
                     </div>
                     <div className="bg-gray-50 p-3 rounded-lg">
-                      <p className="text-xs text-gray-600 mb-1">Objectif</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-1">Objectif</p>
                       <p className="text-lg font-semibold text-green-600">
                         {objective.target_value} {objective.unit || ''}
                       </p>
@@ -339,7 +339,7 @@ export function ObjectivesTab({ companyId, employees, currentUserId }: Objective
                 )}
 
                 {/* Dates */}
-                <div className="flex items-center justify-between text-xs text-gray-500 mt-4 pt-4 border-t">
+                <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-4 pt-4 border-t">
                   <span>Début: {new Date(objective.start_date).toLocaleDateString('fr-FR')}</span>
                   <span>Échéance: {new Date(objective.due_date).toLocaleDateString('fr-FR')}</span>
                 </div>

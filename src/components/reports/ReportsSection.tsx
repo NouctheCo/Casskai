@@ -56,7 +56,7 @@ const ReportFiltersComponent: React.FC<{
       <div className="flex flex-col md:flex-row gap-4">
         <div className="flex-1">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
             <Input
               placeholder="Rechercher un rapport..."
               value={filters.search}
@@ -123,7 +123,7 @@ const ReportCard: React.FC<{
               {report.status}
             </Badge>
           </div>
-          <div className="flex items-center gap-4 text-sm text-gray-600">
+          <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
             <span>Période: {new Date(report.period_start).toLocaleDateString('fr-FR')} - {new Date(report.period_end).toLocaleDateString('fr-FR')}</span>
             <span>Format: {report.format}</span>
             <span>Généré: {report.generated_at ? new Date(report.generated_at).toLocaleDateString('fr-FR') : 'Jamais'}</span>
@@ -178,7 +178,7 @@ const ReportCard: React.FC<{
           <span>Afficher écarts</span>
         </div>
         <div className="text-sm">
-          <span className="text-gray-600">Accès: </span>
+          <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Accès: </span>
           <Badge variant="outline">{report.access_level}</Badge>
         </div>
       </div>
@@ -202,7 +202,7 @@ export const ReportsSection: React.FC<ReportsSectionProps> = ({
 
       {/* Reports Count */}
       <div className="flex justify-between items-center">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
           {filteredReports.length} rapport{filteredReports.length !== 1 ? 's' : ''} sur {reports.length}
         </p>
       </div>

@@ -1200,7 +1200,7 @@ export default function OptimizedReportsTab() {
 
         <div>
 
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center space-x-2">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white flex items-center space-x-2">
 
             <BarChart3 className="w-7 h-7 text-blue-500" />
 
@@ -1208,7 +1208,7 @@ export default function OptimizedReportsTab() {
 
           </h2>
 
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 mt-1">
 
             Génération automatique conforme aux normes PCG et IFRS
 
@@ -1264,7 +1264,7 @@ export default function OptimizedReportsTab() {
 
                 <div className="flex items-center justify-between">
 
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-400">
 
                     {stat.label}
 
@@ -1286,7 +1286,7 @@ export default function OptimizedReportsTab() {
 
                 </div>
 
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
 
                   {stat.isPercentage ? `${stat.value}%` : `${stat.value.toLocaleString('fr-FR')} €`}
 
@@ -1314,7 +1314,7 @@ export default function OptimizedReportsTab() {
 
             <div>
 
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300 mb-2 block">
 
                 Période d'analyse
 
@@ -1352,7 +1352,7 @@ export default function OptimizedReportsTab() {
 
             <div>
 
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300 mb-2 block">
 
                 Catégorie de rapports
 
@@ -1392,7 +1392,7 @@ export default function OptimizedReportsTab() {
 
             <div>
 
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300 mb-2 block">
 
                 Actions rapides
 
@@ -1492,7 +1492,7 @@ export default function OptimizedReportsTab() {
 
                   <div className="flex items-center space-x-2">
 
-                    <h3 className="font-semibold text-gray-900 dark:text-white text-lg">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white text-lg">
 
                       {report.name}
 
@@ -1500,13 +1500,13 @@ export default function OptimizedReportsTab() {
 
                   </div>
 
-                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 leading-relaxed">
 
                     {report.description}
 
                   </p>
 
-                  <div className="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400">
 
                     <span className="flex items-center space-x-1">
 
@@ -1668,9 +1668,9 @@ export default function OptimizedReportsTab() {
 
                     <div>
 
-                      <h4 className="font-medium text-gray-900 dark:text-white">{report.name}</h4>
+                      <h4 className="font-medium text-gray-900 dark:text-gray-100 dark:text-white">{report.name}</h4>
 
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">
 
                         Généré le {new Date(report.created_at).toLocaleDateString('fr-FR')} • {Math.round((report.file_size || 0) / 1024 / 1024 * 10) / 10} MB
 
@@ -1846,7 +1846,7 @@ export default function OptimizedReportsTab() {
 
                     <div className="flex items-start justify-between">
 
-                      <h4 className="font-semibold text-gray-900 dark:text-white">
+                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white">
 
                         {template.name}
 
@@ -1860,13 +1860,13 @@ export default function OptimizedReportsTab() {
 
                     </div>
 
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">
 
                       {template.description}
 
                     </p>
 
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
 
                       <Badge variant="outline">{template.type}</Badge>
 

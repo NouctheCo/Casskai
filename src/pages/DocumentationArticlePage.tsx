@@ -3956,13 +3956,13 @@ const DocumentationArticlePage = () => {
 
             <div className="text-center">
 
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-4">
 
                 Article non trouvé
 
               </h1>
 
-              <p className="text-gray-600 dark:text-gray-300 mb-8">
+              <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-8">
 
                 L'article demandé n'existe pas ou a été déplacé.
 
@@ -3996,31 +3996,31 @@ const DocumentationArticlePage = () => {
 
       if (line.startsWith('# ')) {
 
-        return <h1 key={index} className="text-3xl font-bold text-gray-900 dark:text-white mb-6 mt-8">{line.substring(2)}</h1>;
+        return <h1 key={index} className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-6 mt-8">{line.substring(2)}</h1>;
 
       }
 
       if (line.startsWith('## ')) {
 
-        return <h2 key={index} className="text-2xl font-bold text-gray-900 dark:text-white mb-4 mt-8">{line.substring(3)}</h2>;
+        return <h2 key={index} className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-4 mt-8">{line.substring(3)}</h2>;
 
       }
 
       if (line.startsWith('### ')) {
 
-        return <h3 key={index} className="text-xl font-semibold text-gray-900 dark:text-white mb-3 mt-6">{line.substring(4)}</h3>;
+        return <h3 key={index} className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-3 mt-6">{line.substring(4)}</h3>;
 
       }
 
       if (line.startsWith('#### ')) {
 
-        return <h4 key={index} className="text-lg font-semibold text-gray-900 dark:text-white mb-2 mt-4">{line.substring(5)}</h4>;
+        return <h4 key={index} className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2 mt-4">{line.substring(5)}</h4>;
 
       }
 
       if (line.startsWith('- ') || line.startsWith('* ')) {
 
-        return <li key={index} className="text-gray-700 dark:text-gray-300 mb-1 ml-4">{line.substring(2)}</li>;
+        return <li key={index} className="text-gray-700 dark:text-gray-300 dark:text-gray-300 mb-1 ml-4">{line.substring(2)}</li>;
 
       }
 
@@ -4032,11 +4032,11 @@ const DocumentationArticlePage = () => {
 
       if (line.startsWith('**') && line.endsWith('**')) {
 
-        return <p key={index} className="font-semibold text-gray-900 dark:text-white mb-2">{line.slice(2, -2)}</p>;
+        return <p key={index} className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">{line.slice(2, -2)}</p>;
 
       }
 
-      return <p key={index} className="text-gray-700 dark:text-gray-300 mb-3 leading-relaxed">{line}</p>;
+      return <p key={index} className="text-gray-700 dark:text-gray-300 dark:text-gray-300 mb-3 leading-relaxed">{line}</p>;
 
     });
 
@@ -4054,7 +4054,7 @@ const DocumentationArticlePage = () => {
 
       {/* Header */}
 
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600 dark:border-gray-700">
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
@@ -4082,7 +4082,7 @@ const DocumentationArticlePage = () => {
 
           
 
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-4">
 
             {article.title}
 
@@ -4090,7 +4090,7 @@ const DocumentationArticlePage = () => {
 
           
 
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-6">
+          <p className="text-xl text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-6">
 
             {article.description}
 
@@ -4098,7 +4098,7 @@ const DocumentationArticlePage = () => {
 
           
 
-          <div className="flex items-center space-x-6 text-sm text-gray-500 dark:text-gray-400">
+          <div className="flex items-center space-x-6 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-400">
 
             <div className="flex items-center">
 
@@ -4172,7 +4172,7 @@ const DocumentationArticlePage = () => {
 
               <div className="flex items-center space-x-4">
 
-                <span className="text-sm text-gray-600 dark:text-gray-300">
+                <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300">
 
                   Cet article vous a-t-il été utile ?
 
@@ -4312,7 +4312,7 @@ const DocumentationArticlePage = () => {
 
               <CardContent>
 
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-4">
 
                   Vous ne trouvez pas la réponse à votre question ?
 

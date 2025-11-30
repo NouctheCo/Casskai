@@ -128,7 +128,7 @@ export const CompanyValidationWizard: React.FC<CompanyValidationWizardProps> = (
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
       >
         <div className="p-6">
           {/* En-tête */}
@@ -382,7 +382,7 @@ export const CompanyValidationWizard: React.FC<CompanyValidationWizardProps> = (
                   initial={{ scale: 0.95 }}
                   animate={{ scale: 1 }}
                   exit={{ scale: 0.95 }}
-                  className="bg-white rounded-lg p-6 max-w-md mx-4"
+                  className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md mx-4"
                 >
                   <h3 className="font-bold mb-4">Confirmer la fusion</h3>
                   <p className="text-sm text-muted-foreground mb-6">

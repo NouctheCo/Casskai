@@ -161,7 +161,7 @@ export function QuotaIndicator({
     <div className={cn("space-y-1", className)}>
       {showLabel && (
         <div className="flex justify-between text-xs">
-          <span className="text-gray-600 dark:text-gray-400 capitalize">
+          <span className="text-gray-600 dark:text-gray-400 dark:text-gray-400 capitalize">
             {quotaKey.replace('_', ' ')}
           </span>
           <span className={cn(

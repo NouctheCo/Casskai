@@ -611,7 +611,7 @@ const ThirdPartiesPage: React.FC = () => {
 
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
 
-          <p className="text-gray-600">Chargement des tiers...</p>
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Chargement des tiers...</p>
 
         </div>
 
@@ -651,7 +651,7 @@ const ThirdPartiesPage: React.FC = () => {
 
           <div className="flex items-center space-x-2">
 
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
 
               Gestion des Tiers
 
@@ -663,7 +663,7 @@ const ThirdPartiesPage: React.FC = () => {
 
           <div className="flex items-center space-x-2">
 
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
               {currentEnterprise ? `${currentEnterprise.name} - ` : ''}
 
@@ -763,9 +763,9 @@ const ThirdPartiesPage: React.FC = () => {
 
                         <div>
 
-                          <p className="text-sm font-medium text-gray-600">Total Tiers</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Total Tiers</p>
 
-                          <p className="text-2xl font-bold text-gray-900">
+                          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
 
                             {dashboardData.stats.total_third_parties}
 
@@ -795,9 +795,9 @@ const ThirdPartiesPage: React.FC = () => {
 
                         <div>
 
-                          <p className="text-sm font-medium text-gray-600">Clients Actifs</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Clients Actifs</p>
 
-                          <p className="text-2xl font-bold text-gray-900">
+                          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
 
                             {dashboardData.stats.active_clients}
 
@@ -827,9 +827,9 @@ const ThirdPartiesPage: React.FC = () => {
 
                         <div>
 
-                          <p className="text-sm font-medium text-gray-600">Fournisseurs Actifs</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Fournisseurs Actifs</p>
 
-                          <p className="text-2xl font-bold text-gray-900">
+                          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
 
                             {dashboardData.stats.active_suppliers}
 
@@ -859,9 +859,9 @@ const ThirdPartiesPage: React.FC = () => {
 
                         <div>
 
-                          <p className="text-sm font-medium text-gray-600">Nouveaux ce mois</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Nouveaux ce mois</p>
 
-                          <p className="text-2xl font-bold text-gray-900">
+                          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
 
                             {dashboardData.stats.new_this_month}
 
@@ -897,7 +897,7 @@ const ThirdPartiesPage: React.FC = () => {
 
                         <div>
 
-                          <p className="text-sm font-medium text-gray-600">Total Créances</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Total Créances</p>
 
                           <p className="text-2xl font-bold text-green-600">
 
@@ -925,7 +925,7 @@ const ThirdPartiesPage: React.FC = () => {
 
                         <div>
 
-                          <p className="text-sm font-medium text-gray-600">Total Dettes</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Total Dettes</p>
 
                           <p className="text-2xl font-bold text-red-600">
 
@@ -953,7 +953,7 @@ const ThirdPartiesPage: React.FC = () => {
 
                         <div>
 
-                          <p className="text-sm font-medium text-gray-600">Créances Échues</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Créances Échues</p>
 
                           <p className="text-2xl font-bold text-orange-600">
 
@@ -981,7 +981,7 @@ const ThirdPartiesPage: React.FC = () => {
 
                         <div>
 
-                          <p className="text-sm font-medium text-gray-600">Dettes Échues</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Dettes Échues</p>
 
                           <p className="text-2xl font-bold text-red-600">
 
@@ -1187,7 +1187,7 @@ const ThirdPartiesPage: React.FC = () => {
 
                     <div className="relative">
 
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
 
                       <Input
 
@@ -1415,11 +1415,11 @@ const ThirdPartiesPage: React.FC = () => {
 
                           {thirdParty.category === 'company' ? (
 
-                            <Building2 className="h-6 w-6 text-gray-600" />
+                            <Building2 className="h-6 w-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" />
 
                           ) : (
 
-                            <Users className="h-6 w-6 text-gray-600" />
+                            <Users className="h-6 w-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" />
 
                           )}
 
@@ -1445,9 +1445,9 @@ const ThirdPartiesPage: React.FC = () => {
 
                           </div>
 
-                          <p className="text-sm text-gray-600 mb-1">Code: {thirdParty.code}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-1">Code: {thirdParty.code}</p>
 
-                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                          <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
 
                             <div className="flex items-center gap-1">
 
@@ -1541,7 +1541,7 @@ const ThirdPartiesPage: React.FC = () => {
 
                       <div className="text-center p-3 bg-gray-50 rounded-lg">
 
-                        <p className="text-xs text-gray-600">Solde Actuel</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-500">Solde Actuel</p>
 
                         <p className={`font-semibold ${
 
@@ -1559,7 +1559,7 @@ const ThirdPartiesPage: React.FC = () => {
 
                       <div className="text-center p-3 bg-green-50 rounded-lg">
 
-                        <p className="text-xs text-gray-600">Créances</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-500">Créances</p>
 
                         <p className="font-semibold text-green-600">
 
@@ -1571,7 +1571,7 @@ const ThirdPartiesPage: React.FC = () => {
 
                       <div className="text-center p-3 bg-red-50 rounded-lg">
 
-                        <p className="text-xs text-gray-600">Dettes</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-500">Dettes</p>
 
                         <p className="font-semibold text-red-600">
 
@@ -1583,7 +1583,7 @@ const ThirdPartiesPage: React.FC = () => {
 
                       <div className="text-center p-3 bg-blue-50 rounded-lg">
 
-                        <p className="text-xs text-gray-600">Limite de Crédit</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-500">Limite de Crédit</p>
 
                         <p className="font-semibold text-blue-600">
 
@@ -1623,7 +1623,7 @@ const ThirdPartiesPage: React.FC = () => {
 
                     {thirdParty.last_interaction && (
 
-                      <div className="mt-4 text-xs text-gray-500">
+                      <div className="mt-4 text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                         Dernière interaction: {new Date(thirdParty.last_interaction).toLocaleDateString('fr-FR')}
 

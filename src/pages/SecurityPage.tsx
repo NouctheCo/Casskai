@@ -162,7 +162,7 @@ const SecurityPage = () => {
             <Button
               onClick={() => navigate('/register')}
               size="lg"
-              className="bg-white text-blue-900 hover:bg-gray-100"
+              className="bg-white dark:bg-gray-800 text-blue-900 hover:bg-gray-100"
             >
               <Shield className="w-5 h-5 mr-2" />
               Commencer en toute sécurité
@@ -181,13 +181,13 @@ const SecurityPage = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.1 }}
-                className="text-center p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg"
+                className="text-center p-6 bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl shadow-lg"
               >
                 <stat.icon className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                <div className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
                   {stat.number}
                 </div>
-                <div className="text-gray-600 dark:text-gray-300">
+                <div className="text-gray-600 dark:text-gray-400 dark:text-gray-300">
                   {stat.label}
                 </div>
               </motion.div>
@@ -197,16 +197,16 @@ const SecurityPage = () => {
       </div>
 
       {/* Fonctionnalités de sécurité */}
-      <div className="py-16 bg-white dark:bg-gray-900">
+      <div className="py-16 bg-white dark:bg-gray-800 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Badge className="mb-4 px-4 py-2 bg-blue-100 text-blue-800 border-blue-200">
               Sécurité avancée
             </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-6">
               Protection multicouche
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-400 dark:text-gray-300 max-w-3xl mx-auto">
               Notre approche de sécurité en profondeur protège vos données à chaque étape.
             </p>
           </div>
@@ -227,7 +227,7 @@ const SecurityPage = () => {
                     <CardTitle className="text-xl font-bold">{feature.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-600 dark:text-gray-300 mb-6">
+                    <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-6">
                       {feature.description}
                     </p>
                     <ul className="space-y-2">
@@ -250,10 +250,10 @@ const SecurityPage = () => {
       <div className="py-16 bg-gray-50 dark:bg-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-6">
               Certifications et conformité
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-400 dark:text-gray-300 max-w-3xl mx-auto">
               Nous respectons les standards les plus stricts de l'industrie.
             </p>
           </div>
@@ -265,13 +265,13 @@ const SecurityPage = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-lg text-center"
+                className="bg-white dark:bg-gray-800 dark:bg-gray-900 p-6 rounded-xl shadow-lg text-center"
               >
                 <cert.icon className="w-12 h-12 text-green-600 mx-auto mb-4" />
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
                   {cert.name}
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-3">
                   {cert.description}
                 </p>
                 <Badge className="bg-green-100 text-green-800 border-green-200">
@@ -284,12 +284,12 @@ const SecurityPage = () => {
       </div>
 
       {/* Centre de transparence */}
-      <div className="py-16 bg-white dark:bg-gray-900">
+      <div className="py-16 bg-white dark:bg-gray-800 dark:bg-gray-900">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-6">
             Transparence totale
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
+          <p className="text-xl text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-8">
             Nous croyons en la transparence complète concernant nos pratiques de sécurité.
           </p>
           
@@ -298,7 +298,7 @@ const SecurityPage = () => {
               <CardContent className="p-6">
                 <FileCheck className="w-12 h-12 text-blue-600 mx-auto mb-4" />
                 <h3 className="text-xl font-bold mb-3">Rapports de sécurité</h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-4">
                   Consultez nos rapports d'audit et de conformité.
                 </p>
                 <Button variant="outline" className="w-full">
@@ -311,7 +311,7 @@ const SecurityPage = () => {
               <CardContent className="p-6">
                 <AlertTriangle className="w-12 h-12 text-orange-600 mx-auto mb-4" />
                 <h3 className="text-xl font-bold mb-3">Signalement de vulnérabilités</h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-4">
                   Vous avez identifié une faille ? Contactez-nous.
                 </p>
                 <Button variant="outline" className="w-full">
@@ -336,7 +336,7 @@ const SecurityPage = () => {
             <Button
               onClick={() => navigate('/register')}
               size="lg"
-              className="bg-white text-blue-600 hover:bg-gray-100"
+              className="bg-white dark:bg-gray-800 text-blue-600 hover:bg-gray-100"
             >
               Essai gratuit 14 jours
             </Button>

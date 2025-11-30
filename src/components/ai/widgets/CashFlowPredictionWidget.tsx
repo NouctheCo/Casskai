@@ -130,7 +130,7 @@ export const CashFlowPredictionWidget: React.FC<CashFlowPredictionWidgetProps> =
         <CardContent className="flex items-center justify-center py-12">
           <div className="text-center space-y-3">
             <BarChart3 className="w-12 h-12 text-gray-300 mx-auto" />
-            <p className="text-gray-500">Données insuffisantes pour les prédictions</p>
+            <p className="text-gray-500 dark:text-gray-400">Données insuffisantes pour les prédictions</p>
             {onRefresh && (
               <Button variant="outline" size="sm" onClick={onRefresh}>
                 <RefreshCw className="w-4 h-4 mr-2" />
@@ -175,7 +175,7 @@ export const CashFlowPredictionWidget: React.FC<CashFlowPredictionWidgetProps> =
           <div className="flex items-center space-x-2">
             {getTrendIcon(trend)}
             <div>
-              <p className="text-xs text-gray-500">Tendance</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Tendance</p>
               <p className="text-sm font-medium capitalize">{
                 trend === 'positive' ? 'Positive' :
                 trend === 'negative' ? 'Négative' : 'Stable'
@@ -186,7 +186,7 @@ export const CashFlowPredictionWidget: React.FC<CashFlowPredictionWidgetProps> =
           <div className="flex items-center space-x-2">
             <Target className="w-4 h-4 text-blue-500" />
             <div>
-              <p className="text-xs text-gray-500">Confiance</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Confiance</p>
               <p className="text-sm font-medium">{getConfidenceLabel(avgConfidence)}</p>
             </div>
           </div>
@@ -194,7 +194,7 @@ export const CashFlowPredictionWidget: React.FC<CashFlowPredictionWidgetProps> =
           <div className="flex items-center space-x-2">
             <DollarSign className="w-4 h-4 text-green-500" />
             <div>
-              <p className="text-xs text-gray-500">Solde actuel</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Solde actuel</p>
               <p className="text-sm font-medium">{formatCurrency(currentBalance)}</p>
             </div>
           </div>
@@ -202,7 +202,7 @@ export const CashFlowPredictionWidget: React.FC<CashFlowPredictionWidgetProps> =
           <div className="flex items-center space-x-2">
             <Calendar className="w-4 h-4 text-purple-500" />
             <div>
-              <p className="text-xs text-gray-500">Prédictions</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Prédictions</p>
               <p className="text-sm font-medium">{filteredPredictions.length}</p>
             </div>
           </div>
@@ -293,7 +293,7 @@ export const CashFlowPredictionWidget: React.FC<CashFlowPredictionWidgetProps> =
             <TabsContent value="table" className="space-y-4 mt-4">
               <div className="border rounded-lg overflow-hidden">
                 <div className="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b">
-                  <div className="grid grid-cols-4 gap-4 text-xs font-medium text-gray-600 dark:text-gray-400">
+                  <div className="grid grid-cols-4 gap-4 text-xs font-medium text-gray-600 dark:text-gray-400 dark:text-gray-400">
                     <span>Date</span>
                     <span>Prédiction</span>
                     <span>Confiance</span>
@@ -350,7 +350,7 @@ export const CashFlowPredictionWidget: React.FC<CashFlowPredictionWidgetProps> =
                               </Badge>
                             ))}
                             {(prediction.factors?.length || 0) > 3 && (
-                              <span className="text-xs text-gray-500">
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
                                 +{(prediction.factors?.length || 0) - 3}
                               </span>
                             )}
@@ -377,7 +377,7 @@ export const CashFlowPredictionWidget: React.FC<CashFlowPredictionWidgetProps> =
               >
                 <div className="flex items-center space-x-3">
                   <div className="text-center">
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       {prediction.date.toLocaleDateString('fr-FR', { 
                         day: 'numeric', 
                         month: 'short' 
@@ -394,7 +394,7 @@ export const CashFlowPredictionWidget: React.FC<CashFlowPredictionWidgetProps> =
                         "w-2 h-2 rounded-full",
                         getConfidenceColor(prediction.confidence)
                       )} />
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
                         {getConfidenceLabel(prediction.confidence)}
                       </span>
                     </div>
@@ -413,9 +413,9 @@ export const CashFlowPredictionWidget: React.FC<CashFlowPredictionWidgetProps> =
         )}
 
         {/* Informations sur le modèle */}
-        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="pt-4 border-t border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 text-xs text-gray-500">
+            <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
               <Info className="w-3 h-3" />
               <span>
                 Modèle prédictif ML • Confiance moyenne: {(avgConfidence * 100).toFixed(0)}%
@@ -436,7 +436,7 @@ export const CashFlowPredictionWidget: React.FC<CashFlowPredictionWidgetProps> =
               ) : (
                 <AlertTriangle className="w-4 h-4 text-yellow-500 flex-shrink-0 mt-0.5" />
               )}
-              <p className="text-xs text-gray-600 dark:text-gray-300">
+              <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-300">
                 {avgConfidence >= 0.7 
                   ? "Les prédictions sont fiables. Le modèle dispose de suffisamment de données historiques."
                   : "Prédictions à interpréter avec prudence. Plus de données amélioreront la précision."

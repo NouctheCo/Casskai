@@ -116,7 +116,7 @@ export const UsageQuotaWidget: React.FC<UsageQuotaWidgetProps> = ({
       <Card className={className}>
         <CardContent className="p-6 text-center">
           <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-3" />
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">
             Aucune limite configurée
           </p>
         </CardContent>
@@ -174,13 +174,13 @@ export const UsageQuotaWidget: React.FC<UsageQuotaWidgetProps> = ({
               >
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                    <IconComponent className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                    <IconComponent className="w-4 h-4 text-gray-600 dark:text-gray-400 dark:text-gray-400" />
                   </div>
                 </div>
                 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100 dark:text-white truncate">
                       {getFeatureDisplayName(limit.feature_name)}
                     </span>
                     <div className="flex items-center space-x-2">
@@ -188,7 +188,7 @@ export const UsageQuotaWidget: React.FC<UsageQuotaWidgetProps> = ({
                         {percentage}%
                       </span>
                       {limit.limit_value && (
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                        <span className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400">
                           {limit.current_usage}/{limit.limit_value} {getFeatureUnit(limit.feature_name)}
                         </span>
                       )}

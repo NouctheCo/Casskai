@@ -245,10 +245,10 @@ export const BudgetFormModern: React.FC<BudgetFormModernProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-gray-100">
             {budgetId ? 'Modifier le budget' : 'Nouveau budget'} {formData.year}
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mt-1">
             Définissez vos objectifs financiers par catégorie
           </p>
         </div>
@@ -333,7 +333,7 @@ export const BudgetFormModern: React.FC<BudgetFormModernProps> = ({
       {/* Categories List */}
       <div className="px-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-gray-100">
             Catégories Budgétaires
           </h3>
           <Button onClick={addCategory} size="sm">
@@ -404,7 +404,7 @@ export const BudgetFormModern: React.FC<BudgetFormModernProps> = ({
                         onChange={(e) => updateCategory(index, 'annual_amount', parseFloat(e.target.value) || 0)}
                         placeholder="0"
                       />
-                      <Calculator className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Calculator className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
                     </div>
                   </div>
 
@@ -435,8 +435,8 @@ export const BudgetFormModern: React.FC<BudgetFormModernProps> = ({
           {formData.categories.length === 0 && (
             <Card className="border-dashed border-2">
               <CardContent className="flex flex-col items-center justify-center py-12">
-                <Calculator className="w-16 h-16 text-gray-400 mb-4" />
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                <Calculator className="w-16 h-16 text-gray-400 dark:text-gray-500 mb-4" />
+                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-4">
                   Aucune catégorie budgétaire
                 </p>
                 <Button onClick={addCategory} size="sm">

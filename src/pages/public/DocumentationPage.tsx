@@ -394,17 +394,17 @@ const DocumentationPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-950">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30">
               <BookOpen className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
                 Documentation CassKai
               </h1>
-              <p className="text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mt-1">
                 Tout ce dont vous avez besoin pour maîtriser CassKai
               </p>
             </div>
@@ -412,13 +412,13 @@ const DocumentationPage: React.FC = () => {
 
           {/* Search Bar */}
           <div className="relative max-w-2xl">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
             <Input
               type="text"
               placeholder="Rechercher dans la documentation..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12 pr-4 py-3 w-full text-base rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-500"
+              className="pl-12 pr-4 py-3 w-full text-base rounded-xl border-2 border-gray-200 dark:border-gray-600 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-500"
             />
           </div>
         </div>
@@ -428,8 +428,8 @@ const DocumentationPage: React.FC = () => {
         <div className="grid grid-cols-12 gap-6">
           {/* Sidebar - Sections */}
           <div className="col-span-12 lg:col-span-3">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-200 dark:border-gray-700 sticky top-4">
-              <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">
+            <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-2xl p-4 border border-gray-200 dark:border-gray-600 dark:border-gray-700 sticky top-4">
+              <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-4">
                 Sections
               </h2>
               <nav className="space-y-1">
@@ -470,12 +470,12 @@ const DocumentationPage: React.FC = () => {
           {/* Main Content - Articles */}
           <div className="col-span-12 lg:col-span-9">
             {filteredSections.length === 0 ? (
-              <div className="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center border border-gray-200 dark:border-gray-700">
-                <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-2xl p-12 text-center border border-gray-200 dark:border-gray-600 dark:border-gray-700">
+                <Search className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
                   Aucun résultat trouvé
                 </h3>
-                <p className="text-gray-500 dark:text-gray-400">
+                <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                   Essayez avec d'autres mots-clés
                 </p>
               </div>
@@ -492,7 +492,7 @@ const DocumentationPage: React.FC = () => {
                         >
                           <Icon className="h-5 w-5 text-white" />
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
                           {section.title}
                         </h2>
                       </div>
@@ -504,19 +504,19 @@ const DocumentationPage: React.FC = () => {
                             key={article.id}
                             type="button"
                             onClick={() => handleArticleClick(article.id)}
-                            className="group bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-lg transition-all text-left"
+                            className="group bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-600 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-lg transition-all text-left"
                           >
                             <div className="flex items-start justify-between mb-3">
-                              <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                                 {article.title}
                               </h3>
-                              <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex-shrink-0" />
+                              <ChevronRight className="h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex-shrink-0" />
                             </div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-4">
                               {article.description}
                             </p>
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-500">
+                              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                                 <Clock className="h-3.5 w-3.5" />
                                 {article.readTime}
                               </div>
@@ -524,7 +524,7 @@ const DocumentationPage: React.FC = () => {
                                 {article.tags.slice(0, 2).map((tag) => (
                                   <span
                                     key={tag}
-                                    className="flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs rounded-lg"
+                                    className="flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 text-xs rounded-lg"
                                   >
                                     <Tag className="h-3 w-3" />
                                     {tag}
@@ -545,10 +545,10 @@ const DocumentationPage: React.FC = () => {
             <div className="mt-12 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-8 border border-blue-200 dark:border-blue-800">
               <div className="flex items-start gap-6">
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
                     Besoin d'aide supplémentaire ?
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-4">
                     Consultez nos tutoriels vidéo ou contactez notre équipe de support.
                   </p>
                   <div className="flex items-center gap-3">

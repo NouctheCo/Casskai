@@ -124,10 +124,10 @@ export default function RGPDAdminDashboard() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
             Accès Refusé
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
             Vous devez être super-admin pour accéder à cette page.
           </p>
         </div>
@@ -142,11 +142,11 @@ export default function RGPDAdminDashboard() {
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <Shield className="w-8 h-8 text-green-600 dark:text-green-400" />
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
               Dashboard RGPD
             </h1>
           </div>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
             Monitoring des activités de protection des données
           </p>
         </div>
@@ -155,17 +155,17 @@ export default function RGPDAdminDashboard() {
         {metrics && (
           <div className="grid md:grid-cols-4 gap-6 mb-8">
             {/* Total Exports */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+            <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl shadow-lg p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
                   <Download className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <TrendingUp className="w-5 h-5 text-green-500" />
               </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+              <div className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-1">
                 {metrics.total_exports}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-2">
                 Exports totaux
               </div>
               <div className="text-xs text-green-600 dark:text-green-400">
@@ -174,17 +174,17 @@ export default function RGPDAdminDashboard() {
             </div>
 
             {/* Total Deletions */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+            <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl shadow-lg p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center">
                   <Trash2 className="w-6 h-6 text-red-600 dark:text-red-400" />
                 </div>
                 <TrendingUp className="w-5 h-5 text-green-500" />
               </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+              <div className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-1">
                 {metrics.total_deletions}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-2">
                 Suppressions totales
               </div>
               <div className="text-xs text-green-600 dark:text-green-400">
@@ -193,26 +193,26 @@ export default function RGPDAdminDashboard() {
             </div>
 
             {/* Avg Export Time */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+            <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl shadow-lg p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
                   <Clock className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                 </div>
                 <CheckCircle className="w-5 h-5 text-green-500" />
               </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+              <div className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-1">
                 {metrics.avg_export_time_seconds.toFixed(1)}s
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-2">
                 Temps moyen export
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">
+              <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                 Objectif RGPD: &lt; 30s
               </div>
             </div>
 
             {/* Pending Requests */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+            <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl shadow-lg p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center">
                   <AlertTriangle className="w-6 h-6 text-orange-600 dark:text-orange-400" />
@@ -221,13 +221,13 @@ export default function RGPDAdminDashboard() {
                   <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
                 )}
               </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+              <div className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-1">
                 {metrics.pending_requests}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-2">
                 Requêtes en attente
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">
+              <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                 Délai max: 30 jours
               </div>
             </div>
@@ -257,11 +257,11 @@ export default function RGPDAdminDashboard() {
         )}
 
         {/* Filters & Export */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
+        <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-3">
-              <FileText className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+              <FileText className="w-5 h-5 text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500" />
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
                 Logs d'audit ({logs.length})
               </h2>
             </div>
@@ -272,7 +272,7 @@ export default function RGPDAdminDashboard() {
                 value={filter}
                 onChange={(e) => setFilter(e.target.value as 'all' | 'export' | 'delete' | 'consent')}
                 aria-label="Filtrer les logs d'audit"
-                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg border-none focus:ring-2 focus:ring-blue-500"
+                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:text-white rounded-lg border-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">Toutes les actions</option>
                 <option value="export">Exports uniquement</option>
@@ -293,38 +293,38 @@ export default function RGPDAdminDashboard() {
         </div>
 
         {/* Logs Table */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
           {loading ? (
             <div className="p-12 text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="text-gray-600 dark:text-gray-400 mt-4">Chargement des logs...</p>
+              <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mt-4">Chargement des logs...</p>
             </div>
           ) : logs.length === 0 ? (
             <div className="p-12 text-center">
-              <Eye className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 dark:text-gray-400">Aucun log disponible</p>
+              <Eye className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+              <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Aucun log disponible</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                       Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                       Utilisateur
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                       Action
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                       Temps
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                       Détails
                     </th>
                   </tr>
@@ -332,10 +332,10 @@ export default function RGPDAdminDashboard() {
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {logs.map((log) => (
                     <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 dark:text-white">
                         {new Date(log.created_at).toLocaleString('fr-FR')}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">
                         {log.user_email}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -360,10 +360,10 @@ export default function RGPDAdminDashboard() {
                           {log.status === 'success' ? '✓ Succès' : log.status === 'error' ? '✗ Erreur' : '⏳ En attente'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">
                         {(log.execution_time_ms / 1000).toFixed(2)}s
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                      <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">
                         {log.error_message || '-'}
                       </td>
                     </tr>
@@ -375,7 +375,7 @@ export default function RGPDAdminDashboard() {
         </div>
 
         {/* Footer Info */}
-        <div className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
+        <div className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
           <p>
             📊 Les métriques sont mises à jour en temps réel via la vue <code>rgpd_audit_summary</code>
           </p>

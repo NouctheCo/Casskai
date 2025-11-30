@@ -80,11 +80,11 @@ const EnterpriseKPICard: React.FC<{
         <CardContent className="p-6">
           <div className="flex items-start justify-between mb-4">
             <div className="space-y-1">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-400">
                 {metric.title}
               </p>
               <div className="flex items-baseline space-x-2">
-                <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                <span className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
                   {typeof metric.current_value === 'number' && metric.unit === 'currency'
                     ? new Intl.NumberFormat('fr-FR', {
                         style: 'currency',
@@ -98,7 +98,7 @@ const EnterpriseKPICard: React.FC<{
                   }
                 </span>
                 {metric.target_value && (
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
                     / {metric.target_value.toLocaleString('fr-FR')}
                   </span>
                 )}
@@ -123,14 +123,14 @@ const EnterpriseKPICard: React.FC<{
                 <span className={`text-sm font-medium ${trendColor}`}>
                   {Math.abs(metric.trend_percentage).toFixed(1)}%
                 </span>
-                <span className="text-xs text-gray-600">vs période précédente</span>
+                <span className="text-xs text-gray-600 dark:text-gray-400">vs période précédente</span>
               </div>
             )}
 
             {/* Comparaison budget */}
             {metric.vs_budget_percentage !== undefined && (
               <div className="flex items-center justify-between text-xs">
-                <span className="text-gray-600">vs Budget:</span>
+                <span className="text-gray-600 dark:text-gray-400">vs Budget:</span>
                 <span className={`font-medium ${
                   metric.vs_budget_percentage > 0 ? 'text-green-600' : 'text-red-600'
                 }`}>
@@ -143,7 +143,7 @@ const EnterpriseKPICard: React.FC<{
             {metric.target_value && typeof metric.current_value === 'number' && (
               <div className="space-y-1">
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-600">Objectif</span>
+                  <span className="text-gray-600 dark:text-gray-400">Objectif</span>
                   <span className="font-medium">
                     {Math.round((metric.current_value / metric.target_value) * 100)}%
                   </span>
@@ -390,10 +390,10 @@ const EnterpriseChart: React.FC<{
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">
+              <CardTitle className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
                 {chart.title}
               </CardTitle>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                 Période: {chart.period} • {chart.comparison_enabled ? 'Comparaisons activées' : 'Vue simple'}
               </p>
             </div>
@@ -416,8 +416,8 @@ const EnterpriseChart: React.FC<{
           {chart.metrics ? (
             <div className="grid grid-cols-4 gap-4 mt-4 p-4 bg-gray-50/50 rounded-lg">
               <div className="text-center">
-                <p className="text-xs text-gray-600">Total</p>
-                <p className="text-lg font-bold text-gray-900">
+                <p className="text-xs text-gray-600 dark:text-gray-400">Total</p>
+                <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
                   {new Intl.NumberFormat('fr-FR', {
                     notation: 'compact',
                     compactDisplay: 'short'
@@ -425,7 +425,7 @@ const EnterpriseChart: React.FC<{
                 </p>
               </div>
               <div className="text-center">
-                <p className="text-xs text-gray-600">Croissance</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Croissance</p>
                 <p className={`text-lg font-bold ${
                   (chart.metrics.growth_rate || 0) > 0 ? 'text-green-600' : 'text-red-600'
                 }`}>
@@ -433,7 +433,7 @@ const EnterpriseChart: React.FC<{
                 </p>
               </div>
               <div className="text-center">
-                <p className="text-xs text-gray-600">vs Budget</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">vs Budget</p>
                 <p className={`text-lg font-bold ${
                   (chart.metrics.vs_budget || 0) > 0 ? 'text-green-600' : 'text-red-600'
                 }`}>
@@ -441,7 +441,7 @@ const EnterpriseChart: React.FC<{
                 </p>
               </div>
               <div className="text-center">
-                <p className="text-xs text-gray-600">vs N-1</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">vs N-1</p>
                 <p className={`text-lg font-bold ${
                   (chart.metrics.vs_previous_year || 0) > 0 ? 'text-green-600' : 'text-red-600'
                 }`}>
@@ -451,7 +451,7 @@ const EnterpriseChart: React.FC<{
             </div>
           ) : (
             <div className="mt-4 p-4 bg-gray-50/50 rounded-lg">
-              <p className="text-center text-gray-500">Données des métriques en cours de chargement...</p>
+              <p className="text-center text-gray-500 dark:text-gray-400">Données des métriques en cours de chargement...</p>
             </div>
           )}
         </CardHeader>
@@ -528,7 +528,7 @@ const FinancialHealthCard: React.FC<{
                 <Shield className="h-6 w-6 text-blue-600" />
                 <span>Santé Financière</span>
               </CardTitle>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                 Score global basé sur 6 critères
               </p>
             </div>
@@ -555,7 +555,7 @@ const FinancialHealthCard: React.FC<{
               { label: 'Durabilité', score: healthScore.sustainability_score }
             ].map(({ label, score }) => (
               <div key={label} className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700">{label}</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</span>
                 <div className="flex items-center space-x-2">
                   <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
                     <div
@@ -575,7 +575,7 @@ const FinancialHealthCard: React.FC<{
           {/* Recommandations */}
           {healthScore.recommendations.length > 0 && (
             <div className="mt-6 space-y-2">
-              <h4 className="font-semibold text-gray-900 flex items-center">
+              <h4 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
                 <Sparkles className="h-4 w-4 mr-2 text-yellow-500" />
                 Recommandations prioritaires
               </h4>
@@ -710,7 +710,7 @@ export const EnterpriseDashboard: React.FC = () => {
   }, [isLoading, error, dashboardData, isNewAccount]);
 
   if (isLoading) {
-    return <div className="p-6 text-center text-gray-600">Chargement...</div>;
+    return <div className="p-6 text-center text-gray-600 dark:text-gray-400">Chargement...</div>;
   }
 
   if (isNewAccount || (error && !dashboardData)) {
@@ -733,10 +733,10 @@ export const EnterpriseDashboard: React.FC = () => {
       <div className="flex items-center justify-center min-h-96">
         <Card className="p-8 text-center">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
             Erreur de chargement
           </h2>
-          <p className="text-gray-600 mb-4">{error}</p>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
           <Button onClick={loadDashboardData} variant="outline">
             <RefreshCw className="h-4 w-4 mr-2" />
             Réessayer
@@ -760,10 +760,10 @@ export const EnterpriseDashboard: React.FC = () => {
               <BarChart3 className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
                 Dashboard Enterprise
               </h1>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400">
                 {currentEnterprise?.name} - Vue d'ensemble complète et temps réel
               </p>
             </div>
@@ -891,7 +891,7 @@ export const EnterpriseDashboard: React.FC = () => {
               <EnterpriseKPICard key={metric.id} metric={metric} />
             ))
           ) : (
-            <div className="col-span-full text-center py-8 text-gray-500">
+            <div className="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">
               Aucune métrique disponible
             </div>
           )
@@ -926,13 +926,13 @@ export const EnterpriseDashboard: React.FC = () => {
                   <_BarChartIcon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white">
                     Santé Financière
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">
                     Aucune donnée financière disponible pour le moment.
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400">
                     Commencez à enregistrer vos écritures comptables pour voir votre score de santé financière.
                   </p>
                 </div>
@@ -975,7 +975,7 @@ export const EnterpriseDashboard: React.FC = () => {
                       <div className="flex items-start justify-between">
                         <div>
                           <p className="font-medium text-sm">{alert.title}</p>
-                          <p className="text-xs text-gray-600 mt-1">{alert.message}</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{alert.message}</p>
                         </div>
                         {alert.action_required && (
                           <Button variant="ghost" size="sm" className="ml-2">

@@ -113,7 +113,7 @@ export const BudgetForecastView: React.FC<BudgetForecastViewProps> = ({
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center space-y-4">
           <RefreshCw className="w-12 h-12 text-blue-600 dark:text-blue-400 animate-spin" />
-          <p className="text-gray-600 dark:text-gray-400">Calcul du forecast en cours...</p>
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400">Calcul du forecast en cours...</p>
         </div>
       </div>
     );
@@ -121,13 +121,13 @@ export const BudgetForecastView: React.FC<BudgetForecastViewProps> = ({
 
   if (!forecastData) {
     return (
-      <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+      <Card className="bg-white dark:bg-gray-800 dark:bg-gray-800 border-gray-200 dark:border-gray-600 dark:border-gray-700">
         <CardContent className="flex flex-col items-center justify-center py-12">
           <AlertTriangle className="w-16 h-16 text-orange-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100 mb-2">
             Données de forecast indisponibles
           </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-6 text-center max-w-md">
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 mb-6 text-center max-w-md">
             Vérifiez que le budget est correctement configuré et que des écritures comptables existent
           </p>
           <Button onClick={loadForecast}>
@@ -146,30 +146,30 @@ export const BudgetForecastView: React.FC<BudgetForecastViewProps> = ({
       {/* Header avec contrôles */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-gray-100">
             Forecast & Atterrissage {budgetYear}
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 mt-1">
             Réel YTD + Prorata + Budget restant = Projection fin d'année
           </p>
         </div>
 
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
-            <Calendar className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+            <Calendar className="w-4 h-4 text-gray-500 dark:text-gray-400 dark:text-gray-400" />
             <input
               type="date"
               value={asOfDate.toISOString().split('T')[0]}
               onChange={(e) => setAsOfDate(new Date(e.target.value))}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-800 dark:text-gray-100"
+              className="px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-800 dark:bg-gray-800 dark:text-gray-100"
             />
           </div>
 
           <Select value={mode} onValueChange={(v) => setMode(v as any)}>
-            <SelectTrigger className="w-40 bg-white dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600">
+            <SelectTrigger className="w-40 bg-white dark:bg-gray-800 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600">
               <SelectValue placeholder="Mode" />
             </SelectTrigger>
-            <SelectContent className="bg-white dark:bg-gray-800 dark:border-gray-600">
+            <SelectContent className="bg-white dark:bg-gray-800 dark:bg-gray-800 dark:border-gray-600">
               <SelectItem value="prorata">Prorata</SelectItem>
               <SelectItem value="run_rate">Run-Rate</SelectItem>
             </SelectContent>
@@ -211,15 +211,15 @@ export const BudgetForecastView: React.FC<BudgetForecastViewProps> = ({
 
       {/* KPI principaux */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-gray-800 dark:bg-gray-800 border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20">
                 <TrendingUp className="w-5 h-5 text-blue-500 dark:text-blue-400" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Réel YTD</p>
-                <p className="text-xl font-bold text-gray-900 dark:text-gray-100 mt-1">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-400">Réel YTD</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-gray-100 mt-1">
                   {formatCurrency(kpi.total_actual_ytd)}
                 </p>
               </div>
@@ -227,15 +227,15 @@ export const BudgetForecastView: React.FC<BudgetForecastViewProps> = ({
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-gray-800 dark:bg-gray-800 border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 rounded-lg bg-purple-50 dark:bg-purple-900/20">
                 <DollarSign className="w-5 h-5 text-purple-500 dark:text-purple-400" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Budget Annuel</p>
-                <p className="text-xl font-bold text-gray-900 dark:text-gray-100 mt-1">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-400">Budget Annuel</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-gray-100 mt-1">
                   {formatCurrency(kpi.total_budget_annual)}
                 </p>
               </div>
@@ -243,14 +243,14 @@ export const BudgetForecastView: React.FC<BudgetForecastViewProps> = ({
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-gray-800 dark:bg-gray-800 border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 rounded-lg bg-green-50 dark:bg-green-900/20">
                 <TrendingUp className="w-5 h-5 text-green-500 dark:text-green-400" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Forecast EOY</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-400">Forecast EOY</p>
                 <p className="text-xl font-bold text-green-700 dark:text-green-300 mt-1">
                   {formatCurrency(kpi.total_forecast_eoy)}
                 </p>
@@ -259,7 +259,7 @@ export const BudgetForecastView: React.FC<BudgetForecastViewProps> = ({
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-gray-800 dark:bg-gray-800 border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
               <div className={`p-2 rounded-lg ${kpi.variance_vs_budget >= 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
@@ -270,11 +270,11 @@ export const BudgetForecastView: React.FC<BudgetForecastViewProps> = ({
                 )}
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Écart vs Budget</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-400">Écart vs Budget</p>
                 <p className={`text-xl font-bold mt-1 ${kpi.variance_vs_budget >= 0 ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`}>
                   {formatCurrency(kpi.variance_vs_budget)}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 mt-1">
                   {formatPercentage(kpi.variance_percentage)}
                 </p>
               </div>
@@ -282,15 +282,15 @@ export const BudgetForecastView: React.FC<BudgetForecastViewProps> = ({
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-gray-800 dark:bg-gray-800 border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 rounded-lg bg-orange-50 dark:bg-orange-900/20">
                 <Info className="w-5 h-5 text-orange-500 dark:text-orange-400" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Absorption</p>
-                <p className="text-xl font-bold text-gray-900 dark:text-gray-100 mt-1">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-400">Absorption</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-gray-100 mt-1">
                   {kpi.absorption_rate.toFixed(1)}%
                 </p>
               </div>
@@ -300,7 +300,7 @@ export const BudgetForecastView: React.FC<BudgetForecastViewProps> = ({
       </div>
 
       {/* Sélecteur de vue */}
-      <div className="flex space-x-2 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex space-x-2 border-b border-gray-200 dark:border-gray-600 dark:border-gray-700">
         {[
           { id: 'totals', label: 'Totaux' },
           { id: 'categories', label: 'Par Catégorie' },
@@ -331,9 +331,9 @@ export const BudgetForecastView: React.FC<BudgetForecastViewProps> = ({
           ].map(({ key, label, color }) => {
             const data = totals_by_type[key as keyof typeof totals_by_type];
             return (
-              <Card key={key} className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <Card key={key} className="bg-white dark:bg-gray-800 dark:bg-gray-800 border-gray-200 dark:border-gray-600 dark:border-gray-700">
                 <CardHeader>
-                  <CardTitle className="text-lg text-gray-900 dark:text-gray-100">{label}</CardTitle>
+                  <CardTitle className="text-lg text-gray-900 dark:text-gray-100 dark:text-gray-100">{label}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -377,33 +377,33 @@ export const BudgetForecastView: React.FC<BudgetForecastViewProps> = ({
 
       {/* Vue Par Catégorie */}
       {viewMode === 'categories' && (
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-gray-800 dark:bg-gray-800 border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead className="bg-gray-50 dark:bg-gray-700/50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 uppercase tracking-wider">
                       Catégorie
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 uppercase tracking-wider">
                       Réel YTD
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 uppercase tracking-wider">
                       Budget Annuel
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 uppercase tracking-wider">
                       Forecast EOY
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 uppercase tracking-wider">
                       Écart
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 uppercase tracking-wider">
                       Écart %
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white dark:bg-gray-800/50 divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody className="bg-white dark:bg-gray-800 dark:bg-gray-800/50 divide-y divide-gray-200 dark:divide-gray-700">
                   {by_category.map((cat) => (
                     <tr key={cat.category_id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30">
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -416,18 +416,18 @@ export const BudgetForecastView: React.FC<BudgetForecastViewProps> = ({
                             {cat.category_type === 'revenue' ? 'R' : cat.category_type === 'expense' ? 'C' : 'I'}
                           </span>
                           <div>
-                            <div className="font-medium text-gray-900 dark:text-gray-100">{cat.category_name}</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">{cat.category_code}</div>
+                            <div className="font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">{cat.category_name}</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-400">{cat.category_code}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right font-medium text-gray-900 dark:text-gray-100">
+                      <td className="px-6 py-4 whitespace-nowrap text-right font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">
                         {formatCurrency(cat.actual_ytd)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-gray-500 dark:text-gray-400">
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-gray-500 dark:text-gray-400 dark:text-gray-400">
                         {formatCurrency(cat.budget_annual)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right font-medium text-gray-900 dark:text-gray-100">
+                      <td className="px-6 py-4 whitespace-nowrap text-right font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">
                         {formatCurrency(cat.forecast_eoy)}
                       </td>
                       <td className={`px-6 py-4 whitespace-nowrap text-right font-medium ${
@@ -451,37 +451,37 @@ export const BudgetForecastView: React.FC<BudgetForecastViewProps> = ({
 
       {/* Vue Mois par Mois */}
       {viewMode === 'monthly' && (
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-gray-800 dark:bg-gray-800 border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead className="bg-gray-50 dark:bg-gray-700/50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 uppercase tracking-wider">
                       Mois
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 uppercase tracking-wider">
                       Réel
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 uppercase tracking-wider">
                       Budget
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 uppercase tracking-wider">
                       Forecast
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 uppercase tracking-wider">
                       Écart
                     </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-400 uppercase tracking-wider">
                       Statut
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white dark:bg-gray-800/50 divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody className="bg-white dark:bg-gray-800 dark:bg-gray-800/50 divide-y divide-gray-200 dark:divide-gray-700">
                   {by_month.map((month) => (
                     <tr key={month.month} className={`${month.is_current ? 'bg-blue-50 dark:bg-blue-900/10' : ''} hover:bg-gray-50 dark:hover:bg-gray-700/30`}>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-medium text-gray-900 dark:text-gray-100">
+                        <div className="font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">
                           {month.month_name}
                           {month.is_current && (
                             <span className="ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
@@ -490,13 +490,13 @@ export const BudgetForecastView: React.FC<BudgetForecastViewProps> = ({
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right font-medium text-gray-900 dark:text-gray-100">
+                      <td className="px-6 py-4 whitespace-nowrap text-right font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">
                         {month.is_past || month.is_current ? formatCurrency(month.actual) : '-'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-gray-500 dark:text-gray-400">
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-gray-500 dark:text-gray-400 dark:text-gray-400">
                         {formatCurrency(month.budget)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right font-medium text-gray-900 dark:text-gray-100">
+                      <td className="px-6 py-4 whitespace-nowrap text-right font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">
                         {formatCurrency(month.forecast)}
                       </td>
                       <td className={`px-6 py-4 whitespace-nowrap text-right ${

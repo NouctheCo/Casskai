@@ -148,7 +148,7 @@ export default function StripeSuccessPage() {
 
               <h2 className="text-xl font-semibold mb-2">Activation de votre abonnement</h2>
 
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400">
 
                 Nous finalisons la configuration de votre compte Premium...
 
@@ -192,7 +192,7 @@ export default function StripeSuccessPage() {
 
             <h2 className="text-2xl font-bold mb-2">Félicitations !</h2>
 
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 mb-6">
 
               Votre abonnement Premium a été activé avec succès. Vous pouvez maintenant profiter de toutes les fonctionnalités avancées de CassKai.
 

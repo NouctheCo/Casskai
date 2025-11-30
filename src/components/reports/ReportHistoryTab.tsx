@@ -163,7 +163,7 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <RefreshCw className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Chargement de l'historique...</p>
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Chargement de l'historique...</p>
         </div>
       </div>
     );
@@ -176,7 +176,7 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-sm font-medium text-gray-600">Total</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Total</p>
               <p className="text-2xl font-bold">{stats.total}</p>
             </div>
           </CardContent>
@@ -184,15 +184,15 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-sm font-medium text-gray-600">Brouillons</p>
-              <p className="text-2xl font-bold text-gray-600">{stats.draft}</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Brouillons</p>
+              <p className="text-2xl font-bold text-gray-600 dark:text-gray-400 dark:text-gray-500">{stats.draft}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-sm font-medium text-gray-600">Générés</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Générés</p>
               <p className="text-2xl font-bold text-blue-600">{stats.generated}</p>
             </div>
           </CardContent>
@@ -200,7 +200,7 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-sm font-medium text-gray-600">Approuvés</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Approuvés</p>
               <p className="text-2xl font-bold text-green-600">{stats.approved}</p>
             </div>
           </CardContent>
@@ -208,7 +208,7 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-sm font-medium text-gray-600">Archivés</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500">Archivés</p>
               <p className="text-2xl font-bold text-yellow-600">{stats.archived}</p>
             </div>
           </CardContent>
@@ -224,7 +224,7 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
               <Input
                 placeholder="Rechercher..."
                 value={searchTerm}
@@ -290,7 +290,7 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
                       </Badge>
                     )}
                   </div>
-                  <div className="flex flex-wrap gap-2 text-sm text-gray-600 mb-2">
+                  <div className="flex flex-wrap gap-2 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-2">
                     <span className="flex items-center">
                       <Calendar className="w-4 h-4 mr-1" />
                       {format(new Date(report.period_start), 'dd/MM/yyyy', { locale: fr })} - {format(new Date(report.period_end), 'dd/MM/yyyy', { locale: fr })}
@@ -306,7 +306,7 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
                     )}
                   </div>
                   {report.notes && (
-                    <p className="text-sm text-gray-600 mt-2 p-2 bg-gray-50 rounded">{report.notes}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 mt-2 p-2 bg-gray-50 rounded">{report.notes}</p>
                   )}
                   {report.tags && report.tags.length > 0 && (
                     <div className="flex gap-1 mt-2">
@@ -359,9 +359,9 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
       {filteredReports.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center">
-            <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">Aucun rapport trouvé</h3>
-            <p className="text-gray-600">
+            <FileText className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Aucun rapport trouvé</h3>
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">
               {searchTerm || statusFilter !== 'all' || typeFilter !== 'all'
                 ? 'Aucun rapport ne correspond à vos critères de recherche'
                 : 'Commencez par générer votre premier rapport dans l\'onglet Génération'}

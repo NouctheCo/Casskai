@@ -641,7 +641,7 @@ const EntryPreviewDialog = ({ open, onClose, entry }) => {
 
             <div>
 
-              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Référence</Label>
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Référence</Label>
 
               <p className="text-lg font-semibold">{entry.reference}</p>
 
@@ -649,7 +649,7 @@ const EntryPreviewDialog = ({ open, onClose, entry }) => {
 
             <div>
 
-              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Statut</Label>
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Statut</Label>
 
               <div className="mt-1">{getStatusBadge(entry.status)}</div>
 
@@ -667,7 +667,7 @@ const EntryPreviewDialog = ({ open, onClose, entry }) => {
 
               <div>
 
-                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Date</Label>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Date</Label>
 
                 <p className="text-base">{new Date(entry.date).toLocaleDateString('fr-FR')}</p>
 
@@ -681,7 +681,7 @@ const EntryPreviewDialog = ({ open, onClose, entry }) => {
 
               <div>
 
-                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Description</Label>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Description</Label>
 
                 <p className="text-base">{entry.description}</p>
 
@@ -697,7 +697,7 @@ const EntryPreviewDialog = ({ open, onClose, entry }) => {
 
           <div className="space-y-4">
 
-            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Lignes d'écriture</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">Lignes d'écriture</h3>
 
             <div className="rounded-md border">
 
@@ -761,7 +761,7 @@ const EntryPreviewDialog = ({ open, onClose, entry }) => {
 
             <div className="text-center">
 
-              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Débit</Label>
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Total Débit</Label>
 
               <p className="text-xl font-bold text-red-600">{entry.totalDebit?.toFixed(2)} €</p>
 
@@ -769,7 +769,7 @@ const EntryPreviewDialog = ({ open, onClose, entry }) => {
 
             <div className="text-center">
 
-              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Crédit</Label>
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Total Crédit</Label>
 
               <p className="text-xl font-bold text-green-600">{entry.totalCredit?.toFixed(2)} €</p>
 
@@ -971,7 +971,7 @@ const EntryRow = ({ entry, onEdit, onDelete, onView }) => {
 
               {entry.lines.map((line, index) => (
 
-                <div key={index} className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                <div key={index} className="flex justify-between text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                   <span>{line.account} - {line.description}</span>
 
@@ -1280,7 +1280,7 @@ export default function OptimizedJournalEntriesTab() {
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total écritures</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Total écritures</p>
 
                 <p className="text-2xl font-bold">{summary.totalEntries}</p>
 
@@ -1304,7 +1304,7 @@ export default function OptimizedJournalEntriesTab() {
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Validées</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Validées</p>
 
                 <p className="text-2xl font-bold">{summary.validatedEntries}</p>
 
@@ -1328,7 +1328,7 @@ export default function OptimizedJournalEntriesTab() {
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total débits</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Total débits</p>
 
                 <p className="text-xl font-bold">{summary.totalDebit.toFixed(2)} €</p>
 
@@ -1352,7 +1352,7 @@ export default function OptimizedJournalEntriesTab() {
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total crédits</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Total crédits</p>
 
                 <p className="text-xl font-bold">{summary.totalCredit.toFixed(2)} €</p>
 
@@ -1390,7 +1390,7 @@ export default function OptimizedJournalEntriesTab() {
 
               <div className="relative">
 
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
 
                 <Input
 

@@ -43,13 +43,13 @@ export function InventoryHeader({ onNewArticle, itemVariants }: InventoryHeaderP
     >
       <div className="space-y-2">
         <div className="flex items-center space-x-2">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
             {t('inventory')}
           </h1>
           <Sparkles className="h-6 w-6 text-yellow-500" />
         </div>
         <div className="flex items-center space-x-2">
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400">
             {t('inventorypage.grez_vos_stocks_de_marchandises_et_suivi_de_production', { defaultValue: 'Gérez vos stocks de marchandises et suivi de production.' })}
           </p>
           <Badge variant="secondary" className="text-xs">

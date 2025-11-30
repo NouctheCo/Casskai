@@ -79,7 +79,7 @@ const DataTable: React.FC<DataTableProps> = ({
       </Table>
       
       {tableData.length > pageSize && (
-        <div className="text-xs text-gray-500 text-center">
+        <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
           +{tableData.length - pageSize} autres éléments
         </div>
       )}

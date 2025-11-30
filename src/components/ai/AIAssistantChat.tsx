@@ -301,15 +301,15 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
                       <button
                         key={action.id}
                         onClick={() => handleQuickAction(action)}
-                        className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                        className="p-3 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 transition-colors text-left"
                       >
                         <div className="flex items-center gap-2 mb-1">
                           <div className={`w-6 h-6 ${action.color} rounded-full flex items-center justify-center`}>
                             <IconComponent size={14} className="text-white" />
                           </div>
-                          <span className="text-sm font-medium text-gray-700">{action.label}</span>
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{action.label}</span>
                         </div>
-                        <p className="text-xs text-gray-500 truncate">{action.query}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{action.query}</p>
                       </button>
                     );
                     })}
@@ -362,7 +362,7 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
                     <div className="bg-gray-100 p-3 rounded-lg rounded-tl-none">
                       <div className="flex items-center gap-2">
                         <Loader2 size={16} className="animate-spin text-purple-600" />
-                        <span className="text-sm text-gray-600">CassKai AI réfléchit...</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">CassKai AI réfléchit...</span>
                       </div>
                     </div>
                   </motion.div>
@@ -372,7 +372,7 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
               </div>
 
               {/* Input */}
-              <div className="border-t border-gray-200 p-4">
+              <div className="border-t border-gray-200 dark:border-gray-600 p-4">
                 <div className="flex items-center gap-2">
                   <div className="flex-1 relative">
                     <input
@@ -382,7 +382,7 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
                       onChange={(e) => setCurrentMessage(e.target.value)}
                       onKeyPress={handleKeyPress}
                       placeholder="Posez votre question..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       disabled={isLoading}
                     />
                     {recognitionRef.current && (
@@ -404,7 +404,7 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
                     <Send size={16} />
                   </button>
                 </div>
-                <p className="text-xs text-gray-500 mt-2 text-center">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
                   CassKai AI peut faire des erreurs. Vérifiez les informations importantes.
                 </p>
               </div>

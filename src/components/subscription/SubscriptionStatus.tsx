@@ -88,15 +88,15 @@ const SubscriptionStatus: React.FC = () => {
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">Fonctionnalités incluses</span>
+                <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Fonctionnalités incluses</span>
                 <span className="font-medium">Base</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">Utilisateurs</span>
+                <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Utilisateurs</span>
                 <span className="font-medium">1</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">Clients</span>
+                <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Clients</span>
                 <span className="font-medium">10</span>
               </div>
               <Button className="w-full mt-4" onClick={() => window.location.href = '/pricing'}>
@@ -109,15 +109,15 @@ const SubscriptionStatus: React.FC = () => {
     }
 
     return (
-      <Card className="w-full border-dashed border-2 border-gray-300 dark:border-gray-600">
+      <Card className="w-full border-dashed border-2 border-gray-300 dark:border-gray-600 dark:border-gray-600">
         <CardContent className="flex flex-col items-center justify-center py-12 text-center">
           <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
-            <CreditCard className="w-8 h-8 text-gray-400" />
+            <CreditCard className="w-8 h-8 text-gray-400 dark:text-gray-500" />
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
             Aucun abonnement actif
           </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-6 max-w-md">
             Choisissez un plan pour débloquer toutes les fonctionnalités de CassKai
           </p>
           <Button>
@@ -154,7 +154,7 @@ const SubscriptionStatus: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="space-y-2">
               <div className="flex items-center space-x-3">
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
                   Plan {plan.name}
                 </h3>
                 <Badge
@@ -183,16 +183,16 @@ const SubscriptionStatus: React.FC = () => {
                   )}
                 </Badge>
               </div>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                 {formatPrice(plan.price, plan.currency)}/{plan.interval === 'month' ? 'mois' : 'an'}
               </p>
             </div>
             
             <div className="text-right">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                 {daysUntilRenewal > 0 ? 'Renouvellement dans' : 'Expiré depuis'}
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
                 {Math.abs(daysUntilRenewal)} jour{Math.abs(daysUntilRenewal) > 1 ? 's' : ''}
               </p>
             </div>
@@ -206,10 +206,10 @@ const SubscriptionStatus: React.FC = () => {
               <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                 <Calendar className="w-5 h-5 text-blue-500" />
                 <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 dark:text-white">
                     Période actuelle
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                     {subscription.currentPeriodStart.toLocaleDateString('fr-FR')} - {subscription.currentPeriodEnd.toLocaleDateString('fr-FR')}
                   </p>
                 </div>
@@ -218,10 +218,10 @@ const SubscriptionStatus: React.FC = () => {
               <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                 <Shield className="w-5 h-5 text-green-500" />
                 <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 dark:text-white">
                     Support {plan.supportLevel}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                     {plan.supportLevel === 'basic' ? 'Support par email' :
                      plan.supportLevel === 'priority' ? 'Support prioritaire' :
                      'Support dédié 24/7'}
@@ -263,7 +263,7 @@ const SubscriptionStatus: React.FC = () => {
 
           {/* Usage metrics */}
           <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center space-x-2">
+            <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white flex items-center space-x-2">
               <TrendingUp className="w-5 h-5 text-purple-500" />
               <span>Utilisation</span>
             </h4>
@@ -273,12 +273,12 @@ const SubscriptionStatus: React.FC = () => {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <Users className="w-4 h-4 text-gray-500" />
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <Users className="w-4 h-4 text-gray-500 dark:text-gray-400 dark:text-gray-500" />
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300">
                         Utilisateurs
                       </span>
                     </div>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
                       {usageLimits.users.current}/{usageLimits.users.limit}
                     </span>
                   </div>
@@ -293,12 +293,12 @@ const SubscriptionStatus: React.FC = () => {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <Users className="w-4 h-4 text-gray-500" />
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <Users className="w-4 h-4 text-gray-500 dark:text-gray-400 dark:text-gray-500" />
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300">
                         Clients
                       </span>
                     </div>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
                       {usageLimits.clients.current}/{usageLimits.clients.limit}
                     </span>
                   </div>
@@ -313,12 +313,12 @@ const SubscriptionStatus: React.FC = () => {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <Database className="w-4 h-4 text-gray-500" />
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <Database className="w-4 h-4 text-gray-500 dark:text-gray-400 dark:text-gray-500" />
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300">
                         Stockage
                       </span>
                     </div>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
                       {usageLimits.storage.current} GB/{usageLimits.storage.limit ? usageLimits.storage.limit / 1024 : 0} GB
                     </span>
                   </div>
@@ -332,7 +332,7 @@ const SubscriptionStatus: React.FC = () => {
           </div>
 
           {/* Actions */}
-          <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200 dark:border-gray-600 dark:border-gray-700">
             <Button
               onClick={handleBillingPortal}
               variant="outline"

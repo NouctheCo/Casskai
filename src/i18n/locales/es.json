@@ -267,7 +267,6 @@
     "humanResources": "Recursos Humanos",
     "inDevelopment": "En Desarrollo",
     "inventory": "Inventario",
-    "invoicing": "Facturación",
     "loading": "Cargando...",
     "month": "Mois",
     "newFeatures": "Nouvelles fonctionnalités",
@@ -1376,7 +1375,65 @@
     "unit": "Unité",
     "unit_": "Unité"
   },
-  "invoicing": "Facturación",
+  "invoicing": {
+    "title": "Facturación",
+    "subtitle": "Gestión profesional de facturas y presupuestos",
+    "periods": {
+      "currentMonth": "Mes actual",
+      "currentQuarter": "Trimestre actual",
+      "currentYear": "Año actual",
+      "lastMonth": "Mes pasado",
+      "custom": "Período personalizado"
+    },
+    "newInvoice": "Nueva factura",
+    "refresh": "Actualizar",
+    "kpis": {
+      "revenue": "Ingresos",
+      "revenueDesc": "Ingresos totales este mes",
+      "paidInvoices": "Facturas pagadas",
+      "paidInvoicesDesc": "Pagos recibidos",
+      "pendingInvoices": "Pendientes",
+      "pendingInvoicesDesc": "Facturas pendientes",
+      "overdueInvoices": "Vencidas",
+      "overdueInvoicesDesc": "Facturas vencidas"
+    },
+    "tabs": {
+      "overview": "Resumen",
+      "invoices": "Facturas",
+      "quotes": "Presupuestos",
+      "clients": "Clientes",
+      "payments": "Pagos"
+    },
+    "quickActions": {
+      "newInvoice": "Nueva factura",
+      "newInvoiceDesc": "Crear una factura para cliente",
+      "newQuote": "Nuevo presupuesto",
+      "newQuoteDesc": "Crear un presupuesto",
+      "newPayment": "Nuevo pago",
+      "newPaymentDesc": "Registrar un pago",
+      "viewClients": "Gestionar clientes",
+      "viewClientsDesc": "Ver lista de clientes"
+    },
+    "revenueBreakdown": {
+      "title": "Desglose de ingresos",
+      "paidInvoices": "Facturas pagadas",
+      "pendingInvoices": "Pendiente de pago",
+      "overdueInvoices": "Facturas vencidas",
+      "noData": "No hay datos de ingresos disponibles para el período seleccionado"
+    },
+    "recentActivity": {
+      "title": "Actividad reciente",
+      "noActivity": "No hay actividad reciente"
+    },
+    "stats": {
+      "invoicesCreated": "Facturas creadas",
+      "thisMonth": "Este mes",
+      "activeClients": "Clientes activos",
+      "total": "Total",
+      "averageValue": "Valor promedio",
+      "perInvoice": "Por factura"
+    }
+  },
   "journal": "Journal",
   "journalEntryDeletedSuccess": "Écriture supprimée avec succès",
   "journal_entries": {
@@ -2905,7 +2962,6 @@
     "humanResources": "Recursos Humanos",
     "inventaire": "Inventario",
     "inventory": "Inventario",
-    "invoicing": "Facturación",
     "manageSubscription": "Gestionar suscripción",
     "management": "Gestión",
     "modules": "módulos",
@@ -2992,23 +3048,7 @@
     "subtitle": "Gestiona tus declaraciones, obligaciones y calendario fiscal",
     "realTime": "En tiempo real",
     "export": "Exportar",
-    "newDeclaration": {
-      "title": "Crear una Nueva Declaración",
-      "description": "Agrega una nueva declaración fiscal",
-      "type": "Tipo de declaración *",
-      "selectType": "Seleccionar un tipo",
-      "name": "Nombre *",
-      "namePlaceholder": "Ej: IVA T1 2024",
-      "periodStart": "Inicio del período *",
-      "periodEnd": "Fin del período *",
-      "dueDate": "Fecha de vencimiento *",
-      "amount": "Importe (€)",
-      "descriptionField": "Descripción",
-      "descriptionPlaceholder": "Notas o detalles adicionales",
-      "cancel": "Cancelar",
-      "creating": "Creando...",
-      "create": "Crear Declaración"
-    },
+    "newDeclaration": "Nueva declaración",
     "tabs": {
       "dashboard": "Panel de Control",
       "compliance": "Cumplimiento Fiscal",
@@ -3714,7 +3754,6 @@
     "realtime": "Tiempo real",
     "loading": "Cargando datos fiscales...",
     "export": "Exportar CSV",
-    "newDeclaration": "Nueva declaración",
     "tabs": {
       "dashboard": "Panel",
       "compliance": "Cumplimiento",
@@ -3789,34 +3828,6 @@
       "requiresApproval": "Requiere aprobación",
       "emailNotifications": "Notificaciones por correo",
       "notificationEmails": "Correos de notificación"
-    },
-    "newDeclaration": {
-      "title": "Nueva declaración fiscal",
-      "subtitle": "Cree una nueva declaración fiscal para su empresa",
-      "form": {
-        "type": "Tipo de declaración",
-        "selectType": "Seleccione un tipo",
-        "types": {
-          "tva": "IVA - Impuesto al valor agregado",
-          "is": "Impuesto de sociedades",
-          "liasse": "Paquete de declaración fiscal",
-          "ir": "Impuesto sobre la renta",
-          "cfe": "Impuesto sobre propiedades comerciales",
-          "cvae": "Contribución sobre el valor agregado"
-        },
-        "name": "Nombre de la declaración",
-        "namePlaceholder": "Ej: IVA T1 2025",
-        "periodStart": "Inicio del período",
-        "periodEnd": "Fin del período",
-        "dueDate": "Fecha de vencimiento",
-        "amount": "Monto (opcional)",
-        "amountPlaceholder": "0.00",
-        "description": "Descripción (opcional)",
-        "descriptionPlaceholder": "Notas o información adicional",
-        "cancel": "Cancelar",
-        "create": "Crear declaración",
-        "creating": "Creando..."
-      }
     },
     "errors": {
       "loadDashboardData": "Error al cargar el panel",

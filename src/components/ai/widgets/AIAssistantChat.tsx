@@ -320,7 +320,7 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
                     {/* Métadonnées du message assistant */}
                     {message.type === 'assistant' && !message.isLoading && (
                       <div className="space-y-2">
-                        <div className="flex items-center space-x-2 text-xs text-gray-500">
+                        <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
                           <span>{message.timestamp.toLocaleTimeString('fr-FR')}</span>
                           
                           {message.queryType && (
@@ -369,7 +369,7 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
                         {/* Suggestions */}
                         {message.suggestions && message.suggestions.length > 0 && (
                           <div className="space-y-1">
-                            <p className="text-xs text-gray-500">Suggestions:</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Suggestions:</p>
                             <div className="flex flex-wrap gap-1">
                               {message.suggestions.map((suggestion, idx) => (
                                 <button
@@ -387,7 +387,7 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
                         {/* Sources */}
                         {message.sources && message.sources.length > 0 && (
                           <div className="space-y-1">
-                            <p className="text-xs text-gray-500">Sources:</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Sources:</p>
                             <div className="flex flex-wrap gap-1">
                               {message.sources.map((source, idx) => (
                                 <Badge key={idx} variant="outline" className="text-xs">
@@ -405,7 +405,7 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
                   {message.type === 'user' && (
                     <div className="flex-shrink-0">
                       <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                        <User className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                        <User className="w-4 h-4 text-gray-600 dark:text-gray-400 dark:text-gray-300" />
                       </div>
                     </div>
                   )}
@@ -447,7 +447,7 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
         </div>
 
         {/* Indicateur de contexte */}
-        <div className="text-xs text-gray-500 text-center">
+        <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
           Contexte: {transactions.length} transactions • Solde: {currentBalance.toLocaleString('fr-FR')}€
         </div>
       </CardContent>

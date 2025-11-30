@@ -386,7 +386,7 @@ export function ReportGenerationTab({ companyId, refreshTrigger, onReportGenerat
 
                 <div className="space-y-2">
                   <h3 className="font-semibold text-lg">{report.name}</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">{report.description}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{report.description}</p>
                   <Badge variant="outline" className="text-xs">{report.category}</Badge>
                 </div>
 

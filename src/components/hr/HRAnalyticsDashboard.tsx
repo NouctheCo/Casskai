@@ -135,7 +135,7 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement des analytics...</p>
+          <p className="text-gray-600 dark:text-gray-400">Chargement des analytics...</p>
         </div>
       </div>
     );
@@ -155,14 +155,14 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
               <Users className="w-4 h-4" />
               Effectif Total
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold text-blue-600">{totalEmployees}</p>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               {hiredThisYear} recrutés cette année
             </p>
           </CardContent>
@@ -170,7 +170,7 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
               <DollarSign className="w-4 h-4" />
               Salaire Moyen
             </CardTitle>
@@ -179,7 +179,7 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
             <p className="text-3xl font-bold text-green-600">
               {Math.round(avgSalary).toLocaleString('fr-FR')} €
             </p>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               Masse salariale: {Math.round(avgSalary * totalEmployees).toLocaleString('fr-FR')} €
             </p>
           </CardContent>
@@ -187,14 +187,14 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
               <Target className="w-4 h-4" />
               Objectifs
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold text-purple-600">{stats.objectives.total}</p>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               {stats.objectives.completed} complétés • {stats.objectives.at_risk} à risque
             </p>
           </CardContent>
@@ -202,7 +202,7 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
               <Award className="w-4 h-4" />
               Note Moyenne
             </CardTitle>
@@ -211,7 +211,7 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
             <p className="text-3xl font-bold text-yellow-600">
               {stats.reviews.avg_rating.toFixed(1)}/5
             </p>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               {stats.reviews.total} évaluations
             </p>
           </CardContent>
@@ -231,7 +231,7 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
           <CardContent className="space-y-4">
             <div>
               <div className="flex justify-between text-sm mb-2">
-                <span className="text-gray-600">Progression moyenne</span>
+                <span className="text-gray-600 dark:text-gray-400">Progression moyenne</span>
                 <span className="font-semibold text-purple-600">
                   {stats.objectives.avg_progress}%
                 </span>
@@ -243,7 +243,7 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
               <div className="bg-green-50 p-3 rounded-lg text-center">
                 <CheckCircle className="w-6 h-6 text-green-600 mx-auto mb-1" />
                 <p className="text-2xl font-bold text-green-600">{stats.objectives.completed}</p>
-                <p className="text-xs text-gray-600">Complétés</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Complétés</p>
               </div>
 
               <div className="bg-blue-50 p-3 rounded-lg text-center">
@@ -251,18 +251,18 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
                 <p className="text-2xl font-bold text-blue-600">
                   {stats.objectives.total - stats.objectives.completed - stats.objectives.at_risk}
                 </p>
-                <p className="text-xs text-gray-600">En cours</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">En cours</p>
               </div>
 
               <div className="bg-orange-50 p-3 rounded-lg text-center">
                 <AlertCircle className="w-6 h-6 text-orange-600 mx-auto mb-1" />
                 <p className="text-2xl font-bold text-orange-600">{stats.objectives.at_risk}</p>
-                <p className="text-xs text-gray-600">À risque</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">À risque</p>
               </div>
             </div>
 
             <div className="pt-4 border-t">
-              <p className="text-sm text-gray-600 mb-2">Taux de réussite</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Taux de réussite</p>
               <div className="flex items-center gap-2">
                 <Progress
                   value={stats.objectives.total > 0
@@ -292,24 +292,24 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-blue-50 p-3 rounded-lg text-center">
                 <p className="text-2xl font-bold text-blue-600">{stats.feedback.total}</p>
-                <p className="text-xs text-gray-600">Total</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Total</p>
               </div>
 
               <div className="bg-green-50 p-3 rounded-lg text-center">
                 <p className="text-2xl font-bold text-green-600">{stats.feedback.praise}</p>
-                <p className="text-xs text-gray-600">Éloges</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Éloges</p>
               </div>
 
               <div className="bg-orange-50 p-3 rounded-lg text-center">
                 <p className="text-2xl font-bold text-orange-600">{stats.feedback.constructive}</p>
-                <p className="text-xs text-gray-600">Constructifs</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Constructifs</p>
               </div>
             </div>
 
             <div className="space-y-3">
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-600">Feedback positif</span>
+                  <span className="text-gray-600 dark:text-gray-400">Feedback positif</span>
                   <span className="font-semibold text-green-600">
                     {stats.feedback.total > 0
                       ? Math.round((stats.feedback.praise / stats.feedback.total) * 100)
@@ -326,7 +326,7 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
 
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-600">Feedback constructif</span>
+                  <span className="text-gray-600 dark:text-gray-400">Feedback constructif</span>
                   <span className="font-semibold text-orange-600">
                     {stats.feedback.total > 0
                       ? Math.round((stats.feedback.constructive / stats.feedback.total) * 100)
@@ -344,7 +344,7 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
 
             <div className="pt-4 border-t">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Moyenne par employé</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">Moyenne par employé</span>
                 <span className="text-lg font-bold text-blue-600">
                   {totalEmployees > 0 ? (stats.feedback.total / totalEmployees).toFixed(1) : 0}
                 </span>
@@ -367,44 +367,44 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
             <div className="bg-blue-50 p-4 rounded-lg text-center">
               <BookOpen className="w-8 h-8 text-blue-600 mx-auto mb-2" />
               <p className="text-2xl font-bold text-blue-600">{stats.training.total_trainings}</p>
-              <p className="text-sm text-gray-600">Formations</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Formations</p>
             </div>
 
             <div className="bg-purple-50 p-4 rounded-lg text-center">
               <Calendar className="w-8 h-8 text-purple-600 mx-auto mb-2" />
               <p className="text-2xl font-bold text-purple-600">{stats.training.total_sessions}</p>
-              <p className="text-sm text-gray-600">Sessions</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Sessions</p>
             </div>
 
             <div className="bg-green-50 p-4 rounded-lg text-center">
               <Users className="w-8 h-8 text-green-600 mx-auto mb-2" />
               <p className="text-2xl font-bold text-green-600">{stats.training.total_enrollments}</p>
-              <p className="text-sm text-gray-600">Inscriptions</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Inscriptions</p>
             </div>
 
             <div className="bg-yellow-50 p-4 rounded-lg text-center">
               <Percent className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
               <p className="text-2xl font-bold text-yellow-600">{stats.training.completion_rate}%</p>
-              <p className="text-sm text-gray-600">Taux complétion</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Taux complétion</p>
             </div>
 
             <div className="bg-orange-50 p-4 rounded-lg text-center">
               <Award className="w-8 h-8 text-orange-600 mx-auto mb-2" />
               <p className="text-2xl font-bold text-orange-600">{stats.training.active_certifications}</p>
-              <p className="text-sm text-gray-600">Certifications</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Certifications</p>
             </div>
           </div>
 
           <div className="mt-6 pt-6 border-t">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Investissement formation</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Investissement formation</p>
                 <p className="text-2xl font-bold text-green-600">
                   {stats.training.total_cost.toLocaleString('fr-FR')} €
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-gray-600 mb-1">Par employé</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Par employé</p>
                 <p className="text-xl font-bold text-blue-600">
                   {totalEmployees > 0
                     ? Math.round(stats.training.total_cost / totalEmployees).toLocaleString('fr-FR')
@@ -428,7 +428,7 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center">
               <p className="text-3xl font-bold text-blue-600">{stats.reviews.total}</p>
-              <p className="text-sm text-gray-600">Évaluations</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Évaluations</p>
             </div>
 
             <div className="text-center">
@@ -446,21 +446,21 @@ export function HRAnalyticsDashboard({ companyId, employees }: HRAnalyticsDashbo
                   </span>
                 ))}
               </div>
-              <p className="text-sm text-gray-600">Note moyenne</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Note moyenne</p>
             </div>
 
             <div className="text-center">
               <p className="text-3xl font-bold text-green-600">
                 {totalEmployees > 0 ? Math.round((stats.reviews.total / totalEmployees) * 100) : 0}%
               </p>
-              <p className="text-sm text-gray-600">Couverture</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Couverture</p>
             </div>
 
             <div className="text-center">
               <p className="text-3xl font-bold text-purple-600">
                 {totalEmployees > 0 ? (stats.reviews.total / totalEmployees).toFixed(1) : 0}
               </p>
-              <p className="text-sm text-gray-600">Par employé</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Par employé</p>
             </div>
           </div>
         </CardContent>

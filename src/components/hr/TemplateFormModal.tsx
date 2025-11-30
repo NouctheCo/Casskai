@@ -114,17 +114,17 @@ export function TemplateFormModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b sticky top-0 bg-white">
+          <div className="flex items-center justify-between p-6 border-b sticky top-0 bg-white dark:bg-gray-800">
             <h2 className="text-2xl font-bold">
               {isEditing ? 'Modifier le Template' : 'Nouveau Template'}
             </h2>
             <button
               type="button"
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-gray-400 dark:text-gray-500 hover:text-gray-600"
             >
               <X className="w-6 h-6" />
             </button>
@@ -135,7 +135,7 @@ export function TemplateFormModal({
             {/* Basic Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Nom du template *
                 </label>
                 <Input
@@ -147,7 +147,7 @@ export function TemplateFormModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Catégorie *
                 </label>
                 <select
@@ -168,7 +168,7 @@ export function TemplateFormModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Type de document *
               </label>
               <Input
@@ -177,13 +177,13 @@ export function TemplateFormModal({
                 required
                 placeholder="Ex: cdi, cdd, stage, avenant_salaire, certificat_travail..."
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
                 Types courants: cdi, cdd, stage, apprentissage, avenant_salaire, certificat_travail, promesse_embauche
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Description
               </label>
               <textarea
@@ -197,7 +197,7 @@ export function TemplateFormModal({
 
             {/* Content */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Contenu HTML *
               </label>
               <textarea
@@ -208,7 +208,7 @@ export function TemplateFormModal({
                 required
                 placeholder="<div>Contenu du document avec {{variables}}...</div>"
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
                 Utilisez la syntaxe {`{{variable_name}}`} pour insérer des variables
               </p>
             </div>
@@ -216,7 +216,7 @@ export function TemplateFormModal({
             {/* Variables */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Variables disponibles
                 </label>
                 <Button
@@ -233,7 +233,7 @@ export function TemplateFormModal({
 
               <div className="border rounded-lg p-4 bg-gray-50">
                 {formData.variables.length === 0 ? (
-                  <p className="text-sm text-gray-500 text-center py-4">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 text-center py-4">
                     Aucune variable. Ajoutez les variables standard ou créez vos propres variables.
                   </p>
                 ) : (
@@ -241,7 +241,7 @@ export function TemplateFormModal({
                     {formData.variables.map((variable, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center justify-between bg-white p-3 rounded-lg"
+                        className="flex items-center justify-between bg-white dark:bg-gray-800 p-3 rounded-lg"
                       >
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
@@ -252,7 +252,7 @@ export function TemplateFormModal({
                             )}
                           </div>
                           {variable.description && (
-                            <p className="text-xs text-gray-500 mt-1">{variable.description}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">{variable.description}</p>
                           )}
                         </div>
                         <Button

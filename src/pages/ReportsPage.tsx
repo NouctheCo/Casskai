@@ -20,7 +20,7 @@ const ReportsPage: React.FC = () => {
   if (!currentCompany) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <p className="text-gray-600">Veuillez sélectionner une entreprise</p>
+        <p className="text-gray-600 dark:text-gray-400">Veuillez sélectionner une entreprise</p>
       </div>
     );
   }

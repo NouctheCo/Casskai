@@ -108,7 +108,7 @@ export const PageTabs: React.FC<PageTabsProps> = ({
 
   if (variant === 'underline') {
     return (
-      <div className="flex border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+      <div className="flex border-b border-gray-200 dark:border-gray-600 dark:border-gray-700 overflow-x-auto">
         {tabs.map(tab => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;

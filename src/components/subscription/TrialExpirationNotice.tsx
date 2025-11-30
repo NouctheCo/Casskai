@@ -212,7 +212,7 @@ export const TrialExpirationNotice: React.FC<TrialExpirationNoticeProps> = ({
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
                     
-                    <div className="flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400">
                       <Calendar className="w-3 h-3" />
                       <span>
                         Expire le {trialInfo?.trialEnd?.toLocaleDateString('fr-FR') || subscription?.currentPeriodEnd?.toLocaleDateString('fr-FR')}

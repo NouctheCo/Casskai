@@ -151,7 +151,7 @@ export const NewClientModal: React.FC<NewClientModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Information */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium text-gray-700">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
               {t('crm.client.sections.basicInfo')}
             </h3>
 
@@ -188,7 +188,7 @@ export const NewClientModal: React.FC<NewClientModalProps> = ({
 
           {/* Contact Information */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
               <Mail className="w-4 h-4" />
               {t('crm.client.sections.contact')}
             </h3>
@@ -220,7 +220,7 @@ export const NewClientModal: React.FC<NewClientModalProps> = ({
 
           {/* Address Information */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
               <MapPin className="w-4 h-4" />
               {t('crm.client.sections.address')}
             </h3>
@@ -272,7 +272,7 @@ export const NewClientModal: React.FC<NewClientModalProps> = ({
 
           {/* Legal Information */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
               <FileText className="w-4 h-4" />
               {t('crm.client.sections.legal')}
             </h3>

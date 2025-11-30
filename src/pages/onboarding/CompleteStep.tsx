@@ -154,7 +154,7 @@ const CompletionHeader: React.FC<{
 
       </CardTitle>
 
-      <CardDescription className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+      <CardDescription className="text-lg text-gray-600 dark:text-gray-400 dark:text-gray-400 max-w-2xl mx-auto">
 
         {isCompleted ? t('onboarding.complete.welcomeSubtitle', 'Votre plateforme est prête ! Vous pouvez maintenant commencer à gérer votre entreprise.') : t('onboarding.complete.configuringSubtitle', 'Nous préparons votre espace de travail personnalisé...')}
 
@@ -192,9 +192,9 @@ const ProgressSection: React.FC<{
 
         <div className="flex items-center justify-between mb-2">
 
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Progression : {progressPercentage}%</span>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300">Progression : {progressPercentage}%</span>
 
-          <span className="text-sm text-gray-500 dark:text-gray-400">{currentStep + 1} / {completionSteps.length}</span>
+          <span className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-400">{currentStep + 1} / {completionSteps.length}</span>
 
         </div>
 
@@ -202,7 +202,7 @@ const ProgressSection: React.FC<{
 
         <div className="text-center">
 
-          <span className="text-sm text-gray-600 dark:text-gray-400">{completionSteps[currentStep]?.label || 'Finalisation...'}</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">{completionSteps[currentStep]?.label || 'Finalisation...'}</span>
 
         </div>
 
@@ -292,11 +292,11 @@ const CompletedContent: React.FC<{
 
     <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.6 }} className="mb-8">
 
-      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 text-center">Récapitulatif de votre configuration</h3>
+      <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-6 text-center">Récapitulatif de votre configuration</h3>
 
       <div className="grid md:grid-cols-2 gap-6">
 
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-600 dark:border-gray-700">
 
           <div className="flex items-center space-x-3 mb-3">
 
@@ -304,9 +304,9 @@ const CompletedContent: React.FC<{
 
             <div>
 
-              <h4 className="font-semibold text-gray-900 dark:text-white">Entreprise</h4>
+              <h4 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white">Entreprise</h4>
 
-              <p className="text-sm text-gray-600 dark:text-gray-400">{companyData.name}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">{companyData.name}</p>
 
             </div>
 
@@ -314,7 +314,7 @@ const CompletedContent: React.FC<{
 
         </div>
 
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-600 dark:border-gray-700">
 
           <div className="flex items-center space-x-3 mb-3">
 
@@ -322,9 +322,9 @@ const CompletedContent: React.FC<{
 
             <div>
 
-              <h4 className="font-semibold text-gray-900 dark:text-white">Modules</h4>
+              <h4 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white">Modules</h4>
 
-              <p className="text-sm text-gray-600 dark:text-gray-400">{enabledModulesCount} module{enabledModulesCount > 1 ? 's' : ''} activé{enabledModulesCount > 1 ? 's' : ''}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">{enabledModulesCount} module{enabledModulesCount > 1 ? 's' : ''} activé{enabledModulesCount > 1 ? 's' : ''}</p>
 
             </div>
 
@@ -340,13 +340,13 @@ const CompletedContent: React.FC<{
 
     <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.6 }} className="mb-8">
 
-      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 text-center">Prochaines étapes recommandées</h3>
+      <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-6 text-center">Prochaines étapes recommandées</h3>
 
       <div className="grid gap-4">
 
         {nextSteps.map((step, index) => (
 
-          <motion.div key={index} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.8 + index * 0.1, duration: 0.5 }} className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleNavigate(step.path)}>
+          <motion.div key={index} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.8 + index * 0.1, duration: 0.5 }} className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600 dark:border-gray-700 hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleNavigate(step.path)}>
 
             <div className="flex items-center space-x-3">
 
@@ -354,9 +354,9 @@ const CompletedContent: React.FC<{
 
               <div>
 
-                <h4 className="font-semibold text-gray-900 dark:text-white text-sm">{step.title}</h4>
+                <h4 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white text-sm">{step.title}</h4>
 
-                <p className="text-xs text-gray-600 dark:text-gray-400">{step.description}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-400">{step.description}</p>
 
               </div>
 
@@ -384,7 +384,7 @@ const CompletedContent: React.FC<{
 
       </Button>
 
-      <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">🎉 Félicitations ! Redirection automatique dans 8 secondes...</p>
+      <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 mt-4">🎉 Félicitations ! Redirection automatique dans 8 secondes...</p>
 
     </motion.div>
 

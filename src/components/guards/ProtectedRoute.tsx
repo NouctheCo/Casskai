@@ -101,10 +101,10 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400">
               Chargement des données de l'entreprise...
             </p>
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
               Si ce message persiste, veuillez rafraîchir la page.
             </p>
           </div>

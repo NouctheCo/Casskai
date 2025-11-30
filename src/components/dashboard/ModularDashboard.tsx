@@ -670,7 +670,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
 
                   variant="outline"
 
-                  className="h-6 w-6 p-0 bg-white shadow-sm"
+                  className="h-6 w-6 p-0 bg-white dark:bg-gray-800 shadow-sm"
 
                   onClick={() => handleRemoveWidget(widgetId)}
 
@@ -692,7 +692,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
 
                       variant="outline"
 
-                      className="h-6 w-6 p-0 bg-white shadow-sm"
+                      className="h-6 w-6 p-0 bg-white dark:bg-gray-800 shadow-sm"
 
                     >
 
@@ -782,7 +782,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
 
             <div className="flex items-center justify-between">
 
-              <h3 className="text-sm font-medium text-gray-900 dark:text-white truncate">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 dark:text-white truncate">
 
                 {widget.title}
 
@@ -798,7 +798,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
 
             {widget.description && (
 
-              <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+              <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 line-clamp-2">
 
                 {widget.description}
 
@@ -824,7 +824,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
 
             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-move">
 
-              <Move className="w-4 h-4 text-gray-400" />
+              <Move className="w-4 h-4 text-gray-400 dark:text-gray-500" />
 
             </div>
 
@@ -862,7 +862,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
 
       <div className="text-center py-12">
 
-        <p className="text-gray-500 dark:text-gray-400">
+        <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
           Aucun dashboard sélectionné
 
@@ -882,11 +882,11 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
 
       {/* Barre d'outils principale */}
 
-      <div className="flex items-center justify-between mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-between mb-6 p-4 bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
 
         <div className="flex items-center space-x-4">
 
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-white">
 
             {currentDashboard.name}
 
@@ -896,7 +896,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
 
           {currentDashboard.description && (
 
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
               {currentDashboard.description}
 
@@ -1094,17 +1094,17 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
 
             <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
 
-              <Plus className="w-8 h-8 text-gray-400" />
+              <Plus className="w-8 h-8 text-gray-400 dark:text-gray-500" />
 
             </div>
 
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 dark:text-white mb-2">
 
               Dashboard vide
 
             </h3>
 
-            <p className="text-gray-500 dark:text-gray-400 mb-4 max-w-md">
+            <p className="text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mb-4 max-w-md">
 
               Commencez par ajouter des widgets à votre dashboard pour visualiser vos données.
 

@@ -139,7 +139,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[85vh] overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[85vh] overflow-hidden">
         {/* Header */}
         <div className="p-4 border-b flex justify-between items-center bg-gradient-to-r from-purple-600 to-purple-500">
           <div className="flex items-center gap-2 text-white">
@@ -174,7 +174,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
         {/* Contenu */}
         <div className="p-4 overflow-y-auto max-h-[55vh]">
           {editingRules.length === 0 && !showNewRuleForm ? (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
               <Zap className="h-16 w-16 mx-auto mb-4 text-gray-300" />
               <p className="text-lg font-medium mb-2">Aucune règle définie</p>
               <p className="text-sm mb-4">
@@ -196,12 +196,12 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                   .map((rule) => (
                     <div
                       key={rule.id}
-                      className="border rounded-lg p-4 hover:shadow-md transition bg-white dark:bg-gray-700"
+                      className="border rounded-lg p-4 hover:shadow-md transition bg-white dark:bg-gray-800 dark:bg-gray-700"
                     >
                       <div className="flex items-start gap-4">
                         {/* Priorité */}
                         <div className="flex-shrink-0">
-                          <label className="text-xs text-gray-500 block mb-1">Priorité</label>
+                          <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Priorité</label>
                           <input
                             type="number"
                             value={rule.priority}
@@ -217,7 +217,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
 
                         {/* Pattern */}
                         <div className="flex-1">
-                          <label className="text-xs text-gray-500 block mb-1">
+                          <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">
                             Motif de recherche
                           </label>
                           <div className="flex items-center gap-2">
@@ -246,7 +246,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
 
                         {/* Compte */}
                         <div className="flex-1">
-                          <label className="text-xs text-gray-500 block mb-1">
+                          <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">
                             Compte comptable
                           </label>
                           <select
@@ -278,7 +278,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                       {/* Template de description (optionnel) */}
                       {rule.description_template && (
                         <div className="mt-3 pt-3 border-t">
-                          <label className="text-xs text-gray-500 block mb-1">
+                          <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">
                             Libellé personnalisé (optionnel)
                           </label>
                           <input
@@ -302,7 +302,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
               {!showNewRuleForm && (
                 <button
                   onClick={() => setShowNewRuleForm(true)}
-                  className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition flex items-center justify-center gap-2 text-gray-600 hover:text-purple-600"
+                  className="w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition flex items-center justify-center gap-2 text-gray-600 dark:text-gray-400 hover:text-purple-600"
                 >
                   <Plus className="h-5 w-5" />
                   Ajouter une nouvelle règle
@@ -318,7 +318,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                     </h3>
                     <button
                       onClick={() => setShowNewRuleForm(false)}
-                      className="text-gray-500 hover:text-gray-700"
+                      className="text-gray-500 dark:text-gray-400 hover:text-gray-700"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -419,7 +419,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
 
         {/* Footer */}
         <div className="p-4 border-t flex justify-between items-center bg-gray-50 dark:bg-gray-700">
-          <div className="text-sm text-gray-600 dark:text-gray-300">
+          <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300">
             {editingRules.length} règle(s) active(s)
           </div>
           <button

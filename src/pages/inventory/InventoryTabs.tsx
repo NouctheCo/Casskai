@@ -483,9 +483,9 @@ export function BarcodeTab({ inventoryItems, stockMovements }: { inventoryItems:
             </CardHeader>
             <CardContent>
               <div className="text-center space-y-4">
-                <div className="w-48 h-48 mx-auto bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
+                <div className="w-48 h-48 mx-auto bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600">
                   <div className="text-center">
-                    <Scan className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+                    <Scan className="h-12 w-12 mx-auto text-gray-400 dark:text-gray-500 mb-2" />
                     <p className="text-sm text-muted-foreground">Zone de scan</p>
                   </div>
                 </div>

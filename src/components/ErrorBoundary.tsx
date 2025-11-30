@@ -106,7 +106,7 @@ const ErrorHeader: React.FC = () => (
     <div className="mx-auto mb-4 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
       <AlertTriangle className="w-6 h-6 text-red-600" />
     </div>
-    <CardTitle className="text-xl text-gray-900">
+    <CardTitle className="text-xl text-gray-900 dark:text-gray-100">
       Une erreur inattendue s'est produite
     </CardTitle>
     <CardDescription>
@@ -142,7 +142,7 @@ const ErrorActions: React.FC<{
       onClick={reportError}
       variant="ghost"
       size="sm"
-      className="w-full text-gray-600"
+      className="w-full text-gray-600 dark:text-gray-400"
     >
       <Bug className="w-4 h-4 mr-2" />
       Signaler le problème
@@ -159,7 +159,7 @@ const ErrorDetails: React.FC<{
   <div className="border-t pt-4 mt-4">
     <button
       onClick={toggleDetails}
-      className="flex items-center justify-between w-full text-sm text-gray-500 hover:text-gray-700"
+      className="flex items-center justify-between w-full text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700"
     >
       <span>Détails techniques</span>
       {showDetails ? (
@@ -170,7 +170,7 @@ const ErrorDetails: React.FC<{
     </button>
 
     {showDetails && (
-      <div className="mt-3 p-3 bg-gray-50 rounded text-xs text-gray-600 font-mono">
+      <div className="mt-3 p-3 bg-gray-50 rounded text-xs text-gray-600 dark:text-gray-400 font-mono">
         <div className="mb-2">
           <strong>Message:</strong>
           <div className="mt-1 text-red-600">{error.message}</div>

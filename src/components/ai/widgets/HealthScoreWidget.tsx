@@ -54,7 +54,7 @@ export const HealthScoreWidget: React.FC<HealthScoreWidgetProps> = ({
       case 'declining':
         return <TrendingDown className="w-4 h-4 text-red-500" />;
       default:
-        return <Minus className="w-4 h-4 text-gray-500" />;
+        return <Minus className="w-4 h-4 text-gray-500 dark:text-gray-400 dark:text-gray-500" />;
     }
   };
 
@@ -110,7 +110,7 @@ export const HealthScoreWidget: React.FC<HealthScoreWidgetProps> = ({
         <CardContent className="flex items-center justify-center py-12">
           <div className="text-center space-y-3">
             <Shield className="w-12 h-12 text-gray-300 mx-auto" />
-            <p className="text-gray-500">Données insuffisantes pour le calcul</p>
+            <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Données insuffisantes pour le calcul</p>
             {onRefresh && (
               <Button variant="outline" size="sm" onClick={onRefresh}>
                 <RefreshCw className="w-4 h-4 mr-2" />
@@ -163,7 +163,7 @@ export const HealthScoreWidget: React.FC<HealthScoreWidgetProps> = ({
                 stroke="currentColor"
                 strokeWidth="6"
                 fill="none"
-                className="text-gray-200 dark:text-gray-700"
+                className="text-gray-200 dark:text-gray-700 dark:text-gray-300"
               />
               <motion.circle
                 cx="50"
@@ -193,7 +193,7 @@ export const HealthScoreWidget: React.FC<HealthScoreWidgetProps> = ({
                 >
                   {healthScore.overall}
                 </motion.div>
-                <div className="text-xs text-gray-500">/ 100</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">/ 100</div>
               </div>
             </div>
           </motion.div>
@@ -201,7 +201,7 @@ export const HealthScoreWidget: React.FC<HealthScoreWidgetProps> = ({
           {/* Tendance */}
           <div className="flex items-center justify-center space-x-2">
             {getTrendIcon(healthScore.trend)}
-            <span className="text-sm text-gray-600 dark:text-gray-400">
+            <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
               {getTrendLabel(healthScore.trend)}
             </span>
           </div>
@@ -209,7 +209,7 @@ export const HealthScoreWidget: React.FC<HealthScoreWidgetProps> = ({
 
         {/* Facteurs détaillés */}
         <div className="space-y-4">
-          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center space-x-2">
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300 flex items-center space-x-2">
             <Info className="w-4 h-4" />
             <span>Analyse détaillée</span>
           </h4>
@@ -230,7 +230,7 @@ export const HealthScoreWidget: React.FC<HealthScoreWidgetProps> = ({
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
-                          <Info className="w-3 h-3 text-gray-400" />
+                          <Info className="w-3 h-3 text-gray-400 dark:text-gray-500" />
                         </TooltipTrigger>
                         <TooltipContent>
                           <p className="text-xs max-w-xs">{factor.description}</p>
@@ -267,8 +267,8 @@ export const HealthScoreWidget: React.FC<HealthScoreWidgetProps> = ({
         </div>
 
         {/* Dernière mise à jour */}
-        <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
-          <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+        <div className="pt-4 border-t border-gray-200 dark:border-gray-600 dark:border-gray-800">
+          <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 text-center">
             Dernière analyse: {new Date(healthScore.lastUpdated).toLocaleString('fr-FR')}
           </p>
         </div>

@@ -44,13 +44,13 @@ const AccountingImportPage: React.FC = () => {
 
         <div className="text-center">
 
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
 
             {t('common.noCompanySelected')}
 
           </h2>
 
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
 
             Veuillez sélectionner une entreprise pour accéder aux fonctionnalités d'import.
 

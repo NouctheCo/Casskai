@@ -43,10 +43,10 @@ const TermsOfSalePage = () => {
             <h1 className="text-4xl font-bold mb-4">
               Conditions Générales de Vente (CGV)
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400">
               Version {version} - Dernière mise à jour : {lastUpdated}
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
+            <p className="text-sm text-gray-500 dark:text-gray-500 dark:text-gray-400 mt-2">
               Applicables à tous les abonnements CassKai SaaS
             </p>
           </div>
@@ -227,7 +227,7 @@ const TermsOfSalePage = () => {
                 ou de résilier son compte avant la fin des 30 jours (aucun paiement ne sera demandé).</li>
               </ul>
 
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">
                 <strong>Note :</strong> Une seule période d'essai est autorisée par entreprise (basée sur le numéro SIRET/identification fiscale).
               </p>
             </CardContent>
@@ -527,7 +527,7 @@ const TermsOfSalePage = () => {
           <Card className="mb-8">
             <CardHeader>
               <CardTitle className="flex items-center">
-                <FileText className="w-6 h-6 mr-3 text-gray-600" />
+                <FileText className="w-6 h-6 mr-3 text-gray-600 dark:text-gray-400" />
                 11. Dispositions diverses
               </CardTitle>
             </CardHeader>
@@ -607,10 +607,10 @@ const TermsOfSalePage = () => {
 
           {/* Footer CGV */}
           <div className="text-center py-8 border-t">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 mb-2">
               Conditions Générales de Vente - Version {version}
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Dernière mise à jour : {lastUpdated}
             </p>
             <div className="mt-4 flex justify-center gap-4 text-sm">

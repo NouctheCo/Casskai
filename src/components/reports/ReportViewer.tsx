@@ -144,7 +144,7 @@ export function ReportViewer() {
     return (
       <Card className="max-w-2xl mx-auto">
         <CardContent className="pt-6">
-          <div className="text-center text-gray-500">
+          <div className="text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">
             Veuillez sélectionner une entreprise pour générer des rapports.
           </div>
         </CardContent>
@@ -185,7 +185,7 @@ export function ReportViewer() {
                         }`} />
                         <div>
                           <h3 className="font-medium">{report.label}</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                             {report.description}
                           </p>
                         </div>
@@ -202,7 +202,7 @@ export function ReportViewer() {
             <div className="space-y-2">
               <Label htmlFor="dateFrom">Date de début</Label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
                 <Input
                   id="dateFrom"
                   type="date"
@@ -215,7 +215,7 @@ export function ReportViewer() {
             <div className="space-y-2">
               <Label htmlFor="dateTo">Date de fin</Label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
                 <Input
                   id="dateTo"
                   type="date"

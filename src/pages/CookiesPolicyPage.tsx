@@ -514,7 +514,7 @@ const CookiesPolicyPage = () => {
 
           <CardContent>
 
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-6">
 
               Vous pouvez contrôler quels types de cookies CassKai peut utiliser. 
 
@@ -568,13 +568,13 @@ const CookiesPolicyPage = () => {
 
                   </div>
 
-                  <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">
+                  <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-2">
 
                     {type.description}
 
                   </p>
 
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
 
                     Durée: {type.duration}
 
@@ -696,7 +696,7 @@ const CookiesPolicyPage = () => {
 
                   <h4 className="font-semibold text-sm mb-1">Sécurisés</h4>
 
-                  <p className="text-xs text-gray-600 dark:text-gray-300">
+                  <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-300">
 
                     Chiffrés et protégés contre l'accès non autorisé
 
@@ -710,7 +710,7 @@ const CookiesPolicyPage = () => {
 
                   <h4 className="font-semibold text-sm mb-1">Temporaires</h4>
 
-                  <p className="text-xs text-gray-600 dark:text-gray-300">
+                  <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-300">
 
                     Durée de vie limitée selon leur fonction
 
@@ -724,7 +724,7 @@ const CookiesPolicyPage = () => {
 
                   <h4 className="font-semibold text-sm mb-1">Contrôlables</h4>
 
-                  <p className="text-xs text-gray-600 dark:text-gray-300">
+                  <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-300">
 
                     Vous gardez le contrôle sur leur utilisation
 
@@ -772,7 +772,7 @@ const CookiesPolicyPage = () => {
 
                         <h3 className="text-lg font-semibold">{type.title}</h3>
 
-                        <p className="text-sm text-gray-600 dark:text-gray-300">{type.description}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300">{type.description}</p>
 
                       </div>
 
@@ -896,13 +896,13 @@ const CookiesPolicyPage = () => {
 
                   </div>
 
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-2">
 
                     Mesure d'audience et analyse d'utilisation anonymisée
 
                   </p>
 
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
 
                     Cookies: _ga, _ga_*, _gid • Durée: 2 ans • 
 
@@ -928,13 +928,13 @@ const CookiesPolicyPage = () => {
 
                   </div>
 
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-2">
 
                     Traitement sécurisé des paiements
 
                   </p>
 
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
 
                     Cookies: __stripe_* • Durée: Session • 
 
@@ -960,13 +960,13 @@ const CookiesPolicyPage = () => {
 
                   </div>
 
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-2">
 
                     Chat de support client intégré
 
                   </p>
 
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
 
                     Cookies: intercom-* • Durée: 1 an • 
 
@@ -1114,7 +1114,7 @@ const CookiesPolicyPage = () => {
 
                   <h4 className="font-semibold mb-2">Délégué à la Protection des Données</h4>
 
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300">
 
                     Email: privacy@casskai.app<br />
 
@@ -1128,7 +1128,7 @@ const CookiesPolicyPage = () => {
 
                   <h4 className="font-semibold mb-2">Support technique</h4>
 
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300">
 
                     Email: support@casskai.app<br />
 
@@ -1148,11 +1148,11 @@ const CookiesPolicyPage = () => {
 
           {/* Modifications */}
 
-          <div className="text-center py-8 border-t border-gray-200 dark:border-gray-700">
+          <div className="text-center py-8 border-t border-gray-200 dark:border-gray-600 dark:border-gray-700">
 
             <h3 className="text-lg font-semibold mb-4">Modifications de cette politique</h3>
 
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-4">
 
               Nous pouvons modifier cette politique des cookies pour refléter les évolutions 
 
@@ -1162,7 +1162,7 @@ const CookiesPolicyPage = () => {
 
             </p>
 
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
 
               Version 2.0 • Dernière modification : {lastUpdated} • 
 

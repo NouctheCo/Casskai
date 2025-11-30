@@ -104,7 +104,7 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
         <td className="px-4 py-3">
           <div className="font-medium text-sm">{transaction.description}</div>
           {transaction.reference && (
-            <div className="text-xs text-gray-500">Réf: {transaction.reference}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">Réf: {transaction.reference}</div>
           )}
           {suggestedAccount && transaction.status === 'pending' && (
             <div className="flex items-center gap-1 mt-1">
@@ -172,7 +172,7 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
               </button>
               <button
                 onClick={onIgnore}
-                className="p-1 text-gray-400 hover:bg-gray-100 rounded transition"
+                className="p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 rounded transition"
                 title="Ignorer"
               >
                 <X className="h-5 w-5" />
@@ -197,7 +197,7 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
                   className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-primary"
                   placeholder="Modifier le libellé..."
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
                   Ce libellé apparaîtra dans l'écriture comptable
                 </p>
               </div>
@@ -224,7 +224,7 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
                     <Zap className="h-4 w-4" />
                   </button>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
                   Les futures transactions contenant ce motif seront suggérées automatiquement
                 </p>
               </div>
@@ -232,13 +232,13 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
               {/* Aperçu écriture */}
               <div>
                 <label className="block text-sm font-medium mb-1">Aperçu écriture</label>
-                <div className="text-sm bg-white dark:bg-gray-800 p-3 rounded border">
+                <div className="text-sm bg-white dark:bg-gray-800 dark:bg-gray-800 p-3 rounded border">
                   {selectedAccount ? (
                     <>
                       {transaction.type === 'debit' ? (
                         <>
                           <div className="flex justify-between mb-1">
-                            <span className="text-gray-600">
+                            <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500">
                               D: {accounts.find((a) => a.id === selectedAccount)?.account_number}
                             </span>
                             <span className="font-medium">
@@ -261,7 +261,7 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
                             </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-600">
+                            <span className="text-gray-600 dark:text-gray-400 dark:text-gray-500">
                               C: {accounts.find((a) => a.id === selectedAccount)?.account_number}
                             </span>
                             <span className="font-medium">
@@ -270,12 +270,12 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
                           </div>
                         </>
                       )}
-                      <div className="border-t mt-2 pt-2 text-xs text-gray-500">
+                      <div className="border-t mt-2 pt-2 text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
                         Équilibre: D = C = {transaction.amount.toFixed(2)} €
                       </div>
                     </>
                   ) : (
-                    <div className="text-gray-400 text-center py-2">
+                    <div className="text-gray-400 dark:text-gray-500 text-center py-2">
                       Sélectionnez un compte pour voir l'aperçu
                     </div>
                   )}

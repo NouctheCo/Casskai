@@ -119,17 +119,17 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-900">
+        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b px-6 py-4 flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             {employee ? 'Modifier l\'employé' : 'Nouvel Employé'}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 transition-colors"
             aria-label="Fermer"
           >
             <X className="h-6 w-6" aria-hidden="true" />
@@ -141,7 +141,7 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Section Informations Personnelles */}
             <div className="col-span-2">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                 Informations Personnelles
               </h3>
             </div>
@@ -206,7 +206,7 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
 
             {/* Section Professionnelle */}
             <div className="col-span-2 mt-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                 Informations Professionnelles
               </h3>
             </div>
@@ -338,7 +338,7 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
 
             {/* Section Adresse */}
             <div className="col-span-2 mt-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                 Adresse
               </h3>
             </div>
@@ -369,7 +369,7 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
 
             {/* Section Contact d'urgence */}
             <div className="col-span-2 mt-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                 Contact d'urgence
               </h3>
             </div>

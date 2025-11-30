@@ -411,10 +411,10 @@ const DocumentationCategoryPage = () => {
         <div className="pt-24 pb-16">
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-4">
                 Catégorie non trouvée
               </h1>
-              <p className="text-gray-600 dark:text-gray-300 mb-8">
+              <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 mb-8">
                 La catégorie demandée n'existe pas ou a été déplacée.
               </p>
               <Button onClick={() => navigate('/help')}>
@@ -487,16 +487,16 @@ const DocumentationCategoryPage = () => {
               <CategoryIcon className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
                 {category.title}
               </h1>
-              <p className="text-xl text-gray-600 dark:text-gray-300">
+              <p className="text-xl text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">
                 {category.description}
               </p>
             </div>
           </div>
           
-          <div className="flex items-center space-x-6 text-sm text-gray-600 dark:text-gray-300">
+          <div className="flex items-center space-x-6 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300">
             <div className="flex items-center">
               <BookOpen className="w-4 h-4 mr-2" />
               {category.articles.length} articles
@@ -511,12 +511,12 @@ const DocumentationCategoryPage = () => {
 
       {/* Filtres et recherche */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-8">
+        <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Recherche */}
             <div className="md:col-span-2">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
                 <Input
                   type="text"
                   placeholder="Rechercher dans cette catégorie..."
@@ -532,7 +532,7 @@ const DocumentationCategoryPage = () => {
               <select
                 value={difficultyFilter}
                 onChange={(e) => setDifficultyFilter(e.target.value)}
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 dark:bg-gray-800"
               >
                 <option value="">Toutes difficultés</option>
                 <option value="Débutant">Débutant</option>
@@ -546,7 +546,7 @@ const DocumentationCategoryPage = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 dark:bg-gray-800"
               >
                 <option value="popular">Plus populaires</option>
                 <option value="views">Plus vus</option>
@@ -579,7 +579,7 @@ const DocumentationCategoryPage = () => {
                         </Badge>
                       )}
                     </div>
-                    <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors" />
+                    <ChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 transition-colors" />
                   </div>
                   
                   <CardTitle className="text-xl font-bold group-hover:text-blue-600 transition-colors line-clamp-2">
@@ -588,11 +588,11 @@ const DocumentationCategoryPage = () => {
                 </CardHeader>
                 
                 <CardContent>
-                  <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
+                  <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 mb-4 line-clamp-3">
                     {article.description}
                   </p>
                   
-                  <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                     <div className="flex items-center">
                       <Clock className="w-4 h-4 mr-1" />
                       {article.readTime}
@@ -618,11 +618,11 @@ const DocumentationCategoryPage = () => {
 
         {filteredArticles.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">📚</div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            <div className="text-gray-400 dark:text-gray-500 text-6xl mb-4">📚</div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
               Aucun article trouvé
             </h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-300 mb-6">
               Essayez de modifier vos critères de recherche ou parcourez d'autres catégories.
             </p>
             <Button onClick={() => {setSearchQuery(''); setDifficultyFilter('');}}>

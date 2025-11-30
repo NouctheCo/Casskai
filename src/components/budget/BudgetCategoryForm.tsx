@@ -270,7 +270,7 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
             Compte comptable <span className="text-red-500">*</span>
           </label>
           {loadingAccounts ? (
-            <div className="flex items-center gap-2 text-gray-500">
+            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 dark:text-gray-500">
               <RefreshCw className="h-4 w-4 animate-spin" />
               Chargement du plan comptable...
             </div>
@@ -278,7 +278,7 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
             <select
               value={formData.account_id}
               onChange={(e) => handleAccountSelect(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
+              className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-800"
             >
               <option value="">-- Sélectionner un compte --</option>
 
@@ -317,7 +317,7 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
 
         <div>
           <label className="block text-sm font-medium mb-2">
-            Sous-catégorie <span className="text-gray-400">(optionnel)</span>
+            Sous-catégorie <span className="text-gray-400 dark:text-gray-500">(optionnel)</span>
           </label>
           <input
             type="text"
@@ -343,7 +343,7 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
               placeholder="0"
               className="w-full px-3 py-2 border rounded-lg pr-20"
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">€/an</span>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">€/an</span>
           </div>
         </div>
 
@@ -360,7 +360,7 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
               step="0.1"
               className="w-full px-3 py-2 border rounded-lg pr-12"
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">%</span>
           </div>
         </div>
       </div>
@@ -385,9 +385,9 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
             </button>
 
             {showRepartitionMenu && (
-              <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-xl border z-50">
+              <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-lg shadow-xl border z-50">
                 <div className="p-2">
-                  <div className="text-xs text-gray-500 px-3 py-1 mb-1">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 px-3 py-1 mb-1">
                     Choisir un mode de répartition
                   </div>
                   {REPARTITION_MODES.map((mode) => (
@@ -404,7 +404,7 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
                       <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded">{mode.icon}</div>
                       <div>
                         <div className="font-medium">{mode.name}</div>
-                        <div className="text-xs text-gray-500">{mode.description}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">{mode.description}</div>
                       </div>
                     </button>
                   ))}
@@ -418,7 +418,7 @@ export const BudgetCategoryForm: React.FC<BudgetCategoryFormProps> = ({
         <div className="grid grid-cols-12 gap-2">
           {MONTHS.map((month, index) => (
             <div key={month} className="text-center">
-              <label className="block text-xs text-gray-500 mb-1">{month}</label>
+              <label className="block text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-1">{month}</label>
               <input
                 type="number"
                 value={formData.monthly_distribution[index] || ''}

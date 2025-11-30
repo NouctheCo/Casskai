@@ -152,12 +152,12 @@ const SubscriptionWidget: React.FC = () => {
           {/* Renewal info */}
           <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
             <div className="flex items-center space-x-2">
-              <Calendar className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">
+              <Calendar className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+              <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">
                 {daysUntilRenewal > 0 ? 'Renouvellement dans' : 'Expiré depuis'}
               </span>
             </div>
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
+            <span className="text-sm font-medium text-gray-900 dark:text-gray-100 dark:text-white">
               {Math.abs(daysUntilRenewal)} jour{Math.abs(daysUntilRenewal) > 1 ? 's' : ''}
             </span>
           </div>
@@ -167,10 +167,10 @@ const SubscriptionWidget: React.FC = () => {
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center space-x-2">
-                  <Users className="w-4 h-4 text-gray-500" />
-                  <span className="text-gray-600 dark:text-gray-400">Utilisateurs</span>
+                  <Users className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                  <span className="text-gray-600 dark:text-gray-400 dark:text-gray-400">Utilisateurs</span>
                 </div>
-                <span className="font-medium text-gray-900 dark:text-white">
+                <span className="font-medium text-gray-900 dark:text-gray-100 dark:text-white">
                   {usageData.users.current}/{usageData.users.limit}
                 </span>
               </div>

@@ -644,7 +644,7 @@ export default function ProjectsPage() {
 
           <div className="flex items-center space-x-2">
 
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
 
               {t('projects')}
 
@@ -656,7 +656,7 @@ export default function ProjectsPage() {
 
           <div className="flex items-center space-x-2">
 
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400">
 
               {t('projectspage.suivez_vos_projets_internes_et_clients', { defaultValue: 'Suivez vos projets internes et clients.' })}
 
@@ -874,7 +874,7 @@ export default function ProjectsPage() {
 
                   onChange={(e) => setProjectStatus(e.target.value)}
 
-                  className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-white dark:bg-gray-900 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-white dark:bg-gray-800 dark:bg-gray-900 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 
                 >
 
@@ -2540,7 +2540,7 @@ export default function ProjectsPage() {
 
             exit={{ scale: 0.9, opacity: 0 }}
 
-            className="bg-white dark:bg-gray-900 rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-gray-800 dark:bg-gray-900 rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto"
 
             onClick={(e) => e.stopPropagation()}
 

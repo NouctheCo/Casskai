@@ -126,7 +126,7 @@ export const TrialManager: React.FC = () => {
                 <div className="space-y-3">
                   <AlertTriangle className="h-12 w-12 text-orange-500 mx-auto" />
                   <p>Vous n'êtes pas éligible à un essai gratuit</p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
                     Vous avez déjà utilisé votre essai ou avez un abonnement actif
                   </p>
                 </div>
@@ -176,7 +176,7 @@ export const TrialStatistics: React.FC = () => {
                 <div className="text-2xl font-bold text-blue-600">
                   {stat.metric.includes('percent') ? `${stat.value}%` : stat.value}
                 </div>
-                <div className="text-sm text-gray-600 capitalize">
+                <div className="text-sm text-gray-600 dark:text-gray-400 capitalize">
                   {stat.metric.replace(/_/g, ' ').replace('percent', '(%)')}
                 </div>
               </div>

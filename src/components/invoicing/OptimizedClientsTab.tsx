@@ -422,7 +422,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
             <div>
 
-              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Nom complet</Label>
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Nom complet</Label>
 
               <p className="text-lg font-semibold">{client.name}</p>
 
@@ -430,7 +430,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
             <div>
 
-              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Entreprise</Label>
+              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Entreprise</Label>
 
               <p className="text-base">{client.company || 'N/A'}</p>
 
@@ -444,7 +444,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
           <div className="space-y-4">
 
-            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Informations de contact</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">Informations de contact</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
@@ -454,7 +454,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
                 <div>
 
-                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Email</Label>
+                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Email</Label>
 
                   <p className="text-base">{client.email}</p>
 
@@ -472,7 +472,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
                   <div>
 
-                    <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Téléphone</Label>
+                    <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Téléphone</Label>
 
                     <p className="text-base">{client.phone}</p>
 
@@ -494,7 +494,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
             <div className="space-y-4">
 
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Adresse</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">Adresse</h3>
 
               <div className="flex items-start space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
 
@@ -506,7 +506,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
                   {(client.city || client.postalCode || client.country) && (
 
-                    <p className="text-base text-gray-600 dark:text-gray-400">
+                    <p className="text-base text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                       {[client.postalCode, client.city].filter(Boolean).join(' ')}
 
@@ -530,7 +530,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
           <div className="space-y-4">
 
-            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Informations commerciales</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">Informations commerciales</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
@@ -538,7 +538,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
                 <FileText className="w-6 h-6 text-blue-500 mx-auto mb-2" />
 
-                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Factures</Label>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Factures</Label>
 
                 <p className="text-xl font-bold">{client.invoicesCount}</p>
 
@@ -550,7 +550,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
                 <Euro className="w-6 h-6 text-green-500 mx-auto mb-2" />
 
-                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">CA total</Label>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">CA total</Label>
 
                 <p className="text-xl font-bold">{client.totalAmount.toFixed(2)} €</p>
 
@@ -562,7 +562,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
                 <Building className="w-6 h-6 text-purple-500 mx-auto mb-2" />
 
-                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">CA moyen</Label>
+                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">CA moyen</Label>
 
                 <p className="text-xl font-bold">
 
@@ -584,7 +584,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
             <div className="space-y-4">
 
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Notes</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">Notes</h3>
 
               <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
 
@@ -602,7 +602,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
           <div className="border-t pt-4">
 
-            <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">Historique</Label>
+            <Label className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Historique</Label>
 
             <div className="mt-2 space-y-2">
 
@@ -670,7 +670,7 @@ const ClientRow = ({ client, onEdit, onDelete, onView }) => {
 
           {client.company && (
 
-            <div className="text-sm text-gray-500 dark:text-gray-400">{client.company}</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{client.company}</div>
 
           )}
 
@@ -684,7 +684,7 @@ const ClientRow = ({ client, onEdit, onDelete, onView }) => {
 
           <div className="flex items-center space-x-2 text-sm">
 
-            <Mail className="w-3 h-3 text-gray-400" />
+            <Mail className="w-3 h-3 text-gray-400 dark:text-gray-500" />
 
             <span>{client.email}</span>
 
@@ -692,9 +692,9 @@ const ClientRow = ({ client, onEdit, onDelete, onView }) => {
 
           {client.phone && (
 
-            <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
-              <Phone className="w-3 h-3 text-gray-400" />
+              <Phone className="w-3 h-3 text-gray-400 dark:text-gray-500" />
 
               <span>{client.phone}</span>
 
@@ -712,7 +712,7 @@ const ClientRow = ({ client, onEdit, onDelete, onView }) => {
 
           <div className="flex items-center space-x-2 text-sm">
 
-            <MapPin className="w-3 h-3 text-gray-400" />
+            <MapPin className="w-3 h-3 text-gray-400 dark:text-gray-500" />
 
             <span>{client.city}, {client.country}</span>
 
@@ -1102,7 +1102,7 @@ export default function OptimizedClientsTab() {
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total clients</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Total clients</p>
 
                 <p className="text-2xl font-bold">{summary.totalClients}</p>
 
@@ -1126,7 +1126,7 @@ export default function OptimizedClientsTab() {
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Clients actifs</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">Clients actifs</p>
 
                 <p className="text-2xl font-bold">{summary.activeClients}</p>
 
@@ -1150,7 +1150,7 @@ export default function OptimizedClientsTab() {
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">CA total</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">CA total</p>
 
                 <p className="text-xl font-bold">{summary.totalRevenue.toFixed(2)} €</p>
 
@@ -1174,7 +1174,7 @@ export default function OptimizedClientsTab() {
 
               <div>
 
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">CA moyen</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">CA moyen</p>
 
                 <p className="text-xl font-bold">{summary.averageRevenue.toFixed(2)} €</p>
 
@@ -1212,7 +1212,7 @@ export default function OptimizedClientsTab() {
 
               <div className="relative">
 
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
 
                 <Input
 
@@ -1298,9 +1298,9 @@ export default function OptimizedClientsTab() {
 
                     <TableCell colSpan={6} className="text-center py-8">
 
-                      <Users className="w-12 h-12 mx-auto text-gray-400 mb-2" />
+                      <Users className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 mb-2" />
 
-                      <p className="text-gray-600 dark:text-gray-400">
+                      <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
 
                         {searchTerm ? 'Aucun client trouvé' : 'Aucun client. Commencez par en créer un !'}
 

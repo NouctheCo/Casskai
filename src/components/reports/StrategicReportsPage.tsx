@@ -143,8 +143,8 @@ export const StrategicReportsPage: React.FC = () => {
       <div className="container mx-auto p-6">
         <Card>
           <CardContent className="p-6 text-center">
-            <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-            <p className="text-gray-600">Veuillez sélectionner une entreprise pour accéder aux rapports stratégiques</p>
+            <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Veuillez sélectionner une entreprise pour accéder aux rapports stratégiques</p>
           </CardContent>
         </Card>
       </div>
@@ -156,7 +156,7 @@ export const StrategicReportsPage: React.FC = () => {
       {/* En-tête */}
       <div>
         <h1 className="text-3xl font-bold">Rapports Stratégiques & Gestion</h1>
-        <p className="text-gray-600">Analyses, KPI et outils de pilotage pour la prise de décision</p>
+        <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Analyses, KPI et outils de pilotage pour la prise de décision</p>
       </div>
 
       {/* Info card - Rapports comptables */}
@@ -215,7 +215,7 @@ export const StrategicReportsPage: React.FC = () => {
             </Select>
 
             <div>
-              <label className="text-sm text-gray-600">Date de début</label>
+              <label className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Date de début</label>
               <input
                 type="date"
                 value={dateRange.start}
@@ -225,7 +225,7 @@ export const StrategicReportsPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-sm text-gray-600">Date de fin</label>
+              <label className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Date de fin</label>
               <input
                 type="date"
                 value={dateRange.end}

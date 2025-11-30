@@ -229,7 +229,7 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
                     </SelectItem>
                   ))}
                   {clients.length === 0 && !loadingClients && (
-                    <div className="px-2 py-4 text-sm text-gray-500 text-center">
+                    <div className="px-2 py-4 text-sm text-gray-500 dark:text-gray-400 text-center">
                       {t('crm.opportunity.noClients')}
                     </div>
                   )}
@@ -240,7 +240,7 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
 
           {/* Financial Information */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
               <DollarSign className="w-4 h-4" />
               {t('crm.opportunity.sections.financial')}
             </h3>
@@ -270,7 +270,7 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
                     value={formData.probability}
                     onChange={(e) => handleChange('probability', e.target.value)}
                   />
-                  <span className="text-sm text-gray-500">%</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">%</span>
                 </div>
               </div>
             </div>
@@ -295,7 +295,7 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
 
           {/* Pipeline Information */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
               <TrendingUp className="w-4 h-4" />
               {t('crm.opportunity.sections.pipeline')}
             </h3>
@@ -336,7 +336,7 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
 
           {/* Timeline */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
               <Calendar className="w-4 h-4" />
               {t('crm.opportunity.sections.timeline')}
             </h3>

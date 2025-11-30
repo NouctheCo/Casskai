@@ -82,7 +82,7 @@ const PurchasesTable: React.FC<PurchasesTableProps> = ({
     return (
       <Card>
         <CardContent className="p-6 text-center">
-          <div className="text-gray-500">
+          <div className="text-gray-500 dark:text-gray-400">
             <p className="text-lg font-medium">{t('purchases.noPurchases')}</p>
             <p className="text-sm mt-2">{t('purchases.noPurchasesDescription')}</p>
           </div>
@@ -124,7 +124,7 @@ const PurchasesTable: React.FC<PurchasesTableProps> = ({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <p className="text-sm text-gray-600 max-w-xs truncate" title={purchase.description}>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 max-w-xs truncate" title={purchase.description}>
                       {purchase.description}
                     </p>
                   </TableCell>

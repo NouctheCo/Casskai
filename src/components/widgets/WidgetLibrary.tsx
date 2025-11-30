@@ -397,10 +397,10 @@ export const WidgetLibrary: React.FC<WidgetLibraryProps> = ({
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                        <IconComponent className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                        <IconComponent className="w-5 h-5 text-gray-600 dark:text-gray-400 dark:text-gray-400" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-sm text-gray-900 dark:text-white truncate">
+                        <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100 dark:text-white truncate">
                           {widget.name}
                         </h3>
                         <div className="flex items-center space-x-2 mt-1">
@@ -419,13 +419,13 @@ export const WidgetLibrary: React.FC<WidgetLibraryProps> = ({
                       </div>
                     </div>
                     
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400">
                       {getSizeInfo(widget.defaultSize)}
                     </div>
                   </div>
 
                   {/* Description */}
-                  <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
+                  <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-400 line-clamp-2">
                     {widget.description}
                   </p>
 
@@ -434,13 +434,13 @@ export const WidgetLibrary: React.FC<WidgetLibraryProps> = ({
                     {widget.tags.slice(0, 3).map(tag => (
                       <span
                         key={tag}
-                        className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full"
+                        className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 dark:text-gray-400 rounded-full"
                       >
                         {tag}
                       </span>
                     ))}
                     {widget.tags.length > 3 && (
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                      <span className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400">
                         +{widget.tags.length - 3}
                       </span>
                     )}
@@ -460,12 +460,12 @@ export const WidgetLibrary: React.FC<WidgetLibraryProps> = ({
                           )}
                         />
                       ))}
-                      <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">
+                      <span className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 ml-1">
                         {widget.rating?.toFixed(1)}
                       </span>
                     </div>
                     
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400">
                       v{widget.version}
                     </div>
                   </div>

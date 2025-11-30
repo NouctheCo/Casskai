@@ -20,7 +20,7 @@ const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
       <div className="space-y-3">
         <h2 className="text-xl font-bold">{t('tour.welcome.title')} 👋</h2>
         <p>{t('tour.welcome.intro')}</p>
-        <p className="text-sm text-gray-600">{t('tour.welcome.duration')}</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400">{t('tour.welcome.duration')}</p>
       </div>
     ),
     placement: 'center',
@@ -42,7 +42,7 @@ const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
       <div className="space-y-2">
         <h3 className="font-semibold">📚 {t('tour.accounting.title')}</h3>
         <p>{t('tour.accounting.description')}</p>
-        <p className="text-sm text-gray-600">⏱️ {t('tour.accounting.time')}</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400">⏱️ {t('tour.accounting.time')}</p>
       </div>
     ),
     placement: 'right'
@@ -103,7 +103,7 @@ const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
       <div className="space-y-3">
         <h2 className="text-xl font-bold">{t('tour.ready.title')} 🚀</h2>
         <p>{t('tour.ready.description')}</p>
-        <p className="text-sm text-gray-600">{t('tour.ready.tip')}</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400">{t('tour.ready.tip')}</p>
       </div>
     ),
     placement: 'center'

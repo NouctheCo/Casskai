@@ -194,7 +194,7 @@ export const DocumentsManagementTab: React.FC<DocumentsManagementTabProps> = ({
         <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-3 w-full">
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
             <Input
               placeholder="Rechercher..."
               value={filters.search}
@@ -263,12 +263,12 @@ export const DocumentsManagementTab: React.FC<DocumentsManagementTabProps> = ({
       {/* Documents list */}
       {loading ? (
         <div className="text-center py-12">
-          <p className="text-gray-500">Chargement...</p>
+          <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Chargement...</p>
         </div>
       ) : filteredDocuments.length === 0 ? (
         <div className="text-center py-12">
-          <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-500">Aucun document trouvé</p>
+          <FileText className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+          <p className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Aucun document trouvé</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -279,7 +279,7 @@ export const DocumentsManagementTab: React.FC<DocumentsManagementTabProps> = ({
                   <FileText className="h-5 w-5 text-blue-600" />
                   <div>
                     <h3 className="font-semibold text-sm">{doc.title}</h3>
-                    <p className="text-xs text-gray-500">{doc.employee_name}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">{doc.employee_name}</p>
                   </div>
                 </div>
                 {doc.is_confidential && (
@@ -289,12 +289,12 @@ export const DocumentsManagementTab: React.FC<DocumentsManagementTabProps> = ({
 
               <div className="space-y-2 mb-4">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-500">Type:</span>
+                  <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Type:</span>
                   <Badge variant="outline">{documentTypeLabels[doc.document_type]}</Badge>
                 </div>
 
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-500">Statut:</span>
+                  <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Statut:</span>
                   <Badge className={statusColors[doc.status]}>
                     {statusLabels[doc.status]}
                   </Badge>
@@ -302,21 +302,21 @@ export const DocumentsManagementTab: React.FC<DocumentsManagementTabProps> = ({
 
                 {doc.file_size && (
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-500">Taille:</span>
+                    <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Taille:</span>
                     <span>{formatFileSize(doc.file_size)}</span>
                   </div>
                 )}
 
                 {doc.issue_date && (
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-500">Date d'émission:</span>
+                    <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Date d'émission:</span>
                     <span>{new Date(doc.issue_date).toLocaleDateString('fr-FR')}</span>
                   </div>
                 )}
 
                 {doc.expiry_date && (
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-500">Date d'expiration:</span>
+                    <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">Date d'expiration:</span>
                     <span className={new Date(doc.expiry_date) < new Date() ? 'text-red-600 font-semibold' : ''}>
                       {new Date(doc.expiry_date).toLocaleDateString('fr-FR')}
                     </span>
@@ -325,7 +325,7 @@ export const DocumentsManagementTab: React.FC<DocumentsManagementTabProps> = ({
               </div>
 
               {doc.description && (
-                <p className="text-xs text-gray-600 mb-4 line-clamp-2">{doc.description}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-4 line-clamp-2">{doc.description}</p>
               )}
 
               <div className="flex items-center gap-2 pt-3 border-t">
@@ -377,9 +377,9 @@ export const DocumentsManagementTab: React.FC<DocumentsManagementTabProps> = ({
       {/* TODO: Add DocumentUploadModal component */}
       {showUploadModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
             <h3 className="text-lg font-semibold mb-4">Upload de document</h3>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-4">
               Le formulaire d'upload sera implémenté dans la prochaine étape
             </p>
             <Button onClick={() => setShowUploadModal(false)}>Fermer</Button>

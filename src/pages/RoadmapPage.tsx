@@ -231,10 +231,10 @@ export default function RoadmapPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full mb-4">
             <Calendar className="w-8 h-8 text-purple-600 dark:text-purple-400" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-4">
             Roadmap CassKai 2025-2026
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-6">
+          <p className="text-lg text-gray-600 dark:text-gray-400 dark:text-gray-300 max-w-2xl mx-auto mb-6">
             Découvrez nos prochaines fonctionnalités et votez pour vos priorités
           </p>
           
@@ -283,7 +283,7 @@ export default function RoadmapPage() {
             return (
               <div
                 key={feature.id}
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all p-6 flex flex-col"
+                className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all p-6 flex flex-col"
               >
                 {/* Header */}
                 <div className="flex items-start justify-between mb-3">
@@ -291,16 +291,16 @@ export default function RoadmapPage() {
                     <StatusIcon className="w-3 h-3" />
                     {statusConfig[feature.status].label}
                   </div>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                  <span className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400">
                     {feature.quarter}
                   </span>
                 </div>
 
                 {/* Title & Description */}
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
                   {feature.title}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">
+                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 text-sm mb-4 flex-grow">
                   {feature.description}
                 </p>
 
@@ -312,7 +312,7 @@ export default function RoadmapPage() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-600 dark:border-gray-700">
                   <button
                     onClick={() => handleVote(feature.id)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
@@ -325,7 +325,7 @@ export default function RoadmapPage() {
                     <span>{feature.votes + (hasVoted ? 1 : 0)}</span>
                   </button>
                   
-                  <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 dark:text-gray-400">
                     <MessageSquare className="w-4 h-4" />
                     <span className="text-sm">{feature.comments}</span>
                   </div>
@@ -337,29 +337,29 @@ export default function RoadmapPage() {
 
         {/* Stats */}
         <div className="grid md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 text-center">
+          <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl shadow-lg p-6 text-center">
             <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">
               {features.filter(f => f.status === 'completed').length}
             </div>
-            <div className="text-gray-600 dark:text-gray-300 text-sm">Terminées</div>
+            <div className="text-gray-600 dark:text-gray-400 dark:text-gray-300 text-sm">Terminées</div>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 text-center">
+          <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl shadow-lg p-6 text-center">
             <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
               {features.filter(f => f.status === 'in-progress').length}
             </div>
-            <div className="text-gray-600 dark:text-gray-300 text-sm">En cours</div>
+            <div className="text-gray-600 dark:text-gray-400 dark:text-gray-300 text-sm">En cours</div>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 text-center">
+          <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl shadow-lg p-6 text-center">
             <div className="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-2">
               {features.filter(f => f.status === 'planned').length}
             </div>
-            <div className="text-gray-600 dark:text-gray-300 text-sm">Planifiées</div>
+            <div className="text-gray-600 dark:text-gray-400 dark:text-gray-300 text-sm">Planifiées</div>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 text-center">
-            <div className="text-3xl font-bold text-gray-600 dark:text-gray-400 mb-2">
+          <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl shadow-lg p-6 text-center">
+            <div className="text-3xl font-bold text-gray-600 dark:text-gray-400 dark:text-gray-400 mb-2">
               {features.filter(f => f.status === 'backlog').length}
             </div>
-            <div className="text-gray-600 dark:text-gray-300 text-sm">Backlog</div>
+            <div className="text-gray-600 dark:text-gray-400 dark:text-gray-300 text-sm">Backlog</div>
           </div>
         </div>
 
@@ -373,7 +373,7 @@ export default function RoadmapPage() {
           </p>
           <a
             href="mailto:feedback@casskai.com?subject=Suggestion de fonctionnalité"
-            className="inline-flex items-center gap-2 bg-white text-purple-600 px-6 py-3 rounded-lg font-medium hover:bg-purple-50 transition-colors"
+            className="inline-flex items-center gap-2 bg-white dark:bg-gray-800 text-purple-600 px-6 py-3 rounded-lg font-medium hover:bg-purple-50 transition-colors"
           >
             <Lightbulb className="w-5 h-5" />
             Proposer une fonctionnalité

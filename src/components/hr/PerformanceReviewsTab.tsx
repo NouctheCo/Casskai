@@ -138,7 +138,7 @@ export function PerformanceReviewsTab({
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement des évaluations...</p>
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Chargement des évaluations...</p>
         </div>
       </div>
     );
@@ -152,7 +152,7 @@ export function PerformanceReviewsTab({
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-2xl font-bold text-blue-600">{stats.total}</p>
-              <p className="text-sm text-gray-600">Total</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Total</p>
             </div>
           </CardContent>
         </Card>
@@ -160,8 +160,8 @@ export function PerformanceReviewsTab({
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-2xl font-bold text-gray-600">{stats.draft}</p>
-              <p className="text-sm text-gray-600">Brouillons</p>
+              <p className="text-2xl font-bold text-gray-600 dark:text-gray-400 dark:text-gray-500">{stats.draft}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Brouillons</p>
             </div>
           </CardContent>
         </Card>
@@ -170,7 +170,7 @@ export function PerformanceReviewsTab({
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-2xl font-bold text-blue-600">{stats.submitted}</p>
-              <p className="text-sm text-gray-600">Soumises</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Soumises</p>
             </div>
           </CardContent>
         </Card>
@@ -179,7 +179,7 @@ export function PerformanceReviewsTab({
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-2xl font-bold text-green-600">{stats.completed}</p>
-              <p className="text-sm text-gray-600">Complétées</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Complétées</p>
             </div>
           </CardContent>
         </Card>
@@ -191,7 +191,7 @@ export function PerformanceReviewsTab({
                 <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
                 <p className="text-2xl font-bold text-yellow-600">{stats.avg_rating}</p>
               </div>
-              <p className="text-sm text-gray-600">Note moyenne</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Note moyenne</p>
             </div>
           </CardContent>
         </Card>
@@ -202,7 +202,7 @@ export function PerformanceReviewsTab({
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
               <Input
                 placeholder="Rechercher un employé ou évaluateur..."
                 value={searchTerm}
@@ -214,7 +214,7 @@ export function PerformanceReviewsTab({
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="px-4 py-2 border rounded-lg bg-white text-sm"
+              className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
             >
               <option value="all">Tous les types</option>
               <option value="self">Auto-évaluation</option>
@@ -229,7 +229,7 @@ export function PerformanceReviewsTab({
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border rounded-lg bg-white text-sm"
+              className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
             >
               <option value="all">Tous les statuts</option>
               <option value="draft">Brouillon</option>
@@ -253,10 +253,10 @@ export function PerformanceReviewsTab({
             <CardContent className="pt-6">
               <div className="text-center py-12">
                 <ClipboardCheck className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                   Aucune évaluation trouvée
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-4">
                   {searchTerm || typeFilter !== 'all' || statusFilter !== 'all'
                     ? 'Essayez de modifier vos critères de recherche'
                     : 'Commencez par créer votre première évaluation'}
@@ -286,7 +286,7 @@ export function PerformanceReviewsTab({
                     <CardTitle className="text-lg">
                       Évaluation de {review.employee_name}
                     </CardTitle>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
                       Par {review.reviewer_name} • {new Date(review.review_date).toLocaleDateString('fr-FR')}
                     </p>
                   </div>
@@ -304,7 +304,7 @@ export function PerformanceReviewsTab({
                 {review.review_date && (
                   <div className="bg-gray-50 p-3 rounded-lg mb-4">
                     <p className="text-sm font-semibold mb-1">Période évaluée</p>
-                    <p className="text-sm text-gray-700">{new Date(review.review_date).toLocaleDateString('fr-FR')}</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">{new Date(review.review_date).toLocaleDateString('fr-FR')}</p>
                   </div>
                 )}
 
@@ -315,7 +315,7 @@ export function PerformanceReviewsTab({
                     <div className="grid grid-cols-2 gap-2">
                       {Object.entries(review.competencies_ratings).map(([comp, rating]) => (
                         <div key={comp} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                          <span className="text-sm text-gray-700 capitalize">{comp}</span>
+                          <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">{comp}</span>
                           <div className="flex items-center gap-1">
                             {getRatingStars(rating as unknown as number)}
                           </div>
@@ -329,13 +329,13 @@ export function PerformanceReviewsTab({
                 {review.goals_total && (
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div className="bg-blue-50 p-3 rounded-lg">
-                      <p className="text-xs text-gray-600 mb-1">Objectifs atteints</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-1">Objectifs atteints</p>
                       <p className="text-lg font-semibold text-blue-600">
                         {review.goals_achieved}/{review.goals_total}
                       </p>
                     </div>
                     <div className="bg-green-50 p-3 rounded-lg">
-                      <p className="text-xs text-gray-600 mb-1">Taux de réussite</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-1">Taux de réussite</p>
                       <p className="text-lg font-semibold text-green-600">
                         {Math.round((review.goals_achieved / review.goals_total) * 100)}%
                       </p>
@@ -371,14 +371,14 @@ export function PerformanceReviewsTab({
                 {review.strengths && (
                   <div className="mb-3">
                     <p className="text-sm font-semibold text-green-700">Points forts</p>
-                    <p className="text-sm text-gray-700 line-clamp-2">{review.strengths}</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">{review.strengths}</p>
                   </div>
                 )}
 
                 {review.areas_for_improvement && (
                   <div className="mb-3">
                     <p className="text-sm font-semibold text-orange-700">Axes d'amélioration</p>
-                    <p className="text-sm text-gray-700 line-clamp-2">{review.areas_for_improvement}</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">{review.areas_for_improvement}</p>
                   </div>
                 )}
 
@@ -428,12 +428,12 @@ export function PerformanceReviewsTab({
 function ReviewDetailModal({ review, onClose }: { review: PerformanceReview; onClose: () => void }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold">Détails de l'évaluation</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:text-gray-500 transition-colors"
           >
             <span className="text-2xl">×</span>
           </button>
@@ -445,7 +445,7 @@ function ReviewDetailModal({ review, onClose }: { review: PerformanceReview; onC
             <h3 className="text-lg font-semibold mb-2">
               Évaluation de {review.employee_name}
             </h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
               Par {review.reviewer_name} • {new Date(review.review_date).toLocaleDateString('fr-FR')}
             </p>
           </div>
@@ -472,7 +472,7 @@ function ReviewDetailModal({ review, onClose }: { review: PerformanceReview; onC
           {review.strengths && (
             <div>
               <h4 className="font-semibold mb-2 text-green-700">Points forts</h4>
-              <p className="text-gray-700 whitespace-pre-wrap">{review.strengths}</p>
+              <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{review.strengths}</p>
             </div>
           )}
 
@@ -480,7 +480,7 @@ function ReviewDetailModal({ review, onClose }: { review: PerformanceReview; onC
           {review.areas_for_improvement && (
             <div>
               <h4 className="font-semibold mb-2 text-orange-700">Axes d'amélioration</h4>
-              <p className="text-gray-700 whitespace-pre-wrap">{review.areas_for_improvement}</p>
+              <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{review.areas_for_improvement}</p>
             </div>
           )}
 
@@ -488,7 +488,7 @@ function ReviewDetailModal({ review, onClose }: { review: PerformanceReview; onC
           {review.development_plan && (
             <div>
               <h4 className="font-semibold mb-2 text-blue-700">Plan de développement</h4>
-              <p className="text-gray-700 whitespace-pre-wrap">{review.development_plan}</p>
+              <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{review.development_plan}</p>
             </div>
           )}
 
@@ -496,14 +496,14 @@ function ReviewDetailModal({ review, onClose }: { review: PerformanceReview; onC
           {review.manager_comments && (
             <div>
               <h4 className="font-semibold mb-2">Commentaires de l'évaluateur</h4>
-              <p className="text-gray-700 whitespace-pre-wrap">{review.manager_comments}</p>
+              <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{review.manager_comments}</p>
             </div>
           )}
 
           {review.employee_comments && (
             <div>
               <h4 className="font-semibold mb-2">Commentaires de l'employé</h4>
-              <p className="text-gray-700 whitespace-pre-wrap">{review.employee_comments}</p>
+              <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{review.employee_comments}</p>
             </div>
           )}
         </div>

@@ -104,18 +104,18 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <FileText className="h-6 w-6 text-blue-600" />
-            <h2 className="text-2xl font-bold text-gray-900">Ajouter un Document</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Ajouter un Document</h2>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 transition-colors"
           >
             <X className="h-6 w-6" />
           </button>
@@ -214,7 +214,7 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
                   value={formData.expiry_date}
                   onChange={e => setFormData({ ...formData, expiry_date: e.target.value })}
                 />
-                <p className="text-xs text-gray-500 mt-1">Optionnel - pour documents temporaires</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">Optionnel - pour documents temporaires</p>
               </div>
             </div>
 
@@ -235,17 +235,17 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
                         <p className="mb-2 text-sm text-green-600 font-semibold">
                           {file.name}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
                           {(file.size / 1024).toFixed(1)} KB
                         </p>
                       </>
                     ) : (
                       <>
-                        <Upload className="w-10 h-10 mb-3 text-gray-400" />
-                        <p className="mb-2 text-sm text-gray-500">
+                        <Upload className="w-10 h-10 mb-3 text-gray-400 dark:text-gray-500" />
+                        <p className="mb-2 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
                           <span className="font-semibold">Cliquez pour télécharger</span> ou glissez-déposez
                         </p>
-                        <p className="text-xs text-gray-500">PDF, DOC, DOCX, PNG, JPG (MAX. 10MB)</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">PDF, DOC, DOCX, PNG, JPG (MAX. 10MB)</p>
                       </>
                     )}
                   </div>

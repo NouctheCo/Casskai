@@ -211,7 +211,7 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white rounded-xl shadow-sm border"
+          className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border"
         >
           <div className="p-4 border-b border-gray-100">
             <div className="flex items-center gap-2">
@@ -224,7 +224,7 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({
           </div>
           <div className="p-4 space-y-3 max-h-80 overflow-y-auto">
             {alerts.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                 <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-2" />
                 <p>Aucune alerte active</p>
                 <p className="text-sm">Tout semble en ordre !</p>
@@ -244,13 +244,13 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <h4 className="font-medium text-sm mb-1">{alert.title}</h4>
-                      <p className="text-xs text-gray-600 mb-2">{alert.message}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">{alert.message}</p>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
                           {new Date(alert.timestamp).toLocaleDateString('fr-FR')}
                         </span>
                         {alert.actions && alert.actions.length > 0 && (
-                          <button className="text-xs bg-white px-2 py-1 rounded border hover:bg-gray-50">
+                          <button className="text-xs bg-white dark:bg-gray-800 px-2 py-1 rounded border hover:bg-gray-50">
                             {alert.actions[0].label}
                           </button>
                         )}
@@ -268,7 +268,7 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white rounded-xl shadow-sm border"
+          className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border"
         >
           <div className="p-4 border-b border-gray-100">
             <div className="flex items-center gap-2">
@@ -293,7 +293,7 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({
                     ) : (
                       <div className="w-4 h-4 bg-gray-400 rounded-full" />
                     )}
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       {(prediction.confidence * 100).toFixed(0)}%
                     </span>
                   </div>
@@ -328,7 +328,7 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-white rounded-xl shadow-sm border"
+          className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border"
         >
           <div className="p-4 border-b border-gray-100">
             <div className="flex items-center gap-2">
@@ -364,12 +364,12 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({
                   </div>
                   <div className="flex-1">
                     <h4 className="font-medium text-sm mb-1">{insight.title}</h4>
-                    <p className="text-xs text-gray-600 mb-2">{insight.description}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">{insight.description}</p>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs bg-white px-2 py-0.5 rounded border">
+                      <span className="text-xs bg-white dark:bg-gray-800 px-2 py-0.5 rounded border">
                         {insight.category}
                       </span>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
                         {(insight.confidence * 100).toFixed(0)}% confiance
                       </span>
                     </div>
@@ -389,12 +389,12 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({
                   <DollarSign className="w-5 h-5 text-green-600 mt-0.5" />
                   <div className="flex-1">
                     <h4 className="font-medium text-sm mb-1">{tax.title}</h4>
-                    <p className="text-xs text-gray-600 mb-2">{tax.description}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">{tax.description}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-medium text-green-700">
                         Économie: {tax.potentialSavings.toLocaleString()}€
                       </span>
-                      <span className="text-xs bg-white px-2 py-0.5 rounded border">
+                      <span className="text-xs bg-white dark:bg-gray-800 px-2 py-0.5 rounded border">
                         {tax.category}
                       </span>
                     </div>
@@ -404,7 +404,7 @@ export const PredictiveDashboard: React.FC<PredictiveDashboardProps> = ({
             ))}
 
             {insights.length === 0 && taxOptimizations.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                 <Target className="w-12 h-12 text-gray-300 mx-auto mb-2" />
                 <p>Analyse en cours...</p>
                 <p className="text-sm">Les recommandations arrivent bientôt</p>

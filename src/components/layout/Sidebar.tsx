@@ -247,7 +247,7 @@ export const Sidebar: React.FC = () => {
           </div>
           <div>
             <h1 className="font-bold text-xl text-gray-800 dark:text-white">CassKai</h1>
-            <p className="text-xs text-gray-400 dark:text-gray-500 truncate max-w-[140px]">
+            <p className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 truncate max-w-[140px]">
               {currentCompany?.name || 'Finance Platform'}
             </p>
           </div>
@@ -262,12 +262,12 @@ export const Sidebar: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t('common.search', 'Rechercher un module...')}
-            className="w-full pl-11 pr-12 py-3 bg-slate-100/80 dark:bg-gray-800/80 border-0 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-gray-800 transition-all placeholder-gray-400 dark:text-white"
+            className="w-full pl-11 pr-12 py-3 bg-slate-100/80 dark:bg-gray-800/80 border-0 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:bg-gray-800 dark:focus:bg-gray-800 transition-all placeholder-gray-400 dark:placeholder-gray-500 dark:text-white"
           />
-          <Search className="absolute left-4 top-3.5 h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+          <Search className="absolute left-4 top-3.5 h-5 w-5 text-gray-400 dark:text-gray-500 group-focus-within:text-indigo-500 transition-colors" />
           <div className="absolute right-3 top-2.5 flex gap-0.5">
-            <kbd className="px-1.5 py-1 bg-white dark:bg-gray-700 text-gray-400 text-xs rounded-md shadow-sm">⌘</kbd>
-            <kbd className="px-1.5 py-1 bg-white dark:bg-gray-700 text-gray-400 text-xs rounded-md shadow-sm">K</kbd>
+            <kbd className="px-1.5 py-1 bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-xs rounded-md shadow-sm">⌘</kbd>
+            <kbd className="px-1.5 py-1 bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-xs rounded-md shadow-sm">K</kbd>
           </div>
         </div>
       </div>
@@ -296,7 +296,7 @@ export const Sidebar: React.FC = () => {
                       : 'bg-white/60 dark:bg-gray-800/60 text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 hover:shadow-sm'
                     }`}
                 >
-                  <span className="text-gray-500 dark:text-gray-400">{item.icon}</span>
+                  <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{item.icon}</span>
                   <span>{item.label}</span>
                   {item.badge && item.badge > 0 && (
                     <span className="w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
@@ -362,7 +362,7 @@ export const Sidebar: React.FC = () => {
 
             {/* Section Items */}
             {expandedSections.includes(section.id) && (
-              <div className="bg-white dark:bg-gray-800 p-2 space-y-1">
+              <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 p-2 space-y-1">
                 {section.items.map(item => (
                   <button
                     key={item.id}
@@ -418,7 +418,7 @@ export const Sidebar: React.FC = () => {
         </button>
 
         {/* Shortcuts hint */}
-        <div className="mt-3 flex items-center justify-center gap-2 text-xs text-gray-400">
+        <div className="mt-3 flex items-center justify-center gap-2 text-xs text-gray-400 dark:text-gray-500">
           <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">⌘</kbd>
           <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">⇧</kbd>
           <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">D</kbd>

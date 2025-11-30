@@ -58,7 +58,7 @@ export const SmartAlertsWidget: React.FC<SmartAlertsWidgetProps> = ({
       case 'info':
         return <Info className="w-4 h-4 text-blue-500" />;
       default:
-        return <Bell className="w-4 h-4 text-gray-500" />;
+        return <Bell className="w-4 h-4 text-gray-500 dark:text-gray-400" />;
     }
   };
 
@@ -148,7 +148,7 @@ export const SmartAlertsWidget: React.FC<SmartAlertsWidgetProps> = ({
             <CheckCircle className="w-12 h-12 text-green-500 mx-auto" />
             <div>
               <p className="text-lg font-medium text-green-600">Tout va bien !</p>
-              <p className="text-sm text-gray-500">Aucune alerte active</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Aucune alerte active</p>
             </div>
             {onRefresh && (
               <Button variant="outline" size="sm" onClick={onRefresh}>
@@ -281,7 +281,7 @@ export const SmartAlertsWidget: React.FC<SmartAlertsWidgetProps> = ({
                   
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center space-x-2">
-                      <h4 className="font-medium text-gray-900 dark:text-white">
+                      <h4 className="font-medium text-gray-900 dark:text-gray-100 dark:text-white">
                         {alert.title}
                       </h4>
                       
@@ -297,11 +297,11 @@ export const SmartAlertsWidget: React.FC<SmartAlertsWidgetProps> = ({
                       </div>
                     </div>
 
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">
                       {alert.message}
                     </p>
 
-                    <div className="flex items-center space-x-4 text-xs text-gray-500">
+                    <div className="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
                       <div className="flex items-center space-x-1">
                         <Clock className="w-3 h-3" />
                         <span>{alert.timestamp.toLocaleString('fr-FR')}</span>
@@ -346,16 +346,16 @@ export const SmartAlertsWidget: React.FC<SmartAlertsWidgetProps> = ({
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="border-t border-gray-200 dark:border-gray-700 pt-3 space-y-3"
+                    className="border-t border-gray-200 dark:border-gray-600 dark:border-gray-700 pt-3 space-y-3"
                   >
                     {/* Données de l'alerte */}
                     {alert.data && (
                       <div className="space-y-2">
-                        <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300">
                           Détails:
                         </h5>
                         <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-3">
-                          <pre className="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap">
+                          <pre className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-400 whitespace-pre-wrap">
                             {JSON.stringify(alert.data, null, 2)}
                           </pre>
                         </div>
@@ -365,7 +365,7 @@ export const SmartAlertsWidget: React.FC<SmartAlertsWidgetProps> = ({
                     {/* Actions disponibles */}
                     {alert.actions && alert.actions.length > 0 && (
                       <div className="space-y-2">
-                        <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300">
                           Actions:
                         </h5>
                         <div className="flex flex-wrap gap-2">
@@ -433,7 +433,7 @@ export const SmartAlertsWidget: React.FC<SmartAlertsWidgetProps> = ({
         {filteredAlerts.length === 0 && (
           <div className="text-center py-8 space-y-2">
             <Filter className="w-8 h-8 text-gray-300 mx-auto" />
-            <p className="text-gray-500">Aucune alerte pour les filtres sélectionnés</p>
+            <p className="text-gray-500 dark:text-gray-400">Aucune alerte pour les filtres sélectionnés</p>
             <Button 
               variant="outline" 
               size="sm"
@@ -449,7 +449,7 @@ export const SmartAlertsWidget: React.FC<SmartAlertsWidgetProps> = ({
 
         {/* Information sur l'IA */}
         {filteredAlerts.length > 0 && (
-          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-600 dark:border-gray-700">
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-md p-3">
               <div className="flex items-start space-x-2">
                 <Zap className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />

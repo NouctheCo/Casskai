@@ -456,7 +456,7 @@ const ModuleManager: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Gestion des Modules</h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">
             {activeModulesCount} module{activeModulesCount > 1 ? 's' : ''} activé{activeModulesCount > 1 ? 's' : ''} sur {modules.length}
           </p>
         </div>
@@ -475,7 +475,7 @@ const ModuleManager: React.FC = () => {
                 <CheckCircle className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Modules actifs</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Modules actifs</p>
                 <p className="text-xl font-bold">{activeModulesCount}</p>
               </div>
             </div>
@@ -489,7 +489,7 @@ const ModuleManager: React.FC = () => {
                 <Package className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Total disponible</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Total disponible</p>
                 <p className="text-xl font-bold">{modules.length}</p>
               </div>
             </div>
@@ -503,7 +503,7 @@ const ModuleManager: React.FC = () => {
                 <Clock className="w-5 h-5 text-orange-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">En bêta</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">En bêta</p>
                 <p className="text-xl font-bold">{modules.filter(m => m.status === 'beta').length}</p>
               </div>
             </div>
@@ -517,7 +517,7 @@ const ModuleManager: React.FC = () => {
                 <Star className="w-5 h-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Premium</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">Premium</p>
                 <p className="text-xl font-bold">{modules.filter(m => m.isPremium).length}</p>
               </div>
             </div>
@@ -592,21 +592,21 @@ const ModuleManager: React.FC = () => {
                 {/* Informations du module */}
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <p className="text-gray-600">Version</p>
+                    <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Version</p>
                     <p className="font-medium">{module.version}</p>
                   </div>
                   <div>
-                    <p className="text-gray-600">Prix</p>
+                    <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Prix</p>
                     <p className="font-medium">{formatPrice(module.pricing)}</p>
                   </div>
                   {module.downloads && (
                     <div>
-                      <p className="text-gray-600">Téléchargements</p>
+                      <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Téléchargements</p>
                       <p className="font-medium">{module.downloads.toLocaleString()}</p>
                     </div>
                   )}
                   <div>
-                    <p className="text-gray-600">Auteur</p>
+                    <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">Auteur</p>
                     <p className="font-medium">{module.author}</p>
                   </div>
                 </div>
@@ -614,7 +614,7 @@ const ModuleManager: React.FC = () => {
                 {/* Dépendances */}
                 {module.dependencies.length > 0 && (
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">Dépendances:</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500 mb-1">Dépendances:</p>
                     <div className="flex flex-wrap gap-1">
                       {module.dependencies.map(dep => (
                         <Badge key={dep} variant="outline" className="text-xs">
@@ -711,11 +711,11 @@ const ModuleManager: React.FC = () => {
 
       {filteredModules.length === 0 && (
         <div className="text-center py-12">
-          <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <Package className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
             Aucun module trouvé
           </h3>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500">
             Aucun module ne correspond à vos critères de recherche.
           </p>
         </div>

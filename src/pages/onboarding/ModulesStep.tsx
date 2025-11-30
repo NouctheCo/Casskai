@@ -168,7 +168,7 @@ const ModulesHeader: React.FC = () => (
     <CardTitle className="text-2xl font-bold gradient-text mb-2">
       Sélection des Modules
     </CardTitle>
-    <CardDescription className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+    <CardDescription className="text-lg text-gray-600 dark:text-gray-400 dark:text-gray-400 max-w-2xl mx-auto">
       Choisissez les fonctionnalités que vous souhaitez activer dans votre espace CassKai.
       Vous pourrez modifier ces choix plus tard dans les paramètres.
     </CardDescription>
@@ -186,11 +186,11 @@ const ModulesSummary: React.FC<{
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay: 0.3, duration: 0.5 }}
   >
-    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+    <Card className="bg-white dark:bg-gray-800 dark:bg-gray-800 border-gray-200 dark:border-gray-600 dark:border-gray-700">
       <CardContent className="pt-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-4">
-            <div className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">
               {selectedCount} module{selectedCount !== 1 ? 's' : ''} sélectionné{selectedCount !== 1 ? 's' : ''}
             </div>
             <Badge variant="secondary" className="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300">
@@ -238,9 +238,9 @@ const ModulesList: React.FC<{
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 + index * 0.1, duration: 0.5 }}
       >
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-gray-800 dark:bg-gray-800 border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <CardHeader className="pb-4">
-            <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
+            <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-gray-100 dark:text-white">
               {category === 'core' && <Settings className="h-5 w-5 text-orange-600 dark:text-orange-400" />}
               {category === 'finance' && <Calculator className="h-5 w-5 text-green-600 dark:text-green-400" />}
               {category === 'operations' && <Package className="h-5 w-5 text-blue-600 dark:text-blue-400" />}
@@ -251,7 +251,7 @@ const ModulesList: React.FC<{
                 {category === 'operations' && 'Opérations'}
                 {category === 'analytics' && 'Analytique'}
               </span>
-              <Badge variant="outline" className="border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400">
+              <Badge variant="outline" className="border-gray-300 dark:border-gray-600 dark:border-gray-600 text-gray-600 dark:text-gray-400 dark:text-gray-400">
                 {modules.length} module{modules.length !== 1 ? 's' : ''}
               </Badge>
             </CardTitle>
@@ -332,7 +332,7 @@ const ModuleCard: React.FC<{
             {module.icon}
           </div>
           <div className="flex items-center space-x-2">
-            <h3 className="font-semibold text-gray-900 dark:text-white">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white">
               {module.name}
             </h3>
             {module.recommended && (
@@ -342,11 +342,11 @@ const ModuleCard: React.FC<{
             )}
           </div>
         </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 leading-relaxed">
+        <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 mb-3 leading-relaxed">
           {module.description}
         </p>
         <div className="flex items-center justify-between">
-          <Badge variant="outline" className="text-xs border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400">
+          <Badge variant="outline" className="text-xs border-gray-300 dark:border-gray-600 dark:border-gray-600 text-gray-600 dark:text-gray-400 dark:text-gray-400">
             ~{module.estimatedSetupTime} min
           </Badge>
           {isSelected && (

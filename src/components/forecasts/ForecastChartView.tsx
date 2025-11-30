@@ -76,8 +76,8 @@ const ForecastChartView: React.FC<ForecastChartViewProps> = ({
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-4 border border-gray-300 rounded-lg shadow-lg">
-          <p className="font-medium text-gray-900 mb-2">{`${label} ${new Date().getFullYear()}`}</p>
+        <div className="bg-white dark:bg-gray-800 p-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg">
+          <p className="font-medium text-gray-900 dark:text-gray-100 mb-2">{`${label} ${new Date().getFullYear()}`}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} style={{ color: entry.color }} className="text-sm">
               {`${entry.name}: ${formatCurrency(entry.value)}`}
@@ -92,10 +92,10 @@ const ForecastChartView: React.FC<ForecastChartViewProps> = ({
   return (
     <div className={`bg-white rounded-lg border border-gray-200 p-6 ${className}`}>
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
           Évolution Financière - {forecast.name}
         </h3>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
           Projection mensuelle des revenus et dépenses pour l'année en cours
         </p>
       </div>

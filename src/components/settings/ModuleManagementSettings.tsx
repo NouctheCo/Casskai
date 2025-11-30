@@ -202,7 +202,7 @@ export function ModuleManagementSettings() {
     if (status.effectiveState) {
       return <CheckCircle className="h-4 w-4 text-green-500" />;
     }
-    return <Info className="h-4 w-4 text-gray-400" />;
+    return <Info className="h-4 w-4 text-gray-400 dark:text-gray-500" />;
   };
 
   if (contextLoading) {

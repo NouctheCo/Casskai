@@ -42,10 +42,10 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({ budget }) => {
                 return (
                   <div key={index} className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium text-gray-700 dark:text-gray-300">
+                      <span className="font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300">
                         {category.category}
                         {category.subcategory && (
-                          <span className="text-gray-500 ml-1">• {category.subcategory}</span>
+                          <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500 ml-1">• {category.subcategory}</span>
                         )}
                       </span>
                       <span className="font-semibold text-green-600">
@@ -82,10 +82,10 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({ budget }) => {
                 return (
                   <div key={index} className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium text-gray-700 dark:text-gray-300">
+                      <span className="font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300">
                         {category.category}
                         {category.subcategory && (
-                          <span className="text-gray-500 ml-1">• {category.subcategory}</span>
+                          <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500 ml-1">• {category.subcategory}</span>
                         )}
                       </span>
                       <span className="font-semibold text-red-600">
@@ -115,8 +115,8 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({ budget }) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center text-gray-500 py-8">
-            <BarChart3 className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+          <div className="text-center text-gray-500 dark:text-gray-400 dark:text-gray-500 py-8">
+            <BarChart3 className="w-12 h-12 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
             <p>Graphique de répartition mensuelle à venir</p>
             <p className="text-sm mt-2">Visualisation des flux mensuels prévus</p>
           </div>

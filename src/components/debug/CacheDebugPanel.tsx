@@ -69,7 +69,7 @@ export const CacheDebugPanel: React.FC = () => {
         <CardContent className="space-y-4">
           {/* État du cache */}
           <div className="space-y-2">
-            <h4 className="text-xs font-medium text-gray-700">État actuel</h4>
+            <h4 className="text-xs font-medium text-gray-700 dark:text-gray-300">État actuel</h4>
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div className="flex items-center justify-between">
                 <span>Entreprises:</span>
@@ -88,7 +88,7 @@ export const CacheDebugPanel: React.FC = () => {
 
           {/* Validation */}
           <div className="space-y-2">
-            <h4 className="text-xs font-medium text-gray-700">Validation</h4>
+            <h4 className="text-xs font-medium text-gray-700 dark:text-gray-300">Validation</h4>
             <div className="flex items-center space-x-2">
               {validation.isValid ? (
                 <CheckCircle className="h-4 w-4 text-green-500" />
@@ -167,7 +167,7 @@ export const CacheDebugPanel: React.FC = () => {
           </div>
 
           {/* Instructions */}
-          <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+          <div className="text-xs text-gray-600 dark:text-gray-400 bg-gray-50 p-2 rounded">
             <p className="font-medium">Résolution du problème:</p>
             <ol className="list-decimal list-inside space-y-1 mt-1">
               <li>Cliquez "Nettoyage intelligent"</li>
