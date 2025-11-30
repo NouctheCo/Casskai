@@ -122,6 +122,14 @@ import { DatePicker } from '@/components/ui/date-picker';
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+import { supabase } from '@/lib/supabase';
+
+import { useAuth } from '@/contexts/AuthContext';
+
+import { useEffect } from 'react';
+
+import { useNavigate } from 'react-router-dom';
+
 
 
 // Les données sont chargées depuis le service projectsService via useProjects hook
@@ -131,6 +139,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export default function ProjectsPage() {
 
   const { t } = useLocale();
+
+  const { currentCompany } = useAuth();
+
+  const navigate = useNavigate();
 
 
 
@@ -173,6 +185,94 @@ export default function ProjectsPage() {
     averageProgress
 
   } = useProjects();
+
+
+
+  // State pour les resources (employees)
+
+  const [resources, setResources] = useState<any[]>([]);
+
+  const [loadingResources, setLoadingResources] = useState(false);
+
+
+
+  // Charger les employees depuis Supabase
+
+  useEffect(() => {
+
+    const loadEmployees = async () => {
+
+      if (!currentCompany?.id) return;
+
+
+
+      setLoadingResources(true);
+
+      try {
+
+        const { data, error } = await supabase
+
+          .from('employees')
+
+          .select('*')
+
+          .eq('company_id', currentCompany.id)
+
+          .eq('status', 'active');
+
+
+
+        if (error) throw error;
+
+
+
+        // Transformer les employees en format resources
+
+        const employeesAsResources = (data || []).map(emp => ({
+
+          id: emp.id,
+
+          name: `${emp.first_name} ${emp.last_name}`,
+
+          role: emp.position || 'Employee',
+
+          email: emp.email,
+
+          skills: emp.skills || [],
+
+          availability: 80, // Valeur par défaut
+
+          hourlyRate: emp.hourly_rate || 0,
+
+          currentProjects: [], // À calculer depuis les time entries
+
+          totalHours: 0, // À calculer
+
+          billableHours: 0 // À calculer
+
+        }));
+
+
+
+        setResources(employeesAsResources);
+
+      } catch (error) {
+
+        console.error('Error loading employees:', error);
+
+      } finally {
+
+        setLoadingResources(false);
+
+      }
+
+    };
+
+
+
+    loadEmployees();
+
+  }, [currentCompany?.id]);
 
 
 
@@ -223,182 +323,6 @@ export default function ProjectsPage() {
   };
 
 
-
-  // Mock des resources temporaire pour éviter l'erreur
-
-  const resources = [
-
-    {
-
-      id: '1',
-
-      name: 'Marie Dubois',
-
-      role: 'Chef de Projet',
-
-      email: 'marie.dubois@casskai.app',
-
-      skills: ['Project Management', 'Agile', 'Scrum'],
-
-      availability: 85,
-
-      hourlyRate: 75,
-
-      currentProjects: ['1', '2'], // Projets actifs
-
-      totalHours: 160,
-
-      billableHours: 152
-
-    },
-
-    {
-
-      id: '2',
-
-      name: 'Pierre Martin',
-
-      role: 'Développeur Full Stack',
-
-      email: 'pierre.martin@casskai.app',
-
-      skills: ['React', 'Node.js', 'TypeScript'],
-
-      availability: 92,
-
-      hourlyRate: 65,
-
-      currentProjects: ['1'], // Projets actifs
-
-      totalHours: 168,
-
-      billableHours: 165
-
-    },
-
-    {
-
-      id: '3',
-
-      name: 'Sophie Bernard',
-
-      role: 'Designer UX/UI',
-
-      email: 'sophie.bernard@casskai.app',
-
-      skills: ['Figma', 'Adobe XD', 'User Research'],
-
-      availability: 78,
-
-      hourlyRate: 60,
-
-      currentProjects: ['1', '3'], // Projets actifs
-
-      totalHours: 140,
-
-      billableHours: 138
-
-    }
-
-  ];
-
-
-
-  // Mock des timesheets temporaire pour éviter l'erreur
-
-  const timesheets = [
-
-    {
-
-      id: '1',
-
-      project_id: '1',
-
-      task_id: '1',
-
-      user_id: 'user-1',
-
-      user_name: 'Marie Dubois',
-
-      date: '2024-03-15',
-
-      hours: 8,
-
-      billable: true,
-
-      billableHours: 8,
-
-      hourlyRate: 75,
-
-      description: 'Développement front-end',
-
-      task: 'UI Implementation',
-
-      approved: true
-
-    },
-
-    {
-
-      id: '2',
-
-      project_id: '1',
-
-      task_id: '2',
-
-      user_id: 'user-2',
-
-      user_name: 'Pierre Martin',
-
-      date: '2024-03-15',
-
-      hours: 7.5,
-
-      billable: true,
-
-      billableHours: 7.5,
-
-      hourlyRate: 65,
-
-      description: 'API Development',
-
-      task: 'Backend Integration',
-
-      approved: true
-
-    },
-
-    {
-
-      id: '3',
-
-      project_id: '2',
-
-      task_id: '3',
-
-      user_id: 'user-3',
-
-      user_name: 'Sophie Bernard',
-
-      date: '2024-03-14',
-
-      hours: 6,
-
-      billable: true,
-
-      billableHours: 6,
-
-      hourlyRate: 60,
-
-      description: 'Design System',
-
-      task: 'UX Research',
-
-      approved: false
-
-    }
-
-  ];
 
 
 
@@ -922,7 +846,7 @@ export default function ProjectsPage() {
 
             <TabsTrigger value="resources">{t("projectspage.tabs.resources")}</TabsTrigger>
 
-            <TabsTrigger value="timesheets">{t("projectspage.tabs.time")}</TabsTrigger>
+            <TabsTrigger value="timeEntries">{t("projectspage.tabs.time")}</TabsTrigger>
 
             <TabsTrigger value="billing">{t("projectspage.tabs.billing")}</TabsTrigger>
 
@@ -1642,7 +1566,7 @@ export default function ProjectsPage() {
 
 
 
-          <TabsContent value="timesheets" className="space-y-6">
+          <TabsContent value="timeEntries" className="space-y-6">
 
             <Card>
 
@@ -1680,7 +1604,7 @@ export default function ProjectsPage() {
 
                 <div className="space-y-4">
 
-                  {timesheets.map((timesheet) => {
+                  {timeEntries.map((timesheet) => {
 
                     const project = projects.find(p => p.id === timesheet.project_id);
 
@@ -1784,11 +1708,11 @@ export default function ProjectsPage() {
 
                   </div>
 
-                  <Button onClick={() => toastSuccess("Interface à implémenter")}>
+                  <Button onClick={() => navigate('/invoicing')}>
 
                     <PlusCircle className="h-4 w-4 mr-2" />
 
-                    Générer facture
+                    Créer une facture
 
                   </Button>
 
@@ -1832,7 +1756,7 @@ export default function ProjectsPage() {
 
                           <p className="text-2xl font-bold text-blue-600">
 
-                            {timesheets.reduce((sum, ts) => sum + ts.billableHours, 0)}h
+                            {timeEntries.reduce((sum, ts) => sum + ts.billableHours, 0)}h
 
                           </p>
 
@@ -1854,7 +1778,7 @@ export default function ProjectsPage() {
 
                           <p className="text-2xl font-bold text-purple-600">
 
-                            €{(timesheets.reduce((sum, ts) => sum + ts.hourlyRate, 0) / timesheets.length).toFixed(0)}
+                            €{(timeEntries.reduce((sum, ts) => sum + ts.hourlyRate, 0) / timeEntries.length).toFixed(0)}
 
                           </p>
 
@@ -1878,7 +1802,7 @@ export default function ProjectsPage() {
 
                     {projects.map((project) => {
 
-                      const projectTimesheets = timesheets.filter(ts => ts.project_id === project.id);
+                      const projectTimesheets = timeEntries.filter(ts => ts.project_id === project.id);
 
                       const totalBillable = projectTimesheets.reduce((sum, ts) => sum + ts.billableHours * ts.hourlyRate, 0);
 
