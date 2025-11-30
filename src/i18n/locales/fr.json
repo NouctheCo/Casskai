@@ -256,7 +256,6 @@
     "humanResources": "Ressources Humaines",
     "inDevelopment": "En développement",
     "inventory": "Inventaire",
-    "invoicing": "Facturation",
     "loading": "Chargement...",
     "month": "Mois",
     "newFeatures": "Nouvelles fonctionnalités",
@@ -1468,7 +1467,6 @@
     "unit": "Unité",
     "unit_": "Unité"
   },
-  "invoicing": "Facturation",
   "journal": "Journal",
   "journal_entries": {
     "account": "Compte",
@@ -2997,7 +2995,6 @@
     "humanResources": "Ressources Humaines",
     "inventaire": "Inventaire",
     "inventory": "Stock & Inventaire",
-    "invoicing": "Facturation",
     "management": "Gestion",
     "manageSubscription": "Gérer l'abonnement",
     "modules": "modules",
