@@ -62,13 +62,38 @@ export const EU_COUNTRIES = [
   'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE'
 ] as const;
 
+/** Pays du Maghreb utilisant SCF/PCG Adapté */
+export const MAGHREB_COUNTRIES = [
+  'DZ', // Algérie (SCF - Système Comptable Financier)
+  'MA', // Maroc (PCG marocain inspiré du français)
+  'TN'  // Tunisie (Système comptable tunisien inspiré du français)
+] as const;
+
+/** Pays anglophones africains utilisant IFRS */
+export const IFRS_AFRICA_COUNTRIES = [
+  'ZA', // Afrique du Sud
+  'NG', // Nigeria
+  'KE', // Kenya
+  'GH', // Ghana
+  'TZ', // Tanzanie
+  'UG', // Ouganda
+  'RW', // Rwanda
+  'ZM', // Zambie
+  'ZW', // Zimbabwe
+  'BW'  // Botswana
+] as const;
+
 /** Mapping pays → Plan comptable recommandé */
-export const COUNTRY_TO_CHART_MAP: Record<string, 'SYSCOHADA' | 'PCG' | 'IAS_IFRS' | 'UK_GAAP' | 'US_GAAP'> = {
-  // OHADA
+export const COUNTRY_TO_CHART_MAP: Record<string, 'SYSCOHADA' | 'PCG' | 'SCF' | 'IAS_IFRS' | 'UK_GAAP' | 'US_GAAP'> = {
+  // OHADA (17 pays)
   ...Object.fromEntries(OHADA_COUNTRIES.map(c => [c, 'SYSCOHADA' as const])),
-  
-  // France et DOM-TOM
+
+  // France, Belgique, Luxembourg (PCG)
   'FR': 'PCG',
+  'BE': 'PCG',
+  'LU': 'PCG',
+
+  // DOM-TOM français
   'RE': 'PCG', // Réunion
   'GP': 'PCG', // Guadeloupe
   'MQ': 'PCG', // Martinique
@@ -76,15 +101,21 @@ export const COUNTRY_TO_CHART_MAP: Record<string, 'SYSCOHADA' | 'PCG' | 'IAS_IFR
   'YT': 'PCG', // Mayotte
   'NC': 'PCG', // Nouvelle-Calédonie
   'PF': 'PCG', // Polynésie française
-  
+
+  // Maghreb (3 pays - SCF/PCG Adapté)
+  ...Object.fromEntries(MAGHREB_COUNTRIES.map(c => [c, 'SCF' as const])),
+
+  // Afrique anglophone (10 pays - IFRS)
+  ...Object.fromEntries(IFRS_AFRICA_COUNTRIES.map(c => [c, 'IAS_IFRS' as const])),
+
   // UK
   'GB': 'UK_GAAP',
-  
+
   // USA
   'US': 'US_GAAP',
-  
-  // Pays UE (peuvent choisir IAS/IFRS ou plan local)
-  ...Object.fromEntries(EU_COUNTRIES.map(c => [c, 'IAS_IFRS' as const]))
+
+  // Autres pays UE (peuvent choisir IAS/IFRS ou plan local)
+  ...Object.fromEntries(EU_COUNTRIES.filter(c => !['FR', 'BE', 'LU'].includes(c)).map(c => [c, 'IAS_IFRS' as const]))
 };
 
 // ========================================
@@ -96,7 +127,7 @@ export interface ChartDetectionResult {
   alternatives: AccountPlan[];
   countryCode: string;
   countryName: string;
-  zone: 'OHADA' | 'EU' | 'OTHER';
+  zone: 'OHADA' | 'MAGHREB' | 'IFRS_AFRICA' | 'EU' | 'OTHER';
   confidence: 'HIGH' | 'MEDIUM' | 'LOW';
   reasoning: string;
 }
@@ -118,10 +149,14 @@ export function detectChartOfAccounts(
   _industry?: string
 ): ChartDetectionResult {
   const upperCode = countryCode.toUpperCase();
-  
+
   // Déterminer zone géographique
-  const zone = (OHADA_COUNTRIES as readonly string[]).includes(upperCode) 
+  const zone = (OHADA_COUNTRIES as readonly string[]).includes(upperCode)
     ? 'OHADA'
+    : (MAGHREB_COUNTRIES as readonly string[]).includes(upperCode)
+    ? 'MAGHREB'
+    : (IFRS_AFRICA_COUNTRIES as readonly string[]).includes(upperCode)
+    ? 'IFRS_AFRICA'
     : (EU_COUNTRIES as readonly string[]).includes(upperCode)
     ? 'EU'
     : 'OTHER';
@@ -139,8 +174,34 @@ export function detectChartOfAccounts(
     };
   }
 
-  // France + DOM-TOM (confidence HIGH)
-  if (upperCode === 'FR' || ['RE', 'GP', 'MQ', 'GF', 'YT', 'NC', 'PF'].includes(upperCode)) {
+  // Maghreb - SCF/PCG Adapté (confidence HIGH)
+  if (zone === 'MAGHREB') {
+    return {
+      recommended: PCG_FRANCE, // Utilise PCG comme base (SCF et PCG marocain/tunisien s'en inspirent)
+      alternatives: [],
+      countryCode: upperCode,
+      countryName: getCountryName(upperCode),
+      zone: 'MAGHREB',
+      confidence: 'HIGH',
+      reasoning: 'Système Comptable Financier (SCF) ou PCG adapté. Le PCG français est utilisé comme base car les standards du Maghreb s\'en inspirent fortement.'
+    };
+  }
+
+  // Afrique anglophone - IFRS (confidence HIGH)
+  if (zone === 'IFRS_AFRICA') {
+    return {
+      recommended: PCG_FRANCE, // Temporaire - IFRS templates seront ajoutés
+      alternatives: [],
+      countryCode: upperCode,
+      countryName: getCountryName(upperCode),
+      zone: 'IFRS_AFRICA',
+      confidence: 'HIGH',
+      reasoning: 'Standards internationaux IFRS obligatoires dans ce pays. Templates IFRS complets seront déployés prochainement.'
+    };
+  }
+
+  // France, Belgique, Luxembourg + DOM-TOM (confidence HIGH)
+  if (['FR', 'BE', 'LU', 'RE', 'GP', 'MQ', 'GF', 'YT', 'NC', 'PF'].includes(upperCode)) {
     return {
       recommended: PCG_FRANCE,
       alternatives: [],
@@ -148,7 +209,7 @@ export function detectChartOfAccounts(
       countryName: getCountryName(upperCode),
       zone: 'OTHER',
       confidence: 'HIGH',
-      reasoning: 'Plan Comptable Général (PCG) français, obligatoire en France et DOM-TOM.'
+      reasoning: 'Plan Comptable Général (PCG) français, obligatoire en France, Belgique, Luxembourg et DOM-TOM.'
     };
   }
 
