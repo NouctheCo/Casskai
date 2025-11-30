@@ -100,7 +100,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
 
       // Charger les comptes comptables
       const { data: accData, error: accError } = await supabase
-        .from('accounts')
+        .from('chart_of_accounts')
         .select('id, account_number, name, type, class')
         .eq('company_id', currentCompany.id)
         .order('account_number');
@@ -267,7 +267,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
 
     // Chercher en base si pas trouvé localement
     const { data } = await supabase
-      .from('accounts')
+      .from('chart_of_accounts')
       .select('id')
       .eq('company_id', currentCompany?.id)
       .eq('account_number', accountNumber)
