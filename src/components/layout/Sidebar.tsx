@@ -102,11 +102,13 @@ export const Sidebar: React.FC = () => {
         .eq('company_id', currentCompany.id)
         .lte('end_date', new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString());
 
-      setBadges({
-        invoicing: invoicesPending || 0,
-        hr: leavePending || 0,
-        contracts: contractsExpiring || 0
-      });
+      // Ne définir les badges QUE s'ils ont une valeur > 0
+      const newBadges: Record<string, number> = {};
+      if (invoicesPending && invoicesPending > 0) newBadges.invoicing = invoicesPending;
+      if (leavePending && leavePending > 0) newBadges.hr = leavePending;
+      if (contractsExpiring && contractsExpiring > 0) newBadges.contracts = contractsExpiring;
+
+      setBadges(newBadges);
     };
 
     loadBadges();
