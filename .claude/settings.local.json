@@ -155,7 +155,10 @@
       "Bash(del DEPOT_APP1_Code_Sourcecasskai-app-v1.0.0.zip)",
       "Bash(unzip:*)",
       "Bash(git log:*)",
-      "Bash(del /F /Q \"DEPOT_APP\\1_Code_Source\\casskai-app-v1.0.0.zip\")"
+      "Bash(del /F /Q \"DEPOT_APP\\1_Code_Source\\casskai-app-v1.0.0.zip\")",
+      "Bash(git reflog:*)",
+      "Bash(git gc:*)",
+      "Bash(git remote add:*)"
     ],
     "deny": []
   }
