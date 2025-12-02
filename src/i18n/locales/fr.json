@@ -233,7 +233,18 @@
   "close": "Fermer",
   "comingSoon": "Bientôt disponible",
   "common": {
-    "actions": "Actions",
+    "actions": {
+      "label": "Actions",
+      "cancel": "Annuler",
+      "create": "Créer",
+      "save": "Enregistrer",
+      "delete": "Supprimer",
+      "edit": "Modifier",
+      "close": "Fermer",
+      "confirm": "Confirmer",
+      "saving": "Enregistrement...",
+      "loading": "Chargement..."
+    },
     "back": "Retour",
     "backToDashboard": "Retour au tableau de bord",
     "beta": "Bêta",
@@ -608,6 +619,123 @@
     "clientStatus": {
       "active": "Actif",
       "inactive": "Inactif"
+    },
+    "client": {
+      "new": "Nouveau client",
+      "sections": {
+        "basicInfo": "Informations générales",
+        "contact": "Contact",
+        "address": "Adresse",
+        "legal": "Informations légales"
+      },
+      "fields": {
+        "companyName": "Nom de l'entreprise",
+        "type": "Type",
+        "email": "Email",
+        "phone": "Téléphone",
+        "address": "Adresse",
+        "postalCode": "Code postal",
+        "city": "Ville",
+        "country": "Pays",
+        "siret": "SIRET",
+        "vatNumber": "N° TVA",
+        "notes": "Notes"
+      },
+      "placeholders": {
+        "companyName": "Nom de l'entreprise",
+        "email": "email@exemple.com",
+        "phone": "+33 1 23 45 67 89",
+        "address": "Adresse complète",
+        "postalCode": "75001",
+        "city": "Paris",
+        "siret": "123 456 789 00012",
+        "vatNumber": "FR12345678901",
+        "notes": "Notes sur le client..."
+      },
+      "types": {
+        "prospect": "Prospect",
+        "client": "Client",
+        "partner": "Partenaire"
+      },
+      "created": "Client créé avec succès",
+      "errors": {
+        "createFailed": "Erreur lors de la création du client"
+      },
+      "validation": {
+        "companyNameRequired": "Le nom de l'entreprise est requis"
+      }
+    },
+    "opportunity": {
+      "new": "Nouvelle opportunité",
+      "fields": {
+        "title": "Titre",
+        "client": "Client",
+        "amount": "Montant",
+        "probability": "Probabilité",
+        "stage": "Étape",
+        "priority": "Priorité",
+        "expectedCloseDate": "Date de clôture prévue",
+        "notes": "Notes"
+      },
+      "placeholders": {
+        "title": "Titre de l'opportunité",
+        "selectClient": "Sélectionner un client",
+        "amount": "0.00",
+        "notes": "Notes sur l'opportunité..."
+      },
+      "sections": {
+        "financial": "Informations financières",
+        "pipeline": "Pipeline",
+        "timeline": "Échéances"
+      },
+      "created": "Opportunité créée avec succès",
+      "errors": {
+        "createFailed": "Erreur lors de la création de l'opportunité"
+      },
+      "validation": {
+        "titleRequired": "Le titre est requis",
+        "clientRequired": "Le client est requis"
+      }
+    },
+    "action": {
+      "new": "Nouvelle action",
+      "fields": {
+        "subject": "Sujet",
+        "type": "Type",
+        "client": "Client",
+        "opportunity": "Opportunité",
+        "dueDate": "Date d'échéance",
+        "dueTime": "Heure",
+        "priority": "Priorité",
+        "assignedTo": "Assigné à",
+        "notes": "Notes"
+      },
+      "placeholders": {
+        "subject": "Sujet de l'action",
+        "selectClient": "Sélectionner un client",
+        "selectOpportunity": "Sélectionner une opportunité",
+        "notes": "Notes sur l'action..."
+      },
+      "sections": {
+        "relations": "Relations",
+        "schedule": "Planification"
+      },
+      "types": {
+        "call": "Appel",
+        "email": "Email",
+        "meeting": "Réunion",
+        "task": "Tâche"
+      },
+      "noClient": "Aucun client",
+      "noOpportunity": "Aucune opportunité",
+      "selectClientFirst": "Sélectionnez d'abord un client",
+      "created": "Action créée avec succès",
+      "errors": {
+        "createFailed": "Erreur lors de la création de l'action"
+      },
+      "validation": {
+        "subjectRequired": "Le sujet est requis"
+      }
     }
   },
   "currencies_extended": {
@@ -3140,7 +3268,10 @@
       "autoGenerate": "Génération automatique",
       "requiresApproval": "Nécessite approbation",
       "emailNotifications": "Notifications par email",
-      "notificationEmails": "Emails de notification"
+      "notificationEmails": "Emails de notification",
+      "noObligations": "Aucune obligation fiscale configurée",
+      "noObligationsDesc": "Configurez vos obligations fiscales pour suivre automatiquement vos échéances TVA, IS, CFE, CVAE, etc.",
+      "setupFirst": "Configurer mes obligations"
     },
     "errors": {
       "loadDashboardData": "Erreur lors du chargement du tableau de bord",
@@ -3189,6 +3320,36 @@
         "cancel": "Annuler",
         "create": "Créer la déclaration",
         "creating": "Création en cours..."
+      }
+    },
+    "modules": {
+      "accounting": "Comptabilité",
+      "invoicing": "Facturation",
+      "banking": "Banque",
+      "hr": "Ressources Humaines",
+      "syncStatus": {
+        "synced": "Synchronisé",
+        "pending": "En attente"
+      },
+      "syncButton": "Synchroniser",
+      "pendingHelp": "Les modules en attente se synchroniseront automatiquement lorsque vous ajouterez des données.",
+      "tooltips": {
+        "accounting": {
+          "synced": "Les écritures comptables sont synchronisées",
+          "pending": "En attente de données comptables. Créez des écritures pour synchroniser."
+        },
+        "invoicing": {
+          "synced": "Les factures sont synchronisées pour le calcul de TVA",
+          "pending": "En attente de factures. Créez des factures pour synchroniser."
+        },
+        "banking": {
+          "synced": "Les transactions bancaires sont synchronisées",
+          "pending": "En attente de transactions. Importez vos relevés bancaires."
+        },
+        "hr": {
+          "synced": "Les données RH sont synchronisées pour la DSN",
+          "pending": "En attente de données RH. Configurez vos employés."
+        }
       }
     }
   },

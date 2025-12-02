@@ -243,7 +243,13 @@
       "6": "s",
       "cancel": "Cancelar",
       "create": "Crear",
-      "saving": "Guardando..."
+      "saving": "Guardando...",
+      "save": "Guardar",
+      "delete": "Eliminar",
+      "edit": "Editar",
+      "close": "Cerrar",
+      "confirm": "Confirmar",
+      "loading": "Cargando..."
     },
     "back": "Retour",
     "backToDashboard": "Retour au tableau de bord",
@@ -575,6 +581,123 @@
     "clientStatus": {
       "active": "Activo",
       "inactive": "Inactivo"
+    },
+    "client": {
+      "new": "Nuevo cliente",
+      "sections": {
+        "basicInfo": "Información general",
+        "contact": "Contacto",
+        "address": "Dirección",
+        "legal": "Información legal"
+      },
+      "fields": {
+        "companyName": "Nombre de la empresa",
+        "type": "Tipo",
+        "email": "Correo electrónico",
+        "phone": "Teléfono",
+        "address": "Dirección",
+        "postalCode": "Código postal",
+        "city": "Ciudad",
+        "country": "País",
+        "siret": "SIRET",
+        "vatNumber": "N° IVA",
+        "notes": "Notas"
+      },
+      "placeholders": {
+        "companyName": "Nombre de la empresa",
+        "email": "correo@ejemplo.com",
+        "phone": "+34 912 34 56 78",
+        "address": "Dirección completa",
+        "postalCode": "28001",
+        "city": "Madrid",
+        "siret": "123 456 789 00012",
+        "vatNumber": "ES12345678Z",
+        "notes": "Notas sobre el cliente..."
+      },
+      "types": {
+        "prospect": "Prospecto",
+        "client": "Cliente",
+        "partner": "Socio"
+      },
+      "created": "Cliente creado exitosamente",
+      "errors": {
+        "createFailed": "Error al crear el cliente"
+      },
+      "validation": {
+        "companyNameRequired": "El nombre de la empresa es obligatorio"
+      }
+    },
+    "opportunity": {
+      "new": "Nueva oportunidad",
+      "fields": {
+        "title": "Título",
+        "client": "Cliente",
+        "amount": "Monto",
+        "probability": "Probabilidad",
+        "stage": "Etapa",
+        "priority": "Prioridad",
+        "expectedCloseDate": "Fecha de cierre prevista",
+        "notes": "Notas"
+      },
+      "placeholders": {
+        "title": "Título de la oportunidad",
+        "selectClient": "Seleccionar un cliente",
+        "amount": "0.00",
+        "notes": "Notas sobre la oportunidad..."
+      },
+      "sections": {
+        "financial": "Información financiera",
+        "pipeline": "Pipeline",
+        "timeline": "Cronología"
+      },
+      "created": "Oportunidad creada exitosamente",
+      "errors": {
+        "createFailed": "Error al crear la oportunidad"
+      },
+      "validation": {
+        "titleRequired": "El título es obligatorio",
+        "clientRequired": "El cliente es obligatorio"
+      }
+    },
+    "action": {
+      "new": "Nueva acción",
+      "fields": {
+        "subject": "Asunto",
+        "type": "Tipo",
+        "client": "Cliente",
+        "opportunity": "Oportunidad",
+        "dueDate": "Fecha de vencimiento",
+        "dueTime": "Hora",
+        "priority": "Prioridad",
+        "assignedTo": "Asignado a",
+        "notes": "Notas"
+      },
+      "placeholders": {
+        "subject": "Asunto de la acción",
+        "selectClient": "Seleccionar un cliente",
+        "selectOpportunity": "Seleccionar una oportunidad",
+        "notes": "Notas sobre la acción..."
+      },
+      "sections": {
+        "relations": "Relaciones",
+        "schedule": "Planificación"
+      },
+      "types": {
+        "call": "Llamada",
+        "email": "Correo",
+        "meeting": "Reunión",
+        "task": "Tarea"
+      },
+      "noClient": "Sin cliente",
+      "noOpportunity": "Sin oportunidad",
+      "selectClientFirst": "Seleccione primero un cliente",
+      "created": "Acción creada exitosamente",
+      "errors": {
+        "createFailed": "Error al crear la acción"
+      },
+      "validation": {
+        "subjectRequired": "El asunto es obligatorio"
+      }
     }
   },
   "currencies_extended": {
@@ -3122,7 +3245,10 @@
       "autoGenerate": "Generación automática",
       "requiresApproval": "Requiere aprobación",
       "emailNotifications": "Notificaciones por correo",
-      "notificationEmails": "Correos de notificación"
+      "notificationEmails": "Correos de notificación",
+      "noObligations": "No hay obligaciones fiscales configuradas",
+      "noObligationsDesc": "Configure sus obligaciones fiscales para realizar un seguimiento automático de IVA, Impuesto de Sociedades, CFE, CVAE, etc.",
+      "setupFirst": "Configurar mis obligaciones"
     },
     "errors": {
       "loadDashboardData": "Error al cargar el panel",
@@ -3171,6 +3297,36 @@
         "cancel": "Cancelar",
         "create": "Crear Declaración",
         "creating": "Creando..."
+      }
+    },
+    "modules": {
+      "accounting": "Contabilidad",
+      "invoicing": "Facturación",
+      "banking": "Banco",
+      "hr": "Recursos Humanos",
+      "syncStatus": {
+        "synced": "Sincronizado",
+        "pending": "Pendiente"
+      },
+      "syncButton": "Sincronizar",
+      "pendingHelp": "Los módulos pendientes se sincronizarán automáticamente cuando agregues datos.",
+      "tooltips": {
+        "accounting": {
+          "synced": "Los asientos contables están sincronizados",
+          "pending": "Esperando datos contables. Crea asientos para sincronizar."
+        },
+        "invoicing": {
+          "synced": "Las facturas están sincronizadas para el cálculo del IVA",
+          "pending": "Esperando facturas. Crea facturas para sincronizar."
+        },
+        "banking": {
+          "synced": "Las transacciones bancarias están sincronizadas",
+          "pending": "Esperando transacciones. Importa tus extractos bancarios."
+        },
+        "hr": {
+          "synced": "Los datos de RRHH están sincronizados para declaraciones",
+          "pending": "Esperando datos de RRHH. Configura tus empleados."
+        }
       }
     }
   },

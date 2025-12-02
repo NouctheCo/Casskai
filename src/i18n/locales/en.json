@@ -236,7 +236,13 @@
     "actions": {
       "cancel": "Cancel",
       "create": "Create",
-      "saving": "Saving..."
+      "saving": "Saving...",
+      "save": "Save",
+      "delete": "Delete",
+      "edit": "Edit",
+      "close": "Close",
+      "confirm": "Confirm",
+      "loading": "Loading..."
     },
     "back": "Retour",
     "backToDashboard": "Retour au tableau de bord",
@@ -568,6 +574,123 @@
     "clientStatus": {
       "active": "Active",
       "inactive": "Inactive"
+    },
+    "client": {
+      "new": "New client",
+      "sections": {
+        "basicInfo": "General information",
+        "contact": "Contact",
+        "address": "Address",
+        "legal": "Legal information"
+      },
+      "fields": {
+        "companyName": "Company name",
+        "type": "Type",
+        "email": "Email",
+        "phone": "Phone",
+        "address": "Address",
+        "postalCode": "Postal code",
+        "city": "City",
+        "country": "Country",
+        "siret": "SIRET",
+        "vatNumber": "VAT number",
+        "notes": "Notes"
+      },
+      "placeholders": {
+        "companyName": "Company name",
+        "email": "email@example.com",
+        "phone": "+1 234 567 8900",
+        "address": "Full address",
+        "postalCode": "12345",
+        "city": "City",
+        "siret": "123 456 789 00012",
+        "vatNumber": "GB123456789",
+        "notes": "Notes about the client..."
+      },
+      "types": {
+        "prospect": "Prospect",
+        "client": "Client",
+        "partner": "Partner"
+      },
+      "created": "Client created successfully",
+      "errors": {
+        "createFailed": "Failed to create client"
+      },
+      "validation": {
+        "companyNameRequired": "Company name is required"
+      }
+    },
+    "opportunity": {
+      "new": "New opportunity",
+      "fields": {
+        "title": "Title",
+        "client": "Client",
+        "amount": "Amount",
+        "probability": "Probability",
+        "stage": "Stage",
+        "priority": "Priority",
+        "expectedCloseDate": "Expected close date",
+        "notes": "Notes"
+      },
+      "placeholders": {
+        "title": "Opportunity title",
+        "selectClient": "Select a client",
+        "amount": "0.00",
+        "notes": "Notes about the opportunity..."
+      },
+      "sections": {
+        "financial": "Financial information",
+        "pipeline": "Pipeline",
+        "timeline": "Timeline"
+      },
+      "created": "Opportunity created successfully",
+      "errors": {
+        "createFailed": "Failed to create opportunity"
+      },
+      "validation": {
+        "titleRequired": "Title is required",
+        "clientRequired": "Client is required"
+      }
+    },
+    "action": {
+      "new": "New action",
+      "fields": {
+        "subject": "Subject",
+        "type": "Type",
+        "client": "Client",
+        "opportunity": "Opportunity",
+        "dueDate": "Due date",
+        "dueTime": "Time",
+        "priority": "Priority",
+        "assignedTo": "Assigned to",
+        "notes": "Notes"
+      },
+      "placeholders": {
+        "subject": "Action subject",
+        "selectClient": "Select a client",
+        "selectOpportunity": "Select an opportunity",
+        "notes": "Notes about the action..."
+      },
+      "sections": {
+        "relations": "Relations",
+        "schedule": "Schedule"
+      },
+      "types": {
+        "call": "Call",
+        "email": "Email",
+        "meeting": "Meeting",
+        "task": "Task"
+      },
+      "noClient": "No client",
+      "noOpportunity": "No opportunity",
+      "selectClientFirst": "Select a client first",
+      "created": "Action created successfully",
+      "errors": {
+        "createFailed": "Failed to create action"
+      },
+      "validation": {
+        "subjectRequired": "Subject is required"
+      }
     }
   },
   "currencies_extended": {
@@ -3110,7 +3233,10 @@
       "autoGenerate": "Auto-generate",
       "requiresApproval": "Requires approval",
       "emailNotifications": "Email notifications",
-      "notificationEmails": "Notification emails"
+      "notificationEmails": "Notification emails",
+      "noObligations": "No tax obligations configured",
+      "noObligationsDesc": "Configure your tax obligations to automatically track VAT, Corporate Tax, CFE, CVAE, and other deadlines.",
+      "setupFirst": "Set up my obligations"
     },
     "errors": {
       "loadDashboardData": "Error loading dashboard",
@@ -3159,6 +3285,36 @@
         "cancel": "Cancel",
         "create": "Create Declaration",
         "creating": "Creating..."
+      }
+    },
+    "modules": {
+      "accounting": "Accounting",
+      "invoicing": "Invoicing",
+      "banking": "Banking",
+      "hr": "Human Resources",
+      "syncStatus": {
+        "synced": "Synced",
+        "pending": "Pending"
+      },
+      "syncButton": "Sync",
+      "pendingHelp": "Pending modules will sync automatically when you add data.",
+      "tooltips": {
+        "accounting": {
+          "synced": "Accounting entries are synchronized",
+          "pending": "Waiting for accounting data. Create entries to sync."
+        },
+        "invoicing": {
+          "synced": "Invoices are synchronized for VAT calculation",
+          "pending": "Waiting for invoices. Create invoices to sync."
+        },
+        "banking": {
+          "synced": "Bank transactions are synchronized",
+          "pending": "Waiting for transactions. Import your bank statements."
+        },
+        "hr": {
+          "synced": "HR data is synchronized for payroll declarations",
+          "pending": "Waiting for HR data. Configure your employees."
+        }
       }
     }
   },

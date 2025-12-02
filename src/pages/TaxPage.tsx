@@ -170,7 +170,19 @@ const TaxPage: React.FC = () => {
     try {
       const response = await taxService.getDeclarations(currentEnterprise!.id);
       if (response.data) {
-        setDeclarations(response.data);
+        // Filtrer les déclarations invalides (UNKNOWN, null, etc.)
+        const validDeclarations = response.data.filter(decl =>
+          decl.type &&
+          decl.type !== 'UNKNOWN' &&
+          decl.type.trim() !== '' &&
+          ['TVA', 'IS', 'Liasse', 'IR', 'CFE', 'CVAE', 'DSN'].includes(decl.type)
+        );
+
+        if (validDeclarations.length < response.data.length) {
+          console.warn(`${response.data.length - validDeclarations.length} déclaration(s) invalide(s) filtrée(s)`);
+        }
+
+        setDeclarations(validDeclarations);
       }
       if (response.error) {
         toastError(t('tax.errors.loadDeclarations'));
@@ -272,6 +284,14 @@ const TaxPage: React.FC = () => {
     e.preventDefault();
 
     if (!currentEnterprise?.id) return;
+
+    // Validation du type de déclaration
+    const VALID_TYPES = ['TVA', 'IS', 'Liasse', 'IR', 'CFE', 'CVAE', 'DSN'];
+    if (!VALID_TYPES.includes(newDeclaration.type)) {
+      toastError(`Type de déclaration invalide: ${newDeclaration.type}`);
+      setIsSubmitting(false);
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -490,7 +510,7 @@ const TaxPage: React.FC = () => {
             onClick={() => setActiveTab('new-declaration')}
           >
             <Plus className="h-4 w-4" />
-            {t('tax.newDeclaration')}
+            {t('tax.newDeclaration.title')}
           </Button>
         </div>
       </motion.div>
@@ -1040,8 +1060,28 @@ const TaxPage: React.FC = () => {
 
           {/* Obligations Tab */}
           <TabsContent value="obligations" className="space-y-6">
+            {obligations.length === 0 ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <AlertCircle className="h-16 w-16 mx-auto text-gray-400 dark:text-gray-500 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    {t('tax.obligations.noObligations')}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                    {t('tax.obligations.noObligationsDesc')}
+                  </p>
+                  <Button
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                    onClick={() => setActiveTab('dashboard')}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    {t('tax.obligations.setupFirst')}
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
             <div className="grid gap-6">
-              {(obligations || []).map((obligation) => (
+              {obligations.map((obligation) => (
                 <Card key={obligation.id}>
                   <CardContent className="p-6">
                     <div className="flex justify-between items-start mb-4">
@@ -1139,6 +1179,7 @@ const TaxPage: React.FC = () => {
                 </Card>
               ))}
             </div>
+            )}
           </TabsContent>
 
           {/* New Declaration Tab */}

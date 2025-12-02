@@ -159,7 +159,9 @@ export const NewActionModal: React.FC<NewActionModalProps> = ({
 
   const handleChange = (field: keyof ActionFormData, value: string) => {
     setFormData((prev) => {
-      const newData = { ...prev, [field]: value };
+      // Convertir "none" en chaîne vide pour les valeurs optionnelles
+      const actualValue = value === 'none' ? '' : value;
+      const newData = { ...prev, [field]: actualValue };
 
       // Si on change de client, réinitialiser l'opportunité
       if (field === 'third_party_id') {
@@ -314,7 +316,7 @@ export const NewActionModal: React.FC<NewActionModalProps> = ({
                     } />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">{t('crm.action.noClient')}</SelectItem>
+                    <SelectItem value="none" disabled>{t('crm.action.noClient')}</SelectItem>
                     {clients.map((client) => (
                       <SelectItem key={client.id} value={client.id}>
                         {client.name}
@@ -341,7 +343,7 @@ export const NewActionModal: React.FC<NewActionModalProps> = ({
                     } />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">{t('crm.action.noOpportunity')}</SelectItem>
+                    <SelectItem value="none" disabled>{t('crm.action.noOpportunity')}</SelectItem>
                     {opportunities.map((opp) => (
                       <SelectItem key={opp.id} value={opp.id}>
                         {opp.title}

@@ -839,36 +839,11 @@ export default function SalesCrmPage() {
 
                 </CardHeader>
 
-                <CardContent className="p-6">
-
-                  <div className="flex items-center justify-center py-12">
-
-                    <div className="text-center space-y-4">
-
-                      <Users className="w-12 h-12 mx-auto text-muted-foreground" />
-
-                      <div>
-
-                        <h3 className="font-medium">{t('crm.modules.clients.title')}</h3>
-
-                        <p className="text-sm text-muted-foreground">
-
-                          {t('crm.modules.clients.description')}
-
-                        </p>
-
-                      </div>
-
-                      <Button onClick={() => devLogger.info('Open client management')}>
-
-                        {t('crm.buttons.openClients')}
-
-                      </Button>
-
-                    </div>
-
-                  </div>
-
+                <CardContent>
+                  <ClientsManagement
+                    clients={clients}
+                    onCreateClient={() => setShowNewClientModal(true)}
+                  />
                 </CardContent>
 
               </Card>
@@ -945,35 +920,15 @@ export default function SalesCrmPage() {
 
                 </CardHeader>
 
-                <CardContent className="p-6">
+                <CardContent>
 
-                  <div className="flex items-center justify-center py-12">
+                  <OpportunitiesKanban
 
-                    <div className="text-center space-y-4">
+                    opportunities={opportunities}
 
-                      <Target className="w-12 h-12 mx-auto text-muted-foreground" />
+                    onCreateOpportunity={() => setShowNewOpportunityModal(true)}
 
-                      <div>
-
-                        <h3 className="font-medium">{t('crm.modules.opportunities.title')}</h3>
-
-                        <p className="text-sm text-muted-foreground">
-
-                          {t('crm.modules.opportunities.description')}
-
-                        </p>
-
-                      </div>
-
-                      <Button onClick={() => devLogger.info('Open opportunities')}>
-
-                        {t('crm.buttons.openPipeline')}
-
-                      </Button>
-
-                    </div>
-
-                  </div>
+                  />
 
                 </CardContent>
 
@@ -1031,35 +986,15 @@ export default function SalesCrmPage() {
 
                 </CardHeader>
 
-                <CardContent className="p-6">
+                <CardContent>
 
-                  <div className="flex items-center justify-center py-12">
+                  <CommercialActions
 
-                    <div className="text-center space-y-4">
+                    actions={commercialActions}
 
-                      <Activity className="w-12 h-12 mx-auto text-muted-foreground" />
+                    onCreateAction={() => setShowNewActionModal(true)}
 
-                      <div>
-
-                        <h3 className="font-medium">{t('crm.sections.commercialActions')}</h3>
-
-                        <p className="text-sm text-muted-foreground">
-
-                          {t('crm.modules.actions.description')}
-
-                        </p>
-
-                      </div>
-
-                      <Button onClick={() => devLogger.info('Open actions')}>
-
-                        {t('crm.buttons.openActions')}
-
-                      </Button>
-
-                    </div>
-
-                  </div>
+                  />
 
                 </CardContent>
 

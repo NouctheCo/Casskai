@@ -103,6 +103,15 @@ export const COUNTRY_TAX_CONFIGS: Record<string, CountryTaxConfig> = {
         forms: ['2050', '2051', '2052', '2053', '2054', '2055', '2056', '2057', '2058', '2059']
       },
       {
+        id: 'IS',
+        name: 'IS - Impôt sur les Sociétés',
+        description: 'Déclaration annuelle d\'impôt sur les sociétés (intégrée à la liasse)',
+        frequency: 'annual',
+        deadline: '15 mai N+1',
+        mandatory: true,
+        forms: ['2065', '2033']
+      },
+      {
         id: 'CVAE',
         name: 'CVAE 1330-CVAE',
         description: 'Cotisation sur la Valeur Ajoutée des Entreprises',
@@ -111,12 +120,33 @@ export const COUNTRY_TAX_CONFIGS: Record<string, CountryTaxConfig> = {
         mandatory: true,
         threshold: 500000,
         forms: ['1330-CVAE']
+      },
+      {
+        id: 'CFE',
+        name: 'CFE 1447-C',
+        description: 'Cotisation Foncière des Entreprises',
+        frequency: 'annual',
+        deadline: '15 décembre',
+        mandatory: true,
+        forms: ['1447-C']
+      },
+      {
+        id: 'DSN',
+        name: 'DSN - Déclaration Sociale Nominative',
+        description: 'Déclaration mensuelle des cotisations sociales',
+        frequency: 'monthly',
+        deadline: '5 ou 15 du mois suivant',
+        mandatory: true,
+        forms: ['DSN']
       }
     ],
     deadlines: {
       CA3: '19th-next-month',
       LIASSE_FISCALE: 'may-15',
-      CVAE: 'may-15'
+      IS: 'may-15',
+      CVAE: 'may-15',
+      CFE: 'december-15',
+      DSN: '5th-or-15th-next-month'
     },
     languages: ['fr-FR']
   },
