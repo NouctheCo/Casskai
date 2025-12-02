@@ -70,7 +70,7 @@ const QUICK_START_STEP_CONFIGS: QuickStartStepConfig[] = [
 ];
 
 const HELP_LINKS = [
-  { id: 'documentation', icon: '📚', url: 'https://docs.casskai.app' },
+  { id: 'documentation', icon: '📚', url: '/help' },
   { id: 'support', icon: '💬', url: 'mailto:support@casskai.app' },
   { id: 'tutorials', icon: '🎥', url: 'https://youtube.com/@casskai' }
 ] as const;
@@ -198,23 +198,37 @@ const HelpSection: React.FC<{
   title: string;
   description: string;
   links: Array<{ id: string; label: string; url: string; icon: string }>;
-}> = ({ title, description, links }) => (
-  <Card data-tour="help-section">
-    <CardHeader>
-      <CardTitle>{title}</CardTitle>
-      <CardDescription>{description}</CardDescription>
-    </CardHeader>
-    <CardContent>
-      <div className="flex flex-wrap gap-3">
-        {links.map((link) => (
-          <Button key={link.id} variant="outline" onClick={() => window.open(link.url, '_blank')}>
-            {link.icon} {link.label}
-          </Button>
-        ))}
-      </div>
-    </CardContent>
-  </Card>
-);
+  navigate: ReturnType<typeof useNavigate>;
+}> = ({ title, description, links, navigate }) => {
+  const handleLinkClick = (url: string) => {
+    // Navigation intelligente : liens internes = même onglet, externes = nouvel onglet
+    if (url.startsWith('/')) {
+      // Lien interne : navigation React Router
+      navigate(url);
+    } else {
+      // Lien externe (mailto:, https://) : nouvel onglet
+      window.open(url, '_blank');
+    }
+  };
+
+  return (
+    <Card data-tour="help-section">
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-wrap gap-3">
+          {links.map((link) => (
+            <Button key={link.id} variant="outline" onClick={() => handleLinkClick(link.url)}>
+              {link.icon} {link.label}
+            </Button>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 const StatsGrid: React.FC<{
   stats: Array<{ id: string; label: string; value: string; icon: string }>;
@@ -313,7 +327,7 @@ export function WelcomeDashboard({ companyName, userName }: WelcomeDashboardProp
         onStepClick={handleStepClick}
         title={quickStartTitle}
       />
-      <HelpSection title={helpTitle} description={helpDescription} links={helpLinks} />
+      <HelpSection title={helpTitle} description={helpDescription} links={helpLinks} navigate={navigate} />
       <StatsGrid stats={stats} emptyLabel={statsEmptyLabel} />
     </div>
   );

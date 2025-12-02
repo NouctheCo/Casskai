@@ -175,6 +175,7 @@ export class BudgetService {
       if (budgetData.categories.length > 0) {
         const categoriesData = budgetData.categories.map(cat => ({
           budget_id: budget.id,
+          account_id: cat.account_id, // Lien vers chart_of_accounts
           category: cat.category,
           subcategory: cat.subcategory,
           category_type: cat.category_type,
@@ -274,6 +275,7 @@ export class BudgetService {
         if (budgetData.categories.length > 0) {
           const categoriesData = budgetData.categories.map(cat => ({
             budget_id: budgetId,
+            account_id: cat.account_id, // Lien vers chart_of_accounts
             category: cat.category,
             subcategory: cat.subcategory,
             category_type: cat.category_type,

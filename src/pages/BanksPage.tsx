@@ -361,11 +361,18 @@ const BanksPageNew: React.FC = () => {
               {bankAccounts.length === 0 ? (
                 <option value="">{t('banking.import.noAccount')}</option>
               ) : (
-                bankAccounts.map((account) => (
-                  <option key={account.id} value={account.id}>
-                    {account.bank_name} - {account.account_name} ({account.account_number})
-                  </option>
-                ))
+                bankAccounts.map((account) => {
+                  // Formater l'affichage de l'IBAN
+                  const ibanDisplay = account.iban
+                    ? `(•••• ${account.iban.replace(/\s/g, '').slice(-4)})`
+                    : '(⚠️ IBAN non configuré)';
+
+                  return (
+                    <option key={account.id} value={account.id}>
+                      {account.bank_name} - {account.account_name} {ibanDisplay}
+                    </option>
+                  );
+                })
               )}
             </select>
           </div>
@@ -511,7 +518,7 @@ const BanksPageNew: React.FC = () => {
 
       {/* Tab Content: SEPA Transfers */}
       {activeTab === 'sepa-transfers' && (
-        <SepaPaymentGenerator />
+        <SepaPaymentGenerator onNavigateToAccounts={() => setActiveTab('accounts')} />
       )}
     </div>
   );

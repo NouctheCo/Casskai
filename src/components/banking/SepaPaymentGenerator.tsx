@@ -21,9 +21,10 @@ import { motion } from 'framer-motion';
 
 interface SepaPaymentGeneratorProps {
   onClose?: () => void;
+  onNavigateToAccounts?: () => void;
 }
 
-export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onClose }) => {
+export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onClose, onNavigateToAccounts }) => {
   const { currentCompany } = useAuth();
   const { t } = useTranslation();
 
@@ -213,14 +214,26 @@ export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onCl
                 </SelectContent>
               </Select>
               {bankAccounts.length === 0 && (
-                <div className="mt-2 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-                  <p className="text-sm text-amber-900 dark:text-amber-100 flex items-center gap-2 mb-2">
+                <div className="mt-2 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg space-y-3">
+                  <p className="text-sm text-amber-900 dark:text-amber-100 flex items-center gap-2">
                     <AlertCircle className="h-4 w-4" />
                     Aucun compte bancaire avec IBAN configuré
                   </p>
                   <p className="text-xs text-amber-700 dark:text-amber-200">
-                    Veuillez ajouter un compte bancaire dans l'onglet "Comptes" pour générer des virements SEPA
+                    Pour générer des virements SEPA, vous devez d'abord configurer un compte bancaire avec IBAN et BIC.
                   </p>
+                  {onNavigateToAccounts && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={onNavigateToAccounts}
+                      className="w-full border-amber-300 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/40"
+                    >
+                      <CreditCard className="h-4 w-4 mr-2" />
+                      Configurer un compte bancaire
+                    </Button>
+                  )}
                 </div>
               )}
             </div>

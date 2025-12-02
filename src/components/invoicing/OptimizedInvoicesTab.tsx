@@ -22,6 +22,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 
 import { Textarea } from '@/components/ui/textarea';
 
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
 import { useToast } from '@/components/ui/use-toast';
 
 import { useAuth } from '@/contexts/AuthContext';
@@ -856,23 +858,45 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
           </Button>
 
-          <Button 
+          <TooltipProvider>
 
-            onClick={handleBulkExport} 
+            <Tooltip>
 
-            variant="outline" 
+              <TooltipTrigger asChild>
 
-            size="sm"
+                <Button
 
-            disabled={filteredInvoices.length === 0}
+                  onClick={handleBulkExport}
 
-          >
+                  variant="outline"
 
-            <Download className="w-4 h-4 mr-2" />
+                  size="sm"
 
-            Exporter PDF
+                  disabled={filteredInvoices.length === 0}
 
-          </Button>
+                >
+
+                  <Download className="w-4 h-4 mr-2" />
+
+                  Exporter PDF
+
+                </Button>
+
+              </TooltipTrigger>
+
+              {filteredInvoices.length === 0 && (
+
+                <TooltipContent>
+
+                  <p>Créez d'abord une facture pour exporter en PDF</p>
+
+                </TooltipContent>
+
+              )}
+
+            </Tooltip>
+
+          </TooltipProvider>
 
           <Button onClick={handleNewInvoice} className="bg-blue-600 hover:bg-blue-700">
 

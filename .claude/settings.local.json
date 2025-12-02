@@ -158,7 +158,8 @@
       "Bash(del /F /Q \"DEPOT_APP\\1_Code_Source\\casskai-app-v1.0.0.zip\")",
       "Bash(git reflog:*)",
       "Bash(git gc:*)",
-      "Bash(git remote add:*)"
+      "Bash(git remote add:*)",
+      "Bash(dos2unix:*)"
     ],
     "deny": []
   }

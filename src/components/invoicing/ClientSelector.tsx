@@ -45,11 +45,13 @@ export const ClientSelector: React.FC<ClientSelectorProps> = ({
         setLoading(true);
         const clientsData = await thirdPartiesService.getThirdParties('customer');
         setClients(clientsData || []);
+        // ✅ Liste vide = comportement normal (pas d'erreur affichée)
       } catch (error) {
         console.error('Error fetching clients:', error);
+        // ⚠️ Afficher l'erreur uniquement pour les vraies erreurs réseau/serveur
         toast({
           title: 'Erreur',
-          description: 'Impossible de charger la liste des clients',
+          description: 'Impossible de charger la liste des clients. Vérifiez votre connexion.',
           variant: 'destructive'
         });
         setClients([]);

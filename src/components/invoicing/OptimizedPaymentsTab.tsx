@@ -1057,15 +1057,105 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
 
 
   const handleExportPayments = () => {
+    // Vérifier s'il y a des paiements à exporter
+    if (payments.length === 0) {
+      toast({
+        title: "Aucun paiement",
+        description: "Il n'y a aucun paiement à exporter.",
+        variant: "default"
+      });
+      return;
+    }
 
-    toast({
+    try {
+      // Préparer les données pour l'export CSV
+      const csvHeaders = [
+        'Référence',
+        'Client',
+        'Facture',
+        'Date',
+        'Montant (€)',
+        'Méthode',
+        'Type',
+        'Statut',
+        'Description'
+      ];
 
-      title: "Export en cours",
+      // Fonction pour formater la méthode de paiement
+      const formatMethod = (method) => {
+        const methods = {
+          'card': 'Carte',
+          'bank_transfer': 'Virement',
+          'cash': 'Espèces',
+          'check': 'Chèque',
+          'sepa': 'SEPA'
+        };
+        return methods[method] || method;
+      };
 
-      description: "Génération du fichier d'export des paiements..."
+      // Fonction pour formater le type
+      const formatType = (type) => {
+        return type === 'income' ? 'Encaissement' : 'Décaissement';
+      };
 
-    });
+      // Fonction pour formater le statut
+      const formatStatus = (status) => {
+        const statuses = {
+          'pending': 'En attente',
+          'completed': 'Complété',
+          'failed': 'Échoué',
+          'cancelled': 'Annulé'
+        };
+        return statuses[status] || status;
+      };
 
+      // Convertir les paiements en lignes CSV
+      const csvRows = payments.map(payment => [
+        payment.reference || '',
+        payment.clientName || '',
+        payment.invoiceNumber || '',
+        new Date(payment.date).toLocaleDateString('fr-FR'),
+        payment.amount.toFixed(2),
+        formatMethod(payment.method),
+        formatType(payment.type),
+        formatStatus(payment.status),
+        (payment.description || '').replace(/"/g, '""') // Échapper les guillemets
+      ]);
+
+      // Créer le contenu CSV
+      const csvContent = [
+        csvHeaders.join(';'),
+        ...csvRows.map(row => row.map(cell => `"${cell}"`).join(';'))
+      ].join('\n');
+
+      // Ajouter le BOM UTF-8 pour Excel
+      const BOM = '\uFEFF';
+      const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+
+      // Créer un lien de téléchargement
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      const date = new Date().toISOString().split('T')[0];
+
+      link.href = url;
+      link.download = `paiements_${date}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Export réussi",
+        description: `${payments.length} paiement(s) exporté(s) avec succès.`
+      });
+    } catch (error) {
+      console.error('Error exporting payments:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'exporter les paiements.",
+        variant: "destructive"
+      });
+    }
   };
 
 
