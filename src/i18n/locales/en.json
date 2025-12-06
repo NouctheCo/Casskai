@@ -557,7 +557,9 @@
     "stages": {
       "prospecting": "Prospecting",
       "prospect": "Prospect",
+      "lead": "Lead",
       "qualification": "Qualification",
+      "qualified": "Qualified",
       "proposal": "Proposal",
       "negotiation": "Negotiation",
       "closing": "Closing",
@@ -627,6 +629,7 @@
     },
     "opportunity": {
       "new": "New opportunity",
+      "noClients": "No clients available",
       "fields": {
         "title": "Title",
         "client": "Client",
