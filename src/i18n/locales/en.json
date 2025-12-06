@@ -573,12 +573,162 @@
     },
     "actionStatus": {
       "pending": "Pending",
+      "planned": "Planned",
       "completed": "Completed",
       "cancelled": "Cancelled"
     },
     "clientStatus": {
       "active": "Active",
-      "inactive": "Inactive"
+      "inactive": "Inactive",
+      "prospect": "Prospect",
+      "lost": "Lost"
+    },
+    "clientSize": {
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large",
+      "enterprise": "Enterprise"
+    },
+    "actionTypes": {
+      "call": "Call",
+      "email": "Email",
+      "meeting": "Meeting",
+      "task": "Task",
+      "note": "Note",
+      "demo": "Demo",
+      "proposal": "Proposal"
+    },
+    "clientsManagement": {
+      "title": "Client Management",
+      "clients": "Clients",
+      "contacts": "Contacts",
+      "addContact": "Add contact",
+      "addClient": "Add client"
+    },
+    "filters": {
+      "title": "Filters",
+      "search": "Search",
+      "searchPlaceholder": "Search...",
+      "searchActions": "Search actions...",
+      "status": "Status",
+      "allStatuses": "All statuses",
+      "industry": "Industry",
+      "allIndustries": "All industries",
+      "size": "Size",
+      "allSizes": "All sizes",
+      "type": "Type",
+      "allTypes": "All types",
+      "priority": "Priority",
+      "allPriorities": "All priorities",
+      "dateFrom": "Start date",
+      "dateTo": "End date",
+      "clear": "Clear"
+    },
+    "clientsTable": {
+      "company": "Company",
+      "industry": "Industry",
+      "size": "Size",
+      "status": "Status",
+      "location": "Location",
+      "contacts": "Contacts",
+      "revenue": "Revenue"
+    },
+    "contactsTable": {
+      "name": "Name",
+      "company": "Company",
+      "position": "Position",
+      "email": "Email",
+      "phone": "Phone",
+      "created": "Created"
+    },
+    "contactForm": {
+      "createTitle": "New Contact",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "phone": "Phone",
+      "position": "Position",
+      "client": "Client",
+      "selectClient": "Select a client"
+    },
+    "clientForm": {
+      "createTitle": "New Client",
+      "editTitle": "Edit Client",
+      "companyName": "Company name",
+      "companyNamePlaceholder": "Company name",
+      "industry": "Industry",
+      "size": "Size",
+      "status": "Status",
+      "city": "City",
+      "website": "Website",
+      "address": "Address",
+      "notes": "Notes"
+    },
+    "actions": {
+      "title": "Commercial Actions",
+      "description": "Manage your actions and customer interactions",
+      "create": "New Action",
+      "overdue": "Overdue",
+      "stats": {
+        "total": "Total Actions",
+        "completed": "Completed",
+        "planned": "Planned",
+        "overdue": "Overdue"
+      }
+    },
+    "actionsTable": {
+      "type": "Type",
+      "title": "Title",
+      "client": "Client",
+      "contact": "Contact",
+      "status": "Status",
+      "priority": "Priority",
+      "dueDate": "Due date",
+      "assigned": "Assigned to"
+    },
+    "actionForm": {
+      "createTitle": "New Action",
+      "editTitle": "Edit Action",
+      "type": "Type",
+      "status": "Status",
+      "title": "Title",
+      "description": "Description",
+      "client": "Client",
+      "selectClient": "Select a client",
+      "noClient": "No client",
+      "contact": "Contact",
+      "selectContact": "Select a contact",
+      "noContact": "No contact",
+      "opportunity": "Opportunity",
+      "selectOpportunity": "Select an opportunity",
+      "noOpportunity": "No opportunity",
+      "priority": "Priority",
+      "dueDate": "Due date",
+      "assignedTo": "Assigned to",
+      "outcome": "Outcome"
+    },
+    "opportunities": {
+      "title": "Opportunities",
+      "description": "Manage your sales pipeline",
+      "create": "New Opportunity",
+      "add": "Add opportunity",
+      "nextAction": "Next Action"
+    },
+    "opportunityForm": {
+      "createTitle": "New Opportunity",
+      "editTitle": "Edit Opportunity",
+      "title": "Title",
+      "stage": "Stage",
+      "client": "Client",
+      "selectClient": "Select a client",
+      "contact": "Contact",
+      "selectContact": "Select a contact",
+      "amount": "Amount",
+      "probability": "Probability",
+      "expectedCloseDate": "Expected close date",
+      "priority": "Priority",
+      "description": "Description",
+      "notes": "Notes"
     },
     "client": {
       "new": "New client",

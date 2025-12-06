@@ -573,12 +573,162 @@
     },
     "actionStatus": {
       "pending": "Pendiente",
+      "planned": "Planificada",
       "completed": "Completada",
       "cancelled": "Cancelada"
     },
     "clientStatus": {
       "active": "Activo",
-      "inactive": "Inactivo"
+      "inactive": "Inactivo",
+      "prospect": "Prospecto",
+      "lost": "Perdido"
+    },
+    "clientSize": {
+      "small": "Pequeña",
+      "medium": "Mediana",
+      "large": "Grande",
+      "enterprise": "Empresa"
+    },
+    "actionTypes": {
+      "call": "Llamada",
+      "email": "Correo",
+      "meeting": "Reunión",
+      "task": "Tarea",
+      "note": "Nota",
+      "demo": "Demostración",
+      "proposal": "Propuesta"
+    },
+    "clientsManagement": {
+      "title": "Gestión de Clientes",
+      "clients": "Clientes",
+      "contacts": "Contactos",
+      "addContact": "Agregar contacto",
+      "addClient": "Agregar cliente"
+    },
+    "filters": {
+      "title": "Filtros",
+      "search": "Buscar",
+      "searchPlaceholder": "Buscar...",
+      "searchActions": "Buscar acciones...",
+      "status": "Estado",
+      "allStatuses": "Todos los estados",
+      "industry": "Sector",
+      "allIndustries": "Todos los sectores",
+      "size": "Tamaño",
+      "allSizes": "Todos los tamaños",
+      "type": "Tipo",
+      "allTypes": "Todos los tipos",
+      "priority": "Prioridad",
+      "allPriorities": "Todas las prioridades",
+      "dateFrom": "Fecha de inicio",
+      "dateTo": "Fecha de fin",
+      "clear": "Limpiar"
+    },
+    "clientsTable": {
+      "company": "Empresa",
+      "industry": "Sector",
+      "size": "Tamaño",
+      "status": "Estado",
+      "location": "Ubicación",
+      "contacts": "Contactos",
+      "revenue": "Ingresos"
+    },
+    "contactsTable": {
+      "name": "Nombre",
+      "company": "Empresa",
+      "position": "Puesto",
+      "email": "Correo",
+      "phone": "Teléfono",
+      "created": "Creado"
+    },
+    "contactForm": {
+      "createTitle": "Nuevo Contacto",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Correo",
+      "phone": "Teléfono",
+      "position": "Puesto",
+      "client": "Cliente",
+      "selectClient": "Seleccionar un cliente"
+    },
+    "clientForm": {
+      "createTitle": "Nuevo Cliente",
+      "editTitle": "Editar Cliente",
+      "companyName": "Nombre de la empresa",
+      "companyNamePlaceholder": "Nombre de la empresa",
+      "industry": "Sector",
+      "size": "Tamaño",
+      "status": "Estado",
+      "city": "Ciudad",
+      "website": "Sitio web",
+      "address": "Dirección",
+      "notes": "Notas"
+    },
+    "actions": {
+      "title": "Acciones Comerciales",
+      "description": "Gestiona tus acciones e interacciones con clientes",
+      "create": "Nueva Acción",
+      "overdue": "Atrasado",
+      "stats": {
+        "total": "Total Acciones",
+        "completed": "Completadas",
+        "planned": "Planificadas",
+        "overdue": "Atrasadas"
+      }
+    },
+    "actionsTable": {
+      "type": "Tipo",
+      "title": "Título",
+      "client": "Cliente",
+      "contact": "Contacto",
+      "status": "Estado",
+      "priority": "Prioridad",
+      "dueDate": "Fecha límite",
+      "assigned": "Asignado a"
+    },
+    "actionForm": {
+      "createTitle": "Nueva Acción",
+      "editTitle": "Editar Acción",
+      "type": "Tipo",
+      "status": "Estado",
+      "title": "Título",
+      "description": "Descripción",
+      "client": "Cliente",
+      "selectClient": "Seleccionar un cliente",
+      "noClient": "Sin cliente",
+      "contact": "Contacto",
+      "selectContact": "Seleccionar un contacto",
+      "noContact": "Sin contacto",
+      "opportunity": "Oportunidad",
+      "selectOpportunity": "Seleccionar una oportunidad",
+      "noOpportunity": "Sin oportunidad",
+      "priority": "Prioridad",
+      "dueDate": "Fecha límite",
+      "assignedTo": "Asignado a",
+      "outcome": "Resultado"
+    },
+    "opportunities": {
+      "title": "Oportunidades",
+      "description": "Gestiona tu pipeline de ventas",
+      "create": "Nueva Oportunidad",
+      "add": "Agregar oportunidad",
+      "nextAction": "Próxima Acción"
+    },
+    "opportunityForm": {
+      "createTitle": "Nueva Oportunidad",
+      "editTitle": "Editar Oportunidad",
+      "title": "Título",
+      "stage": "Etapa",
+      "client": "Cliente",
+      "selectClient": "Seleccionar un cliente",
+      "contact": "Contacto",
+      "selectContact": "Seleccionar un contacto",
+      "amount": "Monto",
+      "probability": "Probabilidad",
+      "expectedCloseDate": "Fecha de cierre prevista",
+      "priority": "Prioridad",
+      "description": "Descripción",
+      "notes": "Notas"
     },
     "client": {
       "new": "Nuevo cliente",
