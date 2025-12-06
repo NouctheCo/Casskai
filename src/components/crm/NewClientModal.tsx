@@ -319,10 +319,10 @@ export const NewClientModal: React.FC<NewClientModalProps> = ({
               onClick={() => onOpenChange(false)}
               disabled={loading}
             >
-              {t('common.actions.cancel')}
+              {t('common.action.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? t('common.actions.saving') : t('common.actions.create')}
+              {loading ? t('common.action.saving') : t('common.action.create')}
             </Button>
           </DialogFooter>
         </form>

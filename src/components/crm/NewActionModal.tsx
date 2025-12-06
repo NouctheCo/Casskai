@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ClientSelector } from '@/components/invoicing/ClientSelector';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
 import { Calendar, Phone, Mail, Users, CheckSquare } from 'lucide-react';
 import { devLogger } from '@/utils/devLogger';
@@ -48,11 +49,6 @@ interface ActionFormData {
   notes?: string;
 }
 
-interface ThirdParty {
-  id: string;
-  name: string;
-}
-
 interface Opportunity {
   id: string;
   title: string;
@@ -74,9 +70,7 @@ export const NewActionModal: React.FC<NewActionModalProps> = ({
   const { t } = useTranslation();
   const { currentCompany } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [clients, setClients] = useState<ThirdParty[]>([]);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
-  const [loadingClients, setLoadingClients] = useState(false);
   const [loadingOpportunities, setLoadingOpportunities] = useState(false);
 
   const [formData, setFormData] = useState<ActionFormData>({
@@ -91,10 +85,9 @@ export const NewActionModal: React.FC<NewActionModalProps> = ({
     notes: '',
   });
 
-  // Charger clients et opportunités
+  // Charger les opportunités au démarrage
   useEffect(() => {
     if (currentCompany?.id) {
-      loadClients();
       loadOpportunities();
     }
   }, [currentCompany?.id]);
@@ -108,27 +101,6 @@ export const NewActionModal: React.FC<NewActionModalProps> = ({
       loadOpportunities();
     }
   }, [formData.third_party_id]);
-
-  const loadClients = async () => {
-    if (!currentCompany?.id) return;
-
-    setLoadingClients(true);
-    try {
-      const { data, error } = await supabase
-        .from('third_parties')
-        .select('id, name')
-        .eq('company_id', currentCompany.id)
-        .eq('is_active', true)
-        .order('name', { ascending: true });
-
-      if (error) throw error;
-      setClients(data || []);
-    } catch (error) {
-      devLogger.error('Error loading clients:', error);
-    } finally {
-      setLoadingClients(false);
-    }
-  };
 
   const loadOpportunities = async (thirdPartyId?: string) => {
     if (!currentCompany?.id) return;
@@ -302,28 +274,13 @@ export const NewActionModal: React.FC<NewActionModalProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="third_party_id">{t('crm.action.fields.client')}</Label>
-                <Select
-                  value={formData.third_party_id}
-                  onValueChange={(value) => handleChange('third_party_id', value)}
-                  disabled={loadingClients}
-                >
-                  <SelectTrigger id="third_party_id">
-                    <SelectValue placeholder={
-                      loadingClients
-                        ? t('common.loading')
-                        : t('crm.action.placeholders.selectClient')
-                    } />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none" disabled>{t('crm.action.noClient')}</SelectItem>
-                    {clients.map((client) => (
-                      <SelectItem key={client.id} value={client.id}>
-                        {client.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <ClientSelector
+                  value={formData.third_party_id || ''}
+                  onChange={(clientId) => handleChange('third_party_id', clientId)}
+                  label={t('crm.action.fields.client')}
+                  placeholder={t('crm.action.placeholders.selectClient')}
+                  required={false}
+                />
               </div>
 
               <div>
@@ -418,10 +375,10 @@ export const NewActionModal: React.FC<NewActionModalProps> = ({
               onClick={() => onOpenChange(false)}
               disabled={loading}
             >
-              {t('common.actions.cancel')}
+              {t('common.action.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? t('common.actions.saving') : t('common.actions.create')}
+              {loading ? t('common.action.saving') : t('common.action.create')}
             </Button>
           </DialogFooter>
         </form>

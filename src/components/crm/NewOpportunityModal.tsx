@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ClientSelector } from '@/components/invoicing/ClientSelector';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
 import { Target, Calendar, DollarSign, TrendingUp } from 'lucide-react';
 import { devLogger } from '@/utils/devLogger';
@@ -46,12 +47,6 @@ interface OpportunityFormData {
   notes?: string;
 }
 
-interface ThirdParty {
-  id: string;
-  name: string;
-  type: string;
-}
-
 export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
   open,
   onOpenChange,
@@ -60,8 +55,6 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
   const { t } = useTranslation();
   const { currentCompany } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [clients, setClients] = useState<ThirdParty[]>([]);
-  const [loadingClients, setLoadingClients] = useState(false);
 
   const [formData, setFormData] = useState<OpportunityFormData>({
     title: '',
@@ -73,40 +66,6 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
     expected_close_date: '',
     notes: '',
   });
-
-  // Charger la liste des clients/prospects
-  useEffect(() => {
-    if (currentCompany?.id) {
-      loadClients();
-    }
-  }, [currentCompany?.id]);
-
-  const loadClients = async () => {
-    if (!currentCompany?.id) return;
-
-    setLoadingClients(true);
-    try {
-      const { data, error } = await supabase
-        .from('third_parties')
-        .select('id, name, type')
-        .eq('company_id', currentCompany.id)
-        .eq('is_active', true)
-        .in('type', ['customer'])
-        .order('name', { ascending: true });
-
-      if (error) {
-        // Only log error, don't show toast for empty data
-        devLogger.error('Error loading clients:', error);
-      }
-      setClients(data || []);
-    } catch (error) {
-      devLogger.error('Error loading clients:', error);
-      // Don't show error toast - empty client list is normal for new companies
-      setClients([]);
-    } finally {
-      setLoadingClients(false);
-    }
-  };
 
   const handleChange = (field: keyof OpportunityFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -211,34 +170,13 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="third_party_id">
-                {t('crm.opportunity.fields.client')} <span className="text-red-500">*</span>
-              </Label>
-              <Select
+              <ClientSelector
                 value={formData.third_party_id}
-                onValueChange={(value) => handleChange('third_party_id', value)}
-                disabled={loadingClients}
-              >
-                <SelectTrigger id="third_party_id">
-                  <SelectValue placeholder={
-                    loadingClients
-                      ? t('common.loading')
-                      : t('crm.opportunity.placeholders.selectClient')
-                  } />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.name} ({t(`crm.client.types.${client.type}`)})
-                    </SelectItem>
-                  ))}
-                  {clients.length === 0 && !loadingClients && (
-                    <div className="px-2 py-4 text-sm text-gray-500 dark:text-gray-400 text-center">
-                      {t('crm.opportunity.noClients')}
-                    </div>
-                  )}
-                </SelectContent>
-              </Select>
+                onChange={(clientId) => handleChange('third_party_id', clientId)}
+                label={t('crm.opportunity.fields.client')}
+                placeholder={t('crm.opportunity.placeholders.selectClient')}
+                required
+              />
             </div>
           </div>
 
@@ -375,10 +313,10 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
               onClick={() => onOpenChange(false)}
               disabled={loading}
             >
-              {t('common.actions.cancel')}
+              {t('common.action.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? t('common.actions.saving') : t('common.actions.create')}
+              {loading ? t('common.action.saving') : t('common.action.create')}
             </Button>
           </DialogFooter>
         </form>
