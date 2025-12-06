@@ -43,7 +43,7 @@ const AGING_BUCKETS = [
 ];
 
 export const AgingAnalysisTab: React.FC<AgingAnalysisTabProps> = ({ companyId }) => {
-  const { t } = useTranslation();
+  const { t: _t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [buckets, setBuckets] = useState<AgingBucket[]>([]);
   const [viewMode, setViewMode] = useState<'both' | 'receivables' | 'payables'>('both');

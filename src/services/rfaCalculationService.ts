@@ -165,7 +165,7 @@ export const rfaCalculationService = {
     const endDate = new Date(contract.end_date);
     const today = new Date();
     const yearStart = new Date(today.getFullYear(), 0, 1);
-    const yearEnd = new Date(today.getFullYear(), 11, 31);
+    const _yearEnd = new Date(today.getFullYear(), 11, 31);
 
     // 2. Récupérer les factures du client sur la période du contrat
     const { data: invoices } = await supabase

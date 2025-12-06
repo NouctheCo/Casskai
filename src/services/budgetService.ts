@@ -15,15 +15,12 @@ import { supabase } from '@/lib/supabase';
 import type {
   Budget,
   BudgetCategory,
-  BudgetAssumption,
   BudgetFormData,
-  BudgetAnalysis,
   BudgetTemplate,
   BudgetImportData,
   BudgetFilter,
   BudgetValidationResult,
   BudgetStatus,
-  CategoryType,
   BudgetVarianceAnalysis
 } from '@/types/budget.types';
 

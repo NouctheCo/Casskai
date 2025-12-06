@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import {
-  Archive, Search, Filter, Eye, Download, AlertCircle,
+  Archive, Search, Eye, Download, AlertCircle,
   Calendar, HardDrive, FileText, User, Clock, CheckCircle
 } from 'lucide-react';
 import { hrDocumentTemplatesService } from '@/services/hrDocumentTemplatesService';

@@ -63,11 +63,11 @@ class MigrationService {
       const companiesTableExists = tablesData && tablesData.length > 0;
 
       // Vérifier si la fonction get_dashboard_stats existe
-      let functionsData = false;
+      let _functionsData = false;
       let functionsError = null;
       try {
         await supabase.rpc('get_dashboard_stats', { p_company_id: '00000000-0000-0000-0000-000000000000' });
-        functionsData = true;
+        _functionsData = true;
       } catch (error: any) {
         functionsError = error;
       }
@@ -194,7 +194,7 @@ class MigrationService {
     ];
 
     for (const tableName of requiredTables) {
-      const { data, error } = await supabase
+      const { data: _data, error } = await supabase
         .from(tableName)
         .select('*')
         .limit(1);

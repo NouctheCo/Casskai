@@ -907,7 +907,7 @@ const ContractsPage: React.FC = () => {
 
   // Composant calculs RFA
 
-  const RFACalculationsList: React.FC = () => (
+  const _RFACalculationsList: React.FC = () => (
 
     <div className="space-y-4">
 

@@ -237,30 +237,33 @@ export class AccountDeletionService {
       // Générer un export FEC pour chaque entreprise
       const exportPromises = (userCompanies || []).map(async (uc: any) => {
         const currentYear = new Date().getFullYear();
-        const startDate = new Date(currentYear, 0, 1);
-        const endDate = new Date(currentYear, 11, 31);
+        const startDate = new Date(currentYear, 0, 1).toISOString().split('T')[0];
+        const endDate = new Date(currentYear, 11, 31).toISOString().split('T')[0];
 
-        return fecExportService.generateFECExport({
-          companyId: uc.company_id,
-          year: currentYear,
-          startDate,
-          endDate,
-          includeDocuments: true
-        });
+        try {
+          const fecData = await fecExportService.generateFECExport(
+            uc.company_id,
+            startDate,
+            endDate
+          );
+          return { success: true, data: fecData, companyId: uc.company_id };
+        } catch (_err) {
+          return { success: false, data: [], companyId: uc.company_id };
+        }
       });
 
       const exports = await Promise.all(exportPromises);
 
-      // Mettre à jour la demande avec les liens d'export
-      const exportUrls = exports
-        .filter(exp => exp.success)
-        .map(exp => exp.fileUrl)
+      // Mettre à jour la demande avec les liens d'export (IDs des exports)
+      const exportIds = exports
+        .filter(exp => exp.success && exp.data.length > 0)
+        .map(exp => exp.companyId)
         .join(',');
 
       await supabase
         .from('user_deletion_requests')
         .update({
-          export_download_url: exportUrls,
+          export_download_url: exportIds,
           export_generated_at: new Date().toISOString()
         })
         .eq('id', requestId);

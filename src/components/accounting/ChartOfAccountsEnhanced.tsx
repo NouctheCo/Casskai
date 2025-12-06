@@ -301,7 +301,7 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
         level = 0;
       }
 
-      const { data, error } = await supabase
+      const { data: _data, error } = await supabase
         .from('chart_of_accounts')
         .insert({
           company_id: companyId,
@@ -310,7 +310,7 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
           account_type: accountType,
           account_class: accountClass,
           parent_account_id: realParentId,
-          level: level,
+          level,
           is_detail_account: !!parentAccount,
           is_active: true
         })

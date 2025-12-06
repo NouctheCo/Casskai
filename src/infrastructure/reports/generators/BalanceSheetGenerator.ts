@@ -2,7 +2,7 @@ import { BaseReportGenerator } from '../../../domain/reports/services/IReportGen
 
 import { Report, ReportParameters, ReportResult } from '../../../domain/reports/entities/Report';
 
-import { FinancialStatementData, AssetCategory, LiabilityCategory } from '../../../domain/reports/entities/FinancialReport';
+import { FinancialStatementData } from '../../../domain/reports/entities/FinancialReport';
 
 import { IReportRepository } from '../../../domain/reports/repositories/IReportRepository';
 

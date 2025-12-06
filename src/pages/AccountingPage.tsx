@@ -22,8 +22,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { Button } from '@/components/ui/button';
 
-import { Progress } from '@/components/ui/progress';
-
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 import { toastError, toastSuccess } from '@/lib/toast-helpers';
@@ -54,8 +52,6 @@ import {
 
   ArrowDownRight,
 
-  PieChart,
-
   Activity,
 
   Plus,
@@ -65,8 +61,6 @@ import {
   RefreshCw,
 
   Download,
-
-  CheckCircle,
 
   Upload,
 
@@ -200,9 +194,9 @@ const AccountingKPICard: React.FC<AccountingKPICardProps> = ({ title, value, ico
 
         <div className="space-y-2">
 
-          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 dark:text-gray-400">{title}</h3>
+          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</h3>
 
-          <div className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
+          <div className="text-2xl font-bold text-gray-900 dark:text-white">
 
             {value}
 
@@ -210,7 +204,7 @@ const AccountingKPICard: React.FC<AccountingKPICardProps> = ({ title, value, ico
 
           {description && (
 
-            <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400">{description}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{description}</p>
 
           )}
 
@@ -319,13 +313,13 @@ const QuickActions: React.FC<QuickActionsProps> = ({ onNewEntry, onViewReports, 
 
                 <div className="flex-1">
 
-                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white text-sm">
+                  <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
 
                     {action.title}
 
                   </h4>
 
-                  <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-400">
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
 
                     {action.description}
 
@@ -388,7 +382,7 @@ const RecentAccountingActivities = () => {
 
           {activities.length === 0 ? (
 
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400 dark:text-gray-400">
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
 
               <Activity className="w-12 h-12 mx-auto mb-3 opacity-30" />
 
@@ -442,13 +436,13 @@ const RecentAccountingActivities = () => {
 
               <div className="flex-1">
 
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 dark:text-white">
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
 
                   {activity.description}
 
                 </p>
 
-                <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
 
                   Il y a {activity.time}
 
@@ -504,7 +498,7 @@ export default function AccountingPageOptimized() {
 
 
 
-  const accountingService = AccountingService.getInstance();
+  const _accountingService = AccountingService.getInstance();
 
 
 
@@ -697,7 +691,7 @@ export default function AccountingPageOptimized() {
 
         <div>
 
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white flex items-center space-x-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center space-x-2">
 
             <Calculator className="w-8 h-8 text-blue-500" />
 
@@ -705,7 +699,7 @@ export default function AccountingPageOptimized() {
 
           </h1>
 
-          <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400 mt-2">
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
 
             {t('accounting.subtitle', 'Gérez vos écritures comptables et analyses financières')}
 

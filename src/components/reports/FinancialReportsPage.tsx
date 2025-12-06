@@ -21,15 +21,12 @@ import {
 } from '@/services/financialReportsService';
 import {
   FileText,
-  BarChart3,
   TrendingUp,
   Calculator,
-  Download,
   RefreshCw,
   Calendar,
   CheckCircle2,
   AlertCircle,
-  DollarSign,
   Building2
 } from 'lucide-react';
 import { format, startOfYear, endOfYear, subMonths, startOfMonth, endOfMonth } from 'date-fns';

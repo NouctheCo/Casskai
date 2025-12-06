@@ -64,7 +64,7 @@ const authenticate = async (req: AuthenticatedRequest, res: Response, next: Next
     };
 
     next();
-  } catch (error) {
+  } catch (_error) {
     res.status(401).json({
       success: false,
       error: 'Invalid authentication',
@@ -137,7 +137,7 @@ router.post(
   authenticate,
   extractCompanyId,
   validateSubmissionRequest,
-  handleAPIResponse(async (req: AuthenticatedRequest, res: Response) => {
+  handleAPIResponse(async (req: AuthenticatedRequest, _res: Response) => {
     const { invoice_id, format, channel, async, validate, archive } = req.body;
     const requestId = req.headers['x-request-id'] as string;
 
@@ -158,7 +158,7 @@ router.get(
   '/companies/:companyId/einvoicing/documents/:documentId',
   authenticate,
   extractCompanyId,
-  handleAPIResponse(async (req: AuthenticatedRequest, res: Response) => {
+  handleAPIResponse(async (req: AuthenticatedRequest, _res: Response) => {
     const { documentId } = req.params;
     const requestId = req.headers['x-request-id'] as string;
 
@@ -178,7 +178,7 @@ router.get(
   '/companies/:companyId/einvoicing/documents',
   authenticate,
   extractCompanyId,
-  handleAPIResponse(async (req: AuthenticatedRequest, res: Response) => {
+  handleAPIResponse(async (req: AuthenticatedRequest, _res: Response) => {
     const pagination = {
       page: parseInt(req.query.page as string) || 1,
       limit: parseInt(req.query.limit as string) || 20,
@@ -213,7 +213,7 @@ router.get(
   '/companies/:companyId/einvoicing/capabilities',
   authenticate,
   extractCompanyId,
-  handleAPIResponse(async (req: AuthenticatedRequest, res: Response) => {
+  handleAPIResponse(async (req: AuthenticatedRequest, _res: Response) => {
     const requestId = req.headers['x-request-id'] as string;
 
     return einvoicingAPI.getCapabilities(
@@ -231,7 +231,7 @@ router.get(
   '/companies/:companyId/einvoicing/statistics',
   authenticate,
   extractCompanyId,
-  handleAPIResponse(async (req: AuthenticatedRequest, res: Response) => {
+  handleAPIResponse(async (req: AuthenticatedRequest, _res: Response) => {
     const { date_from, date_to } = req.query;
     const requestId = req.headers['x-request-id'] as string;
 
@@ -252,7 +252,7 @@ router.post(
   '/companies/:companyId/einvoicing/enable',
   authenticate,
   extractCompanyId,
-  handleAPIResponse(async (req: AuthenticatedRequest, res: Response) => {
+  handleAPIResponse(async (req: AuthenticatedRequest, _res: Response) => {
     const requestId = req.headers['x-request-id'] as string;
 
     return einvoicingAPI.enableEInvoicing(
@@ -270,7 +270,7 @@ router.post(
   '/companies/:companyId/einvoicing/disable',
   authenticate,
   extractCompanyId,
-  handleAPIResponse(async (req: AuthenticatedRequest, res: Response) => {
+  handleAPIResponse(async (req: AuthenticatedRequest, _res: Response) => {
     const requestId = req.headers['x-request-id'] as string;
 
     return einvoicingAPI.disableEInvoicing(
@@ -287,7 +287,7 @@ router.post(
 router.post(
   '/einvoicing/webhooks/status',
   // Note: Webhooks typically don't require authentication but should verify signature
-  handleAPIResponse(async (req: Request, res: Response) => {
+  handleAPIResponse(async (req: Request, _res: Response) => {
     const { message_id, status, reason } = req.body;
     const requestId = req.headers['x-request-id'] as string;
 
@@ -323,7 +323,7 @@ router.get('/einvoicing/health', (req: Request, res: Response) => {
 });
 
 // Error handling middleware
-router.use((error: Error, req: Request, res: Response, next: NextFunction) => {
+router.use((error: Error, req: Request, res: Response, _next: NextFunction) => {
   console.error('E-invoicing API error:', error);
 
   let statusCode = 500;

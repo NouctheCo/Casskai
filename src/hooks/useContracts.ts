@@ -83,7 +83,7 @@ export const useContracts = (): UseContractsReturn => {
   const [rfaCalculations, setRFACalculations] = useState<RFACalculation[]>([]);
   const [simulationResults, setSimulationResults] = useState<SimulationResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, _setError] = useState<string | null>(null);
 
   // Filtres
   const [filters, setFilters] = useState<ContractFilters>({});
@@ -335,9 +335,10 @@ export const useContracts = (): UseContractsReturn => {
       if (response.success && response.data) {
         setDashboardData(response.data);
       } else {
+        // No dashboard data returned - keep current state
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? (err as Error).message : 'Erreur inconnue';
+    } catch (_err) {
+      const _errorMessage = _err instanceof Error ? (_err as Error).message : 'Erreur inconnue';
     } finally {
       setLoading(false);
     }
@@ -465,7 +466,7 @@ export const useRFASimulation = (contractId?: string) => {
           variant: "destructive"
         });
       }
-    } catch (err) {
+    } catch (_err) {
       toast({
         title: "Erreur",
         description: "Erreur lors de la simulation",

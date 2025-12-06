@@ -15,7 +15,7 @@ import { supabase } from '../lib/supabase';
 
 export const dashboardService = {
   // Obtenir les statistiques principales du dashboard
-  getDashboardStats: async (currentEnterpriseId, options = {}) => {
+  getDashboardStats: async (currentEnterpriseId, _options = {}) => {
     if (!currentEnterpriseId) {
       return { data: null, error: new Error('Company ID is required') };
     }

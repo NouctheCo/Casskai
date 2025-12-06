@@ -167,6 +167,234 @@
   "allStatuses": "Tous les statuts",
   "allTypes": "Tous les types",
   "applyFilters": "Appliquer les filtres",
+  "assets": {
+    "title": "Immobilisations",
+    "subtitle": "Gestion du registre des immobilisations et des amortissements",
+    "actions": {
+      "createAsset": "Nouvelle immobilisation",
+      "createFirst": "Créer la première immobilisation",
+      "generateEntries": "Générer les écritures",
+      "generateNow": "Générer maintenant"
+    },
+    "categories": {
+      "manage": "Gérer les catégories",
+      "comingSoon": "Gestion des catégories à venir"
+    },
+    "depreciationMethod": {
+      "linear": "Linéaire",
+      "decliningBalance": "Dégressif",
+      "unitsOfProduction": "Unités d'œuvre"
+    },
+    "detail": {
+      "generalInfo": "Informations générales",
+      "history": "Historique",
+      "noHistory": "Aucun historique disponible",
+      "tabs": {
+        "details": "Détails",
+        "depreciation": "Amortissement",
+        "history": "Historique"
+      }
+    },
+    "entries": {
+      "comingSoon": "Génération d'écritures à venir"
+    },
+    "errors": {
+      "loadFailed": "Impossible de charger les données",
+      "saveFailed": "Erreur lors de la sauvegarde"
+    },
+    "filters": {
+      "category": "Catégorie",
+      "search": "Rechercher par nom, numéro...",
+      "status": "Statut"
+    },
+    "form": {
+      "acquisitionDate": "Date d'acquisition",
+      "acquisitionValue": "Valeur d'acquisition",
+      "assetNumber": "Numéro d'inventaire",
+      "assetNumberPlaceholder": "Ex: IMM-2025-001",
+      "category": "Catégorie",
+      "createTitle": "Nouvelle immobilisation",
+      "decliningRate": "Coefficient dégressif",
+      "depreciationMethod": "Méthode d'amortissement",
+      "depreciationStartDate": "Date de début d'amortissement",
+      "description": "Description",
+      "descriptionPlaceholder": "Description détaillée de l'immobilisation",
+      "durationYears": "Durée d'amortissement (années)",
+      "editTitle": "Modifier l'immobilisation",
+      "errors": {
+        "acquisitionValueRequired": "La valeur d'acquisition est requise",
+        "durationRequired": "La durée d'amortissement est requise",
+        "nameRequired": "Le nom est requis"
+      },
+      "invoiceReference": "Référence facture",
+      "invoiceReferencePlaceholder": "Ex: FA-2025-001",
+      "location": "Localisation",
+      "locationPlaceholder": "Ex: Bureau principal",
+      "name": "Nom",
+      "namePlaceholder": "Ex: MacBook Pro 16\"",
+      "notes": "Notes",
+      "notesPlaceholder": "Notes et commentaires",
+      "residualValue": "Valeur résiduelle",
+      "responsiblePerson": "Personne responsable",
+      "responsiblePersonPlaceholder": "Nom du responsable",
+      "selectResponsiblePerson": "Sélectionner un responsable",
+      "sections": {
+        "acquisition": "Acquisition",
+        "depreciation": "Amortissement",
+        "identification": "Identification"
+      },
+      "selectCategory": "Sélectionner une catégorie",
+      "serialNumber": "Numéro de série",
+      "serialNumberPlaceholder": "Numéro de série fabricant"
+    },
+    "kpi": {
+      "active": "actif(s)",
+      "amortization": "Amortissements",
+      "cumulative": "Cumulés",
+      "depreciation": "Amortissements cumulés",
+      "gross": "Valeur brute",
+      "grossValue": "Valeur brute totale",
+      "acquisitionValue": "Valeur d'acquisition",
+      "netBookValue": "Valeur Nette Comptable (VNC)",
+      "totalAssets": "Total immobilisations"
+    },
+    "registry": {
+      "count": "immobilisation(s)",
+      "empty": "Aucune immobilisation enregistrée",
+      "title": "Registre des immobilisations"
+    },
+    "schedule": {
+      "comingSoon": "Plan d'amortissement à venir",
+      "periods": "période(s)",
+      "title": "Plan d'amortissement"
+    },
+    "status": {
+      "active": "Actif",
+      "disposed": "Cédé",
+      "fullyDepreciated": "Amorti",
+      "underMaintenance": "En maintenance"
+    },
+    "success": {
+      "created": "Immobilisation créée avec succès",
+      "updated": "Immobilisation mise à jour avec succès"
+    },
+    "table": {
+      "acquisitionDate": "Date acquisition",
+      "acquisitionValue": "Valeur acquisition",
+      "assetNumber": "N° inventaire",
+      "category": "Catégorie",
+      "method": "Méthode",
+      "name": "Nom",
+      "netBookValue": "VNC",
+      "status": "Statut"
+    },
+    "warnings": {
+      "pendingEntries": "écriture(s) d'amortissement en attente",
+      "pendingEntriesDescription": "Des dotations aux amortissements doivent être passées en comptabilité"
+    },
+    "categories": {
+      "manage": "Gérer les catégories",
+      "list": "Liste des catégories",
+      "add": "Ajouter une catégorie",
+      "edit": "Modifier la catégorie",
+      "name": "Nom",
+      "code": "Code comptable",
+      "method": "Méthode",
+      "duration": "Durée",
+      "empty": "Aucune catégorie définie",
+      "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette catégorie ?",
+      "namePlaceholder": "Ex: Matériel informatique",
+      "accounts": "Comptes comptables",
+      "accountAsset": "Compte immobilisation",
+      "accountDepreciation": "Compte amortissement",
+      "accountExpense": "Compte de dotation",
+      "defaultSettings": "Paramètres par défaut",
+      "success": {
+        "created": "Catégorie créée avec succès",
+        "updated": "Catégorie mise à jour avec succès",
+        "deleted": "Catégorie supprimée avec succès"
+      },
+      "errors": {
+        "nameRequired": "Le nom est requis"
+      }
+    },
+    "schedule": {
+      "export": "Exporter CSV",
+      "exportSuccess": "Plan d'amortissement exporté avec succès",
+      "totalPeriods": "Périodes totales",
+      "totalDepreciation": "Total dotations",
+      "postedEntries": "Écritures passées",
+      "remainingValue": "VNC restante",
+      "noData": "Aucun plan d'amortissement disponible",
+      "year": "Année",
+      "period": "Période",
+      "startDate": "Date début",
+      "endDate": "Date fin",
+      "openingNBV": "VNC début",
+      "depreciation": "Dotation",
+      "cumulative": "Cumulé",
+      "closingNBV": "VNC fin",
+      "prorata": "Prorata",
+      "status": "Statut",
+      "posted": "Passée",
+      "pending": "En attente",
+      "total": "TOTAL",
+      "postedLegend": "Écriture comptable passée",
+      "pendingLegend": "En attente de passage",
+      "prorataLegend": "Prorata temporis (jours)",
+      "viewFullSchedule": "Cliquez sur l'icône calendrier dans le tableau pour voir le plan complet"
+    },
+    "entries": {
+      "description": "Génère automatiquement les écritures de dotation aux amortissements pour la période sélectionnée",
+      "fiscalYear": "Exercice fiscal",
+      "period": "Période",
+      "allPeriods": "Toutes les périodes",
+      "periodHint": "Laissez vide pour générer toutes les périodes de l'exercice",
+      "warning": "Les écritures générées seront automatiquement passées en comptabilité",
+      "success": "{{count}} écriture(s) générée(s) pour un montant total de {{amount}} €",
+      "partialSuccess": "Génération partiellement réussie",
+      "successTitle": "Écritures générées avec succès",
+      "partialTitle": "Génération avec erreurs",
+      "entriesCreated": "Écritures créées",
+      "totalAmount": "Montant total",
+      "errors": "Erreurs rencontrées",
+      "generating": "Génération en cours..."
+    },
+    "attachments": {
+      "title": "Documents joints",
+      "upload": "Télécharger des fichiers",
+      "acceptedFormats": "PDF, JPG, PNG, DOC, DOCX (max 10 MB)",
+      "empty": "Aucun document joint",
+      "uploadingFiles": "Envoi de {{count}} fichier(s)...",
+      "uploadSuccess": "Fichiers envoyés avec succès"
+    },
+    "disposal": {
+      "title": "Cession d'immobilisation",
+      "description": "Cette action est irréversible. L'immobilisation sera marquée comme cédée et une écriture de cession sera générée.",
+      "date": "Date de cession",
+      "method": "Mode de cession",
+      "value": "Valeur de cession",
+      "gain": "Plus/Moins-value",
+      "confirm": "Confirmer la cession",
+      "success": "Immobilisation cédée avec succès",
+      "methods": {
+        "sale": "Vente",
+        "scrap": "Mise au rebut",
+        "donation": "Don"
+      }
+    },
+    "history": {
+      "created": "Création",
+      "lastUpdate": "Dernière modification",
+      "lastDepreciation": "Dernier amortissement"
+    },
+    "detail": {
+      "financial": "Informations financières",
+      "tabs": {
+        "attachments": "Documents"
+      }
+    }
+  },
   "auth": {
     "alreadyHaveAccount": "Vous avez déjà un compte ?",
     "backToLogin": "Retour à la connexion",
@@ -233,8 +461,10 @@
   "close": "Fermer",
   "comingSoon": "Bientôt disponible",
   "common": {
-    "actions": {
-      "label": "Actions",
+    "all": "Tous",
+    "none": "Aucun",
+    "actions": "Actions",
+    "action": {
       "cancel": "Annuler",
       "create": "Créer",
       "save": "Enregistrer",
@@ -655,7 +885,9 @@
       "types": {
         "prospect": "Prospect",
         "client": "Client",
-        "partner": "Partenaire"
+        "partner": "Partenaire",
+        "supplier": "Fournisseur",
+        "other": "Autre"
       },
       "created": "Client créé avec succès",
       "errors": {
@@ -809,6 +1041,26 @@
     "totalRevenueDescription": "Revenus de la période actuelle",
     "upcomingDeadlines": "Échéances à venir",
     "upcomingDeadlinesDescription": "Échéances et obligations à venir",
+    "operational": {
+      "title": "Dashboard Opérationnel",
+      "subtitle": "Vision en temps réel de votre performance financière"
+    },
+    "aiAnalysis": {
+      "title": "Analyse IA & Recommandations",
+      "powered": "Propulsé par OpenAI",
+      "fallback": "Analyse règles métier",
+      "keyInsights": "Points clés",
+      "recommendations": "Recommandations stratégiques",
+      "risks": "Facteurs de risque",
+      "actions": "Actions à entreprendre",
+      "expectedImpact": "Impact attendu",
+      "noData": "Aucune analyse disponible",
+      "priority": {
+        "high": "Urgent",
+        "medium": "Important",
+        "low": "À planifier"
+      }
+    },
     "welcome": {
       "accountReady": "Compte créé avec succès",
       "companyReady": "{{companyName}} est prêt à démarrer.",
@@ -1551,6 +1803,10 @@
     }
   },
   "inventorypage": {
+    "production": "Production",
+    "fournisseurs": "Fournisseurs",
+    "alertes": "Alertes",
+    "dashboard": "Tableau de bord",
     "80000": "80 000",
     "120000": "120 000",
     "ajouter_larticle": "Ajouter l'article",
@@ -2227,6 +2483,97 @@
     }
   },
   "projects": "Projets",
+  "billingPage": {
+    "title": "Facturation & Abonnements",
+    "subtitle": "Gérez votre abonnement, vos paiements et vos factures",
+    "refresh": "Actualiser",
+    "tabs": {
+      "overview": "Vue d'ensemble",
+      "plans": "Formules",
+      "payment": "Moyens de paiement",
+      "invoices": "Factures"
+    },
+    "quickActions": {
+      "changePlan": {
+        "title": "Changer de formule",
+        "description": "Modifiez votre plan d'abonnement selon vos besoins"
+      },
+      "paymentMethods": {
+        "title": "Gérer les moyens de paiement",
+        "description": "Ajoutez ou modifiez vos cartes bancaires"
+      },
+      "invoiceHistory": {
+        "title": "Historique des factures",
+        "description": "Consultez et téléchargez toutes vos factures"
+      }
+    },
+    "plans": {
+      "title": "Votre formule actuelle",
+      "subtitle": "Gérez votre plan d'abonnement",
+      "currentPlan": "Formule actuelle",
+      "status": "Statut",
+      "active": "Actif",
+      "manageInStripe": "Gérer dans Stripe",
+      "seeAllPlansDescription": "Découvrez toutes nos formules et fonctionnalités",
+      "seeAllPlans": "Voir toutes les formules"
+    },
+    "payment": {
+      "title": "Moyens de paiement",
+      "expires": "Expire",
+      "default": "Par défaut",
+      "setDefault": "Définir par défaut",
+      "manage": "Gérer dans Stripe",
+      "addNew": "Ajouter un nouveau moyen de paiement",
+      "addCard": "Ajouter une carte",
+      "noMethods": {
+        "title": "Aucun moyen de paiement enregistré",
+        "description": "Ajoutez une carte bancaire pour gérer vos paiements"
+      }
+    },
+    "invoices": {
+      "title": "Historique des factures",
+      "filter": "Filtrer par statut",
+      "status": {
+        "paid": "Payée",
+        "open": "En attente",
+        "void": "Annulée",
+        "uncollectible": "Impayée",
+        "unknown": "Inconnu"
+      },
+      "table": {
+        "invoice": "Facture",
+        "status": "Statut",
+        "amount": "Montant",
+        "date": "Date",
+        "actions": "Actions"
+      },
+      "pdf": "Télécharger PDF",
+      "view": "Voir dans Stripe",
+      "noInvoices": {
+        "title": "Aucune facture",
+        "description": "Vos factures apparaîtront ici une fois votre abonnement actif"
+      }
+    },
+    "toasts": {
+      "subscriptionActivated": "Abonnement activé avec succès !",
+      "paymentCanceled": "Paiement annulé",
+      "needSubscription": "Veuillez souscrire à un abonnement d'abord",
+      "portalError": "Erreur lors de l'ouverture du portail de facturation",
+      "unexpectedError": "Une erreur inattendue s'est produite",
+      "needActiveSubscription": "Vous devez avoir un abonnement actif pour gérer vos moyens de paiement",
+      "paymentManagementError": "Erreur lors de la gestion des moyens de paiement",
+      "paymentPortalOpening": "Ouverture du portail de paiement...",
+      "paymentMethodError": "Erreur lors de la gestion des moyens de paiement",
+      "pdfNotAvailable": "Le PDF n'est pas encore disponible pour cette facture",
+      "downloadingInvoice": "Téléchargement de la facture {{invoiceId}}...",
+      "invoiceDownloaded": "Facture téléchargée avec succès",
+      "downloadError": "Erreur lors du téléchargement de la facture",
+      "invoiceNotAvailable": "L'URL de la facture n'est pas disponible",
+      "accessingInvoice": "Accès à la facture {{invoiceId}}...",
+      "invoiceOpening": "Ouverture de la facture dans un nouvel onglet...",
+      "viewError": "Erreur lors de l'ouverture de la facture"
+    }
+  },
   "projectspage": {
     "title": "Gestion des Projets",
     "subtitle": "Suivez et gérez vos projets internes et clients",
@@ -2347,9 +2694,17 @@
   },
   "purchases": {
     "actions": {
+      "refresh": "Actualiser",
       "export": "Exporter",
       "generateReport": "Générer rapport PDF",
       "markAsPaid": "Marquer comme payé"
+    },
+    "status": {
+      "realTime": "En temps réel",
+      "pending": "En attente",
+      "paid": "Payé",
+      "overdue": "En retard",
+      "cancelled": "Annulé"
     },
     "createPurchase": "Nouvel achat",
     "description": "Description",
@@ -3106,6 +3461,7 @@
     "accountingImport": "Import/Export Comptable",
     "admin": "Administration",
     "analytics": "Analyse",
+    "assets": "Immobilisations",
     "audit_logs": "Logs d'Audit",
     "automation": "Automatisation",
     "bank": "Banque",

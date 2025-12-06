@@ -8,8 +8,6 @@ import {
 
   DragEndEvent,
 
-  DragOverEvent,
-
   DragStartEvent,
 
   PointerSensor,
@@ -47,10 +45,6 @@ import { devLogger } from '@/utils/devLogger';
 import {
 
   Euro,
-
-  Calendar,
-
-  User,
 
   Plus,
 

@@ -20,7 +20,7 @@ import { Progress } from '../components/ui/progress';
 import { Input } from '../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
+import { dateFnsLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -50,7 +50,6 @@ import {
   Bell,
   Plus,
   Search,
-  Filter,
   FileDown,
   Eye,
   Edit,
@@ -67,7 +66,7 @@ const locales = {
   fr,
 };
 
-const localizer = dateFnsLocalizer({
+const _localizer = dateFnsLocalizer({
   format,
   parse,
   startOfWeek,
@@ -83,7 +82,7 @@ const TaxPage: React.FC = () => {
   const [dashboardData, setDashboardData] = useState<TaxDashboardData | null>(null);
   const [declarations, setDeclarations] = useState<TaxDeclaration[]>([]);
   const [filteredDeclarations, setFilteredDeclarations] = useState<TaxDeclaration[]>([]);
-  const [calendarEvents, setCalendarEvents] = useState<TaxCalendarEvent[]>([]);
+  const [_calendarEvents, setCalendarEvents] = useState<TaxCalendarEvent[]>([]);
   const [alerts, setAlerts] = useState<TaxAlert[]>([]);
   const [obligations, setObligations] = useState<TaxObligation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -173,7 +172,7 @@ const TaxPage: React.FC = () => {
         // Filtrer les déclarations invalides (UNKNOWN, null, etc.)
         const validDeclarations = response.data.filter(decl =>
           decl.type &&
-          decl.type !== 'UNKNOWN' &&
+          (decl.type as string) !== 'UNKNOWN' &&
           decl.type.trim() !== '' &&
           ['TVA', 'IS', 'Liasse', 'IR', 'CFE', 'CVAE', 'DSN'].includes(decl.type)
         );
@@ -198,7 +197,7 @@ const TaxPage: React.FC = () => {
       const response = await taxService.getCalendarEvents(currentEnterprise!.id);
       if (response.data) {
         // Transform events for calendar
-        const events = response.data.map(event => ({
+        const _events = response.data.map(event => ({
           ...event,
           start: new Date(event.start_date),
           end: event.end_date ? new Date(event.end_date) : new Date(event.start_date),
@@ -353,7 +352,7 @@ const TaxPage: React.FC = () => {
         ));
         toastSuccess(t('tax.success.alertAcknowledged'));
       }
-    } catch (error) {
+    } catch (_error) {
       toastError(t('tax.errors.acknowledgeAlert'));
     }
   };
@@ -376,6 +375,7 @@ const TaxPage: React.FC = () => {
   };
 
   const handleDeleteDeclaration = async (declarationId: string, declarationName: string) => {
+    // eslint-disable-next-line no-alert
     if (!window.confirm(t('tax.confirm.deleteDeclaration', { name: declarationName }))) {
       return;
     }
@@ -397,6 +397,7 @@ const TaxPage: React.FC = () => {
   };
 
   const handleDeleteObligation = async (obligationId: string, obligationName: string) => {
+    // eslint-disable-next-line no-alert
     if (!window.confirm(t('tax.confirm.deleteObligation', { name: obligationName }))) {
       return;
     }

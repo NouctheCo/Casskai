@@ -414,7 +414,7 @@ export class PPFProvider extends ChannelProvider {
     }
   }
 
-  private mapPPFStatusToStandard(ppfStatus: string, codeStatut: number): string {
+  private mapPPFStatusToStandard(ppfStatus: string, _codeStatut: number): string {
     // Map Chorus Pro status codes to standard lifecycle status
     switch (ppfStatus?.toUpperCase()) {
       case 'DEPOSE':

@@ -542,7 +542,7 @@ export class ValidationService {
   private validatePaymentTerms(
     paymentTerms: NonNullable<EN16931Invoice['payment_terms']>,
     errors: ValidationResult['errors'],
-    warnings: ValidationResult['warnings']
+    _warnings: ValidationResult['warnings']
   ): void {
     // BT-9: Payment due date
     if (paymentTerms.due_date && !this.isValidISODate(paymentTerms.due_date)) {

@@ -236,6 +236,61 @@ class CrmService {
     }
   }
 
+  async createSupplier(enterpriseId: string, formData: ClientFormData): Promise<CrmServiceResponse<Client>> {
+    try {
+      // Créer dans la table third_parties avec client_type = supplier
+      const { data, error } = await supabase
+        .from('third_parties')
+        .insert({
+          company_id: enterpriseId,
+          name: formData.company_name,
+          industry: formData.industry,
+          address_street: formData.address,
+          address_city: formData.city,
+          address_postal_code: formData.postal_code,
+          address_country: formData.country,
+          website: formData.website,
+          notes: formData.notes,
+          client_type: 'supplier',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Transform back to Client format (suppliers use same structure)
+      const newSupplier: Client = {
+        id: data.id,
+        enterprise_id: enterpriseId,
+        company_name: data.name,
+        industry: data.industry,
+        size: formData.size,
+        address: data.address_street,
+        city: data.address_city,
+        postal_code: data.address_postal_code,
+        country: data.address_country,
+        website: data.website,
+        notes: data.notes,
+        status: formData.status || 'active',
+        total_revenue: 0,
+        last_interaction: null,
+        created_at: data.created_at,
+        updated_at: data.updated_at
+      };
+
+      return { success: true, data: newSupplier };
+    } catch (error) {
+      console.error('Error creating supplier:', error instanceof Error ? error.message : String(error));
+      return {
+        success: false,
+        data: {} as Client,
+        error: { message: 'Erreur lors de la création du fournisseur' }
+      };
+    }
+  }
+
   // Contacts - Utilise maintenant la table crm_contacts
   async getContacts(clientId?: string, companyId?: string): Promise<CrmServiceResponse<Contact[]>> {
     try {
@@ -820,7 +875,7 @@ class CrmService {
       };
 
       return { success: true, data: dashboardData };
-    } catch (error) {
+    } catch (_error) {
       return {
         success: false,
         data: {} as CrmDashboardData,

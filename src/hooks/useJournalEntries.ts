@@ -10,12 +10,11 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import type {
   JournalEntry,
-  JournalEntryLine,
   Account,
   Journal
 } from '@/types/database/accounting.types';
@@ -308,7 +307,7 @@ export function useJournalEntries(companyId: string) {
 
 
 
-      const { data: lines, error: linesError } = await supabase
+      const { data: _lines, error: linesError } = await supabase
 
         .from('journal_entry_lines')
 
@@ -762,7 +761,7 @@ export function useJournalEntries(companyId: string) {
 
       return (data || []) as Account[];
 
-    } catch (err) {
+    } catch (_err) {
 
       console.error('...', error);
 
@@ -802,7 +801,7 @@ export function useJournalEntries(companyId: string) {
 
       return data || [];
 
-    } catch (err) {
+    } catch (_err) {
 
       console.error('...', error);
 
@@ -858,7 +857,7 @@ export function useJournalEntries(companyId: string) {
 
       return data;
 
-    } catch (err) {
+    } catch (_err) {
 
       console.error('...', error);
 

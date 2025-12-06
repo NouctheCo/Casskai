@@ -45,10 +45,10 @@ export const useSuppliers = () => {
     try {
       const { data, error } = await supabase
         .from('third_parties')
-        .select('id, name, email, phone, address')
+        .select('id, name, email, phone, address_line1')
         .eq('company_id', currentCompany.id)
-        .in('type', ['supplier', 'both'])
-        .eq('status', 'active')
+        .eq('type', 'supplier')
+        .eq('is_active', true)
         .order('name');
 
       if (error) throw error;

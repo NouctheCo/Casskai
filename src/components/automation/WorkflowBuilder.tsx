@@ -6,20 +6,17 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
 import { useAutomation } from '@/hooks/useAutomation';
-import { Workflow, WorkflowAction, TriggerConfig, TriggerType } from '@/services/automationService';
+import { WorkflowAction, TriggerConfig, TriggerType } from '@/services/automationService';
 import {
   ArrowLeft,
   Plus,
   Trash2,
-  Clock,
   Zap,
   Mail,
   FileText,
   Bell,
   Database,
-  Calendar,
   Settings,
   Play,
   Save

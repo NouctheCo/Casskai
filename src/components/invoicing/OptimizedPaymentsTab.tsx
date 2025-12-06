@@ -24,10 +24,6 @@ import { useAuth } from '@/contexts/AuthContext';
 
 import paymentsService from '@/services/paymentsService';
 
-import { thirdPartiesService } from '@/services/thirdPartiesService';
-
-import type { ThirdParty } from '@/types/third-parties.types';
-
 import ClientSelector from '@/components/invoicing/ClientSelector';
 
 import { 
@@ -35,8 +31,6 @@ import {
   Plus,
 
   Search,
-
-  Filter,
 
   Download,
 
@@ -48,15 +42,9 @@ import {
 
   CreditCard,
 
-  CheckCircle,
-
   Clock,
 
-  AlertTriangle,
-
   Euro,
-
-  Calendar,
 
   Building,
 

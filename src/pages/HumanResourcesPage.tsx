@@ -23,7 +23,6 @@ import { Badge } from '@/components/ui/badge';
 import { BetaBadge } from '@/components/ui/BetaBadge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
 import { EmployeeFormModal } from '@/components/hr/EmployeeFormModal';
 import { LeaveFormModal } from '@/components/hr/LeaveFormModal';
 import { ExpenseFormModal } from '@/components/hr/ExpenseFormModal';
@@ -43,12 +42,9 @@ import {
   UserPlus,
   Calendar,
   DollarSign,
-  Clock,
-  TrendingUp,
   RefreshCw,
   AlertTriangle,
   Sparkles,
-  Award,
   Target,
   CheckCircle,
   XCircle,
@@ -78,12 +74,12 @@ export default function HumanResourcesPage() {
     employeesLoading,
     leavesLoading,
     expensesLoading,
-    metricsLoading,
+    metricsLoading: _metricsLoading,
     error,
-    fetchEmployees,
-    fetchLeaves,
-    fetchExpenses,
-    fetchMetrics,
+    fetchEmployees: _fetchEmployees,
+    fetchLeaves: _fetchLeaves,
+    fetchExpenses: _fetchExpenses,
+    fetchMetrics: _fetchMetrics,
     refreshAll,
     createEmployee,
     createLeave,
@@ -96,7 +92,7 @@ export default function HumanResourcesPage() {
     exportEmployeesToExcel,
     exportLeavesToCSV,
     exportExpensesToCSV,
-    exportTimeEntriesToCSV
+    exportTimeEntriesToCSV: _exportTimeEntriesToCSV
   } = useHRPayroll({
     employees,
     leaves,
@@ -487,7 +483,7 @@ export default function HumanResourcesPage() {
                             Commencez par ajouter vos premiers employés
                           </p>
                         </div>
-                        <Button>
+                        <Button onClick={() => setShowEmployeeModal(true)}>
                           <UserPlus className="w-4 h-4 mr-2" />
                           Ajouter un Employé
                         </Button>

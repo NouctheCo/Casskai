@@ -10,7 +10,7 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 import { motion } from 'framer-motion';
 
@@ -38,7 +38,7 @@ import { Badge } from '@/components/ui/badge';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-import { Switch } from '@/components/ui/switch';
+
 
 import { Textarea } from '@/components/ui/textarea';
 
@@ -46,25 +46,23 @@ import { useAuth } from '@/contexts/AuthContext';
 
 import { useLocale } from '@/contexts/LocaleContext';
 
-import { toastError, toastSuccess, toastCreated, toastUpdated, toastDeleted } from '@/lib/toast-helpers';
+import { toastSuccess, toastCreated, toastUpdated, toastDeleted } from '@/lib/toast-helpers';
 
 import {
 
-  Users, UserPlus, UserX, Shield, Settings, Mail, Phone, MapPin,
+  Users, UserPlus, Shield, Mail,
 
-  Calendar, Activity, Search, Filter, MoreHorizontal, Edit, Trash2,
+  Activity, Search, Edit, Trash2,
 
   CheckCircle, XCircle, Clock, AlertTriangle, Eye, EyeOff, Send,
 
-  Crown, Star, User, Building, ChevronDown, Plus, Download
+  Crown, Star, User
 
 } from 'lucide-react';
 
 import { format } from 'date-fns';
 
 import { fr } from 'date-fns/locale';
-
-import { SYSTEM_ROLES, PERMISSION_MODULES } from '@/types/user.types';
 
 
 
@@ -82,13 +80,13 @@ const UserManagementPage = () => {
 
   const [users, setUsers] = useState([]);
 
-  const [roles, setRoles] = useState([]);
+  const [roles, _setRoles] = useState([]);
 
   const [invitations, setInvitations] = useState([]);
 
-  const [activities, setActivities] = useState([]);
+  const [activities, _setActivities] = useState([]);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, _setLoading] = useState(true);
 
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -102,7 +100,7 @@ const UserManagementPage = () => {
 
   const [showUserDialog, setShowUserDialog] = useState(false);
 
-  const [showRoleDialog, setShowRoleDialog] = useState(false);
+  const [_showRoleDialog, _setShowRoleDialog] = useState(false);
 
   const [showInviteDialog, setShowInviteDialog] = useState(false);
 
@@ -110,7 +108,7 @@ const UserManagementPage = () => {
 
   const [selectedUser, setSelectedUser] = useState(null);
 
-  const [selectedRole, setSelectedRole] = useState(null);
+  const [_selectedRole, _setSelectedRole] = useState(null);
 
 
 
@@ -138,7 +136,7 @@ const UserManagementPage = () => {
 
 
 
-  const [roleForm, setRoleForm] = useState({
+  const [_roleForm, _setRoleForm] = useState({
 
     name: '',
 

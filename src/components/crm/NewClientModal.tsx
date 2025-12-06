@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toastSuccess, toastError } from '@/lib/toast-helpers';
-import { Building2, Mail, Phone, MapPin, FileText } from 'lucide-react';
+import { Building2, Mail, MapPin, FileText } from 'lucide-react';
 import { devLogger } from '@/utils/devLogger';
 
 interface NewClientModalProps {

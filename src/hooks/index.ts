@@ -29,7 +29,7 @@ export { useCrm } from './useCrm';
 export { useCRMAnalytics } from './useCRMAnalytics';
 
 // Types exports
-type UseConfigReturn = any;
+type _UseConfigReturn = any;
 
 // Hook personnalisé combiné pour faciliter l'usage
 // import { useConfigContext } from '@/contexts/ConfigContext';

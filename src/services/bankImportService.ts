@@ -238,7 +238,7 @@ class BankImportService {
     
     for (const match of matches) {
       try {
-        const trnType = this.extractOFXTag(match, 'TRNTYPE');
+        const _trnType = this.extractOFXTag(match, 'TRNTYPE');
         const dtPosted = this.extractOFXTag(match, 'DTPOSTED');
         const trnAmt = this.extractOFXTag(match, 'TRNAMT');
         const fitId = this.extractOFXTag(match, 'FITID');
@@ -496,15 +496,16 @@ class BankImportService {
     // QIF date format: MM/DD/YYYY ou DD/MM/YY
     const parts = qifDate.split('/');
     if (parts.length === 3) {
-      let [first, second, year] = parts;
+      const [first, second, yearPart] = parts;
       
       // Assume DD/MM format for European banks
       const day = first.padStart(2, '0');
       const month = second.padStart(2, '0');
       
       // Handle 2-digit years
-      if (year.length === 2) {
-        year = parseInt(year) > 50 ? `19${year}` : `20${year}`;
+      let year = yearPart;
+      if (yearPart.length === 2) {
+        year = parseInt(yearPart) > 50 ? `19${yearPart}` : `20${yearPart}`;
       }
       
       return `${year}-${month}-${day}`;

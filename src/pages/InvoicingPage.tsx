@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Badge as _Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toastError, toastSuccess, toastCreated } from '@/lib/toast-helpers';
+import { toastSuccess } from '@/lib/toast-helpers';
 import { PageContainer } from '@/components/ui/PageContainer';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/contexts/SubscriptionContext';
@@ -38,7 +38,6 @@ import {
   Plus,
   Eye,
   Edit as _Edit,
-  Send,
   Download as _Download,
   RefreshCw,
   Search as _Search,
@@ -262,7 +261,7 @@ export default function InvoicingPageOptimized() {
     pendingInvoicesTrend: undefined as number | undefined,
     overdueInvoicesTrend: undefined as number | undefined
   });
-  const [error, setError] = useState(null);
+  const [_error, setError] = useState(null);
 
   useEffect(() => {
     const loadInvoicingData = async () => {

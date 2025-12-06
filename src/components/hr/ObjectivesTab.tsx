@@ -12,7 +12,6 @@ import {
   Target,
   Plus,
   Search,
-  Filter,
   TrendingUp,
   AlertCircle,
   CheckCircle,
@@ -29,7 +28,7 @@ interface ObjectivesTabProps {
   currentUserId: string;
 }
 
-export function ObjectivesTab({ companyId, employees, currentUserId }: ObjectivesTabProps) {
+export function ObjectivesTab({ companyId, employees, currentUserId: _currentUserId }: ObjectivesTabProps) {
   const [objectives, setObjectives] = useState<Objective[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -60,7 +59,7 @@ export function ObjectivesTab({ companyId, employees, currentUserId }: Objective
     return false;
   };
 
-  const handleUpdateProgress = async (objectiveId: string, currentValue: number, progressPercentage: number) => {
+  const _handleUpdateProgress = async (objectiveId: string, currentValue: number, progressPercentage: number) => {
     const response = await hrPerformanceService.updateObjectiveProgress(
       objectiveId,
       currentValue,

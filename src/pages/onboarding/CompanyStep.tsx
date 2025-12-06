@@ -178,7 +178,7 @@ const GeneralInfoSection: React.FC<{
 
   getSectorIcon: (code: string) => string;
 
-}> = ({ companyData, updateField, errors, countries = [], sectors = [], companySizes = [], getSectorIcon }) => (
+}> = ({ companyData, updateField, errors, countries: _countries = [], sectors = [], companySizes: _companySizes = [], getSectorIcon }) => (
 
   <motion.div
 
@@ -378,7 +378,7 @@ const AddressSection: React.FC<{
 
   timezones?: any[];
 
-}> = ({ companyData, updateField, errors, countries = [], timezones = [] }) => (
+}> = ({ companyData, updateField, errors, countries = [], timezones: _timezones = [] }) => (
 
   <motion.div
 
@@ -1240,7 +1240,7 @@ export default function CompanyStep() {
 
     timezones,
 
-    currencies,
+    currencies: _currencies,
 
     loading: referentialsLoading
 

@@ -1022,7 +1022,7 @@ const TextWidget: React.FC<{ config: TextWidgetConfig }> = ({ config }) => {
 
         fontSize: `${fontSize}px`,
 
-        textAlign: textAlign
+        textAlign
 
       }}
 
@@ -1190,13 +1190,7 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
 
         
 
-        case 'line-chart':
-
-        case 'bar-chart':
-
-        case 'pie-chart':
-
-        case 'area-chart': {
+        case 'line-chart': case 'bar-chart': case 'pie-chart': case 'area-chart': {
 
           const chartConfig = widget.config?.chart as { data?: unknown[]; [key: string]: unknown } | undefined;
 
@@ -1293,17 +1287,7 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
 
         // Widgets non implémentés - placeholder
 
-        case 'heatmap':
-
-        case 'timeline':
-
-        case 'kanban':
-
-        case 'metrics-grid':
-
-        case 'iframe-widget':
-
-        default:
+        case 'heatmap': case 'timeline': case 'kanban': case 'metrics-grid': case 'iframe-widget': default:
 
           return (
 

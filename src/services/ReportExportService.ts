@@ -281,7 +281,7 @@ export class ReportExportService {
   // CSV Export simple et efficace
   exportToCSV(
     data: TableData | TableData[],
-    options: ExportOptions = { format: 'csv' }
+    _options: ExportOptions = { format: 'csv' }
   ): string {
     try {
       const tables = Array.isArray(data) ? data : [data];

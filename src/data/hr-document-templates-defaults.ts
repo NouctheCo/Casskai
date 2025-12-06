@@ -3,8 +3,10 @@
  * Prêts à être importés dans la base de données
  */
 
-import type { DocumentTemplateFormData } from '@/types/hr-document-templates.types';
-import { STANDARD_VARIABLES } from '@/types/hr-document-templates.types';
+import {
+  STANDARD_VARIABLES,
+  type DocumentTemplateFormData
+} from '@/types/hr-document-templates.types';
 
 // =====================================================
 // CONTRAT CDI

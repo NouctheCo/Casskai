@@ -8,8 +8,6 @@ import type {
   BudgetFormData,
   BudgetCategoryFormData,
   BudgetAssumptionFormData,
-  CategoryType,
-  DriverType,
   BudgetValidationResult
 } from '@/types/budget.types';
 

@@ -72,6 +72,7 @@ export const BankAccountsTab: React.FC<BankAccountsTabProps> = ({
   };
 
   const handleDelete = async (accountId: string) => {
+    // eslint-disable-next-line no-alert
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce compte bancaire ?')) {
       return;
     }

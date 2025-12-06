@@ -20,13 +20,13 @@ import { useAuth } from '@/contexts/AuthContext';
 
 import { supabase } from '@/lib/supabase';
 
-import { Building, MapPin, Phone, Mail, Globe, Save, Loader2, Upload, Trash2, AlertTriangle, Calendar } from 'lucide-react';
+import { Building, MapPin, Phone, Mail, Globe, Save, Loader2, Trash2, AlertTriangle, Calendar } from 'lucide-react';
 
 import { useCountries } from '@/hooks/useReferentials';
 
 
 
-interface CompanySettings {
+interface CompanySettingsForm {
 
   name: string;
 
@@ -78,7 +78,7 @@ export function CompanySettings() {
 
   const { toast } = useToast();
 
-  const { countries, loading: countriesLoading } = useCountries();
+  const { countries, loading: _countriesLoading } = useCountries();
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -88,7 +88,7 @@ export function CompanySettings() {
 
 
 
-  const [settings, setSettings] = useState<CompanySettings>({
+  const [settings, setSettings] = useState<CompanySettingsForm>({
 
     name: '',
 

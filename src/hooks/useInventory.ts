@@ -14,16 +14,15 @@ import { useState, useEffect, useCallback } from 'react';
 
 import { useAuth } from '@/contexts/AuthContext';
 
-import { InventoryService } from '@/services/inventoryService';
-
-import type {
-  InventoryItem,
-  StockMovement,
-  InventoryMetrics,
-  InventoryItemFilters,
-  StockMovementFilters,
-  NewInventoryItemInput,
-  NewStockMovementInput
+import {
+  InventoryService,
+  type InventoryItem,
+  type StockMovement,
+  type InventoryMetrics,
+  type InventoryItemFilters,
+  type StockMovementFilters,
+  type NewInventoryItemInput,
+  type NewStockMovementInput
 } from '@/services/inventoryService';
 
 

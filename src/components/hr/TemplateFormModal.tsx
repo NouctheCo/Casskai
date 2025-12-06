@@ -9,13 +9,13 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { X, Plus, Trash2, Save } from 'lucide-react';
 import { hrDocumentTemplatesService } from '@/services/hrDocumentTemplatesService';
-import { STANDARD_VARIABLES } from '@/types/hr-document-templates.types';
-import type {
-  DocumentTemplate,
-  DocumentTemplateFormData,
-  DocumentCategory,
-  TemplateVariable,
-  DocumentTemplateType
+import {
+  STANDARD_VARIABLES,
+  type DocumentTemplate,
+  type DocumentTemplateFormData,
+  type DocumentCategory,
+  type TemplateVariable,
+  type DocumentTemplateType
 } from '@/types/hr-document-templates.types';
 
 interface TemplateFormModalProps {
@@ -84,7 +84,7 @@ export function TemplateFormModal({
     }
   };
 
-  const handleAddVariable = (variable: TemplateVariable) => {
+  const _handleAddVariable = (variable: TemplateVariable) => {
     if (!formData.variables.find(v => v.name === variable.name)) {
       setFormData({
         ...formData,

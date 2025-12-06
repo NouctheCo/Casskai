@@ -18,7 +18,6 @@ import {
   GDPRRequest,
   CookieConsent,
   ComplianceReport,
-  DataProcessingActivity,
   DATA_RETENTION_PERIODS,
   GDPR_RESPONSE_TIMES 
 } from '@/types/security.types';
@@ -457,7 +456,7 @@ class SecurityService {
       setTimeout(() => {
         const settings = JSON.parse(localStorage.getItem('casskai_security_settings') || '{}');
         const incidents = JSON.parse(localStorage.getItem('casskai_security_incidents') || '[]');
-        const gdprRequests = JSON.parse(localStorage.getItem('casskai_gdpr_requests') || '[]');
+        const _gdprRequests = JSON.parse(localStorage.getItem('casskai_gdpr_requests') || '[]');
 
         const findings = [];
         let score = 100;

@@ -36,7 +36,7 @@ export function CurrencySelector({ value, onValueChange, showAfricanOnly = false
 }
 
 // Exemple d'utilisation dans un composant
-export function AmountDisplay({ amount, currency }: { amount: number; currency: string }) {
+export function AmountDisplay({ amount, currency: _currency }: { amount: number; currency: string }) {
   const { formatAmount } = useCurrency();
 
   return (

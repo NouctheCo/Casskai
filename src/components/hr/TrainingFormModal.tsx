@@ -55,10 +55,10 @@ export function TrainingFormModal({
         currency: training.currency || 'EUR',
         max_participants: training.max_participants?.toString() || '',
         prerequisites: training.prerequisites || '',
-        objectives: training.objectives || '',
+        objectives: Array.isArray(training.objectives) ? training.objectives.join(', ') : (training.objectives || ''),
         provider: training.provider || '',
         is_mandatory: training.is_mandatory || false,
-        is_internal: training.is_internal || true,
+        is_internal: training.is_internal ?? true,
         is_certified: training.is_certified || false
       });
     }

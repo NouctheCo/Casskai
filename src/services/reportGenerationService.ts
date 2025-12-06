@@ -15,7 +15,7 @@ import { supabase } from '@/lib/supabase';
 import { reportExportService, TableData, ExportOptions } from './ReportExportService';
 import { format, startOfYear, endOfYear } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { AccountingStandardAdapter, AccountingStandard } from './accountingStandardAdapter';
+import { AccountingStandardAdapter } from './accountingStandardAdapter';
 
 export interface FinancialData {
   compte: string;
@@ -754,7 +754,7 @@ export class ReportGenerationService {
       let total90 = 0;
       let totalOver90 = 0;
 
-      Object.entries(customerBalances).forEach(([customerId, data]) => {
+      Object.entries(customerBalances).forEach(([_customerId, data]) => {
         let balance = 0;
         let current = 0;
         let days30 = 0;
@@ -927,19 +927,19 @@ export class ReportGenerationService {
           ['Ratio de liquidité réduite', quickRatio.toFixed(2), quickRatio > 1 ? '✓ Bon' : '✗ Faible'],
           ['', '', ''],
           ['RATIOS DE RENTABILITÉ', '', ''],
-          ['Marge brute (%)', grossMargin.toFixed(1) + '%', grossMargin > 30 ? '✓ Excellent' : grossMargin > 20 ? '~ Bon' : '✗ Faible'],
-          ['Marge nette (%)', netMargin.toFixed(1) + '%', netMargin > 10 ? '✓ Excellent' : netMargin > 5 ? '~ Bon' : '✗ Faible'],
-          ['Rentabilité des actifs (ROA) (%)', roa.toFixed(1) + '%', roa > 5 ? '✓ Bon' : '~ Moyen'],
-          ['Rentabilité des capitaux propres (ROE) (%)', roe.toFixed(1) + '%', roe > 15 ? '✓ Excellent' : roe > 10 ? '~ Bon' : '✗ Faible'],
+          ['Marge brute (%)', `${grossMargin.toFixed(1)}%`, grossMargin > 30 ? '✓ Excellent' : grossMargin > 20 ? '~ Bon' : '✗ Faible'],
+          ['Marge nette (%)', `${netMargin.toFixed(1)}%`, netMargin > 10 ? '✓ Excellent' : netMargin > 5 ? '~ Bon' : '✗ Faible'],
+          ['Rentabilité des actifs (ROA) (%)', `${roa.toFixed(1)}%`, roa > 5 ? '✓ Bon' : '~ Moyen'],
+          ['Rentabilité des capitaux propres (ROE) (%)', `${roe.toFixed(1)}%`, roe > 15 ? '✓ Excellent' : roe > 10 ? '~ Bon' : '✗ Faible'],
           ['', '', ''],
           ['RATIOS D\'ACTIVITÉ', '', ''],
           ['Rotation des stocks (jours)', inventoryDays.toFixed(0), inventoryDays < 60 ? '✓ Rapide' : '~ Normale'],
-          ['Délai de recouvrement clients (DSO)', dso.toFixed(0) + ' jours', dso < 45 ? '✓ Bon' : dso < 60 ? '~ Acceptable' : '✗ Long'],
-          ['Délai de paiement fournisseurs (DPO)', dpo.toFixed(0) + ' jours', dpo > 45 ? '✓ Bon' : '~ Court'],
+          ['Délai de recouvrement clients (DSO)', `${dso.toFixed(0)} jours`, dso < 45 ? '✓ Bon' : dso < 60 ? '~ Acceptable' : '✗ Long'],
+          ['Délai de paiement fournisseurs (DPO)', `${dpo.toFixed(0)} jours`, dpo > 45 ? '✓ Bon' : '~ Court'],
           ['', '', ''],
           ['RATIOS D\'ENDETTEMENT', '', ''],
           ['Ratio d\'endettement', debtToEquity.toFixed(2), debtToEquity < 1 ? '✓ Faible' : debtToEquity < 2 ? '~ Modéré' : '✗ Élevé'],
-          ['Dette / Actifs (%)', debtToAssets.toFixed(1) + '%', debtToAssets < 50 ? '✓ Sain' : '✗ Risqué']
+          ['Dette / Actifs (%)', `${debtToAssets.toFixed(1)}%`, debtToAssets < 50 ? '✓ Sain' : '✗ Risqué']
         ],
         summary: {
           'Score de liquidité': currentRatio > 1.5 ? 'EXCELLENT' : currentRatio > 1 ? 'BON' : 'À SURVEILLER',
@@ -1194,15 +1194,15 @@ export class ReportGenerationService {
       let days30Total = 0;
       let days60Total = 0;
       let days90Total = 0;
-      let days120Total = 0;
+      let _days120Total = 0;
       let over120Total = 0;
 
-      Object.entries(supplierBalances).forEach(([supplierId, data]) => {
+      Object.entries(supplierBalances).forEach(([_supplierId, data]) => {
         let current = 0;
         let days30 = 0;
         let days60 = 0;
         let days90 = 0;
-        let days120 = 0;
+        const days120 = 0;
         let over120 = 0;
 
         data.entries.forEach(entry => {
@@ -1247,7 +1247,7 @@ export class ReportGenerationService {
           days30Total += days30;
           days60Total += days60;
           days90Total += days90;
-          days120Total += days120;
+          _days120Total += days120;
           over120Total += over120;
         }
       });
@@ -1664,7 +1664,7 @@ export class ReportGenerationService {
 
       // Croissance (estimation YoY à +8%)
       const revenueGrowth = 8.0;
-      const profitGrowth = profitMargin > 0 ? 10.0 : -5.0;
+      const _profitGrowth = profitMargin > 0 ? 10.0 : -5.0;
 
       // Interprétations
       const getStatus = (value: number, good: number, avg: number): string => {
@@ -2405,7 +2405,7 @@ export class ReportGenerationService {
   }
 
   // Méthode pour récupérer les rapports récents
-  async getRecentReports(companyId: string): Promise<any[]> {
+  async getRecentReports(_companyId: string): Promise<any[]> {
     // TODO: Implémenter la récupération depuis la base de données
     return [];
   }

@@ -16,10 +16,8 @@
 
 import { supabase } from '@/lib/supabase';
 import type {
-  PerformanceCycle,
   Objective,
   PerformanceReview,
-  Feedback,
   ObjectiveFormData,
   ReviewFormData,
   FeedbackFormData

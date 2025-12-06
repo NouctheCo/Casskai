@@ -12,7 +12,6 @@
 
 import { MARKET_CONFIGS } from '../../data/markets';
 import {
-  OnboardingStep,
   OnboardingData,
   CompanyProfile,
   OnboardingPreferences,

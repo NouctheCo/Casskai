@@ -541,7 +541,7 @@ class ReportsService {
 
       return { data: data || [] };
 
-    } catch (error) {
+    } catch (_error) {
 
       return {
 
@@ -643,7 +643,7 @@ class ReportsService {
 
       return { data: data || newTemplate };
 
-    } catch (error) {
+    } catch (_error) {
 
       return {
 
@@ -679,7 +679,7 @@ class ReportsService {
 
       return { data: data || [] };
 
-    } catch (error) {
+    } catch (_error) {
 
       return {
 
@@ -759,7 +759,7 @@ class ReportsService {
 
       return { data: data || newSchedule };
 
-    } catch (error) {
+    } catch (_error) {
 
       return {
 
@@ -895,7 +895,7 @@ class ReportsService {
 
       return { data: analytics };
 
-    } catch (error) {
+    } catch (_error) {
 
       return {
 
@@ -1011,7 +1011,7 @@ class ReportsService {
 
       return { data: dashboardData };
 
-    } catch (error) {
+    } catch (_error) {
 
       return {
 
@@ -1173,7 +1173,7 @@ class ReportsService {
 
       return { data: exportUrl };
 
-    } catch (error) {
+    } catch (_error) {
 
       return {
 
@@ -1375,7 +1375,7 @@ class ReportsService {
 
       return { data: charts };
 
-    } catch (error) {
+    } catch (_error) {
 
       return {
 
@@ -1419,7 +1419,7 @@ class ReportsService {
 
       return { data: data as FinancialReport };
 
-    } catch (error) {
+    } catch (_error) {
 
       return { data: null, error: { message: 'Erreur lors de la récupération du rapport' } };
 
@@ -1473,7 +1473,7 @@ class ReportsService {
 
       return { data: exportRes.data };
 
-    } catch (error) {
+    } catch (_error) {
 
       return { data: '', error: { message: 'Erreur lors de la génération du lien de téléchargement' } };
 

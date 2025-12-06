@@ -10,8 +10,7 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
-import { z } from 'zod';
-import { JournalEntrySchema, JournalEntryType, ImportError, LetterageMatch } from '../types/accounting-import.types';
+import { JournalEntrySchema, JournalEntryType, ImportError } from '../types/accounting-import.types';
 import { supabase } from '../lib/supabase';
 
 /**
@@ -395,7 +394,7 @@ export class AccountingValidationService {
     const endDate = new Date(dateRange);
     endDate.setDate(endDate.getDate() + 7);
 
-    const totalAmount = entry.items.reduce((sum, item) => sum + item.debitAmount + item.creditAmount, 0) / 2;
+    const _totalAmount = entry.items.reduce((sum, item) => sum + item.debitAmount + item.creditAmount, 0) / 2;
 
     const similarEntries = await supabase
       .from('journal_entries')

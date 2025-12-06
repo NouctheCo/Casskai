@@ -16,7 +16,6 @@ import {
   SubscriptionPlan, 
   getModulesForPlan, 
   isModuleAllowedForPlan, 
-  isTrialUser,
   SUBSCRIPTION_PLANS as PREDEFINED_PLANS
 } from '@/types/subscription.types';
 

@@ -3,7 +3,7 @@
  * Onglet de génération de rapports avec sauvegarde automatique
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,15 +11,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
-  Plus, Download, FileText, TrendingUp, BarChart3, Calculator,
-  Clock, RefreshCw, Calendar, Settings, AlertCircle
+  Plus, FileText, TrendingUp, BarChart3, Calculator,
+  Clock, RefreshCw, Calendar, AlertCircle
 } from 'lucide-react';
 import { reportGenerationService, type ReportFilters } from '@/services/reportGenerationService';
 import { reportArchiveService } from '@/services/reportArchiveService';
-import { DEFAULT_REPORT_TEMPLATES } from '@/data/reportTemplates';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/useToast';
-import { format, startOfYear, endOfYear } from 'date-fns';
+import { format } from 'date-fns';
 
 interface ReportGenerationTabProps {
   companyId: string;
@@ -29,7 +28,7 @@ interface ReportGenerationTabProps {
 
 type ReportType = 'balance_sheet' | 'income_statement' | 'trial_balance' | 'general_ledger' | 'vat_report';
 
-export function ReportGenerationTab({ companyId, refreshTrigger, onReportGenerated }: ReportGenerationTabProps) {
+export function ReportGenerationTab({ companyId: _companyId, refreshTrigger: _refreshTrigger, onReportGenerated }: ReportGenerationTabProps) {
   const { currentCompany } = useAuth();
   const { showToast } = useToast();
   const [selectedPeriod, setSelectedPeriod] = useState('current-month');

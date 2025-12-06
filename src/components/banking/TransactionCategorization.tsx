@@ -3,14 +3,10 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import {
-  Check,
-  X,
   Search,
   Zap,
-  ChevronDown,
   RefreshCw,
   CheckCircle2,
-  Sparkles,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { TransactionRow } from './TransactionRow';
@@ -140,7 +136,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
           try {
             const pattern = new RegExp(rule.pattern, 'i');
             matches = pattern.test(tx.description);
-          } catch (e) {
+          } catch (_e) {
             console.error('Invalid regex:', rule.pattern);
             continue;
           }

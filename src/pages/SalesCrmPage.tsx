@@ -22,7 +22,7 @@ import { useCrm } from '../hooks/useCrm';
 
 import { useCRMAnalytics } from '../hooks/useCRMAnalytics';
 
-import { toastError, toastSuccess, toastCreated, toastUpdated, toastDeleted } from '@/lib/toast-helpers';
+import { toastError, toastSuccess } from '@/lib/toast-helpers';
 
 import { useAuth } from '../contexts/AuthContext';
 
@@ -134,15 +134,16 @@ export default function SalesCrmPage() {
 
     forecastData,
 
-    exportClientsCsv,
+    exportClientsCSV: exportClientsCsv,
 
     exportClientsExcel,
 
-    exportOpportunitiesCsv,
+     
+    exportOpportunitiesCSV: _exportOpportunitiesCsv,
 
     exportOpportunitiesExcel,
 
-    exportActionsCsv,
+    exportActionsCSV: exportActionsCsv,
 
     exportPipelineReport,
 
@@ -221,7 +222,7 @@ export default function SalesCrmPage() {
 
   // Handle client creation
 
-  const handleCreateClient = async (clientData: ClientFormData) => {
+  const _handleCreateClient = async (clientData: ClientFormData) => {
 
     try {
 
@@ -247,7 +248,7 @@ export default function SalesCrmPage() {
 
   // Handle contact creation
 
-  const handleCreateContact = async (contactData: ContactFormData) => {
+  const _handleCreateContact = async (contactData: ContactFormData) => {
 
     try {
 
@@ -273,7 +274,7 @@ export default function SalesCrmPage() {
 
   // Handle opportunity creation
 
-  const handleCreateOpportunity = async (opportunityData: OpportunityFormData) => {
+  const _handleCreateOpportunity = async (opportunityData: OpportunityFormData) => {
 
     try {
 
@@ -299,7 +300,7 @@ export default function SalesCrmPage() {
 
   // Handle commercial action creation
 
-  const handleCreateAction = async (actionData: CommercialActionFormData) => {
+  const _handleCreateAction = async (actionData: CommercialActionFormData) => {
 
     try {
 

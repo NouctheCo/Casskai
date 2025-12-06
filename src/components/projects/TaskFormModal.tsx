@@ -75,8 +75,8 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       });
 
       onClose();
-    } catch (_error) {
-      console.error('Error saving task:', _error);
+    } catch (error) {
+      console.error('Error saving task:', error);
     } finally {
       setSubmitting(false);
     }
@@ -169,16 +169,20 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             <div>
               <Label className="text-gray-700 dark:text-gray-300">Date début</Label>
               <DatePicker
-                date={formData.startDate}
-                onDateChange={(date) => setFormData({ ...formData, startDate: date })}
+                value={formData.startDate}
+                onChange={(date) => setFormData({ ...formData, startDate: date })}
+                placeholder="Sélectionner une date"
+                className=""
               />
             </div>
 
             <div>
               <Label className="text-gray-700 dark:text-gray-300">Date fin</Label>
               <DatePicker
-                date={formData.dueDate}
-                onDateChange={(date) => setFormData({ ...formData, dueDate: date })}
+                value={formData.dueDate}
+                onChange={(date) => setFormData({ ...formData, dueDate: date })}
+                placeholder="Sélectionner une date"
+                className=""
               />
             </div>
           </div>

@@ -20,9 +20,7 @@ import type {
   EmployeeDocument,
   DocumentFormData,
   DocumentFilters,
-  DocumentStats,
-  ContractTemplate,
-  GenerateContractData
+  DocumentStats
 } from '@/types/hr-documents.types';
 
 const STORAGE_BUCKET = 'hr-documents';
@@ -40,7 +38,7 @@ export class HRDocumentsService {
       // 1. Upload du fichier vers Supabase Storage
       const fileName = `${companyId}/${formData.employee_id}/${Date.now()}_${formData.file.name}`;
 
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { data: _uploadData, error: uploadError } = await supabase.storage
         .from(STORAGE_BUCKET)
         .upload(fileName, formData.file, {
           cacheControl: '3600',

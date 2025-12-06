@@ -18,16 +18,11 @@ import {
   RFACalculation,
   RFAFormData,
   RFAFilters,
-  RFASimulation,
   TurnoverScenario,
   SimulationResult,
   ContractAlert,
   ContractHistory,
   ContractServiceResponse,
-  DiscountConfig,
-  RFATierBreakdown,
-  RFACalculationDetails,
-  ContractExportOptions,
   RFAReport
 } from '../types/contracts.types';
 import * as ContractImpl from './contractsServiceImplementations';
@@ -99,7 +94,7 @@ export const contractsService = {
   /**
    * Calcule une simulation de RFA
    */
-  async simulateRFA(contractId: string, scenarios: TurnoverScenario[]): Promise<ContractServiceResponse<SimulationResult[]>> {
+  async simulateRFA(_contractId: string, _scenarios: TurnoverScenario[]): Promise<ContractServiceResponse<SimulationResult[]>> {
     // TODO: Implement RFA simulation logic
     return { data: [], success: true };
   },
@@ -191,7 +186,7 @@ export const contractsService = {
   /**
    * Génère un rapport détaillé de RFA
    */
-  async generateRFAReport(contractId: string, periodStart: string, periodEnd: string): Promise<ContractServiceResponse<RFAReport>> {
+  async generateRFAReport(_contractId: string, _periodStart: string, _periodEnd: string): Promise<ContractServiceResponse<RFAReport>> {
     // TODO: Implement RFA report generation
     return { data: null, success: false, error: { message: 'Not implemented yet' } };
   },
@@ -201,7 +196,7 @@ export const contractsService = {
   /**
    * Récupère les alertes de contrats
    */
-  async getContractAlerts(enterpriseId: string): Promise<ContractServiceResponse<ContractAlert[]>> {
+  async getContractAlerts(_enterpriseId: string): Promise<ContractServiceResponse<ContractAlert[]>> {
     // TODO: Implement alerts logic
     return { data: [], success: true };
   },
@@ -209,7 +204,7 @@ export const contractsService = {
   /**
    * Récupère l'historique d'un contrat
    */
-  async getContractHistory(contractId: string): Promise<ContractServiceResponse<ContractHistory[]>> {
+  async getContractHistory(_contractId: string): Promise<ContractServiceResponse<ContractHistory[]>> {
     // TODO: Implement history retrieval from contract_history table
     return { data: [], success: true };
   }

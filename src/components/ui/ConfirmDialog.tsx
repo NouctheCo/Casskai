@@ -202,7 +202,7 @@ export function useConfirmDialog(): UseConfirmDialogReturn {
 
 
 
-  const ConfirmDialogComponent: React.ComponentType<Omit<ConfirmDialogProps, 'children'>> = (props) => {
+  const ConfirmDialogComponent: React.ComponentType<Omit<ConfirmDialogProps, 'children'>> = (_props) => {
 
     if (!dialogProps) return null;
 

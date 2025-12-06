@@ -72,6 +72,7 @@ export function GenerateDocumentModal({
 
   const handleGenerate = async () => {
     if (!selectedEmployee) {
+      // eslint-disable-next-line no-alert
       alert('Veuillez sélectionner un employé');
       return;
     }
@@ -83,6 +84,7 @@ export function GenerateDocumentModal({
       .map(v => v.label);
 
     if (missingRequired.length > 0) {
+      // eslint-disable-next-line no-alert
       alert(`Veuillez remplir les variables requises: ${missingRequired.join(', ')}`);
       return;
     }
@@ -103,10 +105,12 @@ export function GenerateDocumentModal({
       if (response.success) {
         onSubmit();
       } else {
+        // eslint-disable-next-line no-alert
         alert(`Erreur: ${response.error}`);
       }
     } catch (error) {
       console.error('Error generating document:', error);
+      // eslint-disable-next-line no-alert
       alert('Erreur lors de la génération du document');
     } finally {
       setSaving(false);

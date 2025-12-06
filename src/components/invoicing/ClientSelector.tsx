@@ -2,11 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { thirdPartiesService } from '@/services/thirdPartiesService';
+import { ThirdPartyFormDialog } from '@/components/third-parties/ThirdPartyFormDialog';
+import { useAuth } from '@/contexts/AuthContext';
 import type { ThirdParty } from '@/types/third-parties.types';
 import { Plus, Loader2 } from 'lucide-react';
 
@@ -30,20 +29,15 @@ export const ClientSelector: React.FC<ClientSelectorProps> = ({
   const [clients, setClients] = useState<ThirdParty[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewClientForm, setShowNewClientForm] = useState(false);
-  const [newClientData, setNewClientData] = useState({
-    name: '',
-    primary_email: '',
-    primary_phone: ''
-  });
-  const [savingClient, setSavingClient] = useState(false);
   const { toast } = useToast();
+  const { currentCompany } = useAuth();
 
   // Fetch clients on component mount
   useEffect(() => {
     const fetchClients = async () => {
       try {
         setLoading(true);
-        const clientsData = await thirdPartiesService.getThirdParties('customer');
+        const clientsData = await thirdPartiesService.getThirdParties(undefined, 'customer');
         setClients(clientsData || []);
         // ✅ Liste vide = comportement normal (pas d'erreur affichée)
       } catch (error) {
@@ -63,60 +57,24 @@ export const ClientSelector: React.FC<ClientSelectorProps> = ({
     fetchClients();
   }, [toast]);
 
-  const handleCreateNewClient = async () => {
-    if (!newClientData.name || !newClientData.primary_email || !newClientData.primary_phone) {
-      toast({
-        title: 'Erreur',
-        description: 'Veuillez remplir tous les champs du client',
-        variant: 'destructive'
-      });
-      return;
-    }
-
+  // Callback quand un nouveau client est créé via ThirdPartyFormDialog
+  const handleClientCreated = async () => {
+    // Recharger la liste des clients
     try {
-      setSavingClient(true);
-      const createdClient = await thirdPartiesService.createThirdParty({
-        type: 'customer',
-        name: newClientData.name,
-        email: newClientData.primary_email,
-        phone: newClientData.primary_phone,
-        country: 'FR',
-        payment_terms: 30
-      });
+      const clientsData = await thirdPartiesService.getThirdParties(undefined, 'customer');
+      setClients(clientsData || []);
 
-      // Add to local clients list
-      setClients([...clients, createdClient]);
+      // Sélectionner automatiquement le dernier client créé
+      if (clientsData && clientsData.length > 0) {
+        const latestClient = clientsData[clientsData.length - 1];
+        onChange(latestClient.id);
 
-      // Update parent if callback provided
-      if (onNewClient) {
-        onNewClient(createdClient);
+        if (onNewClient) {
+          onNewClient(latestClient);
+        }
       }
-
-      // Auto-select the new client
-      onChange(createdClient.id);
-
-      // Reset form
-      setNewClientData({
-        name: '',
-        primary_email: '',
-        primary_phone: ''
-      });
-      setShowNewClientForm(false);
-
-      toast({
-        title: 'Succès',
-        description: `Client ${newClientData.name} créé et sélectionné`,
-        variant: 'default'
-      });
     } catch (error) {
-      console.error('Error creating client:', error);
-      toast({
-        title: 'Erreur',
-        description: 'Impossible de créer le client',
-        variant: 'destructive'
-      });
-    } finally {
-      setSavingClient(false);
+      console.error('Error reloading clients:', error);
     }
   };
 
@@ -168,74 +126,14 @@ export const ClientSelector: React.FC<ClientSelectorProps> = ({
         </Select>
       )}
 
-      {/* New Client Form Dialog */}
-      <Dialog open={showNewClientForm} onOpenChange={setShowNewClientForm}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Créer un nouveau client</DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            <div>
-              <Label htmlFor="new-client-name">Nom du client *</Label>
-              <Input
-                id="new-client-name"
-                value={newClientData.name}
-                onChange={(e) => setNewClientData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Ex: Entreprise ABC"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="new-client-email">Email *</Label>
-              <Input
-                id="new-client-email"
-                type="email"
-                value={newClientData.primary_email}
-                onChange={(e) => setNewClientData(prev => ({ ...prev, primary_email: e.target.value }))}
-                placeholder="contact@exemple.fr"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="new-client-phone">Téléphone *</Label>
-              <Input
-                id="new-client-phone"
-                type="tel"
-                value={newClientData.primary_phone}
-                onChange={(e) => setNewClientData(prev => ({ ...prev, primary_phone: e.target.value }))}
-                placeholder="+33 1 23 45 67 89"
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setShowNewClientForm(false)}
-              disabled={savingClient}
-            >
-              Annuler
-            </Button>
-            <Button
-              type="button"
-              onClick={handleCreateNewClient}
-              disabled={savingClient}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              {savingClient ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Création...
-                </>
-              ) : (
-                'Créer'
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Formulaire complet de création de client */}
+      <ThirdPartyFormDialog
+        open={showNewClientForm}
+        onClose={() => setShowNewClientForm(false)}
+        onSuccess={handleClientCreated}
+        companyId={currentCompany?.id || ''}
+        defaultType="customer"
+      />
     </div>
   );
 };

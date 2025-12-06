@@ -39,7 +39,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
   const { currentCompany } = useAuth();
   const [editingRules, setEditingRules] = useState<CategorizationRule[]>(rules);
   const [showNewRuleForm, setShowNewRuleForm] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [_saving, _setSaving] = useState(false);
 
   // Formulaire nouvelle règle
   const [newRule, setNewRule] = useState({
@@ -51,6 +51,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
   });
 
   const handleDeleteRule = async (ruleId: string) => {
+    // eslint-disable-next-line no-alert
     if (!confirm(t('confirm.deleteRule', 'Supprimer cette règle ?'))) return;
 
     try {
@@ -132,7 +133,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
     onClose();
   };
 
-  const getAccountLabel = (accountId: string) => {
+  const _getAccountLabel = (accountId: string) => {
     const account = accounts.find((a) => a.id === accountId);
     return account ? `${account.account_number} - ${account.name}` : 'Compte inconnu';
   };

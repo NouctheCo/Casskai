@@ -585,19 +585,19 @@ export class EInvoicingAPI {
     error: any,
     requestId: string,
     endpoint: string,
-    context: any
+    _context: any
   ): APIResponse {
     console.error(`API Error in ${endpoint}:`, error);
 
     let errorMessage = 'Internal server error';
-    let errorCode = 'INTERNAL_ERROR';
+    let _errorCode = 'INTERNAL_ERROR';
 
     if (error instanceof EInvoicingError) {
       errorMessage = error.message;
-      errorCode = error.code;
+      _errorCode = error.code;
     } else if (error instanceof FeatureDisabledError) {
       errorMessage = error.message;
-      errorCode = error.code;
+      _errorCode = error.code;
     } else if (error instanceof Error) {
       errorMessage = error.message;
     }

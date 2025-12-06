@@ -11,7 +11,7 @@
  */
 
 import { supabase } from '@/lib/supabase';
-import { AIAssistantMessage, AIInsight, SmartAlert, CashFlowPrediction, TaxOptimization, AnomalyDetection } from '@/types/ai.types';
+import { AIInsight, SmartAlert, CashFlowPrediction, TaxOptimization, AnomalyDetection } from '@/types/ai.types';
 
 interface AIServiceResponse<T = any> {
   data?: T;
@@ -27,7 +27,7 @@ interface ChatRequest {
   company_id: string;
 }
 
-interface AnalysisRequest {
+interface _AnalysisRequest {
   type: 'financial_health' | 'cash_flow' | 'anomaly_detection' | 'tax_optimization';
   company_id: string;
   data?: any;

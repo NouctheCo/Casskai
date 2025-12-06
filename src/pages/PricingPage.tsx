@@ -35,9 +35,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 export default function PricingPage() {
-  const { subscriptionPlan } = useSubscription();
+  const { subscriptionPlan: _subscriptionPlan } = useSubscription();
   const { user } = useAuth();
-  const { trialInfo, canCreateTrial, createTrial } = useTrial();
+  const { trialInfo, canCreateTrial, createTrial: _createTrial } = useTrial();
 
   const [isLoading, setIsLoading] = useState(false);
   const [billingPeriod, setBillingPeriod] = useState<'month' | 'year'>('month');
@@ -182,7 +182,7 @@ export default function PricingPage() {
       popular: false
     },
     {
-      id: 'professional',
+      id: 'pro',
       name: 'Professionnel',
       description: 'Pour les entreprises en croissance',
       price: billingPeriod === 'month' ? currentPricing.professional.monthly : Math.round(currentPricing.professional.yearly / 12),
@@ -359,7 +359,14 @@ export default function PricingPage() {
                   ))}
                 </ul>
                 <Button
-                  onClick={() => handleChoosePlan(plan.id === 'starter' ? 'starter_monthly' : plan.id === 'professional' ? 'professional_monthly' : plan.id === 'enterprise' ? 'enterprise_monthly' : plan.id)}
+                  onClick={() => {
+                    // Construire l'ID du plan: planId_interval (ex: pro_monthly, starter_yearly)
+                    const fullPlanId = plan.id === 'free'
+                      ? 'free'
+                      : `${plan.id}_${billingPeriod === 'year' ? 'yearly' : 'monthly'}`;
+
+                    handleChoosePlan(fullPlanId);
+                  }}
                   className="w-full"
                   disabled={isLoading}
                   variant={plan.popular ? 'default' : 'outline'}

@@ -12,9 +12,7 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { motion, useAnimation } from 'framer-motion';
-
-import { useInView } from 'framer-motion';
+import { motion, useAnimation, useInView } from 'framer-motion';
 
 import { useTranslation } from 'react-i18next';
 
@@ -31,7 +29,7 @@ import { CountrySelector } from '@/components/ui/CountrySelector';
 
 import { generateCountryPricing, formatPriceWithCurrency, getDefaultCountry } from '@/services/pricingMultiCurrency';
 
-import { changeLanguageAndDetectCountry } from '@/i18n/i18n';
+
 
 import { PageContainer } from '@/components/ui/PageContainer';
 
@@ -63,13 +61,7 @@ import {
 
   Star,
 
-  Menu,
-
-  X,
-
   MessageCircle,
-
-  MapPin,
 
   Mail,
 
@@ -79,35 +71,17 @@ import {
 
   CreditCard,
 
-  Banknote,
-
-  TrendingUp,
-
-  BarChart3,
-
   Clock,
 
   Lock,
 
   Database,
 
-  CloudUpload,
-
-  Smartphone,
-
-  Laptop,
-
-  Tablet,
-
-  Award,
-
   Target,
 
   Briefcase,
 
   DollarSign,
-
-  Euro,
 
   Quote
 
@@ -293,7 +267,7 @@ const HeroSection = () => {
 
             {/* Description */}
 
-            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 dark:text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
 
               {t('landing.hero.description', 'CassKai révolutionne la gestion d\'entreprise avec une suite complète : comptabilité, facturation, CRM, projets, RH et bien plus. Tout en un, simple et puissant.')}
 
@@ -441,7 +415,7 @@ const HeroSection = () => {
 
                 </div>
 
-                <div className="text-gray-600 dark:text-gray-300 dark:text-gray-300 font-medium">
+                <div className="text-gray-600 dark:text-gray-300 font-medium">
 
                   {stat.label}
 
@@ -469,7 +443,7 @@ const HeroSection = () => {
 
 const AdvantagesSection = () => {
 
-  const { t } = useTranslation();
+  const { t: _t } = useTranslation();
 
 
 
@@ -899,7 +873,7 @@ const FeaturesSection = () => {
 
           
 
-          <p className="text-xl text-gray-600 dark:text-gray-300 dark:text-gray-300 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
 
             {t('landing.features.description', 'CassKai réunit tous les outils essentiels à la gestion de votre entreprise dans une interface moderne et intuitive.')}
 
@@ -959,7 +933,7 @@ const FeaturesSection = () => {
 
                   <CardContent>
 
-                    <p className="text-gray-600 dark:text-gray-300 dark:text-gray-300 mb-6 leading-relaxed">
+                    <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
 
                       {feature.description}
 
@@ -969,7 +943,7 @@ const FeaturesSection = () => {
 
                       {feature.details.map((detail, idx) => (
 
-                        <li key={idx} className="flex items-center text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">
+                        <li key={idx} className="flex items-center text-sm text-gray-600 dark:text-gray-300">
 
                           <CheckCircle className="w-4 h-4 text-green-500 mr-3 flex-shrink-0" />
 
@@ -1045,7 +1019,7 @@ const FeaturesSection = () => {
 
                 key={index}
 
-                className="text-center p-6 bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl shadow-lg"
+                className="text-center p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg"
 
                 whileHover={{ scale: 1.05 }}
 
@@ -1061,7 +1035,7 @@ const FeaturesSection = () => {
 
                 </h3>
 
-                <p className="text-gray-600 dark:text-gray-300 dark:text-gray-300">
+                <p className="text-gray-600 dark:text-gray-300">
 
                   {benefit.description}
 
@@ -1089,7 +1063,7 @@ const FeaturesSection = () => {
 
 const PricingSection = () => {
 
-  const { t, i18n } = useTranslation();
+  const { t, i18n: _i18n } = useTranslation();
 
   const navigate = useNavigate();
 
@@ -1257,17 +1231,17 @@ const PricingSection = () => {
 
     // Prix selon la période sélectionnée
 
-    const currentPrice = isAnnual ? pricing.annual : pricing.monthly;
+    const currentPrice = isAnnual ? pricing.yearly : pricing.monthly;
 
-    const currentOriginalPrice = isAnnual ? pricing.annualOriginal : pricing.monthlyOriginal;
+    const currentOriginalPrice = isAnnual ? pricing.yearlyOriginal : pricing.monthlyOriginal;
 
-    
+
 
     // Pour l'affichage annuel, calculer le prix mensuel équivalent
 
-    const displayMonthlyPrice = isAnnual ? Math.round(pricing.annual / 12) : pricing.monthly;
+    const displayMonthlyPrice = isAnnual ? Math.round(pricing.yearly / 12) : pricing.monthly;
 
-    const displayMonthlyOriginalPrice = isAnnual ? Math.round(pricing.annualOriginal / 12) : pricing.monthlyOriginal;
+    const displayMonthlyOriginalPrice = isAnnual ? Math.round(pricing.yearlyOriginal / 12) : pricing.monthlyOriginal;
 
     
 
@@ -1331,7 +1305,7 @@ const PricingSection = () => {
 
           
 
-          <p className="text-xl text-gray-600 dark:text-gray-300 dark:text-gray-300 max-w-3xl mx-auto mb-8">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
 
             {t('landing.pricing.description', 'Tous nos plans incluent un essai gratuit de 30 jours, sans engagement et sans carte bancaire.')}
 
@@ -1465,7 +1439,7 @@ const PricingSection = () => {
 
                     
 
-                    <p className="text-gray-600 dark:text-gray-300 dark:text-gray-300 mb-6">
+                    <p className="text-gray-600 dark:text-gray-300 mb-6">
 
                       {plan.description}
 
@@ -1495,7 +1469,7 @@ const PricingSection = () => {
 
                             </span>
 
-                            <span className="text-gray-600 dark:text-gray-300 dark:text-gray-300 ml-2">
+                            <span className="text-gray-600 dark:text-gray-300 ml-2">
 
                               /mois
 
@@ -1547,7 +1521,7 @@ const PricingSection = () => {
 
                             </span>
 
-                            <span className="text-gray-600 dark:text-gray-300 dark:text-gray-300 ml-2">
+                            <span className="text-gray-600 dark:text-gray-300 ml-2">
 
                               {plan.period}
 
@@ -1617,7 +1591,7 @@ const PricingSection = () => {
 
                           <CheckCircle className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
 
-                          <span className="text-gray-700 dark:text-gray-300 dark:text-gray-300">
+                          <span className="text-gray-700 dark:text-gray-300">
 
                             {feature}
 
@@ -1707,7 +1681,7 @@ const PricingSection = () => {
 
                 </h3>
 
-                <p className="text-gray-600 dark:text-gray-300 dark:text-gray-300">
+                <p className="text-gray-600 dark:text-gray-300">
 
                   {guarantee.description}
 
@@ -1827,7 +1801,7 @@ const TestimonialsSection = () => {
 
 
 
-          <p className="text-xl text-gray-600 dark:text-gray-300 dark:text-gray-300 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
 
             {t('landing.testimonials.description', 'Retours honnêtes de nos premiers utilisateurs et des professionnels qui testent CassKai.')}
 
@@ -1887,7 +1861,7 @@ const TestimonialsSection = () => {
 
                     {/* Témoignage */}
 
-                    <blockquote className="text-gray-700 dark:text-gray-300 dark:text-gray-300 mb-8 text-lg leading-relaxed">
+                    <blockquote className="text-gray-700 dark:text-gray-300 mb-8 text-lg leading-relaxed">
 
                       "{testimonial.content}"
 
@@ -1913,13 +1887,13 @@ const TestimonialsSection = () => {
 
                         </div>
 
-                        <div className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">
+                        <div className="text-sm text-gray-600 dark:text-gray-300">
 
                           {testimonial.position}
 
                         </div>
 
-                        <div className="text-sm text-gray-500 dark:text-gray-300 dark:text-gray-300">
+                        <div className="text-sm text-gray-500 dark:text-gray-300">
 
                           {testimonial.company}
 
@@ -1993,7 +1967,7 @@ const ContactSection = () => {
 
           
 
-          <p className="text-xl text-gray-600 dark:text-gray-300 dark:text-gray-300 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
 
             {t('landing.contact.description', 'Notre équipe d\'experts est disponible pour répondre à toutes vos questions et vous accompagner dans votre réussite.')}
 
@@ -2075,13 +2049,13 @@ const ContactSection = () => {
 
                 </h3>
 
-                <p className="text-lg text-gray-700 dark:text-gray-300 dark:text-gray-300 mb-2 font-semibold">
+                <p className="text-lg text-gray-700 dark:text-gray-300 mb-2 font-semibold">
 
                   {contact.content}
 
                 </p>
 
-                <p className="text-gray-600 dark:text-gray-300 dark:text-gray-300">
+                <p className="text-gray-600 dark:text-gray-300">
 
                   {contact.description}
 
@@ -2528,7 +2502,7 @@ const LandingPage = () => {
 
                 transition={{ delay: 0.1 }}
 
-                className="text-xl text-gray-600 dark:text-gray-300 dark:text-gray-300 max-w-3xl mx-auto"
+                className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto"
 
               >
 
@@ -2554,7 +2528,7 @@ const LandingPage = () => {
 
                 transition={{ delay: 0.1 }}
 
-                className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl shadow-lg p-6 border-t-4 border-blue-500 hover:shadow-xl transition-shadow"
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-t-4 border-blue-500 hover:shadow-xl transition-shadow"
 
               >
 
@@ -2622,7 +2596,7 @@ const LandingPage = () => {
 
                 transition={{ delay: 0.2 }}
 
-                className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl shadow-lg p-6 border-t-4 border-green-500 hover:shadow-xl transition-shadow"
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-t-4 border-green-500 hover:shadow-xl transition-shadow"
 
               >
 
@@ -2678,7 +2652,7 @@ const LandingPage = () => {
 
                 transition={{ delay: 0.3 }}
 
-                className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl shadow-lg p-6 border-t-4 border-orange-500 hover:shadow-xl transition-shadow"
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-t-4 border-orange-500 hover:shadow-xl transition-shadow"
 
               >
 
@@ -2746,7 +2720,7 @@ const LandingPage = () => {
 
                 transition={{ delay: 0.4 }}
 
-                className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl shadow-lg p-6 border-t-4 border-purple-500 hover:shadow-xl transition-shadow"
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-t-4 border-purple-500 hover:shadow-xl transition-shadow"
 
               >
 

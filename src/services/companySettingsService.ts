@@ -15,7 +15,6 @@ import { supabase, handleSupabaseError } from '@/lib/supabase';
 import { 
   CompanySettings, 
   CompanyRow, 
-  CompanyUpdate,
   mapRowToSettings, 
   mapSettingsToUpdate,
   DEFAULT_COMPANY_SETTINGS 
@@ -69,7 +68,7 @@ export class CompanySettingsService {
       
       // Si on marque les settings comme complétés
       if (settings.metadata?.settingsCompletedAt) {
-        updateData.settings_completed_at = settings.metadata.settingsCompletedAt.toISOString();
+        (updateData as Record<string, unknown>).onboarding_completed_at = settings.metadata.settingsCompletedAt.toISOString();
       }
 
       const { data, error } = await supabase

@@ -30,9 +30,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
-
-import { toastError, toastSuccess, toastDeleted, toastCreated, toastUpdated } from '@/lib/toast-helpers';
+import { toastError, toastSuccess, toastDeleted, toastUpdated } from '@/lib/toast-helpers';
 
 import { useEnterprise } from '../contexts/EnterpriseContext';
 
@@ -52,11 +50,7 @@ import {
 
   ThirdPartyFilters,
 
-  ThirdPartyDashboardData,
-
-  AgingReport,
-
-  Transaction
+  ThirdPartyDashboardData
 
 } from '../types/third-parties.types';
 
@@ -98,11 +92,7 @@ import {
 
   Clock,
 
-  DollarSign,
-
-  Sparkles,
-
-  Upload
+  Sparkles
 
 } from 'lucide-react';
 
@@ -110,7 +100,7 @@ import {
 
 const ThirdPartiesPage: React.FC = () => {
 
-  const { t } = useTranslation();
+  const { t: _t } = useTranslation();
 
   const { currentEnterprise } = useEnterprise();
 
@@ -124,13 +114,13 @@ const ThirdPartiesPage: React.FC = () => {
 
   const [filteredThirdParties, setFilteredThirdParties] = useState<ThirdParty[]>([]);
 
-  const [agingReport, setAgingReport] = useState<AgingReport[]>([]);
+  const [_agingReport, setAgingReport] = useState<unknown[]>([]);
 
   const [loading, setLoading] = useState(true);
 
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  const [selectedThirdParty, setSelectedThirdParty] = useState<ThirdParty | null>(null);
+  const [_selectedThirdParty, setSelectedThirdParty] = useState<ThirdParty | null>(null);
 
   const [showFilters, setShowFilters] = useState(false);
 
@@ -285,7 +275,7 @@ const ThirdPartiesPage: React.FC = () => {
 
         id: tp.id,
 
-        type: tp.party_type,
+        type: tp.type,
 
         name: tp.name,
 
@@ -303,13 +293,13 @@ const ThirdPartiesPage: React.FC = () => {
 
         billing_address: {
 
-          street: tp.primary_address_line1 || '',
+          street: tp.address_line1 || '',
 
-          city: tp.primary_city || '',
+          city: tp.city || '',
 
-          postal_code: tp.primary_postal_code || '',
+          postal_code: tp.postal_code || '',
 
-          country: tp.primary_country || 'FR'
+          country: tp.country || 'FR'
 
         },
 
@@ -323,9 +313,9 @@ const ThirdPartiesPage: React.FC = () => {
 
         current_balance: tp.balance,
 
-        total_receivables: tp.party_type === 'customer' ? tp.balance : 0,
+        total_receivables: tp.type === 'customer' ? tp.balance : 0,
 
-        total_payables: tp.party_type === 'supplier' ? tp.balance : 0,
+        total_payables: tp.type === 'supplier' ? tp.balance : 0,
 
         tags: [],
 
@@ -514,7 +504,7 @@ const ThirdPartiesPage: React.FC = () => {
 
 
   const handleDeleteThirdParty = async (thirdParty: ThirdParty) => {
-
+    // eslint-disable-next-line no-alert
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce tiers ?')) {
 
       return;
@@ -651,7 +641,7 @@ const ThirdPartiesPage: React.FC = () => {
 
           <div className="flex items-center space-x-2">
 
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
 
               Gestion des Tiers
 

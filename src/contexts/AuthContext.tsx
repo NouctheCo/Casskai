@@ -12,7 +12,7 @@
 
 /* eslint-disable react-refresh/only-export-components */
 
-/* eslint-disable max-lines-per-function */
+ 
 
 import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode, useRef } from 'react';
 
@@ -475,6 +475,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             await switchCompany(companyToLoad.id);
 
             // Marquer le check initial comme complété après succès
+            // eslint-disable-next-line require-atomic-updates
             hasCompletedInitialCheck.current = true;
 
           } catch (switchError) {
@@ -490,6 +491,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 await switchCompany(companies[0].id);
 
                 // Marquer le check initial comme complété après succès du fallback
+                // eslint-disable-next-line require-atomic-updates
                 hasCompletedInitialCheck.current = true;
 
               } catch (fallbackError) {

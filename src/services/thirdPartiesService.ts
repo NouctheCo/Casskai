@@ -22,11 +22,7 @@ import {
 
   ThirdPartyServiceResponse,
 
-  ExportConfig,
-
-  ThirdPartyFormData,
-
-  ThirdPartyFilters
+  ExportConfig
 
 } from '@/types/third-parties.types';
 
@@ -158,7 +154,7 @@ class ThirdPartiesService {
 
         .select('*')
 
-        .eq('enterprise_id', companyId)
+        .eq('company_id', companyId)
 
         .order('name');
 
@@ -188,7 +184,7 @@ class ThirdPartiesService {
 
         billing_address: item.billing_address || {
 
-          street: item.address || '',
+          street: item.address_line1 || '',
 
           city: item.city || '',
 
@@ -702,7 +698,7 @@ class ThirdPartiesService {
 
 
 
-  async getAgingReport(enterpriseId: string): Promise<ThirdPartyServiceResponse<AgingReport[]>> {
+  async getAgingReport(_enterpriseId: string): Promise<ThirdPartyServiceResponse<AgingReport[]>> {
 
     try {
 

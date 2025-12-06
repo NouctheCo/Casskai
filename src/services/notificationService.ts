@@ -307,7 +307,7 @@ export class NotificationService {
    */
   async markAllAsRead(userId: string): Promise<NotificationServiceResponse<number>> {
     try {
-      const { data, error, count } = await supabase
+      const { data: _data, error, count } = await supabase
         .from('notifications')
         .update({
           is_read: true,
@@ -389,7 +389,7 @@ export class NotificationService {
    */
   async cleanupExpiredNotifications(): Promise<NotificationServiceResponse<number>> {
     try {
-      const { data, error, count } = await supabase
+      const { data: _data, error, count } = await supabase
         .from('notifications')
         .delete()
         .lt('expires_at', new Date().toISOString())

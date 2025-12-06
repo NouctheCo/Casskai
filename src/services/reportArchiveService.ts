@@ -389,7 +389,7 @@ class ReportArchiveService {
       const filePath = pathData as string;
 
       // Upload du fichier
-      const { data, error } = await supabase.storage
+      const { data: _data, error } = await supabase.storage
         .from('financial-reports')
         .upload(filePath, file, {
           cacheControl: '3600',
@@ -808,7 +808,7 @@ class ReportArchiveService {
   async exportReportsToZip(
     companyId: string,
     reportIds: string[],
-    zipName?: string
+    _zipName?: string
   ): Promise<ServiceResponse<Blob>> {
     try {
       // Import dynamique de JSZip

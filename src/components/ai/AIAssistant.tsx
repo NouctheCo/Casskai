@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  MessageCircle, X, Send, Mic, MicOff, Volume2, VolumeX,
+  X, Send,
   Sparkles, Loader2, ChevronDown, Plus,
   FileText, Calculator
 } from 'lucide-react';
@@ -18,16 +18,16 @@ interface AIMessage {
 }
 
 export const AIAssistant: React.FC = () => {
-  const navigate = useNavigate();
-  const { user, currentCompany } = useAuth();
+  const _navigate = useNavigate();
+  const { user: _user, currentCompany } = useAuth();
 
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [_isListening, _setIsListening] = useState(false);
+  const [_isSpeaking, _setIsSpeaking] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);

@@ -618,7 +618,7 @@ class OnboardingService {
    * Obtient les formats de date disponibles
    */
   getDateFormats(): Array<{ value: string; label: string; example: string }> {
-    const now = new Date('2024-03-15');
+    const _now = new Date('2024-03-15');
     return [
       { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY (européen)', example: '15/03/2024' },
       { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY (américain)', example: '03/15/2024' },

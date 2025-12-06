@@ -13,7 +13,7 @@ interface LicenseCheckerProps {
 export function LicenseChecker({ children, requiredFeature }: LicenseCheckerProps) {
   const [licenseService] = useState(() => LicenseService.getInstance());
   const [hasAccess, setHasAccess] = useState(false);
-  const [currentLicense, setCurrentLicense] = useState(licenseService.getCurrentLicense());
+  const [currentLicense, _setCurrentLicense] = useState(licenseService.getCurrentLicense());
 
   useEffect(() => {
     if (!requiredFeature) {

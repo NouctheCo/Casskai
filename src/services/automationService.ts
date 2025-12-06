@@ -399,7 +399,7 @@ class AutomationService {
     }
   }
 
-  private async executeAction(action: WorkflowAction, workflow: Workflow): Promise<any> {
+  private async executeAction(action: WorkflowAction, _workflow: Workflow): Promise<any> {
     switch (action.type) {
       case 'send_email':
       case 'generate_report':
@@ -408,7 +408,7 @@ class AutomationService {
         console.log(`Action ${action.type}:`, action.config);
         return { success: true };
 
-      case 'webhook_call':
+      case 'webhook_call': {
         if (!action.config.url) throw new Error('URL webhook manquante');
         const response = await fetch(action.config.url, {
           method: action.config.method || 'POST',
@@ -416,11 +416,13 @@ class AutomationService {
           body: action.config.payload ? JSON.stringify(action.config.payload) : undefined
         });
         return { status: response.status, ok: response.ok };
+      }
 
-      case 'delay':
+      case 'delay': {
         const ms = (action.config.duration || 1) * 1000;
         await new Promise(resolve => setTimeout(resolve, ms));
         return { delayed: true, duration: ms };
+      }
 
       default:
         throw new Error(`Type d'action non supporté: ${action.type}`);
@@ -463,7 +465,7 @@ class AutomationService {
     const now = new Date();
     const [hours, minutes] = (config.time || '09:00').split(':').map(Number);
 
-    let nextRun = new Date(now);
+    const nextRun = new Date(now);
     nextRun.setHours(hours, minutes, 0, 0);
 
     switch (config.frequency) {
@@ -473,7 +475,7 @@ class AutomationService {
         }
         break;
 
-      case 'weekly':
+      case 'weekly': {
         const targetDay = config.day ?? 1;
         let daysUntilTarget = targetDay - now.getDay();
         if (daysUntilTarget <= 0 || (daysUntilTarget === 0 && nextRun <= now)) {
@@ -481,14 +483,16 @@ class AutomationService {
         }
         nextRun.setDate(now.getDate() + daysUntilTarget);
         break;
+      }
 
-      case 'monthly':
+      case 'monthly': {
         const targetDayOfMonth = config.day ?? 1;
         nextRun.setDate(targetDayOfMonth);
         if (nextRun <= now) {
           nextRun.setMonth(nextRun.getMonth() + 1);
         }
         break;
+      }
     }
 
     return nextRun.toISOString();
@@ -496,3 +500,49 @@ class AutomationService {
 }
 
 export const automationService = new AutomationService();
+
+// =====================================================
+// STANDALONE EXPORTED FUNCTIONS
+// =====================================================
+
+/**
+ * Create a workflow from a template
+ */
+export async function createWorkflowFromTemplate(
+  templateId: string,
+  companyId: string,
+  _userId: string
+): Promise<Workflow> {
+  return automationService.createFromTemplate(companyId, templateId);
+}
+
+/**
+ * Toggle workflow active state
+ */
+export async function toggleWorkflow(
+  workflowId: string,
+  _companyId: string,
+  isActive: boolean
+): Promise<Workflow> {
+  return automationService.toggleWorkflow(workflowId, isActive);
+}
+
+/**
+ * Delete a workflow
+ */
+export async function deleteWorkflow(
+  workflowId: string,
+  _companyId?: string
+): Promise<void> {
+  return automationService.deleteWorkflow(workflowId);
+}
+
+/**
+ * Trigger a workflow manually
+ */
+export async function triggerWorkflowManually(
+  workflowId: string,
+  _companyId?: string
+): Promise<WorkflowExecution> {
+  return automationService.executeWorkflow(workflowId, 'manual');
+}

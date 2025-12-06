@@ -143,7 +143,7 @@ export class ErrorHandlingService {
   /**
    * Gestion centralisée des erreurs
    */
-  private handleError<T>(error: Error, context: ErrorContext): never {
+  private handleError<_T>(error: Error, context: ErrorContext): never {
     const apiError = (error as unknown as {statusCode?: string}).statusCode ? (error as unknown as ApiError) : this.createApiError(error, context);
 
     // Log error for monitoring

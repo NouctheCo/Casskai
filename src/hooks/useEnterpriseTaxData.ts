@@ -38,7 +38,7 @@ import { useToast } from '../components/ui/use-toast';
 
 import { useAuth } from '../contexts/AuthContext';
 
-import { format, addMonths, addQuarters, addYears, isBefore } from 'date-fns';
+import { format, isBefore } from 'date-fns';
 
 
 
@@ -304,7 +304,7 @@ export function useEnterpriseTaxData() {
 
       
 
-    } catch (err) {
+    } catch (_err) {
 
       console.error('...', error);
 
@@ -380,7 +380,7 @@ export function useEnterpriseTaxData() {
 
       
 
-    } catch (err) {
+    } catch (_err) {
 
       console.error('...', error);
 
@@ -584,7 +584,7 @@ export function useEnterpriseTaxData() {
 
       // Mettre à jour dans la base de données
 
-      const { data, error } = await supabase
+      const { data: _data, error } = await supabase
 
         .from('company_tax_rates')
 
@@ -880,7 +880,7 @@ export function useEnterpriseTaxData() {
 
       // Mettre à jour dans la base de données
 
-      const { data, error } = await supabase
+      const { data: _data2, error } = await supabase
 
         .from('company_tax_declarations')
 
@@ -952,7 +952,7 @@ export function useEnterpriseTaxData() {
 
       // Mettre à jour dans la base de données
 
-      const { data, error } = await supabase
+      const { data: _data3, error } = await supabase
 
         .from('company_tax_declarations')
 

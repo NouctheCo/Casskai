@@ -13,11 +13,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Building2, Mail, Phone, MapPin, User, FileText, Shield } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { EXTERNAL_LINKS } from '@/config/links';
 
 const MentionsLegalesPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t: _t } = useTranslation();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-950">

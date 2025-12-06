@@ -298,7 +298,7 @@ export class PerformanceOptimizer {
   private enableServiceWorkerCaching(): void {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js')
-        .then(registration => {
+        .then(_registration => {
           console.warn('Service Worker registered for caching optimization');
         })
         .catch(error => {

@@ -11,8 +11,8 @@
  */
 
 // src/services/accountingService.ts
-import type { AccountPlan, AccountClass, Account, AccountType } from '../types/accounting';
-import { PCG_ACCOUNTS, PCG_CLASSES } from '../data/pcg';
+import type { AccountPlan, Account, AccountType } from '../types/accounting';
+import { PCG_ACCOUNTS, PCG_CLASSES as _PCG_CLASSES } from '../data/pcg';
 import { SYSCOHADA_PLAN } from '../data/syscohada';
 import { supabase } from '../lib/supabase';
 

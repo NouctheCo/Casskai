@@ -184,7 +184,7 @@ export async function encryptData(data: any): Promise<string> {
     const encryptedBuffer = await crypto.subtle.encrypt(
       {
         name: 'AES-GCM',
-        iv: iv,
+        iv,
         tagLength: 128 // Tag d'authentification de 128 bits
       },
       cryptoKey,
@@ -192,7 +192,7 @@ export async function encryptData(data: any): Promise<string> {
     );
 
     // 6. Encoder en Base64: iv:encryptedData
-    const ivBase64 = arrayBufferToBase64(iv);
+    const ivBase64 = arrayBufferToBase64(iv.buffer);
     const encryptedBase64 = arrayBufferToBase64(encryptedBuffer);
     const result = `${ivBase64}:${encryptedBase64}`;
 
@@ -262,7 +262,7 @@ export async function decryptData(encryptedData: string): Promise<any> {
     const decryptedBuffer = await crypto.subtle.decrypt(
       {
         name: 'AES-GCM',
-        iv: iv,
+        iv,
         tagLength: 128
       },
       cryptoKey,
@@ -332,7 +332,7 @@ export const encryptionService = {
   generateKey: generateEncryptionKey,
   encrypt: encryptData,
   decrypt: decryptData,
-  isEncrypted: isEncrypted
+  isEncrypted
 };
 
 export default encryptionService;

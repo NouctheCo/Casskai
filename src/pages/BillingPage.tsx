@@ -11,7 +11,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 
 import { useSearchParams, useNavigate } from 'react-router-dom';
@@ -22,19 +22,15 @@ import { Button } from '@/components/ui/button';
 
 import { Badge } from '@/components/ui/badge';
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-import { toastError, toastSuccess, toastUpdated, toastCreated } from '@/lib/toast-helpers';
+import { toastError, toastSuccess } from '@/lib/toast-helpers';
 
 import { 
 
   CreditCard,
 
   Download,
-
-  Calendar,
 
   AlertCircle,
 
@@ -52,8 +48,6 @@ import {
 
   ArrowUpCircle,
 
-  ArrowDownCircle,
-
   Filter
 
 } from 'lucide-react';
@@ -62,25 +56,22 @@ import { useSubscription } from '@/contexts/SubscriptionContext';
 
 import { useAuth } from '@/contexts/AuthContext';
 
-import { SUBSCRIPTION_PLANS, formatPrice } from '@/types/subscription.types';
+import { formatPrice } from '@/types/subscription.types';
 
 import SubscriptionStatus from '@/components/subscription/SubscriptionStatus';
 
-import PricingCard from '@/components/subscription/PricingCard';
-
 import { TrialStatusCard, TrialActionsCard } from '@/components/TrialComponents';
-
-import { useTrial } from '@/hooks/trial.hooks';
 
 
 
 const BillingPage: React.FC = () => {
-
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [searchParams] = useSearchParams();
 
-  const { user } = useAuth();
+   
+  const { user: _user } = useAuth();
 
   const {
 
@@ -94,11 +85,14 @@ const BillingPage: React.FC = () => {
 
     paymentMethods,
 
-    defaultPaymentMethod,
+     
+    defaultPaymentMethod: _defaultPaymentMethod,
 
-    subscribe,
+     
+    subscribe: _subscribe,
 
-    updateSubscription,
+     
+    updateSubscription: _updateSubscription,
 
     refreshSubscription,
 
@@ -107,12 +101,6 @@ const BillingPage: React.FC = () => {
   } = useSubscription();
 
 
-
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-
-  const [subscriptionLoading, setSubscriptionLoading] = useState(false);
-
-  const [billingPeriod, setBillingPeriod] = useState<'month' | 'year'>('month');
 
   const [activeTab, setActiveTab] = useState<string>('overview');
 
@@ -146,7 +134,7 @@ const BillingPage: React.FC = () => {
 
     if (success === 'true') {
 
-      toastSuccess('Votre abonnement a été activé avec succès');
+      toastSuccess(t('billingPage.toasts.subscriptionActivated'));
 
       // Refresh subscription data
 
@@ -158,7 +146,7 @@ const BillingPage: React.FC = () => {
 
     } else if (canceled === 'true') {
 
-      toastError('Vous avez annulé le processus de paiement');
+      toastError(t('billingPage.toasts.paymentCanceled'));
 
       // Clean URL
 
@@ -170,103 +158,6 @@ const BillingPage: React.FC = () => {
 
 
 
-  const handleSubscribe = async (planId: string) => {
-
-    if (!user) return;
-
-
-
-    setSelectedPlan(planId);
-
-    setSubscriptionLoading(true);
-
-
-
-    try {
-
-      const result = await subscribe(planId);
-
-      
-
-      if (result.success && result.checkoutUrl) {
-
-        // In a real app, redirect to Stripe checkout
-
-        // window.location.href = result.checkoutUrl;
-
-        
-
-        // For demo, show success message
-
-        toastCreated(`Abonnement au plan ${SUBSCRIPTION_PLANS.find(p => p.id === planId)?.name}`);
-
-      } else {
-
-        toastError(result.error || 'Une erreur est survenue lors de l\'abonnement');
-
-      }
-
-    } catch (error) {
-
-      console.error('Subscription error:', error instanceof Error ? error.message : String(error));
-
-      toastError('Une erreur inattendue est survenue');
-
-    } finally {
-
-      setSubscriptionLoading(false);
-
-      setSelectedPlan(null);
-
-    }
-
-  };
-
-
-
-  const handlePlanChange = async (newPlanId: string) => {
-
-    if (!subscription) return;
-
-
-
-    setSelectedPlan(newPlanId);
-
-    setSubscriptionLoading(true);
-
-
-
-    try {
-
-      const result = await updateSubscription(newPlanId);
-
-
-
-      if (result.success) {
-
-        toastUpdated('Votre plan');
-
-      } else {
-
-        toastError(result.error || 'Une erreur est survenue lors de la modification');
-
-      }
-
-    } catch (error) {
-
-      console.error('Plan change error:', error instanceof Error ? error.message : String(error));
-
-      toastError('Une erreur inattendue est survenue');
-
-    } finally {
-
-      setSubscriptionLoading(false);
-
-      setSelectedPlan(null);
-
-    }
-
-  };
 
 
 
@@ -274,7 +165,7 @@ const BillingPage: React.FC = () => {
 
     if (!subscription) {
 
-      toastError('Vous devez avoir un abonnement actif pour ajouter une méthode de paiement');
+      toastError(t('billingPage.toasts.needSubscription'));
 
       return;
 
@@ -290,7 +181,7 @@ const BillingPage: React.FC = () => {
 
       if (!result.success) {
 
-        toastError(result.error || "Impossible d'accéder au portail de facturation.");
+        toastError(result.error || t('billingPage.toasts.portalError'));
 
       }
 
@@ -300,7 +191,7 @@ const BillingPage: React.FC = () => {
 
       console.error('Error opening billing portal:', error instanceof Error ? error.message : String(error));
 
-      toastError('Une erreur inattendue est survenue');
+      toastError(t('billingPage.toasts.unexpectedError'));
 
     }
 
@@ -308,11 +199,11 @@ const BillingPage: React.FC = () => {
 
 
 
-  const handleManagePaymentMethod = async (methodId: string) => {
+  const handleManagePaymentMethod = async (_methodId: string) => {
 
     if (!subscription) {
 
-      toastError('Vous devez avoir un abonnement actif');
+      toastError(t('billingPage.toasts.needActiveSubscription'));
 
       return;
 
@@ -330,11 +221,11 @@ const BillingPage: React.FC = () => {
 
       if (!result.success) {
 
-        toastError(result.error || "Impossible d'accéder à la gestion des paiements");
+        toastError(result.error || t('billingPage.toasts.paymentManagementError'));
 
       } else {
 
-        toastSuccess('Ouverture du portail de gestion des paiements');
+        toastSuccess(t('billingPage.toasts.paymentPortalOpening'));
 
       }
 
@@ -344,7 +235,7 @@ const BillingPage: React.FC = () => {
 
       console.error('Error managing payment method:', error instanceof Error ? error.message : String(error));
 
-      toastError("Impossible d'accéder à la gestion des méthodes de paiement");
+      toastError(t('billingPage.toasts.paymentMethodError'));
 
     }
 
@@ -352,31 +243,6 @@ const BillingPage: React.FC = () => {
 
 
 
-  const handleSetDefaultPaymentMethod = async (methodId: string) => {
-
-    try {
-
-      // Dans une vraie application, ceci ferait un appel API pour définir la méthode par défaut
-
-      // Pour l'instant, on simule le comportement
-
-      toastUpdated('Méthode de paiement par défaut');
-
-
-
-      // Recharger les données d'abonnement pour réfléter les changements
-
-      await refreshSubscription();
-
-    } catch (error) {
-
-      console.error('Error setting default payment method:', error instanceof Error ? error.message : String(error));
-
-      toastError('Impossible de définir cette méthode comme défaut');
-
-    }
-
-  };
 
 
 
@@ -386,7 +252,7 @@ const BillingPage: React.FC = () => {
 
       if (!invoice.pdfUrl) {
 
-        toastError("Le PDF de cette facture n'est pas encore disponible.");
+        toastError(t('billingPage.toasts.pdfNotAvailable'));
 
         return;
 
@@ -394,33 +260,29 @@ const BillingPage: React.FC = () => {
 
 
 
-      // Dans une vraie application, ceci téléchargerait le PDF depuis l'URL
-
-      // Pour l'instant, on simule le téléchargement
-
-      toastSuccess(`Téléchargement de la facture #${invoice.stripeInvoiceId.slice(-8)}`);
+      toastSuccess(t('billingPage.toasts.downloadingInvoice', { invoiceId: invoice.stripeInvoiceId.slice(-8) }));
 
 
 
-      // Simuler l'ouverture du PDF dans un nouvel onglet
+      // Ouvrir le PDF dans un nouvel onglet pour téléchargement
 
-      // window.open(invoice.pdfUrl, '_blank');
+      window.open(invoice.pdfUrl, '_blank');
 
 
 
-      // Pour la démo, on affiche un message de succès après un délai
+      // Message de succès
 
       setTimeout(() => {
 
-        toastSuccess("La facture a été téléchargée avec succès.");
+        toastSuccess(t('billingPage.toasts.invoiceDownloaded'));
 
-      }, 2000);
+      }, 1000);
 
     } catch (error) {
 
       console.error('Error downloading PDF:', error instanceof Error ? error.message : String(error));
 
-      toastError("Impossible de télécharger le PDF de cette facture.");
+      toastError(t('billingPage.toasts.downloadError'));
 
     }
 
@@ -434,7 +296,7 @@ const BillingPage: React.FC = () => {
 
       if (!invoice.invoiceUrl) {
 
-        toastError("Cette facture n'est pas encore accessible en ligne.");
+        toastError(t('billingPage.toasts.invoiceNotAvailable'));
 
         return;
 
@@ -442,33 +304,29 @@ const BillingPage: React.FC = () => {
 
 
 
-      // Dans une vraie application, ceci ouvrirait la facture dans Stripe ou un autre portail
-
-      // Pour l'instant, on simule l'ouverture
-
-      toastSuccess(`Accès à la facture #${invoice.stripeInvoiceId.slice(-8)}`);
+      toastSuccess(t('billingPage.toasts.accessingInvoice', { invoiceId: invoice.stripeInvoiceId.slice(-8) }));
 
 
 
-      // Simuler l'ouverture dans un nouvel onglet
+      // Ouvrir la facture Stripe dans un nouvel onglet
 
-      // window.open(invoice.invoiceUrl, '_blank');
+      window.open(invoice.invoiceUrl, '_blank');
 
 
 
-      // Pour la démo, on affiche un message informatif
+      // Message de succès
 
       setTimeout(() => {
 
-        toastSuccess("La facture s'ouvre dans un nouvel onglet.");
+        toastSuccess(t('billingPage.toasts.invoiceOpening'));
 
-      }, 2000);
+      }, 500);
 
     } catch (error) {
 
       console.error('Error viewing invoice:', error instanceof Error ? error.message : String(error));
 
-      toastError("Impossible d'ouvrir cette facture.");
+      toastError(t('billingPage.toasts.viewError'));
 
     }
 
@@ -504,23 +362,23 @@ const BillingPage: React.FC = () => {
 
       case 'paid':
 
-        return 'Payée';
+        return t('billingPage.invoices.status.paid');
 
       case 'open':
 
-        return 'En attente';
+        return t('billingPage.invoices.status.open');
 
       case 'void':
 
-        return 'Annulée';
+        return t('billingPage.invoices.status.void');
 
       case 'uncollectible':
 
-        return 'Impayée';
+        return t('billingPage.invoices.status.uncollectible');
 
       default:
 
-        return 'Inconnue';
+        return t('billingPage.invoices.status.unknown');
 
     }
 
@@ -580,17 +438,17 @@ const BillingPage: React.FC = () => {
 
         <div>
 
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white flex items-center space-x-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center space-x-2">
 
             <CreditCard className="w-8 h-8 text-blue-500" />
 
-            <span>Facturation et abonnement</span>
+            <span>{t('billingPage.title')}</span>
 
           </h1>
 
           <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mt-2">
 
-            Gérez votre abonnement, moyens de paiement et factures
+            {t('billingPage.subtitle')}
 
           </p>
 
@@ -604,7 +462,7 @@ const BillingPage: React.FC = () => {
 
             <RefreshCw className="w-4 h-4 mr-2" />
 
-            Actualiser
+            {t('billingPage.refresh')}
 
           </Button>
 
@@ -630,13 +488,13 @@ const BillingPage: React.FC = () => {
 
         <TabsList className="grid w-full grid-cols-4">
 
-          <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
+          <TabsTrigger value="overview">{t('billingPage.tabs.overview')}</TabsTrigger>
 
-          <TabsTrigger value="plans">Plans</TabsTrigger>
+          <TabsTrigger value="plans">{t('billingPage.tabs.plans')}</TabsTrigger>
 
-          <TabsTrigger value="payment">Paiement</TabsTrigger>
+          <TabsTrigger value="payment">{t('billingPage.tabs.payment')}</TabsTrigger>
 
-          <TabsTrigger value="invoices">Factures</TabsTrigger>
+          <TabsTrigger value="invoices">{t('billingPage.tabs.invoices')}</TabsTrigger>
 
         </TabsList>
 
@@ -660,15 +518,15 @@ const BillingPage: React.FC = () => {
 
                 <ArrowUpCircle className="w-8 h-8 text-blue-500 mx-auto mb-3" />
 
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
 
-                  Changer de plan
+                  {t('billingPage.quickActions.changePlan.title')}
 
                 </h3>
 
-                <p className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
 
-                  Mettez à niveau ou réduisez votre plan
+                  {t('billingPage.quickActions.changePlan.description')}
 
                 </p>
 
@@ -684,15 +542,15 @@ const BillingPage: React.FC = () => {
 
                 <CreditCard className="w-8 h-8 text-green-500 mx-auto mb-3" />
 
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
 
-                  Moyens de paiement
+                  {t('billingPage.quickActions.paymentMethods.title')}
 
                 </h3>
 
-                <p className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
 
-                  Gérez vos cartes de crédit
+                  {t('billingPage.quickActions.paymentMethods.description')}
 
                 </p>
 
@@ -708,15 +566,15 @@ const BillingPage: React.FC = () => {
 
                 <FileText className="w-8 h-8 text-purple-500 mx-auto mb-3" />
 
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
 
-                  Historique des factures
+                  {t('billingPage.quickActions.invoiceHistory.title')}
 
                 </h3>
 
-                <p className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
 
-                  Téléchargez vos factures
+                  {t('billingPage.quickActions.invoiceHistory.description')}
 
                 </p>
 
@@ -734,65 +592,103 @@ const BillingPage: React.FC = () => {
 
         <TabsContent value="plans" className="space-y-6">
 
-          <div className="flex items-center justify-between">
+          <Card className="border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/20 dark:to-gray-900">
 
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
+            <CardHeader>
 
-              Choisissez votre plan
+              <CardTitle className="text-2xl text-blue-900 dark:text-blue-100">
 
-            </h2>
+                {t('billingPage.plans.title')}
 
-            
+              </CardTitle>
 
-            <div className="flex items-center space-x-4">
+              <CardDescription>
 
-              <span className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">Facturation :</span>
+                {t('billingPage.plans.subtitle')}
 
-              <Select value={billingPeriod} onValueChange={(value: 'month' | 'year') => setBillingPeriod(value)}>
+              </CardDescription>
 
-                <SelectTrigger className="w-32">
+            </CardHeader>
 
-                  <SelectValue />
+            <CardContent className="space-y-4">
 
-                </SelectTrigger>
+              {subscription && (
 
-                <SelectContent>
+                <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-blue-200 dark:border-blue-800">
 
-                  <SelectItem value="month">Mensuelle</SelectItem>
+                  <div className="flex items-center justify-between">
 
-                  <SelectItem value="year">Annuelle (-20%)</SelectItem>
+                    <div>
 
-                </SelectContent>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{t('billingPage.plans.currentPlan')}</p>
 
-              </Select>
+                      <p className="text-xl font-bold text-gray-900 dark:text-white">
 
-            </div>
+                        {plan?.name || subscription.planId}
 
-          </div>
+                      </p>
 
-          
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {t('billingPage.plans.status')}: <Badge variant={subscription.status === 'active' ? 'default' : 'secondary'}>
 
-            {SUBSCRIPTION_PLANS.map(planOption => (
+                          {subscription.status === 'active' ? t('billingPage.plans.active') : subscription.status}
 
-              <PricingCard
+                        </Badge>
 
-                key={planOption.id}
+                      </p>
 
-                plan={planOption}
+                    </div>
 
-                isCurrentPlan={plan?.id === planOption.id}
+                    <Button
 
-                onSelect={subscription ? handlePlanChange : handleSubscribe}
+                      variant="outline"
 
-                loading={subscriptionLoading && selectedPlan === planOption.id}
+                      onClick={() => openBillingPortal()}
 
-              />
+                    >
 
-            ))}
+                      {t('billingPage.plans.manageInStripe')}
 
-          </div>
+                    </Button>
+
+                  </div>
+
+                </div>
+
+              )}
+
+
+
+              <div className="pt-4">
+
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+
+                  {t('billingPage.plans.seeAllPlansDescription')}
+
+                </p>
+
+                <Button
+
+                  onClick={() => navigate('/pricing')}
+
+                  className="w-full"
+
+                  size="lg"
+
+                >
+
+                  <ArrowUpCircle className="w-5 h-5 mr-2" />
+
+                  {t('billingPage.plans.seeAllPlans')}
+
+                </Button>
+
+              </div>
+
+            </CardContent>
+
+          </Card>
 
         </TabsContent>
 
@@ -804,9 +700,9 @@ const BillingPage: React.FC = () => {
 
           <div className="space-y-6">
 
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
 
-              Moyens de paiement
+              {t('billingPage.payment.title')}
 
             </h2>
 
@@ -838,15 +734,15 @@ const BillingPage: React.FC = () => {
 
                           <div>
 
-                            <p className="font-medium text-gray-900 dark:text-gray-100 dark:text-white">
+                            <p className="font-medium text-gray-900 dark:text-white">
 
                               •••• •••• •••• {method.last4}
 
                             </p>
 
-                            <p className="text-sm text-gray-500 dark:text-gray-300 dark:text-gray-300">
+                            <p className="text-sm text-gray-500 dark:text-gray-300">
 
-                              Expire {method.expiryMonth}/{method.expiryYear}
+                              {t('billingPage.payment.expires')} {method.expiryMonth}/{method.expiryYear}
 
                             </p>
 
@@ -854,7 +750,7 @@ const BillingPage: React.FC = () => {
 
                           {method.isDefault && (
 
-                            <Badge variant="secondary">Par défaut</Badge>
+                            <Badge variant="secondary">{t('billingPage.payment.default')}</Badge>
 
                           )}
 
@@ -866,17 +762,17 @@ const BillingPage: React.FC = () => {
 
                           {!method.isDefault && (
 
-                            <Button 
+                            <Button
 
-                              variant="outline" 
+                              variant="outline"
 
                               size="sm"
 
-                              onClick={() => handleSetDefaultPaymentMethod(method.id)}
+                              onClick={() => handleManagePaymentMethod(method.id)}
 
                             >
 
-                              Définir par défaut
+                              {t('billingPage.payment.setDefault')}
 
                             </Button>
 
@@ -894,7 +790,7 @@ const BillingPage: React.FC = () => {
 
                             <Settings className="w-4 h-4 mr-1" />
 
-                            Gérer
+                            {t('billingPage.payment.manage')}
 
                           </Button>
 
@@ -920,7 +816,7 @@ const BillingPage: React.FC = () => {
 
                     <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-4 text-sm">
 
-                      Ajouter une nouvelle méthode de paiement
+                      {t('billingPage.payment.addNew')}
 
                     </p>
 
@@ -936,7 +832,7 @@ const BillingPage: React.FC = () => {
 
                       <CreditCard className="w-4 h-4 mr-2" />
 
-                      Ajouter une carte
+                      {t('billingPage.payment.addCard')}
 
                     </Button>
 
@@ -954,21 +850,21 @@ const BillingPage: React.FC = () => {
 
                   <CreditCard className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
 
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
 
-                    Aucun moyen de paiement
+                    {t('billingPage.payment.noMethods.title')}
 
                   </h3>
 
                   <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-6">
 
-                    Ajoutez une carte de crédit pour gérer vos paiements
+                    {t('billingPage.payment.noMethods.description')}
 
                   </p>
 
                   <Button onClick={() => handleAddPaymentMethod()}>
 
-                    Ajouter une carte
+                    {t('billingPage.payment.addCard')}
 
                   </Button>
 
@@ -990,9 +886,9 @@ const BillingPage: React.FC = () => {
 
           <div className="flex items-center justify-between">
 
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
 
-              Historique des factures
+              {t('billingPage.invoices.title')}
 
             </h2>
 
@@ -1002,7 +898,7 @@ const BillingPage: React.FC = () => {
 
               <Filter className="w-4 h-4 mr-2" />
 
-              Filtrer
+              {t('billingPage.invoices.filter')}
 
             </Button>
 
@@ -1026,31 +922,31 @@ const BillingPage: React.FC = () => {
 
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wider">
 
-                          Facture
+                          {t('billingPage.invoices.table.invoice')}
 
                         </th>
 
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wider">
 
-                          Statut
+                          {t('billingPage.invoices.table.status')}
 
                         </th>
 
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wider">
 
-                          Montant
+                          {t('billingPage.invoices.table.amount')}
 
                         </th>
 
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wider">
 
-                          Date
+                          {t('billingPage.invoices.table.date')}
 
                         </th>
 
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wider">
 
-                          Actions
+                          {t('billingPage.invoices.table.actions')}
 
                         </th>
 
@@ -1066,13 +962,13 @@ const BillingPage: React.FC = () => {
 
                           <td className="px-6 py-4 whitespace-nowrap">
 
-                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100 dark:text-white">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">
 
                               #{invoice.stripeInvoiceId.slice(-8)}
 
                             </div>
 
-                            <div className="text-sm text-gray-500 dark:text-gray-300 dark:text-gray-300">
+                            <div className="text-sm text-gray-500 dark:text-gray-300">
 
                               {invoice.createdAt.toLocaleDateString('fr-FR')}
 
@@ -1086,7 +982,7 @@ const BillingPage: React.FC = () => {
 
                               {getInvoiceStatusIcon(invoice.status)}
 
-                              <span className="text-sm text-gray-900 dark:text-gray-100 dark:text-white">
+                              <span className="text-sm text-gray-900 dark:text-white">
 
                                 {getInvoiceStatusLabel(invoice.status)}
 
@@ -1096,13 +992,13 @@ const BillingPage: React.FC = () => {
 
                           </td>
 
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 dark:text-white">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
 
                             {formatPrice(invoice.amount, invoice.currency)}
 
                           </td>
 
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 dark:text-gray-300">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
 
                             {invoice.dueDate.toLocaleDateString('fr-FR')}
 
@@ -1126,7 +1022,7 @@ const BillingPage: React.FC = () => {
 
                                   <Download className="w-4 h-4 mr-1" />
 
-                                  PDF
+                                  {t('billingPage.invoices.pdf')}
 
                                 </Button>
 
@@ -1146,7 +1042,7 @@ const BillingPage: React.FC = () => {
 
                                   <ExternalLink className="w-4 h-4 mr-1" />
 
-                                  Voir
+                                  {t('billingPage.invoices.view')}
 
                                 </Button>
 
@@ -1178,15 +1074,15 @@ const BillingPage: React.FC = () => {
 
                 <FileText className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
 
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
 
-                  Aucune facture
+                  {t('billingPage.invoices.noInvoices.title')}
 
                 </h3>
 
-                <p className="text-gray-600 dark:text-gray-300 dark:text-gray-300">
+                <p className="text-gray-600 dark:text-gray-300">
 
-                  Vos factures apparaîtront ici une fois que vous aurez un abonnement actif
+                  {t('billingPage.invoices.noInvoices.description')}
 
                 </p>
 

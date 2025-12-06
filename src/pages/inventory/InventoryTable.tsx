@@ -54,7 +54,7 @@ export function InventoryTable({
   onSelectItem,
   onStockMovement,
 }: InventoryTableProps) {
-  const { t } = useLocale();
+  const { t: _t } = useLocale();
 
   return (
     <Card>

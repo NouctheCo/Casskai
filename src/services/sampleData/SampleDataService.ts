@@ -189,7 +189,7 @@ export class SampleDataService {
   }
 
   // Données d'exemple pour fournisseurs
-  private getSampleSuppliers(config: ChartOfAccountsConfig) {
+  private getSampleSuppliers(_config: ChartOfAccountsConfig) {
     return [
       {
         name: 'FOURNISSEUR GLOBAL SARL',
@@ -418,7 +418,7 @@ export class SampleDataService {
 
         for (const transaction of transactions) {
           // Créer l'écriture comptable
-          const { data: journalEntry, error: journalError } = await supabase
+          const { data: journalEntry, error: _journalError } = await supabase
             .from('journal_entries')
             .insert({
               company_id: this.companyId,

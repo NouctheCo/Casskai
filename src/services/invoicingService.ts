@@ -131,7 +131,7 @@ class InvoicingService {
         .from('invoices')
         .select(`
           *,
-          third_party:third_parties(id, name, email, phone, address, city, postal_code, country),
+          third_party:third_parties(id, name, email, phone, address_line1, city, postal_code, country),
           invoice_lines(id, description, quantity, unit_price, discount_percent, tax_rate, line_total, line_order)
         `)
         .eq('company_id', companyId);
@@ -145,7 +145,7 @@ class InvoicingService {
       }
 
       // Tri
-      const orderBy = options?.orderBy || 'issue_date';
+      const orderBy = options?.orderBy || 'invoice_date';
       const orderDirection = options?.orderDirection || 'desc';
       query = query.order(orderBy, { ascending: orderDirection === 'asc' });
 
@@ -524,12 +524,12 @@ class InvoicingService {
         .from('invoices')
         .select('*')
         .eq('company_id', companyId);
-      
+
       if (params?.periodStart) {
-        invoicesQuery = invoicesQuery.gte('issue_date', params.periodStart);
+        invoicesQuery = invoicesQuery.gte('invoice_date', params.periodStart);
       }
       if (params?.periodEnd) {
-        invoicesQuery = invoicesQuery.lte('issue_date', params.periodEnd);
+        invoicesQuery = invoicesQuery.lte('invoice_date', params.periodEnd);
       }
       
       const { data: invoices, error: invoicesError } = await invoicesQuery;
@@ -540,7 +540,7 @@ class InvoicingService {
         .from('third_parties')
         .select('id')
         .eq('company_id', companyId)
-        .eq('client_type', 'customer');
+        .eq('party_type', 'customer');
       if (clientsError) throw clientsError;
       
       // Get quotes count (assuming quotes are stored in a quotes table or as draft invoices)
@@ -548,8 +548,8 @@ class InvoicingService {
         .from('invoices')
         .select('id')
         .eq('company_id', companyId)
-        .eq('type', 'quote');
-      if (quotesError) logger.warn('InvoicingService: Quotes table might not exist', quotesError);
+        .eq('invoice_type', 'quote');
+      if (quotesError) logger.warn('InvoicingService: Quotes table might not exist', { error: quotesError });
       
       const invoicesList = invoices || [];
       const clientsList = clients || [];

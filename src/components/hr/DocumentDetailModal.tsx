@@ -5,7 +5,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { X, Send, FileSignature, Archive, Download } from 'lucide-react';
+import { X, Send, FileSignature, Archive } from 'lucide-react';
 import { DOCUMENT_TYPE_LABELS } from '@/data/hr-document-templates-defaults';
 import type { GeneratedDocument, GeneratedDocumentStatus } from '@/types/hr-document-templates.types';
 import { createSafeHTML } from '@/utils/sanitize';

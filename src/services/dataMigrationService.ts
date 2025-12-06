@@ -65,7 +65,7 @@ class DataMigrationService {
       }
 
       // 3. Créer un abonnement d'essai
-      const { data: trialResult, error: trialError } = await supabase
+      const { data: _trialResult, error: trialError } = await supabase
         .rpc('create_trial_subscription', {
           p_user_id: userId,
           p_company_id: companyId

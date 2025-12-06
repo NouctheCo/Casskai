@@ -16,7 +16,7 @@ import { useNavigate } from 'react-router-dom';
 
 
 
-export const ThirdPartyListItem = ({ thirdParty, onEdit, onDelete, onView, formatCurrency }) => {
+export const ThirdPartyListItem = ({ thirdParty, onEdit, onDelete: _onDelete, onView, formatCurrency }) => {
 
   const { t } = useLocale();
 

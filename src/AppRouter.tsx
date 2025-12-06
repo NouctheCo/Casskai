@@ -26,6 +26,7 @@ import ProtectedRoute from '@/components/guards/ProtectedRoute';
 const LazyLandingPage = React.lazy(() => import('@/pages/LandingPage'));
 const LazyDashboardPage = React.lazy(() => import('@/pages/DashboardPage'));
 const LazyAccountingPage = React.lazy(() => import('@/pages/AccountingPage'));
+const LazyAssetsPage = React.lazy(() => import('@/pages/AssetsPage'));
 const LazyInvoicingPage = React.lazy(() => import('@/pages/InvoicingPage'));
 const LazyBanksPage = React.lazy(() => import('@/pages/BanksPage'));
 const LazyReportsPage = React.lazy(() => import('@/pages/ReportsPage'));
@@ -241,6 +242,13 @@ const AppRouter: React.FC = () => {
               <ProtectedRoute>
                 <Suspense fallback={<LoadingFallback />}>
                   <LazyAccountingPage />
+                </Suspense>
+              </ProtectedRoute>
+            } />
+            <Route path="assets" element={
+              <ProtectedRoute>
+                <Suspense fallback={<LoadingFallback />}>
+                  <LazyAssetsPage />
                 </Suspense>
               </ProtectedRoute>
             } />

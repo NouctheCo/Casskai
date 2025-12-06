@@ -64,7 +64,7 @@ export function useReportsData() {
 
       setRecentReports(reports);
 
-    } catch (error) {
+    } catch (_error) {
 
       showToast('Impossible de charger les rapports récents', 'error');
 
@@ -104,7 +104,7 @@ export function useReportsData() {
 
       await loadRecentReports();
 
-    } catch (error) {
+    } catch (_error) {
 
       showToast('Impossible de générer le rapport', 'error');
 

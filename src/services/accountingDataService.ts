@@ -158,7 +158,7 @@ export class AccountingDataService {
 
       // TODO: Remplacer par l'appel réel à Supabase
 
-      const query = `
+      const _query = `
 
         SELECT
 

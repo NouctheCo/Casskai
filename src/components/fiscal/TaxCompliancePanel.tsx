@@ -9,8 +9,6 @@ import { Badge } from '@/components/ui/badge';
 
 import { Progress } from '@/components/ui/progress';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 import { useToast } from '@/components/ui/use-toast';
@@ -46,8 +44,6 @@ import {
 } from 'lucide-react';
 
 import { useTaxCompliance } from '@/hooks/useTaxCompliance';
-
-import { COUNTRY_TAX_CONFIGS } from '@/services/fiscal/MultiCountryTaxService';
 
 
 
@@ -88,7 +84,7 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
 
     integrationStatus,
 
-    countryConfig,
+    countryConfig: _countryConfig,
 
     countryName,
 
@@ -108,7 +104,7 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
 
     exportTaxData,
 
-    validateCompliance,
+    validateCompliance: _validateCompliance,
 
     syncWithModules,
 
@@ -166,7 +162,7 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
 
       });
 
-    } catch (error) {
+    } catch (_error) {
 
       // Error is already handled by the hook
 
@@ -194,7 +190,7 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
 
       }
 
-    } catch (error) {
+    } catch (_error) {
 
       // Error is already handled by the hook
 
@@ -244,7 +240,7 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
 
       }
 
-    } catch (error) {
+    } catch (_error) {
 
       // Error is already handled by the hook
 
@@ -302,7 +298,7 @@ export const TaxCompliancePanel: React.FC<TaxCompliancePanelProps> = ({
 
 
 
-  const formatCurrency = (amount: number) => {
+  const _formatCurrency = (amount: number) => {
 
     return new Intl.NumberFormat('fr-FR', {
 

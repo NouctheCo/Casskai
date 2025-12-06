@@ -31,6 +31,8 @@ export const AuthForm: React.FC = () => {
   const [error, setError] = useState('');
 
   const [success, setSuccess] = useState('');
+  const [signInForm, setSignInForm] = useState({ email: '', password: '' });
+  const [signUpForm, setSignUpForm] = useState({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
 
 
 
@@ -49,12 +51,6 @@ export const AuthForm: React.FC = () => {
     return <Navigate to="/onboarding" replace />;
 
   }
-
-
-
-  const [signInForm, setSignInForm] = useState({ email: '', password: '' });
-
-  const [signUpForm, setSignUpForm] = useState({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
 
 
 
@@ -338,3 +334,5 @@ const AuthGuardComp: React.FC<AuthGuardProps> = ({ children }) => {
   return <>{children}</>;
 
 };
+
+export const AuthGuard = AuthGuardComp;

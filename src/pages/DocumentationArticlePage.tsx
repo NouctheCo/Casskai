@@ -18,8 +18,6 @@ import { useTranslation } from 'react-i18next';
 
 import { toastSuccess } from '@/lib/toast-helpers';
 
-import { motion } from 'framer-motion';
-
 import {
 
   ArrowLeft,
@@ -31,8 +29,6 @@ import {
   Calendar,
 
   BookOpen,
-
-  CheckCircle,
 
   ArrowRight,
 
@@ -55,8 +51,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 import { Button } from '@/components/ui/button';
-
-import { PageContainer } from '@/components/ui/PageContainer';
 
 import { PublicNavigation } from '@/components/navigation/PublicNavigation';
 
@@ -3780,7 +3774,7 @@ const DocumentationArticlePage = () => {
 
   const navigate = useNavigate();
 
-  const { t } = useTranslation();
+  const { t: _t } = useTranslation();
 
   const [hasRated, setHasRated] = useState(false);
 
@@ -3822,7 +3816,7 @@ const DocumentationArticlePage = () => {
 
         });
 
-      } catch (error) {
+      } catch (_error) {
 
         console.log('Partage annulé');
 
@@ -3846,7 +3840,7 @@ const DocumentationArticlePage = () => {
 
       toastSuccess("Le lien de l'article a été copié dans le presse-papiers");
 
-    } catch (error) {
+    } catch (_error) {
 
       toastSuccess("Impossible de copier le lien");
 

@@ -32,8 +32,6 @@ import {
 
   Edit, 
 
-  Copy, 
-
   Ban, 
 
   UserCheck,
@@ -82,7 +80,7 @@ import { PublicNavigation } from '@/components/navigation/PublicNavigation';
 
 const GDPRPage = () => {
 
-  const { t, i18n } = useTranslation();
+  const { t: _t, i18n } = useTranslation();
 
 
 

@@ -106,17 +106,17 @@ class QuotesService {
     try {
       const companyId = await this.getCurrentCompanyId();
       
-      // For now, we'll use the invoices table with type='quote'
+      // For now, we'll use the invoices table with invoice_type='quote'
       // In a real implementation, you might have a separate quotes table
       let query = supabase
         .from('invoices')
         .select(`
           *,
-          third_party:third_parties(id, name, email, phone, address, city, postal_code, country),
+          third_party:third_parties(id, name, email, phone, address_line1, city, postal_code, country),
           invoice_lines(id, description, quantity, unit_price, discount_percent, tax_rate, line_total, line_order)
         `)
         .eq('company_id', companyId)
-        .eq('type', 'quote');
+        .eq('invoice_type', 'quote');
 
       // Filters
       if (options?.status) {
@@ -127,7 +127,7 @@ class QuotesService {
       }
 
       // Sorting
-      const orderBy = options?.orderBy || 'issue_date';
+      const orderBy = options?.orderBy || 'invoice_date';
       const orderDirection = options?.orderDirection || 'desc';
       query = query.order(orderBy, { ascending: orderDirection === 'asc' });
 
@@ -153,7 +153,7 @@ class QuotesService {
         third_party_id: invoice.third_party_id,
         quote_number: invoice.invoice_number,
         status: invoice.status as Quote['status'],
-        issue_date: invoice.issue_date,
+        issue_date: invoice.invoice_date,
         valid_until: invoice.due_date, // Using due_date as valid_until
         subtotal: invoice.subtotal,
         tax_amount: invoice.tax_amount,
@@ -194,12 +194,12 @@ class QuotesService {
         .from('invoices')
         .select(`
           *,
-          third_party:third_parties(id, name, email, phone, address, city, postal_code, country),
+          third_party:third_parties(id, name, email, phone, address_line1, city, postal_code, country),
           invoice_lines(id, description, quantity, unit_price, discount_percent, tax_rate, line_total, line_order)
         `)
         .eq('id', id)
         .eq('company_id', companyId)
-        .eq('type', 'quote')
+        .eq('invoice_type', 'quote')
         .single();
 
       if (error) {
@@ -345,7 +345,7 @@ class QuotesService {
         .update({ status })
         .eq('id', id)
         .eq('company_id', companyId)
-        .eq('type', 'quote');
+        .eq('invoice_type', 'quote');
 
       if (error) {
         throw new Error(`Failed to update quote status: ${error.message}`);
@@ -446,7 +446,7 @@ class QuotesService {
         .delete()
         .eq('id', id)
         .eq('company_id', companyId)
-        .eq('type', 'quote');
+        .eq('invoice_type', 'quote');
 
       if (error) {
         throw new Error(`Failed to delete quote: ${error.message}`);
@@ -466,7 +466,7 @@ class QuotesService {
         .from('invoices')
         .select('invoice_number')
         .eq('company_id', companyId)
-        .eq('type', 'quote')
+        .eq('invoice_type', 'quote')
         .order('created_at', { ascending: false })
         .limit(1);
 

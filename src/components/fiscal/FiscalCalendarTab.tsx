@@ -1,6 +1,6 @@
 // FiscalCalendarTab.tsx - Interactive Fiscal Calendar Component
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +13,6 @@ import {
   Clock,
   CheckCircle,
   AlertTriangle,
-  Filter,
   Download,
   TrendingUp
 } from 'lucide-react';
@@ -28,11 +27,11 @@ interface FiscalCalendarTabProps {
 
 export const FiscalCalendarTab: React.FC<FiscalCalendarTabProps> = ({
   countryCode,
-  enterpriseId,
+  enterpriseId: _enterpriseId,
   completedEventIds = []
 }) => {
   const currentYear = new Date().getFullYear();
-  const currentMonth = new Date().getMonth();
+  const _currentMonth = new Date().getMonth();
 
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [selectedMonth, setSelectedMonth] = useState<number | 'all'>('all');

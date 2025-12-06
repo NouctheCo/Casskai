@@ -23,8 +23,6 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import {
-  CalendarDays,
-  Clock,
   TrendingUp,
   Zap,
   Shield,
@@ -35,7 +33,6 @@ import {
   CheckCircle2,
   Sparkles
 } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 
 interface TrialEngagement {

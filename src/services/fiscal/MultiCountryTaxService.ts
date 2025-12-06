@@ -13,7 +13,7 @@
 /* eslint-disable max-lines */
 // Service fiscal multi-pays pour CassKai
 import { frenchTaxComplianceService } from './FrenchTaxComplianceService';
-import { getTaxConfiguration, TAX_CONFIGURATIONS } from '../../data/taxConfigurations';
+import { getTaxConfiguration } from '../../data/taxConfigurations';
 
 export interface CountryTaxConfig {
   country: string;

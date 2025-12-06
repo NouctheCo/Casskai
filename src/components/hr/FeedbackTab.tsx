@@ -14,8 +14,7 @@ import {
   ThumbsUp,
   AlertCircle,
   Lightbulb,
-  Award,
-  Heart
+  Award
 } from 'lucide-react';
 import { hrPerformanceService } from '@/services/hrPerformanceService';
 import { FeedbackFormModal } from './FeedbackFormModal';
@@ -27,7 +26,7 @@ interface FeedbackTabProps {
   currentUserId: string;
 }
 
-export function FeedbackTab({ companyId, employees, currentUserId }: FeedbackTabProps) {
+export function FeedbackTab({ companyId, employees, currentUserId: _currentUserId }: FeedbackTabProps) {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');

@@ -687,7 +687,7 @@ export class WebhookMiddleware {
             error: result.error?.message || 'Webhook processing failed'
           });
         }
-      } catch (error) {
+      } catch (_error) {
         console.error('Webhook middleware error');
         res.status(500).json({
           error: 'Internal server error'
@@ -719,7 +719,7 @@ export class WebhookMiddleware {
         }
 
         next();
-      } catch (error) {
+      } catch (_error) {
         res.status(500).json({
           error: 'Validation failed'
         });

@@ -10,7 +10,6 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  GraduationCap,
   Plus,
   Search,
   Calendar,
@@ -18,11 +17,13 @@ import {
   Award,
   BookOpen,
   CheckCircle,
-  Clock,
-  TrendingUp
+  Clock
 } from 'lucide-react';
 import { hrTrainingService } from '@/services/hrTrainingService';
 import type { TrainingCatalog, TrainingSession, TrainingEnrollment, Certification } from '@/types/hr-training.types';
+import { TrainingFormModal } from './TrainingFormModal';
+import { SessionFormModal } from './SessionFormModal';
+import { CertificationFormModal } from './CertificationFormModal';
 
 interface TrainingTabProps {
   companyId: string;
@@ -30,7 +31,7 @@ interface TrainingTabProps {
   currentUserId: string;
 }
 
-export function TrainingTab({ companyId, employees, currentUserId }: TrainingTabProps) {
+export function TrainingTab({ companyId, employees: _employees, currentUserId: _currentUserId }: TrainingTabProps) {
   const [trainings, setTrainings] = useState<TrainingCatalog[]>([]);
   const [sessions, setSessions] = useState<TrainingSession[]>([]);
   const [enrollments, setEnrollments] = useState<TrainingEnrollment[]>([]);
@@ -38,6 +39,11 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('catalog');
+
+  // Modal states
+  const [showTrainingModal, setShowTrainingModal] = useState(false);
+  const [showSessionModal, setShowSessionModal] = useState(false);
+  const [showCertificationModal, setShowCertificationModal] = useState(false);
 
   useEffect(() => {
     loadAllData();
@@ -58,6 +64,37 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
     if (certificationsRes.success && certificationsRes.data) setCertifications(certificationsRes.data);
 
     setLoading(false);
+  };
+
+  // Handlers pour les modaux
+  const handleCreateTraining = async (formData: any) => {
+    const result = await hrTrainingService.createTrainingCatalog(companyId, formData);
+    if (result.success) {
+      await loadAllData();
+      setShowTrainingModal(false);
+      return true;
+    }
+    return false;
+  };
+
+  const handleCreateSession = async (formData: any) => {
+    const result = await hrTrainingService.createSession(companyId, formData);
+    if (result.success) {
+      await loadAllData();
+      setShowSessionModal(false);
+      return true;
+    }
+    return false;
+  };
+
+  const handleCreateCertification = async (formData: any) => {
+    const result = await hrTrainingService.createCertification(companyId, formData);
+    if (result.success) {
+      await loadAllData();
+      setShowCertificationModal(false);
+      return true;
+    }
+    return false;
   };
 
   const getCategoryColor = (category: string) => {
@@ -208,7 +245,7 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
         {/* Catalogue */}
         <TabsContent value="catalog" className="space-y-4">
           <div className="flex justify-end">
-            <Button>
+            <Button onClick={() => setShowTrainingModal(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Nouvelle formation
             </Button>
@@ -226,7 +263,7 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
                     <p className="text-gray-600 dark:text-gray-300 mb-4">
                       Commencez par ajouter des formations au catalogue
                     </p>
-                    <Button>
+                    <Button onClick={() => setShowTrainingModal(true)}>
                       <Plus className="w-4 h-4 mr-2" />
                       Ajouter une formation
                     </Button>
@@ -286,7 +323,7 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
         {/* Sessions */}
         <TabsContent value="sessions" className="space-y-4">
           <div className="flex justify-end">
-            <Button>
+            <Button onClick={() => setShowSessionModal(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Nouvelle session
             </Button>
@@ -304,7 +341,7 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
                     <p className="text-gray-600 dark:text-gray-300 mb-4">
                       Planifiez votre première session de formation
                     </p>
-                    <Button>
+                    <Button onClick={() => setShowSessionModal(true)}>
                       <Plus className="w-4 h-4 mr-2" />
                       Planifier une session
                     </Button>
@@ -391,7 +428,7 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
         {/* Certifications */}
         <TabsContent value="certifications" className="space-y-4">
           <div className="flex justify-end">
-            <Button>
+            <Button onClick={() => setShowCertificationModal(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Nouvelle certification
             </Button>
@@ -409,7 +446,7 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
                     <p className="text-gray-600 dark:text-gray-300 mb-4">
                       Enregistrez les certifications des employés
                     </p>
-                    <Button>
+                    <Button onClick={() => setShowCertificationModal(true)}>
                       <Plus className="w-4 h-4 mr-2" />
                       Ajouter une certification
                     </Button>
@@ -487,6 +524,30 @@ export function TrainingTab({ companyId, employees, currentUserId }: TrainingTab
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Modaux */}
+      <TrainingFormModal
+        isOpen={showTrainingModal}
+        onClose={() => setShowTrainingModal(false)}
+        onSubmit={handleCreateTraining}
+        training={null}
+      />
+
+      <SessionFormModal
+        isOpen={showSessionModal}
+        onClose={() => setShowSessionModal(false)}
+        onSubmit={handleCreateSession}
+        session={null}
+        trainingCatalog={trainings.map(t => ({ id: t.id, title: t.title }))}
+      />
+
+      <CertificationFormModal
+        isOpen={showCertificationModal}
+        onClose={() => setShowCertificationModal(false)}
+        onSubmit={handleCreateCertification}
+        certification={null}
+        employees={_employees}
+      />
     </div>
   );
 }

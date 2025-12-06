@@ -10,52 +10,63 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
-// Dashboard Page pour CassKai - Version Enterprise
-import React from 'react';
-import { useEnterprise } from '@/contexts/EnterpriseContext';
-import { EnterpriseDashboard } from '@/components/dashboard/EnterpriseDashboard';
-import { DashboardErrorBoundary } from '@/components/dashboard/DashboardErrorBoundary';
-import { Building } from 'lucide-react';
-
-const DashboardPage = () => {
-  const { currentEnterprise } = useEnterprise();
-
-  // Si pas d'entreprise sélectionnée, afficher un message
-  if (!currentEnterprise) {
-    return (
-      <div className="flex items-center justify-center min-h-96 p-8">
-        <div className="text-center max-w-md">
-          <div className="mb-6">
-            <Building className="h-20 w-20 text-blue-400 mx-auto" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-            Aucune entreprise configurée
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-            Pour accéder au dashboard, vous devez d'abord créer votre entreprise via le processus d'onboarding.
-          </p>
-          <button
-            onClick={() => window.location.href = '/onboarding'}
-            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <Building className="h-5 w-5 mr-2" />
-            Créer mon entreprise
-          </button>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">
-            L'onboarding vous guidera dans la configuration de votre première entreprise
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <DashboardErrorBoundary>
-        <EnterpriseDashboard />
-      </DashboardErrorBoundary>
-    </>
-  );
-};
-
+// Dashboard Page pour CassKai - Version Opérationnelle
+import React from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { RealOperationalDashboard } from '@/components/dashboard/RealOperationalDashboard';
+import { DashboardErrorBoundary } from '@/components/dashboard/DashboardErrorBoundary';
+import { WelcomeTourBanner } from '@/components/dashboard/WelcomeTourBanner';
+import { OnboardingTour } from '@/components/dashboard/OnboardingTour';
+import { Building } from 'lucide-react';
+
+const DashboardPage = () => {
+  const { currentCompany } = useAuth();
+
+  // Si pas d'entreprise sélectionnée, afficher un message
+  if (!currentCompany) {
+    return (
+      <div className="flex items-center justify-center min-h-96 p-8">
+        <div className="text-center max-w-md">
+          <div className="mb-6">
+            <Building className="h-20 w-20 text-blue-400 mx-auto" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+            Aucune entreprise configurée
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+            Pour accéder au dashboard, vous devez d'abord créer votre entreprise via le processus d'onboarding.
+          </p>
+          <button
+            onClick={() => window.location.href = '/onboarding'}
+            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Building className="h-5 w-5 mr-2" />
+            Créer mon entreprise
+          </button>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">
+            L'onboarding vous guidera dans la configuration de votre première entreprise
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <DashboardErrorBoundary>
+        <RealOperationalDashboard />
+      </DashboardErrorBoundary>
+
+      {/* Welcome Tour Banner */}
+      <WelcomeTourBanner />
+
+      {/* Onboarding Tour */}
+      <OnboardingTour
+        isNewAccount={!currentCompany?.onboarding_completed_at}
+        companyName={currentCompany?.name || ''}
+      />
+    </>
+  );
+};
+
 export default DashboardPage;

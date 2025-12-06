@@ -16,7 +16,7 @@ export const CountrySelector: React.FC<CountrySelectorProps> = ({
   selectedCountry,
   onCountryChange,
   className = "",
-  showAfricanFirst = true
+  showAfricanFirst: _showAfricanFirst = true
 }) => {
   const { t } = useTranslation();
 

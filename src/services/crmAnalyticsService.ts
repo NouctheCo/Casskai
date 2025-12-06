@@ -364,7 +364,7 @@ class CRMAnalyticsService {
   ): ClientHealthScore[] {
     return clients.map(client => {
       const clientOpportunities = opportunities.filter(o => o.client_id === client.id);
-      const clientActions = actions.filter(a => a.client_id === client.id);
+      const _clientActions = actions.filter(a => a.client_id === client.id);
 
       // Revenue contribution
       const totalRevenue = client.total_revenue || 0;

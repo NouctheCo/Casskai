@@ -11,11 +11,12 @@
  */
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 import { toastSuccess } from '@/lib/toast-helpers';
 import {
   Factory,
@@ -29,7 +30,6 @@ import {
   Upload,
   Scan
 } from 'lucide-react';
-import { motion } from 'framer-motion';
 interface InventoryItem {
   id: string;
   name: string;
@@ -106,7 +106,7 @@ interface Supplier {
   totalAmount: number;
 }
 
-interface InventoryTabsProps {
+interface _InventoryTabsProps {
   inventoryItems: InventoryItem[];
   stockMovements: StockMovement[];
   computedMetrics: ComputedMetrics;
@@ -350,7 +350,7 @@ export function AlertsTab({ inventoryItems, onStockMovement }: { inventoryItems:
   );
 }
 
-export function ReportsTab({ computedMetrics, inventoryItems, stockMovements }: { computedMetrics: ComputedMetrics; inventoryItems: InventoryItem[]; stockMovements: StockMovement[] }) {
+export function ReportsTab({ computedMetrics, inventoryItems, _stockMovements }: { computedMetrics: ComputedMetrics; inventoryItems: InventoryItem[]; _stockMovements: StockMovement[] }) {
   return (
     <Card>
       <CardHeader>

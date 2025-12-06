@@ -338,7 +338,7 @@ export class ModuleTestService {
   }
 
   // Test de performance pour l'activation
-  static async simulateModuleActivation(moduleId: string): Promise<{
+  static async simulateModuleActivation(_moduleId: string): Promise<{
     success: boolean;
     duration: number;
     steps: Array<{ name: string; duration: number; success: boolean }>;

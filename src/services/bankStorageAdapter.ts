@@ -16,7 +16,7 @@
  */
 
 import { supabase } from '@/lib/supabase';
-import { bankImportService, BankTransaction, ImportResult } from './bankImportService';
+import { bankImportService, ImportResult } from './bankImportService';
 
 export interface ImportedFile {
   id: string;
@@ -65,7 +65,7 @@ class BankStorageAdapter {
   /**
    * Crée un compte bancaire par défaut si aucun n'existe
    */
-  async ensureDefaultAccount(companyId: string, userId: string) {
+  async ensureDefaultAccount(companyId: string, _userId: string) {
     const accounts = await this.loadBankAccounts(companyId);
 
     if (accounts.length === 0) {

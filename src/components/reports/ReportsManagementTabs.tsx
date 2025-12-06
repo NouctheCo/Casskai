@@ -20,7 +20,7 @@ export function ReportsManagementTabs({ companyId }: ReportsManagementTabsProps)
   const [activeTab, setActiveTab] = useState('generation');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const refreshAll = () => {
+  const _refreshAll = () => {
     setRefreshTrigger(prev => prev + 1);
   };
 

@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import {
-  Archive, Download, Eye, Search, AlertCircle, CheckCircle,
+  Archive, Download, Search, AlertCircle, CheckCircle,
   Calendar, HardDrive, FileText, Shield, RefreshCw, Scale
 } from 'lucide-react';
 import { reportArchiveService, type ReportArchive, type ArchiveStats } from '@/services/reportArchiveService';

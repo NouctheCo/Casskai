@@ -772,7 +772,7 @@ export function formatCurrency(amount: number, locale: string, currency?: string
 
     }).format(amount);
 
-  } catch (err) {
+  } catch (_err) {
 
     return `${amount} ${detectedCurrency || 'EUR'}`;
 
@@ -790,7 +790,7 @@ export function formatNumber(value: number, locale: string): string {
 
     return new Intl.NumberFormat(locale.startsWith('fr') ? 'fr-FR' : 'en-US').format(value);
 
-  } catch (err) {
+  } catch (_err) {
 
     return value.toString();
 
@@ -810,7 +810,7 @@ export function formatDate(value: string | Date, locale: string): string {
 
     return new Intl.DateTimeFormat(locale.startsWith('fr') ? 'fr-FR' : 'en-US').format(date);
 
-  } catch (err) {
+  } catch (_err) {
 
     return value.toString();
 

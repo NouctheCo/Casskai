@@ -11,7 +11,6 @@
  */
 
 import { subscriptionService } from './subscriptionService';
-import { getModulesForPlan } from '@/types/subscription.types';
 
 /**
  * Service pour gérer l'expiration des périodes d'essai

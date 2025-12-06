@@ -54,7 +54,7 @@ export class BudgetInsightProvider extends BankingProvider {
     try {
   const response = await this.makeRequest<{ status: string }>('GET', '/2.0/status');
       return response.status === 'OK';
-  } catch (error) {
+  } catch (_error) {
       return false;
     }
   }
@@ -72,7 +72,7 @@ export class BudgetInsightProvider extends BankingProvider {
 
       this.accessToken = response.access_token;
       this.tokenExpiresAt = new Date(Date.now() + response.expires_in * 1000);
-  } catch (error) {
+  } catch (_error) {
       throw new AuthenticationError('Failed to authenticate with Budget Insight API');
     }
   }

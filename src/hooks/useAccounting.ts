@@ -237,8 +237,8 @@ export function useAccounting(companyId: string) {
 
       // Create journal entry lines
       const accountMap = new Map(accounts.map((account) => [account.id, account]));
-      const linesData = entryData.lines.map((line, index) => {
-        const accountInfo = accountMap.get(line.account_id);
+      const linesData = entryData.lines.map((line, _index) => {
+        const _accountInfo = accountMap.get(line.account_id);
         return {
           journal_entry_id: newEntry.id,
           account_id: line.account_id,

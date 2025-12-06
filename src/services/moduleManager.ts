@@ -381,7 +381,7 @@ export class ModuleManager {
   }
 
   // Persistence des activations
-  /* eslint-disable max-lines-per-function */
+   
   private async loadActivations(tenantId: string): Promise<void> {
     try {
       // D'abord essayer de charger depuis Supabase si disponible
@@ -521,7 +521,6 @@ export class ModuleManager {
   }
 
   private async saveActivation(_activation: ModuleActivation): Promise<void> {
-    /* eslint-disable max-depth */
     try {
       // Sauvegarder en format simple pour compatibilité avec AuthContext
       const allActivations = Array.from(this.activations.values());
@@ -581,7 +580,7 @@ export class ModuleManager {
       console.error('[ModuleManager] Erreur sauvegarde activation:', error);
     }
   }
-  /* eslint-enable max-lines-per-function */
+   
 
   // Debugging et monitoring
   getDebugInfo(): {

@@ -253,7 +253,7 @@ export async function recordVATPayment(
  */
 export async function exportVATDeclaration(
   declarationId: string,
-  format: 'pdf' | 'excel' = 'pdf'
+  _format: 'pdf' | 'excel' = 'pdf'
 ): Promise<{ url: string }> {
   try {
     // Récupérer la déclaration

@@ -14,8 +14,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-import { useLocale } from '@/contexts/LocaleContext';
-
 import { useToast } from '@/components/ui/use-toast';
 
 import { 
@@ -273,7 +271,7 @@ export default function FECImportTab() {
 
 
 
-    } catch (error) {
+    } catch (_error) {
 
       toast({
 
@@ -365,7 +363,7 @@ export default function FECImportTab() {
 
 
 
-    } catch (error) {
+    } catch (_error) {
 
       toast({
 

@@ -22,7 +22,7 @@ import { purchasesService } from '../services/purchasesService';
 
 import { Button } from '../components/ui/button';
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 
 import { Badge } from '../components/ui/badge';
 
@@ -66,7 +66,7 @@ export default function PurchasesPage() {
 
   const { currentEnterpriseId, currentEnterprise } = useEnterprise();
 
-  const { ConfirmDialog, confirm } = useConfirmDialog();
+  const { ConfirmDialog: _ConfirmDialog, confirm } = useConfirmDialog();
 
   
 
@@ -530,7 +530,7 @@ export default function PurchasesPage() {
 
             <p className="text-sm text-gray-500 dark:text-gray-400">
 
-              t('purchases.noCompanySelectedDescription')
+              {t('purchases.noCompanySelectedDescription')}
 
             </p>
 
@@ -596,7 +596,7 @@ export default function PurchasesPage() {
 
             <Badge variant="secondary" className="text-xs">
 
-              t('purchases.status.realTime')
+              {t('purchases.status.realTime')}
 
             </Badge>
 
@@ -622,7 +622,7 @@ export default function PurchasesPage() {
 
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
 
-            t('purchases.actions.refresh')
+            {t('purchases.actions.refresh')}
 
           </Button>
 

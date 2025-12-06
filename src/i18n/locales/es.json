@@ -233,14 +233,10 @@
   "close": "Cerrar",
   "comingSoon": "Bientôt disponible",
   "common": {
-    "actions": {
-      "0": "A",
-      "1": "c",
-      "2": "t",
-      "3": "i",
-      "4": "o",
-      "5": "n",
-      "6": "s",
+    "all": "Todos",
+    "none": "Ninguno",
+    "actions": "Acciones",
+    "action": {
       "cancel": "Cancelar",
       "create": "Crear",
       "saving": "Guardando...",
@@ -617,7 +613,9 @@
       "types": {
         "prospect": "Prospecto",
         "client": "Cliente",
-        "partner": "Socio"
+        "partner": "Socio",
+        "supplier": "Proveedor",
+        "other": "Otro"
       },
       "created": "Cliente creado exitosamente",
       "errors": {
@@ -814,6 +812,26 @@
       },
       "stepsCompleted": "{{completed}}/{{total}} pasos completados",
       "subtitle": "Estamos preparando su espacio de trabajo personalizado..."
+    },
+    "operational": {
+      "title": "Panel Operacional",
+      "subtitle": "Vista en tiempo real de su rendimiento financiero"
+    },
+    "aiAnalysis": {
+      "title": "Análisis IA y Recomendaciones",
+      "powered": "Impulsado por OpenAI",
+      "fallback": "Análisis basado en reglas",
+      "keyInsights": "Puntos Clave",
+      "recommendations": "Recomendaciones Estratégicas",
+      "risks": "Factores de Riesgo",
+      "actions": "Acciones a Tomar",
+      "expectedImpact": "Impacto Esperado",
+      "noData": "No hay análisis disponible",
+      "priority": {
+        "high": "Urgente",
+        "medium": "Importante",
+        "low": "A Planificar"
+      }
     }
   },
   "date": "Fecha",
@@ -1454,6 +1472,10 @@
   "interval_year": "année",
   "inventory": "Inventario",
   "inventorypage": {
+    "production": "Producción",
+    "fournisseurs": "Proveedores",
+    "alertes": "Alertas",
+    "dashboard": "Panel",
     "80000": "80000",
     "120000": "120000",
     "ajouter_larticle": "Agregar el artículo",
@@ -2189,6 +2211,97 @@
     }
   },
   "projects": "Proyectos",
+  "billingPage": {
+    "title": "Facturación y Suscripciones",
+    "subtitle": "Gestione su suscripción, pagos y facturas",
+    "refresh": "Actualizar",
+    "tabs": {
+      "overview": "Resumen",
+      "plans": "Planes",
+      "payment": "Métodos de Pago",
+      "invoices": "Facturas"
+    },
+    "quickActions": {
+      "changePlan": {
+        "title": "Cambiar Plan",
+        "description": "Modifique su plan de suscripción según sus necesidades"
+      },
+      "paymentMethods": {
+        "title": "Gestionar Métodos de Pago",
+        "description": "Añada o modifique sus tarjetas de crédito"
+      },
+      "invoiceHistory": {
+        "title": "Historial de Facturas",
+        "description": "Consulte y descargue todas sus facturas"
+      }
+    },
+    "plans": {
+      "title": "Su Plan Actual",
+      "subtitle": "Gestione su plan de suscripción",
+      "currentPlan": "Plan Actual",
+      "status": "Estado",
+      "active": "Activo",
+      "manageInStripe": "Gestionar en Stripe",
+      "seeAllPlansDescription": "Descubra todos nuestros planes y funcionalidades",
+      "seeAllPlans": "Ver Todos los Planes"
+    },
+    "payment": {
+      "title": "Métodos de Pago",
+      "expires": "Expira",
+      "default": "Predeterminado",
+      "setDefault": "Establecer como Predeterminado",
+      "manage": "Gestionar en Stripe",
+      "addNew": "Añadir Nuevo Método de Pago",
+      "addCard": "Añadir Tarjeta",
+      "noMethods": {
+        "title": "Sin Método de Pago Registrado",
+        "description": "Añada una tarjeta de crédito para gestionar sus pagos"
+      }
+    },
+    "invoices": {
+      "title": "Historial de Facturas",
+      "filter": "Filtrar por Estado",
+      "status": {
+        "paid": "Pagada",
+        "open": "Pendiente",
+        "void": "Anulada",
+        "uncollectible": "Incobrable",
+        "unknown": "Desconocido"
+      },
+      "table": {
+        "invoice": "Factura",
+        "status": "Estado",
+        "amount": "Importe",
+        "date": "Fecha",
+        "actions": "Acciones"
+      },
+      "pdf": "Descargar PDF",
+      "view": "Ver en Stripe",
+      "noInvoices": {
+        "title": "Sin Facturas",
+        "description": "Sus facturas aparecerán aquí una vez que su suscripción esté activa"
+      }
+    },
+    "toasts": {
+      "subscriptionActivated": "¡Suscripción activada con éxito!",
+      "paymentCanceled": "Pago cancelado",
+      "needSubscription": "Por favor, suscríbase primero",
+      "portalError": "Error al abrir el portal de facturación",
+      "unexpectedError": "Se produjo un error inesperado",
+      "needActiveSubscription": "Debe tener una suscripción activa para gestionar los métodos de pago",
+      "paymentManagementError": "Error al gestionar los métodos de pago",
+      "paymentPortalOpening": "Abriendo portal de pago...",
+      "paymentMethodError": "Error al gestionar los métodos de pago",
+      "pdfNotAvailable": "PDF aún no disponible para esta factura",
+      "downloadingInvoice": "Descargando factura {{invoiceId}}...",
+      "invoiceDownloaded": "Factura descargada con éxito",
+      "downloadError": "Error al descargar la factura",
+      "invoiceNotAvailable": "URL de factura no disponible",
+      "accessingInvoice": "Accediendo a la factura {{invoiceId}}...",
+      "invoiceOpening": "Abriendo factura en nueva pestaña...",
+      "viewError": "Error al abrir la factura"
+    }
+  },
   "projectspage": {
     "title": "Gestión de Proyectos",
     "subtitle": "Seguimiento y gestión de sus proyectos internos y de clientes",
@@ -2309,9 +2422,17 @@
   },
   "purchases": {
     "actions": {
+      "refresh": "Actualizar",
       "export": "Exportar",
       "generateReport": "Generar informe PDF",
       "markAsPaid": "Marcar como pagado"
+    },
+    "status": {
+      "realTime": "Tiempo real",
+      "pending": "Pendiente",
+      "paid": "Pagado",
+      "overdue": "Vencido",
+      "cancelled": "Cancelado"
     },
     "createPurchase": "Nueva compra",
     "description": "Descripción",
@@ -3929,6 +4050,212 @@
         "reconcile": "Reconciliar"
       },
       "pagination": "Mostrando las primeras {{shown}} transacciones de {{total}}"
+    }
+  },
+  "assets": {
+    "title": "Activos Fijos",
+    "subtitle": "Gestione los activos fijos y la depreciación de su empresa",
+    "stats": {
+      "totalValue": "Valor Total",
+      "totalValueDesc": "Valor de adquisición de activos",
+      "currentValue": "Valor Actual",
+      "currentValueDesc": "Valor neto contable",
+      "totalDepreciation": "Depreciación Total",
+      "totalDepreciationDesc": "Depreciación acumulada",
+      "assetsCount": "Activos",
+      "assetsCountDesc": "Número de activos activos"
+    },
+    "tabs": {
+      "list": "Lista de Activos",
+      "categories": "Categorías",
+      "reports": "Informes"
+    },
+    "actions": {
+      "addAsset": "Añadir Activo",
+      "manageCategories": "Gestionar Categorías",
+      "generateEntries": "Generar Asientos",
+      "generate": "Generar",
+      "viewSchedule": "Ver Calendario",
+      "viewDetails": "Ver Detalles"
+    },
+    "table": {
+      "assetNumber": "Nº Activo",
+      "name": "Nombre",
+      "category": "Categoría",
+      "acquisitionDate": "Fecha de Adquisición",
+      "acquisitionValue": "Valor de Adquisición",
+      "depreciationMethod": "Método",
+      "netBookValue": "Valor Neto Contable",
+      "status": "Estado",
+      "actions": "Acciones"
+    },
+    "status": {
+      "active": "Activo",
+      "disposed": "Dispuesto",
+      "fully_depreciated": "Totalmente Depreciado"
+    },
+    "depreciationMethod": {
+      "linear": "Lineal",
+      "declining_balance": "Saldo Decreciente",
+      "units_of_production": "Unidades de Producción"
+    },
+    "form": {
+      "createTitle": "Añadir Activo Fijo",
+      "editTitle": "Editar Activo Fijo",
+      "description": "Descripción",
+      "sections": {
+        "identification": "Identificación",
+        "acquisition": "Adquisición",
+        "depreciation": "Depreciación"
+      },
+      "category": "Categoría",
+      "selectCategory": "Seleccione una categoría",
+      "assetNumber": "Número de Activo",
+      "assetNumberPlaceholder": "Auto-generado si vacío",
+      "name": "Nombre del Activo",
+      "namePlaceholder": "ej., Portátil Dell",
+      "descriptionPlaceholder": "Detalles adicionales sobre el activo",
+      "serialNumber": "Número de Serie",
+      "serialNumberPlaceholder": "ej., SN123456",
+      "location": "Ubicación",
+      "locationPlaceholder": "ej., Oficina Principal - Dpto. TI",
+      "acquisitionDate": "Fecha de Adquisición",
+      "acquisitionValue": "Valor de Adquisición",
+      "invoiceReference": "Referencia de Factura",
+      "invoiceReferencePlaceholder": "ej., FAC-2024-001",
+      "responsiblePerson": "Persona Responsable",
+      "responsiblePersonPlaceholder": "ej., Juan Pérez",
+      "depreciationMethod": "Método de Depreciación",
+      "depreciationStartDate": "Fecha Inicio Depreciación",
+      "durationYears": "Duración (años)",
+      "decliningRate": "Tasa Decreciente",
+      "residualValue": "Valor Residual",
+      "selectResponsiblePerson": "Seleccionar una persona responsable",
+      "notes": "Notas",
+      "notesPlaceholder": "Notas o comentarios adicionales",
+      "errors": {
+        "nameRequired": "El nombre del activo es obligatorio",
+        "acquisitionValueRequired": "El valor de adquisición debe ser mayor que 0",
+        "durationRequired": "La duración debe ser mayor que 0"
+      }
+    },
+    "categories": {
+      "manage": "Gestionar Categorías",
+      "list": "Lista de Categorías",
+      "add": "Añadir Categoría",
+      "edit": "Editar Categoría",
+      "name": "Nombre",
+      "code": "Código Contable",
+      "method": "Método",
+      "duration": "Duración",
+      "empty": "No hay categorías definidas",
+      "confirmDelete": "¿Está seguro de que desea eliminar esta categoría?",
+      "namePlaceholder": "ej., Equipo Informático",
+      "accounts": "Cuentas Contables",
+      "accountAsset": "Cuenta de Activo",
+      "accountDepreciation": "Cuenta de Depreciación",
+      "accountExpense": "Cuenta de Gasto",
+      "defaultSettings": "Configuración Predeterminada",
+      "success": {
+        "created": "Categoría creada correctamente",
+        "updated": "Categoría actualizada correctamente",
+        "deleted": "Categoría eliminada correctamente"
+      },
+      "errors": {
+        "nameRequired": "El nombre es obligatorio"
+      }
+    },
+    "schedule": {
+      "title": "Calendario de Depreciación",
+      "export": "Exportar CSV",
+      "exportSuccess": "Calendario de depreciación exportado correctamente",
+      "totalPeriods": "Períodos Totales",
+      "totalDepreciation": "Depreciación Total",
+      "postedEntries": "Asientos Contabilizados",
+      "remainingValue": "VNC Restante",
+      "noData": "No hay calendario de depreciación disponible",
+      "year": "Año",
+      "period": "Período",
+      "startDate": "Fecha Inicio",
+      "endDate": "Fecha Fin",
+      "openingNBV": "VNC Apertura",
+      "depreciation": "Depreciación",
+      "cumulative": "Acumulado",
+      "closingNBV": "VNC Cierre",
+      "prorata": "Prorata",
+      "status": "Estado",
+      "posted": "Contabilizado",
+      "pending": "Pendiente",
+      "total": "TOTAL",
+      "postedLegend": "Asiento contable registrado",
+      "pendingLegend": "Pendiente de contabilizar",
+      "prorataLegend": "Prorata temporis (días)",
+      "viewFullSchedule": "Haga clic en el icono del calendario en la tabla para ver el calendario completo"
+    },
+    "entries": {
+      "description": "Generar automáticamente asientos contables de depreciación para el período seleccionado",
+      "fiscalYear": "Ejercicio Fiscal",
+      "period": "Período",
+      "allPeriods": "Todos los períodos",
+      "periodHint": "Dejar vacío para generar todos los períodos del ejercicio fiscal",
+      "warning": "Los asientos generados se contabilizarán automáticamente",
+      "success": "{{count}} asiento(s) generado(s) por un importe total de {{amount}} €",
+      "partialSuccess": "Generación parcialmente exitosa",
+      "successTitle": "Asientos generados correctamente",
+      "partialTitle": "Generación con errores",
+      "entriesCreated": "Asientos Creados",
+      "totalAmount": "Importe Total",
+      "errors": "Errores Encontrados",
+      "generating": "Generando..."
+    },
+    "attachments": {
+      "title": "Archivos Adjuntos",
+      "upload": "Subir Archivos",
+      "acceptedFormats": "PDF, JPG, PNG, DOC, DOCX (máx. 10 MB)",
+      "empty": "Sin archivos adjuntos",
+      "uploadingFiles": "Subiendo {{count}} archivo(s)...",
+      "uploadSuccess": "Archivos subidos correctamente"
+    },
+    "disposal": {
+      "title": "Baja de Activo",
+      "description": "Esta acción es irreversible. El activo se marcará como dado de baja y se generará un asiento de baja.",
+      "date": "Fecha de Baja",
+      "method": "Método de Baja",
+      "value": "Valor de Baja",
+      "gain": "Ganancia/Pérdida",
+      "confirm": "Confirmar Baja",
+      "success": "Activo dado de baja correctamente",
+      "methods": {
+        "sale": "Venta",
+        "scrap": "Desguace",
+        "donation": "Donación"
+      }
+    },
+    "history": {
+      "created": "Creado",
+      "lastUpdate": "Última Modificación",
+      "lastDepreciation": "Última Depreciación"
+    },
+    "detail": {
+      "financial": "Resumen Financiero",
+      "tabs": {
+        "details": "Detalles",
+        "attachments": "Adjuntos",
+        "depreciation": "Depreciación",
+        "history": "Historial"
+      }
+    },
+    "success": {
+      "created": "Activo creado correctamente",
+      "updated": "Activo actualizado correctamente",
+      "deleted": "Activo eliminado correctamente"
+    },
+    "errors": {
+      "loadFailed": "Error al cargar los datos del activo",
+      "saveFailed": "Error al guardar el activo",
+      "deleteFailed": "Error al eliminar el activo",
+      "generateFailed": "Error al generar asientos",
+      "disposeFailed": "Error al dar de baja el activo"
     }
   }
 }

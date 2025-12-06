@@ -93,11 +93,11 @@ export const NewActionModal: React.FC<NewActionModalProps> = ({
 
   // Charger clients et opportunités
   useEffect(() => {
-    if (open && currentCompany?.id) {
+    if (currentCompany?.id) {
       loadClients();
       loadOpportunities();
     }
-  }, [open, currentCompany?.id]);
+  }, [currentCompany?.id]);
 
   // Filtrer les opportunités selon le client sélectionné
   useEffect(() => {

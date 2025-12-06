@@ -214,7 +214,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
 
       // Créer le budget
 
-      const { data, error } = await budgetService.createBudgetFromImport(companyId, importData);
+      const { data: _data, error } = await budgetService.createBudgetFromImport(companyId, importData);
 
       
 

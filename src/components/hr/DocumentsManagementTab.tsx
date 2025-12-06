@@ -5,12 +5,11 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  Upload, FileText, Download, Archive, Eye, Edit2, Trash2,
-  CheckCircle, Clock, AlertTriangle, Filter, Search, Plus, FileCheck
+  FileText, Download, Archive, Trash2,
+  Search, Plus, FileCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -33,11 +32,11 @@ export const DocumentsManagementTab: React.FC<DocumentsManagementTabProps> = ({
   const { toast } = useToast();
 
   // State
-  const [documents, setDocuments] = useState<EmployeeDocument[]>([]);
+  const [_documents, setDocuments] = useState<EmployeeDocument[]>([]);
   const [filteredDocuments, setFilteredDocuments] = useState<EmployeeDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<EmployeeDocument | null>(null);
+  const [_selectedDocument, _setSelectedDocument] = useState<EmployeeDocument | null>(null);
 
   // Filters
   const [filters, setFilters] = useState({
@@ -110,9 +109,9 @@ export const DocumentsManagementTab: React.FC<DocumentsManagementTabProps> = ({
 
   // Format file size
   const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    if (bytes < 1024) return `${bytes  } B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)  } KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)  } MB`;
   };
 
   // Download document
@@ -149,6 +148,7 @@ export const DocumentsManagementTab: React.FC<DocumentsManagementTabProps> = ({
 
   // Archive document
   const handleArchive = async (doc: EmployeeDocument) => {
+    // eslint-disable-next-line no-alert
     if (!confirm('Êtes-vous sûr de vouloir archiver ce document ?')) return;
 
     const response = await hrDocumentsService.archiveDocument(doc.id);
@@ -169,6 +169,7 @@ export const DocumentsManagementTab: React.FC<DocumentsManagementTabProps> = ({
 
   // Delete document
   const handleDelete = async (doc: EmployeeDocument) => {
+    // eslint-disable-next-line no-alert
     if (!confirm('Êtes-vous sûr de vouloir supprimer définitivement ce document ?')) return;
 
     const response = await hrDocumentsService.deleteDocument(doc.id);

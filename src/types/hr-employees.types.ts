@@ -2,7 +2,7 @@
  * Types pour la gestion des employés RH
  */
 
-import { Database } from './supabase';
+import type { Database as _Database } from './supabase';
 
 // Type de base pour un employé
 export type Employee = {

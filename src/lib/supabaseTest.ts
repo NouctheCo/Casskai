@@ -39,7 +39,7 @@ if (!testKey) {
 console.log('🧪 Test Supabase config:', {
   url: testUrl,
   keyType: testKey?.includes('service_role') ? 'SERVICE_ROLE ✅ (RLS bypass)' : 'ANON_KEY ⚠️ (RLS active)',
-  keyPrefix: testKey?.substring(0, 20) + '...'
+  keyPrefix: `${testKey?.substring(0, 20)  }...`
 });
 
 if (!testUrl || !testKey) {

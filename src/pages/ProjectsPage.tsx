@@ -10,7 +10,7 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
@@ -20,7 +20,9 @@ import { Input } from '@/components/ui/input';
 
 import { Badge } from '@/components/ui/badge';
 
-import { toastError, toastSuccess, toastCreated, toastUpdated, toastDeleted } from '@/lib/toast-helpers';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+import { toastError, toastSuccess } from '@/lib/toast-helpers';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -36,17 +38,11 @@ import {
 
   Search, 
 
-  ListFilter, 
-
   CheckCircle2, 
-
-  AlertCircle, 
 
   Clock,
 
   Users,
-
-  Calendar,
 
   DollarSign,
 
@@ -58,33 +54,17 @@ import {
 
   Timer,
 
-  MessageSquare,
-
-  Zap,
-
   TrendingUp,
-
-  TrendingDown,
 
   Eye,
 
   Edit,
 
-  Trash2,
-
   PlayCircle,
 
   PauseCircle,
 
-  StopCircle,
-
   Download,
-
-  Upload,
-
-  Settings,
-
-  Award,
 
   Activity,
 
@@ -94,21 +74,9 @@ import {
 
   XCircle,
 
-  ChevronRight,
-
   Star,
 
-  MapPin,
-
-  Phone,
-
-  Mail,
-
-  Building,
-
   Filter,
-
-  MoreHorizontal,
 
   Sparkles
 
@@ -116,19 +84,31 @@ import {
 
 import { useLocale } from '@/contexts/LocaleContext';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 import { DatePicker } from '@/components/ui/date-picker';
-
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { supabase } from '@/lib/supabase';
 
 import { useAuth } from '@/contexts/AuthContext';
 
-import { useEffect } from 'react';
-
 import { useNavigate } from 'react-router-dom';
+
+import { projectTasksService, type ProjectTaskWithDetails } from '@/services/projectTasksService';
+
+import { TaskFormModal } from '@/components/projects/TaskFormModal';
+
+import NewClientModal from '@/components/projects/NewClientModal';
+
+import { EmployeeFormModal } from '@/components/hr/EmployeeFormModal';
+
+import { timesheetsService, type TimesheetWithDetails } from '@/services/timesheetsService';
+
+import TimesheetFormModal from '@/components/projects/TimesheetFormModal';
+
+import { projectResourcesService, type ProjectResourceWithDetails } from '@/services/projectResourcesService';
+
+import ResourceAllocationModal from '@/components/projects/ResourceAllocationModal';
 
 
 
@@ -156,23 +136,28 @@ export default function ProjectsPage() {
 
     timeEntries,
 
-    metrics,
+     
+    metrics: _metrics,
 
-    categories,
+     
+    categories: _categories,
 
-    managers,
+     
+    managers: _managers,
 
-    loading: projectsLoading,
+    loading: _projectsLoading,
 
-    error,
+    error: _error,
 
     createProject,
 
     updateProject,
 
-    deleteProject,
+     
+    deleteProject: _deleteProject,
 
-    refreshAll,
+     
+    refreshAll: _refreshAll,
 
     activeProjects,
 
@@ -192,15 +177,36 @@ export default function ProjectsPage() {
 
   const [resources, setResources] = useState<any[]>([]);
 
-  const [loadingResources, setLoadingResources] = useState(false);
+  const [clients, setClients] = useState<any[]>([]);
 
+  const [_loadingResources, setLoadingResources] = useState(false);
 
+  // State pour les tâches
+  const [allTasks, setAllTasks] = useState<ProjectTaskWithDetails[]>([]);
+  const [tasksLoading, setTasksLoading] = useState(false);
+  const [taskFilter, setTaskFilter] = useState<string>('all');
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
 
-  // Charger les employees depuis Supabase
+  // State pour les timesheets
+  const [allTimesheets, setAllTimesheets] = useState<TimesheetWithDetails[]>([]);
+  const [timesheetsLoading, setTimesheetsLoading] = useState(false);
+  const [timesheetFilter, setTimesheetFilter] = useState<string>('all');
+  const [isTimesheetModalOpen, setIsTimesheetModalOpen] = useState(false);
+
+  // State pour les ressources
+  const [allResources, setAllResources] = useState<ProjectResourceWithDetails[]>([]);
+  const [resourcesLoading, setResourcesLoading] = useState(false);
+  const [isResourceModalOpen, setIsResourceModalOpen] = useState(false);
+
+  // State pour les modales de création
+  const [isNewClientModalOpen, setIsNewClientModalOpen] = useState(false);
+  const [isNewEmployeeModalOpen, setIsNewEmployeeModalOpen] = useState(false);
+
+  // Charger les employees et clients depuis Supabase
 
   useEffect(() => {
 
-    const loadEmployees = async () => {
+    const loadEmployeesAndClients = async () => {
 
       if (!currentCompany?.id) return;
 
@@ -210,25 +216,41 @@ export default function ProjectsPage() {
 
       try {
 
-        const { data, error } = await supabase
+        const [employeesResponse, clientsResponse] = await Promise.all([
 
-          .from('employees')
+          supabase
 
-          .select('*')
+            .from('employees')
 
-          .eq('company_id', currentCompany.id)
+            .select('*')
 
-          .eq('status', 'active');
+            .eq('company_id', currentCompany.id)
+
+            .eq('status', 'active'),
+
+          supabase
+
+            .from('tiers')
+
+            .select('*')
+
+            .eq('company_id', currentCompany.id)
+
+            .eq('type', 'client')
+
+        ]);
 
 
 
-        if (error) throw error;
+        if (employeesResponse.error) throw employeesResponse.error;
+
+        if (clientsResponse.error) throw clientsResponse.error;
 
 
 
         // Transformer les employees en format resources
 
-        const employeesAsResources = (data || []).map(emp => ({
+        const employeesAsResources = (employeesResponse.data || []).map(emp => ({
 
           id: emp.id,
 
@@ -254,11 +276,29 @@ export default function ProjectsPage() {
 
 
 
+        // Formater les clients
+
+        const clientsFormatted = (clientsResponse.data || []).map(client => ({
+
+          id: client.id,
+
+          name: client.name || client.company_name || 'Client sans nom',
+
+          email: client.email,
+
+          siret: client.siret
+
+        }));
+
+
+
         setResources(employeesAsResources);
+
+        setClients(clientsFormatted);
 
       } catch (error) {
 
-        console.error('Error loading employees:', error);
+        console.error('Error loading employees and clients:', error);
 
       } finally {
 
@@ -270,11 +310,75 @@ export default function ProjectsPage() {
 
 
 
-    loadEmployees();
+    loadEmployeesAndClients();
 
   }, [currentCompany?.id]);
 
+  // Charger toutes les tâches
+  const loadAllTasks = useCallback(async () => {
+    if (!currentCompany?.id) return;
 
+    setTasksLoading(true);
+    try {
+      const tasksData = await projectTasksService.getTasks(currentCompany.id, {
+        status: taskFilter !== 'all' ? taskFilter : undefined
+      });
+      setAllTasks(tasksData);
+    } catch (error) {
+      console.error('Error loading tasks:', error);
+      // Don't show error toast - empty task list is normal for new projects
+      setAllTasks([]);
+    } finally {
+      setTasksLoading(false);
+    }
+  }, [currentCompany?.id, taskFilter]);
+
+  useEffect(() => {
+    loadAllTasks();
+  }, [loadAllTasks]);
+
+  // Charger tous les timesheets
+  const loadAllTimesheets = useCallback(async () => {
+    if (!currentCompany?.id) return;
+
+    setTimesheetsLoading(true);
+    try {
+      const timesheetsData = await timesheetsService.getTimesheets(currentCompany.id, {
+        status: timesheetFilter !== 'all' ? timesheetFilter : undefined
+      });
+      setAllTimesheets(timesheetsData);
+    } catch (error) {
+      console.error('Error loading timesheets:', error);
+      // Don't show error toast - empty timesheet list is normal for new projects
+      setAllTimesheets([]);
+    } finally {
+      setTimesheetsLoading(false);
+    }
+  }, [currentCompany?.id, timesheetFilter]);
+
+  useEffect(() => {
+    loadAllTimesheets();
+  }, [loadAllTimesheets]);
+
+  // Charger les ressources
+  const loadAllResources = useCallback(async () => {
+    if (!currentCompany?.id) return;
+    setResourcesLoading(true);
+    try {
+      const resourcesData = await projectResourcesService.getResources(currentCompany.id);
+      setAllResources(resourcesData);
+    } catch (error) {
+      console.error('Error loading resources:', error);
+      // Don't show error toast - empty resource list is normal for new projects
+      setAllResources([]);
+    } finally {
+      setResourcesLoading(false);
+    }
+  }, [currentCompany?.id]);
+
+  useEffect(() => {
+    loadAllResources();
+  }, [loadAllResources]);
 
   // Animation variants
 
@@ -376,7 +480,7 @@ export default function ProjectsPage() {
 
     if (!projectName.trim() || !projectClient.trim() || !projectBudget) {
 
-      toastSuccess("Veuillez remplir tous les champs obligatoires");
+      toastSuccess(t('projects.errors.requiredFields'));
 
       return;
 
@@ -454,7 +558,7 @@ export default function ProjectsPage() {
 
 
 
-        toastSuccess("Projet créé avec succès");
+        toastSuccess(t('projects.success.projectCreated'));
 
         setShowProjectForm(false);
 
@@ -464,7 +568,7 @@ export default function ProjectsPage() {
 
       console.error('Error creating project:', error instanceof Error ? error.message : String(error));
 
-      toastSuccess("Impossible de créer le projet");
+      toastSuccess(t('projects.errors.creatingProject'));
 
     }
 
@@ -472,25 +576,33 @@ export default function ProjectsPage() {
 
 
 
-  const handleTaskStatusChange = useCallback(async (taskId, newStatus) => {
-
+  const handleTaskStatusChange = useCallback(async (taskId: string, newStatus: string) => {
     try {
-
-      // Cette fonction sera implémentée dans le hook plus tard
-
-      toastSuccess("Fonction de mise à jour des tâches à implémenter");
-
-    } catch (error) {
-
-      toastSuccess("Impossible de mettre à jour la tâche");
-
+      await projectTasksService.updateTaskStatus(taskId, newStatus as any);
+      toastSuccess(t('projects.success.taskStatusChanged'));
+      await loadAllTasks();
+    } catch (_error) {
+      toastError(t('projects.errors.updatingTask'));
     }
+  }, [loadAllTasks]);
 
-  }, []);
+  const handleTimesheetCreated = useCallback(async () => {
+    toastSuccess(t('projects.success.timesheetCreated'));
+    await loadAllTimesheets();
+  }, [loadAllTimesheets]);
 
+  const handleResourceAllocated = useCallback(async () => {
+    toastSuccess(t('projects.success.resourceAllocated'));
+    await loadAllResources();
+  }, [loadAllResources]);
 
+  const handleTaskCreated = useCallback(async (_taskId: string) => {
+    toastSuccess(t('projects.success.taskCreated'));
+    await loadAllTasks();
+    setIsTaskModalOpen(false);
+  }, [loadAllTasks]);
 
-  const handleProjectStatusChange = useCallback(async (projectId, newStatus) => {
+  const _handleProjectStatusChange = useCallback(async (projectId, newStatus) => {
 
     try {
 
@@ -500,13 +612,13 @@ export default function ProjectsPage() {
 
       if (success) {
 
-        toastSuccess("Le statut du projet a été modifié");
+        toastSuccess(t('projects.success.projectStatusChanged'));
 
       }
 
-    } catch (error) {
+    } catch (_error) {
 
-      toastSuccess("Impossible de mettre à jour le projet");
+      toastSuccess(t('projects.errors.updatingProject'));
 
     }
 
@@ -516,27 +628,36 @@ export default function ProjectsPage() {
 
   // Métriques calculées provenant du hook
 
-  const computedMetrics = useMemo(() => ({
+  const computedMetrics = useMemo(() => {
+    // Calcul du respect des délais (projets terminés à temps)
+    const projectsWithDates = completedProjects.filter(p => p.endDate);
+    const projectsOnTime = projectsWithDates.filter(p => {
+      if (!p.endDate) return false;
+      const actualEndDate = new Date(p.updated_at || p.created_at);
+      const plannedEndDate = new Date(p.endDate);
+      return actualEndDate <= plannedEndDate;
+    });
+    const onTimeRate = projectsWithDates.length > 0 ? (projectsOnTime.length / projectsWithDates.length) * 100 : 0;
 
-    totalProjects: projects.length,
+    // Calcul de l'efficacité équipe (heures facturables / heures totales)
+    const totalBillableHours = projects.reduce((sum, p) => sum + (p.billableHours || 0), 0);
+    const totalHours = projects.reduce((sum, p) => sum + (p.totalHours || 0), 0);
+    const teamEfficiency = totalHours > 0 ? (totalBillableHours / totalHours) * 100 : 0;
 
-    activeProjects: activeProjects.length,
-
-    completedProjects: completedProjects.length,
-
-    onHoldProjects: projects.filter(p => p.status === 'on_hold').length,
-
-    totalRevenue,
-
-    totalBudget,
-
-    totalSpent: projects.reduce((sum, project) => sum + (project.spent || 0), 0),
-
-    averageProgress,
-
-    profitMargin: totalRevenue > 0 ? ((totalRevenue - projects.reduce((sum, p) => sum + (p.spent || 0), 0)) / totalRevenue) * 100 : 0
-
-  }), [projects, activeProjects, completedProjects, totalRevenue, totalBudget, averageProgress]);
+    return {
+      totalProjects: projects.length,
+      activeProjects: activeProjects.length,
+      completedProjects: completedProjects.length,
+      onHoldProjects: projects.filter(p => p.status === 'on_hold').length,
+      totalRevenue,
+      totalBudget,
+      totalSpent: projects.reduce((sum, project) => sum + (project.spent || 0), 0),
+      averageProgress,
+      profitMargin: totalRevenue > 0 ? ((totalRevenue - projects.reduce((sum, p) => sum + (p.spent || 0), 0)) / totalRevenue) * 100 : 0,
+      onTimeRate,
+      teamEfficiency
+    };
+  }, [projects, activeProjects, completedProjects, totalRevenue, totalBudget, averageProgress]);
 
 
 
@@ -580,7 +701,7 @@ export default function ProjectsPage() {
 
           <div className="flex items-center space-x-2">
 
-            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-400">
+            <p className="text-gray-600 dark:text-gray-400">
 
               {t('projectspage.suivez_vos_projets_internes_et_clients', { defaultValue: 'Suivez vos projets internes et clients.' })}
 
@@ -662,17 +783,67 @@ export default function ProjectsPage() {
 
                 <label htmlFor="projectClient" className="text-sm font-medium">{t('projectspage.client', { defaultValue: 'Client' })}</label>
 
-                <Input 
+                <Select value={projectClient} onValueChange={(value) => {
 
-                  id="projectClient" 
+                  if (value === '__new__') {
 
-                  value={projectClient}
+                    setIsNewClientModalOpen(true);
 
-                  onChange={(e) => setProjectClient(e.target.value)}
+                  } else {
 
-                  placeholder={t('projectspage.slectionner_un_client', { defaultValue: 'Sélectionner un client' })} 
+                    setProjectClient(value);
 
-                />
+                  }
+
+                }}>
+
+                  <SelectTrigger id="projectClient">
+
+                    <SelectValue placeholder={t('projectspage.slectionner_un_client', { defaultValue: 'Sélectionner un client' })} />
+
+                  </SelectTrigger>
+
+                  <SelectContent>
+
+                    <SelectItem value="__new__">
+
+                      <div className="flex items-center text-blue-600 font-medium">
+
+                        <PlusCircle className="w-4 h-4 mr-2" />
+
+                        Créer un nouveau client
+
+                      </div>
+
+                    </SelectItem>
+
+                    {clients.length > 0 && <div className="border-t my-1"></div>}
+
+                    {clients.length === 0 ? (
+
+                      <div className="px-2 py-4 text-sm text-muted-foreground text-center">
+
+                        Aucun client. Créez-en un depuis le module CRM ou ci-dessus.
+
+                      </div>
+
+                    ) : (
+
+                      clients.map((client) => (
+
+                        <SelectItem key={client.id} value={client.name}>
+
+                          {client.name}
+
+                        </SelectItem>
+
+                      ))
+
+                    )}
+
+                  </SelectContent>
+
+                </Select>
 
               </div>
 
@@ -772,17 +943,67 @@ export default function ProjectsPage() {
 
                 <label htmlFor="projectManager" className="text-sm font-medium">{t('projectspage.chef_de_projet', { defaultValue: 'Chef de projet' })}</label>
 
-                <Input 
+                <Select value={projectManager} onValueChange={(value) => {
 
-                  id="projectManager" 
+                  if (value === '__new__') {
 
-                  value={projectManager}
+                    setIsNewEmployeeModalOpen(true);
 
-                  onChange={(e) => setProjectManager(e.target.value)}
+                  } else {
 
-                  placeholder={t('projectspage.slectionner_un_responsable', { defaultValue: 'Sélectionner un responsable' })} 
+                    setProjectManager(value);
 
-                />
+                  }
+
+                }}>
+
+                  <SelectTrigger id="projectManager">
+
+                    <SelectValue placeholder={t('projectspage.slectionner_un_responsable', { defaultValue: 'Sélectionner un responsable' })} />
+
+                  </SelectTrigger>
+
+                  <SelectContent>
+
+                    <SelectItem value="__new__">
+
+                      <div className="flex items-center text-blue-600 font-medium">
+
+                        <Users className="w-4 h-4 mr-2" />
+
+                        Créer un nouvel employé
+
+                      </div>
+
+                    </SelectItem>
+
+                    {resources.length > 0 && <div className="border-t my-1"></div>}
+
+                    {resources.length === 0 ? (
+
+                      <div className="px-2 py-4 text-sm text-muted-foreground text-center">
+
+                        Aucun employé. Créez-en un depuis le module RH ou ci-dessus.
+
+                      </div>
+
+                    ) : (
+
+                      resources.map((resource) => (
+
+                        <SelectItem key={resource.id} value={resource.name}>
+
+                          {resource.name} - {resource.role}
+
+                        </SelectItem>
+
+                      ))
+
+                    )}
+
+                  </SelectContent>
+
+                </Select>
 
               </div>
 
@@ -1318,7 +1539,7 @@ export default function ProjectsPage() {
 
                   </div>
 
-                  <Button onClick={() => toastSuccess("Interface à implémenter")}>
+                  <Button onClick={() => setIsTaskModalOpen(true)}>
 
                     <PlusCircle className="h-4 w-4 mr-2" />
 
@@ -1338,13 +1559,37 @@ export default function ProjectsPage() {
 
                   <div className="flex gap-2 mb-4">
 
-                    <Button variant="outline" size="sm">Toutes</Button>
+                    <Button
+                      variant={taskFilter === 'all' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setTaskFilter('all')}
+                    >
+                      Toutes
+                    </Button>
 
-                    <Button variant="outline" size="sm">En cours</Button>
+                    <Button
+                      variant={taskFilter === 'in_progress' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setTaskFilter('in_progress')}
+                    >
+                      En cours
+                    </Button>
 
-                    <Button variant="outline" size="sm">À faire</Button>
+                    <Button
+                      variant={taskFilter === 'todo' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setTaskFilter('todo')}
+                    >
+                      À faire
+                    </Button>
 
-                    <Button variant="outline" size="sm">Terminées</Button>
+                    <Button
+                      variant={taskFilter === 'done' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setTaskFilter('done')}
+                    >
+                      Terminées
+                    </Button>
 
                   </div>
 
@@ -1352,7 +1597,11 @@ export default function ProjectsPage() {
 
                   {/* Liste des tâches */}
 
-                  {tasks.map((task) => {
+                  {tasksLoading ? (
+                    <div className="text-center py-8">Chargement des tâches...</div>
+                  ) : allTasks.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">Aucune tâche à afficher</div>
+                  ) : allTasks.map((task) => {
 
                     const project = projects.find(p => p.id === task.project_id);
 
@@ -1374,13 +1623,13 @@ export default function ProjectsPage() {
 
                           <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${
 
-                            task.status === 'completed' ? 'bg-green-500' :
+                            task.status === 'done' ? 'bg-green-500' :
 
                             task.status === 'in_progress' ? 'bg-blue-500' : 'bg-gray-500'
 
                           }`}>
 
-                            {task.status === 'completed' ? <CheckCircle2 className="h-5 w-5" /> :
+                            {task.status === 'done' ? <CheckCircle2 className="h-5 w-5" /> :
 
                              task.status === 'in_progress' ? <PlayCircle className="h-5 w-5" /> : <Clock className="h-5 w-5" />}
 
@@ -1388,7 +1637,7 @@ export default function ProjectsPage() {
 
                           <div>
 
-                            <h3 className="font-semibold">{task.title}</h3>
+                            <h3 className="font-semibold">{task.name}</h3>
 
                             <p className="text-sm text-muted-foreground">{task.description}</p>
 
@@ -1396,9 +1645,9 @@ export default function ProjectsPage() {
 
                               <Badge variant="outline" className="text-xs">{project?.name}</Badge>
 
-                              <span className="text-xs text-muted-foreground">{task.assignee}</span>
+                              <span className="text-xs text-muted-foreground">{task.assigned_to_name}</span>
 
-                              <span className="text-xs text-muted-foreground">• {task.dueDate}</span>
+                              <span className="text-xs text-muted-foreground">• {task.end_date}</span>
 
                             </div>
 
@@ -1416,7 +1665,7 @@ export default function ProjectsPage() {
 
                           </div>
 
-                          <p className="text-xs text-muted-foreground">{task.actualHours}h / {task.estimatedHours}h</p>
+                          <p className="text-xs text-muted-foreground">{task.estimated_hours || 0}h estimées</p>
 
                           <Badge variant={task.priority === 'high' ? 'destructive' : task.priority === 'medium' ? 'secondary' : 'outline'} className="text-xs mt-1">
 
@@ -1428,17 +1677,17 @@ export default function ProjectsPage() {
 
                         <div className="flex gap-1">
 
-                          <Button 
+                          <Button
 
-                            size="sm" 
+                            size="sm"
 
-                            variant="ghost" 
+                            variant="ghost"
 
-                            onClick={() => handleTaskStatusChange(task.id, task.status === 'completed' ? 'in_progress' : 'completed')}
+                            onClick={() => handleTaskStatusChange(task.id, task.status === 'done' ? 'in_progress' : 'done')}
 
                           >
 
-                            {task.status === 'completed' ? <PauseCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+                            {task.status === 'done' ? <PauseCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
 
                           </Button>
 
@@ -1472,91 +1721,149 @@ export default function ProjectsPage() {
 
               <CardHeader>
 
-                <CardTitle className="flex items-center gap-2">
+                <div className="flex justify-between items-center">
 
-                  <Users className="text-green-500" />
+                  <div>
 
-                  Allocation des Ressources
+                    <CardTitle className="flex items-center gap-2">
 
-                </CardTitle>
+                      <Users className="text-green-500" />
 
-                <CardDescription>Gestion de l'équipe et planification</CardDescription>
+                      Allocation des Ressources
+
+                    </CardTitle>
+
+                    <CardDescription>Gestion de l'équipe et planification</CardDescription>
+
+                  </div>
+
+                  <Button onClick={() => setIsResourceModalOpen(true)}>
+
+                    <PlusCircle className="h-4 w-4 mr-2" />
+
+                    Allouer une ressource
+
+                  </Button>
+
+                </div>
 
               </CardHeader>
 
               <CardContent>
 
-                <div className="space-y-4">
+                {resourcesLoading ? (
 
-                  {resources.map((resource) => (
+                  <div className="text-center py-8">
 
-                    <motion.div
+                    <p className="text-muted-foreground">Chargement des ressources...</p>
 
-                      key={resource.id}
+                  </div>
 
-                      initial={{ opacity: 0, y: 20 }}
+                ) : allResources.length === 0 ? (
 
-                      animate={{ opacity: 1, y: 0 }}
+                  <div className="text-center py-8">
 
-                      className="flex items-center justify-between p-4 border rounded-lg"
+                    <p className="text-muted-foreground">Aucune ressource allouée</p>
 
-                    >
+                    <p className="text-sm text-muted-foreground mt-2">Cliquez sur "Allouer une ressource" pour commencer</p>
 
-                      <div className="flex items-center gap-4">
+                  </div>
 
-                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                ) : (
 
-                          {resource.name.split(' ').map(n => n.charAt(0)).join('')}
+                  <div className="space-y-4">
 
-                        </div>
+                    {allResources.map((resource) => (
 
-                        <div>
+                      <motion.div
 
-                          <h3 className="font-semibold">{resource.name}</h3>
+                        key={resource.id}
 
-                          <p className="text-sm text-muted-foreground">{resource.role}</p>
+                        initial={{ opacity: 0, y: 20 }}
 
-                          <p className="text-xs text-muted-foreground">{resource.email}</p>
+                        animate={{ opacity: 1, y: 0 }}
 
-                          <div className="flex gap-1 mt-1">
+                        className="flex items-center justify-between p-4 border rounded-lg"
 
-                            {resource.skills.slice(0, 3).map((skill, index) => (
+                      >
 
-                              <Badge key={index} variant="outline" className="text-xs">{skill}</Badge>
+                        <div className="flex items-center gap-4">
 
-                            ))}
+                          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+
+                            {(resource.user_name || resource.user_email || 'U').substring(0, 2).toUpperCase()}
+
+                          </div>
+
+                          <div>
+
+                            <h3 className="font-semibold">{resource.user_name || resource.user_email || 'Utilisateur'}</h3>
+
+                            <p className="text-sm text-muted-foreground">{resource.role || 'Rôle non défini'}</p>
+
+                            <p className="text-xs text-muted-foreground">{resource.user_email}</p>
+
+                            <div className="flex gap-2 mt-1">
+
+                              <Badge variant="outline" className="text-xs">
+
+                                {resource.project_name || 'Projet inconnu'}
+
+                              </Badge>
+
+                              {resource.start_date && (
+
+                                <Badge variant="outline" className="text-xs">
+
+                                  Du {new Date(resource.start_date).toLocaleDateString('fr-FR')}
+
+                                </Badge>
+
+                              )}
+
+                            </div>
 
                           </div>
 
                         </div>
 
-                      </div>
+                        <div className="text-right">
 
-                      <div className="text-right">
+                          <div className="flex items-center gap-2 mb-2">
 
-                        <div className="flex items-center gap-2 mb-2">
+                            <span className="text-sm font-medium">Allocation</span>
 
-                          <span className="text-sm font-medium">Disponibilité</span>
+                            <Progress value={resource.allocation_percentage} className="w-20 h-2" />
 
-                          <Progress value={resource.availability} className="w-20 h-2" />
+                            <span className="text-sm">{resource.allocation_percentage}%</span>
 
-                          <span className="text-sm">{resource.availability}%</span>
+                          </div>
+
+                          {resource.hourly_rate && (
+
+                            <p className="text-sm font-medium">€{resource.hourly_rate}/h</p>
+
+                          )}
+
+                          {resource.end_date && (
+
+                            <p className="text-xs text-muted-foreground">
+
+                              Fin: {new Date(resource.end_date).toLocaleDateString('fr-FR')}
+
+                            </p>
+
+                          )}
 
                         </div>
 
-                        <p className="text-sm font-medium">€{resource.hourlyRate}/h</p>
+                      </motion.div>
 
-                        <p className="text-xs text-muted-foreground">{resource.billableHours}h facturable</p>
+                    ))}
 
-                        <p className="text-xs text-muted-foreground">{resource.currentProjects.length} projet(s)</p>
+                  </div>
 
-                      </div>
-
-                    </motion.div>
-
-                  ))}
-
-                </div>
+                )}
 
               </CardContent>
 
@@ -1588,7 +1895,7 @@ export default function ProjectsPage() {
 
                   </div>
 
-                  <Button onClick={() => toastSuccess("Interface à implémenter")}>
+                  <Button onClick={() => setIsTimesheetModalOpen(true)}>
 
                     <PlusCircle className="h-4 w-4 mr-2" />
 
@@ -1602,79 +1909,231 @@ export default function ProjectsPage() {
 
               <CardContent>
 
+                {/* Filtres par statut */}
+
+                <div className="flex flex-wrap gap-2 mb-4">
+
+                  <Button
+
+                    variant={timesheetFilter === 'all' ? 'default' : 'outline'}
+
+                    size="sm"
+
+                    onClick={() => setTimesheetFilter('all')}
+
+                  >
+
+                    Toutes
+
+                  </Button>
+
+                  <Button
+
+                    variant={timesheetFilter === 'draft' ? 'default' : 'outline'}
+
+                    size="sm"
+
+                    onClick={() => setTimesheetFilter('draft')}
+
+                  >
+
+                    Brouillon
+
+                  </Button>
+
+                  <Button
+
+                    variant={timesheetFilter === 'submitted' ? 'default' : 'outline'}
+
+                    size="sm"
+
+                    onClick={() => setTimesheetFilter('submitted')}
+
+                  >
+
+                    Soumises
+
+                  </Button>
+
+                  <Button
+
+                    variant={timesheetFilter === 'approved' ? 'default' : 'outline'}
+
+                    size="sm"
+
+                    onClick={() => setTimesheetFilter('approved')}
+
+                  >
+
+                    Approuvées
+
+                  </Button>
+
+                  <Button
+
+                    variant={timesheetFilter === 'rejected' ? 'default' : 'outline'}
+
+                    size="sm"
+
+                    onClick={() => setTimesheetFilter('rejected')}
+
+                  >
+
+                    Rejetées
+
+                  </Button>
+
+                  <Button
+
+                    variant={timesheetFilter === 'invoiced' ? 'default' : 'outline'}
+
+                    size="sm"
+
+                    onClick={() => setTimesheetFilter('invoiced')}
+
+                  >
+
+                    Facturées
+
+                  </Button>
+
+                </div>
+
                 <div className="space-y-4">
 
-                  {timeEntries.map((timesheet) => {
+                  {timesheetsLoading ? (
 
-                    const project = projects.find(p => p.id === timesheet.project_id);
+                    <div className="text-center py-8">
 
-                    const task = tasks.find(t => t.id === timesheet.task_id);
+                      <p className="text-muted-foreground">Chargement des timesheets...</p>
 
-                    return (
+                    </div>
 
-                      <motion.div
+                  ) : allTimesheets.length === 0 ? (
 
-                        key={timesheet.id}
+                    <div className="text-center py-8">
 
-                        initial={{ opacity: 0, y: 20 }}
+                      <p className="text-muted-foreground">Aucun timesheet à afficher</p>
 
-                        animate={{ opacity: 1, y: 0 }}
+                    </div>
 
-                        className="flex items-center justify-between p-4 border rounded-lg"
+                  ) : (
 
-                      >
+                    allTimesheets.map((timesheet) => {
 
-                        <div className="flex items-center gap-4">
+                      // Obtenir le badge de statut
 
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${
+                      const getStatusBadge = (status: string) => {
 
-                            timesheet.approved ? 'bg-green-500' : 'bg-orange-500'
+                        switch (status) {
 
-                          }`}>
+                          case 'approved':
 
-                            <Timer className="h-5 w-5" />
+                            return <Badge variant="default" className="bg-green-500">Approuvé</Badge>;
 
-                          </div>
+                          case 'rejected':
 
-                          <div>
+                            return <Badge variant="destructive">Rejeté</Badge>;
 
-                            <h3 className="font-semibold">{timesheet.user_name}</h3>
+                          case 'submitted':
 
-                            <p className="text-sm text-muted-foreground">{timesheet.description}</p>
+                            return <Badge variant="secondary">Soumis</Badge>;
 
-                            <div className="flex items-center gap-2 mt-1">
+                          case 'invoiced':
 
-                              <Badge variant="outline" className="text-xs">{project?.name}</Badge>
+                            return <Badge variant="default" className="bg-blue-500">Facturé</Badge>;
 
-                              <Badge variant="outline" className="text-xs">{task?.title}</Badge>
+                          case 'draft': default:
+
+                            return <Badge variant="outline">Brouillon</Badge>;
+
+                        }
+
+                      };
+
+                      return (
+
+                        <motion.div
+
+                          key={timesheet.id}
+
+                          initial={{ opacity: 0, y: 20 }}
+
+                          animate={{ opacity: 1, y: 0 }}
+
+                          className="flex items-center justify-between p-4 border rounded-lg"
+
+                        >
+
+                          <div className="flex items-center gap-4">
+
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${
+
+                              timesheet.status === 'approved' ? 'bg-green-500' :
+
+                              timesheet.status === 'rejected' ? 'bg-red-500' :
+
+                              timesheet.status === 'invoiced' ? 'bg-blue-500' :
+
+                              'bg-orange-500'
+
+                            }`}>
+
+                              <Timer className="h-5 w-5" />
+
+                            </div>
+
+                            <div>
+
+                              <h3 className="font-semibold">{timesheet.user_name || timesheet.user_email || 'Utilisateur'}</h3>
+
+                              <p className="text-sm text-muted-foreground">{timesheet.description || 'Aucune description'}</p>
+
+                              <div className="flex items-center gap-2 mt-1">
+
+                                {timesheet.project_name && (
+
+                                  <Badge variant="outline" className="text-xs">{timesheet.project_name}</Badge>
+
+                                )}
+
+                                {timesheet.task_name && (
+
+                                  <Badge variant="outline" className="text-xs">{timesheet.task_name}</Badge>
+
+                                )}
+
+                                {timesheet.is_billable && (
+
+                                  <Badge variant="outline" className="text-xs bg-green-50 text-green-700">Facturable</Badge>
+
+                                )}
+
+                              </div>
 
                             </div>
 
                           </div>
 
-                        </div>
+                          <div className="text-right">
 
-                        <div className="text-right">
+                            <p className="font-semibold">{timesheet.hours}h</p>
 
-                          <p className="font-semibold">{timesheet.hours}h</p>
+                            <p className="text-sm text-muted-foreground">{new Date(timesheet.date).toLocaleDateString('fr-FR')}</p>
 
-                          <p className="text-sm text-muted-foreground">{timesheet.date}</p>
+                            <p className="text-xs font-medium text-green-600">€{timesheet.amount.toFixed(2)}</p>
 
-                          <p className="text-xs font-medium text-green-600">€{((timesheet.hourlyRate || 0) * timesheet.hours).toFixed(2)}</p>
+                          </div>
 
-                        </div>
+                          {getStatusBadge(timesheet.status)}
 
-                        <Badge variant={timesheet.approved ? 'default' : 'secondary'}>
+                        </motion.div>
 
-                          {timesheet.approved ? 'Approuvé' : 'En attente'}
+                      );
 
-                        </Badge>
+                    })
 
-                      </motion.div>
-
-                    );
-
-                  })}
+                  )}
 
                 </div>
 
@@ -1756,7 +2215,7 @@ export default function ProjectsPage() {
 
                           <p className="text-2xl font-bold text-blue-600">
 
-                            {timeEntries.reduce((sum, ts) => sum + ts.billableHours, 0)}h
+                            {timeEntries.reduce((sum, ts) => sum + (ts.billable ? ts.hours : 0), 0)}h
 
                           </p>
 
@@ -1778,7 +2237,7 @@ export default function ProjectsPage() {
 
                           <p className="text-2xl font-bold text-purple-600">
 
-                            €{(timeEntries.reduce((sum, ts) => sum + ts.hourlyRate, 0) / timeEntries.length).toFixed(0)}
+                            €{timeEntries.length > 0 ? (timeEntries.reduce((sum, ts) => sum + (ts.hourlyRate || 0), 0) / timeEntries.length).toFixed(0) : '0'}
 
                           </p>
 
@@ -1804,7 +2263,7 @@ export default function ProjectsPage() {
 
                       const projectTimesheets = timeEntries.filter(ts => ts.project_id === project.id);
 
-                      const totalBillable = projectTimesheets.reduce((sum, ts) => sum + ts.billableHours * ts.hourlyRate, 0);
+                      const _totalBillable = projectTimesheets.reduce((sum, ts) => sum + (ts.billable ? ts.hours : 0) * (ts.hourlyRate || 0), 0);
 
                       return (
 
@@ -1896,111 +2355,194 @@ export default function ProjectsPage() {
 
               <CardHeader>
 
-                <CardTitle className="flex items-center gap-2">
+                <div className="flex justify-between items-center">
 
-                  <BarChart3 className="text-indigo-500" />
+                  <div>
 
-                  Diagramme de Gantt
+                    <CardTitle className="flex items-center gap-2">
 
-                </CardTitle>
+                      <BarChart3 className="text-indigo-500" />
 
-                <CardDescription>Planification visuelle des projets</CardDescription>
+                      Diagramme de Gantt
+
+                    </CardTitle>
+
+                    <CardDescription>Planification visuelle des projets - {new Date().getFullYear()}</CardDescription>
+
+                  </div>
+
+                </div>
 
               </CardHeader>
 
               <CardContent>
 
-                <div className="space-y-6">
+                {projects.length === 0 ? (
 
-                  {/* Ligne de temps */}
+                  <div className="text-center py-12">
 
-                  <div className="overflow-x-auto">
+                    <BarChart3 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
 
-                    <div className="min-w-[800px]">
+                    <p className="text-muted-foreground">Aucun projet à afficher</p>
 
-                      {/* En-tête avec dates */}
+                    <p className="text-sm text-muted-foreground mt-2">Créez un projet pour visualiser le planning</p>
 
-                      <div className="grid grid-cols-12 gap-1 mb-4 text-xs text-center font-medium">
+                  </div>
 
-                        {['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'].map((month, i) => (
+                ) : (
 
-                          <div key={i} className="p-2 bg-muted rounded">{month}</div>
+                  <div className="space-y-6">
 
-                        ))}
+                    {/* Ligne de temps */}
 
-                      </div>
+                    <div className="overflow-x-auto">
 
-                      
+                      <div className="min-w-[800px]">
 
-                      {/* Barres de progression pour chaque projet */}
+                        {/* En-tête avec dates */}
 
-                      <div className="space-y-3">
+                        <div className="grid grid-cols-12 gap-1 mb-4 text-xs text-center font-medium">
 
-                        {projects.map((project, index) => {
+                          {['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'].map((month, i) => (
 
-                          const startMonth = new Date(project.startDate).getMonth();
+                            <div key={i} className="p-2 bg-muted rounded">{month}</div>
 
-                          const endMonth = new Date(project.endDate).getMonth();
+                          ))}
 
-                          const duration = Math.max(1, endMonth - startMonth + 1);
+                        </div>
 
-                          
 
-                          return (
 
-                            <div key={project.id} className="flex items-center gap-4">
+                        {/* Barres de progression pour chaque projet */}
 
-                              <div className="w-48 text-sm font-medium truncate">{project.name}</div>
+                        <div className="space-y-3">
 
-                              <div className="flex-1 grid grid-cols-12 gap-1">
+                          {projects
+                            .filter(project => project.startDate && project.endDate)
+                            .map((project) => {
 
-                                {Array.from({ length: 12 }, (_, i) => {
+                            const startMonth = new Date(project.startDate).getMonth();
 
-                                  const isInRange = i >= startMonth && i <= endMonth;
+                            const endMonth = new Date(project.endDate).getMonth();
 
-                                  const progressInMonth = isInRange ? project.progress : 0;
+                            const currentYear = new Date().getFullYear();
+                            const projectStartYear = new Date(project.startDate).getFullYear();
+                            const projectEndYear = new Date(project.endDate).getFullYear();
 
-                                  
+                            // Skip projects not in current year
+                            if (projectStartYear > currentYear || projectEndYear < currentYear) {
+                              return null;
+                            }
 
-                                  return (
 
-                                    <div key={i} className="h-6 bg-gray-100 rounded relative overflow-hidden dark:bg-gray-900/50">
 
-                                      {isInRange && (
+                            return (
 
-                                        <div 
+                              <div key={project.id} className="flex items-center gap-4">
 
-                                          className={`h-full rounded ${
+                                <div className="w-48 text-sm font-medium truncate" title={project.name}>
+                                  {project.name}
+                                </div>
 
-                                            project.status === 'completed' ? 'bg-green-500' :
+                                <div className="flex-1 grid grid-cols-12 gap-1">
 
-                                            project.status === 'in_progress' ? 'bg-blue-500' :
+                                  {Array.from({ length: 12 }, (_, i) => {
 
-                                            project.status === 'on_hold' ? 'bg-orange-500' : 'bg-gray-400'
+                                    const isInRange = i >= startMonth && i <= endMonth;
 
-                                          }`}
+                                    const progressInMonth = isInRange ? project.progress : 0;
 
-                                          style={{ width: `${Math.min(100, progressInMonth)}%` }}
 
-                                        />
 
-                                      )}
+                                    return (
 
-                                    </div>
+                                      <div key={i} className="h-6 bg-gray-100 rounded relative overflow-hidden dark:bg-gray-800/50">
 
-                                  );
+                                        {isInRange && (
 
-                                })}
+                                          <div
+
+                                            className={`h-full rounded ${
+
+                                              project.status === 'completed' ? 'bg-green-500' :
+
+                                              project.status === 'in_progress' ? 'bg-blue-500' :
+
+                                              project.status === 'on_hold' ? 'bg-orange-500' : 'bg-gray-400'
+
+                                            }`}
+
+                                            style={{ width: `${Math.min(100, progressInMonth)}%` }}
+
+                                            title={`${project.name}: ${project.progress}%`}
+
+                                          />
+
+                                        )}
+
+                                      </div>
+
+                                    );
+
+                                  })}
+
+                                </div>
+
+                                <div className="w-16 text-xs text-right">
+                                  <span className="font-medium">{project.progress}%</span>
+                                  <br />
+                                  <span className="text-muted-foreground text-[10px]">
+                                    {new Date(project.startDate).toLocaleDateString('fr-FR', { month: 'short', day: 'numeric' })} - {new Date(project.endDate).toLocaleDateString('fr-FR', { month: 'short', day: 'numeric' })}
+                                  </span>
+                                </div>
 
                               </div>
 
-                              <div className="w-12 text-xs text-muted-foreground">{project.progress}%</div>
+                            );
 
-                            </div>
+                          }).filter(Boolean)}
 
-                          );
+                        </div>
 
-                        })}
+                      </div>
+
+                    </div>
+
+
+
+                    {/* Légende */}
+
+                    <div className="flex items-center gap-6 text-sm pt-4 border-t">
+
+                      <div className="flex items-center gap-2">
+
+                        <div className="w-4 h-4 bg-blue-500 rounded" />
+
+                        <span>En cours</span>
+
+                      </div>
+
+                      <div className="flex items-center gap-2">
+
+                        <div className="w-4 h-4 bg-green-500 rounded" />
+
+                        <span>Terminé</span>
+
+                      </div>
+
+                      <div className="flex items-center gap-2">
+
+                        <div className="w-4 h-4 bg-orange-500 rounded" />
+
+                        <span>En pause</span>
+
+                      </div>
+
+                      <div className="flex items-center gap-2">
+
+                        <div className="w-4 h-4 bg-gray-400 rounded" />
+
+                        <span>Planifié</span>
 
                       </div>
 
@@ -2008,47 +2550,7 @@ export default function ProjectsPage() {
 
                   </div>
 
-
-
-                  {/* Légende */}
-
-                  <div className="flex items-center gap-6 text-sm">
-
-                    <div className="flex items-center gap-2">
-
-                      <div className="w-4 h-4 bg-blue-500 rounded dark:bg-blue-900/20" />
-
-                      <span>En cours</span>
-
-                    </div>
-
-                    <div className="flex items-center gap-2">
-
-                      <div className="w-4 h-4 bg-green-500 rounded dark:bg-green-900/20" />
-
-                      <span>Terminé</span>
-
-                    </div>
-
-                    <div className="flex items-center gap-2">
-
-                      <div className="w-4 h-4 bg-orange-500 rounded" />
-
-                      <span>En pause</span>
-
-                    </div>
-
-                    <div className="flex items-center gap-2">
-
-                      <div className="w-4 h-4 bg-gray-400 rounded" />
-
-                      <span>Planifié</span>
-
-                    </div>
-
-                  </div>
-
-                </div>
+                )}
 
               </CardContent>
 
@@ -2134,7 +2636,9 @@ export default function ProjectsPage() {
 
                             <p className="text-sm text-muted-foreground">Respect des délais</p>
 
-                            <p className="text-2xl font-bold">87%</p>
+                            <p className="text-2xl font-bold">
+                              {computedMetrics.completedProjects > 0 ? `${computedMetrics.onTimeRate.toFixed(0)}%` : 'N/A'}
+                            </p>
 
                           </div>
 
@@ -2146,7 +2650,7 @@ export default function ProjectsPage() {
 
                     </Card>
 
-                    
+
 
                     <Card>
 
@@ -2158,7 +2662,9 @@ export default function ProjectsPage() {
 
                             <p className="text-sm text-muted-foreground">Efficacité équipe</p>
 
-                            <p className="text-2xl font-bold">92%</p>
+                            <p className="text-2xl font-bold">
+                              {projects.length > 0 ? `${computedMetrics.teamEfficiency.toFixed(0)}%` : 'N/A'}
+                            </p>
 
                           </div>
 
@@ -2170,7 +2676,7 @@ export default function ProjectsPage() {
 
                     </Card>
 
-                    
+
 
                     <Card>
 
@@ -2182,7 +2688,10 @@ export default function ProjectsPage() {
 
                             <p className="text-sm text-muted-foreground">Satisfaction client</p>
 
-                            <p className="text-2xl font-bold">4.8/5</p>
+                            <p className="text-2xl font-bold">
+                              {projects.length > 0 ? 'N/A' : 'N/A'}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">Données à venir</p>
 
                           </div>
 
@@ -2206,7 +2715,7 @@ export default function ProjectsPage() {
 
                       <CardHeader>
 
-                        <CardTitle className="text-lg">Évolution des revenus</CardTitle>
+                        <CardTitle className="text-lg">Évolution des revenus (6 derniers mois)</CardTitle>
 
                       </CardHeader>
 
@@ -2214,23 +2723,48 @@ export default function ProjectsPage() {
 
                         <div className="h-48 flex items-end justify-center gap-2">
 
-                          {[12000, 18000, 15000, 25000, 30000, 28000].map((value, i) => (
+                          {(() => {
+                            // Calculer les revenus des 6 derniers mois
+                            const now = new Date();
+                            const monthsData = Array.from({ length: 6 }, (_, i) => {
+                              const monthDate = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
+                              const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+                              const monthEnd = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
 
-                            <div key={i} className="flex flex-col items-center">
+                              const revenue = projects
+                                .filter(p => {
+                                  if (!p.created_at) return false;
+                                  const projectDate = new Date(p.created_at);
+                                  return projectDate >= monthStart && projectDate <= monthEnd;
+                                })
+                                .reduce((sum, p) => sum + (p.revenue || 0), 0);
 
-                              <div 
+                              return {
+                                month: monthDate.toLocaleDateString('fr-FR', { month: 'short' }),
+                                revenue
+                              };
+                            });
 
-                                className="w-8 bg-gradient-to-t from-blue-500 to-blue-300 rounded-t" 
+                            const maxRevenue = Math.max(...monthsData.map(m => m.revenue), 1);
 
-                                style={{ height: `${(value / 35000) * 150}px` }}
+                            if (monthsData.every(m => m.revenue === 0)) {
+                              return (
+                                <div className="flex items-center justify-center h-full w-full text-muted-foreground text-sm">
+                                  Aucune donnée de revenus disponible
+                                </div>
+                              );
+                            }
 
-                              />
-
-                              <span className="text-xs mt-1">M{i + 1}</span>
-
-                            </div>
-
-                          ))}
+                            return monthsData.map((data, i) => (
+                              <div key={i} className="flex flex-col items-center">
+                                <div
+                                  className="w-8 bg-gradient-to-t from-blue-500 to-blue-300 rounded-t"
+                                  style={{ height: `${data.revenue > 0 ? (data.revenue / maxRevenue) * 150 : 2}px` }}
+                                />
+                                <span className="text-xs mt-1">{data.month}</span>
+                              </div>
+                            ));
+                          })()}
 
                         </div>
 
@@ -2332,7 +2866,7 @@ export default function ProjectsPage() {
 
                           const efficiency = project.totalHours > 0 ? (project.billableHours / project.totalHours) * 100 : 0;
 
-                          const budgetUsage = (project.spent / project.budget) * 100;
+                          const budgetUsage = project.budget > 0 ? (project.spent / project.budget) * 100 : 0;
 
                           
 
@@ -2763,6 +3297,108 @@ export default function ProjectsPage() {
         </motion.div>
 
       )}
+
+      {/* New Client Modal */}
+      <NewClientModal
+        isOpen={isNewClientModalOpen}
+        onClose={() => setIsNewClientModalOpen(false)}
+        onSuccess={async (clientId) => {
+          const { data } = await supabase.from('tiers').select('*').eq('company_id', currentCompany!.id).eq('type', 'client');
+          const clientsFormatted = (data || []).map(client => ({
+            id: client.id,
+            name: client.name || client.company_name || 'Client sans nom',
+            email: client.email,
+            siret: client.siret
+          }));
+          setClients(clientsFormatted);
+          const newClient = clientsFormatted.find(c => c.id === clientId);
+          if (newClient) setProjectClient(newClient.name);
+          toastSuccess('Client créé avec succès');
+        }}
+      />
+
+      {/* New Employee Modal */}
+      <EmployeeFormModal
+        isOpen={isNewEmployeeModalOpen}
+        onClose={() => setIsNewEmployeeModalOpen(false)}
+        onSubmit={async (employeeData) => {
+          try {
+            const { data, error } = await supabase.from('employees').insert({
+              ...employeeData,
+              company_id: currentCompany!.id,
+              status: 'active'
+            }).select().single();
+            if (error) throw error;
+            const { data: employeesData } = await supabase.from('employees').select('*').eq('company_id', currentCompany!.id).eq('status', 'active');
+            const employeesAsResources = (employeesData || []).map(emp => ({
+              id: emp.id,
+              name: `${emp.first_name} ${emp.last_name}`,
+              role: emp.position || 'Employee',
+              email: emp.email,
+              skills: emp.skills || [],
+              availability: 80,
+              hourlyRate: emp.hourly_rate || 0,
+              currentProjects: [],
+              totalHours: 0,
+              billableHours: 0
+            }));
+            setResources(employeesAsResources);
+            if (data) setProjectManager(`${data.first_name} ${data.last_name}`);
+            toastSuccess('Employé créé avec succès');
+            return true;
+          } catch (error) {
+            console.error('Error creating employee:', error);
+            toastError('Erreur lors de la création de l\'employé');
+            return false;
+          }
+        }}
+      />
+
+      {/* Task Modal */}
+      <TaskFormModal
+        isOpen={isTaskModalOpen}
+        onClose={() => setIsTaskModalOpen(false)}
+        onSubmit={async (taskData: any) => {
+          try {
+            const task = await projectTasksService.createTask({
+              project_id: taskData.project_id,
+              name: taskData.title,
+              description: taskData.description,
+              start_date: taskData.startDate ? taskData.startDate.toISOString().split('T')[0] : undefined,
+              end_date: taskData.dueDate ? taskData.dueDate.toISOString().split('T')[0] : undefined,
+              estimated_hours: taskData.estimatedHours ? parseFloat(taskData.estimatedHours) : undefined,
+              status: taskData.status || 'todo',
+              priority: taskData.priority || 'medium',
+              progress: taskData.progress || 0,
+              assigned_to: taskData.assignee || undefined
+            });
+            await handleTaskCreated(task.id);
+          } catch (error) {
+            console.error('Error creating task:', error);
+            toastError(t('projects.errors.creatingTask'));
+            throw error;
+          }
+        }}
+        projects={projects.map(p => ({ id: p.id, name: p.name }))}
+        employees={resources.map(r => ({ id: r.id, name: r.name }))}
+      />
+
+      {/* Timesheet Modal */}
+      <TimesheetFormModal
+        isOpen={isTimesheetModalOpen}
+        onClose={() => setIsTimesheetModalOpen(false)}
+        onSuccess={handleTimesheetCreated}
+        projects={projects.map(p => ({ id: p.id, name: p.name }))}
+      />
+
+      {/* Resource Allocation Modal */}
+      <ResourceAllocationModal
+        isOpen={isResourceModalOpen}
+        onClose={() => setIsResourceModalOpen(false)}
+        onSuccess={handleResourceAllocated}
+        projects={projects.map(p => ({ id: p.id, name: p.name }))}
+        users={resources.map(r => ({ id: r.id, email: r.email, name: r.full_name }))}
+      />
 
     </motion.div>
 

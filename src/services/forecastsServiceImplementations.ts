@@ -416,7 +416,7 @@ export async function updateForecast(
     }
 
     // Calculate totals if items are provided
-    let updateData: any = {};
+    const updateData: any = {};
 
     if (formData.name) updateData.name = formData.name;
     if (formData.period_id) updateData.period_id = formData.period_id;

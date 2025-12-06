@@ -16,7 +16,7 @@
  * Ce service centralise la gestion des tiers en utilisant :
  * - Table `customers` pour les clients
  * - Table `suppliers` pour les fournisseurs
- * - Vue `third_parties_unified` pour lectures unifiées
+ * - Vue `third_parties` pour lectures unifiées
  *
  * Garantit la cohérence entre tous les modules de l'application.
  */
@@ -58,7 +58,7 @@ export interface Supplier extends ThirdPartyBase {
 }
 
 export interface UnifiedThirdParty {
-  party_type: 'customer' | 'supplier';
+  type: 'customer' | 'supplier';
   id: string;
   company_id: string;
   party_number: string;
@@ -67,10 +67,10 @@ export interface UnifiedThirdParty {
   phone: string | null;
   company_name: string | null;
   tax_number: string | null;
-  primary_address_line1: string | null;
-  primary_city: string | null;
-  primary_postal_code: string | null;
-  primary_country: string | null;
+  address_line1: string | null;
+  city: string | null;
+  postal_code: string | null;
+  country: string | null;
   payment_terms: number | null;
   currency: string | null;
   discount_rate: number | null;
@@ -383,7 +383,7 @@ class UnifiedThirdPartiesService {
       const activeCompanyId = companyId || await this.getCurrentCompanyId();
 
       let query = supabase
-        .from('third_parties_unified')
+        .from('third_parties')
         .select('*')
         .eq('company_id', activeCompanyId)
         .eq('is_active', true)
@@ -415,7 +415,7 @@ class UnifiedThirdPartiesService {
       const activeCompanyId = companyId || await this.getCurrentCompanyId();
 
       let query = supabase
-        .from('third_parties_unified')
+        .from('third_parties')
         .select('*')
         .eq('company_id', activeCompanyId)
         .eq('is_active', true);
@@ -455,7 +455,7 @@ class UnifiedThirdPartiesService {
       const activeCompanyId = companyId || await this.getCurrentCompanyId();
 
       const { data, error } = await supabase
-        .from('third_parties_unified')
+        .from('third_parties')
         .select('party_type, balance')
         .eq('company_id', activeCompanyId)
         .eq('is_active', true);

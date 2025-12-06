@@ -1008,9 +1008,9 @@ export default function OptimizedJournalEntriesTab() {
   const { toast } = useToast();
 
   const { currentCompany } = useAuth();
-  const { createJournalEntry, loading: hookLoading, error: hookError, getAccountsList } = useJournalEntries(currentCompany?.id || '');
+  const { createJournalEntry, loading: _hookLoading, error: _hookError, getAccountsList } = useJournalEntries(currentCompany?.id || '');
   const [entries, setEntries] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
   const [accounts, setAccounts] = useState([]);
 
   // Charger les écritures réelles depuis Supabase
@@ -1196,6 +1196,7 @@ export default function OptimizedJournalEntriesTab() {
 
   const handleDeleteEntry = async (entry) => {
     // Confirmation
+    // eslint-disable-next-line no-alert
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette écriture ? Cette action est irréversible.')) {
       return;
     }

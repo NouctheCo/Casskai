@@ -278,7 +278,7 @@ class AIAnalyticsService {
   private generateAnomalyReasons(transaction: Transaction, features: number[]): string[] {
     const reasons: string[] = [];
     
-    const [amount, dayOfWeek, hour, isWeekend] = features;
+    const [amount, _dayOfWeek, hour, isWeekend] = features;
     
     if (Math.exp(amount) > 10000) {
       reasons.push('Montant inhabituellement élevé');

@@ -13,8 +13,11 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
-import { auditService } from '@/services/auditService';
-import type { AuditAction, SecurityLevel } from '@/services/auditService';
+import {
+  auditService,
+  type AuditAction,
+  type SecurityLevel
+} from '@/services/auditService';
 import { Shield, Calendar, User, Database, Filter, Download, RefreshCw, AlertTriangle } from 'lucide-react';
 
 interface AuditLog {

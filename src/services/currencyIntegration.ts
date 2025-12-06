@@ -16,7 +16,6 @@ import ConfigService from './configService';
 import { CurrencyService } from './currencyService';
 import { SUPPORTED_CURRENCIES } from '../utils/constants';
 // import { supabase } from '../lib/supabase'; // Commenté pour la compatibilité de build
-import { CompanyConfig } from '../types/config';
 
 export class CurrencyIntegration {
   private static instance: CurrencyIntegration;
@@ -126,7 +125,7 @@ export class CurrencyIntegration {
         if (error && !error.message.includes('already exists')) {
           throw error;
         }
-      } catch (error) {
+      } catch (_error) {
         console.warn('SQL Query failed (may be normal):', `${query.substring(0, 50)}...`);
         // Continuer même si certaines requêtes échouent (tables peuvent déjà exister)
       }
@@ -356,7 +355,7 @@ export class CurrencyIntegration {
       const tableChecks = tables.map(async table => {
         try {
           await supabase.from(table).select('*').limit(1);
-        } catch (error) {
+        } catch (_error) {
           errors.push(`Table ${table} manquante ou inaccessible`);
         }
       });

@@ -34,10 +34,6 @@ import {
 
   Calendar, 
 
-  ToggleLeft,
-
-  ToggleRight,
-
   Info,
 
   CheckCircle,
@@ -64,7 +60,7 @@ import { PublicNavigation } from '@/components/navigation/PublicNavigation';
 
 const CookiesPolicyPage = () => {
 
-  const { t } = useTranslation();
+  const { t: _t } = useTranslation();
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -760,7 +756,7 @@ const CookiesPolicyPage = () => {
 
               <div className="space-y-6">
 
-                {cookieTypes.map((type, index) => (
+                {cookieTypes.map((type, _index) => (
 
                   <div key={type.id} className={`p-6 ${type.bgColor} rounded-lg`}>
 

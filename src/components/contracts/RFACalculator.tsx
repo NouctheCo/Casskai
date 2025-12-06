@@ -30,7 +30,7 @@ import { useCurrency } from '../../hooks/useCurrency';
 
 import { useRFASimulation } from '../../hooks/useContracts';
 
-import { contractsService } from '../../services/contractsService';
+import { contractsService as _contractsService } from '../../services/contractsService';
 
 import { AmountDisplay } from '../currency/AmountDisplay';
 

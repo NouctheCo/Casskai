@@ -121,7 +121,7 @@ export class BridgeProvider extends BankingProvider {
     try {
       const response = await this.makeRequest('GET', '/v2/status') as BridgeStatusResponse;
       return response.status === 'ok';
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -135,7 +135,7 @@ export class BridgeProvider extends BankingProvider {
       }) as BridgeAuthResponse;
 
       this.accessToken = response.access_token;
-    } catch (error) {
+    } catch (_error) {
       throw new AuthenticationError('Failed to authenticate with Bridge API');
     }
   }

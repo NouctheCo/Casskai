@@ -63,6 +63,9 @@ casskai-config.json
 secrets/
 private/
 
+# Configuration locale Claude
+.claude/settings.local.json
+
 # ============================================================================
 # SUPABASE (CONFIGURATION STANDARD)
 # ============================================================================

@@ -525,7 +525,7 @@ class AIAssistantService {
         summary = response.summary || this.generateDefaultSummary(balance, income, expenses);
         keyInsights = response.keyInsights || this.generateDefaultInsights(transactions, metrics);
         recommendations = response.recommendations || this.generateDefaultRecommendations(balance, metrics);
-      } catch (error) {
+      } catch (_error) {
         // Fallback vers génération par défaut
         summary = this.generateDefaultSummary(balance, income, expenses);
         keyInsights = this.generateDefaultInsights(transactions, metrics);

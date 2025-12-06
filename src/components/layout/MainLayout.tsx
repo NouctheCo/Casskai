@@ -10,7 +10,7 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { Outlet, useLocation } from 'react-router-dom';
 
@@ -18,15 +18,11 @@ import { Header } from '@/components/layout/Header';
 
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 
-import { useModulesSafe, useModules } from '@/hooks/modules.hooks';
+import { useModulesSafe } from '@/hooks/modules.hooks';
 
 import { useAuth } from '@/contexts/AuthContext';
 
-import { cn } from '@/lib/utils';
-
 import { motion, AnimatePresence } from 'framer-motion';
-
-import { Loader2 } from 'lucide-react';
 
 import { useLocale } from '@/contexts/LocaleContext';
 
@@ -88,7 +84,7 @@ export function MainLayout() {
 
   const location = useLocation();
 
-  const { user, loading: authLoading, onboardingCompleted, currentCompany } = useAuth();
+  const { user, loading: authLoading, onboardingCompleted: _onboardingCompleted, currentCompany: _currentCompany } = useAuth();
 
   
 
@@ -132,7 +128,7 @@ export function MainLayout() {
 
   // Gestion du collapse sur desktop
 
-  const [isDesktopCollapsed, _setIsDesktopCollapsed] = useState(isSidebarStoredCollapsed);
+  const [_isDesktopCollapsed, _setIsDesktopCollapsed] = useState(isSidebarStoredCollapsed);
 
 
 

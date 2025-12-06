@@ -235,17 +235,20 @@ export class SepaService {
 
     if (error) throw error;
 
-    return (data || []).map(invoice => ({
-      id: invoice.id,
-      beneficiaryName: invoice.third_parties.name,
-      beneficiaryIban: invoice.third_parties.iban,
-      beneficiaryBic: invoice.third_parties.bic || '',
-      amount: invoice.total_amount,
-      reference: invoice.invoice_number,
-      description: `Facture fournisseur ${invoice.invoice_number}`,
-      type: 'supplier_invoice' as const,
-      sourceId: invoice.id,
-    }));
+    return (data || []).map(invoice => {
+      const thirdParty = Array.isArray(invoice.third_parties) ? invoice.third_parties[0] : invoice.third_parties;
+      return {
+        id: invoice.id,
+        beneficiaryName: thirdParty?.name || '',
+        beneficiaryIban: thirdParty?.iban || '',
+        beneficiaryBic: thirdParty?.bic || '',
+        amount: invoice.total_amount,
+        reference: invoice.invoice_number,
+        description: `Facture fournisseur ${invoice.invoice_number}`,
+        type: 'supplier_invoice' as const,
+        sourceId: invoice.id,
+      };
+    });
   }
 
   /**
@@ -274,17 +277,20 @@ export class SepaService {
 
     if (error) throw error;
 
-    return (data || []).map(report => ({
-      id: report.id,
-      beneficiaryName: `${report.employees.first_name} ${report.employees.last_name}`,
-      beneficiaryIban: report.employees.iban,
-      beneficiaryBic: report.employees.bic || '',
-      amount: report.total_amount,
-      reference: report.report_number,
-      description: `Note de frais ${report.report_number}`,
-      type: 'expense_report' as const,
-      sourceId: report.id,
-    }));
+    return (data || []).map(report => {
+      const employee = Array.isArray(report.employees) ? report.employees[0] : report.employees;
+      return {
+        id: report.id,
+        beneficiaryName: `${employee?.first_name || ''} ${employee?.last_name || ''}`.trim(),
+        beneficiaryIban: employee?.iban || '',
+        beneficiaryBic: employee?.bic || '',
+        amount: report.total_amount,
+        reference: report.report_number,
+        description: `Note de frais ${report.report_number}`,
+        type: 'expense_report' as const,
+        sourceId: report.id,
+      };
+    });
   }
 
   /**

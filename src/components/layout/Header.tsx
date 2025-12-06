@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 
-import { Menu, Settings, Bell, User, Search, Command, ChevronDown, Shield } from 'lucide-react';
+import { Menu, Settings, Bell, User, Search, ChevronDown, Shield } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-
-import { Badge } from '@/components/ui/badge';
 
 import { ThemeToggle } from '@/components/ThemeToggle';
 

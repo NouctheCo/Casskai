@@ -69,7 +69,7 @@ export class TenantService {
       if (!response.ok) return null;
       
       return await response.json();
-    } catch (error) {
+    } catch (_error) {
       // Fallback : configuration locale pour le développement
       return this.getLocalTenantConfig(tenantId);
     }

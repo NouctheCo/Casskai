@@ -38,11 +38,12 @@ export class FormattingService {
       let pdfContent: Buffer | undefined;
 
       switch (format) {
-        case 'FACTURX':
+        case 'FACTURX': {
           const facturXResult = await this.generateFacturX(invoice);
           xmlContent = facturXResult.xml;
           pdfContent = facturXResult.pdf;
           break;
+        }
 
         case 'UBL':
           xmlContent = await this.generateUBL(invoice);
@@ -179,7 +180,7 @@ export class FormattingService {
    */
   private async generatePDFWithEmbeddedXML(
     invoice: EN16931Invoice,
-    xmlContent: string
+    _xmlContent: string
   ): Promise<Buffer> {
     // This is a simplified implementation
     // In production, you would use a proper PDF/A-3 library like pdf-lib

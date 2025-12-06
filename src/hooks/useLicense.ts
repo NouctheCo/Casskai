@@ -11,13 +11,13 @@
  */
 
 // hooks/useLicense.ts
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { LicenseService } from '../services/licenseService';
 import type { LicenseFeatures, LicenseLimits, LicenseType } from '../types/licensing';
 
 export function useLicense() {
   const [licenseService] = useState(() => LicenseService.getInstance());
-  const [currentLicense, setCurrentLicense] = useState(licenseService.getCurrentLicense());
+  const [currentLicense, _setCurrentLicense] = useState(licenseService.getCurrentLicense());
 
   const canAccess = (feature: keyof LicenseFeatures): boolean => {
     return licenseService.canAccessFeature(feature);

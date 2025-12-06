@@ -24,10 +24,6 @@ import { useAuth } from '@/contexts/AuthContext';
 
 import quotesService from '@/services/quotesService';
 
-import { thirdPartiesService } from '@/services/thirdPartiesService';
-
-import type { ThirdParty } from '@/types/third-parties.types';
-
 import ClientSelector from '@/components/invoicing/ClientSelector';
 
 import { 
@@ -54,9 +50,7 @@ import {
 
   XCircle,
 
-  Euro,
-
-  Calendar
+  Euro
 
 } from 'lucide-react';
 

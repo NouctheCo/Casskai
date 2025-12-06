@@ -324,7 +324,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
 
   // Gestionnaire de changement de layout
 
-  const handleLayoutChange = useCallback((currentLayout: Layout[], allLayouts: { [key: string]: Layout[] }) => {
+  const handleLayoutChange = useCallback((currentLayout: Layout[], _allLayouts: { [key: string]: Layout[] }) => {
 
     if (!isEditing || !currentDashboard) return;
 
@@ -584,7 +584,7 @@ export const ModularDashboard: React.FC<ModularDashboardProps> = ({
 
   // Rendu des widgets avec wrapper animé
 
-  const renderWidget = (widget: WidgetConfig, layout: WidgetLayout) => {
+  const renderWidget = (widget: WidgetConfig, _layout: WidgetLayout) => {
 
     // Validation et sécurisation des données
 

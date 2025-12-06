@@ -13,7 +13,7 @@
 import { openBankingManager } from './openBanking/OpenBankingManager';
 import { 
   BankConnection, 
-  BankAccount, 
+  BankAccount,
   BankTransaction, 
   OpenBankingResponse,
   PSD2AuthFlow,
@@ -406,7 +406,7 @@ export class BankingService {
     return colors[status] || 'gray';
   }
 
-  private formatCurrency(amount: number, currency: string = 'EUR'): string {
+  private formatCurrency(amount: number, _currency: string = 'EUR'): string {
     const formatted = new Intl.NumberFormat('fr-FR', {}).format(amount);
     return formatted.replace(/\u00a0/g, ' ');
   }

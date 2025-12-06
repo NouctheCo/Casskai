@@ -106,7 +106,7 @@ export interface CurrencyWithValidation extends Currency {
 
 // Fonction de validation des montants
 
-const validateAmount = (
+const _validateAmount = (
 
   amount: AmountValue,
 
@@ -538,7 +538,7 @@ export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
 
       return formatAmount(conversion.convertedAmount, conversion.to);
 
-    } catch (error) {
+    } catch (_error) {
 
       // En cas d'erreur, retourner le montant original
 
@@ -588,17 +588,9 @@ export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
 
   const getExchangeRateHistory = useCallback(async (): Promise<ExchangeRate[]> => {
 
-    try {
+    // Placeholder pour l'historique des taux - retourne un tableau vide
 
-      return []; // Placeholder pour l'historique des taux
-
-    } catch (error) {
-
-      console.warn('Historique des taux non disponible:', error);
-
-      return [];
-
-    }
+    return [];
 
   }, []);
 
@@ -642,9 +634,9 @@ export function useCurrency(defaultCurrency = 'XOF'): UseCurrencyReturn {
 
   // Propriétés dérivées (compatibles avec votre hook existant)
 
-  const currencies = currencyService.getAllCurrencies();
+  const _currencies = currencyService.getAllCurrencies();
 
-  const africanCurrencies = currencyService.getAfricanCurrencies();
+  const _africanCurrencies = currencyService.getAfricanCurrencies();
 
 
 
@@ -850,7 +842,7 @@ export const useQuickConverter = () => {
 
       return formatAmount(converted, to);
 
-    } catch (error) {
+    } catch (_error) {
 
       return formatAmount(amount, from);
 
@@ -876,7 +868,7 @@ export const useQuickConverter = () => {
 
       return formatAmount(conversion.convertedAmount, to);
 
-    } catch (error) {
+    } catch (_error) {
 
       return formatAmount(amount, from);
 

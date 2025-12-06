@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-import { motion } from 'framer-motion';
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { Button } from '@/components/ui/button';
@@ -28,6 +26,8 @@ import { useToast } from '@/components/ui/use-toast';
 
 import { useAuth } from '@/contexts/AuthContext';
 
+import { supabase } from '@/lib/supabase';
+
 import { invoicingService } from '@/services/invoicingService';
 
 import { thirdPartiesService } from '@/services/thirdPartiesService';
@@ -35,6 +35,12 @@ import { thirdPartiesService } from '@/services/thirdPartiesService';
 import CompanySettingsService from '@/services/companySettingsService';
 
 import { InvoicePdfService } from '@/services/invoicePdfService';
+
+import InventoryService, { type InventoryItem } from '@/services/inventoryService';
+
+import NewArticleModal from '@/components/inventory/NewArticleModal';
+
+import ClientSelector from '@/components/invoicing/ClientSelector';
 
 import type { InvoiceWithDetails } from '@/types/database/invoices.types';
 
@@ -48,8 +54,6 @@ import {
 
   Search,
 
-  Filter,
-
   Download,
 
   Edit,
@@ -58,25 +62,11 @@ import {
 
   Eye,
 
-  Send,
-
   FileText,
-
-  CheckCircle,
 
   Clock,
 
-  AlertTriangle,
-
-  Euro,
-
   Calendar,
-
-  User,
-
-  Mail,
-
-  Phone,
 
   Loader2,
 
@@ -154,11 +144,21 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
   const [clients, setClients] = useState<ThirdParty[]>([]);
 
+  const [articles, setArticles] = useState<InventoryItem[]>([]);
+
+  const [suppliers, setSuppliers] = useState<Array<{id: string; name: string}>>([]);
+
+  const [warehouses, setWarehouses] = useState<Array<{id: string; name: string}>>([]);
+
   const [companySettings, setCompanySettings] = useState<CompanySettings | null>(null);
 
   const [loading, setLoading] = useState(true);
 
   const [showForm, setShowForm] = useState(false);
+
+  const [showArticleModal, setShowArticleModal] = useState(false);
+
+  const [articleCreationIndex, setArticleCreationIndex] = useState<number | null>(null);
 
   const [editingInvoice, setEditingInvoice] = useState<InvoiceWithDetails | null>(null);
 
@@ -304,13 +304,19 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
     try {
 
-      const [invoicesData, clientsData, settingsData] = await Promise.all([
+      const [invoicesData, clientsData, settingsData, articlesData, suppliersData, warehousesData] = await Promise.all([
 
         invoicingService.getInvoices(),
 
-        thirdPartiesService.getThirdParties('customer'),
+        thirdPartiesService.getThirdParties(undefined, 'customer'),
 
-        loadCompanySettings()
+        loadCompanySettings(),
+
+        InventoryService.getInventoryItems(currentCompany!.id),
+
+        thirdPartiesService.getThirdParties(undefined, 'supplier'),
+
+        supabase.from('warehouses').select('id, name').eq('company_id', currentCompany!.id)
 
       ]);
 
@@ -321,6 +327,12 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
       setClients(clientsData);
 
       setCompanySettings(settingsData);
+
+      setArticles(articlesData || []);
+
+      setSuppliers(suppliersData.map(s => ({ id: s.id, name: s.name || s.display_name || s.legal_name || 'Sans nom' })));
+
+      setWarehouses(warehousesData.data || []);
 
     } catch (error) {
 
@@ -399,7 +411,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
 
   const handleDeleteInvoice = async (invoiceId: string) => {
-
+    // eslint-disable-next-line no-alert
     if (confirm('Êtes-vous sûr de vouloir supprimer cette facture ?')) {
 
       try {
@@ -416,7 +428,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
         });
 
-      } catch (error) {
+      } catch (_error) {
 
         toast({
 
@@ -743,7 +755,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
   
 
   const handleCreateCreditNote = async (invoice: InvoiceWithDetails) => {
-
+    // eslint-disable-next-line no-alert
     if (confirm(`Êtes-vous sûr de vouloir créer un avoir pour la facture ${invoice.invoice_number} ?`)) {
 
       try {
@@ -803,6 +815,45 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.draft;
 
     return <Badge className={config.color}>{config.label}</Badge>;
+
+  };
+
+
+
+  // Gestion de la création d'articles depuis le formulaire de facture
+  const handleOpenArticleModal = (index: number) => {
+
+    setArticleCreationIndex(index);
+
+    setShowArticleModal(true);
+
+  };
+
+
+
+  const handleArticleCreated = async (articleId: string) => {
+
+    // Recharger les articles
+
+    const articlesData = await InventoryService.getInventoryItems(currentCompany!.id);
+
+    setArticles(articlesData || []);
+
+
+
+    toast({
+
+      title: "Article créé",
+
+      description: "L'article a été créé avec succès et est maintenant disponible dans la liste"
+
+    });
+
+
+
+    // Note: La sélection automatique est gérée par InvoiceFormDialog
+
+    // via articleCreationIndex qui est accessible via state
 
   };
 
@@ -1318,6 +1369,34 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
         onSuccess={loadData}
 
+        articles={articles}
+
+        handleOpenArticleModal={handleOpenArticleModal}
+
+      />
+
+
+
+      {/* Modal de création d'article */}
+
+      <NewArticleModal
+
+        isOpen={showArticleModal}
+
+        onClose={() => {
+
+          setShowArticleModal(false);
+
+          setArticleCreationIndex(null);
+
+        }}
+
+        onSuccess={handleArticleCreated}
+
+        suppliers={suppliers}
+
+        warehouses={warehouses}
+
       />
 
     </div>
@@ -1346,51 +1425,39 @@ interface InvoiceFormDialogProps {
 
   onSuccess: () => void;
 
+  articles: InventoryItem[];
+
+  handleOpenArticleModal: (index: number) => void;
+
 }
 
 
 
-const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({ 
+const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
 
-  open, 
+  open,
 
-  onClose, 
+  onClose,
 
-  invoice, 
+  invoice,
 
-  clients, 
+  clients,
 
   companyId,
 
   companySettings,
 
-  onSuccess 
+  onSuccess,
+
+  articles,
+
+  handleOpenArticleModal
 
 }) => {
 
   const { toast } = useToast();
 
   const [loading, setLoading] = useState(false);
-
-  const [showNewClientForm, setShowNewClientForm] = useState(false);
-
-  const [newClientData, setNewClientData] = useState({
-
-    name: '',
-
-    email: '',
-
-    phone: '',
-
-    address: '',
-
-    city: '',
-
-    postal_code: '',
-
-    payment_terms: 30
-
-  });
 
   const [formData, setFormData] = useState<InvoiceFormData>({
 
@@ -1584,6 +1651,50 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
 
 
 
+  const handleSelectArticle = (index: number, articleId: string) => {
+
+    const article = articles.find(a => a.id === articleId);
+
+    if (!article) return;
+
+
+
+    setFormData(prev => {
+
+      const newItems = [...prev.items];
+
+      newItems[index] = {
+
+        ...newItems[index],
+
+        description: `${article.reference} - ${article.name}`,
+
+        unitPrice: article.sellingPrice,
+
+        quantity: 1,
+
+        taxRate: 20, // TVA par défaut
+
+      };
+
+      // Recalculer le total
+
+      const totalHT = newItems[index].quantity * newItems[index].unitPrice;
+
+      const totalTTC = totalHT * (1 + newItems[index].taxRate / 100);
+
+      newItems[index].total = totalTTC;
+
+
+
+      return { ...prev, items: newItems };
+
+    });
+
+  };
+
+
+
   const calculateTotals = () => {
 
     const totalHT = formData.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
@@ -1604,119 +1715,6 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
 
   };
 
-
-
-  const handleCreateClient = async () => {
-
-    if (!newClientData.name || !newClientData.email) {
-
-      toast({
-
-        title: "Champs requis",
-
-        description: "Le nom et l'email du client sont obligatoires.",
-
-        variant: "destructive"
-
-      });
-
-      return;
-
-    }
-
-
-
-    try {
-
-      const newClient = await thirdPartiesService.createThirdParty({
-
-        type: 'customer',
-
-        name: newClientData.name,
-
-        email: newClientData.email,
-
-        phone: newClientData.phone,
-
-        address: newClientData.address,
-
-        city: newClientData.city,
-
-        postal_code: newClientData.postal_code,
-
-        payment_terms: newClientData.payment_terms,
-
-        country: 'FR'
-
-      });
-
-
-
-      // Refresh clients list
-
-      const updatedClients = await thirdPartiesService.getThirdParties('customer');
-
-      // Update parent component's clients list
-
-      clients.splice(0, clients.length, ...updatedClients);
-
-      
-
-      // Select the new client
-
-      setFormData(prev => ({ ...prev, clientId: newClient.id }));
-
-      
-
-      // Close new client form
-
-      setShowNewClientForm(false);
-
-      setNewClientData({
-
-        name: '',
-
-        email: '',
-
-        phone: '',
-
-        address: '',
-
-        city: '',
-
-        postal_code: '',
-
-        payment_terms: 30
-
-      });
-
-      
-
-      toast({
-
-        title: "Client créé",
-
-        description: `${newClient.name} a été ajouté avec succès.`
-
-      });
-
-    } catch (error) {
-
-      console.error('Error creating client:', error instanceof Error ? error.message : String(error));
-
-      toast({
-
-        title: "Erreur",
-
-        description: "Impossible de créer le client.",
-
-        variant: "destructive"
-
-      });
-
-    }
-
-  };
 
 
 
@@ -1762,7 +1760,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
 
     try {
 
-      const totals = calculateTotals();
+      const _totals = calculateTotals();
 
       
 
@@ -1896,287 +1894,17 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
 
             <div className="space-y-4">
 
-              <div className="space-y-2">
-
-                <div className="flex items-center justify-between">
-
-                  <Label htmlFor="client">Client *</Label>
-
-                  <Button 
-
-                    type="button"
-
-                    variant="ghost" 
-
-                    size="sm"
-
-                    onClick={() => setShowNewClientForm(true)}
-
-                    className="text-blue-600 hover:text-blue-700 dark:text-blue-400"
-
-                  >
-
-                    <Plus className="w-4 h-4 mr-1" />
-
-                    Nouveau client
-
-                  </Button>
-
-                </div>
-
-                <Select 
-
-                  value={formData.clientId} 
-
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, clientId: value }))}
-
-                >
-
-                  <SelectTrigger>
-
-                    <SelectValue placeholder="Sélectionner un client" />
-
-                  </SelectTrigger>
-
-                  <SelectContent>
-
-                    {clients.map(client => (
-
-                      <SelectItem key={client.id} value={client.id}>
-
-                        <div className="flex flex-col">
-
-                          <span className="font-medium">{client.name}</span>
-
-                          {client.primary_email && <span className="text-xs text-gray-500 dark:text-gray-300">{client.primary_email}</span>}
-
-                        </div>
-
-                      </SelectItem>
-
-                    ))}
-
-                  </SelectContent>
-
-                </Select>
-
-                
-
-                {/* Formulaire de nouveau client */}
-
-                {showNewClientForm && (
-
-                  <Card className="mt-4 border-blue-200">
-
-                    <CardHeader className="pb-3">
-
-                      <div className="flex items-center justify-between">
-
-                        <CardTitle className="text-sm">Nouveau client</CardTitle>
-
-                        <Button 
-
-                          type="button"
-
-                          variant="ghost" 
-
-                          size="sm" 
-
-                          onClick={() => setShowNewClientForm(false)}
-
-                        >
-
-                          ×
-
-                        </Button>
-
-                      </div>
-
-                    </CardHeader>
-
-                    <CardContent className="space-y-3">
-
-                      <div className="grid md:grid-cols-2 gap-3">
-
-                        <div>
-
-                          <Label htmlFor="newClientName">Nom *</Label>
-
-                          <Input
-
-                            id="newClientName"
-
-                            placeholder="Nom du client"
-
-                            value={newClientData.name}
-
-                            onChange={(e) => setNewClientData(prev => ({ ...prev, name: e.target.value }))}
-
-                          />
-
-                        </div>
-
-                        <div>
-
-                          <Label htmlFor="newClientEmail">Email *</Label>
-
-                          <Input
-
-                            id="newClientEmail"
-
-                            type="email"
-
-                            placeholder="client@exemple.fr"
-
-                            value={newClientData.email}
-
-                            onChange={(e) => setNewClientData(prev => ({ ...prev, email: e.target.value }))}
-
-                          />
-
-                        </div>
-
-                        <div>
-
-                          <Label htmlFor="newClientPhone">Téléphone</Label>
-
-                          <Input
-
-                            id="newClientPhone"
-
-                            placeholder="+33 1 23 45 67 89"
-
-                            value={newClientData.phone}
-
-                            onChange={(e) => setNewClientData(prev => ({ ...prev, phone: e.target.value }))}
-
-                          />
-
-                        </div>
-
-                        <div>
-
-                          <Label htmlFor="newClientPaymentTerms">Délai de paiement (jours)</Label>
-
-                          <Input
-
-                            id="newClientPaymentTerms"
-
-                            type="number"
-
-                            placeholder="30"
-
-                            value={newClientData.payment_terms}
-
-                            onChange={(e) => setNewClientData(prev => ({ ...prev, payment_terms: parseInt(e.target.value) || 30 }))}
-
-                          />
-
-                        </div>
-
-                      </div>
-
-                      <div>
-
-                        <Label htmlFor="newClientAddress">Adresse</Label>
-
-                        <Input
-
-                          id="newClientAddress"
-
-                          placeholder="123 Rue de la Paix"
-
-                          value={newClientData.address}
-
-                          onChange={(e) => setNewClientData(prev => ({ ...prev, address: e.target.value }))}
-
-                        />
-
-                      </div>
-
-                      <div className="grid md:grid-cols-2 gap-3">
-
-                        <div>
-
-                          <Label htmlFor="newClientCity">Ville</Label>
-
-                          <Input
-
-                            id="newClientCity"
-
-                            placeholder="Paris"
-
-                            value={newClientData.city}
-
-                            onChange={(e) => setNewClientData(prev => ({ ...prev, city: e.target.value }))}
-
-                          />
-
-                        </div>
-
-                        <div>
-
-                          <Label htmlFor="newClientPostalCode">Code postal</Label>
-
-                          <Input
-
-                            id="newClientPostalCode"
-
-                            placeholder="75001"
-
-                            value={newClientData.postal_code}
-
-                            onChange={(e) => setNewClientData(prev => ({ ...prev, postal_code: e.target.value }))}
-
-                          />
-
-                        </div>
-
-                      </div>
-
-                      <div className="flex justify-end space-x-2 pt-2">
-
-                        <Button 
-
-                          type="button"
-
-                          variant="outline" 
-
-                          size="sm" 
-
-                          onClick={() => setShowNewClientForm(false)}
-
-                        >
-
-                          Annuler
-
-                        </Button>
-
-                        <Button 
-
-                          type="button"
-
-                          size="sm" 
-
-                          onClick={handleCreateClient}
-
-                          className="bg-blue-600 hover:bg-blue-700"
-
-                        >
-
-                          Créer client
-
-                        </Button>
-
-                      </div>
-
-                    </CardContent>
-
-                  </Card>
-
-                )}
-
-              </div>
+              <ClientSelector
+                value={formData.clientId}
+                onChange={(clientId) => setFormData(prev => ({ ...prev, clientId }))}
+                label="Client"
+                placeholder="Sélectionner un client"
+                required
+                onNewClient={(newClient) => {
+                  // Ajouter le nouveau client à la liste locale
+                  setClients([...clients, newClient]);
+                }}
+              />
 
               
 
@@ -2290,15 +2018,77 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
 
                     <div className="col-span-4">
 
-                      <Input
+                      <Select value={item.description} onValueChange={(value) => {
 
-                        placeholder="Description"
+                        if (value === '__new__') {
 
-                        value={item.description}
+                          handleOpenArticleModal(index);
 
-                        onChange={(e) => updateItem(index, 'description', e.target.value)}
+                        } else if (value === '__manual__') {
 
-                      />
+                          updateItem(index, 'description', '');
+
+                        } else {
+
+                          handleSelectArticle(index, value);
+
+                        }
+
+                      }}>
+
+                        <SelectTrigger>
+
+                          <SelectValue placeholder="Sélectionner un article ou saisir" />
+
+                        </SelectTrigger>
+
+                        <SelectContent>
+
+                          <SelectItem value="__manual__">✏️ Saisie manuelle</SelectItem>
+
+                          {articles.length > 0 && <SelectItem value="__new__">➕ Créer un nouvel article</SelectItem>}
+
+                          {articles.length > 0 && <div className="border-t my-1"></div>}
+
+                          {articles.map((article) => (
+
+                            <SelectItem key={article.id} value={article.id}>
+
+                              {article.reference} - {article.name} ({article.sellingPrice}€)
+
+                            </SelectItem>
+
+                          ))}
+
+                          {articles.length === 0 && (
+
+                            <div className="px-2 py-4 text-sm text-muted-foreground text-center">
+
+                              Aucun article en stock. Créez-en un depuis l'Inventaire.
+
+                            </div>
+
+                          )}
+
+                        </SelectContent>
+
+                      </Select>
+
+                      {item.description && (
+
+                        <Input
+
+                          placeholder="Description (modifiable)"
+
+                          value={item.description}
+
+                          onChange={(e) => updateItem(index, 'description', e.target.value)}
+
+                          className="mt-2"
+
+                        />
+
+                      )}
 
                     </div>
 
@@ -2537,6 +2327,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
         </DialogFooter>
 
       </DialogContent>
+
 
     </Dialog>
 

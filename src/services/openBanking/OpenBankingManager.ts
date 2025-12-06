@@ -542,7 +542,7 @@ export class OpenBankingManager {
         const isHealthy = await provider.isHealthy();
         providerHealth[providerId] = isHealthy;
         if (isHealthy) healthyProviders++;
-      } catch (error) {
+      } catch (_error) {
         providerHealth[providerId] = false;
       }
     }

@@ -312,9 +312,9 @@ class AIService {
     };
   }
 
-  private generateTitle(userMessage: string, aiResponse: string): string {
+  private generateTitle(userMessage: string, _aiResponse: string): string {
     const words = userMessage.split(' ').slice(0, 5).join(' ');
-    return words.length > 30 ? words.slice(0, 30) + '...' : words;
+    return words.length > 30 ? `${words.slice(0, 30)  }...` : words;
   }
 
   // ----- QUICK ACTIONS -----

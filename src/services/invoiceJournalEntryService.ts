@@ -16,7 +16,7 @@ interface Invoice {
   third_party_id: string;
   third_party_name?: string;
   invoice_number: string;
-  type: 'sale' | 'purchase' | 'credit_note';
+  type: 'sale' | 'purchase' | 'credit_note' | 'debit_note';
   issue_date: string;
   subtotal: number;
   tax_amount: number;
@@ -27,13 +27,13 @@ interface Invoice {
 interface InvoiceLine {
   id: string;
   invoice_id: string;
-  account_id: string;
+  account_id?: string;
   description: string;
   quantity: number;
   unit_price: number;
-  discount_percent: number;
-  tax_rate: number;
-  subtotal: number;
+  discount_percent?: number;
+  tax_rate?: number;
+  subtotal?: number;
   line_total: number;
 }
 
@@ -89,17 +89,14 @@ export async function generateInvoiceJournalEntry(
 
       // Crédit 44571 TVA collectée
       if (invoice.tax_amount > 0) {
-        const vatAccount = await accountingService.getAccountByNumber(
-          company_id,
-          '44571'
-        );
+        const vatAccount = accountingService.getAccountByNumber('44571');
 
         if (!vatAccount) {
           throw new Error('Compte TVA collectée (44571) non trouvé');
         }
 
         journalLines.push({
-          accountId: vatAccount.id,
+          accountId: vatAccount.number,
           debitAmount: 0,
           creditAmount: invoice.tax_amount,
           description: 'TVA collectée',
@@ -120,17 +117,14 @@ export async function generateInvoiceJournalEntry(
 
       // Débit 44566 TVA déductible
       if (invoice.tax_amount > 0) {
-        const vatAccount = await accountingService.getAccountByNumber(
-          company_id,
-          '44566'
-        );
+        const vatAccount = accountingService.getAccountByNumber('44566');
 
         if (!vatAccount) {
           throw new Error('Compte TVA déductible (44566) non trouvé');
         }
 
         journalLines.push({
-          accountId: vatAccount.id,
+          accountId: vatAccount.number,
           debitAmount: invoice.tax_amount,
           creditAmount: 0,
           description: 'TVA déductible',
@@ -149,7 +143,7 @@ export async function generateInvoiceJournalEntry(
     }
 
     // 4. Créer l'écriture comptable
-    const journalEntry = await journalEntriesService.createJournalEntry({
+    const journalEntryResult = await journalEntriesService.createJournalEntry({
       companyId: company_id,
       journalId: journalCode,
       entryDate: invoice.issue_date,
@@ -158,6 +152,12 @@ export async function generateInvoiceJournalEntry(
       status: invoice.status === 'draft' ? 'draft' : 'posted',
       items: journalLines,
     });
+
+    if (!journalEntryResult.success) {
+      throw new Error('error' in journalEntryResult ? journalEntryResult.error : 'Unknown error');
+    }
+
+    const journalEntry = journalEntryResult.data;
 
     // 5. Lier l'écriture à la facture
     const { error: updateError } = await supabase
@@ -195,7 +195,7 @@ export async function generateInvoiceJournalEntry(
 async function getThirdPartyAccount(
   companyId: string,
   thirdPartyId: string,
-  invoiceType: 'sale' | 'purchase' | 'credit_note'
+  invoiceType: 'sale' | 'purchase' | 'credit_note' | 'debit_note'
 ): Promise<{ id: string; account_number: string } | null> {
   try {
     // Déterminer le préfixe du compte selon le type

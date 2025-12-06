@@ -20,7 +20,6 @@ import {
   EInvoicingError
 } from '../../../types/einvoicing.types';
 import { supabase } from '../../../lib/supabase';
-import { createHash } from 'crypto';
 
 export class ArchiveService {
   private readonly BUCKET_NAME = 'einvoicing-documents';

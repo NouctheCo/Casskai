@@ -23,7 +23,7 @@ import { supabase } from '@/lib/supabase';
 import {
   LayoutDashboard, Calculator, Receipt, Landmark, TrendingUp, Scale,
   Handshake, FileSignature, ShoppingCart, Package, FolderKanban,
-  Building, UserCog, BarChart3, Zap, Search, Pin, PinOff,
+  Building, Building2, UserCog, BarChart3, Zap, Search, Pin, PinOff,
   ChevronDown, Sparkles, Shield
 } from 'lucide-react';
 
@@ -53,7 +53,7 @@ export const Sidebar: React.FC = () => {
 
   const [expandedSections, setExpandedSections] = useState<string[]>(['finances']);
   const [pinnedItems, setPinnedItems] = useState<string[]>([]);
-  const [recentItems, setRecentItems] = useState<string[]>([]);
+  const [_recentItems, setRecentItems] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [badges, setBadges] = useState<Record<string, number>>({});
 
@@ -137,6 +137,7 @@ export const Sidebar: React.FC = () => {
       items: [
         { id: 'dashboard-fin', label: t('sidebar.dashboard', 'Tableau de bord'), icon: <LayoutDashboard size={20} />, path: '/dashboard' },
         { id: 'accounting', label: t('sidebar.accounting', 'Comptabilité'), icon: <Calculator size={20} />, path: '/accounting' },
+        { id: 'assets', label: t('sidebar.assets', 'Immobilisations'), icon: <Building2 size={20} />, path: '/assets' },
         { id: 'invoicing', label: t('sidebar.invoicing', 'Facturation'), icon: <Receipt size={20} />, path: '/invoicing', badge: badges.invoicing },
         { id: 'banking', label: t('sidebar.banking', 'Banque'), icon: <Landmark size={20} />, path: '/banks' },
         { id: 'budget', label: t('sidebar.budget', 'Budget & Prévisions'), icon: <TrendingUp size={20} />, path: '/forecasts' },
@@ -388,17 +389,19 @@ export const Sidebar: React.FC = () => {
                           {item.badge}
                         </span>
                       )}
-                      <button
-                        type="button"
+                      <div
                         onClick={(e) => togglePin(item.id, e)}
-                        className={`p-1.5 rounded-lg transition-all ${
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => e.key === 'Enter' && togglePin(item.id, e as any)}
+                        className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                           pinnedItems.includes(item.id)
                             ? 'text-amber-500 bg-amber-50 dark:bg-amber-900/30 opacity-100'
                             : 'text-gray-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/30 opacity-0 group-hover:opacity-100'
                         }`}
                       >
                         {pinnedItems.includes(item.id) ? <PinOff size={14} /> : <Pin size={14} />}
-                      </button>
+                      </div>
                     </div>
                   </button>
                 ))}

@@ -43,7 +43,7 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
   onIgnore,
   onCreateRule,
 }) => {
-  const { t } = useTranslation();
+  const { t: _t } = useTranslation();
   const [selectedAccount, setSelectedAccount] = useState(
     transaction.suggested_account_id || ''
   );

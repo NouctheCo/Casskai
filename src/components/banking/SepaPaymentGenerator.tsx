@@ -24,7 +24,7 @@ interface SepaPaymentGeneratorProps {
   onNavigateToAccounts?: () => void;
 }
 
-export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onClose, onNavigateToAccounts }) => {
+export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onClose: _onClose, onNavigateToAccounts }) => {
   const { currentCompany } = useAuth();
   const { t } = useTranslation();
 
@@ -70,8 +70,8 @@ export const SepaPaymentGenerator: React.FC<SepaPaymentGeneratorProps> = ({ onCl
       if (accounts.length > 0 && !selectedBankAccount) {
         setSelectedBankAccount(accounts[0].id);
       }
-    } catch (_error) {
-      console.error('Error loading bank accounts:', _error);
+    } catch (error) {
+      console.error('Error loading bank accounts:', error);
       toast.error(t('errors.loadData', 'Erreur lors du chargement des données'));
     } finally {
       setLoading(false);

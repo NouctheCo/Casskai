@@ -499,7 +499,7 @@ class FECValidationService {
 
   private isValidAccountNumber(accountNumber: string): boolean {
     // Vérifier si le compte commence par un préfixe valide du PCG
-    const prefix = accountNumber.substring(0, 1);
+    const _prefix = accountNumber.substring(0, 1);
     return this.VALID_ACCOUNT_PREFIXES.some(p => accountNumber.startsWith(p));
   }
 

@@ -183,7 +183,7 @@ export class ReconciliationEngine {
   private async evaluateRule(
     rule: ReconciliationRule,
     transaction: BankTransaction,
-    potentialMatches: AccountingEntry[]
+    _potentialMatches: AccountingEntry[]
   ): Promise<boolean> {
     for (const condition of rule.conditions) {
       if (!await this.evaluateCondition(condition, transaction)) {
@@ -284,8 +284,8 @@ export class ReconciliationEngine {
     accountingEntries: AccountingEntry[]
   ): Promise<ReconciliationMatch[]> {
     const matches: ReconciliationMatch[] = [];
-    const transactionAmount = Math.abs(transaction.amount);
-    const transactionDate = new Date(transaction.date);
+    const _transactionAmount = Math.abs(transaction.amount);
+    const _transactionDate = new Date(transaction.date);
 
     for (const entry of accountingEntries) {
       if (entry.isReconciled) continue;
@@ -387,8 +387,8 @@ export class ReconciliationEngine {
   private async applyAction(
     action: ReconciliationAction,
     match: ReconciliationMatch,
-    transaction: BankTransaction,
-    entry: AccountingEntry
+    _transaction: BankTransaction,
+    _entry: AccountingEntry
   ): Promise<void> {
     switch (action.type) {
       case 'match':

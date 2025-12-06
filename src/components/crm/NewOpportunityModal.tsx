@@ -76,10 +76,10 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
 
   // Charger la liste des clients/prospects
   useEffect(() => {
-    if (open && currentCompany?.id) {
+    if (currentCompany?.id) {
       loadClients();
     }
-  }, [open, currentCompany?.id]);
+  }, [currentCompany?.id]);
 
   const loadClients = async () => {
     if (!currentCompany?.id) return;
@@ -94,11 +94,15 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
         .eq('status', 'active')
         .order('name', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        // Only log error, don't show toast for empty data
+        devLogger.error('Error loading clients:', error);
+      }
       setClients(data || []);
     } catch (error) {
       devLogger.error('Error loading clients:', error);
-      toastError(t('crm.opportunity.errors.loadClientsFailed'));
+      // Don't show error toast - empty client list is normal for new companies
+      setClients([]);
     } finally {
       setLoadingClients(false);
     }

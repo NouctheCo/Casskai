@@ -17,7 +17,6 @@
 
 import { supabase } from '../../../lib/supabase';
 import {
-  EInvoicingFeatureFlags,
   EInvoiceFormat,
   EInvoiceChannel,
   EInvoicingError

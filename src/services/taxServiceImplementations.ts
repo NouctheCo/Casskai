@@ -202,7 +202,7 @@ export async function getDeclarations(enterpriseId: string): Promise<TaxServiceR
     const declarations: TaxDeclaration[] = (data || []).map(d => ({
       id: d.id,
       type: d.declaration_type as any,
-      name: `${d.declaration_type} - ${d.period_type} ${d.year}${d.month ? '/' + d.month : ''}${d.quarter ? '/Q' + d.quarter : ''}`,
+      name: `${d.declaration_type} - ${d.period_type} ${d.year}${d.month ? `/${  d.month}` : ''}${d.quarter ? `/Q${  d.quarter}` : ''}`,
       dueDate: new Date(d.due_date),
       status: d.status as any,
       amount: Number(d.tax_amount) || 0,

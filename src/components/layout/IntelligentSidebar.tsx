@@ -186,7 +186,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
 
   const location = useLocation();
 
-  const { allModules, isModuleActive, activeModules, canAccessModule } = useModulesSafe();
+  const { allModules, isModuleActive: _isModuleActive, activeModules, canAccessModule } = useModulesSafe();
 
   const { user, currentCompany: _currentCompany } = useAuth();
 

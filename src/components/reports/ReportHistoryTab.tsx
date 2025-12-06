@@ -10,8 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
-  Eye, Download, Archive, Trash2, Search, Filter, Calendar,
-  FileText, CheckCircle, Clock, AlertCircle, RefreshCw
+  Download, Archive, Trash2, Search, Calendar,
+  FileText, CheckCircle, Clock, RefreshCw
 } from 'lucide-react';
 import { reportArchiveService, type GeneratedReport } from '@/services/reportArchiveService';
 import { useToast } from '@/hooks/useToast';
@@ -103,6 +103,7 @@ export function ReportHistoryTab({ companyId, refreshTrigger }: ReportHistoryTab
       return;
     }
 
+    // eslint-disable-next-line no-alert
     if (!confirm(`Êtes-vous sûr de vouloir supprimer "${report.report_name}" ?`)) {
       return;
     }

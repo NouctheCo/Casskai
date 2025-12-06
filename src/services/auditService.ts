@@ -64,7 +64,14 @@ export type ComplianceTag = 'RGPD' | 'SOC2' | 'ISO27001' | 'HIPAA' | 'PCI-DSS';
  */
 export interface AuditLogEntry {
   // Champs obligatoires
-  event_type: AuditAction;
+  event_type?: AuditAction;
+  
+  // Alias pour event_type (backward compatibility)
+  action?: string;
+  
+  // Entity information (backward compatibility)
+  entityType?: string;
+  entityId?: string;
 
   // Contexte de l'action
   table_name?: string;           // Table affectée (ex: 'invoices', 'users')
@@ -75,6 +82,9 @@ export interface AuditLogEntry {
   old_values?: Record<string, any>;  // Valeurs avant modification
   new_values?: Record<string, any>;  // Valeurs après modification
   changed_fields?: string[];         // Champs modifiés
+  
+  // Metadata (backward compatibility)
+  metadata?: Record<string, any>;
 
   // Métadonnées de sécurité
   security_level?: SecurityLevel;
@@ -305,7 +315,7 @@ class AuditService {
         .order('event_timestamp', { ascending: false });
 
       if (error) {
-        logger.error('AuditService: Error fetching sensitive logs', error, { companyId, options });
+        logger.error('AuditService: Error fetching sensitive logs', error, { companyId, days });
         throw error;
       }
 

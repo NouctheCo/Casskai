@@ -15,7 +15,7 @@
  */
 
 import { supabase } from '@/lib/supabase';
-import { startOfYear, endOfYear, subMonths, startOfMonth, endOfMonth } from 'date-fns';
+import { startOfYear, endOfYear, startOfMonth, endOfMonth } from 'date-fns';
 
 export interface DashboardStats {
   revenue: number;

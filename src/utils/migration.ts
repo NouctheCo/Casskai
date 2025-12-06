@@ -288,7 +288,7 @@ export class ConfigMigration {
 
             return null; // La table existe
 
-          } catch (error) {
+          } catch (_error) {
 
             return table; // La table est manquante
 
@@ -336,7 +336,7 @@ export class ConfigMigration {
 
       };
 
-    } catch (error) {
+    } catch (_error) {
 
       return {
 

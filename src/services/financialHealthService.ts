@@ -16,7 +16,7 @@
  */
 
 import { supabase } from '@/lib/supabase';
-import { startOfMonth, subMonths, endOfMonth } from 'date-fns';
+import { subMonths } from 'date-fns';
 import type { FinancialHealthScore } from '@/types/enterprise-dashboard.types';
 
 interface FinancialData {

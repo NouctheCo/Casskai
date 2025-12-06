@@ -30,11 +30,11 @@ import {
 
   WhatIfAnalysis,
 
-  RevenueLineItem,
+  RevenueLineItem as _RevenueLineItem,
 
-  ExpenseLineItem,
+  ExpenseLineItem as _ExpenseLineItem,
 
-  CashFlowItem
+  CashFlowItem as _CashFlowItem
 
 } from '../types/forecasts.types';
 import * as ForecastImpl from './forecastsServiceImplementations';

@@ -34,7 +34,7 @@ interface Transaction {
   due_date?: string;
   third_party_id: string;
   third_party_name: string;
-  third_party_type: 'customer' | 'supplier' | 'both' | 'prospect';
+  third_type: 'customer' | 'supplier' | 'both' | 'prospect';
   amount: number;
   paid_amount: number;
   balance: number;
@@ -48,7 +48,7 @@ interface TransactionsTabProps {
 }
 
 export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) => {
-  const { t } = useTranslation();
+  const { t: _t } = useTranslation();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -139,7 +139,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
           due_date: inv.due_date,
           third_party_id: inv.third_party_id || '',
           third_party_name: inv.third_parties?.name || 'Inconnu',
-          third_party_type: inv.third_parties?.type || 'customer',
+          third_type: inv.third_parties?.type || 'customer',
           amount: inv.total_ttc || 0,
           paid_amount: inv.paid_amount || 0,
           balance,
@@ -181,7 +181,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
           due_date: purch.due_date,
           third_party_id: purch.supplier_id || '',
           third_party_name: purch.third_parties?.name || 'Inconnu',
-          third_party_type: purch.third_parties?.type || 'supplier',
+          third_type: purch.third_parties?.type || 'supplier',
           amount: purch.total_ttc || 0,
           paid_amount: purch.paid_amount || 0,
           balance,
@@ -216,7 +216,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
           date: pay.payment_date || '',
           third_party_id: pay.third_party_id || '',
           third_party_name: pay.third_parties?.name || 'Inconnu',
-          third_party_type: pay.third_parties?.type || 'customer',
+          third_type: pay.third_parties?.type || 'customer',
           amount: pay.amount || 0,
           paid_amount: pay.amount || 0,
           balance: 0,
@@ -251,7 +251,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({ companyId }) =
           date: pay.payment_date || '',
           third_party_id: pay.third_party_id || '',
           third_party_name: pay.third_parties?.name || 'Inconnu',
-          third_party_type: pay.third_parties?.type || 'supplier',
+          third_type: pay.third_parties?.type || 'supplier',
           amount: pay.amount || 0,
           paid_amount: pay.amount || 0,
           balance: 0,

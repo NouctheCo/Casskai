@@ -175,6 +175,7 @@ const BanksPageNew: React.FC = () => {
      );
     } finally {
       setUploading(false);
+      // eslint-disable-next-line require-atomic-updates
       event.target.value = ''; // Reset input
     }
   }, [currentCompany?.id, selectedAccountId, user.id]);

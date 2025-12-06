@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 
 import { useToast } from '@/components/ui/use-toast';
 
-import { BarChart3, FileText, CheckCircle, AlertCircle, Eye, RefreshCw, X, ToggleLeft, ToggleRight } from 'lucide-react';
+import { BarChart3, FileText, CheckCircle, AlertCircle, Eye, X, ToggleLeft, ToggleRight } from 'lucide-react';
 import { journalsStatsService, type JournalStats } from '@/services/journalsStatsService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
@@ -25,7 +25,7 @@ export default function OptimizedJournalsTab() {
   const { currentCompany } = useAuth();
   const { t } = useTranslation();
   const [journals, setJournals] = useState<JournalStats[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
   const [selectedJournal, setSelectedJournal] = useState<JournalStats | null>(null);
   const [showJournalDetail, setShowJournalDetail] = useState(false);
 
@@ -157,7 +157,7 @@ export default function OptimizedJournalsTab() {
 
 
 
-  const [viewingJournal, setViewingJournal] = useState(null);
+  const [_viewingJournal, _setViewingJournal] = useState(null);
 
 
 

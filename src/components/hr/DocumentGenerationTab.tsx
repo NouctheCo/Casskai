@@ -9,8 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import {
-  FileText, Plus, Search, Filter, Eye, Send, Download, FileSignature,
-  CheckCircle, Clock, Mail, Archive, User
+  FileText, Search, Eye, Send, FileSignature,
+  Clock, Mail, Archive, User
 } from 'lucide-react';
 import { hrDocumentTemplatesService } from '@/services/hrDocumentTemplatesService';
 import { DOCUMENT_TYPE_LABELS } from '@/data/hr-document-templates-defaults';

@@ -32,7 +32,7 @@ interface PerformanceReviewsTabProps {
 export function PerformanceReviewsTab({
   companyId,
   employees,
-  currentUserId
+  currentUserId: _currentUserId
 }: PerformanceReviewsTabProps) {
   const [reviews, setReviews] = useState<PerformanceReview[]>([]);
   const [loading, setLoading] = useState(true);

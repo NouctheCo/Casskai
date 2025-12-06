@@ -20,6 +20,10 @@ export default [
       'supabase/functions/**/*',
       'tests/e2e/test-results/**/*',
       'playwright-report/**/*',
+      // Test files that use different tsconfig
+      '**/*.test.ts',
+      '**/*.test.tsx',
+      'src/tests/**/*',
       // Fichier UI orphelin avec imports manquants
       'src/components/accounting/CreateAccountDialog.tsx',
       // Scripts de migration et utilitaires à la racine

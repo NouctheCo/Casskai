@@ -444,17 +444,7 @@ export class MigrationChecker {
 
     switch (functionName) {
 
-      case 'get_dashboard_stats':
-
-      case 'get_balance_sheet':
-
-      case 'get_income_statement':
-
-      case 'get_cash_flow_data':
-
-      case 'validate_accounting_data':
-
-      case 'recalculate_all_account_balances':
+      case 'get_dashboard_stats': case 'get_balance_sheet': case 'get_income_statement': case 'get_cash_flow_data': case 'validate_accounting_data': case 'recalculate_all_account_balances':
 
         return { p_company_id: dummyUuid };
 

@@ -12,7 +12,7 @@
 
 // fiscalCalendarService.ts - Service for managing fiscal calendar events and deadlines
 
-import { TAX_CONFIGURATIONS, getTaxConfiguration, CountryTaxConfiguration } from '../data/taxConfigurations';
+import { getTaxConfiguration } from '../data/taxConfigurations';
 import { TaxCalendarEvent } from '../types/tax.types';
 
 export interface FiscalEvent {
@@ -177,7 +177,7 @@ export function generateFiscalEvents(
   }
 
   const events: FiscalEvent[] = [];
-  let eventIdCounter = 0;
+  const _eventIdCounter = 0;
 
   config.taxTypes.forEach(taxType => {
     const frequency = taxType.frequency;
@@ -189,7 +189,7 @@ export function generateFiscalEvents(
         occurrences = [parseDeadline(taxType.deadline, year)];
         break;
 
-      case 'quarterly':
+      case 'quarterly': {
         // Four occurrences per year (typical quarters: Mar, Jun, Sep, Dec)
         const quarterMonths = [2, 5, 8, 11]; // 0-indexed: March, June, September, December
         occurrences = quarterMonths.map(month => {
@@ -197,6 +197,7 @@ export function generateFiscalEvents(
           return new Date(year, month, deadline.getDate());
         });
         break;
+      }
 
       case 'monthly':
         // Twelve occurrences per year

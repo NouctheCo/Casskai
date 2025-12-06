@@ -3,18 +3,16 @@
  * Focus: KPI, Analyses, Pilotage, Décisions stratégiques
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { useEnterprise } from '@/contexts/EnterpriseContext';
 import { useAuth } from '@/contexts/AuthContext';
 import {
-  TrendingUp,
   DollarSign,
   Users,
   Archive,
@@ -22,14 +20,10 @@ import {
   Zap,
   BarChart3,
   Calendar,
-  RefreshCw,
-  Download,
-  Eye,
   AlertCircle,
   ArrowRight
 } from 'lucide-react';
-import { format, startOfYear, endOfYear, subMonths, startOfMonth, endOfMonth } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { startOfYear, endOfYear, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 
 const strategicReports = [
   {
@@ -98,9 +92,9 @@ const datePresets = [
 export const StrategicReportsPage: React.FC = () => {
   const { toast } = useToast();
   const { currentEnterprise } = useEnterprise();
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
 
-  const [loading, setLoading] = useState(false);
+  const [_loading, _setLoading] = useState(false);
   const [datePreset, setDatePreset] = useState('current_year');
   const [dateRange, setDateRange] = useState({
     start: startOfYear(new Date()).toISOString().split('T')[0],

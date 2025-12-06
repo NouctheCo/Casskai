@@ -8,9 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import {
-  FileText, Plus, Search, Filter, Edit, Trash2, Copy, Eye,
+  FileText, Plus, Search, Edit, Trash2, Copy, Eye,
   CheckCircle, XCircle, FileSignature, Archive, Sparkles
 } from 'lucide-react';
 import { hrDocumentTemplatesService } from '@/services/hrDocumentTemplatesService';
@@ -84,6 +83,7 @@ export function DocumentTemplatesTab({ companyId }: DocumentTemplatesTabProps) {
   };
 
   const handleDeleteTemplate = async (templateId: string) => {
+    // eslint-disable-next-line no-alert
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce template ?')) return;
 
     const response = await hrDocumentTemplatesService.deleteTemplate(templateId);
@@ -102,6 +102,7 @@ export function DocumentTemplatesTab({ companyId }: DocumentTemplatesTabProps) {
   };
 
   const handleImportDefaults = async () => {
+    // eslint-disable-next-line no-alert
     if (!confirm('Importer les templates par défaut ? Cela créera 5 nouveaux templates.')) return;
 
     for (const defaultTemplate of DEFAULT_HR_TEMPLATES) {

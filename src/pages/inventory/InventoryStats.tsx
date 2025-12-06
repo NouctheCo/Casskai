@@ -14,7 +14,6 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Box, DollarSign, AlertTriangle, Activity } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 // Type pour XCircle non utilisé dans le fichier d'origine mais présent dans les imports
 

@@ -46,11 +46,7 @@ import {
 
   UseFormReturn, 
 
-  useFormContext,
-
-  FieldError,
-
-  PathValue
+  useFormContext
 
 } from 'react-hook-form';
 
@@ -438,7 +434,7 @@ export function useInputHelpers<T extends FieldValues = FieldValues, K extends P
 
   const form = useFormContext<T>();
 
-  const { validateField, getFieldError, getFieldWarning, isFieldValidating, createFieldValidator } = useFormValidation(form, {} as FormValidationConfig<T>);
+  const { validateField: _validateField, getFieldError, getFieldWarning, isFieldValidating, createFieldValidator } = useFormValidation(form, {} as FormValidationConfig<T>);
 
   
 

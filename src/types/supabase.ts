@@ -7706,7 +7706,7 @@ export type Database = {
           obligations: string[] | null
           party_name: string | null
           party_role: string | null
-          party_type: string
+          type: string
           phone: string | null
           responsibilities: string[] | null
           signature_date: string | null
@@ -7730,7 +7730,7 @@ export type Database = {
           obligations?: string[] | null
           party_name?: string | null
           party_role?: string | null
-          party_type: string
+          type: string
           phone?: string | null
           responsibilities?: string[] | null
           signature_date?: string | null
@@ -7754,7 +7754,7 @@ export type Database = {
           obligations?: string[] | null
           party_name?: string | null
           party_role?: string | null
-          party_type?: string
+          type?: string
           phone?: string | null
           responsibilities?: string[] | null
           signature_date?: string | null
@@ -12526,7 +12526,7 @@ export type Database = {
           is_archived: boolean | null
           notes: string | null
           party_name: string | null
-          party_type: string | null
+          type: string | null
           retention_until: string | null
           signature_date: string | null
           signed_at: string | null
@@ -12562,7 +12562,7 @@ export type Database = {
           is_archived?: boolean | null
           notes?: string | null
           party_name?: string | null
-          party_type?: string | null
+          type?: string | null
           retention_until?: string | null
           signature_date?: string | null
           signed_at?: string | null
@@ -12598,7 +12598,7 @@ export type Database = {
           is_archived?: boolean | null
           notes?: string | null
           party_name?: string | null
-          party_type?: string | null
+          type?: string | null
           retention_until?: string | null
           signature_date?: string | null
           signed_at?: string | null
@@ -26453,13 +26453,13 @@ export type Database = {
           name: string | null
           notes: string | null
           party_number: string | null
-          party_type: string | null
+          type: string | null
           payment_terms: number | null
           phone: string | null
           primary_address_line1: string | null
-          primary_city: string | null
-          primary_country: string | null
-          primary_postal_code: string | null
+          city: string | null
+          country: string | null
+          postal_code: string | null
           tax_number: string | null
           total_amount: number | null
           transaction_count: number | null
@@ -27355,7 +27355,7 @@ export type Database = {
       }
       get_third_parties_stats: { Args: { p_company_id: string }; Returns: Json }
       get_third_party_details: {
-        Args: { p_party_id: string; p_party_type: string }
+        Args: { p_party_id: string; p_type: string }
         Returns: Json
       }
       get_trial_statistics: {
@@ -27668,7 +27668,7 @@ export type Database = {
         Args: {
           p_company_id: string
           p_limit?: number
-          p_party_type?: string
+          p_type?: string
           p_search_term?: string
         }
         Returns: {
@@ -27678,7 +27678,7 @@ export type Database = {
           is_active: boolean
           name: string
           party_number: string
-          party_type: string
+          type: string
           phone: string
           total_amount: number
         }[]

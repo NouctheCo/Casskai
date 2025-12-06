@@ -46,7 +46,7 @@ const SANITIZE_CONFIG: DOMPurify.Config = {
   ALLOW_DATA_ATTR: false,
 
   // Interdire les URI JavaScript (javascript:, data:, vbscript:, etc.)
-  ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+  ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp):|[^a-z]|[a-z+.-]+(?:[^a-z+.:-]|$))/i,
 
   // Forcer l'ajout de rel="noopener noreferrer" sur les liens externes
   ADD_ATTR: ['target'] as string[],
@@ -80,7 +80,8 @@ export const sanitizeHTML = (dirty: string | undefined | null): string => {
   if (!dirty) return '';
 
   // DOMPurify.sanitize retourne un string sécurisé
-  return DOMPurify.sanitize(dirty, SANITIZE_CONFIG as any) as string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return String(DOMPurify.sanitize(dirty, SANITIZE_CONFIG as any));
 };
 
 /**

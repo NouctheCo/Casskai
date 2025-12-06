@@ -681,7 +681,7 @@ export class CurrencyService {
       if (error) {
         console.warn('Erreur sauvegarde taux:', error);
       }
-    } catch (error) {
+    } catch (_error) {
       // Ignorer les erreurs de DB si pas de configuration
     }
   }

@@ -38,8 +38,6 @@ import {
 
   RefreshCw,
 
-  Loader2,
-
   AlertCircle,
 
   DollarSign,
@@ -812,7 +810,7 @@ export function QuickActionWidget({ actions }: { actions: Array<{ label: string;
 
 
 
-export function TableWidget({ widget, data }: { widget: DashboardWidget; data: TableData }) {
+export function TableWidget({ widget: _widget, data }: { widget: DashboardWidget; data: TableData }) {
 
   const invoices = data.invoices || [];
 
@@ -892,7 +890,7 @@ export function TableWidget({ widget, data }: { widget: DashboardWidget; data: T
 
 
 
-export function ChartWidget({ widget, data }: { widget: DashboardWidget; data: ChartData }) {
+export function ChartWidget({ widget: _widget, data }: { widget: DashboardWidget; data: ChartData }) {
 
   const chartData = data.chartData || [];
 
@@ -998,7 +996,7 @@ export function ChartWidget({ widget, data }: { widget: DashboardWidget; data: C
 
 
 
-export function AlertWidget({ widget, data }: { widget: DashboardWidget; data: AlertData }) {
+export function AlertWidget({ widget: _widget, data }: { widget: DashboardWidget; data: AlertData }) {
 
   const alerts = data.alerts || [];
 

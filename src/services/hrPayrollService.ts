@@ -86,7 +86,7 @@ export class HRPayrollService {
    */
   async generatePayrollJournalEntries(
     payroll: PayrollCalculation,
-    companyId: string
+    _companyId: string
   ): Promise<PayrollJournalEntry[]> {
     const entries: PayrollJournalEntry[] = [];
 

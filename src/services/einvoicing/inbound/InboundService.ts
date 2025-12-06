@@ -362,6 +362,7 @@ export class InboundService {
   ): Promise<boolean> {
     try {
       // Generate payload hash for duplicate detection
+      // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
       const crypto = require('crypto');
       const payloadHash = crypto.createHash('sha256').update(payload).digest('hex');
 
@@ -388,7 +389,7 @@ export class InboundService {
 
   private async parseInvoice(
     payload: string,
-    contentType: string
+    _contentType: string
   ): Promise<ParsedInvoiceResult> {
     try {
       // Detect format from payload

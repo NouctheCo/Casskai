@@ -13,11 +13,12 @@
 // ExcelJS import conditionnel pour éviter les problèmes de build
 let ExcelJS: typeof import('exceljs') | null = null;
 try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   ExcelJS = require('exceljs');
-} catch (error) {
+} catch (_error) {
   console.warn('ExcelJS not available in browser environment');
 }
-import { CSVMapping, ImportResult, ImportError, ImportWarning, FileParserOptions, ImportSession, FECEntry } from '../types/accounting-import.types';
+import { CSVMapping, ImportResult, ImportError, ImportWarning, FileParserOptions, FECEntry } from '../types/accounting-import.types';
 
 /**
  * Service d'import CSV/Excel avec mapping intelligent des colonnes
@@ -111,7 +112,7 @@ export class CSVImportService {
       }
 
       const jsonData: string[][] = [];
-      worksheet.eachRow((row, rowNumber) => {
+      worksheet.eachRow((row, _rowNumber) => {
         const rowData: string[] = [];
         row.eachCell({ includeEmpty: true }, (cell) => {
           rowData.push(cell.value?.toString() || '');
@@ -441,7 +442,7 @@ export class CSVImportService {
   /**
    * Mappe une ligne vers un objet entry
    */
-  private static mapRowToEntry(row: string[], mapping: CSVMapping[], rowNumber: number): Partial<FECEntry> {
+  private static mapRowToEntry(row: string[], mapping: CSVMapping[], _rowNumber: number): Partial<FECEntry> {
     const entry: Record<string, unknown> = {};
 
     mapping.forEach(map => {
@@ -518,9 +519,9 @@ export class CSVImportService {
     
     // Formats communs à détecter
     const formats = [
-      /^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/, // DD/MM/YYYY
-      /^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/, // YYYY/MM/DD
-      /^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2})$/,  // DD/MM/YY
+      /^(\d{1,2})[/\-.](?:\d{1,2})[/\-.](\d{4})$/, // DD/MM/YYYY
+      /^(\d{4})[/\-.](\d{1,2})[/\-.](\d{1,2})$/, // YYYY/MM/DD
+      /^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2})$/,  // DD/MM/YY
     ];
 
     for (const format of formats) {
@@ -578,12 +579,12 @@ export class CSVImportService {
     return result;
   }
 
-  private static async detectCSVEncoding(file: File): Promise<string> {
+  private static async detectCSVEncoding(_file: File): Promise<string> {
     // Réutilise la logique de FECParser
     return 'UTF-8'; // Simplifié pour cet exemple
   }
 
-  private static async detectCSVDelimiter(file: File, encoding: string): Promise<string> {
+  private static async detectCSVDelimiter(_file: File, _encoding: string): Promise<string> {
     // Réutilise la logique de FECParser
     return ';'; // Délimiteur par défaut français
   }

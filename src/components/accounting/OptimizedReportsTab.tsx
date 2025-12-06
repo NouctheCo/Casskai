@@ -42,15 +42,9 @@ import {
 
   Clock,
 
-  DollarSign,
-
   Users,
 
-  Archive,
-
   Target,
-
-  Zap,
 
   Activity,
 
@@ -154,7 +148,7 @@ export default function OptimizedReportsTab() {
 
   // État pour les statistiques en temps réel
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
-  const [statsLoading, setStatsLoading] = useState(true);
+  const [_statsLoading, setStatsLoading] = useState(true);
 
 
 

@@ -79,7 +79,7 @@ export const createEmployeeSchema = z.object({
     .or(z.literal('')),
   phone: z
     .string()
-    .regex(/^[\d\s\+\-\(\)]+$/, 'Numéro de téléphone invalide')
+    .regex(/^[\d\s+().-]+$/, 'Numéro de téléphone invalide')
     .optional()
     .or(z.literal('')),
   position: z
@@ -137,7 +137,7 @@ export const employeeFormSchema = z.object({
     .or(z.literal('')),
   phone: z
     .string()
-    .regex(/^[\d\s\+\-\(\)]+$/, 'Numéro de téléphone invalide')
+    .regex(/^[\d\s+().-]+$/, 'Numéro de téléphone invalide')
     .optional()
     .or(z.literal('')),
   position: z
@@ -255,7 +255,7 @@ export const companySettingsSchema = z.object({
     .default('FR'),
   phone: z
     .string()
-    .regex(/^[\d\s\+\-\(\)]+$/, 'Numéro de téléphone invalide')
+    .regex(/^[\d\s+().-]+$/, 'Numéro de téléphone invalide')
     .optional()
     .or(z.literal('')),
   email: z
@@ -307,7 +307,7 @@ export const createClientSchema = z.object({
     .or(z.literal('')),
   phone: z
     .string()
-    .regex(/^[\d\s\+\-\(\)]+$/, 'Numéro de téléphone invalide')
+    .regex(/^[\d\s+().-]+$/, 'Numéro de téléphone invalide')
     .optional()
     .or(z.literal('')),
   address: z

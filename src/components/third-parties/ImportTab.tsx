@@ -38,7 +38,7 @@ interface ImportTabProps {
 }
 
 export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
-  const { t } = useTranslation();
+  const { t: _t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [importData, setImportData] = useState<ImportRow[]>([]);
@@ -122,7 +122,7 @@ export const ImportTab: React.FC<ImportTabProps> = ({ companyId }) => {
       const sheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json<any>(sheet);
 
-      const rows: ImportRow[] = jsonData.map((row, index) => {
+      const rows: ImportRow[] = jsonData.map((row, _index) => {
         const errors: string[] = [];
         const name = row.name?.toString().trim() || '';
         const type = row.type?.toString().toLowerCase().trim() || '';

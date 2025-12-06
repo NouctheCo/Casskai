@@ -501,7 +501,7 @@ export class ProjectsService {
       }
 
       const projects = projectsResult.data || [];
-      const timeEntries = timeEntriesResult.data || [];
+      const _timeEntries = timeEntriesResult.data || [];
 
       // Calculate basic metrics
       const totalProjects = projects.length;

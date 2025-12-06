@@ -32,21 +32,7 @@ import {
 
   TaxDeclaration, 
 
-  TaxPayment, 
-
-  TaxDocument, 
-
-  TaxSettings,
-
-  TaxDashboardData,
-
-  TaxCalendarEvent,
-
-  TaxAlert,
-
-  TaxObligation,
-
-  TaxServiceResponse
+  TaxPayment
 
 } from '../types/tax.types';
 import * as TaxImpl from './taxServiceImplementations';
@@ -921,29 +907,13 @@ export const taxService = {
 
    */
 
-  async exportToPDF(data: any): Promise<{ success: boolean; error: Error | null }> {
+  async exportToPDF(_data: any): Promise<{ success: boolean; error: Error | null }> {
 
-    try {
+    // This would be implemented with a PDF generation library
 
-      // This would be implemented with a PDF generation library
+    // For now, we'll just return success
 
-      // For now, we'll just return success
-
-      return { success: true, error: null };
-
-    } catch (error) {
-
-      console.error('Error exporting to PDF:', error);
-
-      return { 
-
-        success: false, 
-
-        error: error instanceof Error ? error : new Error('Unknown error exporting to PDF') 
-
-      };
-
-    }
+    return { success: true, error: null };
 
   },
 
@@ -981,9 +951,9 @@ export const taxService = {
     const rows = declarations.map(decl => [
       decl.type || '',
       decl.name || '',
-      decl.periodStart || '',
-      decl.periodEnd || '',
-      decl.dueDate || '',
+      decl.period?.start ? new Date(decl.period.start).toLocaleDateString('fr-FR') : '',
+      decl.period?.end ? new Date(decl.period.end).toLocaleDateString('fr-FR') : '',
+      decl.dueDate ? new Date(decl.dueDate).toLocaleDateString('fr-FR') : '',
       decl.amount?.toString() || '0',
       decl.status || '',
       decl.description || ''
@@ -998,7 +968,7 @@ export const taxService = {
     ].join('\n');
 
     // Create and download file
-    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([`\ufeff${  csvContent}`], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
 
