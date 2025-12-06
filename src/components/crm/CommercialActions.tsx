@@ -432,7 +432,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
 
   const getClientContacts = (clientId: string) => {
 
-    return contacts.filter(contact => contact.client_id === clientId);
+    return (contacts || []).filter(contact => contact.client_id === clientId);
 
   };
 
@@ -440,7 +440,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
 
   const getClientOpportunities = (clientId: string) => {
 
-    return opportunities.filter(opp => opp.client_id === clientId);
+    return (opportunities || []).filter(opp => opp.client_id === clientId);
 
   };
 
@@ -704,7 +704,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
 
                   placeholder={t('crm.filters.searchActions')}
 
-                  value={filters.search || ''}
+                  value={filters?.search || ''}
 
                   onChange={(e) => handleFilterChange('search', e.target.value)}
 
@@ -726,7 +726,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
 
               <Select
 
-                value={filters.type || 'all'}
+                value={filters?.type || 'all'}
 
                 onValueChange={(value) => handleFilterChange('type', value === 'all' ? '' : value)}
 
@@ -768,7 +768,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
 
               <Select
 
-                value={filters.status || 'all'}
+                value={filters?.status || 'all'}
 
                 onValueChange={(value) => handleFilterChange('status', value === 'all' ? '' : value)}
 
@@ -806,7 +806,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
 
               <Select
 
-                value={filters.priority || 'all'}
+                value={filters?.priority || 'all'}
 
                 onValueChange={(value) => handleFilterChange('priority', value === 'all' ? '' : value)}
 
@@ -848,7 +848,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
 
                 type="date"
 
-                value={filters.date_from || ''}
+                value={filters?.date_from || ''}
 
                 onChange={(e) => handleFilterChange('date_from', e.target.value)}
 
@@ -1272,7 +1272,7 @@ const CommercialActions: React.FC<CommercialActionsProps> = ({
 
                     <SelectItem value="none">{t('crm.actionForm.noClient')}</SelectItem>
 
-                    {clients.map((client) => (
+                    {(clients || []).map((client) => (
 
                       <SelectItem key={client.id} value={client.id}>
 

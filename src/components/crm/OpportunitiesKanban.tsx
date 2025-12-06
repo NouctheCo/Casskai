@@ -372,7 +372,7 @@ const OpportunitiesKanban: React.FC<OpportunitiesKanbanProps> = ({
 
   const getClientContacts = (clientId: string) => {
 
-    return contacts.filter(contact => contact.client_id === clientId);
+    return (contacts || []).filter(contact => contact.client_id === clientId);
 
   };
 
@@ -866,7 +866,7 @@ const OpportunitiesKanban: React.FC<OpportunitiesKanbanProps> = ({
 
                   <SelectContent>
 
-                    {clients.map((client) => (
+                    {(clients || []).map((client) => (
 
                       <SelectItem key={client.id} value={client.id}>
 

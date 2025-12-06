@@ -378,7 +378,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
 
   const getClientContacts = (clientId: string) => {
 
-    return contacts.filter(contact => contact.client_id === clientId);
+    return (contacts || []).filter(contact => contact.client_id === clientId);
 
   };
 
@@ -530,7 +530,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
 
                   placeholder={t('crm.filters.searchPlaceholder')}
 
-                  value={filters.search || ''}
+                  value={filters?.search || ''}
 
                   onChange={(e) => handleFilterChange('search', e.target.value)}
 
@@ -552,7 +552,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
 
               <Select
 
-                value={filters.status || 'all'}
+                value={filters?.status || 'all'}
 
                 onValueChange={(value) => handleFilterChange('status', value === 'all' ? '' : value)}
 
@@ -592,7 +592,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
 
               <Select
 
-                value={filters.industry || 'all'}
+                value={filters?.industry || 'all'}
 
                 onValueChange={(value) => handleFilterChange('industry', value === 'all' ? '' : value)}
 
@@ -634,7 +634,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
 
               <Select
 
-                value={filters.size || 'all'}
+                value={filters?.size || 'all'}
 
                 onValueChange={(value) => handleFilterChange('size', value === 'all' ? '' : value)}
 
@@ -924,7 +924,7 @@ const ClientsManagement: React.FC<ClientsManagementProps> = ({
 
                 <TableBody>
 
-                  {contacts.map((contact) => {
+                  {(contacts || []).map((contact) => {
 
                     const client = clients.find(c => c.id === contact.client_id);
 
