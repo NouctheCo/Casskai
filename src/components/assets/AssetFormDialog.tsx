@@ -346,7 +346,7 @@ export const AssetFormDialog: React.FC<AssetFormDialogProps> = ({
                     <SelectValue placeholder={t('assets.form.selectResponsiblePerson')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">{t('common.none')}</SelectItem>
+                    <SelectItem value="none">{t('common.none')}</SelectItem>
                     {employees.map((employee) => (
                       <SelectItem key={employee.id} value={employee.id}>
                         {employee.first_name} {employee.last_name}

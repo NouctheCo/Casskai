@@ -159,7 +159,12 @@
       "Bash(git reflog:*)",
       "Bash(git gc:*)",
       "Bash(git remote add:*)",
-      "Bash(dos2unix:*)"
+      "Bash(dos2unix:*)",
+      "Bash(del \"c:\\Users\\noutc\\Casskai\\update-integration-status.cjs\" \"c:\\Users\\noutc\\Casskai\\update-integration-status2.cjs\" \"c:\\Users\\noutc\\Casskai\\update-integration.py\" \"c:\\Users\\noutc\\Casskai\\tax-integration-improvements.patch\")",
+      "Bash(del add-tax-modules-translations.cjs)",
+      "Bash(del fix-audit-action.cjs)",
+      "Bash(del \"c:\\Users\\noutc\\Casskai\\clean-company-settings.cjs\" \"c:\\Users\\noutc\\Casskai\\fix-company-settings-lines.cjs\")",
+      "Bash(xargs sed:*)"
     ],
     "deny": []
   }

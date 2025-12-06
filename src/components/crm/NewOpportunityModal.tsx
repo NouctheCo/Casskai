@@ -88,9 +88,9 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
     try {
       const { data, error } = await supabase
         .from('third_parties')
-        .select('id, name, type')
+        .select('id, name, client_type')
         .eq('company_id', currentCompany.id)
-        .in('type', ['client', 'prospect'])
+        .in('client_type', ['customer', 'prospect'])
         .eq('status', 'active')
         .order('name', { ascending: true });
 
@@ -156,11 +156,11 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
       const probability = parseFloat(formData.probability) || 0;
       const weightedAmount = calculateWeightedAmount();
 
-      const { error } = await supabase.from('opportunities').insert({
+      const { error } = await supabase.from('crm_opportunities').insert({
         company_id: currentCompany.id,
-        third_party_id: formData.third_party_id,
+        client_id: formData.third_party_id,
         title: formData.title.trim(),
-        amount,
+        value: amount,
         probability,
         weighted_amount: weightedAmount,
         stage: formData.stage,

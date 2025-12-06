@@ -136,14 +136,14 @@ export const NewActionModal: React.FC<NewActionModalProps> = ({
     setLoadingOpportunities(true);
     try {
       let query = supabase
-        .from('opportunities')
-        .select('id, title, third_party_id')
+        .from('crm_opportunities')
+        .select('id, title, client_id')
         .eq('company_id', currentCompany.id)
         .eq('status', 'active')
         .order('title', { ascending: true });
 
       if (thirdPartyId) {
-        query = query.eq('third_party_id', thirdPartyId);
+        query = query.eq('client_id', thirdPartyId);
       }
 
       const { data, error } = await query;
