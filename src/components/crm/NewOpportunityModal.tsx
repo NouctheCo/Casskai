@@ -88,10 +88,10 @@ export const NewOpportunityModal: React.FC<NewOpportunityModalProps> = ({
     try {
       const { data, error } = await supabase
         .from('third_parties')
-        .select('id, name, client_type')
+        .select('id, name, type')
         .eq('company_id', currentCompany.id)
-        .in('client_type', ['customer', 'prospect'])
-        .eq('status', 'active')
+        .eq('is_active', true)
+        .in('type', ['customer'])
         .order('name', { ascending: true });
 
       if (error) {

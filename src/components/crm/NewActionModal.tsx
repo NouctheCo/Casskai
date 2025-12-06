@@ -118,7 +118,7 @@ export const NewActionModal: React.FC<NewActionModalProps> = ({
         .from('third_parties')
         .select('id, name')
         .eq('company_id', currentCompany.id)
-        .eq('status', 'active')
+        .eq('is_active', true)
         .order('name', { ascending: true });
 
       if (error) throw error;
