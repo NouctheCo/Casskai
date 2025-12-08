@@ -28,45 +28,7 @@ import { trialExpirationService } from '../services/trialExpirationService';
 
 import { auditService } from '../services/auditService';
 
-
-
-interface Company {
-
-  id: string;
-
-  name: string;
-
-  country?: string;
-
-  default_currency?: string;
-
-  siret?: string;
-
-  vat_number?: string;
-
-  address?: string;
-
-  city?: string;
-
-  postal_code?: string;
-
-  owner_id?: string;
-
-  phone?: string;
-
-  email?: string;
-
-  website?: string;
-
-  fiscal_year_start?: number;
-
-  created_at?: string;
-
-  updated_at?: string;
-
-  onboarding_completed_at?: string | null;
-
-}
+import type { Company } from '../types/database/company.types';
 
 
 
@@ -417,32 +379,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       const companies = await getUserCompanies(currentUser.id);
 
-      setUserCompanies(companies || []);
+      setUserCompanies((companies as Company[]) || []);
 
 
 
       if (companies && companies.length > 0) {
+        // ============================================
+        // ✅ LOGIQUE ULTRA SIMPLE : Si entreprise existe → onboarding complété
+        // ============================================
+        console.log('✅ Entreprise trouvée, onboarding marqué comme complété automatiquement');
+        setOnboardingCompleted(true);
+        localStorage.setItem(`onboarding_completed_${currentUser.id}`, 'true');
+        localStorage.removeItem('onboarding_just_completed');
 
-        // ✅ VÉRIFICATION RÉELLE: Vérification hybride pour compatibilité rétroactive
-        // 1. Vérifier le flag localStorage (utilisateurs qui viennent de terminer)
-        const localOnboardingFlag = localStorage.getItem(`onboarding_completed_${currentUser.id}`);
 
-        // 2. Vérifier si onboarding_completed_at est défini dans la BDD
-        const hasOnboardingCompletedInDB = companies.some(c => c.onboarding_completed_at !== null);
-
-        // 3. Fallback : Si l'entreprise existe et que l'utilisateur en est propriétaire, considérer l'onboarding terminé
-        //    (pour compatibilité avec les anciennes données avant la migration)
-        const hasCompanyAsOwner = companies.some(c => c.owner_id === currentUser.id);
-
-        const hasCompletedOnboarding = localOnboardingFlag === 'true' ||
-                                       hasOnboardingCompletedInDB ||
-                                       hasCompanyAsOwner;
-
-        setOnboardingCompleted(hasCompletedOnboarding);
-
-        localStorage.removeItem('onboarding_just_completed'); // Clean up the flag
-
-        
 
         // Vérifier et créer automatiquement un abonnement d'essai si nécessaire
 

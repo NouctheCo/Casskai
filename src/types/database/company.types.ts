@@ -2,7 +2,12 @@
 import type { Database } from '../supabase'
 
 // Types pour les tables companies
-export type Company = Database['public']['Tables']['companies']['Row']
+export type CompanyBase = Database['public']['Tables']['companies']['Row']
+
+// Company type - utilise directement CompanyBase
+// (accounting_standard, industry_type, sector sont déjà dans CompanyBase)
+export type Company = CompanyBase
+
 export type CompanyInsert = Database['public']['Tables']['companies']['Insert']
 export type CompanyUpdate = Database['public']['Tables']['companies']['Update']
 

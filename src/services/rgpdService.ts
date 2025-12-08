@@ -874,12 +874,12 @@ export async function exportUserDataViaEdgeFunction(): Promise<UserDataExport> {
     }
 
     // Enregistrer l'audit
-    await auditService.logAction({
-      action_type: 'data_export',
-      action_category: 'privacy',
-      description: 'User data exported via Edge Function',
-      severity: 'medium',
-      status: 'success',
+    await auditService.log({
+      action_type: 'RGPD_EXPORT',
+      event_type: 'RGPD_EXPORT',
+      security_level: 'high',
+      compliance_tags: ['RGPD'],
+      is_sensitive: true,
       metadata: {
         export_method: 'edge_function',
         export_date: new Date().toISOString()
@@ -916,12 +916,12 @@ export async function deleteAccountViaEdgeFunction(
     }
 
     // Enregistrer l'audit
-    await auditService.logAction({
-      action_type: 'account_deletion',
-      action_category: 'privacy',
-      description: 'Account deletion requested via Edge Function',
-      severity: 'critical',
-      status: 'success',
+    await auditService.log({
+      action_type: 'RGPD_DELETE_ACCOUNT',
+      event_type: 'RGPD_DELETE_ACCOUNT',
+      security_level: 'critical',
+      compliance_tags: ['RGPD'],
+      is_sensitive: true,
       metadata: {
         deletion_method: 'edge_function',
         reason,
@@ -963,15 +963,16 @@ export async function cancelAccountDeletion(
     }
 
     // Enregistrer l'audit
-    await auditService.logAction({
-      action_type: 'account_deletion_cancelled',
-      action_category: 'privacy',
-      description: 'Account deletion request cancelled',
-      severity: 'high',
-      status: 'success',
+    await auditService.log({
+      action_type: 'CONFIG_CHANGE',
+      event_type: 'CONFIG_CHANGE',
+      security_level: 'high',
+      compliance_tags: ['RGPD'],
+      is_sensitive: true,
       metadata: {
         deletion_request_id: deletionRequestId,
-        cancellation_reason: cancellationReason
+        cancellation_reason: cancellationReason,
+        action: 'account_deletion_cancelled'
       }
     });
 

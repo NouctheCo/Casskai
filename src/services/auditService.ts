@@ -65,9 +65,10 @@ export type ComplianceTag = 'RGPD' | 'SOC2' | 'ISO27001' | 'HIPAA' | 'PCI-DSS';
 export interface AuditLogEntry {
   // Champs obligatoires
   event_type?: AuditAction;
-  
+
   // Alias pour event_type (backward compatibility)
   action?: string;
+  action_type?: string; // Alias supplémentaire pour rgpdService
   
   // Entity information (backward compatibility)
   entityType?: string;

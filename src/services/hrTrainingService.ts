@@ -78,6 +78,11 @@ export class HRTrainingService {
     }
   }
 
+  // Alias pour compatibilité avec TrainingTab.tsx
+  async createTrainingCatalog(companyId: string, formData: TrainingCatalogFormData) {
+    return this.createTraining(companyId, formData);
+  }
+
   async updateTraining(trainingId: string, updates: Partial<TrainingCatalog>) {
     try {
       const { data, error } = await supabase
@@ -389,6 +394,11 @@ export class HRTrainingService {
       console.error('Error adding certification:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
+  }
+
+  // Alias pour compatibilité avec TrainingTab.tsx
+  async createCertification(companyId: string, formData: CertificationFormData) {
+    return this.addCertification(companyId, formData);
   }
 
   async updateCertification(certificationId: string, updates: Partial<Certification>) {

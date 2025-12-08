@@ -66,6 +66,9 @@ const LazyTutorialsPage = React.lazy(() => import('@/pages/public/TutorialsPage'
 const LazyMentionsLegalesPage = React.lazy(() => import('@/pages/MentionsLegalesPage'));
 const LazySecurityPage = React.lazy(() => import('@/pages/SecurityPage'));
 const LazyHelpCenterPage = React.lazy(() => import('@/pages/HelpCenterPage'));
+const LazyTeamPage = React.lazy(() => import('@/pages/TeamPage'));
+const LazyAcceptInvitationPage = React.lazy(() => import('@/pages/AcceptInvitationPage'));
+const LazyTeamManagementGuide = React.lazy(() => import('@/pages/docs/TeamManagementGuide'));
 
 const AppRouter: React.FC = () => {
   const { isAuthenticated, loading, onboardingCompleted, isCheckingOnboarding, currentCompany } = useAuth();
@@ -79,8 +82,9 @@ const AppRouter: React.FC = () => {
     if (!isAuthenticated) return 'unauthenticated';
 
     // If authenticated but no companies (needs onboarding)
-    // Ne rediriger que si VRAIMENT pas d'entreprise (pas juste onboardingCompleted false)
-    if (isAuthenticated && !onboardingCompleted && !currentCompany) return 'needs-onboarding';
+    // IMPORTANT: Ne rediriger vers onboarding QUE si pas d'entreprise ET onboarding_completed_at null
+    // Si currentCompany existe, même sans onboardingCompleted, c'est que l'onboarding est fait
+    if (isAuthenticated && !currentCompany) return 'needs-onboarding';
 
     // Fully authenticated with company
     return 'authenticated';
@@ -197,6 +201,11 @@ const AppRouter: React.FC = () => {
                 <LazyDocumentationArticlePage />
               </Suspense>
             } />
+            <Route path="docs/guide/team-management" element={
+              <Suspense fallback={<LoadingFallback />}>
+                <LazyTeamManagementGuide />
+              </Suspense>
+            } />
             <Route path="tutorials" element={
               <Suspense fallback={<LoadingFallback />}>
                 <LazyTutorialsPage />
@@ -205,6 +214,11 @@ const AppRouter: React.FC = () => {
             <Route path="mentions-legales" element={
               <Suspense fallback={<LoadingFallback />}>
                 <LazyMentionsLegalesPage />
+              </Suspense>
+            } />
+            <Route path="invitation" element={
+              <Suspense fallback={<LoadingFallback />}>
+                <LazyAcceptInvitationPage />
               </Suspense>
             } />
             <Route path="*" element={<Navigate to="/" replace />} />
@@ -398,6 +412,25 @@ const AppRouter: React.FC = () => {
                   <LazyHelpCenterPage />
                 </Suspense>
               </ProtectedRoute>
+            } />
+            <Route path="docs/guide/team-management" element={
+              <ProtectedRoute>
+                <Suspense fallback={<LoadingFallback />}>
+                  <LazyTeamManagementGuide />
+                </Suspense>
+              </ProtectedRoute>
+            } />
+            <Route path="team" element={
+              <ProtectedRoute>
+                <Suspense fallback={<LoadingFallback />}>
+                  <LazyTeamPage />
+                </Suspense>
+              </ProtectedRoute>
+            } />
+            <Route path="invitation" element={
+              <Suspense fallback={<LoadingFallback />}>
+                <LazyAcceptInvitationPage />
+              </Suspense>
             } />
             <Route path="pricing" element={
               <ProtectedRoute requireOnboarding={false}>

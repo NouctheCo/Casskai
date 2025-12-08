@@ -79,6 +79,7 @@ export interface UnifiedThirdParty {
   total_amount: number;
   transaction_count: number;
   balance: number;
+  current_balance?: number; // Alias pour balance (from third_parties view)
   created_at: string;
   updated_at: string;
 }
@@ -390,7 +391,7 @@ class UnifiedThirdPartiesService {
         .order('name');
 
       if (type) {
-        query = query.eq('party_type', type);
+        query = query.eq('type', type);
       }
 
       const { data, error } = await query;
@@ -421,7 +422,7 @@ class UnifiedThirdPartiesService {
         .eq('is_active', true);
 
       if (type) {
-        query = query.eq('party_type', type);
+        query = query.eq('type', type);
       }
 
       // Recherche sur nom, email, company_name, party_number
@@ -456,7 +457,7 @@ class UnifiedThirdPartiesService {
 
       const { data, error } = await supabase
         .from('third_parties')
-        .select('party_type, balance')
+        .select('type, balance')
         .eq('company_id', activeCompanyId)
         .eq('is_active', true);
 
@@ -473,7 +474,7 @@ class UnifiedThirdPartiesService {
       };
 
       (data || []).forEach(item => {
-        if (item.party_type === 'customer') {
+        if (item.type === 'customer') {
           stats.total_customers++;
           stats.active_customers++;
           stats.total_receivables += item.balance || 0;

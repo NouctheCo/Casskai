@@ -1,0 +1,718 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import des styles de react-grid-layout */
+@import '../node_modules/react-grid-layout/css/styles.css';
+@import '../node_modules/react-resizable/css/styles.css';
+
+/* Import des animations optimisées */
+@import './styles/animations.css';
+@import './styles/grid-layout.css';
+
+/* Layout fixes */
+.main-layout {
+  @apply relative min-h-screen overflow-hidden;
+}
+
+.main-header {
+  @apply h-16;
+  height: 4rem !important;
+}
+
+.main-content {
+  @apply relative;
+}
+
+.content-container {
+  @apply relative w-full;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    
+    --radius: 0.5rem;
+  }
+ 
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+
+  * {
+    border-color: theme('colors.border');
+  }
+
+  body {
+    color: theme('colors.foreground');
+    background-color: theme('colors.background');
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  /* Glassmorphism Card */
+  .auth-card {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  }
+
+  .dark .auth-card {
+    background: rgba(30, 41, 59, 0.9);
+    border: 1px solid rgba(71, 85, 105, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  }
+
+  /* Form Inputs */
+  .form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgb(229, 231, 235);
+    border-radius: 0.5rem;
+    transition: all 200ms;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: rgb(59, 130, 246);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .dark .form-input {
+    background-color: rgba(55, 65, 81, 0.5);
+    border-color: rgb(75, 85, 99);
+  }
+
+  /* Form Labels */
+  .form-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: rgb(55, 65, 81);
+  }
+
+  .dark .form-label {
+    color: rgb(209, 213, 219);
+  }
+
+  /* Primary Button */
+  .btn-primary {
+    background-color: rgb(59, 130, 246);
+    color: white;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 200ms;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background-color: rgb(37, 99, 235);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Gradient Text */
+  .gradient-text {
+    background: linear-gradient(to right, rgb(59, 130, 246), rgb(99, 102, 241));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+@layer utilities {
+  /* Hover Effects */
+  .hover-lift {
+    transition: transform 200ms ease-out;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-2px);
+  }
+
+  /* Theme Transition */
+  .theme-transition {
+    transition-property: background-color, color, border-color;
+    transition-duration: 300ms;
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideInFromBottom {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .animate-slide-in-bottom {
+    animation: slideInFromBottom 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Loading Skeleton */
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  .loading-skeleton {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.4),
+      transparent
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* Card Styles améliorées */
+  .card-modern {
+    @apply bg-gradient-to-br from-white to-gray-50/90 dark:from-gray-800 dark:to-gray-900/90 
+           border border-gray-200/60 dark:border-gray-700/60 rounded-xl 
+           shadow-md hover:shadow-xl transition-all duration-300 backdrop-blur-sm 
+           hover:border-blue-300/50 dark:hover:border-blue-600/50 hover:scale-[1.01];
+  }
+  
+  .card-hover {
+    @apply hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] transition-all duration-200
+           hover:shadow-gray-200/50 dark:hover:shadow-gray-900/50;
+  }
+
+  /* Skeleton Animation */
+  .skeleton {
+    @apply bg-gray-200 dark:bg-gray-700 rounded animate-pulse;
+  }
+
+  /* Layout utilities améliorés */
+  .page-content {
+    @apply px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto;
+  }
+  
+  .dashboard-grid {
+    @apply grid gap-4 md:gap-6;
+  }
+  
+  .content-container {
+    @apply w-full min-h-0 flex-1;
+  }
+  
+  /* Amélioration du scroll pour éviter les comportements bizarres */
+  .main-content {
+    scroll-behavior: smooth;
+  }
+  
+  .page-content {
+    /* Évite le débordement et assure un scroll fluide */
+    overflow-x: hidden;
+  }
+  
+  /* Sidebar et layout améliorés */
+  .sidebar-container {
+    @apply w-64 flex-shrink-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700;
+  }
+  
+  .main-layout {
+    @apply min-h-screen bg-gray-50 dark:bg-gray-900 flex;
+  }
+  
+  .main-content {
+    @apply flex-1 flex flex-col min-w-0;
+  }
+  
+  /* Improved spacing utilities */
+  .section-spacing {
+    @apply mb-8;
+  }
+  
+  .widget-spacing {
+    @apply space-y-4;
+  }
+  
+  /* Custom scrollbar styles */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  
+  .scrollbar-thumb-gray-400::-webkit-scrollbar-thumb {
+    background-color: rgb(156 163 175);
+    border-radius: 0.25rem;
+  }
+  
+  .scrollbar-track-transparent::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+}
+
+/* Media Queries for Desktop Responsiveness */
+@media (min-width: 1024px) {
+  /* Large screens (1024px and up) */
+  .container {
+    max-width: 1200px;
+  }
+  
+  /* Dashboard grid adjustments */
+  .dashboard-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+  }
+  
+  /* Card spacing */
+  .card-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  /* Header adjustments */
+  .header-content {
+    @apply px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto;
+  }
+  
+  /* Sidebar width */
+  .sidebar-expanded {
+    width: 280px;
+  }
+  
+  .sidebar-collapsed {
+    width: 80px;
+  }
+  
+  /* Main content area */
+  .main-content {
+    margin-left: 0;
+    transition: margin-left 0.3s ease;
+  }
+  
+  .main-content-collapsed {
+    margin-left: 0;
+  }
+}
+
+@media (min-width: 1280px) {
+  /* Extra large screens (1280px and up) */
+  .container {
+    max-width: 1400px;
+  }
+  
+  /* Dashboard improvements */
+  .dashboard-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2.5rem;
+  }
+  
+  /* Larger cards */
+  .stat-card {
+    padding: 2rem;
+  }
+  
+  /* Chart containers */
+  .chart-container {
+    min-height: 400px;
+  }
+  
+  /* Table responsiveness */
+  .data-table {
+    min-width: 100%;
+  }
+  
+  /* Form layouts */
+  .form-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+}
+
+@media (min-width: 1440px) {
+  /* XXL screens (1440px and up) */
+  .container {
+    max-width: 1600px;
+  }
+  
+  /* Ultra-wide layouts */
+  .dashboard-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 3rem;
+  }
+  
+  /* Expanded sidebar */
+  .sidebar-expanded {
+    width: 320px;
+  }
+  
+  .main-content {
+    margin-left: 0;
+  }
+  
+  /* Larger chart areas */
+  .chart-container {
+    min-height: 450px;
+  }
+  
+  /* Enhanced spacing */
+  .page-content {
+    padding: 3rem;
+  }
+}
+
+@media (min-width: 1600px) {
+  /* Ultra-wide screens (1600px and up) */
+  .container {
+    max-width: 1800px;
+  }
+  
+  /* Maximum width layouts */
+  .dashboard-grid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 3.5rem;
+  }
+  
+  /* Enhanced components */
+  .stat-card {
+    padding: 2.5rem;
+  }
+  
+  .chart-container {
+    min-height: 500px;
+  }
+  
+  /* Optimized for large displays */
+  .data-table {
+    font-size: 1rem;
+  }
+  
+  .form-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2.5rem;
+  }
+}
+
+/* Specific component responsiveness */
+@media (min-width: 1024px) {
+  /* Header responsiveness and alignment fixes */
+  .main-header {
+    height: 80px;
+    transition: left 0.3s ease-in-out, width 0.3s ease-in-out;
+  }
+  
+  /* Ensure header content is properly contained */
+  .header-content {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* Navigation improvements */
+  .nav-menu {
+    display: flex;
+    gap: 2rem;
+  }
+  
+  /* Button group layouts */
+  .button-group {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  
+  /* Modal sizing */
+  .modal-dialog {
+    max-width: 800px;
+    margin: 2rem auto;
+  }
+  
+  /* Card layouts */
+  .card-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .card-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .card-grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Print media query */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-full-width {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+  
+  .page-break {
+    page-break-before: always;
+  }
+}
+
+/* High-DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .high-dpi-image {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+
+  @media (min-width: 1024px) {
+    .main-content {
+        margin-left: 0;
+        transition: margin-left 0.3s ease;
+    }
+  }
+}
+
+/* ====================================
+   CassKai UX/UI Consistency Classes 
+   ================================== */
+
+@layer components {
+  /* Page transitions consistency */
+  .page-transition {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  
+  /* Loading states unified */
+  .loading-spinner {
+    @apply animate-spin rounded-full border-b-2 border-blue-600;
+  }
+  
+  .loading-skeleton {
+    @apply animate-pulse bg-gray-200 dark:bg-gray-700 rounded;
+  }
+  
+  /* Button states consistency with animations */
+  .btn-loading {
+    @apply opacity-70 pointer-events-none relative;
+  }
+  
+  .btn-loading::after {
+    content: '';
+    @apply absolute inset-0 rounded-md bg-current opacity-20 animate-pulse;
+  }
+  
+  .btn-disabled {
+    @apply opacity-50 pointer-events-none;
+  }
+  
+  .btn-hover-lift {
+    @apply transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:shadow-md;
+  }
+  
+  /* Form error states */
+  .input-error {
+    @apply border-red-500 focus:border-red-500 focus:ring-red-500/20;
+  }
+  
+  .error-message {
+    @apply text-red-600 dark:text-red-400 text-sm mt-1;
+  }
+  
+  /* Success states */
+  .input-success {
+    @apply border-green-500 focus:border-green-500 focus:ring-green-500/20;
+  }
+  
+  .success-message {
+    @apply text-green-600 dark:text-green-400 text-sm mt-1;
+  }
+  
+  /* Card hover states */
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-md hover:-translate-y-0.5;
+  }
+  
+  /* Focus states consistency */
+  .focus-outline {
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500;
+  }
+  
+  /* Modal backdrop */
+  .modal-backdrop {
+    @apply fixed inset-0 bg-black/50 backdrop-blur-sm z-40;
+  }
+  
+  /* Overlay consistent styling */
+  .overlay-dark {
+    @apply bg-black/20 backdrop-blur-sm;
+  }
+  
+  /* Text truncation helpers */
+  .text-truncate {
+    @apply truncate max-w-full;
+  }
+  
+  .text-clamp-2 {
+    @apply line-clamp-2;
+  }
+  
+  .text-clamp-3 {
+    @apply line-clamp-3;
+  }
+  
+  /* Spacing consistency */
+  .section-spacing {
+    @apply py-8 sm:py-12 lg:py-16;
+  }
+  
+  .content-spacing {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+  
+  /* Border consistency */
+  .border-subtle {
+    @apply border border-gray-200 dark:border-gray-700;
+  }
+  
+  /* Shadow consistency */
+  .shadow-card {
+    @apply shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+  
+  .shadow-modal {
+    @apply shadow-2xl;
+  }
+
+  /* Micro-interactions avancées */
+  .interactive-element {
+    @apply transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer;
+    transform-origin: center;
+  }
+
+  .interactive-lift {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1 active:translate-y-0;
+  }
+
+  .interactive-glow:hover {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    transform: translateY(-2px);
+  }
+
+  .ripple-effect {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ripple-effect::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+    z-index: 1;
+  }
+
+  .ripple-effect:active::before {
+    width: 300px;
+    height: 300px;
+  }
+
+  /* Context menu animations */
+  .context-menu {
+    @apply transform scale-95 opacity-0 transition-all duration-150 origin-top-left;
+  }
+
+  .context-menu.open {
+    @apply scale-100 opacity-100;
+  }
+}

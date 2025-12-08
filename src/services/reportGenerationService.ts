@@ -71,6 +71,7 @@ export class ReportGenerationService {
           id,
           entry_date,
           description,
+          status,
           journal_entry_lines (
             account_number,
             account_name,
@@ -79,6 +80,7 @@ export class ReportGenerationService {
           )
         `)
         .eq('company_id', companyId)
+        .eq('status', 'posted')
         .gte('entry_date', startDate || startOfYear(new Date()).toISOString().split('T')[0])
         .lte('entry_date', endDate || endOfYear(new Date()).toISOString().split('T')[0]);
 

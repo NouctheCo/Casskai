@@ -40,7 +40,11 @@ type TransactionWithLines = {
   total_amount: number;
   entry_date: string | Date;
   journal_entry_lines?: Array<{
-    account_code: string;
+    account_code?: string;
+    account_number?: string; // Alias pour compatibility
+    account_name?: string;
+    debit_amount?: number;
+    credit_amount?: number;
   }>;
   [key: string]: unknown;
 };
@@ -109,7 +113,7 @@ export class OpenAIService {
         .from('journal_entries')
         .select(`
           id, entry_date, total_amount, description,
-          journal_entry_lines (account_code, debit_amount, credit_amount)
+          journal_entry_lines (account_number, account_name, debit_amount, credit_amount)
         `)
         .eq('company_id', companyId)
         .gte('entry_date', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
@@ -150,7 +154,7 @@ export class OpenAIService {
         .from('journal_entries')
         .select(`
           entry_date, total_amount, description,
-          journal_entry_lines!inner (account_code, debit_amount, credit_amount)
+          journal_entry_lines!inner (account_number, account_name, debit_amount, credit_amount)
         `)
         .eq('company_id', companyId)
         .gte('entry_date', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString())
@@ -184,7 +188,7 @@ export class OpenAIService {
         .from('journal_entries')
         .select(`
           id, entry_date, total_amount, description, reference,
-          journal_entry_lines (account_code, debit_amount, credit_amount)
+          journal_entry_lines (account_number, account_name, debit_amount, credit_amount)
         `)
         .eq('company_id', companyId)
         .gte('entry_date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
@@ -228,7 +232,7 @@ export class OpenAIService {
         .from('journal_entries')
         .select(`
           entry_date, total_amount, description,
-          journal_entry_lines (account_code, debit_amount, credit_amount)
+          journal_entry_lines (account_number, account_name, debit_amount, credit_amount)
         `)
         .eq('company_id', companyId)
         .gte('entry_date', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString());
@@ -361,7 +365,7 @@ export class OpenAIService {
     // Analyse des revenus
     const recentRevenue = transactions
       .filter(t => new Date(t.entry_date) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000))
-      .filter(t => t.journal_entry_lines?.some((line: any) => line.account_code.startsWith('70')))
+      .filter(t => t.journal_entry_lines?.some((line: any) => line.account_number.startsWith('70')))
       .reduce((sum, t) => sum + t.total_amount, 0);
 
     const previousRevenue = transactions
@@ -370,7 +374,7 @@ export class OpenAIService {
         return date > new Date(Date.now() - 60 * 24 * 60 * 60 * 1000) &&
                date <= new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       })
-      .filter(t => t.journal_entry_lines?.some((line: any) => line.account_code.startsWith('70')))
+      .filter(t => t.journal_entry_lines?.some((line: any) => line.account_number.startsWith('70')))
       .reduce((sum, t) => sum + t.total_amount, 0);
 
     if (previousRevenue > 0) {
@@ -459,12 +463,12 @@ export class OpenAIService {
       const typedTxns = Array.isArray(txns) ? (txns as TransactionWithLines[]) : [];
       const income = typedTxns
         .filter(transaction =>
-          transaction.journal_entry_lines?.some(line => line.account_code.startsWith('70'))
+          transaction.journal_entry_lines?.some(line => line.account_number.startsWith('70'))
         )
         .reduce((sum, transaction) => sum + (Number(transaction.total_amount) || 0), 0);
       const expenses = typedTxns
         .filter(transaction =>
-          transaction.journal_entry_lines?.some(line => line.account_code.startsWith('6'))
+          transaction.journal_entry_lines?.some(line => line.account_number.startsWith('6'))
         )
         .reduce((sum, transaction) => sum + (Number(transaction.total_amount) || 0), 0);
 
@@ -548,7 +552,7 @@ export class OpenAIService {
             amount: transaction.total_amount,
             description: transaction.description || '',
             type: transaction.total_amount > 0 ? 'income' : 'expense',
-            account: transaction.journal_entry_lines?.[0]?.account_code || '',
+            account: transaction.journal_entry_lines?.[0]?.account_number || '',
             reference: transaction.reference
           },
           score,
@@ -572,7 +576,7 @@ export class OpenAIService {
 
     // Optimisation TVA
     const vatTransactions = transactions.filter(t =>
-      t.journal_entry_lines?.some((line: any) => line.account_code.includes('445'))
+      t.journal_entry_lines?.some((line: any) => line.account_number.includes('445'))
     );
 
     if (vatTransactions.length > 10) {
@@ -597,7 +601,7 @@ export class OpenAIService {
 
     // Optimisation amortissements
     const assetAccounts = transactions.filter(t =>
-      t.journal_entry_lines?.some((line: any) => line.account_code.startsWith('2'))
+      t.journal_entry_lines?.some((line: any) => line.account_number.startsWith('2'))
     );
 
     if (assetAccounts.length > 0) {

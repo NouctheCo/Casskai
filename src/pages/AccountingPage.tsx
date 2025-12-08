@@ -28,6 +28,12 @@ import { toastError, toastSuccess } from '@/lib/toast-helpers';
 
 import { useSubscription } from '@/contexts/SubscriptionContext';
 
+import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
+
+import { useNavigate } from 'react-router-dom';
+
+import { toast } from 'sonner';
+
 import { AccountingService } from '@/services/accountingService';
 
 import { accountingDataService } from '@/services/accountingDataService';
@@ -77,6 +83,8 @@ import OptimizedJournalsTab from '@/components/accounting/OptimizedJournalsTab';
 import OptimizedReportsTab from '@/components/accounting/OptimizedReportsTab';
 
 import FECImport from '@/components/accounting/FECImport';
+
+import ExportFecModal from '@/components/accounting/ExportFecModal';
 
 
 
@@ -469,7 +477,9 @@ const RecentAccountingActivities = () => {
 export default function AccountingPageOptimized() {
 
   const { canAccessFeature } = useSubscription();
+  const { isExpired } = useSubscriptionStatus();
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   
 
@@ -605,6 +615,13 @@ export default function AccountingPageOptimized() {
 
   const handleNewEntry = () => {
 
+    // Check if subscription is expired
+    if (isExpired) {
+      toast.error('Abonnement expiré. Veuillez choisir un plan pour continuer.');
+      navigate('/settings/billing');
+      return;
+    }
+
     if (!canAccessFeature('accounting_entries')) {
 
       toastError('Mettez à niveau votre plan pour accéder aux écritures illimitées.');
@@ -635,10 +652,10 @@ export default function AccountingPageOptimized() {
 
 
 
+  const [showExportModal, setShowExportModal] = useState(false);
+
   const handleExportData = () => {
-
-    toastSuccess('Génération du fichier FEC en cours...');
-
+    setShowExportModal(true);
   };
 
 
@@ -964,7 +981,10 @@ export default function AccountingPageOptimized() {
 
         <TabsContent value="fec-import">
 
-          <FECImport currentEnterpriseId={currentCompanyId} />
+          <FECImport
+            currentEnterpriseId={currentCompanyId}
+            onImportSuccess={() => window.location.reload()}
+          />
 
         </TabsContent>
 
@@ -985,6 +1005,12 @@ export default function AccountingPageOptimized() {
         </TabsContent>
 
       </Tabs>
+
+      {/* Modal d'export FEC */}
+      <ExportFecModal
+        open={showExportModal}
+        onClose={() => setShowExportModal(false)}
+      />
 
     </motion.div>
 

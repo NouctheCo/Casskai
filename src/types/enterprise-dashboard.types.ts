@@ -4,9 +4,9 @@ export interface DashboardMetric {
 
   id: string;
 
-  title: string;
+  title?: string;
 
-  current_value: number | string;
+  current_value?: number | string;
 
   target_value?: number;
 
@@ -14,22 +14,30 @@ export interface DashboardMetric {
 
   budget_value?: number;
 
-  unit: 'currency' | 'percentage' | 'number' | 'days';
+  unit?: 'currency' | 'percentage' | 'number' | 'days';
 
-  trend_percentage: number;
+  trend_percentage?: number;
 
   vs_budget_percentage?: number;
 
   vs_previous_year_percentage?: number;
 
-  color: 'green' | 'red' | 'blue' | 'orange' | 'purple' | 'yellow' | 'indigo' | 'emerald';
+  color?: 'green' | 'red' | 'blue' | 'orange' | 'purple' | 'yellow' | 'indigo' | 'emerald';
 
-  category: 'financial' | 'operational' | 'customers' | 'inventory' | 'performance';
+  category?: 'financial' | 'operational' | 'customers' | 'inventory' | 'performance';
 
-  icon: string;
+  icon?: string;
   // Données brutes pour détecter les comptes vides
   transactions?: Record<string, unknown>[];
   journal_entries?: Record<string, unknown>[];
+
+  // Alias pour compatibilité avec realDashboardKpiService
+  label?: string; // Alias pour title
+  value?: number | string; // Alias pour current_value
+  trend?: 'up' | 'down' | 'stable'; // Direction de la tendance
+  change?: number; // Changement absolu
+  period?: string; // Période de comparaison (ex: "vs année précédente")
+  importance?: 'high' | 'medium' | 'low'; // Niveau d'importance
 
 }
 
@@ -49,6 +57,12 @@ export interface TimeSeriesData {
 
 }
 
+// Type pour les données de graphiques non-temporels (bar, pie, donut)
+export interface ChartDataPoint {
+  label: string;
+  value: number;
+}
+
 
 
 export interface DashboardChart {
@@ -59,9 +73,9 @@ export interface DashboardChart {
 
   type: 'line' | 'bar' | 'area' | 'pie' | 'donut' | 'gauge' | 'waterfall' | 'combo';
 
-  data: TimeSeriesData[];
+  data: TimeSeriesData[] | ChartDataPoint[];
 
-  metrics: {
+  metrics?: {
 
     total: number;
 
@@ -73,11 +87,13 @@ export interface DashboardChart {
 
   };
 
-  period: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+  period?: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
 
-  comparison_enabled: boolean;
+  comparison_enabled?: boolean;
 
-  drill_down_available: boolean;
+  drill_down_available?: boolean;
+
+  color?: string; // Couleur pour les graphiques simples (hex ou nom)
 
 }
 

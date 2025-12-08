@@ -19,20 +19,32 @@ export interface Invoice {
   id: string;
   company_id: string;
   third_party_id: string;
+  journal_entry_id?: string;
+  customer_id?: string;
+  quote_id?: string;
   invoice_number: string;
-  type: 'sale' | 'purchase' | 'credit_note' | 'debit_note';
-  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
-  issue_date: string;
+  invoice_type: 'sale' | 'purchase' | 'credit_note' | 'debit_note';
+  title?: string;
+  invoice_date: string;
   due_date: string;
-  subtotal: number;
-  tax_amount: number;
-  total_amount: number;
+  payment_date?: string;
+  subtotal_excl_tax: number;
+  total_tax_amount: number;
+  total_incl_tax: number;
   paid_amount: number;
+  remaining_amount: number;
+  status: 'draft' | 'sent' | 'viewed' | 'paid' | 'partial' | 'overdue' | 'cancelled';
   currency: string;
   notes?: string;
-  created_by: string;
+  internal_notes?: string;
+  tax_rate?: number;
+  payment_terms?: number;
+  discount_amount?: number;
+  created_by?: string;
   created_at: string;
   updated_at: string;
+  sent_at?: string;
+  paid_at?: string;
 }
 
 export interface InvoiceLine {
@@ -56,7 +68,7 @@ export interface InvoiceWithDetails extends Invoice {
     name: string;
     email?: string;
     phone?: string;
-    address?: string;
+    address_line1?: string;
     city?: string;
     postal_code?: string;
     country?: string;
@@ -67,8 +79,8 @@ export interface InvoiceWithDetails extends Invoice {
 export interface CreateInvoiceData {
   third_party_id: string;
   invoice_number?: string;
-  type?: 'sale' | 'purchase' | 'credit_note' | 'debit_note';
-  issue_date: string;
+  invoice_type?: 'sale' | 'purchase' | 'credit_note' | 'debit_note';
+  invoice_date: string;
   due_date: string;
   currency?: string;
   notes?: string;
@@ -121,7 +133,7 @@ class InvoicingService {
     thirdPartyId?: string;
     limit?: number;
     offset?: number;
-    orderBy?: 'issue_date' | 'due_date' | 'total_amount';
+    orderBy?: 'invoice_date' | 'due_date' | 'total_incl_tax';
     orderDirection?: 'asc' | 'desc';
   }): Promise<InvoiceWithDetails[]> {
     try {
@@ -190,7 +202,7 @@ class InvoicingService {
         .from('invoices')
         .select(`
           *,
-          third_party:third_parties(id, name, email, phone, address, city, postal_code, country),
+          third_party:third_parties(id, name, email, phone, address_line1, city, postal_code, country),
           invoice_lines(id, description, quantity, unit_price, discount_percent, tax_rate, line_total, line_order)
         `)
         .eq('id', id)
@@ -245,14 +257,15 @@ class InvoicingService {
           company_id: companyId,
           third_party_id: invoiceData.third_party_id,
           invoice_number,
-          type: invoiceData.type || 'sale',
+          invoice_type: invoiceData.invoice_type || 'sale',
           status: 'draft',
-          issue_date: invoiceData.issue_date,
+          invoice_date: invoiceData.invoice_date,
           due_date: invoiceData.due_date,
-          subtotal,
-          tax_amount,
-          total_amount,
+          subtotal_excl_tax: subtotal,
+          total_tax_amount: tax_amount,
+          total_incl_tax: total_amount,
           paid_amount: 0,
+          remaining_amount: total_amount,
           currency: invoiceData.currency || 'EUR',
           notes: invoiceData.notes,
           created_by: user.id
@@ -307,7 +320,7 @@ class InvoicingService {
         company_id: companyId,
         new_values: {
           invoice_number,
-          type: invoiceData.type || 'sale',
+          invoice_type: invoiceData.invoice_type || 'sale',
           total_amount,
           third_party_id: invoiceData.third_party_id,
           items_count: items.length
@@ -319,7 +332,7 @@ class InvoicingService {
       // 5. Générer automatiquement l'écriture comptable (fire-and-forget)
       // Ne bloque pas la création de la facture si l'écriture échoue
       try {
-        await generateInvoiceJournalEntry(createdInvoice, createdInvoice.invoice_lines || []);
+        await generateInvoiceJournalEntry(createdInvoice as any, createdInvoice.invoice_lines || []);
         logger.info(`InvoicingService: Journal entry created for invoice ${invoice_number}`);
       } catch (journalError) {
         // Log l'erreur mais ne bloque pas la création
@@ -399,9 +412,9 @@ class InvoicingService {
           company_id: companyId,
           old_values: {
             invoice_number: invoiceToDelete.invoice_number,
-            type: invoiceToDelete.type,
+            type: invoiceToDelete.invoice_type,
             status: invoiceToDelete.status,
-            total_amount: invoiceToDelete.total_amount,
+            total_amount: invoiceToDelete.total_incl_tax,
             third_party_id: invoiceToDelete.third_party_id
           },
           security_level: 'high',
@@ -455,8 +468,8 @@ class InvoicingService {
 
       const newInvoiceData: CreateInvoiceData = {
         third_party_id: originalInvoice.third_party_id,
-        type: originalInvoice.type,
-        issue_date: new Date().toISOString().split('T')[0],
+        invoice_type: originalInvoice.invoice_type,
+        invoice_date: new Date().toISOString().split('T')[0],
         due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         currency: originalInvoice.currency,
         notes: originalInvoice.notes
@@ -487,8 +500,8 @@ class InvoicingService {
 
       const creditNoteData: CreateInvoiceData = {
         third_party_id: originalInvoice.third_party_id,
-        type: 'credit_note',
-        issue_date: new Date().toISOString().split('T')[0],
+        invoice_type: 'credit_note',
+        invoice_date: new Date().toISOString().split('T')[0],
         due_date: new Date().toISOString().split('T')[0],
         currency: originalInvoice.currency,
         notes: `Avoir pour facture ${originalInvoice.invoice_number}`
@@ -540,16 +553,15 @@ class InvoicingService {
         .from('third_parties')
         .select('id')
         .eq('company_id', companyId)
-        .eq('party_type', 'customer');
+        .eq('invoice_type', 'customer');
       if (clientsError) throw clientsError;
       
-      // Get quotes count (assuming quotes are stored in a quotes table or as draft invoices)
+      // Get quotes count from the quotes table
       const { data: quotes, error: quotesError } = await supabase
-        .from('invoices')
+        .from('quotes')
         .select('id')
-        .eq('company_id', companyId)
-        .eq('invoice_type', 'quote');
-      if (quotesError) logger.warn('InvoicingService: Quotes table might not exist', { error: quotesError });
+        .eq('company_id', companyId);
+      if (quotesError) logger.warn('InvoicingService: Error fetching quotes', { error: quotesError });
       
       const invoicesList = invoices || [];
       const clientsList = clients || [];

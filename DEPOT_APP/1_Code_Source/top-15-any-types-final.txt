@@ -1,0 +1,15 @@
+19 - src/types/modules.types.ts
+18 - src/types/database-types-fix.ts
+16 - src/infrastructure/reports/SupabaseReportRepository.ts
+16 - src/lib/formHelpers.ts
+16 - src/services/errorHandlingService.ts
+15 - src/hooks/useEnterpriseTaxData.ts
+15 - src/services/enterpriseDashboardService.ts
+14 - src/modules/crm/crmModule.ts
+13 - src/components/contracts/ContractForm.tsx
+13 - src/components/ui/AnimatedChart.tsx
+13 - src/services/entryTemplatesService.ts
+12 - src/services/ReportExportService.ts
+12 - src/services/automationService.ts
+12 - src/services/taxService.ts
+11 - src/hooks/useAccountingImport.ts

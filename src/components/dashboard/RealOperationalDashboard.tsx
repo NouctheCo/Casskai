@@ -85,7 +85,7 @@ export const RealOperationalDashboard: React.FC = () => {
       const analysis = await aiDashboardAnalysisService.analyzeKPIs(
         data,
         currentCompany.name,
-        currentCompany.industry
+        currentCompany.industry_type || currentCompany.sector || 'general'
       );
       setAiAnalysis(analysis);
     } catch (error) {
@@ -143,8 +143,8 @@ export const RealOperationalDashboard: React.FC = () => {
               <div className="space-y-2">
                 <div className="text-2xl font-bold">
                   {metric.value.toLocaleString('fr-FR', {
-                    minimumFractionDigits: metric.unit === '€' ? 2 : 0,
-                    maximumFractionDigits: metric.unit === '€' ? 2 : 0,
+                    minimumFractionDigits: metric.unit === 'currency' ? 2 : 0,
+                    maximumFractionDigits: metric.unit === 'currency' ? 2 : 0,
                   })}
                   <span className="text-sm font-normal text-muted-foreground ml-1">
                     {metric.unit}

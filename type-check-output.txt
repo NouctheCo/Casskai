@@ -2,56 +2,93 @@
 > casskai@1.0.0 type-check
 > tsc --noEmit -p tsconfig.app.json
 
-src/types/company-settings.types.ts(318,2): error TS1128: Declaration or statement expected.
-src/types/company-settings.types.ts(326,19): error TS1005: ';' expected.
-src/types/company-settings.types.ts(328,13): error TS1005: ';' expected.
-src/types/company-settings.types.ts(330,16): error TS1005: ';' expected.
-src/types/company-settings.types.ts(332,7): error TS1109: Expression expected.
-src/types/company-settings.types.ts(332,8): error TS1128: Declaration or statement expected.
-src/types/company-settings.types.ts(352,12): error TS1005: ';' expected.
-src/types/company-settings.types.ts(354,12): error TS1005: ';' expected.
-src/types/company-settings.types.ts(356,14): error TS1005: ';' expected.
-src/types/company-settings.types.ts(358,5): error TS1109: Expression expected.
-src/types/company-settings.types.ts(358,6): error TS1128: Declaration or statement expected.
-src/types/company-settings.types.ts(366,17): error TS1005: ';' expected.
-src/types/company-settings.types.ts(368,7): error TS1109: Expression expected.
-src/types/company-settings.types.ts(368,8): error TS1128: Declaration or statement expected.
-src/types/company-settings.types.ts(372,16): error TS1005: ';' expected.
-src/types/company-settings.types.ts(374,21): error TS1005: ';' expected.
-src/types/company-settings.types.ts(376,17): error TS1005: ';' expected.
-src/types/company-settings.types.ts(390,15): error TS1005: ';' expected.
-src/types/company-settings.types.ts(400,5): error TS1109: Expression expected.
-src/types/company-settings.types.ts(400,6): error TS1128: Declaration or statement expected.
-src/types/company-settings.types.ts(406,21): error TS1005: ';' expected.
-src/types/company-settings.types.ts(408,20): error TS1005: ';' expected.
-src/types/company-settings.types.ts(410,15): error TS1005: ';' expected.
-src/types/company-settings.types.ts(412,15): error TS1005: ';' expected.
-src/types/company-settings.types.ts(414,15): error TS1005: ';' expected.
-src/types/company-settings.types.ts(416,5): error TS1109: Expression expected.
-src/types/company-settings.types.ts(416,6): error TS1128: Declaration or statement expected.
-src/types/company-settings.types.ts(422,19): error TS1005: ';' expected.
-src/types/company-settings.types.ts(424,21): error TS1005: ';' expected.
-src/types/company-settings.types.ts(426,21): error TS1005: ';' expected.
-src/types/company-settings.types.ts(428,20): error TS1005: ';' expected.
-src/types/company-settings.types.ts(430,29): error TS1005: ';' expected.
-src/types/company-settings.types.ts(432,5): error TS1109: Expression expected.
-src/types/company-settings.types.ts(432,6): error TS1128: Declaration or statement expected.
-src/types/company-settings.types.ts(440,14): error TS1005: ';' expected.
-src/types/company-settings.types.ts(442,7): error TS1109: Expression expected.
-src/types/company-settings.types.ts(442,8): error TS1128: Declaration or statement expected.
-src/types/company-settings.types.ts(446,14): error TS1005: ';' expected.
-src/types/company-settings.types.ts(448,16): error TS1005: ';' expected.
-src/types/company-settings.types.ts(452,20): error TS1005: ';' expected.
-src/types/company-settings.types.ts(454,15): error TS1005: ';' expected.
-src/types/company-settings.types.ts(456,17): error TS1005: ';' expected.
-src/types/company-settings.types.ts(460,16): error TS1005: ';' expected.
-src/types/company-settings.types.ts(462,9): error TS1109: Expression expected.
-src/types/company-settings.types.ts(462,10): error TS1128: Declaration or statement expected.
-src/types/company-settings.types.ts(464,8): error TS1128: Declaration or statement expected.
-src/types/company-settings.types.ts(466,6): error TS1128: Declaration or statement expected.
-src/types/company-settings.types.ts(478,13): error TS1005: ';' expected.
-src/types/company-settings.types.ts(482,28): error TS1005: ';' expected.
-src/types/company-settings.types.ts(484,5): error TS1109: Expression expected.
-src/types/company-settings.types.ts(484,6): error TS1128: Declaration or statement expected.
-src/types/company-settings.types.ts(486,3): error TS1128: Declaration or statement expected.
-src/types/company-settings.types.ts(488,1): error TS1128: Declaration or statement expected.
+src/components/accounting/ExportFecModal.tsx(67,25): error TS2339: Property 'accounting_standard' does not exist on type 'Company'.
+src/components/accounting/ExportFecModal.tsx(68,30): error TS2339: Property 'accounting_standard' does not exist on type 'Company'.
+src/components/crm/NewActionModal.tsx(124,24): error TS2345: Argument of type '{ id: any; title: any; client_id: any; }[]' is not assignable to parameter of type 'SetStateAction<Opportunity[]>'.
+  Type '{ id: any; title: any; client_id: any; }[]' is not assignable to type 'Opportunity[]'.
+    Property 'third_party_id' is missing in type '{ id: any; title: any; client_id: any; }' but required in type 'Opportunity'.
+src/components/dashboard/RealOperationalDashboard.tsx(88,24): error TS2339: Property 'industry_type' does not exist on type 'Company'.
+src/components/dashboard/RealOperationalDashboard.tsx(88,56): error TS2339: Property 'sector' does not exist on type 'Company'.
+src/components/dashboard/RealOperationalDashboard.tsx(136,27): error TS2339: Property 'label' does not exist on type 'DashboardMetric'.
+src/components/dashboard/RealOperationalDashboard.tsx(138,25): error TS2339: Property 'trend' does not exist on type 'DashboardMetric'.
+src/components/dashboard/RealOperationalDashboard.tsx(139,25): error TS2339: Property 'trend' does not exist on type 'DashboardMetric'.
+src/components/dashboard/RealOperationalDashboard.tsx(145,27): error TS2339: Property 'value' does not exist on type 'DashboardMetric'.
+src/components/dashboard/RealOperationalDashboard.tsx(146,44): error TS2367: This comparison appears to be unintentional because the types '"number" | "currency" | "days" | "percentage"' and '"€"' have no overlap.
+src/components/dashboard/RealOperationalDashboard.tsx(147,44): error TS2367: This comparison appears to be unintentional because the types '"number" | "currency" | "days" | "percentage"' and '"€"' have no overlap.
+src/components/dashboard/RealOperationalDashboard.tsx(153,25): error TS2339: Property 'change' does not exist on type 'DashboardMetric'.
+src/components/dashboard/RealOperationalDashboard.tsx(153,56): error TS2339: Property 'period' does not exist on type 'DashboardMetric'.
+src/components/dashboard/RealOperationalDashboard.tsx(156,39): error TS2339: Property 'trend' does not exist on type 'DashboardMetric'.
+src/components/dashboard/RealOperationalDashboard.tsx(156,75): error TS2339: Property 'trend' does not exist on type 'DashboardMetric'.
+src/components/dashboard/RealOperationalDashboard.tsx(159,31): error TS2339: Property 'trend' does not exist on type 'DashboardMetric'.
+src/components/dashboard/RealOperationalDashboard.tsx(159,61): error TS2339: Property 'trend' does not exist on type 'DashboardMetric'.
+src/components/dashboard/RealOperationalDashboard.tsx(160,31): error TS2339: Property 'change' does not exist on type 'DashboardMetric'.
+src/components/dashboard/RealOperationalDashboard.tsx(162,69): error TS2339: Property 'period' does not exist on type 'DashboardMetric'.
+src/components/dashboard/RealOperationalDashboard.tsx(165,25): error TS2339: Property 'importance' does not exist on type 'DashboardMetric'.
+src/components/dashboard/RealOperationalDashboard.tsx(168,30): error TS2339: Property 'trend' does not exist on type 'DashboardMetric'.
+src/components/dashboard/RealOperationalDashboard.tsx(170,34): error TS2339: Property 'trend' does not exist on type 'DashboardMetric'.
+src/components/dashboard/RealOperationalDashboard.tsx(207,39): error TS2339: Property 'color' does not exist on type 'DashboardChart'.
+src/components/dashboard/RealOperationalDashboard.tsx(209,44): error TS2339: Property 'color' does not exist on type 'DashboardChart'.
+src/components/dashboard/RealOperationalDashboard.tsx(237,56): error TS2339: Property 'color' does not exist on type 'DashboardChart'.
+src/components/hr/TrainingTab.tsx(71,44): error TS2551: Property 'createTrainingCatalog' does not exist on type 'HRTrainingService'. Did you mean 'getTrainingCatalog'?
+src/components/hr/TrainingTab.tsx(91,44): error TS2551: Property 'createCertification' does not exist on type 'HRTrainingService'. Did you mean 'getCertifications'?
+src/components/invoicing/OptimizedInvoicesTab.tsx(1823,46): error TS2345: Argument of type '{ third_party_id: string; invoice_number: string; issue_date: string; due_date: string; currency: string; notes: string; }' is not assignable to parameter of type 'CreateInvoiceData'.
+  Property 'invoice_date' is missing in type '{ third_party_id: string; invoice_number: string; issue_date: string; due_date: string; currency: string; notes: string; }' but required in type 'CreateInvoiceData'.
+src/components/invoicing/OptimizedInvoicesTab.tsx(1905,19): error TS2552: Cannot find name 'setClients'. Did you mean 'clients'?
+src/pages/AcceptInvitationPage.tsx(97,39): error TS2339: Property 'name' does not exist on type '{ name: any; }[]'.
+src/pages/ThirdPartiesPage.tsx(314,29): error TS2339: Property 'current_balance' does not exist on type 'UnifiedThirdParty'.
+src/pages/ThirdPartiesPage.tsx(316,56): error TS2339: Property 'current_balance' does not exist on type 'UnifiedThirdParty'.
+src/pages/ThirdPartiesPage.tsx(318,53): error TS2339: Property 'current_balance' does not exist on type 'UnifiedThirdParty'.
+src/services/ai/OpenAIService.ts(164,60): error TS2345: Argument of type '{ entry_date: any; total_amount: any; description: any; journal_entry_lines: { account_number: any; account_name: any; debit_amount: any; credit_amount: any; }[]; }[]' is not assignable to parameter of type 'TransactionWithLines[]'.
+  Type '{ entry_date: any; total_amount: any; description: any; journal_entry_lines: { account_number: any; account_name: any; debit_amount: any; credit_amount: any; }[]; }' is not assignable to type 'TransactionWithLines'.
+    Types of property 'journal_entry_lines' are incompatible.
+      Type '{ account_number: any; account_name: any; debit_amount: any; credit_amount: any; }[]' is not assignable to type '{ account_code: string; }[]'.
+        Property 'account_code' is missing in type '{ account_number: any; account_name: any; debit_amount: any; credit_amount: any; }' but required in type '{ account_code: string; }'.
+src/services/ai/OpenAIService.ts(197,57): error TS2345: Argument of type '{ id: any; entry_date: any; total_amount: any; description: any; reference: any; journal_entry_lines: { account_number: any; account_name: any; debit_amount: any; credit_amount: any; }[]; }[]' is not assignable to parameter of type 'TransactionWithLines[]'.
+  Type '{ id: any; entry_date: any; total_amount: any; description: any; reference: any; journal_entry_lines: { account_number: any; account_name: any; debit_amount: any; credit_amount: any; }[]; }' is not assignable to type 'TransactionWithLines'.
+    Types of property 'journal_entry_lines' are incompatible.
+      Type '{ account_number: any; account_name: any; debit_amount: any; credit_amount: any; }[]' is not assignable to type '{ account_code: string; }[]'.
+        Property 'account_code' is missing in type '{ account_number: any; account_name: any; debit_amount: any; credit_amount: any; }' but required in type '{ account_code: string; }'.
+src/services/ai/OpenAIService.ts(462,62): error TS2339: Property 'account_number' does not exist on type '{ account_code: string; }'.
+src/services/ai/OpenAIService.ts(467,62): error TS2339: Property 'account_number' does not exist on type '{ account_code: string; }'.
+src/services/ai/OpenAIService.ts(551,60): error TS2339: Property 'account_number' does not exist on type '{ account_code: string; }'.
+src/services/einvoicing/inbound/InboundService.ts(473,7): error TS2353: Object literal may only specify known properties, and 'invoice_date' does not exist in type 'Partial<EN16931Invoice>'.
+src/services/einvoicing/inbound/InboundService.ts(535,7): error TS2353: Object literal may only specify known properties, and 'invoice_date' does not exist in type 'Partial<EN16931Invoice>'.
+src/services/einvoicing/inbound/InboundService.ts(589,18): error TS2339: Property 'invoice_date' does not exist on type 'Partial<EN16931Invoice>'.
+src/services/einvoicing/inbound/InboundService.ts(620,37): error TS2339: Property 'invoice_date' does not exist on type 'Partial<EN16931Invoice>'.
+src/services/invoicingService.ts(335,43): error TS2345: Argument of type 'InvoiceWithDetails' is not assignable to parameter of type 'Invoice'.
+  Property 'type' is missing in type 'InvoiceWithDetails' but required in type 'Invoice'.
+src/services/realDashboardKpiService.ts(349,9): error TS2322: Type '"€"' is not assignable to type '"number" | "currency" | "days" | "percentage"'.
+src/services/realDashboardKpiService.ts(359,9): error TS2322: Type '"%"' is not assignable to type '"number" | "currency" | "days" | "percentage"'.
+src/services/realDashboardKpiService.ts(367,9): error TS2322: Type '"jours"' is not assignable to type '"number" | "currency" | "days" | "percentage"'.
+src/services/realDashboardKpiService.ts(375,9): error TS2322: Type '""' is not assignable to type '"number" | "currency" | "days" | "percentage"'.
+src/services/realDashboardKpiService.ts(382,9): error TS2322: Type '""' is not assignable to type '"number" | "currency" | "days" | "percentage"'.
+src/services/realDashboardKpiService.ts(390,9): error TS2322: Type '"€"' is not assignable to type '"number" | "currency" | "days" | "percentage"'.
+src/services/realDashboardKpiService.ts(405,9): error TS2322: Type '{ label: string; value: number; }[]' is not assignable to type 'TimeSeriesData[]'.
+  Type '{ label: string; value: number; }' is missing the following properties from type 'TimeSeriesData': date, current_year
+src/services/realDashboardKpiService.ts(415,9): error TS2322: Type '{ label: string; value: number; }[]' is not assignable to type 'TimeSeriesData[]'.
+  Type '{ label: string; value: number; }' is missing the following properties from type 'TimeSeriesData': date, current_year
+src/services/realDashboardKpiService.ts(425,9): error TS2322: Type '{ label: string; value: number; }[]' is not assignable to type 'TimeSeriesData[]'.
+  Type '{ label: string; value: number; }' is missing the following properties from type 'TimeSeriesData': date, current_year
+src/services/rgpdService.ts(877,24): error TS2339: Property 'logAction' does not exist on type 'AuditService'.
+src/services/rgpdService.ts(919,24): error TS2339: Property 'logAction' does not exist on type 'AuditService'.
+src/services/rgpdService.ts(966,24): error TS2339: Property 'logAction' does not exist on type 'AuditService'.
+src/services/teamService.ts(105,33): error TS2339: Property 'email' does not exist on type '{ email: any; full_name: any; avatar_url: any; }[]'.
+src/services/teamService.ts(106,40): error TS2339: Property 'full_name' does not exist on type '{ email: any; full_name: any; avatar_url: any; }[]'.
+src/services/teamService.ts(106,70): error TS2339: Property 'email' does not exist on type '{ email: any; full_name: any; avatar_url: any; }[]'.
+src/services/teamService.ts(107,38): error TS2339: Property 'avatar_url' does not exist on type '{ email: any; full_name: any; avatar_url: any; }[]'.
+src/types/assets.types.ts(390,3): error TS2693: 'AssetCategory' only refers to a type, but is being used as a value here.
+src/types/assets.types.ts(391,3): error TS2693: 'Asset' only refers to a type, but is being used as a value here.
+src/types/assets.types.ts(392,3): error TS2693: 'AssetDepreciationScheduleLine' only refers to a type, but is being used as a value here.
+src/types/assets.types.ts(393,3): error TS2693: 'AssetAttachment' only refers to a type, but is being used as a value here.
+src/types/assets.types.ts(394,3): error TS2693: 'AssetCategoryFormData' only refers to a type, but is being used as a value here.
+src/types/assets.types.ts(395,3): error TS2693: 'AssetFormData' only refers to a type, but is being used as a value here.
+src/types/assets.types.ts(396,3): error TS2693: 'AssetDisposalFormData' only refers to a type, but is being used as a value here.
+src/types/assets.types.ts(397,3): error TS2693: 'DepreciationCalculationParams' only refers to a type, but is being used as a value here.
+src/types/assets.types.ts(398,3): error TS2693: 'DepreciationCalculationResult' only refers to a type, but is being used as a value here.
+src/types/assets.types.ts(399,3): error TS2693: 'DepreciationSchedule' only refers to a type, but is being used as a value here.
+src/types/assets.types.ts(400,3): error TS2693: 'AssetStatistics' only refers to a type, but is being used as a value here.
+src/types/assets.types.ts(401,3): error TS2693: 'AssetListItem' only refers to a type, but is being used as a value here.
+src/types/assets.types.ts(402,3): error TS2693: 'AssetFilters' only refers to a type, but is being used as a value here.
+src/types/assets.types.ts(403,3): error TS2693: 'AssetsListResponse' only refers to a type, but is being used as a value here.
+src/types/assets.types.ts(404,3): error TS2693: 'AssetDetailResponse' only refers to a type, but is being used as a value here.
+src/types/assets.types.ts(405,3): error TS2693: 'GenerateDepreciationEntriesResponse' only refers to a type, but is being used as a value here.

@@ -383,24 +383,8 @@ export interface GenerateDepreciationEntriesResponse {
 }
 
 // ============================================================================
-// EXPORT DEFAULT
+// EXPORT DEFAULT - REMOVED
 // ============================================================================
-
-export default {
-  AssetCategory,
-  Asset,
-  AssetDepreciationScheduleLine,
-  AssetAttachment,
-  AssetCategoryFormData,
-  AssetFormData,
-  AssetDisposalFormData,
-  DepreciationCalculationParams,
-  DepreciationCalculationResult,
-  DepreciationSchedule,
-  AssetStatistics,
-  AssetListItem,
-  AssetFilters,
-  AssetsListResponse,
-  AssetDetailResponse,
-  GenerateDepreciationEntriesResponse,
-};
+// All types are already exported individually above.
+// Default export removed to fix TypeScript errors:
+// "Type only refers to a type, but is being used as a value here"

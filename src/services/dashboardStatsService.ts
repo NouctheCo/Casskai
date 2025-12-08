@@ -99,10 +99,12 @@ class DashboardStatsService {
         ),
         journal_entries!inner (
           company_id,
-          entry_date
+          entry_date,
+          status
         )
       `)
       .eq('journal_entries.company_id', companyId)
+      .eq('journal_entries.status', 'posted')
       .gte('journal_entries.entry_date', startDate)
       .lte('journal_entries.entry_date', endDate);
 

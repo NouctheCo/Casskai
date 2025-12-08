@@ -1770,7 +1770,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
 
         invoice_number: formData.invoiceNumber,
 
-        issue_date: formData.issueDate,
+        invoice_date: formData.issueDate,
 
         due_date: formData.dueDate,
 
@@ -1901,8 +1901,8 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
                 placeholder="Sélectionner un client"
                 required
                 onNewClient={(newClient) => {
-                  // Ajouter le nouveau client à la liste locale
-                  setClients([...clients, newClient]);
+                  // Le nouveau client sera automatiquement disponible après rechargement
+                  console.log('Nouveau client créé:', newClient);
                 }}
               />
 
@@ -2001,7 +2001,7 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
             <CardContent>
 
               {/* En-têtes de colonnes */}
-              <div className="grid grid-cols-12 gap-4 items-center px-4 pb-2 mb-2 text-sm font-medium text-gray-600 dark:text-gray-300 dark:text-gray-300">
+              <div className="grid grid-cols-12 gap-4 items-center px-4 pb-2 mb-2 text-sm font-medium text-gray-600 dark:text-gray-300">
                 <div className="col-span-4">Description</div>
                 <div className="col-span-2 text-center">Quantité</div>
                 <div className="col-span-2 text-center">Prix HT</div>

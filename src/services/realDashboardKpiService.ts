@@ -97,7 +97,7 @@ export class RealDashboardKpiService {
     try {
       const { data, error } = await supabase
         .from('invoices')
-        .select('total_amount_ttc')
+        .select('total_incl_tax')
         .eq('company_id', companyId)
         .in('status', ['paid', 'partially_paid'])
         .gte('invoice_date', startDate)
@@ -108,7 +108,7 @@ export class RealDashboardKpiService {
         return 0;
       }
 
-      return data?.reduce((sum, invoice) => sum + (invoice.total_amount_ttc || 0), 0) || 0;
+      return data?.reduce((sum, invoice) => sum + (invoice.total_incl_tax || 0), 0) || 0;
     } catch (error) {
       console.error('Exception calculating revenue:', error);
       return 0;
@@ -126,7 +126,7 @@ export class RealDashboardKpiService {
     try {
       const { data, error } = await supabase
         .from('purchases')
-        .select('total_amount_ttc')
+        .select('total_amount')
         .eq('company_id', companyId)
         .gte('purchase_date', startDate)
         .lte('purchase_date', endDate);
@@ -136,7 +136,7 @@ export class RealDashboardKpiService {
         return 0;
       }
 
-      return data?.reduce((sum, purchase) => sum + (purchase.total_amount_ttc || 0), 0) || 0;
+      return data?.reduce((sum, purchase) => sum + (purchase.total_amount || 0), 0) || 0;
     } catch (error) {
       console.error('Exception calculating purchases:', error);
       return 0;
@@ -201,7 +201,7 @@ export class RealDashboardKpiService {
     try {
       const { data, error } = await supabase
         .from('bank_accounts')
-        .select('balance')
+        .select('current_balance')
         .eq('company_id', companyId);
 
       if (error) {
@@ -209,7 +209,7 @@ export class RealDashboardKpiService {
         return 0;
       }
 
-      return data?.reduce((sum, account) => sum + (account.balance || 0), 0) || 0;
+      return data?.reduce((sum, account) => sum + (account.current_balance || 0), 0) || 0;
     } catch (error) {
       console.error('Exception calculating cash balance:', error);
       return 0;
@@ -232,7 +232,7 @@ export class RealDashboardKpiService {
 
         const { data, error } = await supabase
           .from('invoices')
-          .select('total_amount_ttc')
+          .select('total_incl_tax')
           .eq('company_id', companyId)
           .in('status', ['paid', 'partially_paid'])
           .gte('invoice_date', startDate)
@@ -242,7 +242,7 @@ export class RealDashboardKpiService {
           console.error(`Error calculating revenue for month ${month}:`, error);
           monthlyData.push({ month: month.toString(), amount: 0 });
         } else {
-          const amount = data?.reduce((sum, invoice) => sum + (invoice.total_amount_ttc || 0), 0) || 0;
+          const amount = data?.reduce((sum, invoice) => sum + (invoice.total_incl_tax || 0), 0) || 0;
           monthlyData.push({ month: month.toString(), amount });
         }
       }
@@ -266,7 +266,7 @@ export class RealDashboardKpiService {
       const { data, error } = await supabase
         .from('invoices')
         .select(`
-          total_amount_ttc,
+          total_incl_tax,
           third_parties!inner(name)
         `)
         .eq('company_id', companyId)
@@ -283,7 +283,7 @@ export class RealDashboardKpiService {
       const clientMap = new Map<string, number>();
       data?.forEach((invoice: any) => {
         const clientName = invoice.third_parties?.name || 'Client inconnu';
-        const amount = invoice.total_amount_ttc || 0;
+        const amount = invoice.total_incl_tax || 0;
         clientMap.set(clientName, (clientMap.get(clientName) || 0) + amount);
       });
 
@@ -309,7 +309,7 @@ export class RealDashboardKpiService {
     try {
       const { data, error } = await supabase
         .from('purchases')
-        .select('total_amount_ttc, category')
+        .select('total_amount, description')
         .eq('company_id', companyId)
         .gte('purchase_date', startDate)
         .lte('purchase_date', endDate);
@@ -319,11 +319,11 @@ export class RealDashboardKpiService {
         return [];
       }
 
-      // Agréger par catégorie
+      // Agréger par catégorie (utiliser description comme proxy pour la catégorie)
       const categoryMap = new Map<string, number>();
-      data?.forEach((purchase) => {
-        const category = purchase.category || 'Non catégorisé';
-        const amount = purchase.total_amount_ttc || 0;
+      data?.forEach((purchase: any) => {
+        const category = purchase.description || 'Non catégorisé';
+        const amount = purchase.total_amount || 0;
         categoryMap.set(category, (categoryMap.get(category) || 0) + amount);
       });
 
@@ -346,7 +346,7 @@ export class RealDashboardKpiService {
         id: 'revenue_ytd',
         label: 'Chiffre d\'affaires YTD',
         value: kpiData.revenue_ytd,
-        unit: '€',
+        unit: 'currency',
         trend: kpiData.revenue_growth > 0 ? 'up' : kpiData.revenue_growth < 0 ? 'down' : 'stable',
         change: Math.abs(kpiData.revenue_growth),
         period: 'vs année précédente',
@@ -356,7 +356,7 @@ export class RealDashboardKpiService {
         id: 'profit_margin',
         label: 'Marge bénéficiaire',
         value: kpiData.profit_margin,
-        unit: '%',
+        unit: 'percentage',
         trend: kpiData.profit_margin > 15 ? 'up' : kpiData.profit_margin < 5 ? 'down' : 'stable',
         importance: 'high',
       },
@@ -364,7 +364,7 @@ export class RealDashboardKpiService {
         id: 'cash_runway',
         label: 'Runway trésorerie',
         value: kpiData.cash_runway_days,
-        unit: 'jours',
+        unit: 'days',
         trend: kpiData.cash_runway_days > 90 ? 'up' : kpiData.cash_runway_days < 30 ? 'down' : 'stable',
         importance: 'high',
       },
@@ -372,14 +372,14 @@ export class RealDashboardKpiService {
         id: 'total_invoices',
         label: 'Factures émises',
         value: kpiData.total_invoices,
-        unit: '',
+        unit: 'number',
         importance: 'medium',
       },
       {
         id: 'pending_invoices',
         label: 'Factures en attente',
         value: kpiData.pending_invoices,
-        unit: '',
+        unit: 'number',
         trend: kpiData.pending_invoices > 10 ? 'down' : 'stable',
         importance: 'medium',
       },
@@ -387,7 +387,7 @@ export class RealDashboardKpiService {
         id: 'cash_balance',
         label: 'Solde de trésorerie',
         value: kpiData.cash_balance,
-        unit: '€',
+        unit: 'currency',
         importance: 'high',
       },
     ];

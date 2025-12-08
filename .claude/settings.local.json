@@ -164,7 +164,11 @@
       "Bash(del add-tax-modules-translations.cjs)",
       "Bash(del fix-audit-action.cjs)",
       "Bash(del \"c:\\Users\\noutc\\Casskai\\clean-company-settings.cjs\" \"c:\\Users\\noutc\\Casskai\\fix-company-settings-lines.cjs\")",
-      "Bash(xargs sed:*)"
+      "Bash(xargs sed:*)",
+      "Bash(then sed -i \"s/total_amount/total_incl_tax/g\" \"$file\")",
+      "Bash(xargs cat:*)",
+      "Bash(xargs grep:*)",
+      "Bash(xargs ls:*)"
     ],
     "deny": []
   }

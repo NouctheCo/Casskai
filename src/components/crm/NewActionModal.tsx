@@ -109,7 +109,7 @@ export const NewActionModal: React.FC<NewActionModalProps> = ({
     try {
       let query = supabase
         .from('crm_opportunities')
-        .select('id, title, client_id')
+        .select('id, title, client_id, third_party_id:client_id')
         .eq('company_id', currentCompany.id)
         .eq('status', 'active')
         .order('title', { ascending: true });
