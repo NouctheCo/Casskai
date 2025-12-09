@@ -422,11 +422,11 @@ const GDPRPage = () => {
 
 
 
-  const handleRequestSubmit = async (e) => {
+  const handleRequestSubmit = async (e: React.FormEvent) => {
 
     e.preventDefault();
 
-    
+
 
     // Validation des données
 

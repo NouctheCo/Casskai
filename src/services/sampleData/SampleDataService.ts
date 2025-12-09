@@ -345,7 +345,7 @@ export class SampleDataService {
 
       // 1. Créer le plan comptable
       const accounts = this.getChartOfAccounts(chartConfig);
-      const accountsToInsert = accounts.map(account => ({
+      const accountsToInsert = accounts.map((account: any) => ({
         company_id: this.companyId,
         account_number: account.code,
         account_name: account.name,

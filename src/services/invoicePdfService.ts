@@ -133,22 +133,22 @@ export class InvoicePdfService {
     const invoiceInfoX = 120;
     let yPos = 35;
     
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('FACTURE N°:', invoiceInfoX, yPos);
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.text(invoice.invoice_number as string, invoiceInfoX + 30, yPos);
     yPos += 6;
     
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('Date:', invoiceInfoX, yPos);
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.text(new Date(invoice.issue_date as string).toLocaleDateString('fr-FR'), invoiceInfoX + 30, yPos);
     yPos += 6;
     
     if (invoice.due_date) {
-      doc.setFont(undefined, 'bold');
+      doc.setFont('helvetica', 'bold');
       doc.text('Échéance:', invoiceInfoX, yPos);
-      doc.setFont(undefined, 'normal');
+      doc.setFont('helvetica', 'normal');
       doc.text(new Date(invoice.due_date as any).toLocaleDateString('fr-FR'), invoiceInfoX + 30, yPos);
       yPos += 6;
     }
@@ -156,17 +156,17 @@ export class InvoicePdfService {
     // Informations client (colonne gauche)
     if (invoice.client) {
       yPos = 75;
-      doc.setFont(undefined, 'bold');
+      doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
       doc.text('FACTURÉ À:', 20, yPos);
       
       yPos += 8;
       doc.setFontSize(11);
-      doc.setFont(undefined, 'bold');
+      doc.setFont('helvetica', 'bold');
       doc.text(invoice.client.name as string, 20, yPos);
       
       yPos += 6;
-      doc.setFont(undefined, 'normal');
+      doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
       
       if (invoice.client.address_street) {
@@ -243,7 +243,7 @@ export class InvoicePdfService {
     doc.setTextColor(0);
     
     // Total HT
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.text('Total HT:', labelX, startY);
     doc.text(this.formatCurrency(invoice.total_ht), rightX, startY, { align: 'right' });
     
@@ -257,14 +257,14 @@ export class InvoicePdfService {
     doc.line(labelX, startY + 10, rightX, startY + 10);
     
     // Total TTC
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
     doc.text('Total TTC:', labelX, startY + 16);
     doc.text(this.formatCurrency(invoice.total_ttc), rightX, startY + 16, { align: 'right' });
     
     // Montant payé et restant dû
     if (invoice.paid_amount > 0) {
-      doc.setFont(undefined, 'normal');
+      doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
       doc.setTextColor(0, 150, 0);
       doc.text('Montant payé:', labelX, startY + 24);
@@ -289,11 +289,11 @@ export class InvoicePdfService {
       
       if (invoice.notes) {
         doc.setFontSize(10);
-        doc.setFont(undefined, 'bold');
+        doc.setFont('helvetica', 'bold');
         doc.setTextColor(0);
         doc.text('Notes:', 20, startY);
         
-        doc.setFont(undefined, 'normal');
+        doc.setFont('helvetica', 'normal');
         doc.setFontSize(9);
         const notesLines = doc.splitTextToSize(invoice.notes as string, 170);
         doc.text(notesLines, 20, startY + 6);
@@ -303,11 +303,11 @@ export class InvoicePdfService {
       if (invoice.terms) {
         startY += 5;
         doc.setFontSize(10);
-        doc.setFont(undefined, 'bold');
+        doc.setFont('helvetica', 'bold');
         doc.setTextColor(0);
         doc.text('Conditions de paiement:', 20, startY);
         
-        doc.setFont(undefined, 'normal');
+        doc.setFont('helvetica', 'normal');
         doc.setFontSize(9);
         const termsLines = doc.splitTextToSize(invoice.terms as string, 170);
         doc.text(termsLines, 20, startY + 6);
@@ -324,7 +324,7 @@ export class InvoicePdfService {
     
     doc.setFontSize(8);
     doc.setTextColor(150);
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     
     // Informations légales
     const legalInfo = [];

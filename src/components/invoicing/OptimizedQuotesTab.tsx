@@ -319,9 +319,9 @@ function QuotePreviewDialog({ open, onClose, quote }: QuotePreviewDialogProps) {
 
               <div className="p-4">
 
-                {quote.items?.length > 0 ? (
+                {(quote.items?.length ?? 0) > 0 ? (
 
-                  quote.items.map((item, index) => (
+                  (quote.items ?? []).map((item, index) => (
 
                     <div key={index} className="flex justify-between py-2 border-b last:border-b-0">
 

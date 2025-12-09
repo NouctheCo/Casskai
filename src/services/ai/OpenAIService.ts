@@ -463,12 +463,12 @@ export class OpenAIService {
       const typedTxns = Array.isArray(txns) ? (txns as TransactionWithLines[]) : [];
       const income = typedTxns
         .filter(transaction =>
-          transaction.journal_entry_lines?.some(line => line.account_number.startsWith('70'))
+          transaction.journal_entry_lines?.some(line => line.account_number?.startsWith('70'))
         )
         .reduce((sum, transaction) => sum + (Number(transaction.total_amount) || 0), 0);
       const expenses = typedTxns
         .filter(transaction =>
-          transaction.journal_entry_lines?.some(line => line.account_number.startsWith('6'))
+          transaction.journal_entry_lines?.some(line => line.account_number?.startsWith('6'))
         )
         .reduce((sum, transaction) => sum + (Number(transaction.total_amount) || 0), 0);
 

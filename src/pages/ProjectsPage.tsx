@@ -604,11 +604,11 @@ export default function ProjectsPage() {
     setIsTaskModalOpen(false);
   }, [loadAllTasks]);
 
-  const _handleProjectStatusChange = useCallback(async (projectId, newStatus) => {
+  const _handleProjectStatusChange = useCallback(async (projectId: string, newStatus: string) => {
 
     try {
 
-      const success = await updateProject(projectId, { status: newStatus });
+      const success = await updateProject(projectId, { status: newStatus as Project['status'] });
 
 
 

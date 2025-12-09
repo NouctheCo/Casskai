@@ -319,9 +319,10 @@ export class AutomaticLetterageService {
    */
   private static groupEntriesByAccount(entries: AccountingEntry[]): Map<string, AccountingEntry[]> {
     const groups = new Map<string, AccountingEntry[]>();
-    
+
     entries.forEach(entry => {
       const accountId = entry.accountId;
+      if (!accountId) return; // Skip entries without accountId
       if (!groups.has(accountId)) {
         groups.set(accountId, []);
       }
@@ -342,8 +343,8 @@ export class AutomaticLetterageService {
     const matches: LetterageMatch[] = [];
 
     // Séparation débit/crédit
-    const debits = entries.filter(e => e.debitAmount > 0);
-    const credits = entries.filter(e => e.creditAmount > 0);
+    const debits = entries.filter(e => (e.debitAmount ?? 0) > 0);
+    const credits = entries.filter(e => (e.creditAmount ?? 0) > 0);
 
     // Recherche de correspondances 1:1 (exact)
     const exactMatches = this.findExactMatches(debits, credits, rule);
@@ -371,7 +372,7 @@ export class AutomaticLetterageService {
 
     debits.forEach(debit => {
       credits.forEach(credit => {
-        if (usedCredits.has(credit.id)) return;
+        if (!credit.id || usedCredits.has(credit.id)) return;
 
         const match = this.evaluateMatch([debit], [credit], rule);
         if (match && match.confidence >= 0.8 && match.difference <= rule.tolerance) {
@@ -396,6 +397,7 @@ export class AutomaticLetterageService {
 
     // Correspondance n:1 (plusieurs débits pour un crédit)
     credits.forEach(credit => {
+      if (credit.creditAmount === undefined) return;
       const combinations = this.findDebitCombinations(debits, credit.creditAmount, rule.tolerance);
       combinations.forEach(combination => {
         const match = this.evaluateMatch(combination, [credit], rule);
@@ -407,6 +409,7 @@ export class AutomaticLetterageService {
 
     // Correspondance 1:n (un débit pour plusieurs crédits)
     debits.forEach(debit => {
+      if (debit.debitAmount === undefined) return;
       const combinations = this.findCreditCombinations(credits, debit.debitAmount, rule.tolerance);
       combinations.forEach(combination => {
         const match = this.evaluateMatch([debit], combination, rule);
@@ -434,7 +437,7 @@ export class AutomaticLetterageService {
       const combos = this.generateCombinations(debits, size);
       
       combos.forEach(combo => {
-        const total = combo.reduce((sum, item) => sum + item.debitAmount, 0);
+        const total = combo.reduce((sum, item) => sum + (item.debitAmount ?? 0), 0);
         if (Math.abs(total - targetAmount) <= tolerance) {
           combinations.push(combo);
         }
@@ -459,7 +462,7 @@ export class AutomaticLetterageService {
       const combos = this.generateCombinations(credits, size);
       
       combos.forEach(combo => {
-        const total = combo.reduce((sum, item) => sum + item.creditAmount, 0);
+        const total = combo.reduce((sum, item) => sum + (item.creditAmount ?? 0), 0);
         if (Math.abs(total - targetAmount) <= tolerance) {
           combinations.push(combo);
         }
@@ -496,8 +499,8 @@ export class AutomaticLetterageService {
     credits: AccountingEntry[],
     rule: LetterageRule
   ): LetterageMatch | null {
-    const totalDebit = debits.reduce((sum, item) => sum + item.debitAmount, 0);
-    const totalCredit = credits.reduce((sum, item) => sum + item.creditAmount, 0);
+    const totalDebit = debits.reduce((sum, item) => sum + (item.debitAmount ?? 0), 0);
+    const totalCredit = credits.reduce((sum, item) => sum + (item.creditAmount ?? 0), 0);
     const difference = Math.abs(totalDebit - totalCredit);
 
     if (difference > rule.tolerance * 2) return null; // Écart trop important
@@ -601,7 +604,7 @@ export class AutomaticLetterageService {
   /**
    * Vérifie si les références correspondent (recherche floue)
    */
-  private static referencesMatch(ref1: string, ref2: string): boolean {
+  private static referencesMatch(ref1: string | undefined, ref2: string | undefined): boolean {
     if (!ref1 || !ref2) return false;
     
     const clean1 = ref1.replace(/[^\w]/g, '').toLowerCase();

@@ -48,7 +48,7 @@ export interface UserSubscription {
 
   stripeCustomerId: string;
 
-  status: 'active' | 'canceled' | 'past_due' | 'incomplete' | 'trialing';
+  status: 'active' | 'inactive' | 'canceled' | 'past_due' | 'incomplete' | 'trialing';
 
   currentPeriodStart: Date;
 
@@ -606,6 +606,10 @@ export const getSubscriptionStatusColor = (status: UserSubscription['status']): 
 
       return 'red';
 
+    case 'inactive':
+
+      return 'gray';
+
     default:
 
       return 'gray';
@@ -639,6 +643,10 @@ export const getSubscriptionStatusLabel = (status: UserSubscription['status']): 
     case 'incomplete':
 
       return 'Incomplet';
+
+    case 'inactive':
+
+      return 'Inactif';
 
     default:
 

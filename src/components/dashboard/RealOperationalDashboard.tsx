@@ -142,7 +142,7 @@ export const RealOperationalDashboard: React.FC = () => {
             <CardContent>
               <div className="space-y-2">
                 <div className="text-2xl font-bold">
-                  {metric.value.toLocaleString('fr-FR', {
+                  {(metric.value ?? 0).toLocaleString('fr-FR', {
                     minimumFractionDigits: metric.unit === 'currency' ? 2 : 0,
                     maximumFractionDigits: metric.unit === 'currency' ? 2 : 0,
                   })}

@@ -628,7 +628,7 @@ export async function exportContractsToCSV(
 
     const csvData = [
       headers.join(','),
-      ...contracts.map(c => [
+      ...(contracts ?? []).map(c => [
         `"${c.contract_name}"`,
         `"${c.client_name}"`,
         c.contract_type,

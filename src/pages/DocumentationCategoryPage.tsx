@@ -846,7 +846,7 @@ const DocumentationCategoryPage = () => {
 
   const filteredArticles = category.articles
 
-    .filter(article => {
+    .filter((article: any) => {
 
       const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
 
@@ -858,7 +858,7 @@ const DocumentationCategoryPage = () => {
 
     })
 
-    .sort((a, b) => {
+    .sort((a: any, b: any) => {
 
       switch (sortBy) {
 
@@ -884,7 +884,7 @@ const DocumentationCategoryPage = () => {
 
 
 
-  const getDifficultyColor = (difficulty) => {
+  const getDifficultyColor = (difficulty: string) => {
 
     switch (difficulty) {
 
@@ -992,7 +992,7 @@ const DocumentationCategoryPage = () => {
 
               <Star className="w-4 h-4 mr-2 text-yellow-500" />
 
-              {category.articles.filter(a => a.popular).length} populaires
+              {category.articles.filter((a: any) => a.popular).length} populaires
 
             </div>
 
@@ -1102,7 +1102,7 @@ const DocumentationCategoryPage = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-          {filteredArticles.map((article, index) => (
+          {filteredArticles.map((article: any, index: number) => (
 
             <motion.div
 

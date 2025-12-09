@@ -277,8 +277,8 @@ export function TrainingTab({ companyId, employees: _employees, currentUserId: _
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <Badge className={getCategoryColor(training.category)}>
-                            {training.category.replace('_', ' ')}
+                          <Badge className={getCategoryColor(training.category ?? '')}>
+                            {(training.category ?? '').replace('_', ' ')}
                           </Badge>
                           {training.is_mandatory && (
                             <Badge variant="destructive">Obligatoire</Badge>

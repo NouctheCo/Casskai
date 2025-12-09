@@ -410,9 +410,9 @@ const UniversalSetupWizard = () => {
 
       market: marketId,
 
-      currency: market.currency,
+      currency: market?.currency ?? 'EUR',
 
-      accountingStandard: market.standard
+      accountingStandard: market?.standard ?? 'PCG'
 
     }));
 

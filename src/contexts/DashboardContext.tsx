@@ -1186,7 +1186,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
       .on('presence', { event: 'sync' }, () => {
 
-        const presenceState = realtimeChannel.current.presenceState();
+        const presenceState = realtimeChannel.current!.presenceState();
 
         const collaborators = Object.entries(presenceState).map(([userId, presence]: [string, unknown[]]) => ({
 

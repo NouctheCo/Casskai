@@ -293,7 +293,7 @@ const SubscriptionWidget: React.FC = () => {
 
               <span className="text-sm text-gray-600 dark:text-gray-400">
 
-                {daysUntilRenewal > 0 ? 'Renouvellement dans' : 'Expiré depuis'}
+                {(daysUntilRenewal ?? 0) > 0 ? 'Renouvellement dans' : 'Expiré depuis'}
 
               </span>
 

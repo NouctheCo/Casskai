@@ -735,7 +735,7 @@ export default function AccountingPageOptimized() {
           companyId
         });
 
-        setAccountingData(stats);
+        setAccountingData(stats as AccountingData);
 
         // Get journal distribution
         setJournalDistributionLoading(true);

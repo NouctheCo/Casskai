@@ -108,8 +108,8 @@ export const EnterpriseTrialManager: React.FC<{ variant?: 'banner' | 'card' | 'm
     setIsDismissed(true);
 
     // Marquer la notification comme vue pour cette phase
-    const notifyEvent = engagement?.days_remaining <= 3 ? 'notified_3_days' :
-                       engagement?.days_remaining <= 7 ? 'notified_7_days' :
+    const notifyEvent = (engagement?.days_remaining ?? 0) <= 3 ? 'notified_3_days' :
+                       (engagement?.days_remaining ?? 0) <= 7 ? 'notified_7_days' :
                        'notified_15_days';
 
     await trackEngagement(notifyEvent);

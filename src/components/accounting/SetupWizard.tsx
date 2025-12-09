@@ -234,7 +234,7 @@ const SetupWizard = ({ currentEnterpriseId: propCurrentEnterpriseId, onFinish })
 
         title: t('error'),
 
-        description: error.message || t('defaultChartImportError')
+        description: error instanceof Error ? error.message : t('defaultChartImportError')
 
       });
 

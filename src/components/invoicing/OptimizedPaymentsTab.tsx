@@ -69,7 +69,7 @@ interface Payment {
   invoiceNumber: string;
   date: string;
   amount: number;
-  method: 'card' | 'bank_transfer' | 'cash' | 'check' | 'sepa';
+  method: 'card' | 'bank_transfer' | 'cash' | 'check' | 'sepa' | 'other';
   type: 'income' | 'expense';
   status: 'completed' | 'pending' | 'failed' | 'refunded' | 'cancelled';
   description?: string;

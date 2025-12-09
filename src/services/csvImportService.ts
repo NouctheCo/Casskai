@@ -102,7 +102,7 @@ export class CSVImportService {
     }
     
     try {
-      const workbook = new ExcelJS.Workbook();
+      const workbook = new ExcelJS!.Workbook();
       const buffer = await file.arrayBuffer();
       await workbook.xlsx.load(buffer);
       
@@ -326,7 +326,7 @@ export class CSVImportService {
     options: FileParserOptions
   ): Promise<ImportResult> {
     try {
-      const workbook = new ExcelJS.Workbook();
+      const workbook = new ExcelJS!.Workbook();
       const buffer = await file.arrayBuffer();
       await workbook.xlsx.load(buffer);
       

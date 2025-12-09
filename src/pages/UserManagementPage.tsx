@@ -80,7 +80,7 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
-  status: 'active' | 'inactive' | 'pending' | 'suspended';
+  status: string; // Supabase returns generic string
   role: Role;
   permissions?: string[];
   createdAt: string;
@@ -97,7 +97,7 @@ interface Invitation {
   id: string;
   email: string;
   role: Role;
-  status: 'pending' | 'accepted' | 'expired' | 'cancelled';
+  status: string; // Supabase returns generic string
   createdAt: string;
   expiresAt: string;
   invitedBy: string;
@@ -238,19 +238,19 @@ const UserManagementPage = () => {
 
   // Event handlers
 
-  const handleUserSubmit = (e) => {
+  const handleUserSubmit = (e: React.FormEvent) => {
 
     e.preventDefault();
 
     const isEditing = !!selectedUser;
 
-    
+
 
     if (isEditing) {
 
-      setUsers(users.map(user => 
+      setUsers(users.map(user =>
 
-        user.id === selectedUser.id 
+        user.id === selectedUser.id
 
           ? { ...user, ...userForm, updatedAt: new Date().toISOString() }
 
@@ -288,7 +288,7 @@ const UserManagementPage = () => {
 
     }
 
-    
+
 
     setShowUserDialog(false);
 
@@ -300,7 +300,7 @@ const UserManagementPage = () => {
 
 
 
-  const handleInviteSubmit = (e) => {
+  const handleInviteSubmit = (e: React.FormEvent) => {
 
     e.preventDefault();
 
@@ -326,13 +326,13 @@ const UserManagementPage = () => {
 
     };
 
-    
+
 
     setInvitations([...invitations, newInvitation]);
 
     toastSuccess(`Invitation envoyée à ${inviteForm.email}`);
 
-    
+
 
     setShowInviteDialog(false);
 
@@ -344,7 +344,7 @@ const UserManagementPage = () => {
 
   const handleDeleteUser = () => {
 
-    setUsers(users.filter(user => user.id !== selectedUser.id));
+    setUsers(users.filter(user => user.id !== selectedUser!.id));
 
     toastDeleted('L\'utilisateur');
 
@@ -356,15 +356,15 @@ const UserManagementPage = () => {
 
 
 
-  const handleToggleUserStatus = (userId) => {
+  const handleToggleUserStatus = (userId: string) => {
 
-    setUsers(users.map(user => 
+    setUsers(users.map(user =>
 
-      user.id === userId 
+      user.id === userId
 
-        ? { 
+        ? {
 
-            ...user, 
+            ...user,
 
             status: user.status === 'active' ? 'inactive' : 'active',
 
@@ -422,7 +422,7 @@ const UserManagementPage = () => {
 
 
 
-  const openEditUser = (user) => {
+  const openEditUser = (user: any) => {
 
     setSelectedUser(user);
 
@@ -452,7 +452,7 @@ const UserManagementPage = () => {
 
 
 
-  const openDeleteUser = (user) => {
+  const openDeleteUser = (user: any) => {
 
     setSelectedUser(user);
 
@@ -1036,7 +1036,7 @@ const UserManagementPage = () => {
 
                         <div className="mt-2 flex flex-wrap gap-1">
 
-                          {role.permissions.slice(0, 3).map((permission, index) => (
+                          {(role.permissions ?? []).slice(0, 3).map((permission, index) => (
 
                             <Badge key={index} variant="secondary" className="text-xs">
 
@@ -1046,11 +1046,11 @@ const UserManagementPage = () => {
 
                           ))}
 
-                          {role.permissions.length > 3 && (
+                          {(role.permissions ?? []).length > 3 && (
 
                             <Badge variant="secondary" className="text-xs">
 
-                              +{role.permissions.length - 3} autres
+                              +{(role.permissions ?? []).length - 3} autres
 
                             </Badge>
 

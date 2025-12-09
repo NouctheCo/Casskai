@@ -14,7 +14,7 @@ import { useState } from 'react';
 
 
 
-    export function useLocalStorage<T>(key: string, initialValue: T) {
+    export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void] {
 
       const [storedValue, setStoredValue] = useState<T>(() => {
 
@@ -58,6 +58,6 @@ import { useState } from 'react';
 
 
 
-      return [storedValue, setValue];
+      return [storedValue, setValue] as [T, (value: T | ((val: T) => T)) => void];
 
     }

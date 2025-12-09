@@ -397,7 +397,7 @@ export interface ReportDistribution {
 
 // Service response types
 export interface ReportServiceResponse<T> {
-  data: T;
+  data: T | null;
   error?: {
     message: string;
     code?: string;

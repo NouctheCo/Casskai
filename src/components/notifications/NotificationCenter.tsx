@@ -256,7 +256,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
 
       const result = await notificationService.getUnreadCount(
 
-        user.id
+        user!.id
 
       );
 
@@ -346,7 +346,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
 
       const result = await notificationService.markAllAsRead(
 
-        user.id
+        user!.id
 
       );
 
@@ -836,7 +836,7 @@ export function useNotificationCenter() {
 
       const result = await notificationService.getUnreadCount(
 
-        user.id
+        user!.id
 
       );
 

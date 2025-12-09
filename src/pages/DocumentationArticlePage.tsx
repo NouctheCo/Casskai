@@ -3884,7 +3884,7 @@ const DocumentationArticlePage = () => {
 
       const categoryArticles = categoriesData[categoryParam].articles;
 
-      const foundArticle = categoryArticles.find(article => article.id === articleId);
+      const foundArticle = categoryArticles.find((article: any) => article.id === articleId);
 
 
 
@@ -3984,9 +3984,9 @@ const DocumentationArticlePage = () => {
 
 
 
-  const renderContent = (contentLines) => {
+  const renderContent = (contentLines: string[]) => {
 
-    return contentLines.map((line, index) => {
+    return contentLines.map((line: string, index: number) => {
 
       if (line.startsWith('# ')) {
 
@@ -4260,7 +4260,7 @@ const DocumentationArticlePage = () => {
 
                 <div className="space-y-3">
 
-                  {article.relatedArticles?.map((relatedId, index) => (
+                  {article.relatedArticles?.map((relatedId: string, index: number) => (
 
                     <Button
 

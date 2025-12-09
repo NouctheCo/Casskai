@@ -308,7 +308,7 @@ export default function InvoicingPageOptimized() {
     loadInvoicingData();
   }, [selectedPeriod, customStartDate, customEndDate]);
   
-  const getPeriodStart = (period) => {
+  const getPeriodStart = (period: string) => {
     const now = new Date();
     switch (period) {
       case 'current-month':
@@ -327,8 +327,8 @@ export default function InvoicingPageOptimized() {
         return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
     }
   };
-  
-  const getPeriodEnd = (period) => {
+
+  const getPeriodEnd = (period: string) => {
     const now = new Date();
     switch (period) {
       case 'current-month':

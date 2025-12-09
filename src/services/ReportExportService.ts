@@ -514,12 +514,12 @@ export class ReportExportService {
           body: table.rows,
           theme: 'grid' as const,
           headStyles: {
-            fillColor: [41, 128, 185],
+            fillColor: [41, 128, 185] as [number, number, number],
             textColor: 255,
             fontStyle: 'bold' as const
           },
           alternateRowStyles: {
-            fillColor: [245, 245, 245]
+            fillColor: [245, 245, 245] as [number, number, number]
           },
           margin: { left: 20, right: 20 }
         };
