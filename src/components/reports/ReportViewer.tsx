@@ -82,9 +82,9 @@ export function ReportViewer() {
     watermark: currentCompany?.name ? `${currentCompany.name} - Confidentiel` : 'Confidentiel',
     companyInfo: currentCompany ? {
       name: currentCompany.name,
-      address: currentCompany.address,
-      phone: currentCompany.phone,
-      email: currentCompany.email
+      address: currentCompany.address || undefined,
+      phone: currentCompany.phone || undefined,
+      email: currentCompany.email || undefined
     } : undefined
   });
 

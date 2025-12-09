@@ -38,7 +38,7 @@ export const ThirdPartyListItem = ({ thirdParty, onEdit, onDelete: _onDelete, on
 
 
 
-  const handleCreateInvoice = (e) => {
+  const handleCreateInvoice = (e: React.MouseEvent) => {
 
     e.stopPropagation();
 

@@ -21,6 +21,7 @@ import type {
   MinimalAccount,
   MinimalJournal,
 } from '@/types/journalEntries.types';
+import { auditService } from './auditService';
 
 type JournalEntryInsert = Database['public']['Tables']['journal_entries']['Insert'];
 type JournalEntryUpdate = Database['public']['Tables']['journal_entries']['Update'];
@@ -140,6 +141,23 @@ class JournalEntriesService {
         throw linesError;
       }
 
+      // ✅ Audit Log: CREATE journal entry
+      auditService.log({
+        event_type: 'CREATE',
+        table_name: 'journal_entries',
+        record_id: entry.id,
+        company_id: payload.companyId,
+        new_values: {
+          entry_number: entry.entry_number,
+          entry_date: entry.entry_date,
+          description: entry.description,
+          status: entry.status,
+          lines_count: lines?.length || 0
+        },
+        security_level: 'standard',
+        compliance_tags: ['RGPD']
+      }).catch(err => console.error('Audit log failed:', err));
+
       return {
         success: true,
         data: {
@@ -158,9 +176,10 @@ class JournalEntriesService {
     try {
       this.ensureBalanced(payload.items);
 
+      // ✅ Récupérer toutes les données existantes pour l'audit
       const { data: existingEntry, error: fetchError } = await supabase
         .from('journal_entries')
-        .select('id, company_id, entry_number, status')
+        .select('*')
         .eq('id', entryId)
         .single();
 
@@ -252,6 +271,34 @@ class JournalEntriesService {
         throw linesError;
       }
 
+      // ✅ Audit Log: UPDATE journal entry
+      const changedFields = Object.keys(entryUpdate).filter(
+        key => existingEntry[key] !== entryUpdate[key as keyof typeof entryUpdate]
+      );
+
+      auditService.log({
+        event_type: 'UPDATE',
+        table_name: 'journal_entries',
+        record_id: entryId,
+        company_id: payload.companyId,
+        old_values: {
+          entry_number: existingEntry.entry_number,
+          entry_date: existingEntry.entry_date,
+          description: existingEntry.description,
+          status: existingEntry.status
+        },
+        new_values: {
+          entry_number: updatedEntry.entry_number,
+          entry_date: updatedEntry.entry_date,
+          description: updatedEntry.description,
+          status: updatedEntry.status,
+          lines_count: lines?.length || 0
+        },
+        changed_fields: changedFields,
+        security_level: 'standard',
+        compliance_tags: ['RGPD']
+      }).catch(err => console.error('Audit log failed:', err));
+
       return {
         success: true,
         data: {
@@ -267,6 +314,14 @@ class JournalEntriesService {
 
   async deleteJournalEntry(entryId: string, companyId: string): Promise<ServiceResult<null>> {
     try {
+      // ✅ Récupérer l'entrée avant suppression pour l'audit
+      const { data: entryToDelete } = await supabase
+        .from('journal_entries')
+        .select('*')
+        .eq('id', entryId)
+        .eq('company_id', companyId)
+        .single();
+
       const { error: linesError } = await supabase
         .from('journal_entry_lines')
         .delete()
@@ -284,6 +339,24 @@ class JournalEntriesService {
 
       if (entryError) {
         throw entryError;
+      }
+
+      // ✅ Audit Log: DELETE journal entry (CRITICAL)
+      if (entryToDelete) {
+        auditService.log({
+          event_type: 'DELETE',
+          table_name: 'journal_entries',
+          record_id: entryId,
+          company_id: companyId,
+          old_values: {
+            entry_number: entryToDelete.entry_number,
+            entry_date: entryToDelete.entry_date,
+            description: entryToDelete.description,
+            status: entryToDelete.status
+          },
+          security_level: 'critical', // ⚠️ Suppression = toujours critical
+          compliance_tags: ['RGPD']
+        }).catch(err => console.error('Audit log failed:', err));
       }
 
       return { success: true, data: null };
@@ -689,6 +762,88 @@ class JournalEntriesService {
     } catch (error) {
       console.warn('Failed to generate entry number, falling back to timestamp-based value:', error);
       return `JR-${Date.now()}`;
+    }
+  }
+
+  /**
+   * Met à jour le statut d'une écriture comptable
+   * @param entryId - ID de l'écriture
+   * @param newStatus - Nouveau statut ('draft', 'posted', 'imported')
+   * @param companyId - ID de l'entreprise
+   * @returns Résultat de l'opération
+   */
+  async updateJournalEntryStatus(
+    entryId: string,
+    newStatus: JournalEntryStatus,
+    companyId: string
+  ): Promise<ServiceResult<JournalEntryWithItems>> {
+    try {
+      console.log(`[journalEntriesService] Updating entry ${entryId} status to ${newStatus}`);
+
+      // Vérifier que l'écriture appartient bien à l'entreprise
+      const { data: existingEntry, error: checkError } = await supabase
+        .from('journal_entries')
+        .select('id, status')
+        .eq('id', entryId)
+        .eq('company_id', companyId)
+        .single();
+
+      if (checkError || !existingEntry) {
+        throw new Error('Écriture introuvable ou accès non autorisé');
+      }
+
+      // Mettre à jour le statut
+      const { data: updatedEntry, error: updateError } = await supabase
+        .from('journal_entries')
+        .update({
+          status: newStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', entryId)
+        .eq('company_id', companyId)
+        .select(`
+          *,
+          journal_entry_lines (
+            *,
+            chart_of_accounts (
+              id,
+              account_number,
+              account_name
+            )
+          )
+        `)
+        .single();
+
+      if (updateError || !updatedEntry) {
+        throw new Error(updateError?.message || 'Échec de la mise à jour du statut');
+      }
+
+      console.log(`[journalEntriesService] Entry ${entryId} status updated successfully`);
+
+      // ✅ Audit Log: STATUS CHANGE (HIGH security si validation)
+      auditService.log({
+        event_type: 'UPDATE',
+        table_name: 'journal_entries',
+        record_id: entryId,
+        company_id: companyId,
+        old_values: { status: existingEntry.status },
+        new_values: { status: newStatus },
+        changed_fields: ['status'],
+        security_level: newStatus === 'posted' || newStatus === 'imported' ? 'high' : 'standard',
+        compliance_tags: ['RGPD']
+      }).catch(err => console.error('Audit log failed:', err));
+
+      return {
+        success: true,
+        data: updatedEntry as unknown as JournalEntryWithItems
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      console.error('[journalEntriesService] Error updating entry status:', errorMessage);
+      return {
+        success: false,
+        error: errorMessage
+      };
     }
   }
 }

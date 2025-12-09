@@ -170,7 +170,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               <Label className="text-gray-700 dark:text-gray-300">Date début</Label>
               <DatePicker
                 value={formData.startDate}
-                onChange={(date) => setFormData({ ...formData, startDate: date })}
+                onChange={(date: any) => setFormData({ ...formData, startDate: date })}
                 placeholder="Sélectionner une date"
                 className=""
               />
@@ -180,7 +180,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               <Label className="text-gray-700 dark:text-gray-300">Date fin</Label>
               <DatePicker
                 value={formData.dueDate}
-                onChange={(date) => setFormData({ ...formData, dueDate: date })}
+                onChange={(date: any) => setFormData({ ...formData, dueDate: date })}
                 placeholder="Sélectionner une date"
                 className=""
               />

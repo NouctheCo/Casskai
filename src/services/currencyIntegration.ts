@@ -368,8 +368,8 @@ export class CurrencyIntegration {
         .select('code')
         .eq('is_active', true);
 
-      const supportedCodes = SUPPORTED_CURRENCIES.map(c => c.code);
-      const existingCodes = currencies?.map(c => c.code) || [];
+      const supportedCodes = SUPPORTED_CURRENCIES.map((c: any) => c.code);
+      const existingCodes = currencies?.map((c: any) => c.code) || [];
       
       for (const code of supportedCodes) {
         if (!existingCodes.includes(code)) {

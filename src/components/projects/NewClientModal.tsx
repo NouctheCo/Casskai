@@ -85,7 +85,7 @@ const NewClientModal: React.FC<NewClientModalProps> = ({ isOpen, onClose, onSucc
       const response = await crmService.createClient(currentCompany.id, {
         company_name: formData.company_name,
         industry: formData.industry,
-        size: null,
+        size: undefined,
         address: formData.address,
         city: formData.city,
         postal_code: formData.postal_code,

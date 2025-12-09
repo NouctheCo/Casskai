@@ -26,7 +26,7 @@ import quotesService from '@/services/quotesService';
 
 import ClientSelector from '@/components/invoicing/ClientSelector';
 
-import { 
+import {
 
   Plus,
 
@@ -54,13 +54,65 @@ import {
 
 } from 'lucide-react';
 
+// Types
+interface QuoteItem {
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  taxRate: number;
+  total: number;
+}
+
+interface Quote {
+  id: string | number;
+  quoteNumber: string;
+  clientId: string;
+  clientName: string;
+  date: string;
+  validUntil: string;
+  total: number;
+  status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired' | 'converted';
+  description?: string;
+  notes?: string;
+  items?: QuoteItem[];
+  third_party_id?: string;
+}
+
+interface QuoteFormData {
+  clientId: string;
+  clientName: string;
+  quoteNumber: string;
+  date: string;
+  validUntil: string;
+  description: string;
+  amount: string;
+  notes: string;
+}
+
+interface QuoteSummary {
+  totalQuotes: number;
+  totalAmount: number;
+  acceptedQuotes: number;
+  pendingQuotes: number;
+  expiredQuotes: number;
+}
+
 
 
 // Quote Row Component
+interface QuoteRowProps {
+  quote: Quote;
+  onEdit: (quote: Quote) => void;
+  onDelete: (quote: Quote) => void;
+  onView: (quote: Quote) => void;
+  onSend: (quote: Quote) => void;
+  onConvertToInvoice: (quote: Quote) => void;
+  onCopy: (quote: Quote) => void;
+}
 
-const QuoteRow = ({ quote, onEdit, onDelete, onView, onSend, onConvertToInvoice, onCopy }) => {
+const QuoteRow: React.FC<QuoteRowProps> = ({ quote, onEdit, onDelete, onView, onSend, onConvertToInvoice, onCopy }) => {
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (status: Quote['status']) => {
 
     switch (status) {
 
@@ -179,8 +231,13 @@ const QuoteRow = ({ quote, onEdit, onDelete, onView, onSend, onConvertToInvoice,
 
 
 // Quote Preview Dialog Component
+interface QuotePreviewDialogProps {
+  open: boolean;
+  onClose: () => void;
+  quote: Quote | null;
+}
 
-function QuotePreviewDialog({ open, onClose, quote }) {
+function QuotePreviewDialog({ open, onClose, quote }: QuotePreviewDialogProps) {
 
   if (!quote) return null;
 
@@ -369,12 +426,18 @@ function QuotePreviewDialog({ open, onClose, quote }) {
 
 
 // Quote Form Dialog Component
+interface QuoteFormDialogProps {
+  open: boolean;
+  onClose: () => void;
+  onSave: (quote: Quote) => void;
+  editingQuote?: Quote | null;
+}
 
-const QuoteFormDialog = ({ open, onClose, onSave, editingQuote = null }) => {
+const QuoteFormDialog: React.FC<QuoteFormDialogProps> = ({ open, onClose, onSave, editingQuote = null }) => {
 
   const { toast } = useToast();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<QuoteFormData>({
 
     clientId: editingQuote?.third_party_id || editingQuote?.clientId || '',
 
@@ -470,7 +533,9 @@ const QuoteFormDialog = ({ open, onClose, onSave, editingQuote = null }) => {
 
 
 
-    const quoteData = {
+    const quoteData: Quote = {
+
+      id: editingQuote?.id || Date.now(),
 
       clientId: formData.clientId,
 
@@ -686,25 +751,30 @@ const QuoteFormDialog = ({ open, onClose, onSave, editingQuote = null }) => {
 
 
 
-export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNewCompleted }) {
+interface OptimizedQuotesTabProps {
+  shouldCreateNew?: boolean;
+  onCreateNewCompleted?: () => void;
+}
+
+export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNewCompleted }: OptimizedQuotesTabProps) {
 
   const { toast } = useToast();
   const { currentCompany } = useAuth();
 
-  const [quotes, setQuotes] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
 
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  const [showQuoteForm, setShowQuoteForm] = useState(false);
+  const [showQuoteForm, setShowQuoteForm] = useState<boolean>(false);
 
-  const [editingQuote, setEditingQuote] = useState(null);
+  const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
 
-  const [previewQuote, setPreviewQuote] = useState(null);
+  const [previewQuote, setPreviewQuote] = useState<Quote | null>(null);
 
   // Charger les devis depuis Supabase
   useEffect(() => {
@@ -786,7 +856,7 @@ export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNe
 
 
 
-  const handleEditQuote = (quote) => {
+  const handleEditQuote = (quote: any) => {
 
     setEditingQuote(quote);
 
@@ -794,7 +864,7 @@ export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNe
 
 
 
-  const handleDeleteQuote = (quote) => {
+  const handleDeleteQuote = (quote: any) => {
 
     setQuotes(prev => prev.filter(q => q.id !== quote.id));
 
@@ -810,7 +880,7 @@ export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNe
 
 
 
-  const handleViewQuote = (quote) => {
+  const handleViewQuote = (quote: any) => {
 
     setPreviewQuote(quote);
 
@@ -818,9 +888,9 @@ export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNe
 
 
 
-  const handleSendQuote = (quote) => {
+  const handleSendQuote = (quote: any) => {
 
-    setQuotes(prev => prev.map(q => 
+    setQuotes(prev => prev.map(q =>
 
       q.id === quote.id ? { ...q, status: 'sent' } : q
 
@@ -838,13 +908,13 @@ export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNe
 
 
 
-  const handleConvertToInvoice = (quote) => {
+  const handleConvertToInvoice = (quote: Quote) => {
 
     // Générer un numéro de facture unique
 
     const currentYear = new Date().getFullYear();
 
-    const existingInvoices = JSON.parse(localStorage.getItem('casskai_invoices') || '[]');
+    const existingInvoices = JSON.parse(localStorage.getItem('casskai_invoices') || '[]') as any[];
 
     const nextInvoiceNumber = existingInvoices.length + 1;
 
@@ -912,9 +982,9 @@ export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNe
 
 
 
-  const handleCopyQuote = (quote) => {
+  const handleCopyQuote = (quote: Quote) => {
 
-    const copiedQuote = {
+    const copiedQuote: Quote = {
 
       ...quote,
 
@@ -952,7 +1022,7 @@ export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNe
 
 
 
-  const handleSaveQuote = (newQuote) => {
+  const handleSaveQuote = (newQuote: Quote) => {
 
     setQuotes(prev => [...prev, newQuote]);
 
@@ -960,11 +1030,11 @@ export default function OptimizedQuotesTab({ shouldCreateNew = false, onCreateNe
 
 
 
-  const summary = {
+  const summary: QuoteSummary = {
 
     totalQuotes: quotes.length,
 
-    totalAmount: quotes.reduce((sum, quote) => sum + quote.total, 0),
+    totalAmount: quotes.reduce((sum: number, quote: Quote) => sum + quote.total, 0),
 
     acceptedQuotes: quotes.filter(q => q.status === 'accepted').length,
 

@@ -15,7 +15,7 @@ import { supabase } from '../lib/supabase';
 
 export const dashboardService = {
   // Obtenir les statistiques principales du dashboard
-  getDashboardStats: async (currentEnterpriseId, _options = {}) => {
+  getDashboardStats: async (currentEnterpriseId: string, _options = {}) => {
     if (!currentEnterpriseId) {
       return { data: null, error: new Error('Company ID is required') };
     }
@@ -31,14 +31,14 @@ export const dashboardService = {
       return { data, error: null };
     } catch (error) {
       console.error('Error fetching dashboard stats:', error instanceof Error ? error.message : String(error));
-      
+
       // Fallback : calculer manuellement si la fonction RPC n'est pas disponible
       return await dashboardService.calculateDashboardStatsManually(currentEnterpriseId);
     }
   },
 
   // Calcul manuel des statistiques (fallback)
-  calculateDashboardStatsManually: async (currentEnterpriseId) => {
+  calculateDashboardStatsManually: async (currentEnterpriseId: string) => {
     try {
       // 1. Statistiques des comptes par classe
       const { data: accounts, error: accountsError } = await supabase
@@ -123,14 +123,14 @@ export const dashboardService = {
   },
 
   // Obtenir le bilan comptable
-  getBalanceSheet: async (currentEnterpriseId, date = null) => {
+  getBalanceSheet: async (currentEnterpriseId: string, date = null) => {
     if (!currentEnterpriseId) {
       return { data: null, error: new Error('Company ID is required') };
     }
 
     try {
       const targetDate = date || new Date().toISOString().split('T')[0];
-      
+
       const { data, error } = await supabase.rpc('get_balance_sheet', {
         p_company_id: currentEnterpriseId,
         p_date: targetDate
@@ -146,7 +146,7 @@ export const dashboardService = {
   },
 
   // Obtenir le compte de résultat
-  getIncomeStatement: async (currentEnterpriseId, startDate = null, endDate = null) => {
+  getIncomeStatement: async (currentEnterpriseId: string, startDate = null, endDate = null) => {
     if (!currentEnterpriseId) {
       return { data: null, error: new Error('Company ID is required') };
     }
@@ -154,7 +154,7 @@ export const dashboardService = {
     try {
       const start = startDate || new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0];
       const end = endDate || new Date().toISOString().split('T')[0];
-      
+
       const { data, error } = await supabase.rpc('get_income_statement', {
         p_company_id: currentEnterpriseId,
         p_start_date: start,
@@ -171,7 +171,7 @@ export const dashboardService = {
   },
 
   // Obtenir les données de cash-flow
-  getCashFlowData: async (currentEnterpriseId, months = 12) => {
+  getCashFlowData: async (currentEnterpriseId: string, months = 12) => {
     if (!currentEnterpriseId) {
       return { data: [], error: new Error('Company ID is required') };
     }
@@ -187,14 +187,14 @@ export const dashboardService = {
       return { data: data || [], error: null };
     } catch (error) {
       console.error('Error fetching cash flow data:', error instanceof Error ? error.message : String(error));
-      
+
       // Fallback : simuler des données de cash-flow
       return await dashboardService.simulateCashFlowData(currentEnterpriseId, months);
     }
   },
 
   // Simuler des données de cash-flow (fallback)
-  simulateCashFlowData: async (currentEnterpriseId, months) => {
+  simulateCashFlowData: async (currentEnterpriseId: string, months: number) => {
     try {
       // Récupérer les mouvements des comptes de trésorerie (classe 5)
       const { data: accounts, error: accountsError } = await supabase
@@ -230,7 +230,7 @@ export const dashboardService = {
   },
 
   // Obtenir les écritures récentes pour le dashboard
-  getRecentJournalEntries: async (currentEnterpriseId, limit = 10) => {
+  getRecentJournalEntries: async (currentEnterpriseId: string, limit = 10) => {
     if (!currentEnterpriseId) {
       return { data: [], error: new Error('Company ID is required') };
     }
@@ -266,7 +266,7 @@ export const dashboardService = {
   },
 
   // Obtenir les comptes avec les plus gros mouvements
-  getTopAccountsByActivity: async (currentEnterpriseId, limit = 5, days = 30) => {
+  getTopAccountsByActivity: async (currentEnterpriseId: string, limit = 5, days = 30) => {
     if (!currentEnterpriseId) {
       return { data: [], error: new Error('Company ID is required') };
     }
@@ -322,13 +322,13 @@ export const dashboardService = {
   },
 
   // Obtenir les alertes et notifications du dashboard
-  getDashboardAlerts: async (currentEnterpriseId) => {
+  getDashboardAlerts: async (currentEnterpriseId: string) => {
     if (!currentEnterpriseId) {
       return { data: [], error: new Error('Company ID is required') };
     }
 
     try {
-      const alerts = [];
+      const alerts: any[] = [];
 
       // 1. Vérifier les écritures non équilibrées
       const { data: unbalancedEntries, error: balanceError } = await supabase
@@ -343,10 +343,10 @@ export const dashboardService = {
       if (!balanceError && unbalancedEntries) {
         unbalancedEntries.forEach(entry => {
           const totalDebit = (entry.journal_entry_lines || []).reduce(
-            (sum, item) => sum + (item.debit_amount || 0), 0
+            (sum: number, item: any) => sum + (item.debit_amount || 0), 0
           );
           const totalCredit = (entry.journal_entry_lines || []).reduce(
-            (sum, item) => sum + (item.credit_amount || 0), 0
+            (sum: number, item: any) => sum + (item.credit_amount || 0), 0
           );
           
           if (Math.abs(totalDebit - totalCredit) > 0.01) {
@@ -429,7 +429,7 @@ export const dashboardService = {
   },
 
   // Obtenir les métriques de performance
-  getPerformanceMetrics: async (currentEnterpriseId, period = '12M') => {
+  getPerformanceMetrics: async (currentEnterpriseId: string, period = '12M') => {
     if (!currentEnterpriseId) {
       return { data: null, error: new Error('Company ID is required') };
     }
@@ -477,24 +477,24 @@ export const dashboardService = {
         const produits = incomeStatement.produits || [];
         const charges = incomeStatement.charges || [];
         
-        metrics.revenue = produits.reduce((sum, p) => sum + (p.amount || 0), 0);
-        metrics.expenses = charges.reduce((sum, c) => sum + (c.amount || 0), 0);
+        metrics.revenue = produits.reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+        metrics.expenses = charges.reduce((sum: number, c: any) => sum + (c.amount || 0), 0);
         metrics.profit = metrics.revenue - metrics.expenses;
-        metrics.profit_margin = metrics.revenue > 0 ? 
+        metrics.profit_margin = metrics.revenue > 0 ?
           (metrics.profit / metrics.revenue) * 100 : 0;
       }
 
       if (balanceSheet) {
         const actif = balanceSheet.actif || [];
         const passif = balanceSheet.passif || [];
-        
-        metrics.asset_total = actif.reduce((sum, a) => sum + (a.amount || 0), 0);
+
+        metrics.asset_total = actif.reduce((sum: number, a: any) => sum + (a.amount || 0), 0);
         metrics.liability_total = passif
-          .filter(p => p.category !== 'Capitaux propres')
-          .reduce((sum, p) => sum + (p.amount || 0), 0);
+          .filter((p: any) => p.category !== 'Capitaux propres')
+          .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
         metrics.equity_total = passif
-          .filter(p => p.category === 'Capitaux propres')
-          .reduce((sum, p) => sum + (p.amount || 0), 0);
+          .filter((p: any) => p.category === 'Capitaux propres')
+          .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
       }
 
       return { data: metrics, error: null };

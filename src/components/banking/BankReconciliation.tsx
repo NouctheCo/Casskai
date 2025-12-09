@@ -36,12 +36,12 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
   const [selectedPeriod, setSelectedPeriod] = useState('month');
   const [isReconciling, setIsReconciling] = useState(false);
   const [_reconciliationData, _setReconciliationData] = useState(null);
-  const [pendingMatches, setPendingMatches] = useState([]);
-  const [autoMatches, setAutoMatches] = useState([]);
+  const [pendingMatches, setPendingMatches] = useState<any[]>([]);
+  const [autoMatches, setAutoMatches] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [showDetails, setShowDetails] = useState(false);
-  const [reconciliationSummary, setReconciliationSummary] = useState(null);
+  const [reconciliationSummary, setReconciliationSummary] = useState<any>(null);
 
   // Données simulées pour les transactions bancaires et écritures comptables
   const [bankTransactions] = useState([
@@ -243,7 +243,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
   };
 
   // Validation d'une correspondance
-  const validateMatch = async (bankTransactionId, accountingEntryId) => {
+  const validateMatch = async (bankTransactionId: string, accountingEntryId: string) => {
     try {
       // Simulation de validation
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -255,7 +255,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
       });
 
       // Retirer de la liste des matches automatiques
-      setAutoMatches(prev => prev.filter(m => 
+      setAutoMatches(prev => prev.filter(m =>
         m.bank_transaction_id !== bankTransactionId || m.accounting_entry_id !== accountingEntryId
       ));
 
@@ -302,21 +302,21 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
   }, [selectedAccount, selectedPeriod]);
 
   // Formatage des montants
-  const formatAmount = (amount) => {
+  const formatAmount = (amount: number) => {
     const abs = Math.abs(amount);
     const sign = amount >= 0 ? '+' : '-';
     return `${sign}${abs.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
   };
 
   // Couleur selon le statut
-  const getStatusColor = (reconciled, hasMatches = false) => {
+  const getStatusColor = (reconciled: boolean, hasMatches = false) => {
     if (reconciled) return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
     if (hasMatches) return 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400';
     return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
   };
 
   // Icône de confiance
-  const getConfidenceIcon = (confidence) => {
+  const getConfidenceIcon = (confidence: number) => {
     if (confidence >= 0.9) return <CheckCircle className="h-4 w-4 text-green-600" />;
     if (confidence >= 0.7) return <AlertCircle className="h-4 w-4 text-orange-600" />;
     return <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />;
@@ -451,7 +451,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                     <SelectValue placeholder="Sélectionnez un compte" />
                   </SelectTrigger>
                   <SelectContent>
-                    {bankAccounts.map(account => (
+                    {bankAccounts.map((account: any) => (
                       <SelectItem key={account.id} value={account.id}>
                         {account.bank_name} - {account.account_name}
                       </SelectItem>
@@ -674,7 +674,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-gray-600 dark:text-gray-300">Montant:</span>
-                                  <span className={`font-medium ${bankTx?.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  <span className={`font-medium ${(bankTx?.amount ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                     {formatAmount(bankTx?.amount || 0)}
                                   </span>
                                 </div>
@@ -702,7 +702,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-gray-600 dark:text-gray-300">Montant:</span>
-                                  <span className={`font-medium ${accountingEntry?.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  <span className={`font-medium ${(accountingEntry?.amount ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                     {formatAmount(accountingEntry?.amount || 0)}
                                   </span>
                                 </div>
@@ -829,14 +829,14 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                       </div>
 
                       <div className="flex items-center space-x-3 ml-4">
-                        <Badge className={getStatusColor(transaction.reconciled, transaction.suggested_matches?.length > 0)}>
-                          {transaction.reconciled ? 'Réconciliée' : 
-                           transaction.suggested_matches?.length > 0 ? 'Suggestions' : 'En attente'}
+                        <Badge className={getStatusColor(transaction.reconciled, (transaction.suggested_matches?.length ?? 0) > 0)}>
+                          {transaction.reconciled ? 'Réconciliée' :
+                           (transaction.suggested_matches?.length ?? 0) > 0 ? 'Suggestions' : 'En attente'}
                         </Badge>
-                        
-                        {!transaction.reconciled && transaction.suggested_matches?.length > 0 && (
+
+                        {!transaction.reconciled && (transaction.suggested_matches?.length ?? 0) > 0 && (
                           <Badge variant="secondary" className="text-xs">
-                            {transaction.suggested_matches.length} suggestion{transaction.suggested_matches.length > 1 ? 's' : ''}
+                            {transaction.suggested_matches?.length} suggestion{(transaction.suggested_matches?.length ?? 0) > 1 ? 's' : ''}
                           </Badge>
                         )}
                         

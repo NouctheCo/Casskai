@@ -687,7 +687,7 @@ export class EntryTemplatesService {
       category: data.category,
       isRecurring: data.is_recurring,
       frequency: data.frequency,
-      accounts: data.template_accounts?.map(acc => ({
+      accounts: data.template_accounts?.map((acc: any) => ({
         id: acc.id,
         accountType: acc.account_type,
         accountNumber: acc.account_number,
@@ -697,7 +697,7 @@ export class EntryTemplatesService {
         isVariable: acc.is_variable,
         conditions: acc.conditions,
       })) || [],
-      vatRules: data.template_vat_rules?.map(rule => ({
+      vatRules: data.template_vat_rules?.map((rule: any) => ({
         id: rule.id,
         name: rule.name,
         rate: rule.rate,

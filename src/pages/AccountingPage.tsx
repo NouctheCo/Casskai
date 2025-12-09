@@ -40,13 +40,13 @@ import { accountingDataService } from '@/services/accountingDataService';
 
 import { supabase } from '@/lib/supabase';
 
-import { 
+import {
 
   Calculator,
 
-  FileText, 
+  FileText,
 
-  BookOpen, 
+  BookOpen,
 
   TrendingUp,
 
@@ -70,6 +70,16 @@ import {
 
   Upload,
 
+  Clock,
+
+  CheckCircle2,
+
+  AlertCircle,
+
+  Users,
+
+  ShoppingCart,
+
   type LucideIcon
 
 } from 'lucide-react';
@@ -85,6 +95,8 @@ import OptimizedReportsTab from '@/components/accounting/OptimizedReportsTab';
 import FECImport from '@/components/accounting/FECImport';
 
 import ExportFecModal from '@/components/accounting/ExportFecModal';
+
+import JournalDistributionChart from '@/components/accounting/JournalDistributionChart';
 
 
 
@@ -132,9 +144,25 @@ interface AccountingData {
 
   entriesCount: number;
 
+  pendingEntriesCount: number;
+
+  postedEntriesCount: number;
+
   accountsCount: number;
 
   journalsCount: number;
+
+  unpaidInvoicesAmount: number;
+
+  unpaidInvoicesCount: number;
+
+  overdueInvoicesCount: number;
+
+  overdueAmount: number;
+
+  unpaidPurchasesAmount: number;
+
+  unpaidPurchasesCount: number;
 
   totalBalanceTrend?: number;
 
@@ -143,6 +171,8 @@ interface AccountingData {
   totalCreditTrend?: number;
 
   entriesCountTrend?: number;
+
+  pendingEntriesCountTrend?: number;
 
 }
 
@@ -355,16 +385,104 @@ const QuickActions: React.FC<QuickActionsProps> = ({ onNewEntry, onViewReports, 
 
 const RecentAccountingActivities = () => {
   const { t } = useTranslation();
-
-  // Remplacé : Plus de données mockées
-  // À l'avenir, ces activités seront chargées depuis une table d'audit dans Supabase
-  type ActivityItem = {
+  const [activities, setActivities] = React.useState<Array<{
     icon: React.ComponentType<{ className?: string }>;
     color: 'blue' | 'green' | 'purple' | 'orange';
     description: string;
     time: string;
-  };
-  const activities: ActivityItem[] = [];
+  }>>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const loadRecentActivities = async () => {
+      try {
+        setLoading(true);
+
+        // Get current user's company
+        const { data: user } = await supabase.auth.getUser();
+        if (!user?.user?.id) return;
+
+        const { data: companies } = await supabase
+          .from('companies')
+          .select('id')
+          .eq('owner_id', user.user.id)
+          .limit(1);
+
+        if (!companies || companies.length === 0) return;
+        const companyId = companies[0].id;
+
+        // Get recent journal entries (last 30 days)
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        const { data: recentEntries } = await supabase
+          .from('journal_entries')
+          .select('id, entry_date, entry_number, description, status, created_at')
+          .eq('company_id', companyId)
+          .gte('created_at', thirtyDaysAgo.toISOString())
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        if (!recentEntries || recentEntries.length === 0) {
+          setActivities([]);
+          return;
+        }
+
+        // Transform to activity format
+        const activityItems = recentEntries.map(entry => {
+          const createdDate = new Date(entry.created_at);
+          const now = new Date();
+          const diffMs = now.getTime() - createdDate.getTime();
+          const diffMins = Math.floor(diffMs / 60000);
+          const diffHours = Math.floor(diffMs / 3600000);
+          const diffDays = Math.floor(diffMs / 86400000);
+
+          let timeAgo: string;
+          if (diffMins < 1) {
+            timeAgo = 'quelques secondes';
+          } else if (diffMins < 60) {
+            timeAgo = `${diffMins} minute${diffMins > 1 ? 's' : ''}`;
+          } else if (diffHours < 24) {
+            timeAgo = `${diffHours} heure${diffHours > 1 ? 's' : ''}`;
+          } else {
+            timeAgo = `${diffDays} jour${diffDays > 1 ? 's' : ''}`;
+          }
+
+          let icon: React.ComponentType<{ className?: string }>;
+          let color: 'blue' | 'green' | 'purple' | 'orange';
+
+          if (entry.status === 'posted' || entry.status === 'imported') {
+            icon = FileText;
+            color = 'green';
+          } else if (entry.status === 'draft') {
+            icon = FileText;
+            color = 'orange';
+          } else {
+            icon = Activity;
+            color = 'blue';
+          }
+
+          const statusLabel = entry.status === 'posted' ? 'validée' : entry.status === 'draft' ? 'brouillon' : entry.status === 'imported' ? 'importée' : entry.status;
+
+          return {
+            icon,
+            color,
+            description: `Écriture ${entry.entry_number || entry.id.substring(0, 8)} ${statusLabel}: ${entry.description || 'Sans description'}`,
+            time: timeAgo
+          };
+        });
+
+        setActivities(activityItems);
+      } catch (error) {
+        console.error('Error loading recent activities:', error);
+        setActivities([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadRecentActivities();
+  }, []);
 
 
 
@@ -388,7 +506,15 @@ const RecentAccountingActivities = () => {
 
         <div className="space-y-3">
 
-          {activities.length === 0 ? (
+          {loading ? (
+
+            <div className="text-center py-8">
+
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+
+            </div>
+
+          ) : activities.length === 0 ? (
 
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
 
@@ -500,11 +626,31 @@ export default function AccountingPageOptimized() {
 
     entriesCount: 0,
 
+    pendingEntriesCount: 0,
+
+    postedEntriesCount: 0,
+
     accountsCount: 0,
 
-    journalsCount: 0
+    journalsCount: 0,
+
+    unpaidInvoicesAmount: 0,
+
+    unpaidInvoicesCount: 0,
+
+    overdueInvoicesCount: 0,
+
+    overdueAmount: 0,
+
+    unpaidPurchasesAmount: 0,
+
+    unpaidPurchasesCount: 0
 
   });
+
+  const [journalDistribution, setJournalDistribution] = useState<Array<{ name: string; code: string; count: number; percentage: number }>>([]);
+
+  const [journalDistributionLoading, setJournalDistributionLoading] = useState(false);
 
 
 
@@ -591,11 +737,22 @@ export default function AccountingPageOptimized() {
 
         setAccountingData(stats);
 
+        // Get journal distribution
+        setJournalDistributionLoading(true);
+        const distribution = await accountingDataService.getJournalDistribution({
+          periodStart,
+          periodEnd,
+          companyId
+        });
+        setJournalDistribution(distribution);
+        setJournalDistributionLoading(false);
+
 
 
       } catch (error) {
 
         console.error('Erreur chargement données comptables:', error instanceof Error ? error.message : String(error));
+        setJournalDistributionLoading(false);
 
       } finally {
 
@@ -788,7 +945,7 @@ export default function AccountingPageOptimized() {
 
 
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
 
         <AccountingKPICard
 
@@ -856,7 +1013,113 @@ export default function AccountingPageOptimized() {
 
           trend={accountingData.entriesCountTrend}
 
-          description={t('accounting.stats.entriesDesc', 'Écritures saisies')}
+          description={t('accounting.stats.entriesDesc', 'Total écritures')}
+
+        />
+
+
+
+        <AccountingKPICard
+
+          title={t('accounting.stats.pendingEntries', 'En attente')}
+
+          value={accountingData.pendingEntriesCount}
+
+          icon={Clock}
+
+          color="yellow"
+
+          trend={accountingData.pendingEntriesCountTrend}
+
+          description={t('accounting.stats.pendingEntriesDesc', 'Écritures à valider')}
+
+          onClick={() => setActiveTab('entries')}
+
+        />
+
+
+
+        <AccountingKPICard
+
+          title={t('accounting.stats.postedEntries', 'Validées')}
+
+          value={accountingData.postedEntriesCount}
+
+          icon={CheckCircle2}
+
+          color="teal"
+
+          description={t('accounting.stats.postedEntriesDesc', 'Écritures comptabilisées')}
+
+        />
+
+      </div>
+
+
+
+      {/* Deuxième rangée de KPIs - Trésorerie et Aging */}
+
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+
+        <AccountingKPICard
+
+          title={t('accounting.stats.receivables', 'À recevoir')}
+
+          value={`${accountingData.unpaidInvoicesAmount.toLocaleString('fr-FR')} €`}
+
+          icon={Users}
+
+          color="cyan"
+
+          description={t('accounting.stats.receivablesDesc', `${accountingData.unpaidInvoicesCount} facture(s) client(s) impayée(s)`)}
+
+        />
+
+
+
+        <AccountingKPICard
+
+          title={t('accounting.stats.payables', 'À payer')}
+
+          value={`${accountingData.unpaidPurchasesAmount.toLocaleString('fr-FR')} €`}
+
+          icon={ShoppingCart}
+
+          color="indigo"
+
+          description={t('accounting.stats.payablesDesc', `${accountingData.unpaidPurchasesCount} facture(s) fournisseur(s)`)}
+
+        />
+
+
+
+        <AccountingKPICard
+
+          title={t('accounting.stats.overdue', 'En retard')}
+
+          value={accountingData.overdueInvoicesCount}
+
+          icon={AlertCircle}
+
+          color={accountingData.overdueInvoicesCount > 0 ? 'red' : 'gray'}
+
+          description={t('accounting.stats.overdueDesc', `${accountingData.overdueAmount.toLocaleString('fr-FR')} € de retard`)}
+
+        />
+
+
+
+        <AccountingKPICard
+
+          title={t('accounting.stats.validationRate', 'Taux validation')}
+
+          value={`${accountingData.entriesCount > 0 ? Math.round((accountingData.postedEntriesCount / accountingData.entriesCount) * 100) : 0}%`}
+
+          icon={TrendingUp}
+
+          color="emerald"
+
+          description={t('accounting.stats.validationRateDesc', 'Écritures validées')}
 
         />
 
@@ -932,30 +1195,19 @@ export default function AccountingPageOptimized() {
 
           />
 
-          
+
 
           <div className="grid gap-6 lg:grid-cols-3">
 
-            {/* Répartition par journal - Temporarily hidden until real journal stats implementation */}
-            {/*
+            {/* Répartition par journal */}
             <div className="lg:col-span-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <PieChart className="w-5 h-5 text-purple-500" />
-                    <span>Répartition par journal</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
-                    Statistiques disponibles après ajout d'écritures comptables
-                  </div>
-                </CardContent>
-              </Card>
+              <JournalDistributionChart
+                data={journalDistribution}
+                loading={journalDistributionLoading}
+              />
             </div>
-            */}
 
-            
+
 
             <RecentAccountingActivities />
 

@@ -418,7 +418,7 @@ export function useInventoryPageController(): InventoryPageControllerResult {
         status: 'pending',
         start_date: formatDate(productionForm.startDate) ?? formatDate(new Date()) ?? '',
         expected_date: formatDate(productionForm.expectedDate) ?? formatDate(productionForm.startDate) ?? formatDate(new Date()) ?? '',
-        completed_date: null,
+        completed_date: undefined,
         priority: productionForm.priority,
         cost: Number(productionForm.cost || 0),
         responsible: productionForm.responsible || '',

@@ -16,6 +16,7 @@ import { reportExportService, TableData, ExportOptions } from './ReportExportSer
 import { format, startOfYear, endOfYear } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { AccountingStandardAdapter } from './accountingStandardAdapter';
+import { financialRatiosService } from './financialRatiosService';
 
 export interface FinancialData {
   compte: string;
@@ -105,36 +106,200 @@ export class ReportGenerationService {
       // Calculer les soldes par compte
       const accountBalances = this.calculateAccountBalances(journalEntries || []);
 
+      // Calculer les amortissements cumulés
+      const depreciationMap = await this.calculateDepreciation(companyId, endDate || endOfYear(new Date()).toISOString().split('T')[0]);
+
+      // Calculer les données N-1 (année précédente)
+      const currentYear = new Date(endDate || new Date()).getFullYear();
+      const previousYearStart = `${currentYear - 1}-01-01`;
+      const previousYearEnd = `${currentYear - 1}-12-31`;
+
+      const previousYearData = await this.calculatePeriodData(companyId, previousYearStart, previousYearEnd);
+
       // Séparer actif et passif
       const actifAccounts = accountBalances.filter(acc => acc.type === 'actif');
       const passifAccounts = accountBalances.filter(acc => acc.type === 'passif');
 
-      // Créer les tables pour le bilan
+      // 📋 STRUCTURE RÉGLEMENTAIRE DU BILAN - Conformité PCG/SYSCOHADA
+
+      // === ACTIF ===
+      // Actif immobilisé (classe 2)
+      const actifImmobilise = actifAccounts.filter(acc => acc.compte.startsWith('2'));
+      // Actif circulant (classe 3, 4 sauf 44, 5)
+      const actifCirculant = actifAccounts.filter(acc =>
+        acc.compte.startsWith('3') ||
+        (acc.compte.startsWith('4') && !acc.compte.startsWith('44')) ||
+        acc.compte.startsWith('5')
+      );
+
+      // === PASSIF ===
+      // Capitaux propres (classe 1 sauf 16, 17, 18)
+      const capitauxPropres = passifAccounts.filter(acc =>
+        acc.compte.startsWith('1') &&
+        !acc.compte.startsWith('16') &&
+        !acc.compte.startsWith('17') &&
+        !acc.compte.startsWith('18')
+      );
+      // Provisions (comptes 15, 16)
+      const provisions = passifAccounts.filter(acc =>
+        acc.compte.startsWith('15') || acc.compte.startsWith('16')
+      );
+      // Dettes (comptes 17, 18, 4x passif)
+      const dettes = passifAccounts.filter(acc =>
+        acc.compte.startsWith('17') ||
+        acc.compte.startsWith('18') ||
+        (acc.compte.startsWith('4') && acc.type === 'passif')
+      );
+
+      // Helper pour trouver le compte correspondant dans N-1
+      const findPreviousYearAccount = (accountNumber: string, previousAccounts: any[]) => {
+        return previousAccounts.find(acc => acc.compte === accountNumber);
+      };
+
+      // Calculer les totaux avec amortissements pour chaque rubrique (avec N-1)
+      const processActifSection = (accounts: any[], previousAccounts: any[]) => {
+        let totalBrut = 0;
+        let totalAmort = 0;
+        let totalNet = 0;
+        let totalNetN1 = 0;
+
+        const rows = accounts.map(acc => {
+          const depreciation = acc.compte.startsWith('2')
+            ? this.getDepreciationForAsset(acc.compte, depreciationMap)
+            : 0;
+
+          const brutValue = acc.debit;
+          const netValue = acc.solde - depreciation;
+
+          // Trouver la valeur N-1
+          const prevAcc = findPreviousYearAccount(acc.compte, previousAccounts);
+          const prevDepreciation = prevAcc && acc.compte.startsWith('2')
+            ? this.getDepreciationForAsset(acc.compte, previousYearData.depreciationMap)
+            : 0;
+          const netValueN1 = prevAcc ? (prevAcc.solde - prevDepreciation) : 0;
+
+          totalBrut += brutValue;
+          totalAmort += depreciation;
+          totalNet += netValue;
+          totalNetN1 += netValueN1;
+
+          return [
+            acc.compte,
+            acc.libelle,
+            this.formatCurrency(brutValue),
+            this.formatCurrency(depreciation),
+            this.formatCurrency(netValue),
+            this.formatCurrency(netValueN1)
+          ];
+        });
+
+        return { rows, totalBrut, totalAmort, totalNet, totalNetN1 };
+      };
+
+      const actifImmData = processActifSection(actifImmobilise, previousYearData.actifImmobilise);
+      const actifCircData = processActifSection(actifCirculant, previousYearData.actifCirculant);
+
+      // Calculer totaux généraux actif
+      const totalActifBrut = actifImmData.totalBrut + actifCircData.totalBrut;
+      const totalAmortissements = actifImmData.totalAmort + actifCircData.totalAmort;
+      const totalActifNet = actifImmData.totalNet + actifCircData.totalNet;
+      const totalActifNetN1 = actifImmData.totalNetN1 + actifCircData.totalNetN1;
+
+      // Créer les tables pour l'actif avec rubriques et comparatif N-1
       const actifTable: TableData = {
         title: 'ACTIF',
-        headers: ['Compte', 'Libellé', 'Brut', 'Amortissements', 'Net'],
-        rows: actifAccounts.map(acc => [
-          acc.compte,
-          acc.libelle,
-          this.formatCurrency(acc.debit),
-          this.formatCurrency(0), // À calculer selon les amortissements
-          this.formatCurrency(acc.solde)
-        ]),
+        headers: ['Compte', 'Libellé', 'Brut N', 'Amort. N', 'Net N', 'Net N-1'],
+        rows: [
+          // Rubrique Actif Immobilisé
+          ['', '═══ ACTIF IMMOBILISÉ ═══', '', '', '', ''],
+          ...actifImmData.rows,
+          ['', 'Sous-total Actif Immobilisé',
+           this.formatCurrency(actifImmData.totalBrut),
+           this.formatCurrency(actifImmData.totalAmort),
+           this.formatCurrency(actifImmData.totalNet),
+           this.formatCurrency(actifImmData.totalNetN1)],
+          ['', '', '', '', '', ''], // Ligne vide
+          // Rubrique Actif Circulant
+          ['', '═══ ACTIF CIRCULANT ═══', '', '', '', ''],
+          ...actifCircData.rows,
+          ['', 'Sous-total Actif Circulant',
+           this.formatCurrency(actifCircData.totalBrut),
+           this.formatCurrency(actifCircData.totalAmort),
+           this.formatCurrency(actifCircData.totalNet),
+           this.formatCurrency(actifCircData.totalNetN1)]
+        ],
         summary: {
-          'Total Actif': this.formatCurrency(actifAccounts.reduce((sum, acc) => sum + acc.solde, 0))
+          'TOTAL ACTIF N (Brut)': this.formatCurrency(totalActifBrut),
+          'TOTAL ACTIF N (Amortissements)': this.formatCurrency(totalAmortissements),
+          'TOTAL ACTIF N (Net)': this.formatCurrency(totalActifNet),
+          'TOTAL ACTIF N-1 (Net)': this.formatCurrency(totalActifNetN1)
         }
       };
 
+      // Créer les tables pour le passif avec rubriques et comparatif N-1
+      const totalCapitauxPropres = capitauxPropres.reduce((sum, acc) => sum + acc.solde, 0);
+      const totalProvisions = provisions.reduce((sum, acc) => sum + acc.solde, 0);
+      const totalDettes = dettes.reduce((sum, acc) => sum + acc.solde, 0);
+      const totalPassif = totalCapitauxPropres + totalProvisions + totalDettes;
+
+      // Calculer totaux N-1 pour le passif
+      const totalCapitauxPropresN1 = previousYearData.capitauxPropres.reduce((sum, acc) => sum + acc.solde, 0);
+      const totalProvisionsN1 = previousYearData.provisions.reduce((sum, acc) => sum + acc.solde, 0);
+      const totalDettesN1 = previousYearData.dettes.reduce((sum, acc) => sum + acc.solde, 0);
+      const totalPassifN1 = totalCapitauxPropresN1 + totalProvisionsN1 + totalDettesN1;
+
       const passifTable: TableData = {
         title: 'PASSIF',
-        headers: ['Compte', 'Libellé', 'Montant'],
-        rows: passifAccounts.map(acc => [
-          acc.compte,
-          acc.libelle,
-          this.formatCurrency(acc.solde)
-        ]),
+        headers: ['Compte', 'Libellé', 'Montant N', 'Montant N-1'],
+        rows: [
+          // Rubrique Capitaux Propres
+          ['', '═══ CAPITAUX PROPRES ═══', '', ''],
+          ...capitauxPropres.map(acc => {
+            const prevAcc = findPreviousYearAccount(acc.compte, previousYearData.capitauxPropres);
+            return [
+              acc.compte,
+              acc.libelle,
+              this.formatCurrency(acc.solde),
+              this.formatCurrency(prevAcc ? prevAcc.solde : 0)
+            ];
+          }),
+          ['', 'Sous-total Capitaux Propres',
+           this.formatCurrency(totalCapitauxPropres),
+           this.formatCurrency(totalCapitauxPropresN1)],
+          ['', '', '', ''], // Ligne vide
+          // Rubrique Provisions
+          ['', '═══ PROVISIONS POUR RISQUES ET CHARGES ═══', '', ''],
+          ...provisions.map(acc => {
+            const prevAcc = findPreviousYearAccount(acc.compte, previousYearData.provisions);
+            return [
+              acc.compte,
+              acc.libelle,
+              this.formatCurrency(acc.solde),
+              this.formatCurrency(prevAcc ? prevAcc.solde : 0)
+            ];
+          }),
+          ['', 'Sous-total Provisions',
+           this.formatCurrency(totalProvisions),
+           this.formatCurrency(totalProvisionsN1)],
+          ['', '', '', ''], // Ligne vide
+          // Rubrique Dettes
+          ['', '═══ DETTES ═══', '', ''],
+          ...dettes.map(acc => {
+            const prevAcc = findPreviousYearAccount(acc.compte, previousYearData.dettes);
+            return [
+              acc.compte,
+              acc.libelle,
+              this.formatCurrency(acc.solde),
+              this.formatCurrency(prevAcc ? prevAcc.solde : 0)
+            ];
+          }),
+          ['', 'Sous-total Dettes',
+           this.formatCurrency(totalDettes),
+           this.formatCurrency(totalDettesN1)]
+        ],
         summary: {
-          'Total Passif': this.formatCurrency(passifAccounts.reduce((sum, acc) => sum + acc.solde, 0))
+          'TOTAL PASSIF N': this.formatCurrency(totalPassif),
+          'TOTAL PASSIF N-1': this.formatCurrency(totalPassifN1)
         }
       };
 
@@ -213,6 +378,21 @@ export class ReportGenerationService {
 
       const accountBalances = this.calculateAccountBalances(journalEntries || []);
 
+      // Calculer les données N-1 pour le Compte de Résultat
+      const currentYear = new Date(endDate || new Date()).getFullYear();
+      const previousYearStart = `${currentYear - 1}-01-01`;
+      const previousYearEnd = `${currentYear - 1}-12-31`;
+      const previousYearDataCR = await this.calculatePeriodData(companyId, previousYearStart, previousYearEnd);
+
+      // Helper pour trouver un compte dans les données de l'année précédente
+      const findPreviousYearAccountCR = (accountNumber: string, accountType: 'charge' | 'produit') => {
+        const previousAccounts = accountType === 'charge'
+          ? [...previousYearDataCR.charges]
+          : [...previousYearDataCR.produits];
+
+        return previousAccounts.find(acc => acc.compte === accountNumber);
+      };
+
       // 🔧 FILTRAGE ADAPTÉ AU STANDARD COMPTABLE
       // Convertir FinancialData en format compatible avec AccountingStandardAdapter
       const chargesData = accountBalances.filter(acc => acc.type === 'charge').map(acc => ({ account_number: acc.compte, ...acc }));
@@ -237,47 +417,88 @@ export class ReportGenerationService {
       const charges = chargesExploitation;
       const produits = produitsExploitation;
 
+      // Calcul des totaux N et N-1
+      let totalChargesN1 = 0;
       const chargesTable: TableData = {
         title: 'CHARGES',
-        headers: ['Compte', 'Libellé', 'Montant'],
-        rows: charges.map(acc => [
-          acc.compte,
-          acc.libelle,
-          this.formatCurrency(acc.debit)
-        ]),
+        headers: ['Compte', 'Libellé', 'Montant N', 'Montant N-1'],
+        rows: charges.map(acc => {
+          const prevAcc = findPreviousYearAccountCR(acc.compte, 'charge');
+          const montantN1 = prevAcc ? prevAcc.debit : 0;
+          totalChargesN1 += montantN1;
+          return [
+            acc.compte,
+            acc.libelle,
+            this.formatCurrency(acc.debit),
+            this.formatCurrency(montantN1)
+          ];
+        }),
         summary: {
-          'Total Charges': this.formatCurrency(charges.reduce((sum, acc) => sum + acc.debit, 0))
+          'Total Charges N': this.formatCurrency(charges.reduce((sum, acc) => sum + acc.debit, 0)),
+          'Total Charges N-1': this.formatCurrency(totalChargesN1)
         }
       };
 
+      let totalProduitsN1 = 0;
       const produitsTable: TableData = {
         title: 'PRODUITS',
-        headers: ['Compte', 'Libellé', 'Montant'],
-        rows: produits.map(acc => [
-          acc.compte,
-          acc.libelle,
-          this.formatCurrency(acc.credit)
-        ]),
+        headers: ['Compte', 'Libellé', 'Montant N', 'Montant N-1'],
+        rows: produits.map(acc => {
+          const prevAcc = findPreviousYearAccountCR(acc.compte, 'produit');
+          const montantN1 = prevAcc ? prevAcc.credit : 0;
+          totalProduitsN1 += montantN1;
+          return [
+            acc.compte,
+            acc.libelle,
+            this.formatCurrency(acc.credit),
+            this.formatCurrency(montantN1)
+          ];
+        }),
         summary: {
-          'Total Produits': this.formatCurrency(produits.reduce((sum, acc) => sum + acc.credit, 0))
+          'Total Produits N': this.formatCurrency(produits.reduce((sum, acc) => sum + acc.credit, 0)),
+          'Total Produits N-1': this.formatCurrency(totalProduitsN1)
         }
       };
 
       const totalCharges = charges.reduce((sum, acc) => sum + acc.debit, 0);
       const totalProduits = produits.reduce((sum, acc) => sum + acc.credit, 0);
       const resultat = totalProduits - totalCharges;
+      const resultatN1 = totalProduitsN1 - totalChargesN1;
 
-      const resultatTable: TableData = {
-        title: 'RÉSULTAT D\'EXPLOITATION',
-        headers: ['Description', 'Montant'],
+      // 📊 CALCUL DES SOLDES INTERMÉDIAIRES DE GESTION (SIG)
+      // Conformité: PCG Article 532-6 à 532-8 - Obligatoire en France
+      const sig = await this.calculateSIG(
+        companyId,
+        startDate || startOfYear(new Date()).toISOString().split('T')[0],
+        endDate || endOfYear(new Date()).toISOString().split('T')[0]
+      );
+
+      const sigTable: TableData = {
+        title: 'SOLDES INTERMÉDIAIRES DE GESTION (SIG)',
+        headers: ['Indicateur', 'Montant'],
         rows: [
-          ['Total Produits d\'exploitation', this.formatCurrency(totalProduits)],
-          ['Total Charges d\'exploitation', this.formatCurrency(totalCharges)],
-          ['Résultat d\'exploitation', this.formatCurrency(resultat)]
+          ['1. Marge commerciale', this.formatCurrency(sig.margeCommerciale)],
+          ['2. Production de l\'exercice', this.formatCurrency(sig.productionExercice)],
+          ['3. Valeur ajoutée', this.formatCurrency(sig.valeurAjoutee)],
+          ['4. Excédent Brut d\'Exploitation (EBE)', this.formatCurrency(sig.ebe)],
+          ['5. Résultat d\'exploitation', this.formatCurrency(sig.resultatExploitation)],
+          ['6. Résultat courant avant impôts', this.formatCurrency(sig.resultatCourant)],
+          ['7. Résultat exceptionnel', this.formatCurrency(sig.resultatExceptionnel)],
+          ['8. Résultat net de l\'exercice', this.formatCurrency(sig.resultatNet)]
         ]
       };
 
-      const tables: TableData[] = [produitsTable, chargesTable, resultatTable];
+      const resultatTable: TableData = {
+        title: 'RÉSULTAT D\'EXPLOITATION',
+        headers: ['Description', 'Année N', 'Année N-1', 'Variation'],
+        rows: [
+          ['Total Produits d\'exploitation', this.formatCurrency(totalProduits), this.formatCurrency(totalProduitsN1), this.formatCurrency(totalProduits - totalProduitsN1)],
+          ['Total Charges d\'exploitation', this.formatCurrency(totalCharges), this.formatCurrency(totalChargesN1), this.formatCurrency(totalCharges - totalChargesN1)],
+          ['Résultat d\'exploitation', this.formatCurrency(resultat), this.formatCurrency(resultatN1), this.formatCurrency(resultat - resultatN1)]
+        ]
+      };
+
+      const tables: TableData[] = [produitsTable, chargesTable, sigTable, resultatTable];
 
       // 🎯 SECTION HAO POUR SYSCOHADA
       if (standard === 'SYSCOHADA' && (produitsHAO.length > 0 || chargesHAO.length > 0)) {
@@ -285,17 +506,28 @@ export class ReportGenerationService {
         const totalChargesHAO = chargesHAO.reduce((sum, acc) => sum + acc.debit, 0);
         const resultatHAO = totalProduitsHAO - totalChargesHAO;
 
+        // Calculer les totaux HAO N-1
+        let totalProduitsHAON1 = 0;
+        let totalChargesHAON1 = 0;
+
         if (produitsHAO.length > 0) {
           tables.push({
             title: 'PRODUITS HAO (Hors Activités Ordinaires)',
-            headers: ['Compte', 'Libellé', 'Montant'],
-            rows: produitsHAO.map(acc => [
-              acc.compte,
-              acc.libelle,
-              this.formatCurrency(acc.credit)
-            ]),
+            headers: ['Compte', 'Libellé', 'Montant N', 'Montant N-1'],
+            rows: produitsHAO.map(acc => {
+              const prevAcc = findPreviousYearAccountCR(acc.compte, 'produit');
+              const montantN1 = prevAcc ? prevAcc.credit : 0;
+              totalProduitsHAON1 += montantN1;
+              return [
+                acc.compte,
+                acc.libelle,
+                this.formatCurrency(acc.credit),
+                this.formatCurrency(montantN1)
+              ];
+            }),
             summary: {
-              'Total Produits HAO': this.formatCurrency(totalProduitsHAO)
+              'Total Produits HAO N': this.formatCurrency(totalProduitsHAO),
+              'Total Produits HAO N-1': this.formatCurrency(totalProduitsHAON1)
             }
           });
         }
@@ -303,27 +535,37 @@ export class ReportGenerationService {
         if (chargesHAO.length > 0) {
           tables.push({
             title: 'CHARGES HAO (Hors Activités Ordinaires)',
-            headers: ['Compte', 'Libellé', 'Montant'],
-            rows: chargesHAO.map(acc => [
-              acc.compte,
-              acc.libelle,
-              this.formatCurrency(acc.debit)
-            ]),
+            headers: ['Compte', 'Libellé', 'Montant N', 'Montant N-1'],
+            rows: chargesHAO.map(acc => {
+              const prevAcc = findPreviousYearAccountCR(acc.compte, 'charge');
+              const montantN1 = prevAcc ? prevAcc.debit : 0;
+              totalChargesHAON1 += montantN1;
+              return [
+                acc.compte,
+                acc.libelle,
+                this.formatCurrency(acc.debit),
+                this.formatCurrency(montantN1)
+              ];
+            }),
             summary: {
-              'Total Charges HAO': this.formatCurrency(totalChargesHAO)
+              'Total Charges HAO N': this.formatCurrency(totalChargesHAO),
+              'Total Charges HAO N-1': this.formatCurrency(totalChargesHAON1)
             }
           });
         }
 
-        // Résultat final incluant HAO
+        // Résultat final incluant HAO avec comparaison N vs N-1
         const resultatNet = resultat + resultatHAO;
+        const resultatHAON1 = totalProduitsHAON1 - totalChargesHAON1;
+        const resultatNetN1 = resultatN1 + resultatHAON1;
+
         tables.push({
           title: 'RÉSULTAT NET GLOBAL (AO + HAO)',
-          headers: ['Description', 'Montant'],
+          headers: ['Description', 'Année N', 'Année N-1', 'Variation'],
           rows: [
-            ['Résultat Activités Ordinaires', this.formatCurrency(resultat)],
-            ['Résultat HAO', this.formatCurrency(resultatHAO)],
-            ['Résultat Net de l\'exercice', this.formatCurrency(resultatNet)]
+            ['Résultat Activités Ordinaires', this.formatCurrency(resultat), this.formatCurrency(resultatN1), this.formatCurrency(resultat - resultatN1)],
+            ['Résultat HAO', this.formatCurrency(resultatHAO), this.formatCurrency(resultatHAON1), this.formatCurrency(resultatHAO - resultatHAON1)],
+            ['Résultat Net de l\'exercice', this.formatCurrency(resultatNet), this.formatCurrency(resultatNetN1), this.formatCurrency(resultatNet - resultatNetN1)]
           ]
         });
       }
@@ -2359,12 +2601,578 @@ export class ReportGenerationService {
     };
   }
 
+  /**
+   * Calculer les amortissements cumulés pour les immobilisations
+   * Les comptes 28x contiennent les amortissements des comptes 2x
+   * Ex: 281 = amortissements des immobilisations incorporelles (20)
+   *     2182 = amortissements du matériel de transport (218)
+   */
+  private async calculateDepreciation(
+    companyId: string,
+    endDate: string
+  ): Promise<Map<string, number>> {
+    const depreciationMap = new Map<string, number>();
+
+    try {
+      // Récupérer toutes les écritures sur comptes 28x (amortissements)
+      const { data: entries, error } = await supabase
+        .from('journal_entries')
+        .select(`
+          journal_entry_lines (
+            account_number,
+            debit_amount,
+            credit_amount
+          )
+        `)
+        .eq('company_id', companyId)
+        .eq('status', 'posted')
+        .lte('entry_date', endDate);
+
+      if (error) {
+        console.error('Error fetching depreciation data:', error);
+        return depreciationMap;
+      }
+
+      if (!entries) return depreciationMap;
+
+      // Agréger les amortissements par compte
+      entries.forEach((entry: any) => {
+        entry.journal_entry_lines?.forEach((line: any) => {
+          const accountNumber = line.account_number;
+
+          // On ne traite que les comptes 28x (amortissements)
+          if (accountNumber && accountNumber.startsWith('28')) {
+            const currentValue = depreciationMap.get(accountNumber) || 0;
+            // Les amortissements sont au crédit (augmentent le compte 28x)
+            const depreciation = (line.credit_amount || 0) - (line.debit_amount || 0);
+            depreciationMap.set(accountNumber, currentValue + depreciation);
+          }
+        });
+      });
+
+      return depreciationMap;
+    } catch (error) {
+      console.error('Error calculating depreciation:', error);
+      return depreciationMap;
+    }
+  }
+
+  /**
+   * Trouver le montant d'amortissement correspondant à un compte d'immobilisation
+   * Ex: Compte 218 (matériel transport) → chercher 2818
+   *     Compte 2154 (matériel industriel) → chercher 28154
+   */
+  private getDepreciationForAsset(
+    assetAccount: string,
+    depreciationMap: Map<string, number>
+  ): number {
+    // Construction du numéro de compte d'amortissement
+    // Règle: 28 + reste du numéro du compte d'actif (sans le 2 initial)
+    const depreciationAccount = '28' + assetAccount.substring(1);
+
+    // Chercher d'abord le compte exact
+    let depreciation = depreciationMap.get(depreciationAccount) || 0;
+
+    // Si pas trouvé, chercher les comptes commençant par ce préfixe
+    // (pour gérer les sous-comptes)
+    if (depreciation === 0) {
+      depreciationMap.forEach((value, key) => {
+        if (key.startsWith(depreciationAccount)) {
+          depreciation += value;
+        }
+      });
+    }
+
+    return depreciation;
+  }
+
+  /**
+   * Calcule les Soldes Intermédiaires de Gestion (SIG)
+   * Conformité: PCG Article 532-6 à 532-8
+   * 8 soldes obligatoires en comptabilité française
+   */
+  private async calculateSIG(
+    companyId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<{
+    margeCommerciale: number;
+    productionExercice: number;
+    valeurAjoutee: number;
+    ebe: number;
+    resultatExploitation: number;
+    resultatCourant: number;
+    resultatExceptionnel: number;
+    resultatNet: number;
+  }> {
+    try {
+      const { data: entries, error } = await supabase
+        .from('journal_entries')
+        .select(`
+          journal_entry_lines (
+            account_number,
+            debit_amount,
+            credit_amount
+          )
+        `)
+        .eq('company_id', companyId)
+        .eq('status', 'posted')
+        .gte('entry_date', startDate)
+        .lte('entry_date', endDate);
+
+      if (error) throw error;
+
+      // Agréger les montants par catégorie de comptes
+      let ventesMarhandises = 0;      // Compte 707
+      let achatsMarchandises = 0;     // Compte 607
+      let production = 0;              // Comptes 70x (sauf 707)
+      let consommationsExterne = 0;   // Comptes 60-62 (sauf 607)
+      let impotsTaxes = 0;             // Compte 63
+      let chargesPersonnel = 0;        // Compte 64
+      let subventionsExploitation = 0; // Compte 74
+      let autresProduits = 0;          // Comptes 75, 781, 791
+      let autresCharges = 0;           // Comptes 65, 681, 691
+      let dotationsAmortissements = 0; // Comptes 681
+      let prodFinanciers = 0;          // Compte 76
+      let chargesFinancieres = 0;      // Compte 66
+      let prodExceptionnels = 0;       // Compte 77
+      let chargesExceptionnelles = 0;  // Compte 67
+      let participationSalaries = 0;   // Compte 691
+      let impotsSocietes = 0;          // Compte 695
+
+      entries?.forEach((entry: any) => {
+        entry.journal_entry_lines?.forEach((line: any) => {
+          const account = line.account_number;
+          const debit = line.debit_amount || 0;
+          const credit = line.credit_amount || 0;
+
+          // Ventes de marchandises (707)
+          if (account.startsWith('707')) {
+            ventesMarhandises += credit - debit;
+          }
+          // Achats de marchandises (607)
+          else if (account.startsWith('607')) {
+            achatsMarchandises += debit - credit;
+          }
+          // Production (70x sauf 707)
+          else if (account.startsWith('70') && !account.startsWith('707')) {
+            production += credit - debit;
+          }
+          // Consommations externes (60-62 sauf 607)
+          else if ((account.startsWith('60') || account.startsWith('61') || account.startsWith('62'))
+                   && !account.startsWith('607')) {
+            consommationsExterne += debit - credit;
+          }
+          // Impôts et taxes (63)
+          else if (account.startsWith('63')) {
+            impotsTaxes += debit - credit;
+          }
+          // Charges de personnel (64)
+          else if (account.startsWith('64')) {
+            chargesPersonnel += debit - credit;
+          }
+          // Subventions d'exploitation (74)
+          else if (account.startsWith('74')) {
+            subventionsExploitation += credit - debit;
+          }
+          // Autres produits (75, 781, 791)
+          else if (account.startsWith('75') || account.startsWith('781') || account.startsWith('791')) {
+            autresProduits += credit - debit;
+          }
+          // Autres charges (65, 681, 691)
+          else if (account.startsWith('65')) {
+            autresCharges += debit - credit;
+          }
+          // Dotations amortissements (681)
+          else if (account.startsWith('681')) {
+            dotationsAmortissements += debit - credit;
+          }
+          // Produits financiers (76, 786, 796)
+          else if (account.startsWith('76') || account.startsWith('786') || account.startsWith('796')) {
+            prodFinanciers += credit - debit;
+          }
+          // Charges financières (66, 686)
+          else if (account.startsWith('66') || account.startsWith('686')) {
+            chargesFinancieres += debit - credit;
+          }
+          // Produits exceptionnels (77, 787, 797)
+          else if (account.startsWith('77') || account.startsWith('787') || account.startsWith('797')) {
+            prodExceptionnels += credit - debit;
+          }
+          // Charges exceptionnelles (67, 687)
+          else if (account.startsWith('67') || account.startsWith('687')) {
+            chargesExceptionnelles += debit - credit;
+          }
+          // Participation des salariés (691)
+          else if (account.startsWith('691')) {
+            participationSalaries += debit - credit;
+          }
+          // Impôts sur les sociétés (695)
+          else if (account.startsWith('695')) {
+            impotsSocietes += debit - credit;
+          }
+        });
+      });
+
+      // Calcul des 8 SIG en cascade
+      const margeCommerciale = ventesMarhandises - achatsMarchandises;
+      const productionExercice = production;
+      const valeurAjoutee = margeCommerciale + productionExercice - consommationsExterne;
+      const ebe = valeurAjoutee + subventionsExploitation - impotsTaxes - chargesPersonnel;
+      const resultatExploitation = ebe + autresProduits - autresCharges - dotationsAmortissements;
+      const resultatCourant = resultatExploitation + prodFinanciers - chargesFinancieres;
+      const resultatExceptionnel = prodExceptionnels - chargesExceptionnelles;
+      const resultatNet = resultatCourant + resultatExceptionnel - participationSalaries - impotsSocietes;
+
+      return {
+        margeCommerciale,
+        productionExercice,
+        valeurAjoutee,
+        ebe,
+        resultatExploitation,
+        resultatCourant,
+        resultatExceptionnel,
+        resultatNet
+      };
+    } catch (error) {
+      console.error('Error calculating SIG:', error);
+      return {
+        margeCommerciale: 0,
+        productionExercice: 0,
+        valeurAjoutee: 0,
+        ebe: 0,
+        resultatExploitation: 0,
+        resultatCourant: 0,
+        resultatExceptionnel: 0,
+        resultatNet: 0
+      };
+    }
+  }
+
+  /**
+   * Calcule les données comptables pour une période donnée (utilisé pour N-1)
+   * Retourne les balances de comptes agrégés
+   */
+  private async calculatePeriodData(
+    companyId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<{
+    actifImmobilise: any[];
+    actifCirculant: any[];
+    capitauxPropres: any[];
+    provisions: any[];
+    dettes: any[];
+    charges: any[];
+    produits: any[];
+    depreciationMap: Map<string, number>;
+  }> {
+    try {
+      const { data: entries } = await supabase
+        .from('journal_entries')
+        .select(`
+          id,
+          entry_date,
+          description,
+          journal_entry_lines (
+            account_number,
+            account_name,
+            debit_amount,
+            credit_amount
+          )
+        `)
+        .eq('company_id', companyId)
+        .eq('status', 'posted')
+        .gte('entry_date', startDate)
+        .lte('entry_date', endDate);
+
+      const journalEntries: JournalEntry[] = [];
+      entries?.forEach(entry => {
+        entry.journal_entry_lines?.forEach((line: any) => {
+          journalEntries.push({
+            account_number: line.account_number,
+            account_name: line.account_name,
+            debit: line.debit_amount || 0,
+            credit: line.credit_amount || 0,
+            entry_date: entry.entry_date,
+            description: entry.description,
+            label: line.account_name
+          });
+        });
+      });
+
+      const accountBalances = this.calculateAccountBalances(journalEntries);
+      const depreciationMap = await this.calculateDepreciation(companyId, endDate);
+
+      const actifAccounts = accountBalances.filter(acc => acc.type === 'actif');
+      const passifAccounts = accountBalances.filter(acc => acc.type === 'passif');
+
+      const actifImmobilise = actifAccounts.filter(acc => acc.compte.startsWith('2'));
+      const actifCirculant = actifAccounts.filter(acc =>
+        acc.compte.startsWith('3') ||
+        (acc.compte.startsWith('4') && !acc.compte.startsWith('44')) ||
+        acc.compte.startsWith('5')
+      );
+
+      const capitauxPropres = passifAccounts.filter(acc =>
+        acc.compte.startsWith('1') &&
+        !acc.compte.startsWith('16') &&
+        !acc.compte.startsWith('17') &&
+        !acc.compte.startsWith('18')
+      );
+      const provisions = passifAccounts.filter(acc =>
+        acc.compte.startsWith('15') || acc.compte.startsWith('16')
+      );
+      const dettes = passifAccounts.filter(acc =>
+        acc.compte.startsWith('17') ||
+        acc.compte.startsWith('18') ||
+        (acc.compte.startsWith('4') && acc.type === 'passif')
+      );
+
+      const charges = accountBalances.filter(acc => acc.type === 'charge');
+      const produits = accountBalances.filter(acc => acc.type === 'produit');
+
+      return {
+        actifImmobilise,
+        actifCirculant,
+        capitauxPropres,
+        provisions,
+        dettes,
+        charges,
+        produits,
+        depreciationMap
+      };
+    } catch (error) {
+      console.error('Error calculating period data:', error);
+      return {
+        actifImmobilise: [],
+        actifCirculant: [],
+        capitauxPropres: [],
+        provisions: [],
+        dettes: [],
+        charges: [],
+        produits: [],
+        depreciationMap: new Map()
+      };
+    }
+  }
+
   private formatCurrency(amount: number): string {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'EUR',
       minimumFractionDigits: 2
     }).format(amount);
+  }
+
+  /**
+   * Génération du Rapport d'Analyse de Gestion (Ratios Financiers)
+   * Calcule et présente 15+ ratios financiers avec interprétations
+   */
+  async generateManagementAnalysis(filters: ReportFilters, exportOptions?: ExportOptions): Promise<string> {
+    try {
+      const { startDate, endDate, companyId } = filters;
+
+      if (!companyId) {
+        throw new Error('Company ID is required');
+      }
+
+      const startDateStr = startDate || startOfYear(new Date()).toISOString().split('T')[0];
+      const endDateStr = endDate || endOfYear(new Date()).toISOString().split('T')[0];
+
+      // Calculer tous les ratios financiers
+      const ratios = await financialRatiosService.calculateRatios(companyId, startDateStr, endDateStr);
+
+      // Table 1: Ratios de Liquidité
+      const liquidityTable: TableData = {
+        title: 'RATIOS DE LIQUIDITÉ',
+        headers: ['Indicateur', 'Valeur', 'Statut', 'Benchmark'],
+        rows: [
+          [
+            'Ratio de liquidité générale',
+            financialRatiosService.formatRatio(ratios.currentRatio, 'ratio'),
+            this.getStatusBadge(financialRatiosService.evaluateRatio('currentRatio', ratios.currentRatio).status),
+            '≥ 2.0 (excellent)'
+          ],
+          [
+            'Ratio de liquidité réduite',
+            financialRatiosService.formatRatio(ratios.quickRatio, 'ratio'),
+            this.getStatusBadge(ratios.quickRatio >= 1 ? 'good' : 'warning'),
+            '≥ 1.0 (bon)'
+          ],
+          [
+            'Ratio de liquidité immédiate',
+            financialRatiosService.formatRatio(ratios.cashRatio, 'ratio'),
+            this.getStatusBadge(ratios.cashRatio >= 0.5 ? 'good' : 'warning'),
+            '≥ 0.5 (acceptable)'
+          ]
+        ]
+      };
+
+      // Table 2: Ratios de Rentabilité
+      const profitabilityTable: TableData = {
+        title: 'RATIOS DE RENTABILITÉ',
+        headers: ['Indicateur', 'Valeur', 'Statut', 'Benchmark'],
+        rows: [
+          [
+            'Return on Equity (ROE)',
+            financialRatiosService.formatRatio(ratios.roe, 'percentage'),
+            this.getStatusBadge(financialRatiosService.evaluateRatio('roe', ratios.roe).status),
+            '≥ 15% (excellent)'
+          ],
+          [
+            'Return on Assets (ROA)',
+            financialRatiosService.formatRatio(ratios.roa, 'percentage'),
+            this.getStatusBadge(ratios.roa >= 10 ? 'excellent' : ratios.roa >= 5 ? 'good' : 'warning'),
+            '≥ 10% (excellent)'
+          ],
+          [
+            'Marge nette',
+            financialRatiosService.formatRatio(ratios.netProfitMargin, 'percentage'),
+            this.getStatusBadge(financialRatiosService.evaluateRatio('netProfitMargin', ratios.netProfitMargin).status),
+            '≥ 10% (excellent)'
+          ],
+          [
+            'Marge brute',
+            financialRatiosService.formatRatio(ratios.grossProfitMargin, 'percentage'),
+            this.getStatusBadge(ratios.grossProfitMargin >= 30 ? 'excellent' : ratios.grossProfitMargin >= 20 ? 'good' : 'warning'),
+            '≥ 30% (excellent)'
+          ],
+          [
+            'Marge d\'exploitation',
+            financialRatiosService.formatRatio(ratios.operatingMargin, 'percentage'),
+            this.getStatusBadge(ratios.operatingMargin >= 15 ? 'excellent' : ratios.operatingMargin >= 10 ? 'good' : 'warning'),
+            '≥ 15% (excellent)'
+          ],
+          [
+            'Marge EBITDA (EBE)',
+            financialRatiosService.formatRatio(ratios.ebitdaMargin, 'percentage'),
+            this.getStatusBadge(ratios.ebitdaMargin >= 20 ? 'excellent' : ratios.ebitdaMargin >= 15 ? 'good' : 'warning'),
+            '≥ 20% (excellent)'
+          ]
+        ]
+      };
+
+      // Table 3: Ratios de Structure Financière
+      const structureTable: TableData = {
+        title: 'RATIOS DE STRUCTURE FINANCIÈRE',
+        headers: ['Indicateur', 'Valeur', 'Statut', 'Benchmark'],
+        rows: [
+          [
+            'Ratio d\'endettement',
+            financialRatiosService.formatRatio(ratios.debtRatio, 'percentage'),
+            this.getStatusBadge(financialRatiosService.evaluateRatio('debtRatio', ratios.debtRatio).status),
+            '≤ 50% (excellent)'
+          ],
+          [
+            'Ratio d\'autonomie financière',
+            financialRatiosService.formatRatio(ratios.equityRatio, 'percentage'),
+            this.getStatusBadge(ratios.equityRatio >= 50 ? 'excellent' : ratios.equityRatio >= 30 ? 'good' : 'warning'),
+            '≥ 50% (excellent)'
+          ],
+          [
+            'Dettes / Capitaux propres',
+            financialRatiosService.formatRatio(ratios.debtToEquityRatio, 'ratio'),
+            this.getStatusBadge(ratios.debtToEquityRatio <= 1 ? 'excellent' : ratios.debtToEquityRatio <= 2 ? 'good' : 'warning'),
+            '≤ 1.0 (excellent)'
+          ],
+          [
+            'Couverture des intérêts',
+            financialRatiosService.formatRatio(ratios.interestCoverageRatio, 'ratio'),
+            this.getStatusBadge(ratios.interestCoverageRatio >= 5 ? 'excellent' : ratios.interestCoverageRatio >= 3 ? 'good' : 'warning'),
+            '≥ 5.0 (excellent)'
+          ]
+        ]
+      };
+
+      // Table 4: Ratios d'Activité
+      const activityTable: TableData = {
+        title: 'RATIOS D\'ACTIVITÉ',
+        headers: ['Indicateur', 'Valeur', 'Statut', 'Benchmark'],
+        rows: [
+          [
+            'Rotation de l\'actif',
+            financialRatiosService.formatRatio(ratios.assetTurnover, 'ratio'),
+            this.getStatusBadge(financialRatiosService.evaluateRatio('assetTurnover', ratios.assetTurnover).status),
+            '≥ 2.0 (excellent)'
+          ],
+          [
+            'Fonds de roulement',
+            financialRatiosService.formatRatio(ratios.workingCapital, 'currency'),
+            this.getStatusBadge(ratios.workingCapital > 0 ? 'good' : 'critical'),
+            '> 0 (positif)'
+          ],
+          [
+            'BFR / CA',
+            financialRatiosService.formatRatio(ratios.workingCapitalRatio, 'percentage'),
+            this.getStatusBadge(ratios.workingCapitalRatio >= 0 ? 'good' : 'warning'),
+            '≥ 0% (acceptable)'
+          ]
+        ]
+      };
+
+      // Table 5: Données de Base
+      const summaryTable: TableData = {
+        title: 'DONNÉES FINANCIÈRES DE BASE',
+        headers: ['Description', 'Montant'],
+        rows: [
+          ['Chiffre d\'affaires', this.formatCurrency(ratios.totalRevenue)],
+          ['Charges totales', this.formatCurrency(ratios.totalExpenses)],
+          ['Résultat net', this.formatCurrency(ratios.netIncome)],
+          ['Total Actif', this.formatCurrency(ratios.totalAssets)],
+          ['Dettes totales', this.formatCurrency(ratios.totalLiabilities)],
+          ['Capitaux propres', this.formatCurrency(ratios.equity)],
+          ['Actif circulant', this.formatCurrency(ratios.currentAssets)],
+          ['Dettes court terme', this.formatCurrency(ratios.currentLiabilities)]
+        ]
+      };
+
+      const tables: TableData[] = [
+        summaryTable,
+        liquidityTable,
+        profitabilityTable,
+        structureTable,
+        activityTable
+      ];
+
+      // Options d'export par défaut
+      const defaultOptions: ExportOptions = {
+        format: 'pdf',
+        title: 'RAPPORT D\'ANALYSE DE GESTION',
+        subtitle: `Ratios Financiers - Période du ${format(new Date(startDateStr), 'dd/MM/yyyy', { locale: fr })} au ${format(new Date(endDateStr), 'dd/MM/yyyy', { locale: fr })}`,
+        orientation: 'portrait',
+        watermark: 'CassKai',
+        ...exportOptions
+      };
+
+      // Générer selon le format demandé
+      switch (defaultOptions.format) {
+        case 'pdf':
+          return await reportExportService.exportToPDF(tables, defaultOptions);
+        case 'excel':
+          return await reportExportService.exportToExcel(tables, defaultOptions);
+        case 'csv':
+          return reportExportService.exportToCSV(summaryTable, defaultOptions);
+        default:
+          return await reportExportService.exportToPDF(tables, defaultOptions);
+      }
+    } catch (error) {
+      console.error('Erreur génération analyse de gestion:', error instanceof Error ? error.message : String(error));
+      throw new Error('Impossible de générer le rapport d\'analyse de gestion');
+    }
+  }
+
+  /**
+   * Helper pour afficher un badge de statut
+   */
+  private getStatusBadge(status: 'excellent' | 'good' | 'warning' | 'critical'): string {
+    const badges: Record<string, string> = {
+      excellent: '🟢 Excellent',
+      good: '🟡 Bon',
+      warning: '🟠 Attention',
+      critical: '🔴 Critique'
+    };
+    return badges[status] || '⚪ N/A';
   }
 
   // Méthode publique pour télécharger directement un rapport

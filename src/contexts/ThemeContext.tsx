@@ -38,7 +38,7 @@ import React, { createContext, useContext, useEffect } from 'react';
 
       const value = {
         theme,
-        setTheme: (newTheme) => {
+        setTheme: (newTheme: 'light' | 'dark') => {
           setTheme(newTheme);
         },
       };

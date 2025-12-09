@@ -64,7 +64,56 @@ import { format } from 'date-fns';
 
 import { fr } from 'date-fns/locale';
 
+// TypeScript interfaces
+interface Role {
+  id: string;
+  name: string;
+  description?: string;
+  permissions?: string[];
+  level?: number;
+  createdAt?: string;
+  isSystemRole?: boolean;
+}
 
+interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  status: 'active' | 'inactive' | 'pending' | 'suspended';
+  role: Role;
+  permissions?: string[];
+  createdAt: string;
+  updatedAt: string;
+  companyId: string;
+  invitedBy?: string;
+  avatar?: string;
+  department?: string;
+  position?: string;
+  lastLoginAt?: string;
+}
+
+interface Invitation {
+  id: string;
+  email: string;
+  role: Role;
+  status: 'pending' | 'accepted' | 'expired' | 'cancelled';
+  createdAt: string;
+  expiresAt: string;
+  invitedBy: string;
+}
+
+interface Activity {
+  id: string;
+  userId: string;
+  userName: string;
+  action: string;
+  details?: string;
+  timestamp: string;
+  ipAddress?: string;
+  resource?: string;
+  metadata?: Record<string, unknown>;
+}
 
 const UserManagementPage = () => {
 
@@ -78,13 +127,13 @@ const UserManagementPage = () => {
 
   const [activeTab, setActiveTab] = useState('users');
 
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<User[]>([]);
 
-  const [roles, _setRoles] = useState([]);
+  const [roles, _setRoles] = useState<Role[]>([]);
 
-  const [invitations, setInvitations] = useState([]);
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
 
-  const [activities, _setActivities] = useState([]);
+  const [activities, _setActivities] = useState<Activity[]>([]);
 
   const [loading, _setLoading] = useState(true);
 
@@ -106,9 +155,9 @@ const UserManagementPage = () => {
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  const [_selectedRole, _setSelectedRole] = useState(null);
+  const [_selectedRole, _setSelectedRole] = useState<Role | null>(null);
 
 
 

@@ -12,6 +12,7 @@
 
 import { supabase } from '../lib/supabase';
 import { Purchase, PurchaseFormData, PurchaseFilters, PurchaseStats, Supplier } from '../types/purchase.types';
+import { auditService } from './auditService';
 
 const toNumber = (value: unknown, fallback = 0): number => {
   const parsed = Number(value);
@@ -153,6 +154,26 @@ export async function createPurchase(
       throw error;
     }
 
+    // Audit log - purchase creation
+    if (data) {
+      auditService.log({
+        event_type: 'CREATE',
+        table_name: 'purchases',
+        record_id: data.id,
+        company_id: companyId,
+        new_values: {
+          invoice_number: data.invoice_number,
+          purchase_date: data.purchase_date,
+          supplier_id: data.supplier_id,
+          subtotal_amount: data.subtotal_amount,
+          total_amount: data.total_amount,
+          payment_status: data.payment_status
+        },
+        security_level: 'standard',
+        compliance_tags: []
+      }).catch(err => console.error('Audit log failed:', err));
+    }
+
     return { data: data ? mapPurchaseRecord(data) : null };
   } catch (error) {
     console.error('Error creating purchase:', error);
@@ -168,6 +189,13 @@ export async function updatePurchase(
   purchaseData: Partial<PurchaseFormData>
 ): Promise<{ data: Purchase | null; error?: any }> {
   try {
+    // Fetch old values for audit trail
+    const { data: oldPurchase } = await supabase
+      .from('purchases')
+      .select('*')
+      .eq('id', id)
+      .single();
+
     const updateData: any = {};
 
     if (purchaseData.invoice_number) updateData.invoice_number = purchaseData.invoice_number;
@@ -202,6 +230,35 @@ export async function updatePurchase(
       return { data: null, error: { message: 'Achat introuvable' } };
     }
 
+    // Audit log - purchase update
+    if (oldPurchase) {
+      const changedFields = Object.keys(updateData);
+
+      auditService.log({
+        event_type: 'UPDATE',
+        table_name: 'purchases',
+        record_id: id,
+        company_id: data.company_id,
+        old_values: {
+          invoice_number: oldPurchase.invoice_number,
+          purchase_date: oldPurchase.purchase_date,
+          supplier_id: oldPurchase.supplier_id,
+          subtotal_amount: oldPurchase.subtotal_amount,
+          payment_status: oldPurchase.payment_status
+        },
+        new_values: {
+          invoice_number: data.invoice_number,
+          purchase_date: data.purchase_date,
+          supplier_id: data.supplier_id,
+          subtotal_amount: data.subtotal_amount,
+          payment_status: data.payment_status
+        },
+        changed_fields: changedFields,
+        security_level: 'standard',
+        compliance_tags: []
+      }).catch(err => console.error('Audit log failed:', err));
+    }
+
     return { data: mapPurchaseRecord(data) };
   } catch (error) {
     console.error('Error updating purchase:', error);
@@ -214,12 +271,39 @@ export async function updatePurchase(
  */
 export async function deletePurchase(id: string): Promise<{ data: boolean; error?: any }> {
   try {
+    // Fetch purchase data before deletion for audit trail
+    const { data: purchaseToDelete } = await supabase
+      .from('purchases')
+      .select('*')
+      .eq('id', id)
+      .single();
+
     const { error } = await supabase
       .from('purchases')
       .delete()
       .eq('id', id);
 
     if (error) throw error;
+
+    // Audit log - purchase deletion (CRITICAL)
+    if (purchaseToDelete) {
+      auditService.log({
+        event_type: 'DELETE',
+        table_name: 'purchases',
+        record_id: id,
+        company_id: purchaseToDelete.company_id,
+        old_values: {
+          invoice_number: purchaseToDelete.invoice_number,
+          purchase_date: purchaseToDelete.purchase_date,
+          supplier_id: purchaseToDelete.supplier_id,
+          subtotal_amount: purchaseToDelete.subtotal_amount,
+          total_amount: purchaseToDelete.total_amount,
+          payment_status: purchaseToDelete.payment_status
+        },
+        security_level: 'critical', // Deletion = always critical
+        compliance_tags: []
+      }).catch(err => console.error('Audit log failed:', err));
+    }
 
     return { data: true };
   } catch (error) {
@@ -236,6 +320,13 @@ export async function markAsPaid(
   paymentDate?: string
 ): Promise<{ data: Purchase | null; error?: any }> {
   try {
+    // Fetch old status for audit trail
+    const { data: oldPurchase } = await supabase
+      .from('purchases')
+      .select('payment_status, company_id')
+      .eq('id', id)
+      .single();
+
     const { data, error } = await supabase
       .from('purchases')
       .update({
@@ -253,6 +344,26 @@ export async function markAsPaid(
 
     if (!data) {
       return { data: null, error: { message: 'Achat introuvable' } };
+    }
+
+    // Audit log - payment status change
+    if (oldPurchase) {
+      auditService.log({
+        event_type: 'UPDATE',
+        table_name: 'purchases',
+        record_id: id,
+        company_id: oldPurchase.company_id,
+        old_values: {
+          payment_status: oldPurchase.payment_status
+        },
+        new_values: {
+          payment_status: 'paid',
+          paid_at: data.paid_at
+        },
+        changed_fields: ['payment_status', 'paid_at'],
+        security_level: 'standard',
+        compliance_tags: []
+      }).catch(err => console.error('Audit log failed:', err));
     }
 
     return { data: mapPurchaseRecord(data) };

@@ -68,12 +68,12 @@ const BanksPageNew: React.FC = () => {
     setLoading(true);
     try {
       // Check and migrate localStorage data if exists
-      const hasLocalData = localStorage.getItem(`casskai_imported_transactions_${user.id}`);
+      const hasLocalData = localStorage.getItem(`casskai_imported_transactions_${user!.id}`);
       if (hasLocalData) {
-        const account = await bankStorageAdapter.ensureDefaultAccount(currentCompany.id, user.id);
+        const account = await bankStorageAdapter.ensureDefaultAccount(currentCompany.id, user!.id);
         if (account) {
           const migrationResult = await bankStorageAdapter.migrateLocalStorageData(
-            user.id,
+            user!.id,
             currentCompany.id,
             account.id
           );
@@ -89,7 +89,7 @@ const BanksPageNew: React.FC = () => {
 
       // Create default account if none exists
       if (accounts.length === 0) {
-        const newAccount = await bankStorageAdapter.ensureDefaultAccount(currentCompany.id, user.id);
+        const newAccount = await bankStorageAdapter.ensureDefaultAccount(currentCompany.id, user!.id);
         if (newAccount) {
           setBankAccounts([newAccount]);
           setSelectedAccountId(newAccount.id);
@@ -150,7 +150,7 @@ const BanksPageNew: React.FC = () => {
       // Ensure account exists
       let accountId = selectedAccountId;
       if (!accountId) {
-        const account = await bankStorageAdapter.ensureDefaultAccount(currentCompany.id, user.id);
+        const account = await bankStorageAdapter.ensureDefaultAccount(currentCompany.id, user!.id);
         if (!account) throw new Error('Failed to create account');
         accountId = account.id;
         setSelectedAccountId(accountId);
@@ -178,7 +178,7 @@ const BanksPageNew: React.FC = () => {
       // eslint-disable-next-line require-atomic-updates
       event.target.value = ''; // Reset input
     }
-  }, [currentCompany?.id, selectedAccountId, user.id]);
+  }, [currentCompany?.id, selectedAccountId, user!.id]);
 
   // Handle reconciliation
   const handleReconcile = async (transactionId: string) => {

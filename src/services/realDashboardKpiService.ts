@@ -88,6 +88,7 @@ export class RealDashboardKpiService {
 
   /**
    * Calcule le chiffre d'affaires sur une période
+   * SOURCE: Écritures comptables (comptes de classe 7) via chart_of_accounts.current_balance
    */
   private async calculateRevenue(
     companyId: string,
@@ -95,20 +96,29 @@ export class RealDashboardKpiService {
     endDate: string
   ): Promise<number> {
     try {
+      // NOUVELLE APPROCHE: Lire depuis les écritures comptables (source de vérité)
+      // Les comptes de classe 7 = Produits (CA)
       const { data, error } = await supabase
-        .from('invoices')
-        .select('total_incl_tax')
+        .from('chart_of_accounts')
+        .select('current_balance, account_number')
         .eq('company_id', companyId)
-        .in('status', ['paid', 'partially_paid'])
-        .gte('invoice_date', startDate)
-        .lte('invoice_date', endDate);
+        .eq('account_class', 7)
+        .eq('is_active', true);
 
       if (error) {
-        console.error('Error calculating revenue:', error);
+        console.error('Error calculating revenue from accounting:', error);
         return 0;
       }
 
-      return data?.reduce((sum, invoice) => sum + (invoice.total_incl_tax || 0), 0) || 0;
+      // Le current_balance est automatiquement mis à jour par le trigger
+      // Pour les comptes de produits (classe 7), le solde = Crédit - Débit
+      const totalRevenue = data?.reduce((sum, account) => {
+        return sum + Math.abs(account.current_balance || 0);
+      }, 0) || 0;
+
+      console.log(`[realDashboardKpiService] Revenue calculated from ${data?.length || 0} revenue accounts: ${totalRevenue} €`);
+
+      return totalRevenue;
     } catch (error) {
       console.error('Exception calculating revenue:', error);
       return 0;
@@ -116,7 +126,8 @@ export class RealDashboardKpiService {
   }
 
   /**
-   * Calcule le total des achats sur une période
+   * Calcule le total des achats/charges sur une période
+   * SOURCE: Écritures comptables (comptes de classe 6) via chart_of_accounts.current_balance
    */
   private async calculatePurchases(
     companyId: string,
@@ -124,21 +135,31 @@ export class RealDashboardKpiService {
     endDate: string
   ): Promise<number> {
     try {
+      // NOUVELLE APPROCHE: Lire depuis les écritures comptables (source de vérité)
+      // Les comptes de classe 6 = Charges (achats, dépenses)
       const { data, error } = await supabase
-        .from('purchases')
-        .select('total_amount')
+        .from('chart_of_accounts')
+        .select('current_balance, account_number')
         .eq('company_id', companyId)
-        .gte('purchase_date', startDate)
-        .lte('purchase_date', endDate);
+        .eq('account_class', 6)
+        .eq('is_active', true);
 
       if (error) {
-        console.error('Error calculating purchases:', error);
+        console.error('Error calculating expenses from accounting:', error);
         return 0;
       }
 
-      return data?.reduce((sum, purchase) => sum + (purchase.total_amount || 0), 0) || 0;
+      // Le current_balance est automatiquement mis à jour par le trigger
+      // Pour les comptes de charges (classe 6), le solde = Débit - Crédit
+      const totalExpenses = data?.reduce((sum, account) => {
+        return sum + Math.abs(account.current_balance || 0);
+      }, 0) || 0;
+
+      console.log(`[realDashboardKpiService] Expenses calculated from ${data?.length || 0} expense accounts: ${totalExpenses} €`);
+
+      return totalExpenses;
     } catch (error) {
-      console.error('Exception calculating purchases:', error);
+      console.error('Exception calculating expenses:', error);
       return 0;
     }
   }
@@ -196,20 +217,33 @@ export class RealDashboardKpiService {
 
   /**
    * Calcule le solde de trésorerie actuel
+   * SOURCE: Écritures comptables (comptes de classe 5) via chart_of_accounts.current_balance
    */
   private async calculateCashBalance(companyId: string): Promise<number> {
     try {
+      // NOUVELLE APPROCHE: Lire depuis les écritures comptables (source de vérité)
+      // Les comptes de classe 5 = Trésorerie (banques, caisses)
       const { data, error } = await supabase
-        .from('bank_accounts')
-        .select('current_balance')
-        .eq('company_id', companyId);
+        .from('chart_of_accounts')
+        .select('current_balance, account_number, account_name')
+        .eq('company_id', companyId)
+        .eq('account_class', 5)
+        .eq('is_active', true);
 
       if (error) {
-        console.error('Error calculating cash balance:', error);
+        console.error('Error calculating cash balance from accounting:', error);
         return 0;
       }
 
-      return data?.reduce((sum, account) => sum + (account.current_balance || 0), 0) || 0;
+      // Le current_balance est automatiquement mis à jour par le trigger
+      // Pour les comptes de trésorerie (classe 5), le solde = Débit - Crédit
+      const totalCash = data?.reduce((sum, account) => {
+        return sum + (account.current_balance || 0);
+      }, 0) || 0;
+
+      console.log(`[realDashboardKpiService] Cash balance calculated from ${data?.length || 0} cash accounts: ${totalCash} €`);
+
+      return totalCash;
     } catch (error) {
       console.error('Exception calculating cash balance:', error);
       return 0;
@@ -218,6 +252,7 @@ export class RealDashboardKpiService {
 
   /**
    * Calcule le CA mensuel pour les graphiques
+   * SOURCE: Écritures comptables (comptes de classe 7) agrégées par mois
    */
   private async calculateMonthlyRevenue(
     companyId: string,
@@ -230,20 +265,38 @@ export class RealDashboardKpiService {
         const startDate = `${year}-${month.toString().padStart(2, '0')}-01`;
         const endDate = new Date(year, month, 0).toISOString().split('T')[0];
 
+        // Lire depuis les écritures comptables pour ce mois
         const { data, error } = await supabase
-          .from('invoices')
-          .select('total_incl_tax')
-          .eq('company_id', companyId)
-          .in('status', ['paid', 'partially_paid'])
-          .gte('invoice_date', startDate)
-          .lte('invoice_date', endDate);
+          .from('journal_entry_lines')
+          .select(`
+            credit_amount,
+            debit_amount,
+            account_number,
+            journal_entries!inner (
+              entry_date,
+              status,
+              company_id
+            ),
+            chart_of_accounts!inner (
+              account_class
+            )
+          `)
+          .eq('journal_entries.company_id', companyId)
+          .gte('journal_entries.entry_date', startDate)
+          .lte('journal_entries.entry_date', endDate)
+          .in('journal_entries.status', ['posted', 'imported'])
+          .eq('chart_of_accounts.account_class', 7);
 
         if (error) {
           console.error(`Error calculating revenue for month ${month}:`, error);
           monthlyData.push({ month: month.toString(), amount: 0 });
         } else {
-          const amount = data?.reduce((sum, invoice) => sum + (invoice.total_incl_tax || 0), 0) || 0;
-          monthlyData.push({ month: month.toString(), amount });
+          // Pour les comptes de classe 7 (produits), CA = Crédit - Débit
+          const amount = data?.reduce((sum, line) => {
+            return sum + ((line.credit_amount || 0) - (line.debit_amount || 0));
+          }, 0) || 0;
+
+          monthlyData.push({ month: month.toString(), amount: Math.abs(amount) });
         }
       }
 

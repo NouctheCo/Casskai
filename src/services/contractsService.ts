@@ -188,7 +188,7 @@ export const contractsService = {
    */
   async generateRFAReport(_contractId: string, _periodStart: string, _periodEnd: string): Promise<ContractServiceResponse<RFAReport>> {
     // TODO: Implement RFA report generation
-    return { data: null, success: false, error: { message: 'Not implemented yet' } };
+    return { data: undefined, success: false, error: { message: 'Not implemented yet' } };
   },
 
   // ==================== ALERTES & HISTORIQUE ====================

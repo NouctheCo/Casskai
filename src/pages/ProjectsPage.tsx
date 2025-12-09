@@ -110,6 +110,8 @@ import { projectResourcesService, type ProjectResourceWithDetails } from '@/serv
 
 import ResourceAllocationModal from '@/components/projects/ResourceAllocationModal';
 
+import type { Project } from '@/services/projectsService';
+
 
 
 // Les données sont chargées depuis le service projectsService via useProjects hook
@@ -434,15 +436,15 @@ export default function ProjectsPage() {
 
   const [showProjectForm, setShowProjectForm] = useState(false);
 
-  const [selectedProject, setSelectedProject] = useState(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
-  
+
 
   // États pour le formulaire projet
 
-  const [startDate, setStartDate] = useState(null);
+  const [startDate, setStartDate] = useState<Date | null>(null);
 
-  const [endDate, setEndDate] = useState(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
 
   const [projectName, setProjectName] = useState('');
 
@@ -2303,7 +2305,7 @@ export default function ProjectsPage() {
 
                               <p className="text-sm text-muted-foreground">Revenus générés</p>
 
-                              <p className="font-semibold text-green-600">€{project.revenue.toLocaleString()}</p>
+                              <p className="font-semibold text-green-600">€{(project.revenue ?? 0).toLocaleString()}</p>
 
                             </div>
 
@@ -2311,9 +2313,9 @@ export default function ProjectsPage() {
 
                               <p className="text-sm text-muted-foreground">Marge bénéficiaire</p>
 
-                              <p className={`font-semibold ${project.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              <p className={`font-semibold ${(project.profit ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
 
-                                €{project.profit.toLocaleString()}
+                                €{(project.profit ?? 0).toLocaleString()}
 
                               </p>
 
@@ -2323,9 +2325,9 @@ export default function ProjectsPage() {
 
                               <p className="text-sm text-muted-foreground">Taux de marge</p>
 
-                              <p className={`font-semibold ${project.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              <p className={`font-semibold ${(project.profit ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
 
-                                {project.revenue > 0 ? ((project.profit / project.revenue) * 100).toFixed(1) : '0'}%
+                                {(project.revenue ?? 0) > 0 ? (((project.profit ?? 0) / (project.revenue ?? 1)) * 100).toFixed(1) : '0'}%
 
                               </p>
 
@@ -2788,19 +2790,19 @@ export default function ProjectsPage() {
 
                           {projects
 
-                            .reduce((acc, project) => {
+                            .reduce((acc: Array<{ client: string; revenue: number; projects: number }>, project) => {
 
                               const existing = acc.find(item => item.client === project.client);
 
                               if (existing) {
 
-                                existing.revenue += project.revenue;
+                                existing.revenue += (project.revenue || 0);
 
                                 existing.projects += 1;
 
                               } else {
 
-                                acc.push({ client: project.client, revenue: project.revenue, projects: 1 });
+                                acc.push({ client: project.client, revenue: project.revenue || 0, projects: 1 });
 
                               }
 
@@ -2864,7 +2866,7 @@ export default function ProjectsPage() {
 
                         {projects.map((project) => {
 
-                          const efficiency = project.totalHours > 0 ? (project.billableHours / project.totalHours) * 100 : 0;
+                          const efficiency = (project.totalHours ?? 0) > 0 ? ((project.billableHours ?? 0) / (project.totalHours ?? 1)) * 100 : 0;
 
                           const budgetUsage = project.budget > 0 ? (project.spent / project.budget) * 100 : 0;
 
@@ -2928,9 +2930,9 @@ export default function ProjectsPage() {
 
                                   <p className="text-sm text-muted-foreground">Rentabilité</p>
 
-                                  <p className={`font-semibold ${project.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  <p className={`font-semibold ${(project.profit ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
 
-                                    {project.revenue > 0 ? ((project.profit / project.revenue) * 100).toFixed(1) : '0'}%
+                                    {(project.revenue ?? 0) > 0 ? (((project.profit ?? 0) / (project.revenue ?? 1)) * 100).toFixed(1) : '0'}%
 
                                   </p>
 
@@ -2940,7 +2942,7 @@ export default function ProjectsPage() {
 
                                   <p className="text-sm text-muted-foreground">Revenus</p>
 
-                                  <p className="font-semibold text-green-600">€{project.revenue.toLocaleString()}</p>
+                                  <p className="font-semibold text-green-600">€{(project.revenue ?? 0).toLocaleString()}</p>
 
                                 </div>
 
@@ -3146,7 +3148,7 @@ export default function ProjectsPage() {
 
                       <span className="text-sm text-muted-foreground">Revenus:</span>
 
-                      <span className="text-sm font-medium text-green-600">€{selectedProject.revenue.toLocaleString()}</span>
+                      <span className="text-sm font-medium text-green-600">€{(selectedProject.revenue ?? 0).toLocaleString()}</span>
 
                     </div>
 
@@ -3154,9 +3156,9 @@ export default function ProjectsPage() {
 
                       <span className="text-sm text-muted-foreground">Profit:</span>
 
-                      <span className={`text-sm font-medium ${selectedProject.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      <span className={`text-sm font-medium ${(selectedProject.profit ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
 
-                        €{selectedProject.profit.toLocaleString()}
+                        €{(selectedProject.profit ?? 0).toLocaleString()}
 
                       </span>
 

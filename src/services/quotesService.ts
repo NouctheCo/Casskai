@@ -164,7 +164,7 @@ class QuotesService {
         created_at: invoice.created_at,
         updated_at: invoice.updated_at,
         third_party: invoice.third_party,
-        quote_lines: invoice.invoice_lines?.map(line => ({
+        quote_lines: invoice.invoice_lines?.map((line: any) => ({
           id: line.id,
           company_id: invoice.company_id,
           quote_id: invoice.id,
@@ -189,7 +189,7 @@ class QuotesService {
   async getQuoteById(id: string): Promise<QuoteWithDetails | null> {
     try {
       const companyId = await this.getCurrentCompanyId();
-      
+
       const { data, error } = await supabase
         .from('invoices')
         .select(`
@@ -226,7 +226,7 @@ class QuotesService {
         created_at: data.created_at,
         updated_at: data.updated_at,
         third_party: data.third_party,
-        quote_lines: data.invoice_lines?.map(line => ({
+        quote_lines: data.invoice_lines?.map((line: any) => ({
           id: line.id,
           company_id: data.company_id,
           quote_id: data.id,

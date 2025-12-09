@@ -16,6 +16,7 @@ import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { chartGenerationService } from './chartGenerationService';
 
 export interface ExportOptions {
   format: 'pdf' | 'excel' | 'csv';
@@ -131,7 +132,7 @@ export class ReportExportService {
           },
           columnStyles: this.getColumnStyles(table.headers),
           margin: { left: 20, right: 20 },
-          didDrawPage: (data) => {
+          didDrawPage: (data: any) => {
             // Pied de page
             pdf.setFontSize(8);
             pdf.setFont('helvetica', 'normal');
@@ -444,6 +445,226 @@ export class ReportExportService {
     worksheet['B1'].s = headerStyle;
 
     XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+  }
+
+  /**
+   * Export PDF avec tables ET graphiques intégrés
+   * Permet d'ajouter des visualisations graphiques entre les tables
+   */
+  async exportToPDFWithCharts(
+    tables: TableData[],
+    charts: ChartData[],
+    options: ExportOptions = { format: 'pdf' }
+  ): Promise<string> {
+    try {
+      const pdf = new jsPDF({
+        orientation: options.orientation || 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      let currentY = 20;
+
+      // En-tête
+      if (options.companyInfo) {
+        await this.addPDFHeader(pdf, options.companyInfo, options.title, options.subtitle);
+        currentY = 60;
+      } else if (options.title) {
+        pdf.setFontSize(20);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(options.title, 20, currentY);
+        currentY += 15;
+
+        if (options.subtitle) {
+          pdf.setFontSize(12);
+          pdf.setFont('helvetica', 'normal');
+          pdf.text(options.subtitle, 20, currentY);
+          currentY += 10;
+        }
+      }
+
+      // Date de génération
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`Généré le ${format(new Date(), 'dd/MM/yyyy à HH:mm', { locale: fr })}`, 20, currentY);
+      currentY += 15;
+
+      // Tables avec graphiques intercalés
+      for (let i = 0; i < tables.length; i++) {
+        const table = tables[i];
+
+        // Vérifier si on a besoin d'une nouvelle page
+        if (currentY > 250) {
+          pdf.addPage();
+          currentY = 20;
+        }
+
+        // Titre de la table
+        if (table.title) {
+          pdf.setFontSize(14);
+          pdf.setFont('helvetica', 'bold');
+          pdf.text(table.title, 20, currentY);
+          currentY += 10;
+        }
+
+        // Tableau
+        const tableConfig = {
+          startY: currentY,
+          head: [table.headers],
+          body: table.rows,
+          theme: 'grid' as const,
+          headStyles: {
+            fillColor: [41, 128, 185],
+            textColor: 255,
+            fontStyle: 'bold' as const
+          },
+          alternateRowStyles: {
+            fillColor: [245, 245, 245]
+          },
+          margin: { left: 20, right: 20 }
+        };
+
+        autoTable(pdf, tableConfig);
+        currentY = (pdf as any).lastAutoTable.finalY + 10;
+
+        // Summary si présent
+        if (table.summary) {
+          if (currentY > 260) {
+            pdf.addPage();
+            currentY = 20;
+          }
+
+          const summaryArray = Array.isArray(table.summary)
+            ? table.summary
+            : Object.entries(table.summary).map(([key, value]) => [key, value]);
+
+          autoTable(pdf, {
+            startY: currentY,
+            body: summaryArray,
+            theme: 'plain' as const,
+            styles: {
+              fontStyle: 'bold' as const
+            },
+            margin: { left: 20, right: 20 }
+          });
+
+          currentY = (pdf as any).lastAutoTable.finalY + 15;
+        }
+
+        // Ajouter un graphique après certaines tables si disponible
+        if (options.includeCharts && charts[i]) {
+          const chart = charts[i];
+
+          if (currentY > 180) {
+            pdf.addPage();
+            currentY = 20;
+          }
+
+          try {
+            let chartImageData: string;
+
+            // Générer le graphique selon le type
+            if (chart.type === 'bar') {
+              chartImageData = await chartGenerationService.generateBarChart(
+                chart.labels,
+                chart.data,
+                chart.title
+              );
+            } else if (chart.type === 'line') {
+              chartImageData = await chartGenerationService.generateLineChart(
+                chart.labels,
+                [{ label: chart.title, data: chart.data, color: '#3b82f6' }],
+                chart.title
+              );
+            } else if (chart.type === 'pie') {
+              chartImageData = await chartGenerationService.generatePieChart(
+                chart.labels,
+                chart.data,
+                chart.title
+              );
+            } else {
+              chartImageData = await chartGenerationService.generateBarChart(
+                chart.labels,
+                chart.data,
+                chart.title
+              );
+            }
+
+            // Ajouter l'image du graphique au PDF
+            const imgWidth = 170;
+            const imgHeight = 100;
+            pdf.addImage(chartImageData, 'PNG', 20, currentY, imgWidth, imgHeight);
+            currentY += imgHeight + 15;
+
+          } catch (error) {
+            console.error('Error adding chart to PDF:', error);
+            // Continuer même si le graphique échoue
+          }
+        }
+
+        currentY += 5;
+      }
+
+      // Watermark si présent
+      if (options.watermark) {
+        const pageCount = pdf.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+          pdf.setPage(i);
+          pdf.setFontSize(60);
+          pdf.setTextColor(200, 200, 200);
+          pdf.text(options.watermark, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() / 2, {
+            align: 'center',
+            angle: 45
+          });
+        }
+      }
+
+      // Générer blob URL
+      const pdfBlob = pdf.output('blob');
+      const url = URL.createObjectURL(pdfBlob);
+      return url;
+
+    } catch (error) {
+      console.error('Error in exportToPDFWithCharts:', error);
+      throw new Error('Impossible de générer le PDF avec graphiques');
+    }
+  }
+
+  /**
+   * Méthode helper pour ajouter un graphique simple au rapport d'analyse
+   */
+  async addChartToAnalysisReport(
+    pdf: jsPDF,
+    chartType: 'bar' | 'line' | 'pie',
+    labels: string[],
+    data: number[],
+    title: string,
+    startY: number
+  ): Promise<number> {
+    try {
+      let chartImageData: string;
+
+      if (chartType === 'bar') {
+        chartImageData = await chartGenerationService.generateBarChart(labels, data, title);
+      } else if (chartType === 'line') {
+        chartImageData = await chartGenerationService.generateLineChart(
+          labels,
+          [{ label: title, data, color: '#3b82f6' }],
+          title
+        );
+      } else {
+        chartImageData = await chartGenerationService.generatePieChart(labels, data, title);
+      }
+
+      const imgWidth = 170;
+      const imgHeight = 100;
+      pdf.addImage(chartImageData, 'PNG', 20, startY, imgWidth, imgHeight);
+
+      return startY + imgHeight + 10;
+    } catch (error) {
+      console.error('Error adding chart:', error);
+      return startY;
+    }
   }
 }
 

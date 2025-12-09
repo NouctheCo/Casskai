@@ -46,7 +46,7 @@ export function ObjectiveFormModal({
         employee_id: objective.employee_id,
         title: objective.title,
         description: objective.description || '',
-        type: objective.type,
+        type: objective.type as "project" | "okr" | "smart" | "kpi",
         start_date: objective.start_date,
         due_date: objective.due_date,
         target_value: objective.target_value?.toString() || '',

@@ -444,10 +444,10 @@ export class AccountingValidationService {
     };
 
     // Similarité des montants
-    const amount1 = entry1.items.reduce((sum, item) => sum + item.debitAmount, 0);
-    const amount2 = entry2.journal_entry_lines.reduce((sum, item) => sum + item.debit_amount, 0);
+    const amount1 = entry1.items.reduce((sum: number, item: any) => sum + item.debitAmount, 0);
+    const amount2 = entry2.journal_entry_lines.reduce((sum: number, item: any) => sum + item.debit_amount, 0);
     const amountSimilarity = 1 - Math.abs(amount1 - amount2) / Math.max(amount1, amount2, 1);
-    
+
     if (amountSimilarity > 0.95) {
       score += weights.amount;
       criteria.push('montant identique');
@@ -457,8 +457,8 @@ export class AccountingValidationService {
     }
 
     // Similarité des comptes
-    const accounts1 = new Set(entry1.items.map(item => item.accountId));
-    const accounts2 = new Set(entry2.journal_entry_lines.map(item => item.account_id));
+    const accounts1 = new Set(entry1.items.map((item: any) => item.accountId));
+    const accounts2 = new Set(entry2.journal_entry_lines.map((item: any) => item.account_id));
     const commonAccounts = new Set([...accounts1].filter(x => accounts2.has(x)));
     const accountSimilarity = commonAccounts.size / Math.max(accounts1.size, accounts2.size);
     

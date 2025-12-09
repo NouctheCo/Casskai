@@ -49,7 +49,7 @@ export function TrainingFormModal({
       setFormData({
         title: training.title,
         description: training.description || '',
-        category: training.category,
+        category: training.category as TrainingCategory,
         duration_hours: training.duration_hours?.toString() || '',
         cost_per_participant: training.cost_per_participant?.toString() || '',
         currency: training.currency || 'EUR',

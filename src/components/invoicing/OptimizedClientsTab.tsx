@@ -22,7 +22,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 import { unifiedThirdPartiesService } from '@/services/unifiedThirdPartiesService';
 
-import { 
+import {
 
   Plus,
 
@@ -52,15 +52,57 @@ import {
 
 } from 'lucide-react';
 
+// Types
+interface Client {
+  id: string | number;
+  name: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  country?: string;
+  notes?: string;
+  createdAt?: string;
+  invoicesCount?: number;
+  totalAmount?: number;
+}
+
+interface ClientFormData {
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  country: string;
+  notes: string;
+}
+
+interface ClientStats {
+  totalClients: number;
+  activeClients: number;
+  totalRevenue: number;
+  averageRevenue: number;
+}
+
 
 
 // Client Form Dialog Component
+interface ClientFormDialogProps {
+  open: boolean;
+  onClose: () => void;
+  client?: Client | null;
+  onSave: (client: Client) => void;
+}
 
-const ClientFormDialog = ({ open, onClose, client = null, onSave }) => {
+const ClientFormDialog: React.FC<ClientFormDialogProps> = ({ open, onClose, client = null, onSave }) => {
 
   const { toast } = useToast();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ClientFormData>({
 
     name: client?.name || '',
 
@@ -104,7 +146,7 @@ const ClientFormDialog = ({ open, onClose, client = null, onSave }) => {
 
 
 
-    onSave({
+    const clientData: Client = {
 
       ...formData,
 
@@ -116,7 +158,11 @@ const ClientFormDialog = ({ open, onClose, client = null, onSave }) => {
 
       totalAmount: client?.totalAmount || 0
 
-    });
+    };
+
+
+
+    onSave(clientData);
 
 
 
@@ -385,8 +431,13 @@ const ClientFormDialog = ({ open, onClose, client = null, onSave }) => {
 
 
 // Client Preview Dialog Component
+interface ClientPreviewDialogProps {
+  open: boolean;
+  onClose: () => void;
+  client: Client | null;
+}
 
-const ClientPreviewDialog = ({ open, onClose, client }) => {
+const ClientPreviewDialog: React.FC<ClientPreviewDialogProps> = ({ open, onClose, client }) => {
 
   if (!client) return null;
 
@@ -550,7 +601,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
                 <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">CA total</Label>
 
-                <p className="text-xl font-bold">{client.totalAmount.toFixed(2)} €</p>
+                <p className="text-xl font-bold">{(client.totalAmount ?? 0).toFixed(2)} €</p>
 
               </div>
 
@@ -564,7 +615,7 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
                 <p className="text-xl font-bold">
 
-                  {client.invoicesCount > 0 ? (client.totalAmount / client.invoicesCount).toFixed(2) : '0.00'} €
+                  {(client.invoicesCount ?? 0) > 0 ? ((client.totalAmount ?? 0) / (client.invoicesCount ?? 1)).toFixed(2) : '0.00'} €
 
                 </p>
 
@@ -612,13 +663,13 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
               </div>
 
-              {client.invoicesCount > 0 && (
+              {(client.invoicesCount ?? 0) > 0 && (
 
                 <div className="flex items-center space-x-3 text-sm">
 
                   <div className="w-2 h-2 bg-green-500 rounded-full dark:bg-green-900/20"></div>
 
-                  <span>{client.invoicesCount} facture{client.invoicesCount > 1 ? 's' : ''} émise{client.invoicesCount > 1 ? 's' : ''}</span>
+                  <span>{client.invoicesCount} facture{(client.invoicesCount ?? 0) > 1 ? 's' : ''} émise{(client.invoicesCount ?? 0) > 1 ? 's' : ''}</span>
 
                 </div>
 
@@ -653,8 +704,14 @@ const ClientPreviewDialog = ({ open, onClose, client }) => {
 
 
 // Client Row Component
+interface ClientRowProps {
+  client: Client;
+  onEdit: (client: Client) => void;
+  onDelete: (client: Client) => void;
+  onView: (client: Client) => void;
+}
 
-const ClientRow = ({ client, onEdit, onDelete, onView }) => {
+const ClientRow: React.FC<ClientRowProps> = ({ client, onEdit, onDelete, onView }) => {
 
   return (
 
@@ -728,7 +785,7 @@ const ClientRow = ({ client, onEdit, onDelete, onView }) => {
 
       <TableCell className="text-right font-mono">
 
-        {client.totalAmount.toFixed(2)} €
+        {(client.totalAmount ?? 0).toFixed(2)} €
 
       </TableCell>
 
@@ -772,17 +829,17 @@ export default function OptimizedClientsTab() {
 
   const { currentCompany } = useAuth();
 
-  const [clients, setClients] = useState([]);
+  const [clients, setClients] = useState<Client[]>([]);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const [showClientForm, setShowClientForm] = useState(false);
+  const [showClientForm, setShowClientForm] = useState<boolean>(false);
 
-  const [editingClient, setEditingClient] = useState(null);
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
 
-  const [previewClient, setPreviewClient] = useState(null);
+  const [previewClient, setPreviewClient] = useState<Client | null>(null);
 
 
 
@@ -806,7 +863,7 @@ export default function OptimizedClientsTab() {
 
       setLoading(true);
 
-      const customers = await unifiedThirdPartiesService.getCustomers(currentCompany.id);
+      const customers = await unifiedThirdPartiesService.getCustomers(currentCompany!.id);
 
 
 
@@ -888,11 +945,11 @@ export default function OptimizedClientsTab() {
 
 
 
-  const filteredClients = clients.filter(client =>
+  const filteredClients = clients.filter((client: Client) =>
 
     client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
 
-    client.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (client.company || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
 
     client.email.toLowerCase().includes(searchTerm.toLowerCase())
 
@@ -900,7 +957,7 @@ export default function OptimizedClientsTab() {
 
 
 
-  const handleSaveClient = async (clientData) => {
+  const handleSaveClient = async (clientData: Client) => {
 
     try {
 
@@ -908,7 +965,7 @@ export default function OptimizedClientsTab() {
 
         // Mise à jour d'un client existant
 
-        await unifiedThirdPartiesService.updateCustomer(editingClient.id, {
+        await unifiedThirdPartiesService.updateCustomer(String(editingClient.id), {
 
           name: clientData.name,
 
@@ -942,7 +999,7 @@ export default function OptimizedClientsTab() {
 
         const result = await unifiedThirdPartiesService.createCustomer({
 
-          company_id: currentCompany.id,
+          company_id: currentCompany!.id,
 
           name: clientData.name,
 
@@ -1006,7 +1063,7 @@ export default function OptimizedClientsTab() {
 
 
 
-  const handleEditClient = (client) => {
+  const handleEditClient = (client: Client) => {
 
     setEditingClient(client);
 
@@ -1016,7 +1073,7 @@ export default function OptimizedClientsTab() {
 
 
 
-  const handleDeleteClient = async (client) => {
+  const handleDeleteClient = async (client: Client) => {
     // eslint-disable-next-line no-alert
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce client ?')) {
 
@@ -1028,7 +1085,7 @@ export default function OptimizedClientsTab() {
 
     try {
 
-      await unifiedThirdPartiesService.deleteCustomer(client.id);
+      await unifiedThirdPartiesService.deleteCustomer(String(client.id));
 
       await loadClients();
 
@@ -1060,7 +1117,7 @@ export default function OptimizedClientsTab() {
 
 
 
-  const handleViewClient = (client) => {
+  const handleViewClient = (client: Client) => {
 
     setPreviewClient(client);
 
@@ -1068,15 +1125,15 @@ export default function OptimizedClientsTab() {
 
 
 
-  const summary = {
+  const summary: ClientStats = {
 
     totalClients: clients.length,
 
-    totalRevenue: clients.reduce((sum, client) => sum + client.totalAmount, 0),
+    totalRevenue: clients.reduce((sum: number, client: Client) => sum + (client.totalAmount || 0), 0),
 
-    averageRevenue: clients.length > 0 ? clients.reduce((sum, client) => sum + client.totalAmount, 0) / clients.length : 0,
+    averageRevenue: clients.length > 0 ? clients.reduce((sum: number, client: Client) => sum + (client.totalAmount || 0), 0) / clients.length : 0,
 
-    activeClients: clients.filter(c => c.invoicesCount > 0).length
+    activeClients: clients.filter((c: Client) => (c.invoicesCount || 0) > 0).length
 
   };
 

@@ -259,6 +259,9 @@ export const AccountingImportExport: React.FC<AccountingImportExportProps> = ({
   // Gestionnaire de templates
   const onTemplateSubmit: SubmitHandler<TemplateConfigType> = async (data) => {
     try {
+      if (!data.journalId) {
+        throw new Error('Journal ID is required');
+      }
       const entry = await EntryTemplatesService.applyTemplate(
         data.templateId,
         data.variables,

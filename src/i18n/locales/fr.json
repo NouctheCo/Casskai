@@ -93,7 +93,26 @@
       "totalCredit": "Total crédit",
       "totalCreditDesc": "Crédits ce mois",
       "entries": "Écritures",
-      "entriesDesc": "Écritures saisies"
+      "entriesDesc": "Écritures saisies",
+      "pendingEntries": "En attente",
+      "pendingEntriesDesc": "Écritures à valider",
+      "postedEntries": "Validées",
+      "postedEntriesDesc": "Écritures comptabilisées",
+      "receivables": "À recevoir",
+      "receivablesDesc": "{{count}} facture(s) client(s) impayée(s)",
+      "payables": "À payer",
+      "payablesDesc": "{{count}} facture(s) fournisseur(s)",
+      "overdue": "En retard",
+      "overdueDesc": "{{amount}} € de retard",
+      "validationRate": "Taux validation",
+      "validationRateDesc": "Écritures validées"
+    },
+    "journalDistribution": {
+      "title": "Répartition par journal",
+      "noData": "Aucune donnée disponible",
+      "entries": "Écritures",
+      "totalJournals": "Total journaux",
+      "totalEntries": "Total écritures"
     },
     "refresh": "Actualiser",
     "newEntry": "Nouvelle écriture",

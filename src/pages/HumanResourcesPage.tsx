@@ -363,7 +363,7 @@ export default function HumanResourcesPage() {
               <ObjectivesTab
                 companyId={currentCompany.id}
                 employees={employees}
-                currentUserId={currentCompany.owner_id}
+                currentUserId={currentCompany.owner_id || ''}
               />
             )}
           </TabsContent>
@@ -374,7 +374,7 @@ export default function HumanResourcesPage() {
               <PerformanceReviewsTab
                 companyId={currentCompany.id}
                 employees={employees}
-                currentUserId={currentCompany.owner_id}
+                currentUserId={currentCompany.owner_id || ''}
               />
             )}
           </TabsContent>
@@ -385,7 +385,7 @@ export default function HumanResourcesPage() {
               <FeedbackTab
                 companyId={currentCompany.id}
                 employees={employees}
-                currentUserId={currentCompany.owner_id}
+                currentUserId={currentCompany.owner_id || ''}
               />
             )}
           </TabsContent>
@@ -396,7 +396,7 @@ export default function HumanResourcesPage() {
               <TrainingTab
                 companyId={currentCompany.id}
                 employees={employees}
-                currentUserId={currentCompany.owner_id}
+                currentUserId={currentCompany.owner_id || ''}
               />
             )}
           </TabsContent>
@@ -684,7 +684,7 @@ export default function HumanResourcesPage() {
             {currentCompany?.id && (
               <DocumentsManagementTab
                 companyId={currentCompany.id}
-                currentUserId={currentCompany.owner_id}
+                currentUserId={currentCompany.owner_id || ''}
                 employees={employees}
               />
             )}

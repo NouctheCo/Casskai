@@ -767,27 +767,54 @@ export class AccountingDataService {
     try {
       const companyId = params?.companyId || await this.getCurrentCompanyId();
 
-      // Build query for journal entries
-      let query = supabase
+      // Build query for journal entries with their lines
+      let entriesQuery = supabase
         .from('journal_entries')
-        .select('*')
+        .select('id, entry_date, status')
         .eq('company_id', companyId);
 
       if (params?.periodStart) {
-        query = query.gte('entry_date', params.periodStart);
+        entriesQuery = entriesQuery.gte('entry_date', params.periodStart);
       }
       if (params?.periodEnd) {
-        query = query.lte('entry_date', params.periodEnd);
+        entriesQuery = entriesQuery.lte('entry_date', params.periodEnd);
       }
 
-      const { data: entries, error } = await query;
-      if (error) throw error;
+      const { data: entries, error: entriesError } = await entriesQuery;
+      if (entriesError) throw entriesError;
 
       const entriesList = entries || [];
+      const entryIds = entriesList.map(e => e.id);
 
-      // Calculate totals
-      const totalDebit = entriesList.reduce((sum, entry) => sum + (entry.total_debit || 0), 0);
-      const totalCredit = entriesList.reduce((sum, entry) => sum + (entry.total_credit || 0), 0);
+      // Get journal entry lines for these entries (only posted and imported)
+      let totalDebit = 0;
+      let totalCredit = 0;
+
+      if (entryIds.length > 0) {
+        const { data: lines, error: linesError } = await supabase
+          .from('journal_entry_lines')
+          .select('debit_amount, credit_amount, journal_entry_id')
+          .in('journal_entry_id', entryIds);
+
+        if (linesError) {
+          console.error('Error fetching journal entry lines:', linesError);
+        } else if (lines) {
+          // Filter lines to only include those from posted/imported entries
+          const postedEntryIds = new Set(
+            entriesList
+              .filter(e => e.status === 'posted' || e.status === 'imported')
+              .map(e => e.id)
+          );
+
+          for (const line of lines) {
+            if (postedEntryIds.has(line.journal_entry_id)) {
+              totalDebit += Number(line.debit_amount) || 0;
+              totalCredit += Number(line.credit_amount) || 0;
+            }
+          }
+        }
+      }
+
       const totalBalance = totalDebit - totalCredit;
 
       // Get counts
@@ -801,13 +828,55 @@ export class AccountingDataService {
         .select('*', { count: 'exact', head: true })
         .eq('company_id', companyId);
 
+      // Count entries by status
+      const pendingEntriesCount = entriesList.filter(e => e.status === 'draft').length;
+      const postedEntriesCount = entriesList.filter(e => e.status === 'posted' || e.status === 'imported').length;
+
+      // Get unpaid invoices (clients - accounts receivable)
+      const { data: unpaidInvoices } = await supabase
+        .from('invoices')
+        .select('total_ttc, due_date')
+        .eq('company_id', companyId)
+        .neq('status', 'paid');
+
+      const unpaidInvoicesAmount = (unpaidInvoices || []).reduce((sum, inv) => sum + (Number(inv.total_ttc) || 0), 0);
+      const unpaidInvoicesCount = (unpaidInvoices || []).length;
+
+      // Calculate overdue invoices (aging > 0 days)
+      const today = new Date();
+      const overdueInvoices = (unpaidInvoices || []).filter(inv => {
+        if (!inv.due_date) return false;
+        const dueDate = new Date(inv.due_date);
+        return dueDate < today;
+      });
+      const overdueInvoicesCount = overdueInvoices.length;
+      const overdueAmount = overdueInvoices.reduce((sum, inv) => sum + (Number(inv.total_ttc) || 0), 0);
+
+      // Get unpaid purchases (fournisseurs - accounts payable)
+      const { data: unpaidPurchases } = await supabase
+        .from('purchases')
+        .select('total_amount, due_date')
+        .eq('company_id', companyId)
+        .neq('payment_status', 'paid');
+
+      const unpaidPurchasesAmount = (unpaidPurchases || []).reduce((sum, p) => sum + (Number(p.total_amount) || 0), 0);
+      const unpaidPurchasesCount = (unpaidPurchases || []).length;
+
       return {
         totalBalance,
         totalDebit,
         totalCredit,
         entriesCount: entriesList.length,
+        pendingEntriesCount,
+        postedEntriesCount,
         accountsCount: accountsCount || 0,
-        journalsCount: journalsCount || 0
+        journalsCount: journalsCount || 0,
+        unpaidInvoicesAmount,
+        unpaidInvoicesCount,
+        overdueInvoicesCount,
+        overdueAmount,
+        unpaidPurchasesAmount,
+        unpaidPurchasesCount
       };
     } catch (error) {
       console.error('Error getting accounting stats:', error);
@@ -816,8 +885,16 @@ export class AccountingDataService {
         totalDebit: 0,
         totalCredit: 0,
         entriesCount: 0,
+        pendingEntriesCount: 0,
+        postedEntriesCount: 0,
         accountsCount: 0,
-        journalsCount: 0
+        journalsCount: 0,
+        unpaidInvoicesAmount: 0,
+        unpaidInvoicesCount: 0,
+        overdueInvoicesCount: 0,
+        overdueAmount: 0,
+        unpaidPurchasesAmount: 0,
+        unpaidPurchasesCount: 0
       };
     }
   }
@@ -877,12 +954,14 @@ export class AccountingDataService {
         totalBalanceTrend: this.calculateTrend(Math.abs(currentStats.totalBalance), Math.abs(previousStats.totalBalance)),
         totalDebitTrend: this.calculateTrend(currentStats.totalDebit, previousStats.totalDebit),
         totalCreditTrend: this.calculateTrend(currentStats.totalCredit, previousStats.totalCredit),
-        entriesCountTrend: this.calculateTrend(currentStats.entriesCount, previousStats.entriesCount)
+        entriesCountTrend: this.calculateTrend(currentStats.entriesCount, previousStats.entriesCount),
+        pendingEntriesCountTrend: this.calculateTrend(currentStats.pendingEntriesCount, previousStats.pendingEntriesCount)
       } : {
         totalBalanceTrend: undefined,
         totalDebitTrend: undefined,
         totalCreditTrend: undefined,
-        entriesCountTrend: undefined
+        entriesCountTrend: undefined,
+        pendingEntriesCountTrend: undefined
       };
 
       return {
@@ -896,13 +975,85 @@ export class AccountingDataService {
         totalDebit: 0,
         totalCredit: 0,
         entriesCount: 0,
+        pendingEntriesCount: 0,
+        postedEntriesCount: 0,
         accountsCount: 0,
         journalsCount: 0,
         totalBalanceTrend: undefined,
         totalDebitTrend: undefined,
         totalCreditTrend: undefined,
-        entriesCountTrend: undefined
+        entriesCountTrend: undefined,
+        pendingEntriesCountTrend: undefined
       };
+    }
+  }
+
+  /**
+   * Get journal distribution statistics
+   */
+  async getJournalDistribution(params?: { periodStart?: string; periodEnd?: string; companyId?: string }): Promise<Array<{ name: string; code: string; count: number; percentage: number }>> {
+    try {
+      const companyId = params?.companyId || await this.getCurrentCompanyId();
+
+      // Build query
+      let query = supabase
+        .from('journal_entries')
+        .select('journal_id, journals(code, name)')
+        .eq('company_id', companyId)
+        .in('status', ['posted', 'imported']);
+
+      // Apply period filters if provided
+      if (params?.periodStart) {
+        query = query.gte('entry_date', params.periodStart);
+      }
+      if (params?.periodEnd) {
+        query = query.lte('entry_date', params.periodEnd);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error fetching journal distribution:', error);
+        return [];
+      }
+
+      if (!data || data.length === 0) {
+        return [];
+      }
+
+      // Aggregate by journal
+      const journalMap = new Map<string, { name: string; code: string; count: number }>();
+
+      data.forEach((entry: any) => {
+        const journal = entry.journals;
+        if (journal) {
+          const key = journal.code;
+          if (journalMap.has(key)) {
+            journalMap.get(key)!.count++;
+          } else {
+            journalMap.set(key, {
+              name: journal.name || journal.code,
+              code: journal.code,
+              count: 1
+            });
+          }
+        }
+      });
+
+      // Calculate percentages and convert to array
+      const total = data.length;
+      const distribution = Array.from(journalMap.values()).map(journal => ({
+        ...journal,
+        percentage: Math.round((journal.count / total) * 100)
+      }));
+
+      // Sort by count descending
+      distribution.sort((a, b) => b.count - a.count);
+
+      return distribution;
+    } catch (error) {
+      console.error('Error getting journal distribution:', error);
+      return [];
     }
   }
 

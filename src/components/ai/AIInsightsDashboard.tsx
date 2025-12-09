@@ -130,16 +130,16 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
         if (result.status === 'fulfilled' && result.value.success) {
           switch (index) {
             case 0:
-              setAnomalies(result.value.data || []);
+              setAnomalies(Array.isArray(result.value.data) ? result.value.data : []);
               break;
             case 1:
-              setHealthScore(result.value.data);
+              setHealthScore(result.value.data || null);
               break;
             case 2:
-              setCashFlowPredictions(result.value.data || []);
+              setCashFlowPredictions(Array.isArray(result.value.data) ? result.value.data : []);
               break;
             case 3:
-              setTaxOptimizations(result.value.data || []);
+              setTaxOptimizations(Array.isArray(result.value.data) ? result.value.data : []);
               break;
           }
         }

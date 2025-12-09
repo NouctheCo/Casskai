@@ -266,7 +266,7 @@ export function WorkflowTemplates() {
 
                 <div className="space-y-2">
 
-                  {(template.workflow_definition?.actions || []).map((action, index) => (
+                  {(template.workflow_definition?.actions || []).map((action: any, index: number) => (
 
                     <div key={index} className="flex items-center space-x-2 text-sm p-2 bg-gray-50 dark:bg-gray-800 rounded">
 

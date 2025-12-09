@@ -53,9 +53,32 @@ import {
 
 
 
-function useEntryFormState(entry) {
+interface EntryLine {
+  account: string;
+  description: string;
+  debit: string;
+  credit: string;
+}
 
-  const [formData, setFormData] = useState({
+interface EntryFormData {
+  date: string;
+  reference: string;
+  description: string;
+  lines: EntryLine[];
+}
+
+interface EntryData {
+  id?: number | string;
+  date: string;
+  reference: string;
+  description: string;
+  lines?: EntryLine[];
+  status?: string;
+}
+
+function useEntryFormState(entry: EntryData | null) {
+
+  const [formData, setFormData] = useState<EntryFormData>({
 
     date: new Date().toISOString().split('T')[0],
 
@@ -137,7 +160,7 @@ function EntryLineForm({ line, index, updateLine, removeLine, canRemove, account
 
           <SelectContent>
 
-            {accounts.map((account) => (
+            {accounts.map((account: any) => (
 
               <SelectItem key={account.id} value={account.id}>
 
@@ -317,7 +340,7 @@ const EntryFormDialog = ({ open, onClose, entry = null, onSave, accounts }) => {
 
   };
 
-  const removeLine = (index) => {
+  const removeLine = (index: number) => {
 
     if (formData.lines.length > 2) {
 
@@ -333,21 +356,21 @@ const EntryFormDialog = ({ open, onClose, entry = null, onSave, accounts }) => {
 
   };
 
-  const updateLine = (index, field, value) => {
+  const updateLine = (index: number, field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
       lines: prev.lines.map((line, i) => {
         if (i === index) {
           const updatedLine = { ...line, [field]: value };
-          
+
           // Auto-fill description when account is selected
           if (field === 'account' && value) {
-            const selectedAccount = accounts.find(account => account.id === value);
+            const selectedAccount = accounts.find((account: any) => account.id === value);
             if (selectedAccount && !line.description) {
               updatedLine.description = selectedAccount.account_name;
             }
           }
-          
+
           return updatedLine;
         }
         return line;
@@ -581,13 +604,13 @@ const EntryFormDialog = ({ open, onClose, entry = null, onSave, accounts }) => {
 
 // Entry Preview Dialog Component
 
-const EntryPreviewDialog = ({ open, onClose, entry }) => {
+const EntryPreviewDialog = ({ open, onClose, entry }: { open: boolean; onClose: () => void; entry: any }) => {
 
   if (!entry) return null;
 
 
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (status: string) => {
 
     switch (status) {
 
@@ -721,7 +744,7 @@ const EntryPreviewDialog = ({ open, onClose, entry }) => {
 
                 <TableBody>
 
-                  {entry.lines?.map((line, index) => (
+                  {entry.lines?.map((line: any, index: number) => (
 
                     <TableRow key={index}>
 
@@ -833,11 +856,13 @@ const EntryPreviewDialog = ({ open, onClose, entry }) => {
 
 // Entry Row Component
 
-const EntryRow = ({ entry, onEdit, onDelete, onView }) => {
+const EntryRow = ({ entry, onEdit, onDelete, onView, onValidate }: { entry: any; onEdit: (entry: any) => void; onDelete: (entry: any) => void; onView: (entry: any) => void; onValidate: (entry: any) => void }) => {
 
   const [expanded, setExpanded] = useState(false);
 
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const [isValidating, setIsValidating] = useState(false);
 
   // Simuler un contrôle RBAC (à remplacer par vrai hook/context)
 
@@ -847,9 +872,11 @@ const EntryRow = ({ entry, onEdit, onDelete, onView }) => {
 
   const userCanView = true;
 
+  const userCanValidate = true; // Nouveau: autorisation de validation
 
 
-  const getStatusBadge = (status) => {
+
+  const getStatusBadge = (status: string) => {
 
     switch (status) {
 
@@ -929,6 +956,27 @@ const EntryRow = ({ entry, onEdit, onDelete, onView }) => {
 
             </Button>
 
+            {/* Bouton Valider - uniquement pour les brouillons */}
+            {entry.status === 'draft' && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={async () => {
+                  if (!userCanValidate) return;
+                  setIsValidating(true);
+                  await onValidate(entry);
+                  setIsValidating(false);
+                }}
+                disabled={!userCanValidate || isValidating}
+                className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20"
+                title="Valider l'écriture"
+              >
+
+              {isValidating ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+
+            </Button>
+            )}
+
             <Button variant="ghost" size="sm" onClick={() => userCanEdit && onEdit(entry)} disabled={!userCanEdit}>
 
               <Edit className="w-4 h-4" />
@@ -969,7 +1017,7 @@ const EntryRow = ({ entry, onEdit, onDelete, onView }) => {
 
               <h4 className="font-medium text-sm">Détail des lignes:</h4>
 
-              {entry.lines.map((line, index) => (
+              {entry.lines.map((line: any, index: number) => (
 
                 <div key={index} className="flex justify-between text-sm text-gray-600 dark:text-gray-300">
 
@@ -1009,9 +1057,9 @@ export default function OptimizedJournalEntriesTab() {
 
   const { currentCompany } = useAuth();
   const { createJournalEntry, loading: _hookLoading, error: _hookError, getAccountsList } = useJournalEntries(currentCompany?.id || '');
-  const [entries, setEntries] = useState([]);
+  const [entries, setEntries] = useState<any[]>([]);
   const [_loading, setLoading] = useState(true);
-  const [accounts, setAccounts] = useState([]);
+  const [accounts, setAccounts] = useState<any[]>([]);
 
   // Charger les écritures réelles depuis Supabase
   useEffect(() => {
@@ -1127,7 +1175,7 @@ export default function OptimizedJournalEntriesTab() {
 
 
 
-  const handleSaveEntry = async (entryData) => {
+  const handleSaveEntry = async (entryData: any) => {
     console.log('[OptimizedJournalEntriesTab] handleSaveEntry called with:', entryData);
 
     if (!currentCompany?.id) {
@@ -1145,7 +1193,7 @@ export default function OptimizedJournalEntriesTab() {
         date: entryData.date,
         description: entryData.description,
         reference: entryData.reference,
-        items: entryData.lines.map(line => ({
+        items: entryData.lines.map((line: any) => ({
           account_id: line.account, // Maintenant line.account contient déjà l'UUID
           description: line.description,
           debit_amount: parseFloat(line.debit) || 0,
@@ -1184,7 +1232,7 @@ export default function OptimizedJournalEntriesTab() {
 
 
 
-  const handleEditEntry = (entry) => {
+  const handleEditEntry = (entry: any) => {
 
     setEditingEntry(entry);
 
@@ -1194,7 +1242,7 @@ export default function OptimizedJournalEntriesTab() {
 
 
 
-  const handleDeleteEntry = async (entry) => {
+  const handleDeleteEntry = async (entry: any) => {
     // Confirmation
     // eslint-disable-next-line no-alert
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette écriture ? Cette action est irréversible.')) {
@@ -1239,9 +1287,51 @@ export default function OptimizedJournalEntriesTab() {
     }
   };
 
+  const handleValidateEntry = async (entry: any) => {
+    if (!currentCompany?.id) {
+      toast({
+        title: "Erreur",
+        description: "Aucune entreprise sélectionnée",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      console.log('✅ Validation écriture:', entry.id);
+
+      const result = await journalEntriesService.updateJournalEntryStatus(
+        entry.id,
+        'posted',
+        currentCompany.id
+      );
+
+      if (result.success) {
+        toast({
+          title: "Écriture validée",
+          description: "L'écriture a été validée avec succès et est maintenant visible dans les rapports."
+        });
+
+        // Recharger la liste depuis la base
+        await loadEntries();
+
+        console.log('✅ Écriture validée et liste rechargée');
+      } else {
+        throw new Error('error' in result ? result.error : 'Échec de la validation');
+      }
+    } catch (error) {
+      console.error('❌ Erreur validation:', error);
+      toast({
+        title: "Erreur de validation",
+        description: error instanceof Error ? error.message : "Impossible de valider l'écriture",
+        variant: "destructive"
+      });
+    }
+  };
 
 
-  const handleViewEntry = (entry) => {
+
+  const handleViewEntry = (entry: any) => {
 
     setPreviewEntry(entry);
 
@@ -1494,6 +1584,8 @@ export default function OptimizedJournalEntriesTab() {
                     onDelete={handleDeleteEntry}
 
                     onView={handleViewEntry}
+
+                    onValidate={handleValidateEntry}
 
                   />
 

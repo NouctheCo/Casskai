@@ -110,7 +110,19 @@
       "totalCredit": "Total crédito",
       "totalCreditDesc": "Créditos este mes",
       "entries": "Asientos",
-      "entriesDesc": "Asientos registrados"
+      "entriesDesc": "Asientos registrados",
+      "pendingEntries": "Pendientes",
+      "pendingEntriesDesc": "Asientos por validar",
+      "postedEntries": "Validados",
+      "postedEntriesDesc": "Asientos contabilizados",
+      "receivables": "Por cobrar",
+      "receivablesDesc": "{{count}} factura(s) cliente(s) impagada(s)",
+      "payables": "Por pagar",
+      "payablesDesc": "{{count}} factura(s) proveedor(es)",
+      "overdue": "Atrasadas",
+      "overdueDesc": "{{amount}} en retraso",
+      "validationRate": "Tasa validación",
+      "validationRateDesc": "Asientos validados"
     },
     "refresh": "Actualizar",
     "newEntry": "Nuevo asiento",
@@ -149,6 +161,13 @@
     "recentActivity": {
       "title": "Actividad reciente",
       "noActivity": "Sin actividad reciente"
+    },
+    "journalDistribution": {
+      "title": "Distribución por diario",
+      "noData": "No hay datos disponibles",
+      "entries": "Asientos",
+      "totalJournals": "Total diarios",
+      "totalEntries": "Total asientos"
     }
   },
   "accountingEntries": "Écritures comptables",
@@ -1646,12 +1665,12 @@
   "interval_year": "année",
   "inventory": "Inventario",
   "inventorypage": {
+    "80000": "80000",
+    "120000": "120000",
     "production": "Producción",
     "fournisseurs": "Proveedores",
     "alertes": "Alertas",
     "dashboard": "Panel",
-    "80000": "80000",
-    "120000": "120000",
     "ajouter_larticle": "Agregar el artículo",
     "ajoutez_un_nouvel_article_votre_stock": "Agregue un nuevo artículo a su inventario",
     "annuler": "Cancelar",
@@ -2601,13 +2620,7 @@
       "generateReport": "Generar informe PDF",
       "markAsPaid": "Marcar como pagado"
     },
-    "status": {
-      "realTime": "Tiempo real",
-      "pending": "Pendiente",
-      "paid": "Pagado",
-      "overdue": "Vencido",
-      "cancelled": "Cancelado"
-    },
+    "status": "Estado",
     "createPurchase": "Nueva compra",
     "description": "Descripción",
     "filters": {
@@ -2679,7 +2692,6 @@
       "totalPurchasesDescription": "Nombrebre total d'achats",
       "urgent": "Urgent"
     },
-    "status": "Estado",
     "table": {
       "amountHT": "Importe HT",
       "amountTTC": "Importe TTC",

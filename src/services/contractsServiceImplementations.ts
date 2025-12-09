@@ -104,7 +104,7 @@ export async function getContract(id: string): Promise<ContractServiceResponse<C
     if (error) throw error;
 
     if (!data) {
-      return { data: null, error: { message: 'Contract not found' }, success: false };
+      return { data: undefined, error: { message: 'Contract not found' }, success: false };
     }
 
     const contract: ContractData = {
@@ -230,7 +230,7 @@ export async function updateContract(
     if (error) throw error;
 
     if (!data) {
-      return { data: null, error: { message: 'Contract not found' }, success: false };
+      return { data: undefined, error: { message: 'Contract not found' }, success: false };
     }
 
     const contract: ContractData = {
@@ -424,7 +424,7 @@ export async function createRFACalculation(
     return { data: rfa, success: true };
   } catch (error) {
     console.error('Error creating RFA calculation:', error);
-    return { data: null, error: { message: String(error) }, success: false };
+    return { data: undefined, error: { message: String(error) }, success: false };
   }
 }
 

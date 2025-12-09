@@ -6,49 +6,95 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 
-const FECImportSummary = ({ parsedData }) => {
+interface FECEntry {
+  EcritureLib?: string;
+  CompteNum?: string;
+  CompteLib?: string;
+  JournalCode?: string;
+  EcritureDate?: string | Date;
+  EcritureNum?: string;
+  Debit?: number;
+  Credit?: number;
+}
+
+interface AccountInfo {
+  libelle: string;
+  type: string;
+  class: string;
+}
+
+interface JournalInfo {
+  libelle: string;
+}
+
+interface ParsedData {
+  entries: FECEntry[];
+  accounts: Map<string, AccountInfo>;
+  journals: Map<string, JournalInfo>;
+  entriesByJournalAndNum: Map<string, FECEntry[]>;
+}
+
+interface FECImportSummaryProps {
+  parsedData: ParsedData | null;
+}
+
+const FECImportSummary: React.FC<FECImportSummaryProps> = ({ parsedData }) => {
   const { t } = useLocale();
   const [searchTerm, setSearchTerm] = useState('');
 
   if (!parsedData) return null;
 
   const { entries, accounts, journals, entriesByJournalAndNum } = parsedData;
+
+  // Convertir les dates au format string si nécessaire
+  const normalizeDate = (date: string | Date | undefined): string => {
+    if (!date) return '';
+    if (date instanceof Date) return date.toLocaleDateString();
+    return date;
+  };
   
   // Limiter le nombre d'entrées affichées pour des raisons de performance
   const maxEntriesToShow = 100;
   
   // Filtrer les entrées en fonction du terme de recherche
-  const filteredEntries = searchTerm 
-    ? entries.filter(entry => 
+  const filteredEntries = searchTerm
+    ? entries.filter((entry: FECEntry) =>
         entry.EcritureLib?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         entry.CompteNum?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         entry.CompteLib?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         entry.JournalCode?.toLowerCase().includes(searchTerm.toLowerCase())
       )
     : entries;
-  
+
   const displayEntries = filteredEntries.slice(0, maxEntriesToShow);
-  
+
   // Regrouper les entrées par journal et numéro d'écriture pour l'affichage
-  const groupedEntries = [];
+  const groupedEntries: Array<{
+    key: string;
+    entries: FECEntry[];
+    date?: string;
+    description: string;
+    totalDebit: number;
+    totalCredit: number;
+  }> = [];
   if (entriesByJournalAndNum) {
     for (const [key, entriesGroup] of entriesByJournalAndNum) {
-      if (searchTerm && !key.toLowerCase().includes(searchTerm.toLowerCase()) && 
-          !entriesGroup.some(e => 
+      if (searchTerm && !key.toLowerCase().includes(searchTerm.toLowerCase()) &&
+          !entriesGroup.some((e: FECEntry) =>
             e.EcritureLib?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             e.CompteNum?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             e.CompteLib?.toLowerCase().includes(searchTerm.toLowerCase())
           )) {
         continue;
       }
-      
+
       groupedEntries.push({
         key,
         entries: entriesGroup,
-        date: entriesGroup[0]?.EcritureDate,
+        date: normalizeDate(entriesGroup[0]?.EcritureDate),
         description: entriesGroup[0]?.EcritureLib || '',
-        totalDebit: entriesGroup.reduce((sum, e) => sum + (e.Debit || 0), 0),
-        totalCredit: entriesGroup.reduce((sum, e) => sum + (e.Credit || 0), 0)
+        totalDebit: entriesGroup.reduce((sum: number, e: FECEntry) => sum + (e.Debit || 0), 0),
+        totalCredit: entriesGroup.reduce((sum: number, e: FECEntry) => sum + (e.Credit || 0), 0)
       });
     }
   }
@@ -75,20 +121,20 @@ const FECImportSummary = ({ parsedData }) => {
         <Tabs defaultValue="grouped">
           <TabsList className="mb-4">
             <TabsTrigger value="grouped">
-              {t('fecImport.summary.groupedEntries', { defaultValue: 'Grouped Entries' })} 
-              ({entriesByJournalAndNum ? entriesByJournalAndNum.length : 0})
+              {t('fecImport.summary.groupedEntries', { defaultValue: 'Grouped Entries' })}
+              ({entriesByJournalAndNum ? entriesByJournalAndNum.size : 0})
             </TabsTrigger>
             <TabsTrigger value="entries">
-              {t('fecImport.summary.entries', { defaultValue: 'Entries' })} 
+              {t('fecImport.summary.entries', { defaultValue: 'Entries' })}
               ({entries.length})
             </TabsTrigger>
             <TabsTrigger value="accounts">
-              {t('fecImport.summary.accounts', { defaultValue: 'Accounts' })} 
-              ({accounts.length})
+              {t('fecImport.summary.accounts', { defaultValue: 'Accounts' })}
+              ({accounts.size})
             </TabsTrigger>
             <TabsTrigger value="journals">
-              {t('fecImport.summary.journals', { defaultValue: 'Journals' })} 
-              ({journals.length})
+              {t('fecImport.summary.journals', { defaultValue: 'Journals' })}
+              ({journals.size})
             </TabsTrigger>
           </TabsList>
           
@@ -108,7 +154,7 @@ const FECImportSummary = ({ parsedData }) => {
                 {displayGroups.map((group, index) => (
                   <TableRow key={index}>
                     <TableCell className="font-medium">{group.key}</TableCell>
-                    <TableCell>{group.date ? group.date.toLocaleDateString() : ''}</TableCell>
+                    <TableCell>{group.date ? (typeof group.date === 'string' ? new Date(group.date).toLocaleDateString() : (group.date as Date).toLocaleDateString()) : ''}</TableCell>
                     <TableCell>{group.description}</TableCell>
                     <TableCell className="text-right">{group.totalDebit.toFixed(2)}</TableCell>
                     <TableCell className="text-right">{group.totalCredit.toFixed(2)}</TableCell>
@@ -140,15 +186,15 @@ const FECImportSummary = ({ parsedData }) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {displayEntries.map((entry, index) => (
+                {displayEntries.map((entry: FECEntry, index: number) => (
                   <TableRow key={index}>
                     <TableCell>{entry.JournalCode}</TableCell>
                     <TableCell>{entry.EcritureNum}</TableCell>
-                    <TableCell>{entry.EcritureDate ? entry.EcritureDate.toLocaleDateString() : ''}</TableCell>
+                    <TableCell>{normalizeDate(entry.EcritureDate)}</TableCell>
                     <TableCell>{entry.CompteNum}</TableCell>
                     <TableCell>{entry.EcritureLib}</TableCell>
-                    <TableCell className="text-right">{entry.Debit.toFixed(2)}</TableCell>
-                    <TableCell className="text-right">{entry.Credit.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">{entry.Debit?.toFixed(2) || '0.00'}</TableCell>
+                    <TableCell className="text-right">{entry.Credit?.toFixed(2) || '0.00'}</TableCell>
                   </TableRow>
                 ))}
                 {filteredEntries.length > maxEntriesToShow && (
@@ -173,13 +219,13 @@ const FECImportSummary = ({ parsedData }) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {accounts
-                  .filter(([accountNum, accountInfo]) => 
-                    !searchTerm || 
-                    accountNum.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                {Array.from(accounts.entries())
+                  .filter(([accountNum, accountInfo]: [string, AccountInfo]) =>
+                    !searchTerm ||
+                    accountNum.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     accountInfo.libelle.toLowerCase().includes(searchTerm.toLowerCase())
                   )
-                  .map(([accountNum, accountInfo], index) => (
+                  .map(([accountNum, accountInfo]: [string, AccountInfo], index: number) => (
                     <TableRow key={index}>
                       <TableCell className="font-mono">{accountNum}</TableCell>
                       <TableCell>{accountInfo.libelle}</TableCell>
@@ -201,9 +247,9 @@ const FECImportSummary = ({ parsedData }) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {journals
-                  .filter(journal => !searchTerm || journal.toLowerCase().includes(searchTerm.toLowerCase()))
-                  .map((journal, index) => (
+                {Array.from(journals.keys())
+                  .filter((journal: string) => !searchTerm || journal.toLowerCase().includes(searchTerm.toLowerCase()))
+                  .map((journal: string, index: number) => (
                     <TableRow key={index}>
                       <TableCell className="font-medium">{journal}</TableCell>
                       <TableCell>{t(`fecImport.journalTypes.${journal.startsWith('BQ') ? 'bank' : journal === 'HA' ? 'purchase' : journal === 'OD' ? 'miscellaneous' : journal === 'AN' ? 'opening' : 'other'}`, { defaultValue: journal })}</TableCell>

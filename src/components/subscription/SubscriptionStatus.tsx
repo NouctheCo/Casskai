@@ -256,9 +256,9 @@ const SubscriptionStatus: React.FC = () => {
 
 
 
-  const statusColor = getSubscriptionStatusColor(subscription.status);
+  const statusColor = getSubscriptionStatusColor(subscription?.status ?? 'inactive');
 
-  const statusLabel = getSubscriptionStatusLabel(subscription.status);
+  const statusLabel = getSubscriptionStatusLabel(subscription?.status ?? 'inactive');
 
 
 
@@ -310,7 +310,7 @@ const SubscriptionStatus: React.FC = () => {
 
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
 
-                  Plan {plan.name}
+                  Plan {plan?.name ?? 'Non défini'}
 
                 </h3>
 
@@ -330,7 +330,7 @@ const SubscriptionStatus: React.FC = () => {
 
                 >
 
-                  {subscription.status === 'trialing' ? (
+                  {subscription?.status === 'trialing' ? (
 
                     <>
 
@@ -368,7 +368,7 @@ const SubscriptionStatus: React.FC = () => {
 
               <p className="text-gray-600 dark:text-gray-300">
 
-                {formatPrice(plan.price, plan.currency)}/{plan.interval === 'month' ? 'mois' : 'an'}
+                {formatPrice(plan?.price ?? 0, plan?.currency ?? 'eur')}/{plan?.interval === 'month' ? 'mois' : 'an'}
 
               </p>
 
@@ -380,13 +380,13 @@ const SubscriptionStatus: React.FC = () => {
 
               <p className="text-sm text-gray-500 dark:text-gray-300">
 
-                {daysUntilRenewal > 0 ? 'Renouvellement dans' : 'Expiré depuis'}
+                {(daysUntilRenewal ?? 0) > 0 ? 'Renouvellement dans' : 'Expiré depuis'}
 
               </p>
 
               <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
 
-                {Math.abs(daysUntilRenewal)} jour{Math.abs(daysUntilRenewal) > 1 ? 's' : ''}
+                {Math.abs(daysUntilRenewal ?? 0)} jour{Math.abs(daysUntilRenewal ?? 0) > 1 ? 's' : ''}
 
               </p>
 
@@ -420,7 +420,7 @@ const SubscriptionStatus: React.FC = () => {
 
                   <p className="text-xs text-gray-500 dark:text-gray-300">
 
-                    {subscription.currentPeriodStart.toLocaleDateString('fr-FR')} - {subscription.currentPeriodEnd.toLocaleDateString('fr-FR')}
+                    {subscription?.currentPeriodStart?.toLocaleDateString('fr-FR')} - {subscription?.currentPeriodEnd?.toLocaleDateString('fr-FR')}
 
                   </p>
 
@@ -438,15 +438,15 @@ const SubscriptionStatus: React.FC = () => {
 
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100 dark:text-white">
 
-                    Support {plan.supportLevel}
+                    Support {plan?.supportLevel ?? 'basic'}
 
                   </p>
 
                   <p className="text-xs text-gray-500 dark:text-gray-300">
 
-                    {plan.supportLevel === 'basic' ? 'Support par email' :
+                    {plan?.supportLevel === 'basic' ? 'Support par email' :
 
-                     plan.supportLevel === 'priority' ? 'Support prioritaire' :
+                     plan?.supportLevel === 'priority' ? 'Support prioritaire' :
 
                      'Support dédié 24/7'}
 
@@ -462,7 +462,7 @@ const SubscriptionStatus: React.FC = () => {
 
             <div className="space-y-3">
 
-              {subscription.cancelAtPeriodEnd && (
+              {subscription?.cancelAtPeriodEnd && (
 
                 <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
 
@@ -480,7 +480,7 @@ const SubscriptionStatus: React.FC = () => {
 
                   <p className="text-xs text-red-600 dark:text-red-300 mt-1">
 
-                    Votre abonnement sera annulé le {subscription.currentPeriodEnd.toLocaleDateString('fr-FR')}
+                    Votre abonnement sera annulé le {subscription?.currentPeriodEnd?.toLocaleDateString('fr-FR')}
 
                   </p>
 
@@ -490,7 +490,7 @@ const SubscriptionStatus: React.FC = () => {
 
               
 
-              {isTrialing && subscription.trialEnd && (
+              {isTrialing && subscription?.trialEnd && (
 
                 <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
 
@@ -508,7 +508,7 @@ const SubscriptionStatus: React.FC = () => {
 
                   <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
 
-                    Se termine le {subscription.trialEnd.toLocaleDateString('fr-FR')}
+                    Se termine le {subscription?.trialEnd?.toLocaleDateString('fr-FR')}
 
                   </p>
 

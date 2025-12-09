@@ -20,9 +20,9 @@ interface AnalyticsContextType {
 
   trackPageview: (url?: string) => void;
 
-  trackEvent: (eventName: string, props?: Record<string, unknown>) => void;
+  trackEvent: (eventName: string, props?: PlausibleEventProps) => void;
 
-  trackGoal: (goalName: string, props?: Record<string, unknown>) => void;
+  trackGoal: (goalName: string, props?: PlausibleEventProps) => void;
 
   hasConsent: boolean;
 

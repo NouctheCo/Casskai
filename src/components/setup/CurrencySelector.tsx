@@ -21,7 +21,7 @@ export function CurrencySelector({ value, onValueChange, showAfricanOnly = false
         <SelectValue placeholder="Sélectionner une devise" />
       </SelectTrigger>
       <SelectContent>
-        {currenciesToShow.map(currency => (
+        {currenciesToShow.map((currency: any) => (
           <SelectItem key={currency.code} value={currency.code}>
             <div className="flex items-center gap-2">
               <span className="font-mono text-sm">{currency.symbol}</span>

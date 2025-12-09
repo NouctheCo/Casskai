@@ -1,68 +1,64 @@
 import React, { useState, useCallback } from 'react';
-
 import { motion, AnimatePresence } from 'framer-motion';
-
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-
 import { Button } from '@/components/ui/button';
-
 import { Progress } from '@/components/ui/progress';
-
 import { Badge } from '@/components/ui/badge';
-
 import { Alert, AlertDescription } from '@/components/ui/alert';
-
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
 import { useToast } from '@/components/ui/use-toast';
-
-import { 
-
-  Upload, 
-
-  FileArchive, 
-
-  CheckCircle, 
-
+import {
+  Upload,
+  FileArchive,
+  CheckCircle,
   AlertTriangle,
-
   FileText,
-
   Trash2,
-
   Eye,
-
   RefreshCw,
-
   Database
-
 } from 'lucide-react';
 import { fecService } from '@/services/fecService';
 
+// Types
+interface FECAnalysisResult {
+  company: { name: string; siren?: string; period?: { start: string; end: string } };
+  statistics: {
+    totalEntries: number;
+    totalAccounts: number;
+    totalJournals: number;
+    dateRange: { start: string; end: string };
+    totalDebit?: number;
+    totalCredit?: number;
+    unbalancedEntries?: number;
+  };
+  warnings: Array<string | { line?: number; message: string }>;
+  preview?: {
+    accounts?: any[];
+    entries?: any[];
+    sampleEntries?: any[];
+  };
+}
 
+interface FECImportResult {
+  success: boolean;
+  accountsCreated: number;
+  journalsCreated: number;
+  entriesCreated: number;
+  errors: string[];
+}
 
 export default function FECImportTab() {
-
   const { toast } = useToast();
 
-
-
   // États
-
   const [isDragOver, setIsDragOver] = useState(false);
-
-  const [selectedFile, setSelectedFile] = useState(null);
-
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-
   const [processingStep, setProcessingStep] = useState('');
-
   const [progress, setProgress] = useState(0);
-
-  const [analysisResult, setAnalysisResult] = useState(null);
-
-  const [importResult, setImportResult] = useState(null);
-
+  const [analysisResult, setAnalysisResult] = useState<FECAnalysisResult | null>(null);
+  const [importResult, setImportResult] = useState<FECImportResult | null>(null);
   const [showPreview, setShowPreview] = useState(false);
 
 
@@ -102,45 +98,28 @@ export default function FECImportTab() {
 
 
   // Gestion du drag & drop
-
-  const handleDragOver = useCallback((e) => {
-
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-
     setIsDragOver(true);
-
   }, []);
 
-
-
-  const handleDragLeave = useCallback((e) => {
-
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-
     setIsDragOver(false);
 
   }, []);
 
 
 
-  const handleDrop = useCallback((e) => {
-
+  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-
     setIsDragOver(false);
-
-    
 
     const files = Array.from(e.dataTransfer.files);
-
     handleFileSelection(files[0]);
-
   }, []);
 
-
-
-  const handleFileSelection = (file) => {
-
+  const handleFileSelection = (file: File | undefined) => {
     if (!file) return;
 
 
@@ -201,12 +180,9 @@ export default function FECImportTab() {
 
 
 
-  const handleFileInputChange = (e) => {
-
-    const file = e.target.files[0];
-
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     handleFileSelection(file);
-
   };
 
 
@@ -247,7 +223,24 @@ export default function FECImportTab() {
 
       // ✅ Analyser le fichier FEC avec le vrai service
         const analysis = await fecService.analyzeFECFile(selectedFile);
-        setAnalysisResult(analysis);
+        setAnalysisResult({
+          company: { name: '', siren: '', period: { start: '', end: '' } },
+          statistics: {
+            totalEntries: analysis.totalEntries || 0,
+            totalAccounts: analysis.accountCount || 0,
+            totalJournals: analysis.journalCount || 0,
+            dateRange: { start: '', end: '' },
+            totalDebit: analysis.totalDebit || 0,
+            totalCredit: analysis.totalCredit || 0,
+            unbalancedEntries: 0
+          },
+          warnings: analysis.warnings || [],
+          preview: {
+            accounts: [],
+            entries: [],
+            sampleEntries: []
+          }
+        });
         
         if (!analysis.isValid) {
           toast({
@@ -751,9 +744,9 @@ export default function FECImportTab() {
 
                   <div>
 
-                    <span className="font-medium">Période :</span> 
+                    <span className="font-medium">Période :</span>
 
-                    {' '}{analysisResult.company.period.start} au {analysisResult.company.period.end}
+                    {' '}{analysisResult.company.period?.start} au {analysisResult.company.period?.end}
 
                   </div>
 
@@ -765,7 +758,7 @@ export default function FECImportTab() {
 
                       <CheckCircle className="mr-1 h-3 w-3" />
 
-                      {analysisResult.statistics.totalDebit.toFixed(2)} €
+                      {(analysisResult.statistics.totalDebit ?? 0).toFixed(2)} €
 
                     </Badge>
 
@@ -795,15 +788,14 @@ export default function FECImportTab() {
 
                     <ul className="text-sm space-y-1">
 
-                      {analysisResult.warnings.slice(0, 3).map((warning, index) => (
-
-                        <li key={index}>
-
-                          Ligne {warning.line}: {warning.message}
-
-                        </li>
-
-                      ))}
+                      {analysisResult.warnings.slice(0, 3).map((warning, index) => {
+                        const w = typeof warning === 'string' ? { message: warning } : warning;
+                        return (
+                          <li key={index}>
+                            {w.line ? `Ligne ${w.line}: ` : ''}{w.message}
+                          </li>
+                        );
+                      })}
 
                       {analysisResult.warnings.length > 3 && (
 
@@ -887,7 +879,7 @@ export default function FECImportTab() {
 
                   <CardHeader>
 
-                    <CardTitle>Aperçu des comptes ({analysisResult.preview.accounts.length})</CardTitle>
+                    <CardTitle>Aperçu des comptes ({analysisResult.preview?.accounts?.length ?? 0})</CardTitle>
 
                   </CardHeader>
 
@@ -913,7 +905,7 @@ export default function FECImportTab() {
 
                       <TableBody>
 
-                        {analysisResult.preview.accounts.map((account, index) => (
+                        {(analysisResult.preview?.accounts ?? []).map((account, index) => (
 
                           <TableRow key={index}>
 
@@ -981,7 +973,7 @@ export default function FECImportTab() {
 
                       <TableBody>
 
-                        {analysisResult.preview.sampleEntries.map((entry, index) => (
+                        {(analysisResult.preview?.sampleEntries ?? []).map((entry, index) => (
 
                           <TableRow key={index}>
 

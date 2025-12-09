@@ -161,7 +161,7 @@ export default function OptimizedJournalsTab() {
 
 
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (status: string) => {
 
     switch (status) {
 
@@ -187,7 +187,7 @@ export default function OptimizedJournalsTab() {
 
 
 
-  const getTypeIcon = (type) => {
+  const getTypeIcon = (type: string) => {
 
     switch (type) {
 

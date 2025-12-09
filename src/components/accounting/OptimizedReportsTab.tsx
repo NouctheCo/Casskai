@@ -61,6 +61,7 @@ import type { FinancialReport, ReportFormData } from '@/types/reports.types';
 import { useAuth } from '@/contexts/AuthContext';
 
 import { dashboardStatsService, type DashboardStats } from '@/services/dashboardStatsService';
+import ReportsFinancialDashboard from './ReportsFinancialDashboard';
 
 
 
@@ -449,11 +450,11 @@ export default function OptimizedReportsTab() {
 
           name: currentCompany.name,
 
-          address: currentCompany.address,
+          address: currentCompany.address || undefined,
 
-          phone: currentCompany.phone,
+          phone: currentCompany.phone || undefined,
 
-          email: currentCompany.email
+          email: currentCompany.email || undefined
 
         }
 
@@ -815,11 +816,11 @@ export default function OptimizedReportsTab() {
 
           name: currentCompany.name,
 
-          address: currentCompany.address,
+          address: currentCompany.address || undefined,
 
-          phone: currentCompany.phone,
+          phone: currentCompany.phone || undefined,
 
-          email: currentCompany.email
+          email: currentCompany.email || undefined
 
         }
 
@@ -995,11 +996,11 @@ export default function OptimizedReportsTab() {
 
           name: currentCompany.name,
 
-          address: currentCompany.address,
+          address: currentCompany.address || undefined,
 
-          phone: currentCompany.phone,
+          phone: currentCompany.phone || undefined,
 
-          email: currentCompany.email
+          email: currentCompany.email || undefined
 
         }
 
@@ -1242,7 +1243,8 @@ export default function OptimizedReportsTab() {
 
       </div>
 
-
+      {/* Dashboard Graphique Financier */}
+      <ReportsFinancialDashboard />
 
       {/* Statistiques rapides */}
 

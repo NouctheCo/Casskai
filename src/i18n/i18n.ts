@@ -528,7 +528,7 @@ const initConfig = {
 
   saveMissing: process.env.NODE_ENV === 'development',
 
-  missingKeyHandler: (lng, ns, key) => {
+  missingKeyHandler: (lng: string[], ns: string, key: string) => {
 
     if (process.env.NODE_ENV === 'development') {
 
@@ -578,7 +578,7 @@ const initConfig = {
 
   postProcess: ['fallback'],
 
-  parseMissingKeyHandler: (key) => {
+  parseMissingKeyHandler: (key: string) => {
 
     if (process.env.NODE_ENV === 'development') {
 

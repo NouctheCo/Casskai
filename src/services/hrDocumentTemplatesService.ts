@@ -189,7 +189,7 @@ export class HRDocumentTemplatesService {
       const requiredVars = template.variables
         .filter((v: TemplateVariable) => v.required)
         .map((v: TemplateVariable) => v.name);
-      const missingVariables = requiredVars.filter(v => !providedVars.includes(v));
+      const missingVariables = requiredVars.filter((v: string) => !providedVars.includes(v));
 
       return {
         success: true,

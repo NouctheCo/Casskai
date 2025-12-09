@@ -110,7 +110,19 @@
       "totalCredit": "Total credit",
       "totalCreditDesc": "Credits this month",
       "entries": "Entries",
-      "entriesDesc": "Entries recorded"
+      "entriesDesc": "Entries recorded",
+      "pendingEntries": "Pending",
+      "pendingEntriesDesc": "Entries to validate",
+      "postedEntries": "Validated",
+      "postedEntriesDesc": "Posted entries",
+      "receivables": "Receivables",
+      "receivablesDesc": "{{count}} unpaid invoice(s)",
+      "payables": "Payables",
+      "payablesDesc": "{{count}} supplier invoice(s)",
+      "overdue": "Overdue",
+      "overdueDesc": "{{amount}} overdue",
+      "validationRate": "Validation rate",
+      "validationRateDesc": "Validated entries"
     },
     "refresh": "Refresh",
     "newEntry": "New entry",
@@ -149,6 +161,13 @@
     "recentActivity": {
       "title": "Recent activity",
       "noActivity": "No recent activity"
+    },
+    "journalDistribution": {
+      "title": "Distribution by Journal",
+      "noData": "No data available",
+      "entries": "Entries",
+      "totalJournals": "Total journals",
+      "totalEntries": "Total entries"
     }
   },
   "accountingEntries": "Ã‰critures comptables",
@@ -1646,12 +1665,12 @@
   "interval_year": "annÃ©e",
   "inventory": "Inventory",
   "inventorypage": {
+    "80000": "80000",
+    "120000": "120000",
     "production": "Production",
     "fournisseurs": "Suppliers",
     "alertes": "Alerts",
     "dashboard": "Dashboard",
-    "80000": "80000",
-    "120000": "120000",
     "ajouter_larticle": "Add item",
     "ajoutez_un_nouvel_article_votre_stock": "Add a new item to your inventory",
     "annuler": "Cancel",
@@ -2601,13 +2620,7 @@
       "generateReport": "Generate PDF report",
       "markAsPaid": "Mark as paid"
     },
-    "status": {
-      "realTime": "Real-time",
-      "pending": "Pending",
-      "paid": "Paid",
-      "overdue": "Overdue",
-      "cancelled": "Cancelled"
-    },
+    "status": "Status",
     "createPurchase": "New purchase",
     "description": "Description",
     "filters": {
@@ -2679,7 +2692,6 @@
       "totalPurchasesDescription": "Total number of purchases",
       "urgent": "Urgent"
     },
-    "status": "Status",
     "table": {
       "amountHT": "Amount HT",
       "amountTTC": "Amount TTC",

@@ -268,11 +268,11 @@ const CookiesPolicyPage = () => {
 
 
 
-  const handleCookieToggle = (cookieType) => {
+  const handleCookieToggle = (cookieType: string) => {
 
     if (cookieType === 'essential') return; // Cannot toggle essential cookies
 
-    
+
 
     setCookieSettings(prev => ({
 

@@ -51,7 +51,7 @@ export default function ChartOfAccountsEnhanced({ currentEnterpriseId }: { curre
     error: _error,
     fetchAccounts,
     refresh
-  } = useAccounting(companyId);
+  } = useAccounting(companyId || '');
 
   const [budgetCategories, setBudgetCategories] = useState<BudgetCategory[]>([]);
   const [accountMappings, setAccountMappings] = useState<Map<string, string>>(new Map());

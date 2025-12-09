@@ -12,6 +12,7 @@
 
 // Service RH moderne intégré avec Supabase
 import { supabase } from '@/lib/supabase';
+import { auditService } from './auditService';
 
 // Types pour les ressources humaines
 export interface Employee {
@@ -204,6 +205,26 @@ export class HRService {
         };
       }
 
+      // Audit log - employee creation (personal data)
+      auditService.log({
+        event_type: 'CREATE',
+        table_name: 'hr_employees',
+        record_id: data.id,
+        company_id: companyId,
+        new_values: {
+          employee_number: data.employee_number,
+          first_name: data.first_name,
+          last_name: data.last_name,
+          email: data.email,
+          position: data.position,
+          department: data.department,
+          contract_type: data.contract_type,
+          status: data.status
+        },
+        security_level: 'high', // Personal data = high
+        compliance_tags: ['RGPD']
+      }).catch(err => console.error('Audit log failed:', err));
+
       return {
         success: true,
         data: {
@@ -223,6 +244,13 @@ export class HRService {
 
   async updateEmployee(employeeId: string, updates: Partial<Employee>): Promise<HRServiceResponse<Employee>> {
     try {
+      // Fetch old values for audit trail
+      const { data: oldEmployee } = await supabase
+        .from('hr_employees')
+        .select('*')
+        .eq('id', employeeId)
+        .single();
+
       const { data, error } = await supabase
         .from('hr_employees')
         .update({
@@ -240,6 +268,44 @@ export class HRService {
           data: null,
           error: error.message
         };
+      }
+
+      // Audit log - employee update (personal data)
+      if (oldEmployee) {
+        const changedFields: string[] = [];
+        const trackedFields = ['first_name', 'last_name', 'email', 'position', 'department', 'status', 'contract_type', 'salary'];
+
+        trackedFields.forEach(field => {
+          if (field in updates && oldEmployee[field] !== data[field]) {
+            changedFields.push(field);
+          }
+        });
+
+        auditService.log({
+          event_type: 'UPDATE',
+          table_name: 'hr_employees',
+          record_id: employeeId,
+          company_id: data.company_id,
+          old_values: {
+            first_name: oldEmployee.first_name,
+            last_name: oldEmployee.last_name,
+            email: oldEmployee.email,
+            position: oldEmployee.position,
+            department: oldEmployee.department,
+            status: oldEmployee.status
+          },
+          new_values: {
+            first_name: data.first_name,
+            last_name: data.last_name,
+            email: data.email,
+            position: data.position,
+            department: data.department,
+            status: data.status
+          },
+          changed_fields: changedFields,
+          security_level: 'high', // Personal data = high
+          compliance_tags: ['RGPD']
+        }).catch(err => console.error('Audit log failed:', err));
       }
 
       return {
@@ -261,6 +327,13 @@ export class HRService {
 
   async deleteEmployee(employeeId: string): Promise<HRServiceResponse<boolean>> {
     try {
+      // Fetch employee data before deletion for audit trail
+      const { data: employeeToDelete } = await supabase
+        .from('hr_employees')
+        .select('*')
+        .eq('id', employeeId)
+        .single();
+
       const { error } = await supabase
         .from('hr_employees')
         .delete()
@@ -273,6 +346,27 @@ export class HRService {
           data: null,
           error: error.message
         };
+      }
+
+      // Audit log - employee deletion (CRITICAL - personal data deletion)
+      if (employeeToDelete) {
+        auditService.log({
+          event_type: 'DELETE',
+          table_name: 'hr_employees',
+          record_id: employeeId,
+          company_id: employeeToDelete.company_id,
+          old_values: {
+            employee_number: employeeToDelete.employee_number,
+            first_name: employeeToDelete.first_name,
+            last_name: employeeToDelete.last_name,
+            email: employeeToDelete.email,
+            position: employeeToDelete.position,
+            department: employeeToDelete.department,
+            status: employeeToDelete.status
+          },
+          security_level: 'critical', // Deletion = always critical
+          compliance_tags: ['RGPD']
+        }).catch(err => console.error('Audit log failed:', err));
       }
 
       return {

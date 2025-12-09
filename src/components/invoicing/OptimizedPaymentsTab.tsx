@@ -26,7 +26,7 @@ import paymentsService from '@/services/paymentsService';
 
 import ClientSelector from '@/components/invoicing/ClientSelector';
 
-import { 
+import {
 
   Plus,
 
@@ -60,13 +60,54 @@ import {
 
 } from 'lucide-react';
 
+// Types
+interface Payment {
+  id: string | number;
+  reference: string;
+  clientId: string;
+  clientName: string;
+  invoiceNumber: string;
+  date: string;
+  amount: number;
+  method: 'card' | 'bank_transfer' | 'cash' | 'check' | 'sepa';
+  type: 'income' | 'expense';
+  status: 'completed' | 'pending' | 'failed' | 'refunded' | 'cancelled';
+  description?: string;
+}
+
+interface PaymentFormData {
+  reference: string;
+  clientId: string;
+  clientName: string;
+  invoiceNumber: string;
+  date: string;
+  amount: string;
+  method: string;
+  type: string;
+  description: string;
+}
+
+interface PaymentSummary {
+  totalPayments: number;
+  totalIncome: number;
+  totalExpenses: number;
+  pendingPayments: number;
+  completedPayments: number;
+}
+
 
 
 // Payment Row Component
+interface PaymentRowProps {
+  payment: Payment;
+  onEdit: (payment: Payment) => void;
+  onDelete: (payment: Payment) => void;
+  onView: (payment: Payment) => void;
+}
 
-const PaymentRow = ({ payment, onEdit, onDelete, onView }) => {
+const PaymentRow: React.FC<PaymentRowProps> = ({ payment, onEdit, onDelete, onView }) => {
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (status: Payment['status']) => {
 
     switch (status) {
 
@@ -96,7 +137,7 @@ const PaymentRow = ({ payment, onEdit, onDelete, onView }) => {
 
 
 
-  const getMethodBadge = (method) => {
+  const getMethodBadge = (method: Payment['method']) => {
 
     switch (method) {
 
@@ -150,9 +191,9 @@ const PaymentRow = ({ payment, onEdit, onDelete, onView }) => {
 
 
 
-  const getTypeIcon = (type) => {
+  const getTypeIcon = (type: Payment['type']) => {
 
-    return type === 'income' 
+    return type === 'income'
 
       ? <ArrowDownLeft className="w-4 h-4 text-green-500" />
 
@@ -231,12 +272,17 @@ const PaymentRow = ({ payment, onEdit, onDelete, onView }) => {
 
 
 // Payment Form Dialog Component
+interface PaymentFormDialogProps {
+  open: boolean;
+  onClose: () => void;
+  onSave: (payment: Payment) => void;
+}
 
-const PaymentFormDialog = ({ open, onClose, onSave }) => {
+const PaymentFormDialog: React.FC<PaymentFormDialogProps> = ({ open, onClose, onSave }) => {
 
   const { toast } = useToast();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<PaymentFormData>({
 
     reference: `REF-${new Date().getFullYear()}-${String(Date.now()).slice(-3)}`,
 
@@ -280,7 +326,7 @@ const PaymentFormDialog = ({ open, onClose, onSave }) => {
 
 
 
-    const newPayment = {
+    const newPayment: Payment = {
 
       id: Date.now(),
 
@@ -296,9 +342,9 @@ const PaymentFormDialog = ({ open, onClose, onSave }) => {
 
       amount: parseFloat(formData.amount),
 
-      method: formData.method,
+      method: formData.method as Payment['method'],
 
-      type: formData.type,
+      type: formData.type as Payment['type'],
 
       status: 'completed',
 
@@ -578,13 +624,19 @@ const PaymentFormDialog = ({ open, onClose, onSave }) => {
 
 
 
-const PaymentPreviewDialog = ({ open, onClose, payment }) => {
+interface PaymentPreviewDialogProps {
+  open: boolean;
+  onClose: () => void;
+  payment: Payment | null;
+}
+
+const PaymentPreviewDialog: React.FC<PaymentPreviewDialogProps> = ({ open, onClose, payment }) => {
 
   if (!payment) return null;
 
 
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (status: Payment['status']) => {
 
     switch (status) {
 
@@ -614,7 +666,7 @@ const PaymentPreviewDialog = ({ open, onClose, payment }) => {
 
 
 
-  const getMethodBadge = (method) => {
+  const getMethodBadge = (method: Payment['method']) => {
 
     switch (method) {
 
@@ -668,7 +720,7 @@ const PaymentPreviewDialog = ({ open, onClose, payment }) => {
 
 
 
-  const getTypeIcon = (type) => {
+  const getTypeIcon = (type: Payment['type']) => {
 
     return type === 'income'
 
@@ -882,25 +934,30 @@ const PaymentPreviewDialog = ({ open, onClose, payment }) => {
 
 
 
-export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreateNewCompleted }) {
+interface OptimizedPaymentsTabProps {
+  shouldCreateNew?: boolean;
+  onCreateNewCompleted?: () => void;
+}
+
+export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreateNewCompleted }: OptimizedPaymentsTabProps) {
 
   const { toast } = useToast();
   const { currentCompany } = useAuth();
 
-  const [payments, setPayments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
 
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  const [typeFilter, setTypeFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState<string>('all');
 
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [showPaymentForm, setShowPaymentForm] = useState<boolean>(false);
 
-  const [previewPayment, setPreviewPayment] = useState(null);
+  const [previewPayment, setPreviewPayment] = useState<Payment | null>(null);
 
   // Charger les paiements depuis Supabase
   useEffect(() => {
@@ -990,7 +1047,7 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
 
 
 
-  const handleEditPayment = (payment) => {
+  const handleEditPayment = (payment: Payment) => {
 
     toast({
 
@@ -1004,7 +1061,7 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
 
 
 
-  const handleDeletePayment = (payment) => {
+  const handleDeletePayment = (payment: Payment) => {
 
     setPayments(prev => prev.filter(p => p.id !== payment.id));
 
@@ -1020,7 +1077,7 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
 
 
 
-  const handleViewPayment = (payment) => {
+  const handleViewPayment = (payment: Payment) => {
 
     setPreviewPayment(payment);
 
@@ -1036,7 +1093,7 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
 
 
 
-  const handleSavePayment = (newPayment) => {
+  const handleSavePayment = (newPayment: Payment) => {
 
     setPayments(prev => [...prev, newPayment]);
 
@@ -1070,8 +1127,8 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
       ];
 
       // Fonction pour formater la méthode de paiement
-      const formatMethod = (method) => {
-        const methods = {
+      const formatMethod = (method: string): string => {
+        const methods: Record<string, string> = {
           'card': 'Carte',
           'bank_transfer': 'Virement',
           'cash': 'Espèces',
@@ -1082,13 +1139,13 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
       };
 
       // Fonction pour formater le type
-      const formatType = (type) => {
+      const formatType = (type: string): string => {
         return type === 'income' ? 'Encaissement' : 'Décaissement';
       };
 
       // Fonction pour formater le statut
-      const formatStatus = (status) => {
-        const statuses = {
+      const formatStatus = (status: string): string => {
+        const statuses: Record<string, string> = {
           'pending': 'En attente',
           'completed': 'Complété',
           'failed': 'Échoué',
@@ -1148,13 +1205,13 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
 
 
 
-  const summary = {
+  const summary: PaymentSummary = {
 
     totalPayments: payments.length,
 
-    totalIncome: payments.filter(p => p.type === 'income' && p.status === 'completed').reduce((sum, p) => sum + p.amount, 0),
+    totalIncome: payments.filter(p => p.type === 'income' && p.status === 'completed').reduce((sum: number, p: Payment) => sum + p.amount, 0),
 
-    totalExpenses: payments.filter(p => p.type === 'expense' && p.status === 'completed').reduce((sum, p) => sum + p.amount, 0),
+    totalExpenses: payments.filter(p => p.type === 'expense' && p.status === 'completed').reduce((sum: number, p: Payment) => sum + p.amount, 0),
 
     pendingPayments: payments.filter(p => p.status === 'pending').length,
 
@@ -1164,7 +1221,7 @@ export default function OptimizedPaymentsTab({ shouldCreateNew = false, onCreate
 
 
 
-  const netIncome = summary.totalIncome - summary.totalExpenses;
+  const netIncome: number = summary.totalIncome - summary.totalExpenses;
 
 
 

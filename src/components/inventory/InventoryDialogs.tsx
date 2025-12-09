@@ -164,11 +164,11 @@ export const ProductionOrderDialog: FC<ProductionOrderDialogProps> = ({
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <Label>Début prévu</Label>
-            <DatePicker value={form.startDate} onChange={(date) => onFieldChange('startDate', date)} placeholder="Sélectionner une date" className="" />
+            <DatePicker value={form.startDate} onChange={(date: any) => onFieldChange('startDate', date)} placeholder="Sélectionner une date" className="" />
           </div>
           <div className="space-y-2">
             <Label>Fin attendue</Label>
-            <DatePicker value={form.expectedDate} onChange={(date) => onFieldChange('expectedDate', date)} placeholder="Sélectionner une date" className="" />
+            <DatePicker value={form.expectedDate} onChange={(date: any) => onFieldChange('expectedDate', date)} placeholder="Sélectionner une date" className="" />
           </div>
           <div className="space-y-2 md:col-span-2">
             <Label>Description</Label>

@@ -36,7 +36,7 @@ const LanguageSwitcher = ({ className = "" }) => {
 
   
 
-  const handleLanguageChange = async (langCode) => {
+  const handleLanguageChange = async (langCode: string) => {
 
     try {
 
@@ -398,7 +398,7 @@ const UniversalSetupWizard = () => {
 
 
 
-  const handleMarketSelection = (marketId) => {
+  const handleMarketSelection = (marketId: string) => {
 
     const markets = getMarkets();
 
@@ -1076,7 +1076,7 @@ const UniversalSetupWizard = () => {
 
           <div className="space-y-3">
 
-            {providers.map(provider => (
+            {providers.map((provider: string) => (
 
               <div key={provider} className="flex items-center space-x-3">
 
