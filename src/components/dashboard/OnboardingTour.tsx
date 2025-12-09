@@ -75,6 +75,39 @@ const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
   {
     target: 'body',
     content: (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center">
+            <span className="text-2xl">🧠</span>
+          </div>
+          <h3 className="text-xl font-bold">Intelligence Artificielle</h3>
+        </div>
+        <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-4 rounded-lg border-2 border-purple-200 dark:border-purple-700">
+          <p className="font-semibold text-purple-900 dark:text-purple-200 mb-2">🎉 NOUVEAUTÉ : Analyses IA intégrées !</p>
+          <p className="text-sm text-gray-700 dark:text-gray-300">CassKai intègre une intelligence artificielle de pointe pour analyser automatiquement vos rapports financiers.</p>
+        </div>
+        <div className="space-y-2">
+          <p className="font-medium">✨ Ce que l'IA fait pour vous :</p>
+          <ul className="space-y-1 text-sm">
+            <li>• <strong>7 rapports enrichis</strong> - KPI, trésorerie, créances, ratios, budget, dettes, stocks</li>
+            <li>• <strong>Synthèses exécutives</strong> - Vue d'ensemble en langage clair</li>
+            <li>• <strong>Détection des risques</strong> - Alertes proactives sur votre santé financière</li>
+            <li>• <strong>Recommandations d'expert</strong> - Plans d'action personnalisés</li>
+            <li>• <strong>Disponible 24/7</strong> - Sans surcoût, sur tous les plans</li>
+          </ul>
+        </div>
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-sm">
+          <p className="font-semibold mb-1">📍 Où trouver les analyses IA ?</p>
+          <p>Accédez au module <strong>Rapports</strong> et générez un rapport. L'IA créera automatiquement une synthèse exécutive en première page.</p>
+        </div>
+      </div>
+    ),
+    placement: 'center',
+    disableBeacon: true
+  },
+  {
+    target: 'body',
+    content: (
       <div className="space-y-3">
         <h3 className="text-lg font-semibold">📄 Module Facturation</h3>
         <p>Créez des factures et devis professionnels en quelques clics :</p>
@@ -197,7 +230,12 @@ const buildTourSteps = (t: TFunction, companyName: string): Step[] => [
             <li>Importer vos clients et fournisseurs existants</li>
             <li>Créer votre première facture ou devis</li>
             <li>Explorer le tableau de bord et les rapports</li>
+            <li><strong>🧠 Générer un rapport avec analyse IA</strong> pour découvrir la nouveauté</li>
           </ol>
+        </div>
+        <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-3 rounded-lg text-sm border border-purple-200 dark:border-purple-700">
+          <p className="font-semibold mb-1 text-purple-900 dark:text-purple-200">🌟 N'oubliez pas !</p>
+          <p className="text-gray-700 dark:text-gray-300">L'intelligence artificielle analyse automatiquement tous vos rapports financiers. Aucune configuration nécessaire !</p>
         </div>
         <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-sm">
           <p className="font-semibold mb-1">💡 Besoin d'aide ?</p>

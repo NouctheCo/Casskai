@@ -193,9 +193,11 @@ export class PDFService {
 
     // Footer avec numéro de page
     doc.setFontSize(7);
+    const pageCount = (doc.internal as any).getNumberOfPages();
+    const currentPage = (doc.internal as any).getCurrentPageInfo().pageNumber;
     doc.text(
-      `Généré le ${new Date().toLocaleDateString('fr-FR')} - Page 1`, 
-      pageWidth / 2 - 30, 
+      `Généré le ${new Date().toLocaleDateString('fr-FR')} - Page ${currentPage} / ${pageCount}`,
+      pageWidth / 2 - 30,
       doc.internal.pageSize.height - 10
     );
 

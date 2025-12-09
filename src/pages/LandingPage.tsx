@@ -83,7 +83,15 @@ import {
 
   DollarSign,
 
-  Quote
+  Quote,
+
+  Brain,
+
+  Lightbulb,
+
+  TrendingUp,
+
+  BarChart3
 
 } from 'lucide-react';
 
@@ -195,9 +203,9 @@ const HeroSection = () => {
 
             {/* Badge de nouveauté */}
 
-            <motion.div 
+            <motion.div
 
-              className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 text-blue-800 dark:text-blue-200 text-sm font-medium mb-8 rounded-full border border-blue-200/50 dark:border-blue-700/50 shadow-sm"
+              className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 text-purple-800 dark:text-purple-200 text-sm font-medium mb-8 rounded-full border border-purple-200/50 dark:border-purple-700/50 shadow-sm"
 
               whileHover={{ scale: 1.05 }}
 
@@ -205,9 +213,9 @@ const HeroSection = () => {
 
             >
 
-              <Zap className="w-4 h-4 mr-2 animate-pulse" />
+              <Brain className="w-4 h-4 mr-2 animate-pulse" />
 
-              {t('landing.hero.badge', '🚀 Nouvelle génération de gestion d\'entreprise')}
+              {t('landing.hero.badge', '🚀 Nouveau : Analyses IA intégrées')}
 
               <ArrowRight className="w-4 h-4 ml-2" />
 
@@ -439,6 +447,298 @@ const HeroSection = () => {
 
 
 
+// Section Intelligence Artificielle - Nouvelle feature mise en avant
+
+const AIAnalysisSection = () => {
+
+  const { t } = useTranslation();
+
+
+
+  return (
+
+    <section className="py-24 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-800 relative overflow-hidden">
+
+      {/* Arrière-plan animé */}
+
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse"></div>
+
+        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-indigo-400/20 to-blue-400/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+
+      </div>
+
+
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
+        <AnimatedSection className="text-center mb-16">
+
+          <motion.div
+
+            initial={{ scale: 0.9, opacity: 0 }}
+
+            whileInView={{ scale: 1, opacity: 1 }}
+
+            viewport={{ once: true }}
+
+            transition={{ duration: 0.5 }}
+
+            className="inline-flex items-center mb-6 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-bold rounded-full shadow-xl"
+
+          >
+
+            <Brain className="w-5 h-5 mr-2 animate-pulse" />
+
+            NOUVEAUTE : Intelligence Artificielle Integree
+
+            <Zap className="w-5 h-5 ml-2" />
+
+          </motion.div>
+
+
+
+          <h2 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+
+            Analyses financières IA
+
+            <br />
+
+            <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent">
+
+              qui transforment vos données en décisions
+
+            </span>
+
+          </h2>
+
+
+
+          <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-200 max-w-4xl mx-auto leading-relaxed">
+
+            CassKai intègre une intelligence artificielle de pointe pour analyser automatiquement vos rapports financiers et vous fournir des recommandations d'expert-comptable en temps réel.
+
+          </p>
+
+        </AnimatedSection>
+
+
+
+        {/* Grille de fonctionnalités IA */}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+
+          {[
+
+            {
+
+              icon: Brain,
+
+              title: "Analyse intelligente des KPI",
+
+              description: "L'IA évalue votre santé financière, identifie les tendances et calcule automatiquement vos ratios clés.",
+
+              color: "from-purple-500 to-indigo-600",
+
+              features: ["Trésorerie", "Ratios financiers", "Prévisions"]
+
+            },
+
+            {
+
+              icon: TrendingUp,
+
+              title: "Recommandations personnalisées",
+
+              description: "Recevez des conseils adaptés à votre secteur pour optimiser votre rentabilité et réduire vos risques.",
+
+              color: "from-pink-500 to-rose-600",
+
+              features: ["Cash-flow", "Budget", "Créances clients"]
+
+            },
+
+            {
+
+              icon: Lightbulb,
+
+              title: "Détection proactive des risques",
+
+              description: "L'IA identifie les signaux d'alerte (dettes, stocks, trésorerie) avant qu'ils ne deviennent critiques.",
+
+              color: "from-indigo-500 to-blue-600",
+
+              features: ["Dettes fournisseurs", "Stocks", "Écarts budgétaires"]
+
+            },
+
+            {
+
+              icon: BarChart3,
+
+              title: "7 rapports enrichis par IA",
+
+              description: "Tableau de bord KPI, flux de trésorerie, créances, ratios financiers, écarts budgétaires, dettes et valorisation stocks.",
+
+              color: "from-blue-500 to-cyan-600",
+
+              features: ["Résumés exécutifs", "Analyses multi-périodes", "Graphiques interactifs"]
+
+            },
+
+            {
+
+              icon: CheckCircle,
+
+              title: "Synthèses exécutives automatiques",
+
+              description: "Chaque rapport génère une synthèse en langage clair avec points forts, préoccupations et plan d'action.",
+
+              color: "from-violet-500 to-purple-600",
+
+              features: ["Vue d'ensemble", "Points d'attention", "Actions recommandées"]
+
+            },
+
+            {
+
+              icon: Zap,
+
+              title: "Disponible 24/7",
+
+              description: "Contrairement à un expert-comptable, l'IA analyse vos données en temps réel, à tout moment, sans surcoût.",
+
+              color: "from-fuchsia-500 to-pink-600",
+
+              features: ["Temps réel", "Multilingue", "Sans limite"]
+
+            }
+
+          ].map((feature, index) => (
+
+            <AnimatedSection key={index}>
+
+              <motion.div
+
+                className="group h-full"
+
+                whileHover={{ y: -8, scale: 1.02 }}
+
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+
+              >
+
+                <Card className="h-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
+
+                  <CardContent className="p-6">
+
+                    <div className={`w-14 h-14 bg-gradient-to-r ${feature.color} rounded-xl mb-4 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+
+                      <feature.icon className="w-7 h-7 text-white" />
+
+                    </div>
+
+
+
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+
+                      {feature.title}
+
+                    </h3>
+
+
+
+                    <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+
+                      {feature.description}
+
+                    </p>
+
+
+
+                    <div className="flex flex-wrap gap-2">
+
+                      {feature.features.map((feat, idx) => (
+
+                        <Badge key={idx} className="px-2 py-1 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 text-purple-800 dark:text-purple-200 text-xs">
+
+                          {feat}
+
+                        </Badge>
+
+                      ))}
+
+                    </div>
+
+                  </CardContent>
+
+                </Card>
+
+              </motion.div>
+
+            </AnimatedSection>
+
+          ))}
+
+        </div>
+
+
+
+        {/* Call-to-action IA */}
+
+        <AnimatedSection>
+
+          <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 rounded-2xl p-8 md:p-12 text-white text-center shadow-2xl">
+
+            <Brain className="w-16 h-16 mx-auto mb-6 animate-pulse" />
+
+            <h3 className="text-3xl md:text-4xl font-bold mb-4">
+
+              L'intelligence artificielle au service de votre réussite
+
+            </h3>
+
+            <p className="text-lg md:text-xl opacity-90 mb-8 max-w-3xl mx-auto">
+
+              Essayez dès maintenant l'analyse IA de vos rapports financiers. Aucune configuration requise, l'IA s'active automatiquement sur tous vos rapports.
+
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+
+              <Button
+
+                size="lg"
+
+                className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-3 font-semibold text-lg shadow-xl"
+
+              >
+
+                <Zap className="mr-2 w-5 h-5" />
+
+                Démarrer l'essai gratuit
+
+              </Button>
+
+              <span className="text-sm opacity-75">Analyses IA illimitées incluses dans tous les plans</span>
+
+            </div>
+
+          </div>
+
+        </AnimatedSection>
+
+      </div>
+
+    </section>
+
+  );
+
+};
+
+
+
 // Section Avantages - Honnête et sans chiffres inventés
 
 const AdvantagesSection = () => {
@@ -591,7 +891,7 @@ const AdvantagesSection = () => {
 
 
 
-          <p className="text-xl text-gray-600 dark:text-gray-400 dark:text-gray-300 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
 
             Découvrez les avantages concrets d'une plateforme de gestion moderne, pensée pour les TPE/PME
 
@@ -637,7 +937,7 @@ const AdvantagesSection = () => {
 
 
 
-                    <p className="text-gray-600 dark:text-gray-400 mb-6 text-lg">
+                    <p className="text-gray-600 dark:text-gray-300 mb-6 text-lg">
 
                       {advantage.description}
 
@@ -773,17 +1073,17 @@ const FeaturesSection = () => {
 
     {
 
-      icon: PieChart,
+      icon: Brain,
 
-      title: t('landing.features.analytics.title', 'Analyses & Rapports'),
+      title: t('landing.features.analytics.title', 'Analyses IA & Rapports'),
 
-      description: t('landing.features.analytics.description', 'Tableaux de bord interactifs, analyses prédictives et rapports personnalisables pour piloter votre entreprise en toute connaissance.'),
+      description: t('landing.features.analytics.description', 'Intelligence artificielle intégrée pour analyser vos rapports financiers. Recommandations d\'expert-comptable automatiques sur 7 types de rapports.'),
 
       color: 'from-purple-500 to-violet-600',
 
       bgColor: 'bg-purple-50 dark:bg-purple-900/20',
 
-      details: ['Tableaux de bord interactifs', 'Analyses prédictives', 'Rapports personnalisés', 'KPIs en temps réel']
+      details: ['🧠 Analyses IA avancées', 'Synthèses exécutives automatiques', 'Détection proactive des risques', '7 rapports enrichis par IA']
 
     },
 
@@ -881,11 +1181,11 @@ const FeaturesSection = () => {
 
 
 
-          <div className="mt-6 inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-100 to-blue-100 dark:from-green-900/30 dark:to-blue-900/30 text-green-800 dark:text-green-200 text-sm font-medium rounded-full border border-green-200/50 dark:border-green-700/50 shadow-sm">
+          <div className="mt-6 inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 text-purple-800 dark:text-purple-200 text-sm font-medium rounded-full border border-purple-200/50 dark:border-purple-700/50 shadow-sm">
 
-            <Zap className="w-4 h-4 mr-2" />
+            <Brain className="w-4 h-4 mr-2 animate-pulse" />
 
-            📈 Nouvelles fonctionnalités en continu • Prochaine maj: janvier 2026
+            🧠 Analyses IA incluses • 📈 Nouvelles fonctionnalités en continu
 
           </div>
 
@@ -1371,7 +1671,7 @@ const PricingSection = () => {
 
               {t('landing.pricing.annual', 'Annuel')}
 
-              <Badge className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs">
+              <Badge className="ml-2 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs">
 
                 -20%
 
@@ -2113,7 +2413,7 @@ const Footer = () => {
 
             </div>
 
-            <p className="text-gray-400 dark:text-gray-500 mb-6 leading-relaxed">
+            <p className="text-gray-400 dark:text-gray-300 mb-6 leading-relaxed">
 
               {t('landing.footer.description', 'La solution complète de gestion d\'entreprise pour les PME et indépendants.')}
 
@@ -2171,7 +2471,7 @@ const Footer = () => {
 
                     }}
 
-                    className="text-gray-400 dark:text-gray-500 hover:text-white transition-colors"
+                    className="text-gray-400 dark:text-gray-300 hover:text-white transition-colors"
 
                   >
 
@@ -2231,7 +2531,7 @@ const Footer = () => {
 
                     }}
 
-                    className="text-gray-400 dark:text-gray-500 hover:text-white transition-colors"
+                    className="text-gray-400 dark:text-gray-300 hover:text-white transition-colors"
 
                   >
 
@@ -2275,7 +2575,7 @@ const Footer = () => {
 
                     onClick={() => navigate(item.href)}
 
-                    className="text-gray-400 dark:text-gray-500 hover:text-white transition-colors"
+                    className="text-gray-400 dark:text-gray-300 hover:text-white transition-colors"
 
                   >
 
@@ -2305,7 +2605,7 @@ const Footer = () => {
 
               <h4 className="text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wider">Entreprise</h4>
 
-              <div className="space-y-2 text-sm text-gray-400 dark:text-gray-500">
+              <div className="space-y-2 text-sm text-gray-400 dark:text-gray-300">
 
                 <p>Noutche Conseil SAS</p>
 
@@ -2323,7 +2623,7 @@ const Footer = () => {
 
               <h4 className="text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wider">Fiscal</h4>
 
-              <div className="space-y-2 text-sm text-gray-400 dark:text-gray-500">
+              <div className="space-y-2 text-sm text-gray-400 dark:text-gray-300">
 
                 <p>{t('landing.footer.company.tva')}</p>
 
@@ -2375,7 +2675,7 @@ const Footer = () => {
 
               <h4 className="text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wider">{t('landing.footer.convention.title')}</h4>
 
-              <div className="space-y-1 text-sm text-gray-400 dark:text-gray-500">
+              <div className="space-y-1 text-sm text-gray-400 dark:text-gray-300">
 
                 <p>{t('landing.footer.convention.description1')}</p>
 
@@ -2395,7 +2695,7 @@ const Footer = () => {
 
           <div className="border-t border-gray-800 pt-6 flex flex-col md:flex-row justify-between items-center">
 
-            <div className="text-sm text-gray-400 dark:text-gray-500 mb-4 md:mb-0">
+            <div className="text-sm text-gray-400 dark:text-gray-300 mb-4 md:mb-0">
 
               <p>© {new Date().getFullYear()} CassKai - Édité par Noutche Conseil SAS. {t('landing.footer.copyright', 'Tous droits réservés.')}</p>
 
@@ -2405,7 +2705,7 @@ const Footer = () => {
 
             <div className="flex items-center space-x-4">
 
-              <Badge className="px-3 py-1 bg-gray-800/50 text-gray-400 dark:text-gray-500 border-gray-700/50 text-xs">
+              <Badge className="px-3 py-1 bg-gray-800/50 text-gray-400 dark:text-gray-300 border-gray-700/50 text-xs">
 
                 {t('landing.footer.version')}
 
@@ -2421,7 +2721,7 @@ const Footer = () => {
 
           <div className="border-t border-gray-800 pt-8 mt-8 text-center">
 
-            <p className="text-sm text-gray-400 dark:text-gray-500 mb-4">
+            <p className="text-sm text-gray-400 dark:text-gray-300 mb-4">
 
               {t('landing.footer.coverage', 'Disponible en France, Belgique, Luxembourg et dans 30 pays d\'Afrique')}
 
@@ -2465,6 +2765,8 @@ const LandingPage = () => {
         <PublicNavigation variant="landing" />
 
         <HeroSection />
+
+        <AIAnalysisSection />
 
 
 

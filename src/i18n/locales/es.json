@@ -2765,6 +2765,16 @@
     "currentYear": "Année en cours",
     "customAnalysis": "Analyses Personnalisées",
     "customAnalysisDesc": "Créez des analyses sur mesure selon sus besoins",
+    "dashboard": {
+      "revenue": "Cifra de negocios",
+      "expenses": "Gastos",
+      "profit": "Resultado neto",
+      "cashFlow": "Tesorería",
+      "revenueEvolution": "Evolución de la cifra de negocios",
+      "expensesByCategory": "Gastos por categoría",
+      "monthlyComparison": "Comparación mensual Ingresos / Gastos",
+      "amount": "Importe"
+    },
     "dataLoadError": "Error lors du chargement des datos comptables",
     "debit": "Débit",
     "expenses": "CHARGES",

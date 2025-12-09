@@ -3045,6 +3045,16 @@
     "currentYear": "Année en cours",
     "customAnalysis": "Analyses Personnalisées",
     "customAnalysisDesc": "Créez des analyses sur mesure selon vos besoins",
+    "dashboard": {
+      "revenue": "Chiffre d'affaires",
+      "expenses": "Charges",
+      "profit": "Résultat net",
+      "cashFlow": "Trésorerie",
+      "revenueEvolution": "Évolution du CA",
+      "expensesByCategory": "Charges par catégorie",
+      "monthlyComparison": "Comparaison mensuelle Produits / Charges",
+      "amount": "Montant"
+    },
     "dataLoadError": "Erreur lors du chargement des données comptables",
     "debit": "Débit",
     "expenses": "CHARGES",

@@ -101,32 +101,16 @@ const ReportsFinancialDashboard: React.FC = () => {
         cashFlow: 0
       });
 
-      // Données de graphiques (mockées pour l'instant, à remplacer par vraies données)
-      setRevenueData([
-        { month: 'Jan', montant: 45000 },
-        { month: 'Fév', montant: 52000 },
-        { month: 'Mar', montant: 48000 },
-        { month: 'Avr', montant: 61000 },
-        { month: 'Mai', montant: 55000 },
-        { month: 'Jun', montant: 67000 }
+      // Charger les données réelles des graphiques
+      const [monthlyRevenue, expensesCat, monthlyComp] = await Promise.all([
+        dashboardStatsService.getMonthlyRevenueData(currentCompany.id),
+        dashboardStatsService.getExpensesByCategory(currentCompany.id),
+        dashboardStatsService.getMonthlyComparison(currentCompany.id)
       ]);
 
-      setExpensesByCategory([
-        { name: 'Personnel', value: 35000, color: '#3b82f6' },
-        { name: 'Fournitures', value: 12000, color: '#10b981' },
-        { name: 'Loyers', value: 8000, color: '#f59e0b' },
-        { name: 'Services', value: 15000, color: '#ef4444' },
-        { name: 'Autres', value: 5000, color: '#8b5cf6' }
-      ]);
-
-      setMonthlyComparison([
-        { month: 'Jan', produits: 45000, charges: 32000 },
-        { month: 'Fév', produits: 52000, charges: 35000 },
-        { month: 'Mar', produits: 48000, charges: 33000 },
-        { month: 'Avr', produits: 61000, charges: 38000 },
-        { month: 'Mai', produits: 55000, charges: 36000 },
-        { month: 'Jun', produits: 67000, charges: 42000 }
-      ]);
+      setRevenueData(monthlyRevenue);
+      setExpensesByCategory(expensesCat);
+      setMonthlyComparison(monthlyComp);
 
     } catch (error) {
       console.error('Error loading dashboard data:', error);

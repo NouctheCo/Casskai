@@ -2765,6 +2765,16 @@
     "currentYear": "AnnÃ©e en cours",
     "customAnalysis": "Analyses PersonnalisÃ©es",
     "customAnalysisDesc": "CrÃ©ez des analyses sur mesure selon your besoins",
+    "dashboard": {
+      "revenue": "Revenue",
+      "expenses": "Expenses",
+      "profit": "Net Profit",
+      "cashFlow": "Cash Flow",
+      "revenueEvolution": "Revenue Evolution",
+      "expensesByCategory": "Expenses by Category",
+      "monthlyComparison": "Monthly Comparison Revenue / Expenses",
+      "amount": "Amount"
+    },
     "dataLoadError": "Error lors du chargement des data comptables",
     "debit": "DÃ©bit",
     "expenses": "CHARGES",

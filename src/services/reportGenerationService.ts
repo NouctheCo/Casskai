@@ -17,6 +17,9 @@ import { format, startOfYear, endOfYear } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { AccountingStandardAdapter } from './accountingStandardAdapter';
 import { financialRatiosService } from './financialRatiosService';
+import { chartImageService } from './chartImageService';
+import { aiAnalysisService, type FinancialKPIs as AIFinancialKPIs } from './aiAnalysisService';
+import { aiReportAnalysisService, type CashFlowData, type ReceivablesData, type FinancialRatiosData, type BudgetVarianceData, type PayablesData, type InventoryData, type AIAnalysisResult } from './aiReportAnalysisService';
 
 export interface FinancialData {
   compte: string;
@@ -879,6 +882,44 @@ export class ReportGenerationService {
       const closingCash = cashBalances.reduce((sum, e) => sum + e.debit - e.credit, 0);
       const openingCash = closingCash - netCashChange;
 
+      // Analyse IA du flux de trésorerie
+      let aiAnalysis: AIAnalysisResult | null = null;
+      try {
+        const cashFlowData: CashFlowData = {
+          operatingCashFlow,
+          investingCashFlow,
+          financingCashFlow,
+          netCashFlow: netCashChange,
+          cashBalance: closingCash,
+          cashFlowToDebt: loanProceeds > 0 ? operatingCashFlow / loanProceeds : 0,
+          freeCashFlow: operatingCashFlow + investingCashFlow
+        };
+
+        aiAnalysis = await aiReportAnalysisService.analyzeCashFlow(
+          cashFlowData,
+          format(new Date(startDate || startOfYear(new Date())), 'dd/MM/yyyy', { locale: fr }),
+          format(new Date(endDate || endOfYear(new Date())), 'dd/MM/yyyy', { locale: fr })
+        );
+      } catch (error) {
+        console.error('Erreur lors de l\'analyse IA du flux de trésorerie:', error);
+      }
+
+      const executiveSummaryTable: TableData | null = aiAnalysis ? {
+        title: 'RÉSUMÉ EXÉCUTIF - Analyse IA',
+        subtitle: 'Synthèse intelligente du flux de trésorerie',
+        headers: ['Section', 'Analyse'],
+        rows: [
+          ['Vue d\'ensemble', aiAnalysis.executiveSummary],
+          ['Santé financière', aiAnalysis.financialHealth],
+          ['Points forts', aiAnalysis.keyStrengths.map((s, i) => `${i + 1}. ${s}`).join('\n')],
+          ['Points d\'attention', aiAnalysis.concernPoints.map((c, i) => `${i + 1}. ${c}`).join('\n')],
+          ['Recommandations', aiAnalysis.recommendations.map((r, i) => `${i + 1}. ${r}`).join('\n')],
+          ['Niveau de risque', `${aiAnalysis.riskLevel} - Evaluation globale basée sur les flux de trésorerie`]
+        ],
+        summary: [],
+        footer: [`Analyse générée par IA le ${format(new Date(), 'dd/MM/yyyy à HH:mm', { locale: fr })}`]
+      } : null;
+
       const table: TableData = {
         title: 'TABLEAU DE FLUX DE TRÉSORERIE',
         headers: ['Libellé', 'Montant'],
@@ -916,15 +957,17 @@ export class ReportGenerationService {
         ...exportOptions
       };
 
+      const tables: TableData[] = executiveSummaryTable ? [executiveSummaryTable, table] : [table];
+
       switch (defaultOptions.format) {
         case 'pdf':
-          return await reportExportService.exportToPDF([table], defaultOptions);
+          return await reportExportService.exportToPDF(tables, defaultOptions);
         case 'excel':
-          return await reportExportService.exportToExcel([table], defaultOptions);
+          return await reportExportService.exportToExcel(tables, defaultOptions);
         case 'csv':
           return reportExportService.exportToCSV(table, defaultOptions);
         default:
-          return await reportExportService.exportToPDF([table], defaultOptions);
+          return await reportExportService.exportToPDF(tables, defaultOptions);
       }
     } catch (error) {
       console.error('Erreur génération flux de trésorerie:', error instanceof Error ? error.message : String(error));
@@ -1051,6 +1094,50 @@ export class ReportGenerationService {
         this.formatCurrency(totalOver90)
       ]);
 
+      // Analyse IA des créances clients
+      let aiAnalysis: AIAnalysisResult | null = null;
+      try {
+        const overdueTotal = total30 + total60 + total90 + totalOver90;
+        const dso = totalOutstanding > 0 ? (totalOutstanding / ((entries?.length || 1) / 365)) : 0;
+        const collectionRate = totalOutstanding > 0 ? ((totalCurrent / totalOutstanding) * 100) : 0;
+        const averageOverdue = overdueTotal > 0 ? (overdueTotal / Object.keys(customerBalances).length) : 0;
+
+        const receivablesData: ReceivablesData = {
+          totalReceivables: totalOutstanding,
+          current: totalCurrent,
+          overdue30: total30,
+          overdue60: total60,
+          overdue90: total90 + totalOver90,
+          dso: dso,
+          collectionRate: collectionRate,
+          averageOverdueAmount: averageOverdue
+        };
+
+        aiAnalysis = await aiReportAnalysisService.analyzeReceivables(
+          receivablesData,
+          format(startOfYear(new Date(asOfDate)), 'dd/MM/yyyy', { locale: fr }),
+          format(new Date(asOfDate), 'dd/MM/yyyy', { locale: fr })
+        );
+      } catch (error) {
+        console.error('Erreur lors de l\'analyse IA des créances clients:', error);
+      }
+
+      const executiveSummaryTable: TableData | null = aiAnalysis ? {
+        title: 'RÉSUMÉ EXÉCUTIF - Analyse IA',
+        subtitle: 'Synthèse intelligente des créances clients',
+        headers: ['Section', 'Analyse'],
+        rows: [
+          ['Vue d\'ensemble', aiAnalysis.executiveSummary],
+          ['Santé financière', aiAnalysis.financialHealth],
+          ['Points forts', aiAnalysis.keyStrengths.map((s, i) => `${i + 1}. ${s}`).join('\n')],
+          ['Points d\'attention', aiAnalysis.concernPoints.map((c, i) => `${i + 1}. ${c}`).join('\n')],
+          ['Recommandations', aiAnalysis.recommendations.map((r, i) => `${i + 1}. ${r}`).join('\n')],
+          ['Niveau de risque', `${aiAnalysis.riskLevel} - Evaluation du risque de recouvrement`]
+        ],
+        summary: [],
+        footer: [`Analyse générée par IA le ${format(new Date(), 'dd/MM/yyyy à HH:mm', { locale: fr })}`]
+      } : null;
+
       const table: TableData = {
         title: 'ANALYSE DES CRÉANCES CLIENTS',
         headers: ['Client', 'Total', 'Courant', '31-60j', '61-90j', '91-120j', '>120j'],
@@ -1071,15 +1158,17 @@ export class ReportGenerationService {
         ...exportOptions
       };
 
+      const tables: TableData[] = executiveSummaryTable ? [executiveSummaryTable, table] : [table];
+
       switch (defaultOptions.format) {
         case 'pdf':
-          return await reportExportService.exportToPDF([table], defaultOptions);
+          return await reportExportService.exportToPDF(tables, defaultOptions);
         case 'excel':
-          return await reportExportService.exportToExcel([table], defaultOptions);
+          return await reportExportService.exportToExcel(tables, defaultOptions);
         case 'csv':
           return reportExportService.exportToCSV(table, defaultOptions);
         default:
-          return await reportExportService.exportToPDF([table], defaultOptions);
+          return await reportExportService.exportToPDF(tables, defaultOptions);
       }
     } catch (error) {
       console.error('Erreur génération créances clients:', error instanceof Error ? error.message : String(error));
@@ -1152,15 +1241,73 @@ export class ReportGenerationService {
       // Calcul des ratios
       const currentRatio = currentLiabilities > 0 ? currentAssets / currentLiabilities : 0;
       const quickRatio = currentLiabilities > 0 ? (currentAssets - inventory) / currentLiabilities : 0;
+      const cashRatio = currentLiabilities > 0 ? (journalEntries.filter(e => e.account_number.startsWith('5')).reduce((sum, e) => sum + e.debit - e.credit, 0) / currentLiabilities) : 0;
       const grossMargin = revenues > 0 ? ((revenues - expenses) / revenues) * 100 : 0;
       const netMargin = revenues > 0 ? (netIncome / revenues) * 100 : 0;
       const roa = totalAssets > 0 ? (netIncome / totalAssets) * 100 : 0;
       const roe = equity > 0 ? (netIncome / equity) * 100 : 0;
       const debtToEquity = equity > 0 ? totalLiabilities / equity : 0;
       const debtToAssets = totalAssets > 0 ? (totalLiabilities / totalAssets) * 100 : 0;
+      const interestExpense = journalEntries.filter(e => e.account_number.startsWith('66')).reduce((sum, e) => sum + e.debit - e.credit, 0);
+      const interestCoverage = interestExpense > 0 ? netIncome / interestExpense : 0;
       const inventoryDays = expenses > 0 ? (inventory / (expenses / 365)) : 0;
       const dso = revenues > 0 ? (receivables / (revenues / 365)) : 0;
       const dpo = expenses > 0 ? (payables / (expenses / 365)) : 0;
+      const assetTurnover = totalAssets > 0 ? revenues / totalAssets : 0;
+      const inventoryTurnover = inventory > 0 ? expenses / inventory : 0;
+      const receivablesTurnover = receivables > 0 ? revenues / receivables : 0;
+
+      // Analyse IA des ratios financiers
+      let aiAnalysis: AIAnalysisResult | null = null;
+      try {
+        const financialRatiosData: FinancialRatiosData = {
+          liquidityRatios: {
+            currentRatio: currentRatio,
+            quickRatio: quickRatio,
+            cashRatio: cashRatio
+          },
+          profitabilityRatios: {
+            grossMargin: grossMargin,
+            netMargin: netMargin,
+            roa: roa,
+            roe: roe
+          },
+          leverageRatios: {
+            debtToEquity: debtToEquity,
+            debtToAssets: debtToAssets / 100,
+            interestCoverage: interestCoverage
+          },
+          efficiencyRatios: {
+            assetTurnover: assetTurnover,
+            inventoryTurnover: inventoryTurnover,
+            receivablesTurnover: receivablesTurnover
+          }
+        };
+
+        aiAnalysis = await aiReportAnalysisService.analyzeFinancialRatios(
+          financialRatiosData,
+          format(new Date(startDate || startOfYear(new Date())), 'dd/MM/yyyy', { locale: fr }),
+          format(new Date(endDate || endOfYear(new Date())), 'dd/MM/yyyy', { locale: fr })
+        );
+      } catch (error) {
+        console.error('Erreur lors de l\'analyse IA des ratios financiers:', error);
+      }
+
+      const executiveSummaryTable: TableData | null = aiAnalysis ? {
+        title: 'RÉSUMÉ EXÉCUTIF - Analyse IA',
+        subtitle: 'Synthèse intelligente des ratios financiers',
+        headers: ['Section', 'Analyse'],
+        rows: [
+          ['Vue d\'ensemble', aiAnalysis.executiveSummary],
+          ['Santé financière', aiAnalysis.financialHealth],
+          ['Points forts', aiAnalysis.keyStrengths.map((s, i) => `${i + 1}. ${s}`).join('\n')],
+          ['Points d\'attention', aiAnalysis.concernPoints.map((c, i) => `${i + 1}. ${c}`).join('\n')],
+          ['Recommandations', aiAnalysis.recommendations.map((r, i) => `${i + 1}. ${r}`).join('\n')],
+          ['Niveau de risque', `${aiAnalysis.riskLevel} - Evaluation de la solidité financière`]
+        ],
+        summary: [],
+        footer: [`Analyse générée par IA le ${format(new Date(), 'dd/MM/yyyy à HH:mm', { locale: fr })}`]
+      } : null;
 
       const table: TableData = {
         title: 'ANALYSE PAR RATIOS FINANCIERS',
@@ -1200,15 +1347,17 @@ export class ReportGenerationService {
         ...exportOptions
       };
 
+      const tables: TableData[] = executiveSummaryTable ? [executiveSummaryTable, table] : [table];
+
       switch (defaultOptions.format) {
         case 'pdf':
-          return await reportExportService.exportToPDF([table], defaultOptions);
+          return await reportExportService.exportToPDF(tables, defaultOptions);
         case 'excel':
-          return await reportExportService.exportToExcel([table], defaultOptions);
+          return await reportExportService.exportToExcel(tables, defaultOptions);
         case 'csv':
           return reportExportService.exportToCSV(table, defaultOptions);
         default:
-          return await reportExportService.exportToPDF([table], defaultOptions);
+          return await reportExportService.exportToPDF(tables, defaultOptions);
       }
     } catch (error) {
       console.error('Erreur génération ratios financiers:', error instanceof Error ? error.message : String(error));
@@ -1499,6 +1648,51 @@ export class ReportGenerationService {
       // Trier par montant total décroissant
       agingData.sort((a, b) => b.total - a.total);
 
+      // Récupérer les dépenses totales pour calculer le DPO
+      const expenses = journalEntries
+        .filter(e => e.account_number.startsWith('6'))
+        .reduce((sum, e) => sum + e.debit_amount - e.credit_amount, 0);
+
+      // Analyse IA des dettes fournisseurs
+      let aiAnalysis: AIAnalysisResult | null = null;
+      try {
+        const overdueTotal = days30Total + days60Total + days90Total + over120Total;
+        const payablesData: PayablesData = {
+          totalPayables: totalOutstanding,
+          current: currentTotal,
+          overdue30: days30Total,
+          overdue60: days60Total,
+          overdue90: days90Total + over120Total,
+          dpo: totalOutstanding > 0 && expenses > 0 ? (totalOutstanding / expenses) * 365 : 0,
+          paymentRate: totalOutstanding > 0 ? ((totalOutstanding - overdueTotal) / totalOutstanding) * 100 : 100,
+          averageOverdueAmount: overdueTotal / Math.max(1, agingData.filter(p => p.days30 + p.days60 + p.days90 + p.over120 > 0).length)
+        };
+
+        aiAnalysis = await aiReportAnalysisService.analyzePayables(
+          payablesData,
+          format(new Date(asOfDate), 'dd/MM/yyyy', { locale: fr }),
+          format(new Date(asOfDate), 'dd/MM/yyyy', { locale: fr })
+        );
+      } catch (error) {
+        console.error('Erreur lors de l\'analyse IA des dettes fournisseurs:', error);
+      }
+
+      const executiveSummaryTable: TableData | null = aiAnalysis ? {
+        title: 'RÉSUMÉ EXÉCUTIF - Analyse IA',
+        subtitle: 'Synthèse intelligente des dettes fournisseurs',
+        headers: ['Section', 'Analyse'],
+        rows: [
+          ['Vue d\'ensemble', aiAnalysis.executiveSummary],
+          ['Santé financière', aiAnalysis.financialHealth],
+          ['Points forts', aiAnalysis.keyStrengths.map((s, i) => `${i + 1}. ${s}`).join('\n')],
+          ['Points d\'attention', aiAnalysis.concernPoints.map((c, i) => `${i + 1}. ${c}`).join('\n')],
+          ['Recommandations', aiAnalysis.recommendations.map((r, i) => `${i + 1}. ${r}`).join('\n')],
+          ['Niveau de risque', `${aiAnalysis.riskLevel} - Evaluation basée sur les délais de paiement`]
+        ],
+        summary: [],
+        footer: [`Analyse générée par IA le ${format(new Date(), 'dd/MM/yyyy à HH:mm', { locale: fr })}`]
+      } : null;
+
       // Préparer le tableau pour export
       const table: TableData = agingData.length > 0 ? {
         title: 'Analyse des Dettes Fournisseurs',
@@ -1552,13 +1746,14 @@ export class ReportGenerationService {
       };
 
       // Exporter selon le format
+      const tables: TableData[] = executiveSummaryTable ? [executiveSummaryTable, table] : [table];
       switch (defaultOptions.format) {
         case 'excel':
-          return await reportExportService.exportToExcel(table, defaultOptions);
+          return await reportExportService.exportToExcel(tables, defaultOptions);
         case 'csv':
-          return await reportExportService.exportToCSV(table, defaultOptions);
+          return await reportExportService.exportToCSV(tables, defaultOptions);
         default:
-          return await reportExportService.exportToPDF(table, defaultOptions);
+          return await reportExportService.exportToPDF(tables, defaultOptions);
       }
     } catch (error) {
       console.error('Erreur génération analyse dettes fournisseurs:', error instanceof Error ? error.message : String(error));
@@ -1721,6 +1916,58 @@ export class ReportGenerationService {
         }
       });
 
+      // Analyse IA des écarts budgétaires
+      let aiAnalysis: AIAnalysisResult | null = null;
+      try {
+        const totalBudget = budgetedRevenue + budgetedExpenses;
+        const totalActual = revenues + expenses;
+        const totalVariance = totalActual - totalBudget;
+        const variancePercentage = totalBudget > 0 ? (totalVariance / totalBudget) * 100 : 0;
+
+        const majorVariances = categoryData
+          .filter(cat => Math.abs(cat.variancePct) > 10)
+          .slice(0, 5)
+          .map(cat => ({
+            category: cat.category,
+            budget: cat.budgeted,
+            actual: cat.actual,
+            variance: cat.variance,
+            variancePercent: cat.variancePct
+          }));
+
+        const budgetVarianceData: BudgetVarianceData = {
+          totalBudget: totalBudget,
+          totalActual: totalActual,
+          totalVariance: totalVariance,
+          variancePercentage: variancePercentage,
+          majorVariances: majorVariances
+        };
+
+        aiAnalysis = await aiReportAnalysisService.analyzeBudgetVariance(
+          budgetVarianceData,
+          format(new Date(periodStart), 'dd/MM/yyyy', { locale: fr }),
+          format(new Date(periodEnd), 'dd/MM/yyyy', { locale: fr })
+        );
+      } catch (error) {
+        console.error('Erreur lors de l\'analyse IA des écarts budgétaires:', error);
+      }
+
+      const executiveSummaryTable: TableData | null = aiAnalysis ? {
+        title: 'RÉSUMÉ EXÉCUTIF - Analyse IA',
+        subtitle: 'Synthèse intelligente des écarts budgétaires',
+        headers: ['Section', 'Analyse'],
+        rows: [
+          ['Vue d\'ensemble', aiAnalysis.executiveSummary],
+          ['Santé financière', aiAnalysis.financialHealth],
+          ['Points forts', aiAnalysis.keyStrengths.map((s, i) => `${i + 1}. ${s}`).join('\n')],
+          ['Points d\'attention', aiAnalysis.concernPoints.map((c, i) => `${i + 1}. ${c}`).join('\n')],
+          ['Recommandations', aiAnalysis.recommendations.map((r, i) => `${i + 1}. ${r}`).join('\n')],
+          ['Niveau de risque', `${aiAnalysis.riskLevel} - Evaluation du respect budgétaire`]
+        ],
+        summary: [],
+        footer: [`Analyse générée par IA le ${format(new Date(), 'dd/MM/yyyy à HH:mm', { locale: fr })}`]
+      } : null;
+
       // Préparer les tableaux pour export
       const summaryTable: TableData = journalEntries.length > 0 ? {
         title: 'Analyse des Écarts Budgétaires',
@@ -1798,7 +2045,9 @@ export class ReportGenerationService {
       };
 
       // Exporter selon le format
-      const tables: TableData[] = [summaryTable, detailTable];
+      const tables: TableData[] = executiveSummaryTable
+        ? [executiveSummaryTable, summaryTable, detailTable]
+        : [summaryTable, detailTable];
       switch (defaultOptions.format) {
         case 'excel':
           return await reportExportService.exportToExcel(tables, defaultOptions);
@@ -1910,11 +2159,11 @@ export class ReportGenerationService {
       const revenueGrowth = 8.0;
       const _profitGrowth = profitMargin > 0 ? 10.0 : -5.0;
 
-      // Interprétations
+      // Interprétations (sans caractères Unicode spéciaux)
       const getStatus = (value: number, good: number, avg: number): string => {
-        if (value >= good) return '✓ Excellent';
-        if (value >= avg) return '~ Bon';
-        return '✗ À améliorer';
+        if (value >= good) return 'Excellent';
+        if (value >= avg) return 'Bon';
+        return 'A ameliorer';
       };
 
       // Préparer les tableaux
@@ -1924,11 +2173,11 @@ export class ReportGenerationService {
         headers: ['Indicateur', 'Valeur', 'Objectif', 'Statut'],
         rows: [
           ['Chiffre d\'affaires', this.formatCurrency(revenues), '', ''],
-          ['Résultat net', this.formatCurrency(netIncome), '', profitMargin > 0 ? '✓' : '✗'],
-          ['Marge nette (%)', `${profitMargin.toFixed(1)}%`, '≥ 10%', getStatus(profitMargin, 10, 5)],
-          ['Croissance CA (%)', `${revenueGrowth.toFixed(1)}%`, '≥ 5%', getStatus(revenueGrowth, 5, 2)],
-          ['ROA (%)', `${roa.toFixed(1)}%`, '≥ 8%', getStatus(roa, 8, 4)],
-          ['ROE (%)', `${roe.toFixed(1)}%`, '≥ 15%', getStatus(roe, 15, 8)]
+          ['Resultat net', this.formatCurrency(netIncome), '', profitMargin > 0 ? 'Positif' : 'Negatif'],
+          ['Marge nette (%)', `${profitMargin.toFixed(1)}%`, '>= 10%', getStatus(profitMargin, 10, 5)],
+          ['Croissance CA (%)', `${revenueGrowth.toFixed(1)}%`, '>= 5%', getStatus(revenueGrowth, 5, 2)],
+          ['ROA (%)', `${roa.toFixed(1)}%`, '>= 8%', getStatus(roa, 8, 4)],
+          ['ROE (%)', `${roe.toFixed(1)}%`, '>= 15%', getStatus(roe, 15, 8)]
         ],
         summary: [],
         footer: []
@@ -1945,10 +2194,10 @@ export class ReportGenerationService {
         subtitle: '',
         headers: ['Indicateur', 'Valeur', 'Objectif', 'Statut'],
         rows: [
-          ['Ratio de liquidité générale', currentRatio.toFixed(2), '≥ 1.5', getStatus(currentRatio, 1.5, 1.0)],
-          ['Ratio d\'endettement', debtToEquity.toFixed(2), '≤ 1.0', debtToEquity <= 1.0 ? '✓ Bon' : '✗ Élevé'],
-          ['Fonds de roulement', this.formatCurrency(currentAssets - currentLiabilities), '> 0', currentAssets > currentLiabilities ? '✓' : '✗'],
-          ['Trésorerie nette', this.formatCurrency(currentAssets - currentLiabilities - inventory), '', '']
+          ['Ratio de liquidite generale', currentRatio.toFixed(2), '>= 1.5', getStatus(currentRatio, 1.5, 1.0)],
+          ['Ratio d\'endettement', debtToEquity.toFixed(2), '<= 1.0', debtToEquity <= 1.0 ? 'Bon' : 'Eleve'],
+          ['Fonds de roulement', this.formatCurrency(currentAssets - currentLiabilities), '> 0', currentAssets > currentLiabilities ? 'Positif' : 'Negatif'],
+          ['Tresorerie nette', this.formatCurrency(currentAssets - currentLiabilities - inventory), '', '']
         ],
         summary: [],
         footer: []
@@ -1965,10 +2214,10 @@ export class ReportGenerationService {
         subtitle: '',
         headers: ['Indicateur', 'Valeur', 'Objectif', 'Statut'],
         rows: [
-          ['Rotation des stocks (fois/an)', inventoryTurnover.toFixed(1), '≥ 6', getStatus(inventoryTurnover, 6, 4)],
-          ['Délai clients (DSO jours)', dso.toFixed(0), '≤ 45', dso <= 45 ? '✓ Bon' : '✗ Long'],
-          ['Délai fournisseurs (DPO jours)', dpo.toFixed(0), '≥ 30', dpo >= 30 ? '✓ Bon' : '✗ Court'],
-          ['Cycle de conversion (jours)', cashConversionCycle.toFixed(0), '≤ 30', cashConversionCycle <= 30 ? '✓ Bon' : '~ À surveiller']
+          ['Rotation des stocks (fois/an)', inventoryTurnover.toFixed(1), '>= 6', getStatus(inventoryTurnover, 6, 4)],
+          ['Delai clients (DSO jours)', dso.toFixed(0), '<= 45', dso <= 45 ? 'Bon' : 'Long'],
+          ['Delai fournisseurs (DPO jours)', dpo.toFixed(0), '>= 30', dpo >= 30 ? 'Bon' : 'Court'],
+          ['Cycle de conversion (jours)', cashConversionCycle.toFixed(0), '<= 30', cashConversionCycle <= 30 ? 'Bon' : 'A surveiller']
         ],
         summary: [],
         footer: []
@@ -2007,18 +2256,119 @@ export class ReportGenerationService {
         alertsTable.rows.push(['✓ OK', 'Tous les indicateurs sont dans les objectifs', 'Aucune']);
       }
 
+      // Générer l'analyse IA des KPI
+      let aiAnalysis = null;
+      if (journalEntries.length > 0) {
+        try {
+          const kpisForAI: AIFinancialKPIs = {
+            revenues,
+            expenses,
+            netIncome,
+            profitMargin,
+            currentRatio,
+            debtToEquity,
+            roa,
+            roe,
+            revenueGrowth,
+            inventoryTurnover,
+            dso,
+            dpo,
+            cashConversionCycle,
+            currentAssets,
+            currentLiabilities
+          };
+
+          aiAnalysis = await aiAnalysisService.analyzeFinancialKPIs(
+            kpisForAI,
+            format(new Date(periodStart), 'dd/MM/yyyy', { locale: fr }),
+            format(new Date(periodEnd), 'dd/MM/yyyy', { locale: fr })
+          );
+        } catch (error) {
+          console.error('Erreur lors de l\'analyse IA:', error);
+        }
+      }
+
+      // Créer le tableau de résumé exécutif si l'analyse IA est disponible
+      const executiveSummaryTable: TableData | null = aiAnalysis ? {
+        title: 'RÉSUMÉ EXÉCUTIF - Analyse IA',
+        subtitle: 'Synthèse intelligente de la situation financière',
+        headers: ['Section', 'Analyse'],
+        rows: [
+          ['Vue d\'ensemble', aiAnalysis.executiveSummary],
+          ['Santé financière', aiAnalysis.financialHealth],
+          ['Points forts', aiAnalysis.keyStrengths.map((s, i) => `${i + 1}. ${s}`).join('\n')],
+          ['Points d\'attention', aiAnalysis.concernPoints.map((c, i) => `${i + 1}. ${c}`).join('\n')],
+          ['Recommandations', aiAnalysis.recommendations.map((r, i) => `${i + 1}. ${r}`).join('\n')],
+          ['Niveau de risque', `${aiAnalysis.riskLevel} - Evaluation globale basée sur les indicateurs clés`]
+        ],
+        summary: [],
+        footer: [`Analyse générée par IA le ${format(new Date(), 'dd/MM/yyyy à HH:mm', { locale: fr })}`]
+      } : null;
+
+      // Générer les graphiques pour le PDF
+      const charts: string[] = [];
+
+      if (journalEntries.length > 0) {
+        try {
+          // Graphique 1: Évolution des KPI (Barres)
+          const kpiChart = await chartImageService.generateBarChart({
+            labels: ['Marge nette', 'Croissance CA', 'ROA', 'ROE'],
+            datasets: [{
+              label: 'Valeur (%)',
+              data: [profitMargin, revenueGrowth, roa, roe],
+              backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'],
+              borderColor: ['#2563eb', '#059669', '#d97706', '#7c3aed'],
+              borderWidth: 1
+            }]
+          });
+          charts.push(kpiChart);
+
+          // Graphique 2: Liquidité et Solvabilité (Barres)
+          const liquidityChart = await chartImageService.generateBarChart({
+            labels: ['Ratio liquidite', 'Ratio endettement', 'Fonds de roulement (K€)'],
+            datasets: [{
+              label: 'Valeur',
+              data: [currentRatio, debtToEquity, (currentAssets - currentLiabilities) / 1000],
+              backgroundColor: ['#10b981', '#ef4444', '#3b82f6'],
+              borderColor: ['#059669', '#dc2626', '#2563eb'],
+              borderWidth: 1
+            }]
+          });
+          charts.push(liquidityChart);
+
+          // Graphique 3: Indicateurs Opérationnels (Barres)
+          const operationalChart = await chartImageService.generateBarChart({
+            labels: ['Rotation stocks', 'Delai clients', 'Delai fournisseurs', 'Cycle conversion'],
+            datasets: [{
+              label: 'Valeur (jours/fois)',
+              data: [inventoryTurnover, dso, dpo, cashConversionCycle],
+              backgroundColor: ['#8b5cf6', '#f59e0b', '#10b981', '#3b82f6'],
+              borderColor: ['#7c3aed', '#d97706', '#059669', '#2563eb'],
+              borderWidth: 1
+            }]
+          });
+          charts.push(operationalChart);
+        } catch (error) {
+          console.error('Erreur lors de la génération des graphiques:', error);
+        }
+      }
+
       // Options d'export
       const defaultOptions: ExportOptions = {
         format: exportOptions?.format || 'pdf',
         title: 'TABLEAU DE BORD KPI',
-        subtitle: `${standardName}\nPériode du ${format(new Date(periodStart), 'dd/MM/yyyy', { locale: fr })} au ${format(new Date(periodEnd), 'dd/MM/yyyy', { locale: fr })}`,
+        subtitle: `${standardName}\nPeriode du ${format(new Date(periodStart), 'dd/MM/yyyy', { locale: fr })} au ${format(new Date(periodEnd), 'dd/MM/yyyy', { locale: fr })}`,
         orientation: 'portrait',
         fileName: `kpi_dashboard_${periodStart}_${periodEnd}`,
-        includeCharts: exportOptions?.includeCharts ?? false
+        includeCharts: exportOptions?.includeCharts ?? true,
+        charts: charts.length > 0 ? charts : undefined
       };
 
       // Exporter selon le format
-      const tables: TableData[] = [financialKPITable, liquidityKPITable, operationalKPITable, alertsTable];
+      // Inclure le résumé exécutif IA en première position si disponible
+      const tables: TableData[] = executiveSummaryTable
+        ? [executiveSummaryTable, financialKPITable, liquidityKPITable, operationalKPITable, alertsTable]
+        : [financialKPITable, liquidityKPITable, operationalKPITable, alertsTable];
       switch (defaultOptions.format) {
         case 'excel':
           return await reportExportService.exportToExcel(tables, defaultOptions);
@@ -2383,6 +2733,55 @@ export class ReportGenerationService {
         ? inventoryData.reduce((sum, item) => sum + item.coverage, 0) / inventoryData.length
         : 0;
 
+      // Récupérer les revenus pour le calcul du ratio stock/ventes
+      const revenues = journalEntries
+        .filter(e => e.account_number.startsWith('7'))
+        .reduce((sum, e) => sum + e.credit - e.debit, 0);
+
+      // Analyse IA de la valorisation des stocks
+      let aiAnalysis: AIAnalysisResult | null = null;
+      try {
+        // Calculer le stock obsolète (plus de 365 jours de couverture)
+        const obsoleteInventory = inventoryData
+          .filter(item => item.coverage > 365)
+          .reduce((sum, item) => sum + item.value, 0);
+
+        const inventoryAnalysisData: InventoryData = {
+          totalInventory: totalInventoryValue,
+          rawMaterials: inventoryData.find(i => i.category === 'Matières premières')?.value || 0,
+          workInProgress: inventoryData.find(i => i.category === 'En-cours de production')?.value || inventoryData.find(i => i.category === 'Produits en cours')?.value || 0,
+          finishedGoods: inventoryData.find(i => i.category === 'Produits finis')?.value || inventoryData.find(i => i.category === 'Marchandises')?.value || 0,
+          inventoryTurnover: avgTurnoverRate,
+          daysInventoryOutstanding: avgCoverage,
+          obsoleteInventory: obsoleteInventory,
+          inventoryToSales: totalInventoryValue > 0 && revenues > 0 ? totalInventoryValue / revenues : 0
+        };
+
+        aiAnalysis = await aiReportAnalysisService.analyzeInventory(
+          inventoryAnalysisData,
+          format(new Date(asOfDate), 'dd/MM/yyyy', { locale: fr }),
+          format(new Date(asOfDate), 'dd/MM/yyyy', { locale: fr })
+        );
+      } catch (error) {
+        console.error('Erreur lors de l\'analyse IA de la valorisation des stocks:', error);
+      }
+
+      const executiveSummaryTable: TableData | null = aiAnalysis ? {
+        title: 'RÉSUMÉ EXÉCUTIF - Analyse IA',
+        subtitle: 'Synthèse intelligente de la valorisation des stocks',
+        headers: ['Section', 'Analyse'],
+        rows: [
+          ['Vue d\'ensemble', aiAnalysis.executiveSummary],
+          ['Santé financière', aiAnalysis.financialHealth],
+          ['Points forts', aiAnalysis.keyStrengths.map((s, i) => `${i + 1}. ${s}`).join('\n')],
+          ['Points d\'attention', aiAnalysis.concernPoints.map((c, i) => `${i + 1}. ${c}`).join('\n')],
+          ['Recommandations', aiAnalysis.recommendations.map((r, i) => `${i + 1}. ${r}`).join('\n')],
+          ['Niveau de risque', `${aiAnalysis.riskLevel} - Evaluation basée sur la rotation et l'obsolescence`]
+        ],
+        summary: [],
+        footer: [`Analyse générée par IA le ${format(new Date(), 'dd/MM/yyyy à HH:mm', { locale: fr })}`]
+      } : null;
+
       // Préparer le tableau de valorisation
       const valuationTable: TableData = inventoryData.length > 0 ? {
         title: 'Valorisation des Stocks',
@@ -2510,7 +2909,9 @@ export class ReportGenerationService {
       };
 
       // Exporter selon le format
-      const tables: TableData[] = [valuationTable, recentMovements, alertsTable];
+      const tables: TableData[] = executiveSummaryTable
+        ? [executiveSummaryTable, valuationTable, recentMovements, alertsTable]
+        : [valuationTable, recentMovements, alertsTable];
       switch (defaultOptions.format) {
         case 'excel':
           return await reportExportService.exportToExcel(tables, defaultOptions);

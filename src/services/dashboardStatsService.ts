@@ -89,6 +89,7 @@ class DashboardStatsService {
    */
   private async getFinancialData(companyId: string, startDate: string, endDate: string) {
     // Utiliser journal_entry_lines avec join à chart_of_accounts
+    // ✅ Inclure 'posted', 'validated' ET 'imported' (pour import FEC)
     const { data: lines, error } = await supabase
       .from('journal_entry_lines')
       .select(`
@@ -104,7 +105,7 @@ class DashboardStatsService {
         )
       `)
       .eq('journal_entries.company_id', companyId)
-      .eq('journal_entries.status', 'posted')
+      .in('journal_entries.status', ['posted', 'validated', 'imported'])
       .gte('journal_entries.entry_date', startDate)
       .lte('journal_entries.entry_date', endDate);
 
@@ -172,6 +173,143 @@ class DashboardStatsService {
     const startDate = startOfYear(new Date()).toISOString().split('T')[0];
     const endDate = endOfYear(new Date()).toISOString().split('T')[0];
     return this.calculateStats(companyId, startDate, endDate);
+  }
+
+  /**
+   * Récupère les données de revenus mensuels sur les 6 derniers mois
+   */
+  async getMonthlyRevenueData(companyId: string): Promise<Array<{ month: string; montant: number }>> {
+    const monthlyData: Array<{ month: string; montant: number }> = [];
+    const now = new Date();
+
+    for (let i = 5; i >= 0; i--) {
+      const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const startDate = startOfMonth(monthDate).toISOString().split('T')[0];
+      const endDate = endOfMonth(monthDate).toISOString().split('T')[0];
+
+      const data = await this.getFinancialData(companyId, startDate, endDate);
+
+      // Format month name
+      const monthName = monthDate.toLocaleDateString('fr-FR', { month: 'short' });
+
+      monthlyData.push({
+        month: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+        montant: data.revenue
+      });
+    }
+
+    return monthlyData;
+  }
+
+  /**
+   * Récupère les dépenses par catégorie (classes comptables)
+   */
+  async getExpensesByCategory(companyId: string): Promise<Array<{ name: string; value: number; color: string }>> {
+    const startDate = startOfYear(new Date()).toISOString().split('T')[0];
+    const endDate = endOfYear(new Date()).toISOString().split('T')[0];
+
+    const { data: lines, error } = await supabase
+      .from('journal_entry_lines')
+      .select(`
+        debit_amount,
+        credit_amount,
+        chart_of_accounts!inner (
+          account_number,
+          name
+        ),
+        journal_entries!inner (
+          company_id,
+          entry_date,
+          status
+        )
+      `)
+      .eq('journal_entries.company_id', companyId)
+      .eq('journal_entries.status', 'posted')
+      .gte('journal_entries.entry_date', startDate)
+      .lte('journal_entries.entry_date', endDate);
+
+    if (error || !lines) {
+      console.error('Error fetching expenses by category:', error);
+      return [];
+    }
+
+    const categoryMap = new Map<string, number>();
+    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'];
+
+    lines.forEach(line => {
+      const accountNumber = (line as any).chart_of_accounts?.account_number;
+      if (!accountNumber) return;
+
+      const accountClass = accountNumber.charAt(0);
+      const debit = (line as any).debit_amount || 0;
+      const credit = (line as any).credit_amount || 0;
+
+      // Classe 6 = Charges (expenses)
+      if (accountClass === '6') {
+        const subClass = accountNumber.substring(0, 2);
+        const categoryName = this.getCategoryName(subClass);
+        const amount = debit - credit;
+
+        categoryMap.set(categoryName, (categoryMap.get(categoryName) || 0) + amount);
+      }
+    });
+
+    return Array.from(categoryMap.entries())
+      .map(([name, value], index) => ({
+        name,
+        value: Math.abs(value),
+        color: colors[index % colors.length]
+      }))
+      .filter(item => item.value > 0)
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5); // Top 5 categories
+  }
+
+  /**
+   * Récupère la comparaison mensuelle produits vs charges
+   */
+  async getMonthlyComparison(companyId: string): Promise<Array<{ month: string; produits: number; charges: number }>> {
+    const monthlyData: Array<{ month: string; produits: number; charges: number }> = [];
+    const now = new Date();
+
+    for (let i = 5; i >= 0; i--) {
+      const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const startDate = startOfMonth(monthDate).toISOString().split('T')[0];
+      const endDate = endOfMonth(monthDate).toISOString().split('T')[0];
+
+      const data = await this.getFinancialData(companyId, startDate, endDate);
+
+      // Format month name
+      const monthName = monthDate.toLocaleDateString('fr-FR', { month: 'short' });
+
+      monthlyData.push({
+        month: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+        produits: data.revenue,
+        charges: data.expenses
+      });
+    }
+
+    return monthlyData;
+  }
+
+  /**
+   * Récupère le nom de catégorie pour une sous-classe comptable
+   */
+  private getCategoryName(subClass: string): string {
+    const categoryNames: Record<string, string> = {
+      '60': 'Achats',
+      '61': 'Services extérieurs',
+      '62': 'Autres services',
+      '63': 'Impôts et taxes',
+      '64': 'Charges de personnel',
+      '65': 'Autres charges',
+      '66': 'Charges financières',
+      '67': 'Charges exceptionnelles',
+      '68': 'Dotations',
+      '69': 'Participation'
+    };
+
+    return categoryNames[subClass] || 'Autres charges';
   }
 }
 

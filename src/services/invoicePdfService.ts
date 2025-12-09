@@ -334,9 +334,11 @@ export class InvoicePdfService {
     if (legalInfo.length > 0) {
       doc.text(legalInfo.join(' - '), 105, footerY, { align: 'center' });
     }
-    
-    // Numéro de page
-    doc.text(`Page 1`, 105, footerY + 5, { align: 'center' });
+
+    // Numéro de page avec total
+    const pageCount = (doc.internal as any).getNumberOfPages();
+    const currentPage = (doc.internal as any).getCurrentPageInfo().pageNumber;
+    doc.text(`Page ${currentPage} / ${pageCount}`, 105, footerY + 5, { align: 'center' });
   }
   
   /**

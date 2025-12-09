@@ -25,6 +25,7 @@ export interface ExportOptions {
   subtitle?: string;
   fileName?: string;
   includeCharts?: boolean;
+  charts?: string[]; // Images base64 des graphiques
   watermark?: string;
   companyInfo?: {
     name: string;
@@ -133,11 +134,12 @@ export class ReportExportService {
           columnStyles: this.getColumnStyles(table.headers),
           margin: { left: 20, right: 20 },
           didDrawPage: (data: any) => {
-            // Pied de page
+            // Pied de page avec numérotation correcte
+            const pageCount = (pdf.internal as any).getNumberOfPages();
             pdf.setFontSize(8);
             pdf.setFont('helvetica', 'normal');
             pdf.text(
-              `Page ${data.pageNumber} - ${options.companyInfo?.name || 'Rapport'} - ${format(new Date(), 'dd/MM/yyyy')}`,
+              `Page ${data.pageNumber} / ${pageCount} - ${options.companyInfo?.name || 'Rapport'} - ${format(new Date(), 'dd/MM/yyyy')}`,
               20,
               pdf.internal.pageSize.height - 10
             );
@@ -157,6 +159,35 @@ export class ReportExportService {
         if (i < tables.length - 1) {
           pdf.addPage();
           currentY = 20;
+        }
+      }
+
+      // Ajouter les graphiques si disponibles
+      if (options.includeCharts && options.charts && options.charts.length > 0) {
+        pdf.addPage();
+        currentY = 20;
+
+        pdf.setFontSize(16);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Graphiques et Visualisations', 20, currentY);
+        currentY += 15;
+
+        for (let i = 0; i < options.charts.length; i++) {
+          const chartImage = options.charts[i];
+
+          // Vérifier s'il reste assez d'espace sur la page
+          if (currentY > pdf.internal.pageSize.height - 100) {
+            pdf.addPage();
+            currentY = 20;
+          }
+
+          // Ajouter le graphique
+          try {
+            pdf.addImage(chartImage, 'PNG', 20, currentY, 170, 85);
+            currentY += 95;
+          } catch (error) {
+            console.error('Erreur lors de l\'ajout du graphique:', error);
+          }
         }
       }
 

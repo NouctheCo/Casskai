@@ -137,7 +137,7 @@ export const AIAssistant: React.FC = () => {
           </div>
           <div>
             <h3 className="font-semibold">Assistant CassKai</h3>
-            <p className="text-xs text-white/70">IA propulsée par GPT-4</p>
+            <p className="text-xs text-white/70">IA propulsée par un modèle avancé</p>
           </div>
         </div>
         <div className="flex items-center gap-1">
