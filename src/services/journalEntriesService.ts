@@ -22,6 +22,7 @@ import type {
   MinimalJournal,
 } from '@/types/journalEntries.types';
 import { auditService } from './auditService';
+import AccountingRulesService from './accountingRulesService';
 
 type JournalEntryInsert = Database['public']['Tables']['journal_entries']['Insert'];
 type JournalEntryUpdate = Database['public']['Tables']['journal_entries']['Update'];
@@ -457,6 +458,9 @@ class JournalEntriesService {
 
       if (status && status !== 'all') {
         query = query.eq('status', status);
+      } else if (!status || status === 'all') {
+        // Par défaut, inclure seulement les écritures valides (pas les drafts)
+        query = query.in('status', ['posted', 'validated', 'imported']);
       }
 
       if (accountId) {
@@ -666,6 +670,35 @@ class JournalEntriesService {
     }
   }
 
+  /**
+   * ✅ NOUVELLE MÉTHODE: Valider une écriture selon les règles comptables
+   */
+  private async validateJournalEntry(
+    companyId: string,
+    items: JournalEntryLineForm[]
+  ): Promise<{ valid: boolean; errors: string[]; warnings: string[] }> {
+    // Récupérer les numéros de comptes
+    const accountIds = items.map(item => item.accountId);
+    const { data: accounts } = await supabase
+      .from('chart_of_accounts')
+      .select('id, account_number')
+      .eq('company_id', companyId)
+      .in('id', accountIds);
+
+    const accountMap = new Map((accounts || []).map(acc => [acc.id, acc.account_number || '']));
+
+    // Construire l'objet pour la validation
+    const entryToValidate = {
+      lines: items.map(item => ({
+        accountNumber: accountMap.get(item.accountId) || '',
+        debitAmount: coerceNumber(item.debitAmount),
+        creditAmount: coerceNumber(item.creditAmount),
+      })),
+    };
+
+    return AccountingRulesService.validateJournalEntry(entryToValidate);
+  }
+
   private async normalizeLines(
     companyId: string,
     entryId: string,
@@ -731,34 +764,16 @@ class JournalEntriesService {
   }
 
   private async generateEntryNumber(companyId: string, journalId?: string | null): Promise<string | null> {
-    try {
-      const journalCode = await this.fetchJournalCode(journalId);
-      const sanitizedPrefix = (journalCode ?? 'JR').replace(/[^A-Z0-9]/gi, '').toUpperCase() || 'JR';
+    // ✅ Utiliser le service de règles comptables pour générer le numéro
+    if (!journalId) {
+      // Fallback si pas de journal
       const year = new Date().getFullYear();
-      const likePattern = `${sanitizedPrefix}-${year}-%`;
+      return `OD-${year}-${Date.now().toString().slice(-6)}`;
+    }
 
-      const { data, error } = await supabase
-        .from('journal_entries')
-        .select('entry_number')
-        .eq('company_id', companyId)
-        .like('entry_number', likePattern)
-        .order('entry_number', { ascending: false })
-        .limit(1);
-
-      if (error) {
-        throw error;
-      }
-
-      let nextSequence = 1;
-      const lastEntry = data?.[0]?.entry_number;
-      if (lastEntry) {
-        const match = lastEntry.match(/(\\d+)$/);
-        if (match) {
-          nextSequence = parseInt(match[1], 10) + 1;
-        }
-      }
-
-      return `${sanitizedPrefix}-${year}-${String(nextSequence).padStart(4, '0')}`;
+    try {
+      const entryDate = new Date().toISOString();
+      return await AccountingRulesService.generateEntryNumber(companyId, journalId, entryDate);
     } catch (error) {
       console.warn('Failed to generate entry number, falling back to timestamp-based value:', error);
       return `JR-${Date.now()}`;

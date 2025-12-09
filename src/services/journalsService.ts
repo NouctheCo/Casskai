@@ -48,7 +48,7 @@ export class JournalsService {
 
       if (error) throw error;
       return data || [];
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur récupération journaux:', error);
       return [];
     }
@@ -78,9 +78,9 @@ export class JournalsService {
       if (error) throw error;
 
       return { success: true, data };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur création journal:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }
 
@@ -97,9 +97,9 @@ export class JournalsService {
       if (error) throw error;
 
       return { success: true, data };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur modification journal:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }
 
@@ -125,9 +125,9 @@ export class JournalsService {
       if (error) throw error;
 
       return { success: true };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur suppression journal:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }
 
@@ -155,9 +155,9 @@ export class JournalsService {
       if (error) throw error;
 
       return { success: true, data };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur changement statut journal:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }
 
@@ -180,7 +180,7 @@ export class JournalsService {
         entriesCount: data?.length || 0,
         lastEntryDate: data?.[0]?.entry_date || null
       };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur stats journal:', error);
       return { entriesCount: 0, lastEntryDate: null };
     }
@@ -240,9 +240,9 @@ export class JournalsService {
       if (error) throw error;
 
       return { success: true, journalsCreated: data?.length || 0 };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur création journaux par défaut:', error);
-      return { success: false, journalsCreated: 0, error: error.message };
+      return { success: false, journalsCreated: 0, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }
 }

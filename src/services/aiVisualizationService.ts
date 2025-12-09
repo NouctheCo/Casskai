@@ -39,7 +39,7 @@ class AIVisualizationService {
       
       this.isInitialized = true;
       console.warn('AI Visualization Service initialized successfully');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Failed to initialize AI Visualization Service:', error);
       throw error;
     }
@@ -102,11 +102,11 @@ class AIVisualizationService {
         modelUsed: 'heatmap_generator'
       };
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error generating heatmap data:', error);
       return {
         success: false,
-        error: error.message
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue')
       };
     }
   }
@@ -247,11 +247,11 @@ class AIVisualizationService {
         modelUsed: 'sankey_generator'
       };
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error generating Sankey data:', error);
       return {
         success: false,
-        error: error.message
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue')
       };
     }
   }
@@ -338,11 +338,11 @@ class AIVisualizationService {
         modelUsed: 'treemap_generator'
       };
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error generating treemap data:', error);
       return {
         success: false,
-        error: error.message
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue')
       };
     }
   }
@@ -510,11 +510,11 @@ class AIVisualizationService {
         modelUsed: 'time_series_generator'
       };
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error generating time series data:', error);
       return {
         success: false,
-        error: error.message
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue')
       };
     }
   }

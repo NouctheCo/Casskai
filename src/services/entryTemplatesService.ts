@@ -320,8 +320,8 @@ export class EntryTemplatesService {
       // Évaluation sécurisée de l'expression mathématique
       const result = this.evaluateMathExpression(processedFormula);
       return Math.round(result * 100) / 100; // Arrondi à 2 décimales
-    } catch (error) {
-      throw new Error(`Erreur dans la formule "${formula}": ${error.message}`);
+    } catch (error: unknown) {
+      throw new Error(`Erreur dans la formule "${formula}": ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
     }
   }
 
@@ -569,8 +569,8 @@ export class EntryTemplatesService {
             processed++;
           }
         }
-      } catch (error) {
-        errors.push(`Template ${template.name}: ${error.message}`);
+      } catch (error: unknown) {
+        errors.push(`Template ${template.name}: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
       }
     }
 

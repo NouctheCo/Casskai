@@ -68,7 +68,7 @@ export class ChartOfAccountsService {
 
       if (error) throw error;
       return data || [];
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur récupération comptes:', error);
       return [];
     }
@@ -115,9 +115,9 @@ export class ChartOfAccountsService {
       if (error) throw error;
 
       return { success: true, data };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur création compte:', error);
-      const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la création du compte';
+      const message = error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : 'Erreur inconnue lors de la création du compte';
       return { success: false, error: message };
     }
   }
@@ -165,9 +165,9 @@ export class ChartOfAccountsService {
       if (error) throw error;
 
       return { success: true, data };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur modification compte:', error);
-      const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la mise à jour du compte';
+      const message = error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : 'Erreur inconnue lors de la mise à jour du compte';
       return { success: false, error: message };
     }
   }
@@ -194,9 +194,9 @@ export class ChartOfAccountsService {
       if (error) throw error;
 
       return { success: true };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur suppression compte:', error);
-      const message = error instanceof Error ? error.message : 'Erreur inconnue lors de la suppression du compte';
+      const message = error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : 'Erreur inconnue lors de la suppression du compte';
       return { success: false, error: message };
     }
   }
@@ -236,7 +236,7 @@ export class ChartOfAccountsService {
       });
 
       return stats;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur stats comptes:', error);
       return {
         totalAccounts: 0,
@@ -280,9 +280,9 @@ export class ChartOfAccountsService {
       ].join('\n');
 
       return { success: true, data: csvContent };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur export CSV:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }
 
@@ -340,8 +340,8 @@ export class ChartOfAccountsService {
           } else {
             errors.push(`Ligne ${i + 2}: ${result.error}`);
           }
-        } catch (error) {
-          const message = error instanceof Error ? error.message : 'Erreur inconnue';
+        } catch (error: unknown) {
+          const message = error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : 'Erreur inconnue';
           errors.push(`Ligne ${i + 2}: Erreur de traitement - ${message}`);
         }
       }
@@ -351,9 +351,9 @@ export class ChartOfAccountsService {
         imported, 
         errors 
       };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur import CSV:', error);
-      const message = error instanceof Error ? error.message : 'Erreur inconnue lors de l\'import CSV';
+      const message = error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : 'Erreur inconnue lors de l\'import CSV';
       return { 
         success: false, 
         imported, 
@@ -422,7 +422,7 @@ export class ChartOfAccountsService {
       }, 0) ?? 0;
 
       return balance;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur calcul solde:', error);
       return 0;
     }

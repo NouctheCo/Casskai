@@ -63,8 +63,8 @@ export class EncryptionService {
 
       this.isInitialized = true;
       console.warn('Encryption service initialized successfully');
-    } catch (error) {
-      throw new Error(`Failed to initialize encryption service: ${error.message}`);
+    } catch (error: unknown) {
+      throw new Error(`Failed to initialize encryption service: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
     }
   }
 
@@ -104,8 +104,8 @@ export class EncryptionService {
 
       this.keyCache.set(cacheKey, derivedKey);
       return derivedKey;
-    } catch (error) {
-      throw new Error(`Failed to generate derived key: ${error.message}`);
+    } catch (error: unknown) {
+      throw new Error(`Failed to generate derived key: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
     }
   }
 
@@ -168,12 +168,12 @@ export class EncryptionService {
       });
 
       return encryptedCredentials;
-    } catch (error) {
+    } catch (error: unknown) {
       await this.auditLog('CREDENTIALS_ENCRYPTION_FAILED', userId, {
         providerId,
-        error: error.message
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue')
       });
-      throw new Error(`Failed to encrypt credentials: ${error.message}`);
+      throw new Error(`Failed to encrypt credentials: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
     }
   }
 
@@ -225,13 +225,13 @@ export class EncryptionService {
       });
 
       return credentials;
-    } catch (error) {
+    } catch (error: unknown) {
       await this.auditLog('CREDENTIALS_DECRYPTION_FAILED', encryptedCredentials.userId, {
         providerId: encryptedCredentials.providerId,
         keyId: encryptedCredentials.keyId,
-        error: error.message
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue')
       });
-      throw new Error(`Failed to decrypt credentials: ${error.message}`);
+      throw new Error(`Failed to decrypt credentials: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
     }
   }
 
@@ -262,8 +262,8 @@ export class EncryptionService {
       const encryptedBase64 = btoa(String.fromCharCode(...new Uint8Array(encryptedBuffer)));
       
       return `${keyId}:${ivBase64}:${encryptedBase64}`;
-    } catch (error) {
-      throw new Error(`Failed to encrypt string: ${error.message}`);
+    } catch (error: unknown) {
+      throw new Error(`Failed to encrypt string: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
     }
   }
 
@@ -299,8 +299,8 @@ export class EncryptionService {
       );
 
       return new TextDecoder().decode(decryptedBuffer);
-    } catch (error) {
-      throw new Error(`Failed to decrypt string: ${error.message}`);
+    } catch (error: unknown) {
+      throw new Error(`Failed to decrypt string: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
     }
   }
 
@@ -312,8 +312,8 @@ export class EncryptionService {
       const hashBuffer = await crypto.subtle.digest('SHA-256', data);
       const hashArray = new Uint8Array(hashBuffer);
       return btoa(String.fromCharCode(...hashArray));
-    } catch (error) {
-      throw new Error(`Failed to hash token: ${error.message}`);
+    } catch (error: unknown) {
+      throw new Error(`Failed to hash token: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
     }
   }
 
@@ -357,7 +357,7 @@ export class EncryptionService {
         signatureBuffer,
         encoder.encode(payload)
       );
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('HMAC verification failed:', error);
       return false;
     }
@@ -391,8 +391,8 @@ export class EncryptionService {
       const signatureBase64 = btoa(String.fromCharCode(...signatureArray));
       
       return `${algorithm.toLowerCase().replace('-', '')}=${signatureBase64}`;
-    } catch (error) {
-      throw new Error(`Failed to generate HMAC signature: ${error.message}`);
+    } catch (error: unknown) {
+      throw new Error(`Failed to generate HMAC signature: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
     }
   }
 
@@ -447,7 +447,7 @@ export class EncryptionService {
 
       // En production, sauvegarder en base de données
       console.warn('Audit log:', auditEntry);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Failed to create audit log:', error);
     }
   }
@@ -482,7 +482,7 @@ export class TokenRotationService {
       try {
         await callback();
         console.warn('Token rotation completed successfully');
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Token rotation failed:', error);
       }
     }, this.rotationInterval);
@@ -501,7 +501,7 @@ export class TokenRotationService {
     try {
       await callback();
       console.warn('Forced token rotation completed successfully');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Forced token rotation failed:', error);
       throw error;
     }

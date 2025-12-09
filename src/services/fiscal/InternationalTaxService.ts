@@ -385,11 +385,11 @@ export class InternationalTaxService {
       await this.createCountrySpecificAccounts(companyId, config);
 
       return { success: true };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur configuration fiscale:', error);
       return {
         success: false,
-        error: error.message || 'Erreur lors de la configuration fiscale'
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue') || 'Erreur lors de la configuration fiscale'
       };
     }
   }

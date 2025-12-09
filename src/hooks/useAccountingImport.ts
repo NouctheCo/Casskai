@@ -117,8 +117,8 @@ export function useAccountingImport({
       }
 
       return analysis;
-    } catch (error) {
-      handleError(`Erreur analyse fichier: ${error.message}`);
+    } catch (error: unknown) {
+      handleError(`Erreur analyse fichier: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
       throw error;
     }
   }, [form, handleError]);
@@ -204,8 +204,8 @@ export function useAccountingImport({
       onImportComplete?.(finalResult);
       return finalResult;
 
-    } catch (error) {
-      handleError(`Erreur import: ${error.message}`);
+    } catch (error: unknown) {
+      handleError(`Erreur import: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
       throw error;
     } finally {
       setIsImporting(false);
@@ -273,7 +273,7 @@ export function useAccountingImport({
   const performAutoLetterage = useCallback(async () => {
     try {
       await AutomaticLetterageService.performAutoLetterage(companyId);
-    } catch (error) {
+    } catch (error: unknown) {
       console.warn('Erreur lettrage automatique:', error);
       // N'interrompt pas l'import si le lettrage échoue
     }
@@ -309,8 +309,8 @@ export function useAccountingImport({
   const validateSingleEntry = useCallback(async (entry: any) => {
     try {
       return await AccountingValidationService.validateJournalEntry(entry, companyId);
-    } catch (error) {
-      handleError(`Erreur validation: ${error.message}`);
+    } catch (error: unknown) {
+      handleError(`Erreur validation: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
       throw error;
     }
   }, [companyId, handleError]);
@@ -324,8 +324,8 @@ export function useAccountingImport({
   }) => {
     try {
       return VATCalculationService.calculateVAT(params);
-    } catch (error) {
-      handleError(`Erreur calcul TVA: ${error.message}`);
+    } catch (error: unknown) {
+      handleError(`Erreur calcul TVA: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
       throw error;
     }
   }, [handleError]);
@@ -346,8 +346,8 @@ export function useAccountingImport({
         ...params,
         companyId
       });
-    } catch (error) {
-      handleError(`Erreur génération TVA: ${error.message}`);
+    } catch (error: unknown) {
+      handleError(`Erreur génération TVA: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
       throw error;
     }
   }, [companyId, handleError]);
@@ -356,8 +356,8 @@ export function useAccountingImport({
   const checkDuplicates = useCallback(async (entries: any[]) => {
     try {
       return await AccountingValidationService.detectDuplicates(entries, companyId);
-    } catch (error) {
-      handleError(`Erreur détection doublons: ${error.message}`);
+    } catch (error: unknown) {
+      handleError(`Erreur détection doublons: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
       throw error;
     }
   }, [companyId, handleError]);

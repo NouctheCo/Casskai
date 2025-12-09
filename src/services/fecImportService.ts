@@ -13,6 +13,7 @@
 import { supabase, getCurrentCompany } from '../lib/supabase';
 import { FECParser } from './fecParser';
 import type { ImportResult, FECEntry } from '../types/accounting-import.types';
+import { auditService } from './auditService';
 
 interface ImportSummary {
   journalsCreated: number;
@@ -63,11 +64,11 @@ export const fecImportService = {
       // 3. Importer en base de données
       return await this.importParsedData(parseResult, enterpriseId);
       
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur lors du parsing et import FEC:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Erreur inconnue'
+        error: error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : 'Erreur inconnue'
       };
     }
   },
@@ -107,24 +108,49 @@ export const fecImportService = {
       
       // 3. Créer les écritures comptables
       const entriesResult = await this.createJournalEntries(entriesByJournalAndNum, companyId);
-      
+
+      const summary = {
+        journalsCreated: journalsResult.created,
+        journalsExisting: journalsResult.existing,
+        accountsCreated: accountsResult.created,
+        accountsExisting: accountsResult.existing,
+        entriesCreated: entriesResult.created,
+        entriesWithErrors: entriesResult.errors.length,
+        errors: entriesResult.errors
+      };
+
+      // 4. Logger l'import dans l'audit trail
+      try {
+        await auditService.log({
+          event_type: 'IMPORT_DATA',
+          table_name: 'journal_entries',
+          company_id: companyId,
+          new_values: {
+            import_type: 'FEC',
+            total_entries: parseResult.entries.length,
+            journals_created: summary.journalsCreated,
+            accounts_created: summary.accountsCreated,
+            entries_created: summary.entriesCreated,
+            entries_with_errors: summary.entriesWithErrors,
+            success: true
+          },
+          security_level: 'high',
+          is_sensitive: false
+        });
+      } catch (auditError) {
+        // Ne pas bloquer l'import si le log échoue
+        console.warn('Audit log failed (non-blocking):', auditError);
+      }
+
       return {
         success: true,
-        summary: {
-          journalsCreated: journalsResult.created,
-          journalsExisting: journalsResult.existing,
-          accountsCreated: accountsResult.created,
-          accountsExisting: accountsResult.existing,
-          entriesCreated: entriesResult.created,
-          entriesWithErrors: entriesResult.errors.length,
-          errors: entriesResult.errors
-        }
+        summary
       };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur lors de l\'import FEC:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Une erreur est survenue lors de l\'importation'
+        error: error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : 'Une erreur est survenue lors de l\'importation'
       };
     }
   },
@@ -136,7 +162,7 @@ export const fecImportService = {
     try {
       const company = await getCurrentCompany();
       return company ? (company as any).id : null;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur lors de la récupération de l\'entreprise:', error);
       return null;
     }
@@ -169,11 +195,11 @@ export const fecImportService = {
           errors: entriesResult.errors
         }
       } as any;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur lors de l\'import FEC:', error);
       return {
         success: false,
-        error: error.message || 'Une erreur est survenue lors de l\'importation'
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue') || 'Une erreur est survenue lors de l\'importation'
       };
     }
   },
@@ -308,7 +334,7 @@ export const fecImportService = {
         existing: existingCodes.size,
         journals: []
       };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur lors de la création des journaux:', error);
       throw error;
     }
@@ -374,7 +400,7 @@ export const fecImportService = {
         existing: existingAccountNumbers.size,
         accounts: []
       };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur lors de la création des comptes:', error);
       throw error;
     }
@@ -531,7 +557,7 @@ export const fecImportService = {
         itemsCreated: journalEntryLinesToCreate.length,
         errors
       };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur lors de la création des écritures:', error);
       throw error;
     }

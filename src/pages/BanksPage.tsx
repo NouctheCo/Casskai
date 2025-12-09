@@ -19,6 +19,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { bankStorageAdapter, BankStorageTransaction } from '@/services/bankStorageAdapter';
 import { TransactionCategorization } from '@/components/banking/TransactionCategorization';
 import { useTranslation } from 'react-i18next';
+import { useAutoAccounting } from '@/hooks/useAutoAccounting';
 import {
   Upload,
   RefreshCw,
@@ -38,6 +39,7 @@ import { SepaPaymentGenerator } from '@/components/banking/SepaPaymentGenerator'
 const BanksPageNew: React.FC = () => {
   const { user, currentCompany } = useAuth();
   const { t } = useTranslation();
+  const { generateFromBankTransaction } = useAutoAccounting();
 
   // State
   const [bankAccounts, setBankAccounts] = useState<any[]>([]);
@@ -186,6 +188,28 @@ const BanksPageNew: React.FC = () => {
       const success = await bankStorageAdapter.reconcileTransaction(transactionId);
 
       if (success) {
+        // ✅ NOUVEAU : Générer automatiquement l'écriture comptable
+        if (currentCompany?.id) {
+          try {
+            const transaction = transactions.find(t => t.id === transactionId);
+            if (transaction && selectedAccountId) {
+              await generateFromBankTransaction({
+                id: transaction.id,
+                company_id: currentCompany.id,
+                bank_account_id: selectedAccountId,
+                transaction_date: transaction.date,
+                amount: Math.abs(transaction.amount),
+                type: transaction.amount >= 0 ? 'credit' : 'debit',
+                description: transaction.description || 'Transaction bancaire',
+                counterpart_account_id: undefined, // Sera mappé automatiquement selon le type
+                reference: transaction.reference,
+              });
+            }
+          } catch (error) {
+            console.warn('Auto-accounting generation failed, but reconciliation succeeded:', error);
+          }
+        }
+
         toastSuccess("La transaction a été marquée comme réconciliée"
        );
 

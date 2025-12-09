@@ -92,7 +92,7 @@ class FinancialRatiosService {
           )
         `)
         .eq('company_id', companyId)
-        .eq('status', 'posted')
+        .in('status', ['posted', 'validated', 'imported'])
         .gte('entry_date', startDate)
         .lte('entry_date', endDate);
 

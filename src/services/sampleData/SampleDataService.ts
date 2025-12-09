@@ -451,9 +451,9 @@ export class SampleDataService {
       }
 
       return { success: true, results };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur génération données d\'exemple:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }
 
@@ -479,9 +479,9 @@ export class SampleDataService {
       }
 
       return { success: true };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur suppression données d\'exemple:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }
 }

@@ -83,7 +83,7 @@ export default function PricingPage() {
       console.warn('🛒 [PricingPage] Edge function response:', { data, error });
 
       if (error) {
-        toastError(`Erreur lors de la création de la session: ${error.message || 'Erreur inconnue'}`);
+        toastError(`Erreur lors de la création de la session: ${(error instanceof Error ? error.message : 'Une erreur est survenue') || 'Erreur inconnue'}`);
         return;
       }
 
@@ -123,17 +123,17 @@ export default function PricingPage() {
           console.warn('🛒 [PricingPage] Using manual redirect fallback');
           window.location.href = data.url;
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('🛒 [PricingPage] Stripe redirect failed or timed out:', error);
         console.warn('🛒 [PricingPage] Using manual redirect to URL:', data.url);
         window.location.href = data.url;
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur lors du choix du plan:', error);
-      if (error.name === 'TypeError') {
+      if ((error instanceof Error ? error.name : 'Error') === 'TypeError') {
         toastWarning('⚠️ Problème de connexion réseau. Vérifiez votre connexion Internet et réessayez.');
       } else {
-        toastError(`Erreur inattendue: ${error.message}`);
+        toastError(`Erreur inattendue: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
       }
     } finally {
       setIsLoading(false);

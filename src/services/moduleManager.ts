@@ -70,7 +70,7 @@ export class ModuleManager {
 
       this.isInitialized = true;
       console.warn('[ModuleManager] Initialisé avec succès');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('[ModuleManager] Erreur d\'initialisation:', error);
       throw error;
     }
@@ -148,9 +148,9 @@ export class ModuleManager {
       await this.saveActivation(activation);
 
   console.warn(`[ModuleManager] Module ${moduleId} activé avec succès`);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`[ModuleManager] Erreur lors de l'activation de ${moduleId}:`, error);
-      throw new ModuleError(`Failed to activate module: ${error.message}`, moduleId, 'ACTIVATION_FAILED', error);
+      throw new ModuleError(`Failed to activate module: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`, moduleId, 'ACTIVATION_FAILED', error);
     }
   }
 
@@ -196,9 +196,9 @@ export class ModuleManager {
       await this.saveActivation(activation);
 
   console.warn(`[ModuleManager] Module ${moduleId} désactivé avec succès`);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`[ModuleManager] Erreur lors de la désactivation de ${moduleId}:`, error);
-      throw new ModuleError(`Failed to deactivate module: ${error.message}`, moduleId, 'DEACTIVATION_FAILED', error);
+      throw new ModuleError(`Failed to deactivate module: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`, moduleId, 'DEACTIVATION_FAILED', error);
     }
   }
 
@@ -428,7 +428,7 @@ export class ModuleManager {
             console.warn('[ModuleManager] Modules synchronized from Supabase to localStorage');
             return;
           } else if (error) {
-            console.warn('[ModuleManager] Error loading from Supabase, falling back to localStorage:', error.message);
+            console.warn('[ModuleManager] Error loading from Supabase, falling back to localStorage:', (error instanceof Error ? error.message : 'Une erreur est survenue'));
           }
         } catch (supabaseError) {
           console.warn('[ModuleManager] Supabase not available, using localStorage fallback:', supabaseError);
@@ -494,7 +494,7 @@ export class ModuleManager {
         // Sauvegarder les modules par défaut
         localStorage.setItem('casskai_modules', JSON.stringify(defaultModules));
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('[ModuleManager] Error loading activations:', error);
 
       // En cas d'erreur, utiliser les modules par défaut
@@ -576,7 +576,7 @@ export class ModuleManager {
           console.error('[ModuleManager] Supabase save error:', supabaseError);
         }
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('[ModuleManager] Erreur sauvegarde activation:', error);
     }
   }

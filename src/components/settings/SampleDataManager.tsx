@@ -134,7 +134,7 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
 
       setShowSampleDataConfig(false);
 
-    } catch (error) {
+    } catch (error: unknown) {
 
       setLastOperation({
 
@@ -142,7 +142,7 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
 
         success: false,
 
-        error: error.message
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue')
 
       });
 
@@ -186,7 +186,7 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
 
       setShowConfirmReset(false);
 
-    } catch (error) {
+    } catch (error: unknown) {
 
       setLastOperation({
 
@@ -194,7 +194,7 @@ export const SampleDataManager: React.FC<SampleDataManagerProps> = ({
 
         success: false,
 
-        error: error.message
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue')
 
       });
 

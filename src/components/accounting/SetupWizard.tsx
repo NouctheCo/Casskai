@@ -150,7 +150,7 @@ const SetupWizard = ({ currentEnterpriseId: propCurrentEnterpriseId, onFinish })
 
         
 
-      } catch (error) {
+      } catch (error: unknown) {
 
         console.error('Error checking setup status:', error);
 
@@ -224,7 +224,7 @@ const SetupWizard = ({ currentEnterpriseId: propCurrentEnterpriseId, onFinish })
 
       setShowChartOfAccountsDialog(false);
 
-    } catch (error) {
+    } catch (error: unknown) {
 
       console.error('Error setting up chart of accounts:', error);
 
@@ -234,7 +234,7 @@ const SetupWizard = ({ currentEnterpriseId: propCurrentEnterpriseId, onFinish })
 
         title: t('error'),
 
-        description: error instanceof Error ? error.message : t('defaultChartImportError')
+        description: error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : t('defaultChartImportError')
 
       });
 
@@ -284,7 +284,7 @@ const SetupWizard = ({ currentEnterpriseId: propCurrentEnterpriseId, onFinish })
 
       setShowFiscalYearDialog(false);
 
-    } catch (error) {
+    } catch (error: unknown) {
 
       console.error('Error setting up fiscal year:', error);
 
@@ -294,7 +294,7 @@ const SetupWizard = ({ currentEnterpriseId: propCurrentEnterpriseId, onFinish })
 
         title: t('error'),
 
-        description: error.message || t('accounting.setup.fiscalYearError', { defaultValue: 'Error saving fiscal year settings' })
+        description: (error instanceof Error ? error.message : 'Une erreur est survenue') || t('accounting.setup.fiscalYearError', { defaultValue: 'Error saving fiscal year settings' })
 
       });
 
@@ -340,7 +340,7 @@ const SetupWizard = ({ currentEnterpriseId: propCurrentEnterpriseId, onFinish })
 
       setShowJournalsDialog(false);
 
-    } catch (error) {
+    } catch (error: unknown) {
 
       console.error('Error setting up journals:', error);
 
@@ -350,7 +350,7 @@ const SetupWizard = ({ currentEnterpriseId: propCurrentEnterpriseId, onFinish })
 
         title: t('error'),
 
-        description: error.message || t('accounting.setup.journalsError', { defaultValue: 'Error creating journals' })
+        description: (error instanceof Error ? error.message : 'Une erreur est survenue') || t('accounting.setup.journalsError', { defaultValue: 'Error creating journals' })
 
       });
 

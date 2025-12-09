@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 
 import { motion } from 'framer-motion';
 
+import AccountingRulesService from '@/services/accountingRulesService';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { Button } from '@/components/ui/button';
@@ -127,6 +129,19 @@ function useEntryFormState(entry: EntryData | null) {
 
 
 function EntryLineForm({ line, index, updateLine, removeLine, canRemove, accounts }) {
+  // ✅ Récupérer les infos du compte sélectionné
+  const selectedAccount = accounts.find((acc: any) => acc.id === line.account);
+  const accountNumber = selectedAccount?.account_number || '';
+
+  // ✅ Valider le côté débit/crédit selon les règles comptables
+  const validation = React.useMemo(() => {
+    if (!accountNumber) return { valid: true };
+
+    const debit = parseFloat(line.debit) || 0;
+    const credit = parseFloat(line.credit) || 0;
+
+    return AccountingRulesService.validateAccountSide(accountNumber, debit, credit);
+  }, [accountNumber, line.debit, line.credit]);
 
   return (
 
@@ -208,6 +223,8 @@ function EntryLineForm({ line, index, updateLine, removeLine, canRemove, account
 
           onChange={(e) => updateLine(index, 'debit', e.target.value)}
 
+          className={validation.warning && parseFloat(line.credit) > 0 ? 'border-yellow-500' : ''}
+
         />
 
       </div>
@@ -227,6 +244,8 @@ function EntryLineForm({ line, index, updateLine, removeLine, canRemove, account
           value={line.credit}
 
           onChange={(e) => updateLine(index, 'credit', e.target.value)}
+
+          className={validation.warning && parseFloat(line.debit) > 0 ? 'border-yellow-500' : ''}
 
         />
 
@@ -251,6 +270,14 @@ function EntryLineForm({ line, index, updateLine, removeLine, canRemove, account
         </Button>
 
       </div>
+
+      {/* ✅ Afficher les avertissements comptables */}
+      {validation.warning && (
+        <div className="md:col-span-5 text-sm text-yellow-600 dark:text-yellow-400 flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+          <span>{validation.warning}</span>
+        </div>
+      )}
 
     </motion.div>
 
@@ -300,7 +327,7 @@ function EntryTotals({ totals }) {
 
             )}
 
-            <span className={totals.isBalanced ? 'text-green-600' : 'text-red-600'}>
+            <span className={totals.isBalanced ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
 
               {totals.isBalanced ? 'Équilibrée' : 'Non équilibrée'}
 
@@ -325,6 +352,22 @@ const EntryFormDialog = ({ open, onClose, entry = null, onSave, accounts }) => {
   const { toast } = useToast();
 
   const { formData, setFormData } = useEntryFormState(entry);
+
+  // ✅ FIX: Réinitialiser le formulaire quand on ferme ou ouvre une nouvelle écriture
+  useEffect(() => {
+    if (!entry && open) {
+      // Nouveau formulaire: réinitialisation complète
+      setFormData({
+        date: new Date().toISOString().split('T')[0],
+        reference: '',
+        description: '',
+        lines: [
+          { account: '', description: '', debit: '', credit: '' },
+          { account: '', description: '', debit: '', credit: '' }
+        ]
+      });
+    }
+  }, [open, entry, setFormData]);
 
 
 
@@ -369,6 +412,14 @@ const EntryFormDialog = ({ open, onClose, entry = null, onSave, accounts }) => {
             if (selectedAccount && !line.description) {
               updatedLine.description = selectedAccount.account_name;
             }
+          }
+
+          // ✅ RÈGLE COMPTABLE: Si on remplit le débit, on vide le crédit (et inversement)
+          if (field === 'debit' && parseFloat(value) > 0) {
+            updatedLine.credit = '';
+          }
+          if (field === 'credit' && parseFloat(value) > 0) {
+            updatedLine.debit = '';
           }
 
           return updatedLine;
@@ -616,7 +667,7 @@ const EntryPreviewDialog = ({ open, onClose, entry }: { open: boolean; onClose: 
 
       case 'validated':
 
-        return <Badge className="bg-green-100 text-green-800 border-green-200">Validée</Badge>;
+        return <Badge className="bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800">Validée</Badge>;
 
       case 'draft':
 
@@ -624,7 +675,7 @@ const EntryPreviewDialog = ({ open, onClose, entry }: { open: boolean; onClose: 
 
       case 'pending':
 
-        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">En attente</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800">En attente</Badge>;
 
       default:
 
@@ -794,7 +845,7 @@ const EntryPreviewDialog = ({ open, onClose, entry }: { open: boolean; onClose: 
 
               <Label className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Crédit</Label>
 
-              <p className="text-xl font-bold text-green-600">{entry.totalCredit?.toFixed(2)} €</p>
+              <p className="text-xl font-bold text-green-600 dark:text-green-400">{entry.totalCredit?.toFixed(2)} €</p>
 
             </div>
 
@@ -808,7 +859,7 @@ const EntryPreviewDialog = ({ open, onClose, entry }: { open: boolean; onClose: 
 
             {entry.totalDebit === entry.totalCredit ? (
 
-              <div className="flex items-center justify-center space-x-2 text-green-600">
+              <div className="flex items-center justify-center space-x-2 text-green-600 dark:text-green-400">
 
                 <CheckCircle className="w-5 h-5" />
 
@@ -882,7 +933,7 @@ const EntryRow = ({ entry, onEdit, onDelete, onView, onValidate }: { entry: any;
 
       case 'validated':
 
-        return <Badge className="bg-green-100 text-green-800 border-green-200">Validée</Badge>;
+        return <Badge className="bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800">Validée</Badge>;
 
       case 'draft':
 
@@ -890,7 +941,7 @@ const EntryRow = ({ entry, onEdit, onDelete, onView, onValidate }: { entry: any;
 
       case 'pending':
 
-        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">En attente</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800">En attente</Badge>;
 
       default:
 
@@ -1060,6 +1111,7 @@ export default function OptimizedJournalEntriesTab() {
   const [entries, setEntries] = useState<any[]>([]);
   const [_loading, setLoading] = useState(true);
   const [accounts, setAccounts] = useState<any[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Charger les écritures réelles depuis Supabase
   useEffect(() => {
@@ -1120,6 +1172,27 @@ export default function OptimizedJournalEntriesTab() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fonction de rafraîchissement manuel avec feedback
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([loadEntries(), loadAccounts()]);
+      toast({
+        title: "Données actualisées",
+        description: "Les écritures ont été rechargées depuis la base de données",
+      });
+    } catch (error) {
+      console.error('Error refreshing:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de rafraîchir les données",
+        variant: "destructive"
+      });
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -1497,7 +1570,7 @@ export default function OptimizedJournalEntriesTab() {
 
               </div>
 
-              
+
 
               <Select value={statusFilter} onValueChange={setStatusFilter}>
 
@@ -1521,7 +1594,16 @@ export default function OptimizedJournalEntriesTab() {
 
               </Select>
 
-              
+
+
+              <Button
+                variant="outline"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                title="Rafraîchir les données depuis la base de données"
+              >
+                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              </Button>
 
               <Button onClick={() => setShowEntryForm(true)}>
 

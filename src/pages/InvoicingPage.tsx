@@ -296,9 +296,9 @@ export default function InvoicingPageOptimized() {
           pendingInvoicesTrend: stats.pendingInvoicesTrend,
           overdueInvoicesTrend: stats.overdueInvoicesTrend
         });
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error loading invoicing data:', error);
-        setError(error.message);
+        setError((error instanceof Error ? error.message : 'Une erreur est survenue'));
         toastSuccess("Action effectuée avec succès");
       } finally {
         setIsLoading(false);
@@ -368,7 +368,7 @@ export default function InvoicingPageOptimized() {
       setActiveTab('invoices');
 
       toastSuccess("Action effectuée avec succès");
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error preparing new invoice:', error);
       toastSuccess("Action effectuée avec succès");
     }

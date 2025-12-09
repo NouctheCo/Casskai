@@ -142,8 +142,8 @@ export class CSVImportService {
         preview: preview.slice(1), // Skip header row
         suggestedMapping
       };
-    } catch (error) {
-      throw new Error(`Erreur lors de l'analyse Excel: ${error.message}`);
+    } catch (error: unknown) {
+      throw new Error(`Erreur lors de l'analyse Excel: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
     }
   }
 
@@ -190,8 +190,8 @@ export class CSVImportService {
             preview,
             suggestedMapping
           });
-        } catch (error) {
-          reject(new Error(`Erreur lors de l'analyse CSV: ${error.message}`));
+        } catch (error: unknown) {
+          reject(new Error(`Erreur lors de l'analyse CSV: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`));
         }
       };
       reader.onerror = () => reject(new Error('Impossible de lire le fichier CSV'));
@@ -346,8 +346,8 @@ export class CSVImportService {
       
       const result = this.processDataWithMapping(jsonData, mapping, options);
       return result;
-    } catch (error) {
-      return this.createErrorResult(error.message);
+    } catch (error: unknown) {
+      return this.createErrorResult((error instanceof Error ? error.message : 'Une erreur est survenue'));
     }
   }
 
@@ -372,8 +372,8 @@ export class CSVImportService {
           const data = lines.map(line => this.parseCSVLine(line, delimiter));
           const result = this.processDataWithMapping(data, mapping, options);
           resolve(result);
-        } catch (error) {
-          resolve(this.createErrorResult(error.message));
+        } catch (error: unknown) {
+          resolve(this.createErrorResult((error instanceof Error ? error.message : 'Une erreur est survenue')));
         }
       };
       reader.onerror = () => resolve(this.createErrorResult('Impossible de lire le fichier CSV'));
@@ -418,10 +418,10 @@ export class CSVImportService {
           });
         }
 
-      } catch (error) {
+      } catch (error: unknown) {
         errors.push({
           row: rowNumber,
-          message: `Erreur de mapping: ${error.message}`,
+          message: `Erreur de mapping: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`,
           type: 'format',
           severity: 'error'
         });
@@ -456,8 +456,8 @@ export class CSVImportService {
         }
         
         entry[map.fieldName] = processedValue;
-      } catch (error) {
-        throw new Error(`Colonne ${map.columnName}: ${error.message}`);
+      } catch (error: unknown) {
+        throw new Error(`Colonne ${map.columnName}: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
       }
     });
 

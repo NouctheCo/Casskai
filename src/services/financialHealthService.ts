@@ -131,6 +131,7 @@ class FinancialHealthService {
         .from('journal_entries')
         .select('id')
         .eq('company_id', companyId)
+        .in('status', ['posted', 'validated', 'imported'])
         .gte('entry_date', startDate.toISOString().split('T')[0])
         .lte('entry_date', endDate.toISOString().split('T')[0]);
 
@@ -297,6 +298,7 @@ class FinancialHealthService {
         .from('journal_entries')
         .select('id')
         .eq('company_id', companyId)
+        .in('status', ['posted', 'validated', 'imported'])
         .gte('entry_date', startDate3MonthsAgo.toISOString().split('T')[0])
         .lte('entry_date', endDate3MonthsAgo.toISOString().split('T')[0]);
 

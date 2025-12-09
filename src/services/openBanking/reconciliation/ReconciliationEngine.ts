@@ -32,8 +32,8 @@ export class ReconciliationEngine {
       this.rules = rules.sort((a, b) => a.priority - b.priority);
       this.isInitialized = true;
       console.warn(`Reconciliation engine initialized with ${rules.length} rules`);
-    } catch (error) {
-      throw new Error(`Failed to initialize reconciliation engine: ${error.message}`);
+    } catch (error: unknown) {
+      throw new Error(`Failed to initialize reconciliation engine: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
     }
   }
 
@@ -84,13 +84,13 @@ export class ReconciliationEngine {
         success: true,
         data: matches
       };
-    } catch (error) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: {
           code: 'RECONCILIATION_ERROR',
-          message: `Failed to reconcile transaction: ${error.message}`,
-          details: error
+          message: `Failed to reconcile transaction: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`,
+          details: error instanceof Error ? { message: error.message, stack: error.stack } : { error: String(error) }
         }
       };
     }
@@ -140,13 +140,13 @@ export class ReconciliationEngine {
           statistics
         }
       };
-    } catch (error) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: {
           code: 'BATCH_RECONCILIATION_ERROR',
-          message: `Failed to reconcile batch: ${error.message}`,
-          details: error
+          message: `Failed to reconcile batch: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`,
+          details: error instanceof Error ? { message: error.message, stack: error.stack } : { error: String(error) }
         }
       };
     }

@@ -55,7 +55,7 @@ class AIAnalyticsService {
       
       this.isInitialized = true;
       console.warn('AI Analytics Service initialized successfully');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Failed to initialize AI Analytics Service:', error);
       throw error;
     }
@@ -74,7 +74,7 @@ class AIAnalyticsService {
         // Crée de nouveaux modèles
         await this.createDefaultModels();
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error initializing models:', error);
       // Fallback vers des modèles par défaut
       await this.createDefaultModels();
@@ -228,11 +228,11 @@ class AIAnalyticsService {
         modelUsed: 'anomaly_detection_v1'
       };
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error detecting anomalies:', error);
       return {
         success: false,
-        error: error.message,
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue'),
         processingTime: Date.now() - Date.now()
       };
     }
@@ -338,7 +338,7 @@ class AIAnalyticsService {
         modelUsed: 'category_classification_v1'
       };
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error categorizing expense:', error);
       return this.ruleBasedCategorization(transaction, categories);
     }
@@ -487,7 +487,7 @@ class AIAnalyticsService {
         modelUsed: 'lstm_cash_flow_v1'
       };
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error predicting cash flow:', error);
       return this.statisticalCashFlowPrediction(historicalData, daysAhead);
     }
@@ -631,11 +631,11 @@ class AIAnalyticsService {
         modelUsed: 'health_scoring_v1'
       };
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error calculating health score:', error);
       return {
         success: false,
-        error: error.message
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue')
       };
     }
   }
@@ -754,7 +754,7 @@ class AIAnalyticsService {
       
       localStorage.setItem('ai_models', JSON.stringify(modelMetadata));
       console.warn('Models metadata saved successfully');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error saving models:', error);
     }
   }

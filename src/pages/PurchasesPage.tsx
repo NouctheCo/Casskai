@@ -44,6 +44,8 @@ import { exportToCsv, generatePdfReport } from '../components/purchases/ExportUt
 
 import { Plus, RefreshCw, FileText, AlertTriangle, Sparkles } from 'lucide-react';
 
+import { useAutoAccounting } from '@/hooks/useAutoAccounting';
+
 
 
 export default function PurchasesPage() {
@@ -65,6 +67,8 @@ export default function PurchasesPage() {
   }, [i18n]);
 
   const { currentEnterpriseId, currentEnterprise } = useEnterprise();
+
+  const { generateFromPurchase } = useAutoAccounting();
 
   const { ConfirmDialog: _ConfirmDialog, confirm } = useConfirmDialog();
 
@@ -320,7 +324,59 @@ export default function PurchasesPage() {
 
       }
 
-      
+
+
+      // ✅ Auto-génération de l'écriture comptable pour un nouvel achat
+
+      if (!editingPurchase && result.data && currentEnterprise) {
+
+        try {
+
+          const supplier = suppliers.find(s => s.id === formData.supplier_id);
+
+
+
+          await generateFromPurchase({
+
+            id: result.data.id,
+
+            company_id: currentEnterprise.id,
+
+            supplier_id: formData.supplier_id,
+
+            supplier_name: supplier?.name || 'Fournisseur',
+
+            order_number: formData.invoice_number,
+
+            order_date: formData.purchase_date,
+
+            total_excl_tax: formData.amount_ht,
+
+            total_tax: formData.amount_ht * (formData.tva_rate / 100),
+
+            total_incl_tax: formData.amount_ht * (1 + formData.tva_rate / 100),
+
+            items: [{
+
+              account_id: undefined, // Sera mappé automatiquement (607 Achats)
+
+              description: formData.description || 'Achat fournisseur',
+
+              amount_excl_tax: formData.amount_ht,
+
+            }],
+
+          });
+
+        } catch (error) {
+
+          console.warn('Auto-accounting generation failed, but purchase was created:', error);
+
+        }
+
+      }
+
+
 
       if (editingPurchase) {
 

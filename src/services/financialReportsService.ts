@@ -118,6 +118,7 @@ class FinancialReportsService {
     }
 
     // Récupérer toutes les lignes d'écritures de la période avec jointure
+    // ✅ Inclure les statuts 'posted', 'validated' ET 'imported' (pour les imports FEC)
     const { data: entries, error: entriesError } = await supabase
       .from('journal_entries')
       .select(`
@@ -129,6 +130,7 @@ class FinancialReportsService {
         )
       `)
       .eq('company_id', companyId)
+      .in('status', ['posted', 'validated', 'imported'])
       .lte('entry_date', periodEnd);
 
     if (entriesError) {

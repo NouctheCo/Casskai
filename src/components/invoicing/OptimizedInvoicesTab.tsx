@@ -34,6 +34,8 @@ import { thirdPartiesService } from '@/services/thirdPartiesService';
 
 import CompanySettingsService from '@/services/companySettingsService';
 
+import { useAutoAccounting } from '@/hooks/useAutoAccounting';
+
 import { InvoicePdfService } from '@/services/invoicePdfService';
 
 import InventoryService, { type InventoryItem } from '@/services/inventoryService';
@@ -1457,6 +1459,10 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
 
   const { toast } = useToast();
 
+  const { currentCompany } = useAuth();
+
+  const { generateFromInvoice, isGenerating } = useAutoAccounting();
+
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState<InvoiceFormData>({
@@ -1820,7 +1826,36 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
 
         // Création
 
-        await invoicingService.createInvoice(invoiceData, items);
+        const createdInvoice = await invoicingService.createInvoice(invoiceData, items);
+
+
+        // ✅ NOUVEAU : Générer automatiquement l'écriture comptable
+        if (createdInvoice && currentCompany?.id) {
+          try {
+            const client = clients.find(c => c.id === formData.clientId);
+
+            await generateFromInvoice({
+              id: createdInvoice.id as string,
+              company_id: currentCompany.id,
+              third_party_id: formData.clientId,
+              third_party_name: client?.name || client?.display_name || client?.legal_name || 'Client',
+              invoice_number: formData.invoiceNumber,
+              type: 'sale',
+              invoice_date: formData.issueDate,
+              subtotal_excl_tax: totals.totalHT,
+              total_tax_amount: totals.totalTVA,
+              total_incl_tax: totals.totalTTC,
+              lines: formData.items.map(item => ({
+                account_id: undefined, // Sera mappé automatiquement selon le type
+                description: item.description,
+                subtotal_excl_tax: item.quantity * item.unitPrice,
+                tax_amount: (item.quantity * item.unitPrice) * (item.taxRate / 100),
+              })),
+            });
+          } catch (error) {
+            console.warn('Auto-accounting generation failed, but invoice was created:', error);
+          }
+        }
 
         toast({
 
@@ -2310,15 +2345,15 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
 
         <DialogFooter className="gap-2">
 
-          <Button variant="outline" onClick={onClose} disabled={loading}>
+          <Button variant="outline" onClick={onClose} disabled={loading || isGenerating}>
 
             Annuler
 
           </Button>
 
-          <Button onClick={handleSave} disabled={loading}>
+          <Button onClick={handleSave} disabled={loading || isGenerating}>
 
-            {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            {(loading || isGenerating) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
 
             {invoice ? 'Modifier' : 'Créer'}
 

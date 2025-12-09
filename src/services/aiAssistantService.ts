@@ -65,8 +65,8 @@ class AIAssistantService {
       }
 
       this.isInitialized = true;
-    } catch (error) {
-      console.error('Failed to initialize AI Assistant Service:', error instanceof Error ? error.message : String(error));
+    } catch (error: unknown) {
+      console.error('Failed to initialize AI Assistant Service:', error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : (error instanceof Error ? error.message : String(error)));
       this.isInitialized = true; // Continue en mode mock
     }
   }
@@ -133,11 +133,11 @@ class AIAssistantService {
         modelUsed: this.openai ? this.config.model : 'mock_assistant'
       };
 
-    } catch (error) {
-      console.error('Error processing AI assistant query:', error instanceof Error ? error.message : String(error));
+    } catch (error: unknown) {
+      console.error('Error processing AI assistant query:', error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : (error instanceof Error ? error.message : String(error)));
       return {
         success: false,
-        error: error.message
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue')
       };
     }
   }
@@ -203,8 +203,8 @@ class AIAssistantService {
         suggestions: this.generateSuggestions(query, type)
       };
 
-    } catch (error) {
-      console.error('OpenAI API error:', error instanceof Error ? error.message : String(error));
+    } catch (error: unknown) {
+      console.error('OpenAI API error:', error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : (error instanceof Error ? error.message : String(error)));
       throw error;
     }
   }
@@ -344,11 +344,11 @@ class AIAssistantService {
         modelUsed: 'tax_optimization_analyzer'
       };
 
-    } catch (error) {
-      console.error('Error generating tax optimizations:', error instanceof Error ? error.message : String(error));
+    } catch (error: unknown) {
+      console.error('Error generating tax optimizations:', error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : (error instanceof Error ? error.message : String(error)));
       return {
         success: false,
-        error: error.message
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue')
       };
     }
   }
@@ -476,11 +476,11 @@ class AIAssistantService {
         modelUsed: this.openai ? this.config.model : 'narrative_generator'
       };
 
-    } catch (error) {
-      console.error('Error generating narrative report:', error instanceof Error ? error.message : String(error));
+    } catch (error: unknown) {
+      console.error('Error generating narrative report:', error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : (error instanceof Error ? error.message : String(error)));
       return {
         success: false,
-        error: error.message
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue')
       };
     }
   }
