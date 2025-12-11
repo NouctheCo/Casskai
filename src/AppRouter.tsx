@@ -71,7 +71,7 @@ const LazyAcceptInvitationPage = React.lazy(() => import('@/pages/AcceptInvitati
 const LazyTeamManagementGuide = React.lazy(() => import('@/pages/docs/TeamManagementGuide'));
 
 const AppRouter: React.FC = () => {
-  const { isAuthenticated, loading, onboardingCompleted, isCheckingOnboarding, currentCompany } = useAuth();
+  const { isAuthenticated, loading, onboardingCompleted, isCheckingOnboarding, currentCompany, userCompanies } = useAuth();
 
   // Memoize the routing logic to prevent infinite re-renders
   const routingState = useMemo(() => {
@@ -82,13 +82,13 @@ const AppRouter: React.FC = () => {
     if (!isAuthenticated) return 'unauthenticated';
 
     // If authenticated but no companies (needs onboarding)
-    // IMPORTANT: Ne rediriger vers onboarding QUE si pas d'entreprise ET onboarding_completed_at null
-    // Si currentCompany existe, même sans onboardingCompleted, c'est que l'onboarding est fait
-    if (isAuthenticated && !currentCompany) return 'needs-onboarding';
+    // IMPORTANT: Utiliser userCompanies (chargé depuis DB) au lieu de currentCompany (peut être null temporairement)
+    // Si l'utilisateur a au moins une entreprise dans userCompanies, l'onboarding est complété
+    if (isAuthenticated && (!userCompanies || userCompanies.length === 0)) return 'needs-onboarding';
 
     // Fully authenticated with company
     return 'authenticated';
-  }, [loading, isAuthenticated, onboardingCompleted, isCheckingOnboarding, currentCompany]);
+  }, [loading, isAuthenticated, onboardingCompleted, isCheckingOnboarding, currentCompany, userCompanies]);
 
   if (routingState === 'loading') {
     const loadingMessage = isCheckingOnboarding 
