@@ -47,8 +47,16 @@ export async function generateInvoiceJournalEntry(
   try {
     const { company_id, type, third_party_id } = invoice;
 
-    // 1. Déterminer le journal selon le type de facture
-    const journalCode = type === 'sale' ? 'VT' : 'AC'; // VT=Ventes, AC=Achats
+    // 1. Récupérer le journal approprié selon le type de facture
+    // ✅ On récupère l'ID du journal (UUID), pas le code !
+    const journalType = type === 'sale' ? 'sale' : 'purchase';
+    const journal = await getJournalByType(company_id, journalType);
+
+    if (!journal) {
+      throw new Error(
+        `Journal ${journalType === 'sale' ? 'des ventes (VTE)' : 'des achats (ACH)'} non trouvé pour cette entreprise`
+      );
+    }
 
     // 2. Récupérer le compte du tiers (client ou fournisseur)
     const thirdPartyAccount = await getThirdPartyAccount(
@@ -145,7 +153,7 @@ export async function generateInvoiceJournalEntry(
     // 4. Créer l'écriture comptable
     const journalEntryResult = await journalEntriesService.createJournalEntry({
       companyId: company_id,
-      journalId: journalCode,
+      journalId: journal.id, // ✅ On passe l'ID du journal (UUID), pas le code
       entryDate: invoice.invoice_date,
       description: `Facture ${invoice.invoice_number}`,
       referenceNumber: invoice.invoice_number,
@@ -345,6 +353,35 @@ export async function onInvoiceCreated(invoiceId: string): Promise<void> {
   } catch (error) {
     console.error('Erreur hook onInvoiceCreated:', error);
     throw error;
+  }
+}
+
+/**
+ * Récupère le journal approprié selon son type
+ */
+async function getJournalByType(
+  companyId: string,
+  type: 'sale' | 'purchase' | 'bank' | 'cash' | 'miscellaneous'
+): Promise<{ id: string; code: string; name: string } | null> {
+  try {
+    const { data, error } = await supabase
+      .from('journals')
+      .select('id, code, name')
+      .eq('company_id', companyId)
+      .eq('type', type)
+      .eq('is_active', true)
+      .limit(1)
+      .single();
+
+    if (error) {
+      console.error('Erreur récupération journal:', error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Exception récupération journal:', error);
+    return null;
   }
 }
 

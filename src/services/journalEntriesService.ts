@@ -75,29 +75,42 @@ class JournalEntriesService {
       if (!journalId) {
         try {
           console.warn('🔍 Récupération journal par défaut pour company:', payload.companyId);
+          console.warn('⚠️ ATTENTION: Aucun journal spécifié, utilisation du fallback');
 
+          // Récupérer le journal OD (Opérations Diverses) en priorité pour les écritures manuelles
           const { data: defaultJournal, error: journalError } = await supabase
             .from('journals')
-            .select('id, code, name')
+            .select('id, code, name, type')
             .eq('company_id', payload.companyId)
             .eq('is_active', true)
+            .eq('type', 'miscellaneous') // Priorité au journal OD
             .limit(1)
             .single();
 
           console.warn('🔍 Résultat query journals:', { data: defaultJournal, error: journalError });
 
           if (journalError) {
-            console.error('❌ Erreur récupération journal:', journalError);
-            throw new Error(`Erreur récupération journal: ${journalError.message}`);
-          }
+            console.error('❌ Erreur récupération journal OD:', journalError);
 
-          if (!defaultJournal) {
-            console.error('❌ Aucun journal trouvé');
-            throw new Error('Aucun journal actif trouvé pour cette entreprise');
-          }
+            // Si pas de journal OD, prendre le premier journal actif
+            const { data: anyJournal } = await supabase
+              .from('journals')
+              .select('id, code, name, type')
+              .eq('company_id', payload.companyId)
+              .eq('is_active', true)
+              .limit(1)
+              .single();
 
-          journalId = defaultJournal.id;
-          console.warn('✅ Journal par défaut trouvé:', defaultJournal);
+            if (!anyJournal) {
+              throw new Error('Aucun journal actif trouvé pour cette entreprise. Veuillez créer au moins un journal.');
+            }
+
+            journalId = anyJournal.id;
+            console.warn(`⚠️ Journal de secours utilisé: ${anyJournal.code} - ${anyJournal.name} (type: ${anyJournal.type})`);
+          } else {
+            journalId = defaultJournal.id;
+            console.warn('✅ Journal OD trouvé:', defaultJournal);
+          }
         } catch (error) {
           console.error('💥 Exception récupération journal:', error);
           throw error;
@@ -105,6 +118,11 @@ class JournalEntriesService {
       }
 
       console.warn('🔍 journalId final avant génération numéro:', journalId);
+
+      // Vérification finale : journalId doit être défini
+      if (!journalId) {
+        throw new Error('Impossible de déterminer le journal pour cette écriture. Veuillez spécifier un journal valide.');
+      }
 
       const entryNumber = payload.entryNumber ?? (await this.generateEntryNumber(payload.companyId, journalId));
 
@@ -236,7 +254,7 @@ class JournalEntriesService {
         entry_date: payload.entryDate,
         description: payload.description,
         reference_number: payload.referenceNumber ?? null,
-        journal_id: journalId,
+        journal_id: journalId ?? undefined, // Convertir null en undefined pour TypeScript
         status: payload.status ?? existingEntry.status ?? 'draft',
         entry_number: payload.entryNumber ?? existingEntry.entry_number,
       };
@@ -458,10 +476,8 @@ class JournalEntriesService {
 
       if (status && status !== 'all') {
         query = query.eq('status', status);
-      } else if (!status || status === 'all') {
-        // Par défaut, inclure seulement les écritures valides (pas les drafts)
-        query = query.in('status', ['posted', 'validated', 'imported']);
       }
+      // Sinon, on ne filtre PAS par statut - on montre TOUT
 
       if (accountId) {
         const { data: entryIds, error: accountFilterError } = await supabase
