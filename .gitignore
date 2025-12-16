@@ -34,6 +34,7 @@ src/**/*.js.map
 # Variables d'environnement avec clés sensibles
 .env
 .env.local
+.env.local.*
 .env.development.local
 .env.test
 .env.test.local
@@ -194,6 +195,22 @@ import-files/
 playwright-report/
 test-results/
 _cleanup_backup/
+
+# ============================================================================
+# DÉPÔT APP (ARCHIVES / PACKAGING)
+# ============================================================================
+
+# Dossier d'export/packaging (copie du projet, zips, docs) — pas du code source actif
+DEPOT_APP/
+DEPOT_APP_TEMP/
+
+# Artefacts Windows (chemins transformés en noms de fichiers)
+CUsers*
+cUsers*
+
+# Variantes encodées (ex: "c…Users…") - ignorer uniquement à la racine
+/c*Users*
+/C*Users*
 
 nul
 src/services/nul
