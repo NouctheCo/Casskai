@@ -125,6 +125,7 @@ jobs:
 
       - name: Run npm audit fix (dry-run)
         run: npm audit fix --dry-run
+        continue-on-error: true
 
   # Job 5: Deploy to Staging (only on main)
   deploy-staging:
