@@ -10,10 +10,6 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
-/* eslint-disable react-refresh/only-export-components */
-
- 
-
 import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode, useRef } from 'react';
 
 import { supabase } from '../lib/supabase';

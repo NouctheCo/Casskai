@@ -17,7 +17,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requireOnboarding = true,
   requireCompany = true
 }) => {
-  const { user, loading: authLoading, currentCompany, onboardingCompleted } = useAuth();
+  const { user, loading: authLoading, currentCompany } = useAuth();
   const location = useLocation();
   const { isExpired, isLoading: subscriptionLoading } = useSubscriptionStatus();
 
