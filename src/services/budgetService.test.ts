@@ -129,7 +129,7 @@ describe('BudgetService', () => {
       expect(supabase.from).toHaveBeenCalledWith('budgets');
       expect(mockQuery.select).toHaveBeenCalled();
       expect(mockQuery.eq).toHaveBeenCalledWith('company_id', mockCompanyId);
-      expect(mockQuery.order).toHaveBeenCalledWith('year', { ascending: false });
+      expect(mockQuery.order).toHaveBeenCalledWith('budget_year', { ascending: false });
       expect(result.data).toEqual([mockBudget]);
       expect(result.error).toBeNull();
     });
@@ -154,7 +154,7 @@ describe('BudgetService', () => {
 
       await budgetService.getBudgets(mockCompanyId, filter);
 
-      expect(mockQuery.in).toHaveBeenCalledWith('year', [2024, 2025]);
+      expect(mockQuery.in).toHaveBeenCalledWith('budget_year', [2024, 2025]);
     });
 
     it('should apply status filter when provided', async () => {
@@ -276,7 +276,7 @@ describe('BudgetService', () => {
       const result = await budgetService.getActiveBudget(mockCompanyId, 2024);
 
       expect(mockQuery.eq).toHaveBeenCalledWith('company_id', mockCompanyId);
-      expect(mockQuery.eq).toHaveBeenCalledWith('year', 2024);
+      expect(mockQuery.eq).toHaveBeenCalledWith('budget_year', 2024);
       expect(mockQuery.eq).toHaveBeenCalledWith('status', 'active');
       expect(result.data?.status).toBe('active');
     });

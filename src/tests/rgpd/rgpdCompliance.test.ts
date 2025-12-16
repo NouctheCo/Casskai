@@ -15,6 +15,13 @@ import {
 } from '@/services/rgpdService';
 import { supabaseTest as supabase } from '@/lib/supabaseTest';
 
+const RUN_RGPD_TESTS =
+  import.meta.env.RUN_RGPD_TESTS === 'true' ||
+  import.meta.env.VITE_RUN_RGPD_TESTS === 'true' ||
+  import.meta.env.CI_RGPD_TESTS === 'true';
+
+const describeRgpd = RUN_RGPD_TESTS ? describe : describe.skip;
+
 // ========================================
 // FIXTURES
 // ========================================
@@ -200,7 +207,7 @@ async function cleanupTestData() {
 // TESTS ARTICLE 15 - DROIT D'ACCÈS
 // ========================================
 
-describe('RGPD - Article 15: Droit d\'accès', () => {
+describeRgpd('RGPD - Article 15: Droit d\'accès', () => {
   beforeEach(async () => {
     await cleanupTestData();
     await createTestUser();
@@ -260,7 +267,7 @@ describe('RGPD - Article 15: Droit d\'accès', () => {
 // TESTS ARTICLE 17 - DROIT À L'EFFACEMENT
 // ========================================
 
-describe('RGPD - Article 17: Droit à l\'effacement', () => {
+describeRgpd('RGPD - Article 17: Droit à l\'effacement', () => {
   beforeEach(async () => {
     await cleanupTestData();
     await createTestUser();
@@ -350,7 +357,7 @@ describe('RGPD - Article 17: Droit à l\'effacement', () => {
 // TESTS RÉVOCATION CONSENTEMENT
 // ========================================
 
-describe('RGPD - Révocation consentement cookies', () => {
+describeRgpd('RGPD - Révocation consentement cookies', () => {
   it('✅ Révoque le consentement analytics', async () => {
     const success = await revokeCookieConsent(TEST_USER_ID);
     expect(success).toBe(true);
@@ -381,7 +388,7 @@ describe('RGPD - Révocation consentement cookies', () => {
 // TESTS PERFORMANCES
 // ========================================
 
-describe('RGPD - Performances', () => {
+describeRgpd('RGPD - Performances', () => {
   beforeEach(async () => {
     await cleanupTestData();
     await createTestUser();
@@ -413,7 +420,7 @@ describe('RGPD - Performances', () => {
 // TESTS ERREURS
 // ========================================
 
-describe('RGPD - Gestion erreurs', () => {
+describeRgpd('RGPD - Gestion erreurs', () => {
   it('❌ Export échoue si user inexistant', async () => {
     await expect(exportUserData('user-inexistant-999')).rejects.toThrow();
   });

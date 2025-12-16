@@ -47,7 +47,7 @@ describe('OpenAIService', () => {
   });
 
   afterEach(() => {
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('getInstance', () => {
@@ -137,14 +137,14 @@ describe('OpenAIService', () => {
         entry_date: new Date().toISOString(),
         total_amount: 5000,
         description: 'Vente de produits',
-        journal_entry_lines: [{ account_code: '707000', debit_amount: 5000, credit_amount: 0 }]
+        journal_entry_lines: [{ account_number: '707000', debit_amount: 5000, credit_amount: 0 }]
       },
       {
         id: 'txn-2',
         entry_date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
         total_amount: -3000,
         description: 'Achat de fournitures',
-        journal_entry_lines: [{ account_code: '601000', debit_amount: 0, credit_amount: 3000 }]
+        journal_entry_lines: [{ account_number: '601000', debit_amount: 0, credit_amount: 3000 }]
       }
     ];
 
@@ -166,7 +166,7 @@ describe('OpenAIService', () => {
             }))
           };
         }
-        // For 'accounts' table
+        // For 'chart_of_accounts' table
         return {
           select: vi.fn(() => ({
             eq: vi.fn(() => ({
@@ -196,9 +196,9 @@ describe('OpenAIService', () => {
         select: vi.fn(() => ({
           eq: vi.fn(() => ({
             gte: vi.fn(() => ({
-              order: vi.fn(() => Promise.resolve({ data: table === 'journal_entries' ? mockTransactions : lowCashAccounts, error: null }))
+              order: vi.fn(() => Promise.resolve({ data: mockTransactions, error: null }))
             })),
-            order: vi.fn(() => Promise.resolve({ data: lowCashAccounts, error: null }))
+            eq: vi.fn(() => Promise.resolve({ data: lowCashAccounts, error: null }))
           }))
         }))
       }));
@@ -219,14 +219,14 @@ describe('OpenAIService', () => {
           entry_date: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
           total_amount: 5000,
           description: 'Vente',
-          journal_entry_lines: [{ account_code: '707000', debit_amount: 5000, credit_amount: 0 }]
+          journal_entry_lines: [{ account_number: '707000', debit_amount: 5000, credit_amount: 0 }]
         },
         {
           id: 'txn-2',
           entry_date: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
           total_amount: 3000,
           description: 'Vente',
-          journal_entry_lines: [{ account_code: '707000', debit_amount: 3000, credit_amount: 0 }]
+          journal_entry_lines: [{ account_number: '707000', debit_amount: 3000, credit_amount: 0 }]
         }
       ];
 
@@ -234,9 +234,9 @@ describe('OpenAIService', () => {
         select: vi.fn(() => ({
           eq: vi.fn(() => ({
             gte: vi.fn(() => ({
-              order: vi.fn(() => Promise.resolve({ data: table === 'journal_entries' ? growthTransactions : mockAccounts, error: null }))
+              order: vi.fn(() => Promise.resolve({ data: growthTransactions, error: null }))
             })),
-            order: vi.fn(() => Promise.resolve({ data: mockAccounts, error: null }))
+            eq: vi.fn(() => Promise.resolve({ data: mockAccounts, error: null }))
           }))
         }))
       }));
@@ -253,10 +253,12 @@ describe('OpenAIService', () => {
       const mockFrom = vi.fn(() => ({
         select: vi.fn(() => ({
           eq: vi.fn(() => ({
+            // journal_entries chain
             gte: vi.fn(() => ({
               order: vi.fn(() => Promise.resolve({ data: null, error: null }))
             })),
-            order: vi.fn(() => Promise.resolve({ data: null, error: null }))
+            // chart_of_accounts chain
+            eq: vi.fn(() => Promise.resolve({ data: null, error: null }))
           }))
         }))
       }));
@@ -458,7 +460,7 @@ describe('OpenAIService', () => {
           total_amount: normalAmount,
           description: 'Transaction normale 1',
           reference: 'INV-001',
-          journal_entry_lines: [{ account_code: '707000', debit_amount: normalAmount, credit_amount: 0 }]
+          journal_entry_lines: [{ account_number: '707000', debit_amount: normalAmount, credit_amount: 0 }]
         },
         {
           id: 'txn-2',
@@ -466,7 +468,7 @@ describe('OpenAIService', () => {
           total_amount: normalAmount,
           description: 'Transaction normale 2',
           reference: 'INV-002',
-          journal_entry_lines: [{ account_code: '707000', debit_amount: normalAmount, credit_amount: 0 }]
+          journal_entry_lines: [{ account_number: '707000', debit_amount: normalAmount, credit_amount: 0 }]
         },
         {
           id: 'txn-3',
@@ -474,7 +476,23 @@ describe('OpenAIService', () => {
           total_amount: normalAmount,
           description: 'Transaction normale 3',
           reference: 'INV-003',
-          journal_entry_lines: [{ account_code: '707000', debit_amount: normalAmount, credit_amount: 0 }]
+          journal_entry_lines: [{ account_number: '707000', debit_amount: normalAmount, credit_amount: 0 }]
+        },
+        {
+          id: 'txn-4',
+          entry_date: new Date().toISOString(),
+          total_amount: normalAmount,
+          description: 'Transaction normale 4',
+          reference: 'INV-004',
+          journal_entry_lines: [{ account_number: '707000', debit_amount: normalAmount, credit_amount: 0 }]
+        },
+        {
+          id: 'txn-5',
+          entry_date: new Date().toISOString(),
+          total_amount: normalAmount,
+          description: 'Transaction normale 5',
+          reference: 'INV-005',
+          journal_entry_lines: [{ account_number: '707000', debit_amount: normalAmount, credit_amount: 0 }]
         },
         {
           id: 'txn-outlier',
@@ -482,7 +500,7 @@ describe('OpenAIService', () => {
           total_amount: outlierAmount, // Montant inhabituel
           description: 'Transaction importante',
           reference: 'INV-999',
-          journal_entry_lines: [{ account_code: '707000', debit_amount: outlierAmount, credit_amount: 0 }]
+          journal_entry_lines: [{ account_number: '707000', debit_amount: outlierAmount, credit_amount: 0 }]
         }
       ];
 
@@ -503,7 +521,9 @@ describe('OpenAIService', () => {
       expect(result.data?.length).toBeGreaterThan(0);
       const outlierAnomaly = result.data?.find(a => a.transaction.id === 'txn-outlier');
       expect(outlierAnomaly).toBeDefined();
-      expect(outlierAnomaly?.reasons).toContain(expect.stringContaining('Montant inhabituel'));
+      expect(outlierAnomaly?.reasons).toEqual(
+        expect.arrayContaining([expect.stringContaining('Montant inhabituel')])
+      );
     });
 
     it('should detect weekend transactions', async () => {
@@ -519,15 +539,16 @@ describe('OpenAIService', () => {
           total_amount: normalAmount,
           description: 'Transaction normale',
           reference: 'INV-001',
-          journal_entry_lines: [{ account_code: '707000', debit_amount: normalAmount, credit_amount: 0 }]
+          journal_entry_lines: [{ account_number: '707000', debit_amount: normalAmount, credit_amount: 0 }]
         },
         {
           id: 'txn-weekend',
           entry_date: sunday.toISOString(),
-          total_amount: normalAmount * 50, // Montant élevé pour déclencher l'anomalie
-          description: 'Transaction weekend',
+          total_amount: normalAmount,
+          // Weekend seul = score 0.2, on ajoute un mot-clé suspect pour dépasser le seuil (> 0.3)
+          description: 'Remboursement personnel en espèce',
           reference: 'INV-WEEKEND',
-          journal_entry_lines: [{ account_code: '707000', debit_amount: normalAmount * 50, credit_amount: 0 }]
+          journal_entry_lines: [{ account_number: '707000', debit_amount: normalAmount, credit_amount: 0 }]
         }
       ];
 
@@ -593,7 +614,39 @@ describe('OpenAIService', () => {
           total_amount: normalAmount,
           description: 'Transaction normale',
           reference: 'INV-001',
-          journal_entry_lines: [{ account_code: '707000', debit_amount: normalAmount, credit_amount: 0 }]
+          journal_entry_lines: [{ account_number: '707000', debit_amount: normalAmount, credit_amount: 0 }]
+        },
+        {
+          id: 'txn-normal-2',
+          entry_date: new Date().toISOString(),
+          total_amount: normalAmount,
+          description: 'Transaction normale 2',
+          reference: 'INV-002',
+          journal_entry_lines: [{ account_number: '707000', debit_amount: normalAmount, credit_amount: 0 }]
+        },
+        {
+          id: 'txn-normal-3',
+          entry_date: new Date().toISOString(),
+          total_amount: normalAmount,
+          description: 'Transaction normale 3',
+          reference: 'INV-003',
+          journal_entry_lines: [{ account_number: '707000', debit_amount: normalAmount, credit_amount: 0 }]
+        },
+        {
+          id: 'txn-normal-4',
+          entry_date: new Date().toISOString(),
+          total_amount: normalAmount,
+          description: 'Transaction normale 4',
+          reference: 'INV-004',
+          journal_entry_lines: [{ account_number: '707000', debit_amount: normalAmount, credit_amount: 0 }]
+        },
+        {
+          id: 'txn-normal-5',
+          entry_date: new Date().toISOString(),
+          total_amount: normalAmount,
+          description: 'Transaction normale 5',
+          reference: 'INV-005',
+          journal_entry_lines: [{ account_number: '707000', debit_amount: normalAmount, credit_amount: 0 }]
         },
         {
           id: 'txn-urgent',
@@ -601,7 +654,7 @@ describe('OpenAIService', () => {
           total_amount: normalAmount * 50, // Montant élevé = score 0.4
           description: 'Transaction URGENT', // Urgent = score 0.3 supplémentaire
           reference: 'URGENT-001',
-          journal_entry_lines: [{ account_code: '707000', debit_amount: normalAmount * 50, credit_amount: 0 }]
+          journal_entry_lines: [{ account_number: '707000', debit_amount: normalAmount * 50, credit_amount: 0 }]
         }
       ];
 
@@ -721,7 +774,7 @@ describe('OpenAIService', () => {
         entry_date: new Date().toISOString(),
         total_amount: 1000,
         description: 'Achat avec TVA',
-        journal_entry_lines: [{ account_code: '445660', debit_amount: 200, credit_amount: 0 }]
+        journal_entry_lines: [{ account_number: '445660', debit_amount: 200, credit_amount: 0 }]
       }
     ];
 
@@ -761,7 +814,7 @@ describe('OpenAIService', () => {
         entry_date: new Date().toISOString(),
         total_amount: 1000,
         description: `Transaction TVA ${i}`,
-        journal_entry_lines: [{ account_code: '445660', debit_amount: 200, credit_amount: 0 }]
+        journal_entry_lines: [{ account_number: '445660', debit_amount: 200, credit_amount: 0 }]
       }));
 
       const mockFrom = vi.fn((table) => {
@@ -799,7 +852,7 @@ describe('OpenAIService', () => {
           entry_date: new Date().toISOString(),
           total_amount: 10000,
           description: 'Achat immobilisation',
-          journal_entry_lines: [{ account_code: '218000', debit_amount: 10000, credit_amount: 0 }]
+          journal_entry_lines: [{ account_number: '218000', debit_amount: 10000, credit_amount: 0 }]
         }
       ];
 
@@ -1017,7 +1070,7 @@ describe('OpenAIService', () => {
             gte: vi.fn(() => ({
               order: vi.fn(() => Promise.resolve({ data: null, error: null }))
             })),
-            order: vi.fn(() => Promise.resolve({ data: null, error: null }))
+            eq: vi.fn(() => Promise.resolve({ data: null, error: null }))
           }))
         }))
       }));
@@ -1190,7 +1243,7 @@ describe('OpenAIService', () => {
           entry_date: new Date().toISOString(),
           total_amount: 1000,
           description: 'Transaction',
-          journal_entry_lines: [{ account_code: '707000', debit_amount: 1000, credit_amount: 0 }]
+          journal_entry_lines: [{ account_number: '707000', debit_amount: 1000, credit_amount: 0 }]
         }
       ];
 
@@ -1221,14 +1274,37 @@ describe('OpenAIService', () => {
             }))
           };
         }
+
+        if (table === 'journal_entries') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                gte: vi.fn(() => {
+                  const result = Promise.resolve({ data: mockTransactions, error: null });
+                  return {
+                    order: vi.fn(() => result),
+                    then: result.then.bind(result),
+                    catch: result.catch.bind(result),
+                  };
+                }),
+              }))
+            }))
+          };
+        }
+
+        if (table === 'chart_of_accounts') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                eq: vi.fn(() => Promise.resolve({ data: mockAccounts, error: null }))
+              }))
+            }))
+          };
+        }
+
         return {
           select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              gte: vi.fn(() => ({
-                order: vi.fn(() => Promise.resolve({ data: mockTransactions, error: null }))
-              })),
-              order: vi.fn(() => Promise.resolve({ data: mockAccounts, error: null }))
-            }))
+            eq: vi.fn(() => Promise.resolve({ data: [], error: null }))
           }))
         };
       });

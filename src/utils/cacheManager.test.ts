@@ -75,7 +75,7 @@ describe('CacheManager', () => {
       expect(localStorage.removeItem).toHaveBeenCalledWith('casskai_current_enterprise');
       expect(localStorage.removeItem).toHaveBeenCalledWith('supabase.auth.token');
       expect(localStorage.removeItem).toHaveBeenCalledWith('casskai_onboarding_state');
-      expect(devLogger.log).toHaveBeenCalled();
+      expect(devLogger.info).toHaveBeenCalled();
     });
 
     it('should remove all keys starting with "supabase." or "casskai_"', () => {
@@ -113,10 +113,10 @@ describe('CacheManager', () => {
       CacheManager.clearAll();
 
       // Assert
-      expect(devLogger.log).toHaveBeenCalledWith(
+      expect(devLogger.info).toHaveBeenCalledWith(
         expect.stringContaining('Nettoyage complet du cache localStorage')
       );
-      expect(devLogger.log).toHaveBeenCalledWith(
+      expect(devLogger.info).toHaveBeenCalledWith(
         expect.stringContaining('Cache localStorage nettoyé')
       );
     });
@@ -143,10 +143,10 @@ describe('CacheManager', () => {
       CacheManager.clearEnterprises();
 
       // Assert
-      expect(devLogger.log).toHaveBeenCalledWith(
+      expect(devLogger.info).toHaveBeenCalledWith(
         expect.stringContaining('Nettoyage du cache des entreprises')
       );
-      expect(devLogger.log).toHaveBeenCalledWith(
+      expect(devLogger.info).toHaveBeenCalledWith(
         expect.stringContaining('Cache des entreprises nettoyé')
       );
     });
@@ -161,7 +161,7 @@ describe('CacheManager', () => {
       CacheManager.clearAndReload();
 
       // Assert - clearAll should be called
-      expect(devLogger.log).toHaveBeenCalledWith(
+      expect(devLogger.info).toHaveBeenCalledWith(
         expect.stringContaining('Nettoyage complet du cache localStorage')
       );
 
@@ -173,7 +173,7 @@ describe('CacheManager', () => {
 
       // Assert - reload should be called after 500ms
       expect(window.location.reload).toHaveBeenCalled();
-      expect(devLogger.log).toHaveBeenCalledWith(
+      expect(devLogger.info).toHaveBeenCalledWith(
         expect.stringContaining('Rechargement de la page')
       );
 
@@ -398,7 +398,7 @@ describe('CacheManager', () => {
           type: 'enterpriseContextRefresh',
         })
       );
-      expect(devLogger.log).toHaveBeenCalledWith(
+      expect(devLogger.info).toHaveBeenCalledWith(
         expect.stringContaining("Déclenchement d'un rafraîchissement du contexte Enterprise")
       );
     });
@@ -429,7 +429,7 @@ describe('CacheManager', () => {
       // Assert
       expect(clearEnterprisesSpy).not.toHaveBeenCalled();
       expect(triggerRefreshSpy).not.toHaveBeenCalled();
-      expect(devLogger.log).toHaveBeenCalledWith(
+      expect(devLogger.info).toHaveBeenCalledWith(
         expect.stringContaining('Cache propre, aucun nettoyage nécessaire')
       );
     });
@@ -446,7 +446,7 @@ describe('CacheManager', () => {
       // Assert
       expect(clearEnterprisesSpy).toHaveBeenCalled();
       expect(triggerRefreshSpy).toHaveBeenCalled();
-      expect(devLogger.log).toHaveBeenCalledWith(
+      expect(devLogger.info).toHaveBeenCalledWith(
         expect.stringContaining('Nettoyage nécessaire')
       );
     });
@@ -470,14 +470,14 @@ describe('CacheManager', () => {
       CacheManager.smartClean();
 
       // Assert
-      expect(devLogger.log).toHaveBeenCalledWith(
+      expect(devLogger.info).toHaveBeenCalledWith(
         expect.stringContaining('Nettoyage intelligent du cache')
       );
-      expect(devLogger.log).toHaveBeenCalledWith(
+      expect(devLogger.info).toHaveBeenCalledWith(
         '📊 Rapport du cache:',
         expect.any(Object)
       );
-      expect(devLogger.log).toHaveBeenCalledWith('✅ Validation:', expect.any(Object));
+      expect(devLogger.info).toHaveBeenCalledWith('✅ Validation:', expect.any(Object));
     });
 
     it('should handle complex scenario with invalid current enterprise', () => {
@@ -630,7 +630,7 @@ describe('CacheManager', () => {
       CacheManager.smartClean();
 
       // Assert
-      expect(devLogger.log).toHaveBeenCalledWith(
+      expect(devLogger.info).toHaveBeenCalledWith(
         expect.stringContaining('Nettoyage nécessaire')
       );
     });

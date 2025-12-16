@@ -90,11 +90,9 @@ describe('NotificationService', () => {
       vi.mocked(supabase.from).mockReturnValue({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              or: vi.fn().mockResolvedValue({
-                count: 5,
-                error: null,
-              }),
+            eq: vi.fn().mockResolvedValue({
+              count: 5,
+              error: null,
             }),
           }),
         }),
@@ -110,11 +108,9 @@ describe('NotificationService', () => {
       vi.mocked(supabase.from).mockReturnValue({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              or: vi.fn().mockResolvedValue({
-                count: 0,
-                error: null,
-              }),
+            eq: vi.fn().mockResolvedValue({
+              count: 0,
+              error: null,
             }),
           }),
         }),

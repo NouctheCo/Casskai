@@ -576,7 +576,9 @@ export class OpenAIService {
 
     // Optimisation TVA
     const vatTransactions = transactions.filter(t =>
-      t.journal_entry_lines?.some((line: any) => line.account_number.includes('445'))
+      t.journal_entry_lines?.some((line: any) =>
+        typeof line.account_number === 'string' && line.account_number.includes('445')
+      )
     );
 
     if (vatTransactions.length > 10) {
