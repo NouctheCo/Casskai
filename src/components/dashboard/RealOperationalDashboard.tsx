@@ -36,10 +36,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { realDashboardKpiService } from '@/services/realDashboardKpiService';
-import { aiDashboardAnalysisService } from '@/services/aiDashboardAnalysisService';
-import type { RealKPIData } from '@/services/realDashboardKpiService';
-import type { AIAnalysisResult } from '@/services/aiDashboardAnalysisService';
+import { realDashboardKpiService, type RealKPIData } from '@/services/realDashboardKpiService';
+import { aiDashboardAnalysisService, type AIAnalysisResult } from '@/services/aiDashboardAnalysisService';
 import { formatCurrency } from '@/lib/utils';
 
 const CHART_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];

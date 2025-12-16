@@ -16,7 +16,6 @@ export function lazyWithRetry<T extends ComponentType<unknown>>(
 
         for (let attempt = 0; attempt < retries; attempt++) {
           try {
-            // eslint-disable-next-line no-await-in-loop
             const component = await componentImport();
             resolve(component);
             return;
@@ -29,7 +28,6 @@ export function lazyWithRetry<T extends ComponentType<unknown>>(
 
             // Wait before retrying (exponential backoff)
             if (attempt < retries - 1) {
-              // eslint-disable-next-line no-await-in-loop
               await new Promise((resolveDelay) =>
                 setTimeout(resolveDelay, retryDelay * Math.pow(2, attempt))
               );

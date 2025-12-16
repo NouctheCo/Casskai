@@ -19,7 +19,6 @@ import { Badge } from '@/components/ui/badge';
 import { PageContainer } from '@/components/ui/PageContainer';
 import { PublicNavigation } from '@/components/navigation/PublicNavigation';
 
-/* eslint-disable max-lines-per-function */
 const TermsOfSalePage = () => {
   const lastUpdated = "24 novembre 2025";
   const version = "1.0";

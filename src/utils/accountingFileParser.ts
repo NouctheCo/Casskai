@@ -180,7 +180,7 @@ export const detectStandard = (accountNumbers: string[]): AccountingStandard | n
 // ============ PARSERS DE MONTANTS ============
 
 // Parser montant universel
-export const parseAmount = (value: string | undefined | null, locale?: string): number => {
+export const parseAmount = (value: string | undefined | null, _locale?: string): number => {
   // DEBUG: Log les valeurs reçues
   if (value && value.trim() !== '' && value !== '0' && value !== '0,00' && value !== '0.00') {
     console.log('[parseAmount] Input:', value);
@@ -198,7 +198,7 @@ export const parseAmount = (value: string | undefined | null, locale?: string): 
 
   // Gérer les nombres négatifs entre parenthèses: (1234.56) -> -1234.56
   if (normalized.startsWith('(') && normalized.endsWith(')')) {
-    normalized = '-' + normalized.slice(1, -1);
+    normalized = `-${  normalized.slice(1, -1)}`;
   }
 
   // Détecter le format

@@ -80,7 +80,6 @@ export const sanitizeHTML = (dirty: string | undefined | null): string => {
   if (!dirty) return '';
 
   // DOMPurify.sanitize retourne un string sécurisé
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return String(DOMPurify.sanitize(dirty, SANITIZE_CONFIG as any));
 };
 

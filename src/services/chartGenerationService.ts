@@ -249,7 +249,7 @@ class ChartGenerationService {
     });
 
     // Dessiner les lignes
-    datasets.forEach((dataset, dsIndex) => {
+    datasets.forEach((dataset) => {
       ctx.strokeStyle = dataset.color;
       ctx.lineWidth = 3;
       ctx.beginPath();

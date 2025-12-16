@@ -61,9 +61,11 @@ import {
 import { TeamMember, InviteData } from '@/services/teamService';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
 
 export default function TeamPage() {
   const { t } = useTranslation();
+  const { ConfirmDialog: ConfirmDialogComponent, confirm } = useConfirmDialog();
   const {
     members,
     invitations,
@@ -76,7 +78,7 @@ export default function TeamPage() {
     sendInvitation,
     cancelInvitation,
     resendInvitation,
-    updateMember,
+    updateMember: _updateMember,
     removeMember
   } = useTeam();
 
@@ -152,9 +154,16 @@ export default function TeamPage() {
   };
 
   const handleRemoveMember = async (member: TeamMember) => {
-    if (confirm(t('team.confirm_remove', { name: member.display_name || member.email }))) {
-      await removeMember(member.id);
-    }
+    const confirmed = await confirm({
+      title: t('common.confirmation', 'Confirmation'),
+      description: t('team.confirm_remove', { name: member.display_name || member.email }),
+      confirmText: t('common.delete', 'Supprimer'),
+      cancelText: t('common.cancel', 'Annuler'),
+      variant: 'destructive',
+    });
+
+    if (!confirmed) return;
+    await removeMember(member.id);
   };
 
   if (loading) {
@@ -175,6 +184,8 @@ export default function TeamPage() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
+
+        <ConfirmDialogComponent />
           <h1 className="text-3xl font-bold">{t('team.title')}</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             {t('team.description')}

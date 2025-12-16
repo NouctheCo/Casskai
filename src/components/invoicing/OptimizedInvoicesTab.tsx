@@ -160,8 +160,6 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
   const [showArticleModal, setShowArticleModal] = useState(false);
 
-  const [articleCreationIndex, setArticleCreationIndex] = useState<number | null>(null);
-
   const [editingInvoice, setEditingInvoice] = useState<InvoiceWithDetails | null>(null);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -823,17 +821,14 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
 
   // Gestion de la création d'articles depuis le formulaire de facture
-  const handleOpenArticleModal = (index: number) => {
-
-    setArticleCreationIndex(index);
-
+  const handleOpenArticleModal = (_index: number) => {
     setShowArticleModal(true);
 
   };
 
 
 
-  const handleArticleCreated = async (articleId: string) => {
+  const handleArticleCreated = async (_articleId: string) => {
 
     // Recharger les articles
 
@@ -854,8 +849,6 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
 
     // Note: La sélection automatique est gérée par InvoiceFormDialog
-
-    // via articleCreationIndex qui est accessible via state
 
   };
 
@@ -1365,8 +1358,6 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
         clients={clients}
 
-        companyId={'current-company'}
-
         companySettings={companySettings}
 
         onSuccess={loadData}
@@ -1388,8 +1379,6 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
         onClose={() => {
 
           setShowArticleModal(false);
-
-          setArticleCreationIndex(null);
 
         }}
 
@@ -1421,8 +1410,6 @@ interface InvoiceFormDialogProps {
 
   clients: ThirdParty[];
 
-  companyId: string;
-
   companySettings: CompanySettings | null;
 
   onSuccess: () => void;
@@ -1444,8 +1431,6 @@ const InvoiceFormDialog: React.FC<InvoiceFormDialogProps> = ({
   invoice,
 
   clients,
-
-  companyId,
 
   companySettings,
 

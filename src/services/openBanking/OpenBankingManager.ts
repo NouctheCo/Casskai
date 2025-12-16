@@ -538,7 +538,6 @@ export class OpenBankingManager {
 
     for (const [providerId, provider] of this.providers) {
       try {
-        // eslint-disable-next-line no-await-in-loop
         const isHealthy = await provider.isHealthy();
         providerHealth[providerId] = isHealthy;
         if (isHealthy) healthyProviders++;

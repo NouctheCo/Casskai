@@ -19,7 +19,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { supabase } from '@/lib/supabase';
 import { TrialStatusCard } from '@/components/TrialComponents';
 import { useTrial } from '@/hooks/trial.hooks';
-import { toastError, toastSuccess, toastInfo, toastWarning } from '@/lib/toast-helpers';
+import { toastError, toastSuccess, toastWarning } from '@/lib/toast-helpers';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { PricingPageSEO } from '@/components/SEO/SEOHelmet';
 import {

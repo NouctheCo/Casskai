@@ -10,7 +10,6 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
-/* eslint-disable max-lines */
 import {
   WebhookEvent,
   WebhookConfig,

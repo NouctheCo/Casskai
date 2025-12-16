@@ -26,9 +26,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
-import { Edit, Trash2, Calendar, Upload, FileText, History, XCircle, AlertCircle } from 'lucide-react';
+import { Edit, Trash2, Upload, FileText, History, XCircle, AlertCircle } from 'lucide-react';
 import assetsService from '@/services/assetsService';
 import type { Asset, AssetDepreciationScheduleLine, AssetDisposalFormData, DisposalMethod } from '@/types/assets.types';
 import { formatCurrency } from '@/lib/utils';
@@ -45,6 +46,7 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
   assetId,
 }) => {
   const { t } = useTranslation();
+  const { ConfirmDialog: ConfirmDialogComponent, confirm } = useConfirmDialog();
   const [loading, setLoading] = useState(true);
   const [asset, setAsset] = useState<Asset | null>(null);
   const [schedule, setSchedule] = useState<AssetDepreciationScheduleLine[]>([]);
@@ -83,7 +85,15 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
   const handleDispose = async () => {
     if (!asset) return;
 
-    if (!confirm(t('assets.disposal.confirm'))) return;
+    const confirmed = await confirm({
+      title: t('common.confirmation', 'Confirmation'),
+      description: t('assets.disposal.confirm'),
+      confirmText: t('common.confirm', 'Confirmer'),
+      cancelText: t('common.cancel', 'Annuler'),
+      variant: 'destructive',
+    });
+
+    if (!confirmed) return;
 
     setLoading(true);
     try {
@@ -112,13 +122,16 @@ export const AssetDetailDialog: React.FC<AssetDetailDialogProps> = ({
 
   if (loading || !asset) {
     return (
-      <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent>
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <>
+        <Dialog open={open} onOpenChange={onClose}>
+          <DialogContent>
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          </DialogContent>
+        </Dialog>
+        <ConfirmDialogComponent />
+      </>
     );
   }
 

@@ -10,7 +10,6 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
-/* eslint-disable max-lines */
 import {
   ExportFormat,
   ExportJob,
@@ -203,7 +202,6 @@ export class AccountingExportService {
   }
 
   // Appliquer une règle de validation
-  // eslint-disable-next-line complexity
   private async applyValidationRule(
     data: unknown,
     rule: ValidationRule
@@ -329,7 +327,6 @@ export class AccountingExportService {
   }
 
   // Appliquer une transformation de champ
-  // eslint-disable-next-line complexity
   private async applyTransformation(
     value: unknown,
     transformation: FieldMapping['transformation']
@@ -382,7 +379,6 @@ export class AccountingExportService {
 
         case 'lookup': {
           const lookupTable = transformation.parameters.table || {};
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return (lookupTable as Record<string, any>)[String(value)] ?? transformation.parameters.defaultValue ?? value;
         }
 

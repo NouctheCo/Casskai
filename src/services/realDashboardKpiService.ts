@@ -92,8 +92,8 @@ export class RealDashboardKpiService {
    */
   private async calculateRevenue(
     companyId: string,
-    startDate: string,
-    endDate: string
+    _startDate: string,
+    _endDate: string
   ): Promise<number> {
     try {
       // NOUVELLE APPROCHE: Lire depuis les écritures comptables (source de vérité)
@@ -131,8 +131,8 @@ export class RealDashboardKpiService {
    */
   private async calculatePurchases(
     companyId: string,
-    startDate: string,
-    endDate: string
+    _startDate: string,
+    _endDate: string
   ): Promise<number> {
     try {
       // NOUVELLE APPROCHE: Lire depuis les écritures comptables (source de vérité)

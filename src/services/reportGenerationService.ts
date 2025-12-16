@@ -1108,8 +1108,8 @@ export class ReportGenerationService {
           overdue30: total30,
           overdue60: total60,
           overdue90: total90 + totalOver90,
-          dso: dso,
-          collectionRate: collectionRate,
+          dso,
+          collectionRate,
           averageOverdueAmount: averageOverdue
         };
 
@@ -1262,25 +1262,25 @@ export class ReportGenerationService {
       try {
         const financialRatiosData: FinancialRatiosData = {
           liquidityRatios: {
-            currentRatio: currentRatio,
-            quickRatio: quickRatio,
-            cashRatio: cashRatio
+            currentRatio,
+            quickRatio,
+            cashRatio
           },
           profitabilityRatios: {
-            grossMargin: grossMargin,
-            netMargin: netMargin,
-            roa: roa,
-            roe: roe
+            grossMargin,
+            netMargin,
+            roa,
+            roe
           },
           leverageRatios: {
-            debtToEquity: debtToEquity,
+            debtToEquity,
             debtToAssets: debtToAssets / 100,
-            interestCoverage: interestCoverage
+            interestCoverage
           },
           efficiencyRatios: {
-            assetTurnover: assetTurnover,
-            inventoryTurnover: inventoryTurnover,
-            receivablesTurnover: receivablesTurnover
+            assetTurnover,
+            inventoryTurnover,
+            receivablesTurnover
           }
         };
 
@@ -1936,11 +1936,11 @@ export class ReportGenerationService {
           }));
 
         const budgetVarianceData: BudgetVarianceData = {
-          totalBudget: totalBudget,
-          totalActual: totalActual,
-          totalVariance: totalVariance,
-          variancePercentage: variancePercentage,
-          majorVariances: majorVariances
+          totalBudget,
+          totalActual,
+          totalVariance,
+          variancePercentage,
+          majorVariances
         };
 
         aiAnalysis = await aiReportAnalysisService.analyzeBudgetVariance(
@@ -2753,7 +2753,7 @@ export class ReportGenerationService {
           finishedGoods: inventoryData.find(i => i.category === 'Produits finis')?.value || inventoryData.find(i => i.category === 'Marchandises')?.value || 0,
           inventoryTurnover: avgTurnoverRate,
           daysInventoryOutstanding: avgCoverage,
-          obsoleteInventory: obsoleteInventory,
+          obsoleteInventory,
           inventoryToSales: totalInventoryValue > 0 && revenues > 0 ? totalInventoryValue / revenues : 0
         };
 
@@ -3069,7 +3069,7 @@ export class ReportGenerationService {
   ): number {
     // Construction du numéro de compte d'amortissement
     // Règle: 28 + reste du numéro du compte d'actif (sans le 2 initial)
-    const depreciationAccount = '28' + assetAccount.substring(1);
+    const depreciationAccount = `28${assetAccount.substring(1)}`;
 
     // Chercher d'abord le compte exact
     let depreciation = depreciationMap.get(depreciationAccount) || 0;

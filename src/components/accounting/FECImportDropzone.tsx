@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useLocale } from '@/contexts/LocaleContext';
-import { FileUp, FileText, AlertCircle, CheckCircle, Info } from 'lucide-react';
+import { FileUp, FileText, AlertCircle, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent } from '@/components/ui/card';

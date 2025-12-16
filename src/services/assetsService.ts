@@ -18,7 +18,6 @@ import type {
   AssetDepreciationScheduleLine,
   DepreciationCalculationParams,
   DepreciationCalculationResult,
-  DepreciationSchedule,
   AssetStatistics,
   AssetFilters,
   AssetListItem,
@@ -475,7 +474,7 @@ const calculateDecliningBalanceDepreciation = (
 /**
  * Calculer l'amortissement par unités d'œuvre
  */
-const calculateUnitsOfProductionDepreciation = (
+const _calculateUnitsOfProductionDepreciation = (
   params: DepreciationCalculationParams,
   unitsPerPeriod: number[]
 ): DepreciationCalculationResult[] => {

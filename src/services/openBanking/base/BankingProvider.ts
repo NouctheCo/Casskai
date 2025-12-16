@@ -142,7 +142,6 @@ export abstract class BankingProvider {
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-  // eslint-disable-next-line no-await-in-loop
   return await operation();
       } catch (error) {
         lastError = error;
@@ -151,7 +150,6 @@ export abstract class BankingProvider {
         
         // Backoff exponentiel avec jitter
   const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000;
-  // eslint-disable-next-line no-await-in-loop
   await new Promise(resolve => setTimeout(resolve, delay));
       }
     }

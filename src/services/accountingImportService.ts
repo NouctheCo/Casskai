@@ -232,7 +232,7 @@ export const accountingImportService = {
    * Retourne les valeurs conformes à la contrainte journals_type_check :
    * 'sale', 'purchase', 'bank', 'cash', 'miscellaneous'
    */
-  getJournalType(code: string, standard?: AccountingStandard | null): string {
+  getJournalType(code: string, _standard?: AccountingStandard | null): string {
     const upperCode = code.toUpperCase();
 
     // === BANQUE ===

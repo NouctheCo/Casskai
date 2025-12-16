@@ -44,8 +44,6 @@ export const ChartDetectionBanner: React.FC<ChartDetectionBannerProps> = ({
         onChartSelected(result.recommended.standard as 'SYSCOHADA' | 'PCG');
       }
     }
-    // onChartSelected est stable (défini par le parent)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countryCode, companySize, industry]);
 
   if (!detection) return null;

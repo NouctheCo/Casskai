@@ -5,8 +5,7 @@
 
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-import { autoAccountingService } from '@/services/autoAccountingIntegrationService';
-import type { InvoiceData, BankTransactionData, PurchaseOrderData } from '@/services/autoAccountingIntegrationService';
+import { autoAccountingService, type BankTransactionData, type InvoiceData, type PurchaseOrderData } from '@/services/autoAccountingIntegrationService';
 
 export function useAutoAccounting() {
   const { toast } = useToast();

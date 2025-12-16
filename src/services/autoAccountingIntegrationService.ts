@@ -15,7 +15,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { journalEntriesService } from './journalEntriesService';
-import AccountingRulesService, { JournalType } from './accountingRulesService';
+import { JournalType } from './accountingRulesService';
 import AccountMappingService, { UniversalAccountType } from './accountMappingService';
 import type { JournalEntryPayload } from '@/types/journalEntries.types';
 
@@ -269,7 +269,7 @@ export async function generateBankTransactionEntry(
         accountId: bank_account_id,
         debitAmount: amount,
         creditAmount: 0,
-        description: description,
+        description,
       });
 
       if (counterpart_account_id) {
@@ -277,7 +277,7 @@ export async function generateBankTransactionEntry(
           accountId: counterpart_account_id,
           debitAmount: 0,
           creditAmount: amount,
-          description: description,
+          description,
         });
       }
     } else {
@@ -287,7 +287,7 @@ export async function generateBankTransactionEntry(
           accountId: counterpart_account_id,
           debitAmount: amount,
           creditAmount: 0,
-          description: description,
+          description,
         });
       }
 
@@ -295,14 +295,14 @@ export async function generateBankTransactionEntry(
         accountId: bank_account_id,
         debitAmount: 0,
         creditAmount: amount,
-        description: description,
+        description,
       });
     }
 
     const payload: JournalEntryPayload = {
       companyId: company_id,
       entryDate: transaction_date,
-      description: description,
+      description,
       referenceNumber: reference || undefined,
       journalId: journal.id,
       status: 'draft',
@@ -426,7 +426,7 @@ async function getThirdPartyAccount(
 /**
  * Récupère un compte par son numéro
  */
-async function getAccountByNumber(companyId: string, accountNumber: string) {
+async function _getAccountByNumber(companyId: string, accountNumber: string) {
   const { data, error } = await supabase
     .from('chart_of_accounts')
     .select('*')

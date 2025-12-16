@@ -4,7 +4,6 @@
  * Utilise Sentry en production et console en développement.
  */
 
-/* eslint-disable no-console */
 import * as Sentry from '@sentry/react';
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';

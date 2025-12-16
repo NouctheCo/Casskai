@@ -282,7 +282,7 @@ export function IntelligentSidebar({ collapsed = false }: IntelligentSidebarProp
 
     }
 
-  }, [location.pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
 
 

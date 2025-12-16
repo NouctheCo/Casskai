@@ -11,7 +11,6 @@
  */
 
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -31,8 +30,6 @@ import {
 } from 'lucide-react';
 
 export default function TeamManagementGuide() {
-  const { t } = useTranslation();
-
   return (
     <PageContainer variant="default">
       <div className="max-w-5xl mx-auto py-12 px-4">

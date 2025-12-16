@@ -10,7 +10,6 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
-/* eslint-disable max-lines-per-function */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useToast } from '@/components/ui/use-toast';

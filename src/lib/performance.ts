@@ -40,7 +40,6 @@ export const useRenderPerformance = (componentName: string) => {
 /**
  * Debounce function for search inputs and resize handlers
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const debounce = <T extends (...args: any[]) => any>(
   func: T,
   wait: number
@@ -56,7 +55,6 @@ export const debounce = <T extends (...args: any[]) => any>(
 /**
  * Throttle function for scroll handlers
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const throttle = <T extends (...args: any[]) => any>(
   func: T,
   limit: number
@@ -210,7 +208,6 @@ export const trackWebVitals = () => {
 /**
  * Optimized memo comparison for complex objects
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const deepEqual = (obj1: any, obj2: any): boolean => {
   if (obj1 === obj2) return true;
   if (

@@ -26,7 +26,7 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
   onClose,
   onSubmit,
   purchase,
-  suppliers,
+  suppliers: _suppliers,
   loading
 }) => {
   const { t } = useTranslation();

@@ -11,8 +11,6 @@
  */
 
 import OpenAI from 'openai';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
 
 // Types communs pour les analyses IA
 export interface AIAnalysisResult {

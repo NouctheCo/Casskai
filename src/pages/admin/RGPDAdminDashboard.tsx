@@ -57,7 +57,6 @@ export default function RGPDAdminDashboard() {
   useEffect(() => {
     loadMetrics();
     loadLogs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
   const loadMetrics = async () => {

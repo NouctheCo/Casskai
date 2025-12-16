@@ -133,7 +133,7 @@ const JournalDistributionChart: React.FC<JournalDistributionChartProps> = ({ dat
             <Legend
               verticalAlign="bottom"
               height={36}
-              formatter={(value: string, entry: any) => {
+              formatter={(value: string, _entry: any) => {
                 const item = data[chartData.findIndex(d => d.name === value)];
                 return `${value} (${item?.count || 0})`;
               }}

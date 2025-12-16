@@ -333,7 +333,6 @@ function disableMarketing() {
 // HOOK POUR ACCÉDER AUX PRÉFÉRENCES
 // ========================================
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useCookiePreferences = (): CookiePreferences | null => {
   const [prefs, setPrefs] = useState<CookiePreferences | null>(null);
 

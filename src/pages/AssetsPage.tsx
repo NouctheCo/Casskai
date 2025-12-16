@@ -19,8 +19,6 @@ import {
   Building2,
   Plus,
   Search,
-  Filter,
-  Download,
   TrendingDown,
   Calculator,
   FileText,
@@ -31,7 +29,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import {
   Select,

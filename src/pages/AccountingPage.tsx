@@ -24,7 +24,7 @@ import { Button } from '@/components/ui/button';
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-import { toastError, toastSuccess } from '@/lib/toast-helpers';
+import { toastError } from '@/lib/toast-helpers';
 
 import { useSubscription } from '@/contexts/SubscriptionContext';
 

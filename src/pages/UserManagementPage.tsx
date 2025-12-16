@@ -52,11 +52,11 @@ import {
 
   Users, UserPlus, Shield, Mail,
 
-  Activity, Search, Edit, Trash2,
+  Activity as ActivityIcon, Search, Edit, Trash2,
 
   CheckCircle, XCircle, Clock, AlertTriangle, Eye, EyeOff, Send,
 
-  Crown, Star, User
+  Crown, Star, User as UserIcon
 
 } from 'lucide-react';
 
@@ -512,7 +512,7 @@ const UserManagementPage = () => {
 
       2: Star,
 
-      3: User,
+      3: UserIcon,
 
       4: Eye
 
@@ -520,7 +520,7 @@ const UserManagementPage = () => {
 
     
 
-    const Icon = roleIcons[role.level] || User;
+    const Icon = roleIcons[role.level] || UserIcon;
 
     const colors = {
 
@@ -662,7 +662,7 @@ const UserManagementPage = () => {
 
           <TabsTrigger value="activity" className="flex items-center gap-2">
 
-            <Activity className="h-4 w-4" />
+            <ActivityIcon className="h-4 w-4" />
 
             Activité
 

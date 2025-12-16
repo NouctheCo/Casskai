@@ -34,6 +34,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, Save, X } from 'lucide-react';
 import assetsService from '@/services/assetsService';
@@ -50,6 +51,7 @@ export const CategoryManagementDialog: React.FC<CategoryManagementDialogProps> =
 }) => {
   const { t } = useTranslation();
   const { currentCompany } = useAuth();
+  const { ConfirmDialog: ConfirmDialogComponent, confirm } = useConfirmDialog();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<AssetCategory[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -158,7 +160,15 @@ export const CategoryManagementDialog: React.FC<CategoryManagementDialogProps> =
   };
 
   const handleDelete = async (categoryId: string) => {
-    if (!confirm(t('assets.categories.confirmDelete'))) return;
+    const confirmed = await confirm({
+      title: t('common.confirmation', 'Confirmation'),
+      description: t('assets.categories.confirmDelete'),
+      confirmText: t('common.delete', 'Supprimer'),
+      cancelText: t('common.cancel', 'Annuler'),
+      variant: 'destructive',
+    });
+
+    if (!confirmed) return;
 
     setLoading(true);
     try {
@@ -423,6 +433,8 @@ export const CategoryManagementDialog: React.FC<CategoryManagementDialogProps> =
             </Card>
           )}
         </div>
+
+        <ConfirmDialogComponent />
       </DialogContent>
     </Dialog>
   );

@@ -10,7 +10,6 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
-/* eslint-disable max-lines */
 import { supabase } from '../lib/supabase';
 
 // Types utilitaires pour éviter les `any`

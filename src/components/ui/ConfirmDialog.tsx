@@ -158,7 +158,7 @@ export function ConfirmActionDialog({
 
 interface UseConfirmDialogReturn {
 
-  ConfirmDialog: React.ComponentType<Omit<ConfirmDialogProps, 'children'>>;
+  ConfirmDialog: React.ComponentType<Record<string, never>>;
 
   confirm: (props: Omit<ConfirmDialogProps, 'children' | 'onConfirm'>) => Promise<boolean>;
 
@@ -202,7 +202,7 @@ export function useConfirmDialog(): UseConfirmDialogReturn {
 
 
 
-  const ConfirmDialogComponent: React.ComponentType<Omit<ConfirmDialogProps, 'children'>> = (_props) => {
+  const ConfirmDialogComponent: React.ComponentType<Record<string, never>> = () => {
 
     if (!dialogProps) return null;
 

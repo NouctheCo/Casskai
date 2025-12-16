@@ -162,7 +162,6 @@ export class BudgetImportExportService {
       const categoriesSheet = workbook.Sheets['Catégories'];
       const categoriesJson = XLSX.utils.sheet_to_json<Record<string, unknown>>(categoriesSheet);
 
-      // eslint-disable-next-line complexity
       const categories: BudgetCategoryImport[] = categoriesJson.map((row: Record<string, unknown>) => {
         // Valider les champs obligatoires
         if (!row.category || !row.category_type) {

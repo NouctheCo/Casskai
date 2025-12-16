@@ -70,7 +70,6 @@ export class IntegratedAccountingService {
     return (this.FEC_FIELDS_HEADER as readonly string[]).join('|');
   }
 
-  // eslint-disable-next-line complexity
   private static mapRowToFECLine(item: FECQueryRow): string {
     const entry = (item?.journal_entries ?? {
           entry_number: '',
@@ -124,7 +123,6 @@ export class IntegratedAccountingService {
   /**
    * Orchestrateur principal d'import
    */
-  // eslint-disable-next-line complexity
   static async performCompleteImport(config: {
     file: File;
     format: 'FEC' | 'CSV' | 'Excel' | 'auto';

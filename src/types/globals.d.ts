@@ -1,22 +1,5 @@
 // Global type declarations for modules without types
 
-declare module 'ml-matrix' {
-  export class Matrix {
-    constructor(data: number[][] | number);
-    static from(data: number[][]): Matrix;
-    static zeros(rows: number, cols: number): Matrix;
-    static eye(size: number): Matrix;
-    inverse(): Matrix;
-    mmul(other: Matrix): Matrix;
-    transpose(): Matrix;
-    to2DArray(): number[][];
-    get(row: number, col: number): number;
-    set(row: number, col: number, value: number): void;
-    rows: number;
-    columns: number;
-  }
-}
-
 declare module 'simple-statistics' {
   export function mean(data: number[]): number;
   export function median(data: number[]): number;

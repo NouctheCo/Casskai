@@ -10,7 +10,6 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
-/* eslint-disable max-lines */
 // Service fiscal multi-pays pour CassKai
 import { frenchTaxComplianceService } from './FrenchTaxComplianceService';
 import { getTaxConfiguration } from '../../data/taxConfigurations';

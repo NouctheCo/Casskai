@@ -41,8 +41,6 @@ import {
 
   FileText,
 
-  PieChart,
-
   Users,
 
   Shield,
@@ -450,9 +448,6 @@ const HeroSection = () => {
 // Section Intelligence Artificielle - Nouvelle feature mise en avant
 
 const AIAnalysisSection = () => {
-
-  const { t } = useTranslation();
-
 
 
   return (

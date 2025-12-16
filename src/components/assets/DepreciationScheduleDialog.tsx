@@ -228,7 +228,7 @@ export const DepreciationScheduleDialog: React.FC<DepreciationScheduleDialogProp
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {schedule.map((line, index) => (
+                {schedule.map((line) => (
                   <TableRow key={line.id} className={line.is_posted ? 'bg-green-50 dark:bg-green-950/10' : ''}>
                     <TableCell className="font-medium">{line.fiscal_year}</TableCell>
                     <TableCell>{line.period_number}</TableCell>
