@@ -215,7 +215,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         setCurrentCompany(companyDetails);
 
+        // Conserver les deux clés locales utilisées par les guards (legacy/new)
         localStorage.setItem('casskai_current_company_id', companyId);
+        localStorage.setItem('casskai_current_enterprise', companyId);
 
 
 
@@ -272,6 +274,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsCheckingOnboarding(false);
 
       localStorage.removeItem('casskai_current_company_id');
+      localStorage.removeItem('casskai_current_enterprise');
 
 
 
