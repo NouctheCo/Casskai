@@ -493,6 +493,18 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             'EUR'
           ),
 
+          // ========== ADRESSE COMPLÈTE ==========
+          address: state.data.companyProfile.address || null,
+          city: state.data.companyProfile.city || null,
+          postal_code: state.data.companyProfile.postalCode || null,
+
+          // ========== IDENTIFIANTS FISCAUX ==========
+          siret: state.data.companyProfile.siret || null,
+          siren: state.data.companyProfile.siren || null,
+          vat_number: state.data.companyProfile.vatNumber || null,
+          tax_number: state.data.companyProfile.taxNumber || null,
+          legal_form: state.data.companyProfile.legalForm || null,
+
           // ========== NOUVELLES COLONNES PHASE 1 ==========
           // CompanyStep - 8 colonnes auparavant perdues !
           timezone: state.data.companyProfile.timezone || 'Europe/Paris',
@@ -505,9 +517,19 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           company_size: state.data.companyProfile.companySize || null,
           registration_date: state.data.companyProfile.registrationDate ? new Date(state.data.companyProfile.registrationDate).toISOString().split('T')[0] : null,
 
+          // ========== COMPTABILITÉ ==========
+          accounting_standard: state.data.companyProfile.accountingStandard || null,
+          accounting_method: state.data.companyProfile.accountingMethod || 'accrual',
+          fiscal_year_type: state.data.companyProfile.fiscalYearType || 'calendar',
+          fiscal_year_start_month: state.data.companyProfile.fiscalYearStartMonth || state.data.companyProfile.fiscalYearStart || 1,
+          fiscal_year_start_day: state.data.companyProfile.fiscalYearStartDay || 1,
+
           // Colonnes optionnelles communes et sûres
           ...(state.data.companyProfile?.contact?.phone && {
             phone: state.data.companyProfile.contact.phone
+          }),
+          ...(state.data.companyProfile.phone && {
+            phone: state.data.companyProfile.phone
           }),
           ...(state.data.companyProfile.email && {
             email: state.data.companyProfile.email
