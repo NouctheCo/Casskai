@@ -196,7 +196,7 @@ export const AuthForm: React.FC = () => {
 
                   <Label htmlFor="email-signin">Email</Label>
 
-                  <Input id="email-signin" type="email" placeholder="m@example.com" required value={signInForm.email} onChange={(e) => setSignInForm({...signInForm, email: e.target.value})} data-testid="email-input" />
+                  <Input id="email-signin" type="email" placeholder="m@example.com" required value={signInForm.email} onChange={(e) => setSignInForm({...signInForm, email: e.target.value})} data-testid="email-input" autoComplete="email" />
 
                 </div>
 
@@ -204,7 +204,7 @@ export const AuthForm: React.FC = () => {
 
                   <Label htmlFor="password-signin">Mot de passe</Label>
 
-                  <Input id="password-signin" type="password" required value={signInForm.password} onChange={(e) => setSignInForm({...signInForm, password: e.target.value})} data-testid="password-input" />
+                  <Input id="password-signin" type="password" required value={signInForm.password} onChange={(e) => setSignInForm({...signInForm, password: e.target.value})} data-testid="password-input" autoComplete="current-password" />
 
                 </div>
 
@@ -230,7 +230,7 @@ export const AuthForm: React.FC = () => {
 
                       <Label htmlFor="firstName">Prénom</Label>
 
-                      <Input id="firstName" placeholder="Jean" required value={signUpForm.firstName} onChange={(e) => setSignUpForm({...signUpForm, firstName: e.target.value})} />
+                      <Input id="firstName" placeholder="Jean" required value={signUpForm.firstName} onChange={(e) => setSignUpForm({...signUpForm, firstName: e.target.value})} autoComplete="given-name" />
 
                     </div>
 
@@ -238,7 +238,7 @@ export const AuthForm: React.FC = () => {
 
                       <Label htmlFor="lastName">Nom</Label>
 
-                      <Input id="lastName" placeholder="Dupont" required value={signUpForm.lastName} onChange={(e) => setSignUpForm({...signUpForm, lastName: e.target.value})} />
+                      <Input id="lastName" placeholder="Dupont" required value={signUpForm.lastName} onChange={(e) => setSignUpForm({...signUpForm, lastName: e.target.value})} autoComplete="family-name" />
 
                     </div>
 
@@ -248,7 +248,7 @@ export const AuthForm: React.FC = () => {
 
                   <Label htmlFor="email-signup">Email</Label>
 
-                  <Input id="email-signup" type="email" placeholder="m@example.com" required value={signUpForm.email} onChange={(e) => setSignUpForm({...signUpForm, email: e.target.value})} />
+                  <Input id="email-signup" type="email" placeholder="m@example.com" required value={signUpForm.email} onChange={(e) => setSignUpForm({...signUpForm, email: e.target.value})} autoComplete="email" />
 
                 </div>
 
@@ -256,7 +256,7 @@ export const AuthForm: React.FC = () => {
 
                   <Label htmlFor="password-signup">Mot de passe</Label>
 
-                  <Input id="password-signup" type="password" required value={signUpForm.password} onChange={(e) => setSignUpForm({...signUpForm, password: e.target.value})} />
+                  <Input id="password-signup" type="password" required value={signUpForm.password} onChange={(e) => setSignUpForm({...signUpForm, password: e.target.value})} autoComplete="new-password" />
 
                 </div>
 
@@ -264,7 +264,7 @@ export const AuthForm: React.FC = () => {
 
                     <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
 
-                    <Input id="confirmPassword" type="password" required value={signUpForm.confirmPassword} onChange={(e) => setSignUpForm({...signUpForm, confirmPassword: e.target.value})} />
+                    <Input id="confirmPassword" type="password" required value={signUpForm.confirmPassword} onChange={(e) => setSignUpForm({...signUpForm, confirmPassword: e.target.value})} autoComplete="new-password" />
 
                   </div>
 

@@ -672,6 +672,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Audit trail - Login
     if (response.data.user) {
       auditService.logAuth('LOGIN', response.data.user.id, !response.error);
+
+      // Immediately trigger fetchUserSession to load company data synchronously
+      // This prevents the race condition where the user gets redirected to /onboarding
+      // before fetchUserSession has had a chance to run
+      if (!response.error) {
+        fetchUserSession(response.data.user);
+      }
     }
 
     return response;
