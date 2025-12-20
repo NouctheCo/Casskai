@@ -321,6 +321,8 @@ export default function InvoicingPageOptimized() {
         return new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
       case 'last-month':
         return new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().split('T')[0];
+      case 'last-year':
+        return new Date(now.getFullYear() - 1, 0, 1).toISOString().split('T')[0];
       case 'custom':
         return customStartDate || new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
       default:
@@ -341,6 +343,8 @@ export default function InvoicingPageOptimized() {
         return new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0];
       case 'last-month':
         return new Date(now.getFullYear(), now.getMonth(), 0).toISOString().split('T')[0];
+      case 'last-year':
+        return new Date(now.getFullYear() - 1, 11, 31).toISOString().split('T')[0];
       case 'custom':
         return customEndDate || new Date().toISOString().split('T')[0];
       default:
@@ -455,6 +459,7 @@ export default function InvoicingPageOptimized() {
                     <SelectItem value="current-quarter">{t('invoicing.periods.currentQuarter', 'Trimestre en cours')}</SelectItem>
                     <SelectItem value="current-year">{t('invoicing.periods.currentYear', 'Année en cours')}</SelectItem>
                     <SelectItem value="last-month">{t('invoicing.periods.lastMonth', 'Mois dernier')}</SelectItem>
+                    <SelectItem value="last-year">{t('invoicing.periods.lastYear', 'Année N-1')}</SelectItem>
                     <SelectItem value="custom">{t('invoicing.periods.custom', 'Période personnalisée')}</SelectItem>
                   </SelectContent>
                 </Select>

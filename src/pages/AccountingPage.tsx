@@ -613,6 +613,10 @@ export default function AccountingPageOptimized() {
 
   const [selectedPeriod, setSelectedPeriod] = useState('current-month');
 
+  const [customStartDate, setCustomStartDate] = useState('');
+
+  const [customEndDate, setCustomEndDate] = useState('');
+
   const [isLoading, setIsLoading] = useState(true);
   const [currentCompanyId, setCurrentCompanyId] = useState<string | undefined>(undefined);
 
@@ -723,6 +727,24 @@ export default function AccountingPageOptimized() {
             periodStart = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
             periodEnd = new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0];
             break;
+          case 'last-month':
+            periodStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().split('T')[0];
+            periodEnd = new Date(now.getFullYear(), now.getMonth(), 0).toISOString().split('T')[0];
+            break;
+          case 'last-year':
+            periodStart = new Date(now.getFullYear() - 1, 0, 1).toISOString().split('T')[0];
+            periodEnd = new Date(now.getFullYear() - 1, 11, 31).toISOString().split('T')[0];
+            break;
+          case 'custom':
+            if (customStartDate && customEndDate) {
+              periodStart = customStartDate;
+              periodEnd = customEndDate;
+            } else {
+              // Par défaut, utiliser le mois en cours si les dates ne sont pas définies
+              periodStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+              periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+            }
+            break;
           default:
             periodStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
             periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
@@ -766,7 +788,7 @@ export default function AccountingPageOptimized() {
 
     loadAccountingData();
 
-  }, [selectedPeriod]);
+  }, [selectedPeriod, customStartDate, customEndDate]);
 
 
 
@@ -911,6 +933,8 @@ export default function AccountingPageOptimized() {
 
                 <SelectItem value="last-month">Mois dernier</SelectItem>
 
+                <SelectItem value="last-year">Année N-1</SelectItem>
+
                 <SelectItem value="custom">Période personnalisée</SelectItem>
 
               </SelectContent>
@@ -920,6 +944,33 @@ export default function AccountingPageOptimized() {
           </div>
 
           
+
+          {selectedPeriod === 'custom' && (
+            <div className="flex items-center space-x-2">
+              <div className="flex flex-col">
+                <label className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('common.from', 'Du')}</label>
+                <input
+                  type="date"
+                  value={customStartDate}
+                  onChange={(e) => setCustomStartDate(e.target.value)}
+                  className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Date de début"
+                  title="Date de début de la période personnalisée"
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('common.to', 'Au')}</label>
+                <input
+                  type="date"
+                  value={customEndDate}
+                  onChange={(e) => setCustomEndDate(e.target.value)}
+                  className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Date de fin"
+                  title="Date de fin de la période personnalisée"
+                />
+              </div>
+            </div>
+          )}
 
           <Button variant="outline">
 

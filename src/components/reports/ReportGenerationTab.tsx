@@ -123,6 +123,11 @@ export function ReportGenerationTab({ companyId: _companyId, refreshTrigger: _re
           end: new Date(year, month + 1, 0).toISOString().split('T')[0]
         };
       }
+      case 'last-year':
+        return {
+          start: new Date(currentYear - 1, 0, 1).toISOString().split('T')[0],
+          end: new Date(currentYear - 1, 11, 31).toISOString().split('T')[0]
+        };
       case 'custom':
         return {
           start: customStartDate,
@@ -307,6 +312,7 @@ export function ReportGenerationTab({ companyId: _companyId, refreshTrigger: _re
                   <SelectItem value="current-quarter">Trimestre en cours</SelectItem>
                   <SelectItem value="current-year">Année en cours</SelectItem>
                   <SelectItem value="last-month">Mois dernier</SelectItem>
+                  <SelectItem value="last-year">Année N-1</SelectItem>
                   <SelectItem value="custom">Période personnalisée</SelectItem>
                 </SelectContent>
               </Select>

@@ -125,6 +125,10 @@ export default function OptimizedReportsTab() {
 
   const [selectedPeriod, setSelectedPeriod] = useState('current-month');
 
+  const [customStartDate, setCustomStartDate] = useState('');
+
+  const [customEndDate, setCustomEndDate] = useState('');
+
   const [selectedReportType, setSelectedReportType] = useState('all_types');
 
   const [isGenerating, setIsGenerating] = useState<string | null>(null);
@@ -661,6 +665,26 @@ export default function OptimizedReportsTab() {
         };
 
       }
+
+      case 'last-year':
+
+        return {
+
+          start: new Date(currentYear - 1, 0, 1).toISOString().split('T')[0],
+
+          end: new Date(currentYear - 1, 11, 31).toISOString().split('T')[0]
+
+        };
+
+      case 'custom':
+
+        return {
+
+          start: customStartDate,
+
+          end: customEndDate
+
+        };
 
       default:
 
@@ -1336,6 +1360,8 @@ export default function OptimizedReportsTab() {
 
                   <SelectItem value="last-month">Mois dernier</SelectItem>
 
+                  <SelectItem value="last-year">Année N-1</SelectItem>
+
                   <SelectItem value="custom">Période personnalisée</SelectItem>
 
                 </SelectContent>
@@ -1343,6 +1369,60 @@ export default function OptimizedReportsTab() {
               </Select>
 
             </div>
+
+            
+
+            {selectedPeriod === 'custom' && (
+
+              <div className="flex items-center space-x-2">
+
+                <div className="flex flex-col">
+
+                  <label className="text-xs text-gray-500 dark:text-gray-400 mb-1">Du</label>
+
+                  <input
+
+                    type="date"
+
+                    value={customStartDate}
+
+                    onChange={(e) => setCustomStartDate(e.target.value)}
+
+                    className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+
+                    placeholder="Date de début"
+
+                    title="Date de début de la période personnalisée"
+
+                  />
+
+                </div>
+
+                <div className="flex flex-col">
+
+                  <label className="text-xs text-gray-500 dark:text-gray-400 mb-1">Au</label>
+
+                  <input
+
+                    type="date"
+
+                    value={customEndDate}
+
+                    onChange={(e) => setCustomEndDate(e.target.value)}
+
+                    className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+
+                    placeholder="Date de fin"
+
+                    title="Date de fin de la période personnalisée"
+
+                  />
+
+                </div>
+
+              </div>
+
+            )}
 
 
 
