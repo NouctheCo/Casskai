@@ -534,24 +534,16 @@ describe('useMigration hook', () => {
   });
 
   it('should return true on successful migration', async () => {
-    // Ensure import.meta.env is properly set for this test
-    vi.stubGlobal('import', {
-      meta: {
-        env: {
-          VITE_SUPABASE_URL: 'https://test.supabase.co',
-          VITE_SUPABASE_ANON_KEY: 'test-key',
-        }
-      }
-    });
-
+    // Mock is already configured in beforeEach
+    // Ensure the configService is properly mocked for successful migration
+    testMockConfigService.isConfigured.mockReturnValueOnce(true);
+    
     const { result } = renderHook(() => useMigration());
 
     const success = await result.current.runMigration();
 
     expect(success).toBe(true);
     expect(result.current.error).toBeNull();
-    
-    vi.unstubAllGlobals();
   });
 
   it('should set error on migration failure', async () => {
