@@ -586,7 +586,7 @@ const UserManagementPage = () => {
 
         <div className="flex items-center gap-4">
 
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100 dark:text-gray-100">
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
 
             {t('userManagement.title', { defaultValue: 'Gestion des Utilisateurs' })}
 

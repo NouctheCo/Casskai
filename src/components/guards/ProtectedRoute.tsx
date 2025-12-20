@@ -17,7 +17,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requireOnboarding = true,
   requireCompany = true
 }) => {
-  const { user, loading: authLoading, currentCompany } = useAuth();
+  const { user, loading: authLoading, currentCompany, isCheckingOnboarding } = useAuth();
   const location = useLocation();
   const { isExpired, isLoading: subscriptionLoading } = useSubscriptionStatus();
 
@@ -26,8 +26,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <>{children}</>;
   }
 
-  // Afficher le loader pendant que l'authentification ou l'abonnement se charge
-  if (authLoading || subscriptionLoading) {
+  // Afficher le loader pendant que l'authentification, l'abonnement ou le check d'onboarding se charge
+  if (authLoading || subscriptionLoading || isCheckingOnboarding) {
     return <LoadingFallback message="Vérification des autorisations..." />;
   }
 

@@ -1,3 +1,82 @@
+import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.7";
+
+const cors = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const admin = createClient(supabaseUrl, serviceKey);
+
+function getBearerToken(req: Request) {
+  const h = req.headers.get("Authorization") ?? "";
+  return h.startsWith("Bearer ") ? h.slice(7) : h;
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405, headers: cors });
+  try {
+    const { token } = await req.json();
+    if (!token) {
+      return Response.json({ error: "Missing token" }, { status: 400, headers: cors });
+    }
+
+    const bearer = getBearerToken(req);
+    const { data: userData, error: userErr } = await admin.auth.getUser(bearer);
+    if (userErr || !userData?.user?.id) {
+      return Response.json({ error: "Unauthorized" }, { status: 401, headers: cors });
+    }
+
+    const userId = userData.user.id;
+    const userEmail = userData.user.email ?? "";
+
+    const { data: invite, error: inviteErr } = await admin
+      .from("company_invitations")
+      .select("id, company_id, email, role, status, expires_at")
+      .eq("token", token)
+      .single();
+
+    if (inviteErr || !invite) {
+      return Response.json({ error: "Invitation not found" }, { status: 404, headers: cors });
+    }
+
+    if (invite.status !== "pending") {
+      return Response.json({ error: "Invitation is not pending" }, { status: 400, headers: cors });
+    }
+
+    if (invite.expires_at && new Date(invite.expires_at).getTime() < Date.now()) {
+      return Response.json({ error: "Invitation expired" }, { status: 400, headers: cors });
+    }
+
+    if (invite.email && invite.email.toLowerCase() !== userEmail.toLowerCase()) {
+      return Response.json({ error: "Email mismatch" }, { status: 403, headers: cors });
+    }
+
+    const { error: upsertErr } = await admin
+      .from("user_companies")
+      .upsert({ company_id: invite.company_id, user_id: userId, role: invite.role, is_active: true }, { onConflict: "company_id,user_id" });
+    if (upsertErr) {
+      return Response.json({ error: upsertErr.message }, { status: 500, headers: cors });
+    }
+
+    const { error: updateErr } = await admin
+      .from("company_invitations")
+      .update({ status: "accepted", accepted_at: new Date().toISOString(), accepted_by: userId })
+      .eq("id", invite.id);
+    if (updateErr) {
+      return Response.json({ error: updateErr.message }, { status: 500, headers: cors });
+    }
+
+    return Response.json({ ok: true }, { headers: cors });
+  } catch (err) {
+    return Response.json({ error: String(err) }, { status: 500, headers: cors });
+  }
+});
+
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import Stripe from 'https://esm.sh/stripe@14.21.0'

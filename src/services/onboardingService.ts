@@ -101,7 +101,7 @@ class OnboardingService {
           }
         },
         featuresExploration: {},
-        currentStepId: 'welcome',
+        currentStepId: 'language',
         completedSteps: [],
         startedAt: new Date().toISOString(),
         lastSavedAt: new Date().toISOString(),
@@ -432,7 +432,7 @@ class OnboardingService {
    * Obtient la prochaine étape dans le parcours
    */
   private getNextStep(currentStep: OnboardingStepId): OnboardingStepId {
-    const steps: OnboardingStepId[] = ['welcome', 'company', 'preferences', 'features', 'complete'];
+    const steps: OnboardingStepId[] = ['language', 'welcome', 'company', 'preferences', 'features', 'complete'];
     const currentIndex = steps.indexOf(currentStep);
     return currentIndex < steps.length - 1 ? steps[currentIndex + 1] : 'complete';
   }

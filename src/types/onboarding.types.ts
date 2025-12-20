@@ -142,7 +142,7 @@ export interface OnboardingState {
   progress: number;
 }
 
-export type OnboardingStepId = 'welcome' | 'company' | 'modules' | 'preferences' | 'features' | 'complete';
+export type OnboardingStepId = 'language' | 'welcome' | 'company' | 'modules' | 'preferences' | 'features' | 'complete';
 
 export interface StepValidationResult {
   isValid: boolean;

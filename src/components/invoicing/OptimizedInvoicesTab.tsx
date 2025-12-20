@@ -886,7 +886,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
         <div className="space-y-1">
 
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">Factures</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Factures</h2>
 
           <p className="text-sm text-gray-500 dark:text-gray-300">Gérez vos factures clients</p>
 
@@ -1296,7 +1296,7 @@ const OptimizedInvoicesTab: React.FC<OptimizedInvoicesTabProps> = ({ shouldCreat
 
               <FileText className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
 
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 dark:text-white mb-2">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
 
                 Aucune facture trouvée
 

@@ -149,7 +149,7 @@ export class OnboardingStorageService {
       return legacy;
     }
 
-    return 'welcome';
+    return 'language';
   }
 
   private ensureStringArray(value: unknown): string[] {

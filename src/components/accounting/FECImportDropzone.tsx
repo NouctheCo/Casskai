@@ -226,6 +226,7 @@ const FECImportDropzone: React.FC<FECImportDropzoneProps> = ({ onFileSelected, i
           id="dropzone-file"
           type="file"
           className="hidden"
+          aria-label="Sélectionner un fichier FEC à importer"
           accept=".txt,.csv,.tsv,.dat,.fec,.iif,.xls,.xlsx"
           onChange={handleFileChange}
           disabled={isProcessing}

@@ -1,3 +1,69 @@
+import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.7";
+
+const cors = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const admin = createClient(supabaseUrl, serviceKey);
+
+function getBearerToken(req: Request) {
+  const h = req.headers.get("Authorization") ?? "";
+  return h.startsWith("Bearer ") ? h.slice(7) : h;
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405, headers: cors });
+  try {
+    const { reason } = await req.json().catch(() => ({ reason: null }));
+    const bearer = getBearerToken(req);
+    const { data: userData, error: userErr } = await admin.auth.getUser(bearer);
+    if (userErr || !userData?.user?.id) {
+      return Response.json({ error: "Unauthorized" }, { status: 401, headers: cors });
+    }
+    const userId = userData.user.id;
+
+    const { data: pending } = await admin
+      .from("account_deletion_requests")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("status", "pending");
+    if ((pending ?? []).length > 0) {
+      return Response.json({ error: "Existing pending deletion request" }, { status: 400, headers: cors });
+    }
+
+    const ip = req.headers.get("x-forwarded-for") ?? undefined;
+    const ua = req.headers.get("user-agent") ?? undefined;
+    const scheduled = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+    const { data, error } = await admin
+      .from("account_deletion_requests")
+      .insert({
+        user_id: userId,
+        reason: reason ?? null,
+        status: "pending",
+        requested_at: new Date().toISOString(),
+        scheduled_deletion_date: scheduled,
+        ip_address: ip ?? null,
+        user_agent: ua ?? null,
+      })
+      .select("id, scheduled_deletion_date")
+      .single();
+
+    if (error) {
+      return Response.json({ error: error.message }, { status: 500, headers: cors });
+    }
+    return Response.json({ id: data.id, scheduled_deletion_date: data.scheduled_deletion_date }, { headers: cors });
+  } catch (err) {
+    return Response.json({ error: String(err) }, { status: 500, headers: cors });
+  }
+});
+
 /**
  * CassKai - Edge Function: Delete Account (RGPD Article 17)
  *

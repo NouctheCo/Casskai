@@ -22,7 +22,7 @@ import { Loader2, Lock, User, AlertCircle, CheckCircle } from 'lucide-react';
 
 export const AuthForm: React.FC = () => {
 
-  const { signIn, signUp, isAuthenticated, onboardingCompleted } = useAuth();
+  const { signIn, signUp, isAuthenticated, onboardingCompleted, isCheckingOnboarding } = useAuth();
 
   const [activeTab, setActiveTab] = useState('signin');
 
@@ -36,6 +36,15 @@ export const AuthForm: React.FC = () => {
 
 
 
+  // Attendre que le check d'onboarding soit terminé avant de rediriger
+  if (isAuthenticated && isCheckingOnboarding) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   // Redirect authenticated users appropriately
 
   if (isAuthenticated && onboardingCompleted) {
@@ -44,7 +53,7 @@ export const AuthForm: React.FC = () => {
 
   }
 
-  
+
 
   if (isAuthenticated && !onboardingCompleted) {
 
@@ -295,11 +304,12 @@ interface AuthGuardProps {
 
 const AuthGuardComp: React.FC<AuthGuardProps> = ({ children }) => {
 
-  const { loading, isAuthenticated, onboardingCompleted } = useAuth();
+  const { loading, isAuthenticated, onboardingCompleted, isCheckingOnboarding } = useAuth();
 
 
 
-  if (loading) {
+  // Attendre que le loading initial ET le check d'onboarding soient terminés
+  if (loading || isCheckingOnboarding) {
 
     return (
 

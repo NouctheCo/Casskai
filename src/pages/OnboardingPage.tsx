@@ -10,7 +10,8 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
+import LanguageStep from './onboarding/LanguageStep';
 import WelcomeStep from './onboarding/WelcomeStep';
 import PreferencesStep from './onboarding/PreferencesStep';
 import CompanyStep from './onboarding/CompanyStep';
@@ -34,7 +35,7 @@ export default function OnboardingPage() {
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto"></div>
           <div className="space-y-2">
-            <p className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-white">Initialisation en cours...</p>
+            <p className="text-xl font-semibold text-gray-900 dark:text-white">Initialisation en cours...</p>
             <p className="text-sm text-gray-600 dark:text-gray-400">Configuration de votre espace de travail</p>
           </div>
         </div>
@@ -43,9 +44,10 @@ export default function OnboardingPage() {
   }
 
   const steps = [
+    <LanguageStep key="language" />,
     <WelcomeStep key="welcome" />,
-    <PreferencesStep key="preferences" />,
     <CompanyStep key="company" />,
+    <PreferencesStep key="preferences" />,
     <ModulesStep key="modules" />,
     <CompleteStep key="complete" />,
   ];

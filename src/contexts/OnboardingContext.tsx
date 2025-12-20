@@ -44,7 +44,7 @@ const initialData: OnboardingData = {
   selectedModules: [],
   preferences: {},
   featuresExploration: {},
-  currentStepId: 'welcome',
+  currentStepId: 'language',
   completedSteps: [],
   startedAt: new Date().toISOString(),
   lastSavedAt: new Date().toISOString(),

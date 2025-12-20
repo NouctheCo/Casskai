@@ -223,7 +223,7 @@ const HeroSection = () => {
 
             {/* Titre principal */}
 
-            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-6 leading-tight">
+            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
 
               {t('landing.hero.title', 'Gérez votre entreprise')}
 
@@ -870,7 +870,7 @@ const AdvantagesSection = () => {
 
 
 
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
 
             Pourquoi choisir CassKai ?
 
@@ -924,7 +924,7 @@ const AdvantagesSection = () => {
 
 
 
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-3">
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
 
                       {advantage.title}
 
@@ -1152,7 +1152,7 @@ const FeaturesSection = () => {
 
           
 
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
 
             {t('landing.features.title', 'Tout ce dont vous avez besoin')}
 
@@ -1218,7 +1218,7 @@ const FeaturesSection = () => {
 
                     </div>
 
-                    <CardTitle className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    <CardTitle className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
 
                       {feature.title}
 
@@ -1324,7 +1324,7 @@ const FeaturesSection = () => {
 
                 <benefit.icon className={`w-12 h-12 ${benefit.color} mx-auto mb-4`} />
 
-                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
 
                   {benefit.title}
 
@@ -1568,7 +1568,7 @@ const PricingSection = () => {
 
   return (
 
-    <section id="pricing" className="py-24 bg-white dark:bg-gray-800 dark:bg-gray-900">
+    <section id="pricing" className="py-24 bg-white dark:bg-gray-900">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -1584,7 +1584,7 @@ const PricingSection = () => {
 
           
 
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
 
             {t('landing.pricing.title', 'Choisissez votre plan')}
 
@@ -1758,7 +1758,7 @@ const PricingSection = () => {
 
                           <div className="flex items-center justify-center">
 
-                            <span className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
+                            <span className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">
 
                               {formatPriceWithCurrency(plan.displayMonthlyPrice, plan.currency)}
 
@@ -1810,7 +1810,7 @@ const PricingSection = () => {
 
                           <div className="flex items-center justify-center">
 
-                            <span className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
+                            <span className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">
 
                               {formatPriceWithCurrency(plan.price, plan.currency)}
 
@@ -1970,7 +1970,7 @@ const PricingSection = () => {
 
                 </div>
 
-                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
 
                   {guarantee.title}
 
@@ -2080,7 +2080,7 @@ const TestimonialsSection = () => {
 
           
 
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
 
             {t('landing.testimonials.title', 'Premiers utilisateurs')}
 
@@ -2176,7 +2176,7 @@ const TestimonialsSection = () => {
 
                       <div>
 
-                        <div className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white">
+                        <div className="font-semibold text-gray-900 dark:text-white">
 
                           {testimonial.name}
 
@@ -2230,7 +2230,7 @@ const ContactSection = () => {
 
   return (
 
-    <section id="contact" className="py-24 bg-white dark:bg-gray-800 dark:bg-gray-900">
+    <section id="contact" className="py-24 bg-white dark:bg-gray-900">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -2246,7 +2246,7 @@ const ContactSection = () => {
 
           
 
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
 
             {t('landing.contact.title', 'Une question ?')}
 
@@ -2338,7 +2338,7 @@ const ContactSection = () => {
 
                 </div>
 
-                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
 
                   {contact.title}
 

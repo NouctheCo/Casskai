@@ -23,6 +23,7 @@ import { supabase } from '@/lib/supabase';
 import { Building, MapPin, Phone, Mail, Globe, Save, Loader2, Trash2, AlertTriangle, Calendar } from 'lucide-react';
 
 import { useCountries } from '@/hooks/useReferentials';
+import { CompanyDeletionDialog } from './CompanyDeletionDialog';
 
 
 
@@ -1392,85 +1393,19 @@ export function CompanySettings() {
 
 
 
-      {/* Placeholder pour Company Deletion Dialog */}
+      {/* Company Deletion Dialog */}
 
       {showCompanyDeletion && (
 
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <CompanyDeletionDialog
 
-          <Card className="max-w-md w-full">
+          companyId={currentCompany?.id || ''}
 
-            <CardHeader>
+          companyName={settings.name}
 
-              <CardTitle className="text-red-600 dark:text-red-400">Suppression d'entreprise</CardTitle>
+          onCancel={() => setShowCompanyDeletion(false)}
 
-              <CardDescription>
-
-                Cette fonctionnalité sera bientôt disponible avec le système de consensus des propriétaires.
-
-              </CardDescription>
-
-            </CardHeader>
-
-            <CardContent className="space-y-4">
-
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-
-                La suppression d'entreprise nécessite l'accord de tous les propriétaires
-
-                et inclura un export FEC automatique avant suppression.
-
-              </p>
-
-              <div className="flex space-x-2">
-
-                <Button
-
-                  variant="outline"
-
-                  className="flex-1"
-
-                  onClick={() => setShowCompanyDeletion(false)}
-
-                >
-
-                  Annuler
-
-                </Button>
-
-                <Button
-
-                  variant="destructive"
-
-                  className="flex-1"
-
-                  onClick={() => {
-
-                    toast({
-
-                      title: "Fonctionnalité à venir",
-
-                      description: "La suppression d'entreprise sera disponible prochainement.",
-
-                    });
-
-                    setShowCompanyDeletion(false);
-
-                  }}
-
-                >
-
-                  Continuer
-
-                </Button>
-
-              </div>
-
-            </CardContent>
-
-          </Card>
-
-        </div>
+        />
 
       )}
 
@@ -1479,3 +1414,4 @@ export function CompanySettings() {
   );
 
 }
+

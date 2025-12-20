@@ -58,7 +58,7 @@ class OnboardingService {
       // Créer de nouvelles données d'onboarding
       const initialData: OnboardingData = {
         userId,
-        currentStepId: 'welcome',
+        currentStepId: 'language',
         companyProfile: {
           name: '',
           country: ''

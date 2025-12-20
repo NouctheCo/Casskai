@@ -45,7 +45,7 @@ const TermsOfSalePage = () => {
             <p className="text-gray-600 dark:text-gray-400">
               Version {version} - Dernière mise à jour : {lastUpdated}
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-500 dark:text-gray-400 mt-2">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
               Applicables à tous les abonnements CassKai SaaS
             </p>
           </div>

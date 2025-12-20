@@ -47,7 +47,7 @@ const initialData: OnboardingData = {
   selectedModules: [],
   preferences: {},
   featuresExploration: {},
-  currentStepId: 'welcome',
+  currentStepId: 'language',
   completedSteps: [],
   startedAt: new Date().toISOString(),
   lastSavedAt: new Date().toISOString(),
@@ -799,6 +799,43 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         // Ne pas bloquer pour cette erreur, continuer
       } else {
         devLogger.info('✅ onboarding_completed_at mis à jour dans companies');
+      }
+
+      // ============================================
+      // SAUVEGARDER LES PRÉFÉRENCES UTILISATEUR (PHASE 1)
+      // ============================================
+      // Persister la langue choisie lors de l'onboarding
+      try {
+        const userPreferences = {
+          language: state.data.preferences?.language || 'fr',
+          currency: state.data.preferences?.currency || 'EUR',
+          timezone: state.data.preferences?.timezone || 'Europe/Paris',
+          dateFormat: state.data.preferences?.dateFormat || 'DD/MM/YYYY',
+          theme: state.data.preferences?.theme || 'system',
+          notifications: state.data.preferences?.notifications || {
+            email: true,
+            push: false,
+            marketing: false
+          }
+        };
+
+        // Mettre à jour user_metadata avec les préférences
+        const { error: updateAuthError } = await supabase.auth.updateUser({
+          data: {
+            preferences: userPreferences,
+            onboarding_completed_at: completionTimestamp
+          }
+        });
+
+        if (updateAuthError) {
+          devLogger.warn('⚠️ Erreur mise à jour user_metadata:', updateAuthError);
+          // Non bloquant - continuer
+        } else {
+          devLogger.info('✅ Préférences utilisateur sauvegardées (langue:', userPreferences.language, ')');
+        }
+      } catch (preferencesError) {
+        devLogger.warn('⚠️ Erreur sauvegarde préférences:', preferencesError);
+        // Non bloquant
       }
 
       const completedSteps = Array.from(new Set([...(state.data.completedSteps || []), 'complete']));

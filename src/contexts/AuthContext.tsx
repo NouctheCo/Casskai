@@ -361,13 +361,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 
 
-    // Ne mettre isCheckingOnboarding à true que pour le premier chargement
-
-    if (isInitialMount.current) {
-
-      setIsCheckingOnboarding(true);
-
-    }
+    // ✅ TOUJOURS mettre isCheckingOnboarding à true lors du chargement des données utilisateur
+    // Cela empêche le AuthGuard de rediriger prématurément vers /onboarding
+    setIsCheckingOnboarding(true);
 
 
 

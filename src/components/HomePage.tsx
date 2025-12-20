@@ -8,10 +8,10 @@ import { LoadingFallback } from '@/components/ui/LoadingFallback';
  * selon l'état d'authentification de l'utilisateur
  */
 export const HomePage: React.FC = () => {
-  const { user, loading: authLoading, currentCompany, onboardingCompleted } = useAuth();
+  const { user, loading: authLoading, currentCompany, onboardingCompleted, isCheckingOnboarding } = useAuth();
 
-  // Afficher un loader pendant le chargement
-  if (authLoading) {
+  // Afficher un loader pendant le chargement ou le check d'onboarding
+  if (authLoading || isCheckingOnboarding) {
     return <LoadingFallback message="Chargement..." />;
   }
 
