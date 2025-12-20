@@ -38,6 +38,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { realDashboardKpiService, type RealKPIData } from '@/services/realDashboardKpiService';
 import { aiDashboardAnalysisService, type AIAnalysisResult } from '@/services/aiDashboardAnalysisService';
+import { useKpiRefresh } from '@/hooks/useKpiRefresh';
 import { formatCurrency } from '@/lib/utils';
 
 const CHART_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
@@ -50,6 +51,29 @@ export const RealOperationalDashboard: React.FC = () => {
   const [kpiData, setKpiData] = useState<RealKPIData | null>(null);
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisResult | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+
+  // 🎯 NOUVEAU: Hook pour synchronisation temps réel des KPIs
+  useKpiRefresh(currentCompany?.id, {
+    onCacheInvalidated: async () => {
+      // Le cache a été invalidé, recharger les KPIs en arrière-plan
+      if (currentCompany?.id) {
+        try {
+          const data = await realDashboardKpiService.calculateRealKPIs(currentCompany.id);
+          setKpiData(data);
+          setLastUpdate(new Date());
+          // Recharger aussi l'analyse IA avec les nouvelles données
+          await loadAIAnalysis(data);
+        } catch (error) {
+          console.error('[RealOperationalDashboard] Erreur rafraîchissement KPI:', error);
+        }
+      }
+    },
+    onError: (event) => {
+      console.error('[RealOperationalDashboard] Erreur KPI:', event.message);
+    },
+    subscribeToRealtime: true,
+  });
 
   useEffect(() => {
     if (currentCompany?.id) {
@@ -65,6 +89,7 @@ export const RealOperationalDashboard: React.FC = () => {
       // Charger les KPIs réels
       const data = await realDashboardKpiService.calculateRealKPIs(currentCompany.id);
       setKpiData(data);
+      setLastUpdate(new Date());
 
       // Charger l'analyse IA en parallèle
       loadAIAnalysis(data);
@@ -117,6 +142,12 @@ export const RealOperationalDashboard: React.FC = () => {
         <div>
           <h1 className="text-3xl font-bold">{t('dashboard.operational.title')}</h1>
           <p className="text-muted-foreground">{t('dashboard.operational.subtitle')}</p>
+          {/* 🎯 NOUVEAU: Afficher l'heure de dernière mise à jour */}
+          {lastUpdate && (
+            <p className="text-xs text-gray-500 mt-1">
+              Mis à jour à {lastUpdate.toLocaleTimeString('fr-FR')}
+            </p>
+          )}
         </div>
         <Button onClick={handleRefresh} disabled={refreshing} variant="outline">
           <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />

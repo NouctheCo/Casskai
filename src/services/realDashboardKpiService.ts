@@ -6,6 +6,7 @@
 
 import { supabase } from '@/lib/supabase';
 import type { DashboardMetric, DashboardChart } from '@/types/enterprise-dashboard.types';
+import { kpiCacheService } from './kpiCacheService';
 
 export interface RealKPIData {
   revenue_ytd: number;
@@ -27,8 +28,16 @@ export interface RealKPIData {
 export class RealDashboardKpiService {
   /**
    * Calcule tous les KPIs réels pour le dashboard
+   * Utilise le cache si disponible et valide
    */
   async calculateRealKPIs(companyId: string, fiscalYear?: number): Promise<RealKPIData> {
+    // 🎯 NOUVEAU: Vérifier le cache en premier
+    const cachedData = kpiCacheService.getCache(companyId);
+    if (cachedData && kpiCacheService.isCacheValid(companyId)) {
+      console.log('[RealDashboardKpiService] Cache KPI utilisé pour', companyId);
+      return cachedData;
+    }
+
     const year = fiscalYear || new Date().getFullYear();
     const startOfYear = `${year}-01-01`;
     const endOfYear = `${year}-12-31`;
@@ -71,7 +80,7 @@ export class RealDashboardKpiService {
     const dailyBurn = monthlyBurn / 30;
     const cash_runway_days = dailyBurn > 0 ? Math.floor(cashData / dailyBurn) : 999;
 
-    return {
+    const result = {
       revenue_ytd: revenueData,
       revenue_growth,
       profit_margin,
@@ -84,6 +93,11 @@ export class RealDashboardKpiService {
       top_clients: topClients,
       expense_breakdown: expenseBreakdown,
     };
+
+    // 🎯 NOUVEAU: Sauvegarder en cache
+    kpiCacheService.setCache(companyId, result);
+
+    return result;
   }
 
   /**

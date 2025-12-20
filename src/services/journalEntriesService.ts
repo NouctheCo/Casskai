@@ -23,6 +23,7 @@ import type {
 } from '@/types/journalEntries.types';
 import { auditService } from './auditService';
 import AccountingRulesService from './accountingRulesService';
+import { kpiCacheService } from './kpiCacheService';
 
 type JournalEntryInsert = Database['public']['Tables']['journal_entries']['Insert'];
 type JournalEntryUpdate = Database['public']['Tables']['journal_entries']['Update'];
@@ -177,6 +178,9 @@ class JournalEntriesService {
         compliance_tags: ['RGPD']
       }).catch(err => console.error('Audit log failed:', err));
 
+      // 🎯 NOUVELLE: Invalider le cache KPI après création
+      kpiCacheService.invalidateCache(payload.companyId);
+
       return {
         success: true,
         data: {
@@ -318,6 +322,9 @@ class JournalEntriesService {
         compliance_tags: ['RGPD']
       }).catch(err => console.error('Audit log failed:', err));
 
+      // 🎯 NOUVELLE: Invalider le cache KPI après mise à jour
+      kpiCacheService.invalidateCache(payload.companyId);
+
       return {
         success: true,
         data: {
@@ -377,6 +384,9 @@ class JournalEntriesService {
           compliance_tags: ['RGPD']
         }).catch(err => console.error('Audit log failed:', err));
       }
+
+      // 🎯 NOUVELLE: Invalider le cache KPI après suppression
+      kpiCacheService.invalidateCache(companyId);
 
       return { success: true, data: null };
     } catch (error) {
