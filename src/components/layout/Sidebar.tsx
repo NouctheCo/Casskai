@@ -24,7 +24,7 @@ import {
   LayoutDashboard, Calculator, Receipt, Landmark, TrendingUp, Scale,
   Handshake, FileSignature, ShoppingCart, Package, FolderKanban,
   Building, Building2, UserCog, BarChart3, Zap, Search, Pin, PinOff,
-  ChevronDown, Sparkles, Shield
+  ChevronDown, Sparkles, Shield, DollarSign, TrendingDown
 } from 'lucide-react';
 
 interface MenuItem {
@@ -180,6 +180,8 @@ export const Sidebar: React.FC = () => {
       bgLightHover: 'hover:bg-amber-50 dark:hover:bg-amber-900/10',
       items: [
         { id: 'reports', label: t('sidebar.reports', 'Rapports'), icon: <BarChart3 size={20} />, path: '/reports' },
+        { id: 'tax-simulator', label: t('sidebar.tax_simulator', 'Simulateur IS/IR'), icon: <Calculator size={20} />, path: '/reports/tax-simulator' },
+        { id: 'loan-simulator', label: t('sidebar.loan_simulator', 'Simulateur de Prêt'), icon: <TrendingDown size={20} />, path: '/reports/loan-simulator' },
         { id: 'automation', label: t('sidebar.automation', 'Automatisation'), icon: <Zap size={20} />, path: '/automation' },
       ]
     },

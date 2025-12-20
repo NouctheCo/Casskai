@@ -24,6 +24,7 @@ import { Building, MapPin, Phone, Mail, Globe, Save, Loader2, Trash2, AlertTrian
 
 import { useCountries } from '@/hooks/useReferentials';
 import { CompanyDeletionDialog } from './CompanyDeletionDialog';
+import { BusinessIdValidator } from '@/components/validation/BusinessIdValidator';
 
 
 
@@ -699,6 +700,11 @@ export function CompanySettings() {
 
             </div>
 
+          </div>
+
+          {/* Business ID Validator */}
+          <div className="mt-6">
+            <BusinessIdValidator />
           </div>
 
 

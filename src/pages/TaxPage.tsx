@@ -31,6 +31,7 @@ import { TaxCompliancePanel } from '../components/fiscal/TaxCompliancePanel';
 import { FiscalCalendarTab } from '../components/fiscal/FiscalCalendarTab';
 import { AutoVATDeclarationButton } from '../components/fiscal/AutoVATDeclarationButton';
 import { FECExportButton } from '../components/fiscal/FECExportButton';
+import { VATNumberValidator } from '../components/fiscal/VATNumberValidator';
 import {
   TaxDeclaration,
   TaxCalendarEvent,
@@ -519,13 +520,14 @@ const TaxPage: React.FC = () => {
       {/* Tabs Navigation */}
       <motion.div variants={itemVariants}>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
             <TabsTrigger value="dashboard">{t('tax.tabs.dashboard')}</TabsTrigger>
             <TabsTrigger value="compliance">{t('tax.tabs.compliance')}</TabsTrigger>
             <TabsTrigger value="declarations">{t('tax.tabs.declarations')}</TabsTrigger>
             <TabsTrigger value="calendar">{t('tax.tabs.calendar')}</TabsTrigger>
             <TabsTrigger value="alerts">{t('tax.tabs.alerts')}</TabsTrigger>
             <TabsTrigger value="obligations">{t('tax.tabs.obligations')}</TabsTrigger>
+            <TabsTrigger value="vat-validator">{t('tax.tabs.vat_validator', 'Vérif. TVA')}</TabsTrigger>
             <TabsTrigger value="new-declaration">{t('tax.tabs.new')}</TabsTrigger>
           </TabsList>
 
@@ -1181,6 +1183,11 @@ const TaxPage: React.FC = () => {
               ))}
             </div>
             )}
+          </TabsContent>
+
+          {/* VAT Validator Tab */}
+          <TabsContent value="vat-validator" className="space-y-6">
+            <VATNumberValidator />
           </TabsContent>
 
           {/* New Declaration Tab */}

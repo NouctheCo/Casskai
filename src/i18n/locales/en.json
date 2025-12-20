@@ -3403,6 +3403,7 @@
     "inventaire": "Inventory",
     "inventory": "Inventory",
     "invoicing": "Invoicing",
+    "loan_simulator": "Loan Simulator",
     "manageSubscription": "Manage Subscription",
     "management": "Management",
     "modules": "modules",
@@ -3415,6 +3416,7 @@
     "security": "Security & Privacy",
     "settings": "Settings",
     "tax": "Tax",
+    "tax_simulator": "Tax Simulator IS/IR",
     "taxes": "Taxes",
     "thirdParties": "Third Parties",
     "thirdparties": "Third Parties",
@@ -3491,6 +3493,7 @@
       "calendar": "Calendar",
       "alerts": "Alerts",
       "obligations": "Obligations",
+      "vat_validator": "VAT Check",
       "new": "New"
     },
     "metrics": {
@@ -4510,5 +4513,27 @@
     "success_description": "Redirecting to dashboard...",
     "error_title": "Error",
     "back_home": "Back to home"
+  },
+  "tools": {
+    "taxSimulator": {
+      "title": "Tax Simulator IS / IR",
+      "description": "Compare corporate tax and income tax"
+    },
+    "loanSimulator": {
+      "title": "Business Loan Simulator",
+      "description": "Calculate payments and view amortization schedule"
+    },
+    "lateFeeCalculator": {
+      "title": "Late Fee Calculator",
+      "description": "Calculate legal penalties for unpaid invoices"
+    },
+    "vatValidator": {
+      "title": "Intra-Community VAT Checker",
+      "description": "Validate European Union VAT numbers"
+    },
+    "businessIdValidator": {
+      "title": "Business ID Validator",
+      "description": "Validate SIREN, SIRET, BCE and other IDs"
+    }
   }
 }

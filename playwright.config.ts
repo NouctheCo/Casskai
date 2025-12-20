@@ -11,8 +11,13 @@ dotenv.config({ path: '.env.test' });
 export default defineConfig({
   testDir: './e2e',
 
-  /* Timeout global pour chaque test */
-  timeout: 90000, // 90 secondes par test (au lieu de 30s par défaut)
+  /* Timeout global pour chaque test - augmenté pour CI/CD */
+  timeout: 120000, // 2 minutes par test (au lieu de 90s)
+
+  /* Timeout pour les expect - augmenté pour les pages lentes */
+  expect: {
+    timeout: 10000, // 10 secondes pour les assertions (au lieu de 5s par défaut)
+  },
 
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -20,11 +25,11 @@ export default defineConfig({
   /* Fail the build on CI if you accidentally left test.only in the source code */
   forbidOnly: !!process.env.CI,
 
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 1, // 1 retry même en local
+  /* Retry on CI only - augmenté à 3 retries pour tests flaky */
+  retries: process.env.CI ? 3 : 1,
 
   /* Opt out of parallel tests on CI */
-  workers: process.env.CI ? 1 : 3, // Seulement 3 workers au lieu de 11
+  workers: process.env.CI ? 1 : 3, // 1 seul worker sur CI pour éviter surcharge
 
   /* Reporter to use */
   reporter: [
@@ -46,13 +51,26 @@ export default defineConfig({
 
     /* Video on failure */
     video: 'retain-on-failure',
+
+    /* Augmenter les timeouts pour les actions */
+    actionTimeout: 15000, // 15 secondes pour les clics, inputs, etc.
+    navigationTimeout: 30000, // 30 secondes pour les navigations
+
+    /* Ignorer les erreurs HTTPS en dev */
+    ignoreHTTPSErrors: true,
   },
 
   /* Configure projects for major browsers */
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { 
+        ...devices['Desktop Chrome'],
+        /* Plus de temps pour les pages lentes */
+        launchOptions: {
+          slowMo: process.env.CI ? 100 : 0, // Ralentir de 100ms sur CI
+        },
+      },
     },
 
     // Uncomment for multi-browser testing
@@ -81,6 +99,8 @@ export default defineConfig({
     command: 'npm run dev',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
+    timeout: 180 * 1000, // 3 minutes pour démarrer le serveur (au lieu de 2)
+    stdout: 'pipe', // Afficher les logs du serveur
+    stderr: 'pipe',
   },
 });

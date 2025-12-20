@@ -3684,6 +3684,7 @@
     "inventaire": "Inventaire",
     "inventory": "Stock & Inventaire",
     "invoicing": "Facturation",
+    "loan_simulator": "Simulateur de Prêt",
     "management": "Gestion",
     "manageSubscription": "Gérer l'abonnement",
     "modules": "modules",
@@ -3696,6 +3697,7 @@
     "security": "Sécurité & Confidentialité",
     "settings": "Paramètres",
     "tax": "Fiscalité",
+    "tax_simulator": "Simulateur IS/IR",
     "taxes": "Taxes",
     "thirdparties": "Tiers",
     "thirdParties": "Tiers",
@@ -3762,6 +3764,7 @@
       "calendar": "Calendrier",
       "alerts": "Alertes",
       "obligations": "Obligations",
+      "vat_validator": "Vérif. TVA",
       "new": "Nouvelle"
     },
     "metrics": {
@@ -4531,5 +4534,27 @@
     "success_description": "Vous allez être redirigé vers le tableau de bord...",
     "error_title": "Erreur",
     "back_home": "Retour à l'accueil"
+  },
+  "tools": {
+    "taxSimulator": {
+      "title": "Simulateur Fiscal IS / IR",
+      "description": "Comparez l'impôt sur les sociétés et l'impôt sur le revenu"
+    },
+    "loanSimulator": {
+      "title": "Simulateur de Prêt Professionnel",
+      "description": "Calculez vos mensualités et visualisez le tableau d'amortissement"
+    },
+    "lateFeeCalculator": {
+      "title": "Calculateur de Pénalités de Retard",
+      "description": "Calculez les pénalités légales pour factures impayées"
+    },
+    "vatValidator": {
+      "title": "Vérificateur TVA Intracommunautaire",
+      "description": "Validez les numéros de TVA de l'Union Européenne"
+    },
+    "businessIdValidator": {
+      "title": "Validateur d'Identifiant d'Entreprise",
+      "description": "Validez SIREN, SIRET, BCE et autres identifiants"
+    }
   }
 }

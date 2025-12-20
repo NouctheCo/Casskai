@@ -3403,6 +3403,7 @@
     "inventaire": "Inventario",
     "inventory": "Inventario",
     "invoicing": "Facturación",
+    "loan_simulator": "Simulador de Préstamo",
     "manageSubscription": "Gestionar suscripción",
     "management": "Gestión",
     "modules": "módulos",
@@ -3415,6 +3416,7 @@
     "security": "Seguridad y Privacidad",
     "settings": "Configuración",
     "tax": "Impuestos",
+    "tax_simulator": "Simulador Fiscal IS/IR",
     "taxes": "Impuestos",
     "thirdParties": "Terceros",
     "thirdparties": "Terceros",
@@ -3496,6 +3498,7 @@
       "calendar": "Calendario",
       "alerts": "Alertas",
       "obligations": "Obligaciones",
+      "vat_validator": "Verif. IVA",
       "new": "Nueva"
     },
     "metrics": {
@@ -4515,5 +4518,27 @@
     "success_description": "Redirigiendo al panel de control...",
     "error_title": "Error",
     "back_home": "Volver al inicio"
+  },
+  "tools": {
+    "taxSimulator": {
+      "title": "Simulador Fiscal IS / IR",
+      "description": "Compare el impuesto de sociedades y el impuesto sobre la renta"
+    },
+    "loanSimulator": {
+      "title": "Simulador de Préstamo Empresarial",
+      "description": "Calcule pagos y visualice el cuadro de amortización"
+    },
+    "lateFeeCalculator": {
+      "title": "Calculadora de Penalizaciones por Retraso",
+      "description": "Calcule las penalizaciones legales por facturas impagadas"
+    },
+    "vatValidator": {
+      "title": "Verificador de IVA Intracomunitario",
+      "description": "Valide números de IVA de la Unión Europea"
+    },
+    "businessIdValidator": {
+      "title": "Validador de Identificación Empresarial",
+      "description": "Valide SIREN, SIRET, BCE y otros identificadores"
+    }
   }
 }
