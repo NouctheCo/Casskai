@@ -43,6 +43,8 @@ jobs:
       # Mock Supabase credentials for tests that need them
       TEST_SUPABASE_URL: https://mock.supabase.co
       TEST_SUPABASE_SERVICE_ROLE_KEY: mock-service-role-key
+      # Skip RGPD tests on CI (require real database)
+      RUN_RGPD_TESTS: false
 
     steps:
       - name: Checkout code

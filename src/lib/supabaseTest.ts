@@ -20,7 +20,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const testUrl = import.meta.env.TEST_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL;
+let testUrl = import.meta.env.TEST_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL;
 
 // ⚠️ FALLBACK: Si import.meta.env ne charge pas la variable, on utilise process.env
 // (Vitest parfois ne charge pas les variables VITE_ correctement)
@@ -42,10 +42,13 @@ console.log('🧪 Test Supabase config:', {
   keyPrefix: `${testKey?.substring(0, 20)  }...`
 });
 
+// Si les variables ne sont pas définies, exporter un client mock
 if (!testUrl || !testKey) {
-  console.warn('⚠️  TEST_SUPABASE_URL or TEST_SUPABASE_SERVICE_ROLE_KEY not found - RGPD tests will be skipped');
-  // Export a mock client that will cause tests to skip gracefully
-  throw new Error('Missing TEST_SUPABASE_URL or TEST_SUPABASE_SERVICE_ROLE_KEY in .env - Tests will be skipped');
+  console.warn('⚠️  TEST_SUPABASE_URL or TEST_SUPABASE_SERVICE_ROLE_KEY not found - Using mock client');
+  
+  // Utiliser des valeurs par défaut pour permettre l'import sans erreur
+  testUrl = 'https://mock.supabase.co';
+  testKey = 'mock-key-for-skipped-tests';
 }
 
 export const supabaseTest = createClient(testUrl, testKey, {
