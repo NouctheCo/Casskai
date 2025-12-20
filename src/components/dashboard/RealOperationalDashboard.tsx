@@ -4,9 +4,10 @@
  * Tous droits réservés - All rights reserved
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePageVisibility } from '@/hooks/usePageVisibility';
 import {
   LineChart,
   Line,
@@ -52,37 +53,59 @@ export const RealOperationalDashboard: React.FC = () => {
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisResult | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  
+  // Refs pour éviter les rechargements multiples
+  const hasInitializedRef = useRef(false);
+  const reloadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 🎯 NOUVEAU: Hook pour synchronisation temps réel des KPIs
-  useKpiRefresh(currentCompany?.id, {
-    onCacheInvalidated: async () => {
-      // Le cache a été invalidé, recharger les KPIs en arrière-plan
-      if (currentCompany?.id) {
-        try {
-          const data = await realDashboardKpiService.calculateRealKPIs(currentCompany.id);
-          setKpiData(data);
-          setLastUpdate(new Date());
-          // Recharger aussi l'analyse IA avec les nouvelles données
-          await loadAIAnalysis(data);
-        } catch (error) {
-          console.error('[RealOperationalDashboard] Erreur rafraîchissement KPI:', error);
+  // 🎯 OPTIMISATION: Détecter quand l'utilisateur revient sur la page
+  usePageVisibility({
+    onVisible: () => {
+      // Seulement recharger si les données ont une certaine ancienneté
+      if (lastUpdate) {
+        const ageMs = Date.now() - lastUpdate.getTime();
+        const maxAge = 10 * 60 * 1000; // 10 minutes = rechargement recommandé
+        
+        if (ageMs > maxAge) {
+          console.log('[Dashboard] Données trop anciennes, rechargement recommandé');
+          handleRefresh();
+        } else {
+          console.log('[Dashboard] Données récentes, pas de rechargement');
         }
       }
     },
+    reloadDelay: 300,
+  });
+
+  // 🎯 OPTIMISATION: Hook pour synchronisation temps réel des KPIs
+  const handleCacheInvalidated = useCallback(async () => {
+    // Le cache a été invalidé, recharger les KPIs en arrière-plan
+    if (currentCompany?.id) {
+      try {
+        const data = await realDashboardKpiService.calculateRealKPIs(currentCompany.id);
+        setKpiData(data);
+        setLastUpdate(new Date());
+        // Recharger aussi l'analyse IA avec les nouvelles données
+        await loadAIAnalysis(data);
+      } catch (error) {
+        console.error('[RealOperationalDashboard] Erreur rafraîchissement KPI:', error);
+      }
+    }
+  }, [currentCompany?.id]);
+
+  useKpiRefresh(currentCompany?.id, {
+    onCacheInvalidated: handleCacheInvalidated,
     onError: (event) => {
       console.error('[RealOperationalDashboard] Erreur KPI:', event.message);
     },
     subscribeToRealtime: true,
   });
 
-  useEffect(() => {
-    if (currentCompany?.id) {
-      loadDashboardData();
-    }
-  }, [currentCompany?.id]);
-
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     if (!currentCompany?.id) return;
+
+    // 🎯 OPTIMISATION: Éviter les rechargements multiples simultanés
+    if (loading) return;
 
     setLoading(true);
     try {
@@ -98,7 +121,7 @@ export const RealOperationalDashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentCompany?.id, loading]);
 
   const loadAIAnalysis = async (data: RealKPIData) => {
     if (!currentCompany) return;
@@ -118,11 +141,38 @@ export const RealOperationalDashboard: React.FC = () => {
     }
   };
 
-  const handleRefresh = async () => {
+  // 🎯 OPTIMISATION: Initialisation unique au changement de compagnie
+  useEffect(() => {
+    // Cleanup des timers précédents
+    if (reloadTimeoutRef.current) {
+      clearTimeout(reloadTimeoutRef.current);
+    }
+
+    // Charger les données pour la nouvelle compagnie
+    if (currentCompany?.id && !hasInitializedRef.current) {
+      hasInitializedRef.current = true;
+      loadDashboardData();
+    } else if (currentCompany?.id) {
+      // Compagnie changée - réinitialiser les refs et recharger
+      hasInitializedRef.current = true;
+      loadDashboardData();
+    }
+
+    return () => {
+      if (reloadTimeoutRef.current) {
+        clearTimeout(reloadTimeoutRef.current);
+      }
+    };
+  }, [currentCompany?.id, loadDashboardData]);
+
+  const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await loadDashboardData();
-    setRefreshing(false);
-  };
+    try {
+      await loadDashboardData();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [loadDashboardData]);
 
   if (loading || !kpiData) {
     return (

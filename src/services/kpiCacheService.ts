@@ -26,6 +26,18 @@ export interface KpiEvent {
 }
 
 /**
+ * Options pour le cache KPI
+ */
+export interface KpiCacheOptions {
+  /** TTL en millisecondes (défaut: 5 min) */
+  cacheTTL?: number;
+  /** Recharger en arrière-plan après ce délai (défaut: 4 min 30s) */
+  revalidateAfter?: number;
+  /** Délai de debounce pour éviter rechargements multiples (défaut: 500ms) */
+  debounceDelay?: number;
+}
+
+/**
  * Service centralisé pour gérer:
  * 1. Le cache des KPIs
  * 2. Les subscriptions temps réel Supabase
@@ -39,6 +51,10 @@ export class KpiCacheService {
   private eventListeners = new Set<KpiEventListener>();
   private subscriptions = new Map<string, RealtimeChannel>();
   private CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  private REVALIDATE_AFTER = 4.5 * 60 * 1000; // 4.5 minutes (stale-while-revalidate)
+  private DEBOUNCE_DELAY = 500; // 500ms
+  private debounceTimers = new Map<string, NodeJS.Timeout>();
+  private isRevalidating = new Map<string, boolean>();
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
 
