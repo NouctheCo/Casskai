@@ -57,7 +57,7 @@ export const BusinessIdValidator: React.FC<{ className?: string }> = ({ classNam
   // Valide l'identifiant
   const validate = async () => {
     if (!businessId.trim()) {
-      alert('Veuillez saisir un identifiant');
+      console.warn('Veuillez saisir un identifiant');
       return;
     }
 
@@ -87,7 +87,7 @@ export const BusinessIdValidator: React.FC<{ className?: string }> = ({ classNam
     } catch (error) {
       setResult({
         isValid: false,
-        error: 'Erreur lors de la validation : ' + (error instanceof Error ? error.message : String(error))
+        error: `Erreur lors de la validation : ${error instanceof Error ? error.message : String(error)}`
       });
     } finally {
       setIsValidating(false);
@@ -101,7 +101,7 @@ export const BusinessIdValidator: React.FC<{ className?: string }> = ({ classNam
 
   // Export preuve
   const exportProof = () => {
-    alert('Export PDF - Fonctionnalité à venir');
+    console.warn('Export PDF - Fonctionnalité à venir');
   };
 
   return (

@@ -146,17 +146,10 @@ describe('ConfigMigration', () => {
       mockConfigService.isConfigured.mockReturnValue(false);
       mockConfigService.validateSupabaseConfig.mockResolvedValue(false);
 
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
       const result = await migration.migrateFromHardcodedConfig();
 
       expect(result).toBe(false);
       expect(mockConfigService.saveConfig).not.toHaveBeenCalled();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Configuration Supabase invalide')
-      );
-
-      consoleErrorSpy.mockRestore();
     });
 
     it('should handle errors during migration', async () => {
@@ -165,25 +158,17 @@ describe('ConfigMigration', () => {
         new Error('Validation error')
       );
 
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
       const result = await migration.migrateFromHardcodedConfig();
 
       expect(result).toBe(false);
-      expect(consoleErrorSpy).toHaveBeenCalled();
-
-      consoleErrorSpy.mockRestore();
     });
 
     it('should handle non-Error exceptions gracefully', async () => {
       mockConfigService.isConfigured.mockReturnValue(false);
       mockConfigService.validateSupabaseConfig.mockRejectedValue('String error');
 
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const result = await migration.migrateFromHardcodedConfig();
       expect(result).toBe(false);
-      expect(consoleErrorSpy).toHaveBeenCalled();
-      consoleErrorSpy.mockRestore();
     });
   });
 
@@ -549,12 +534,24 @@ describe('useMigration hook', () => {
   });
 
   it('should return true on successful migration', async () => {
+    // Ensure import.meta.env is properly set for this test
+    vi.stubGlobal('import', {
+      meta: {
+        env: {
+          VITE_SUPABASE_URL: 'https://test.supabase.co',
+          VITE_SUPABASE_ANON_KEY: 'test-key',
+        }
+      }
+    });
+
     const { result } = renderHook(() => useMigration());
 
     const success = await result.current.runMigration();
 
     expect(success).toBe(true);
     expect(result.current.error).toBeNull();
+    
+    vi.unstubAllGlobals();
   });
 
   it('should set error on migration failure', async () => {

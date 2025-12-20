@@ -280,7 +280,7 @@ export function validateBusinessId(id: string, countryCode?: string): {
 
   // Autres formats (validation basique)
   const formats = Object.entries(BUSINESS_ID_FORMATS);
-  for (const [key, format] of formats) {
+  for (const [_key, format] of formats) {
     if (format.regex && format.regex.test(cleaned)) {
       return {
         isValid: true,
@@ -318,7 +318,7 @@ export function formatSIRET(siret: string): string {
  * Enrichit un SIREN/SIRET via API INSEE (France uniquement)
  * NOTE: Nécessite une clé API INSEE
  */
-export async function enrichFromINSEE(siret: string): Promise<{
+export async function enrichFromINSEE(_siret: string): Promise<{
   success: boolean;
   data?: {
     denomination: string;
@@ -350,7 +350,7 @@ export async function enrichFromINSEE(siret: string): Promise<{
   } catch (error) {
     return {
       success: false,
-      error: 'Erreur lors de l\'enrichissement : ' + (error instanceof Error ? error.message : String(error))
+      error: `Erreur lors de l'enrichissement : ${error instanceof Error ? error.message : String(error)}`
     };
   }
 }

@@ -24,7 +24,7 @@ import {
   LayoutDashboard, Calculator, Receipt, Landmark, TrendingUp, Scale,
   Handshake, FileSignature, ShoppingCart, Package, FolderKanban,
   Building, Building2, UserCog, BarChart3, Zap, Search, Pin, PinOff,
-  ChevronDown, Sparkles, Shield, DollarSign, TrendingDown
+  ChevronDown, Sparkles, Shield, TrendingDown
 } from 'lucide-react';
 
 interface MenuItem {
