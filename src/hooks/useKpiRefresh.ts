@@ -53,6 +53,7 @@ export function useKpiRefresh(
         return;
       }
 
+      // Marquer comme en cours de rafraîchissement AVANT d'attendre
       isRefreshingRef.current = true;
 
       try {
@@ -71,6 +72,8 @@ export function useKpiRefresh(
           message: error instanceof Error ? error.message : 'Erreur de rafraîchissement',
         });
       } finally {
+        // Intentionnel: réinitialiser après toute opération async complétée
+        // eslint-disable-next-line require-atomic-updates
         isRefreshingRef.current = false;
       }
     },

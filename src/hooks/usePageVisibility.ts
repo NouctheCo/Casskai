@@ -31,7 +31,6 @@ export function usePageVisibility(options: PageVisibilityOptions = {}) {
   } = options;
 
   const isVisibleRef = useRef(!document.hidden);
-  const pendingReloadRef = useRef(false);
 
   const handleVisibilityChange = useCallback(() => {
     const isNowVisible = !document.hidden;
