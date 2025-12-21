@@ -373,7 +373,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
 
       const companies = await getUserCompanies(currentUser.id);
-
+      console.log('[AuthContext] getUserCompanies returned:', companies?.length || 0, 'companies');
       setUserCompanies((companies as Company[]) || []);
 
 

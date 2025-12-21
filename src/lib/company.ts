@@ -19,8 +19,11 @@ import { supabase } from './supabase';
  */
 export const getUserCompanies = async (userId: string) => {
   if (!userId) {
+    console.error('[company.ts] getUserCompanies called with empty userId');
     throw new Error("L'ID de l'utilisateur est requis.");
   }
+
+  console.log('[company.ts] getUserCompanies fetching for user:', userId);
 
   // Étape 1: récupérer les liaisons (sans join) pour éviter toute récursion RLS
   const { data: links, error: linksError } = await supabase
@@ -29,7 +32,7 @@ export const getUserCompanies = async (userId: string) => {
     .eq('user_id', userId);
 
   if (linksError) {
-    console.error("Erreur lors de la récupération des liaisons user_companies:", linksError);
+    console.error("[company.ts] Error fetching user_companies links:", linksError);
 
     // Gestion des erreurs RLS communes
     if (linksError.code === '42P17' ||
@@ -37,7 +40,7 @@ export const getUserCompanies = async (userId: string) => {
         linksError.message?.includes('500') ||
         linksError.message?.includes('Internal Server Error') ||
         linksError.message?.includes('policy')) {
-      console.warn('🔄 RLS/Policy error detected on user_companies, returning empty array for onboarding');
+      console.warn('[company.ts] RLS/Policy error detected on user_companies, returning empty array for onboarding');
       return [];
     }
 
@@ -45,7 +48,12 @@ export const getUserCompanies = async (userId: string) => {
   }
 
   const companyIds = (links || []).map(l => l.company_id).filter(Boolean);
-  if (companyIds.length === 0) return [];
+  console.log('[company.ts] Found company links for user:', companyIds);
+  
+  if (companyIds.length === 0) {
+    console.log('[company.ts] No companies found for user, returning empty array');
+    return [];
+  }
 
   // Étape 2: récupérer les entreprises par leurs IDs (RLS sur companies autorise si relation existe)
   const { data: companies, error: companiesError } = await supabase
