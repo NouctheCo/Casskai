@@ -45,8 +45,6 @@ export function usePageVisibility(options: PageVisibilityOptions = {}) {
 
     if (isNowVisible) {
       // Page devient visible
-      console.log('[PageVisibility] Page devient visible');
-      
       // Attendre un petit délai pour laisser le page focus se stabiliser
       setTimeout(() => {
         if (onVisible && isVisibleRef.current) {
@@ -55,7 +53,6 @@ export function usePageVisibility(options: PageVisibilityOptions = {}) {
       }, reloadDelay);
     } else {
       // Page devient invisible
-      console.log('[PageVisibility] Page devient invisible');
       if (onHidden) {
         onHidden();
       }

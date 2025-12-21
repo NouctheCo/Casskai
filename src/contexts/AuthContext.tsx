@@ -300,11 +300,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     if (hasCompletedInitialCheck.current && currentCompany && onboardingCompleted) {
 
-      
+      // Session déjà valide, ne rien faire pour éviter les reloads
 
-      setUser(currentUser);
+      // Juste s'assurer que l'état utilisateur est à jour
 
-      setIsAuthenticated(true);
+      if (user?.id !== currentUser.id) {
+
+        setUser(currentUser);
+
+      }
+
+      if (!isAuthenticated) {
+
+        setIsAuthenticated(true);
+
+      }
 
       return;
 
@@ -609,10 +619,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
 
-      console.warn('🔐 Auth state change:', event);
-
-
-
       // Update session for all events
 
       setSession(session);
@@ -627,8 +633,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         if (hashParams.get('type') === 'email_confirmation') {
 
-          console.warn('📧 Email confirmation event detected - redirecting to onboarding');
-
           window.history.replaceState(null, '', '/onboarding');
 
         }
@@ -641,19 +645,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       // TOKEN_REFRESHED happens automatically when user returns to tab - should not trigger full session check
 
-      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
+      // Également ignorer SIGNED_IN si on a déjà une session complète pour éviter les reloads
 
-        console.warn(`🔄 Fetching user session due to ${event}`);
+      if (event === 'SIGNED_OUT') {
 
         fetchUserSession(session?.user ?? null);
 
-      } else if (event === 'TOKEN_REFRESHED') {
+      } else if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
 
-        console.warn('♻️  Token refreshed silently - no session refetch needed');
+        // Ne refetch que si on n'a pas encore de session complète
 
-        // Just update the session, don't refetch everything
+        if (!hasCompletedInitialCheck.current) {
+
+          fetchUserSession(session?.user ?? null);
+
+        }
 
       }
+
+      // TOKEN_REFRESHED: ne rien faire, juste mettre à jour la session ci-dessus
 
     });
 

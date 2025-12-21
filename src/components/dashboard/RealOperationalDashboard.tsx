@@ -160,7 +160,8 @@ export const RealOperationalDashboard: React.FC = () => {
         clearTimeout(reloadTimeoutRef.current);
       }
     };
-  }, [currentCompany?.id, loadDashboardData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentCompany?.id]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
