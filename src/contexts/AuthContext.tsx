@@ -676,10 +676,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (response.data.user) {
       auditService.logAuth('LOGIN', response.data.user.id, !response.error);
 
-      // Immediately trigger fetchUserSession to load company data synchronously
+      // Immediately trigger fetchUserSession to load company data
       // This prevents the race condition where the user gets redirected to /onboarding
       // before fetchUserSession has had a chance to run
       if (!response.error) {
+        // ⚠️ CRITICAL: Set checking flag IMMEDIATELY before calling fetchUserSession
+        // Otherwise AuthGuard will redirect to /onboarding before the async function runs
+        setIsCheckingOnboarding(true);
         fetchUserSession(response.data.user);
       }
     }
