@@ -204,18 +204,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 
   const switchCompany = useCallback(async (companyId: string) => {
-    console.log('[AuthContext] switchCompany called with:', companyId);
 
     // Not setting loading here to avoid flicker when switching companies
 
     try {
-      console.log('[AuthContext] Fetching company details...');
       const companyDetails = await getCompanyDetails(companyId);
-      console.log('[AuthContext] Company details fetched:', companyDetails);
 
       if (companyDetails) {
         setCurrentCompany(companyDetails);
-        console.log('[AuthContext] currentCompany state set to:', companyDetails.id, companyDetails.name);
 
         // Conserver les deux clés locales utilisées par les guards (legacy/new)
         localStorage.setItem('casskai_current_company_id', companyId);
@@ -229,7 +225,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         
 
-        console.warn(`Entreprise changée: ${companyDetails.name}`);
+        
 
       } else {
 
@@ -239,7 +235,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     } catch (error) {
 
-      console.error("[AuthContext] Error during switchCompany:", error);
+      
 
       // Ne pas lancer une erreur fatale, juste logger
 
@@ -304,7 +300,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     if (hasCompletedInitialCheck.current && currentCompany && onboardingCompleted) {
 
-      console.log('✅ Session already valid, skipping full check to avoid reload');
+      
 
       setUser(currentUser);
 
@@ -350,7 +346,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         setUserProfile(profile);
 
-        console.log('✅ Profil utilisateur chargé depuis public.users');
+        
 
       }
 
@@ -373,7 +369,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
 
       const companies = await getUserCompanies(currentUser.id);
-      console.log('[AuthContext] getUserCompanies returned:', companies?.length || 0, 'companies');
+      
       setUserCompanies((companies as Company[]) || []);
 
 
@@ -411,16 +407,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         const companyToLoad = companies.find(c => c.id === lastCompanyId) || companies[0];
 
-        console.log('[AuthContext] companyToLoad:', companyToLoad?.id, companyToLoad?.name);
+        
 
 
         if (companyToLoad) {
 
           try {
 
-            console.log('[AuthContext] Calling switchCompany with:', companyToLoad.id);
+            
             await switchCompany(companyToLoad.id);
-            console.log('[AuthContext] switchCompany completed successfully');
+            
 
             // Marquer le check initial comme complété après succès
             // eslint-disable-next-line require-atomic-updates
@@ -428,7 +424,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
           } catch (switchError) {
 
-            console.error("AuthContext | Erreur lors du chargement de l'entreprise, tentative avec la première entreprise:", switchError);
+            
 
             // Essayer avec la première entreprise si celle sélectionnée échoue
 
@@ -436,9 +432,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
               try {
 
-                console.log('[AuthContext] Retrying with first company:', companies[0].id);
+                
                 await switchCompany(companies[0].id);
-                console.log('[AuthContext] Fallback switchCompany succeeded');
+                
 
                 // Marquer le check initial comme complété après succès du fallback
                 // eslint-disable-next-line require-atomic-updates
@@ -476,7 +472,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     } catch (error) {
 
-      console.error("AuthContext | Erreur lors de la récupération des données utilisateur:", error);
+      
 
 
 
@@ -486,7 +482,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (errorMessage.includes('500') || errorMessage.includes('RLS') || errorMessage.includes('policy')) {
 
-        console.warn('🔄 Erreur RLS détectée - redirection vers onboarding');
+        
 
         setOnboardingCompleted(false);
 
@@ -545,7 +541,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (accessToken && type === 'email_confirmation') {
 
-        console.warn('📧 Email confirmation detected, cleaning URL...');
+        
 
         // Clean URL by removing hash parameters
 
@@ -571,7 +567,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (error) {
 
-        console.warn('Session recovery failed, clearing auth data:', error);
+        
 
         // Clear corrupted session data
 
@@ -597,7 +593,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (isEmailConfirmation && session?.user) {
 
-        console.warn('📧 Email confirmed, user will be redirected to onboarding');
+        
 
       }
 

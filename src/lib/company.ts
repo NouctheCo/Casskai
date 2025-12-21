@@ -19,11 +19,10 @@ import { supabase } from './supabase';
  */
 export const getUserCompanies = async (userId: string) => {
   if (!userId) {
-    console.error('[company.ts] getUserCompanies called with empty userId');
+    
     throw new Error("L'ID de l'utilisateur est requis.");
   }
 
-  console.log('[company.ts] getUserCompanies fetching for user:', userId);
 
   // Étape 1: récupérer les liaisons (sans join) pour éviter toute récursion RLS
   const { data: links, error: linksError } = await supabase
@@ -32,7 +31,6 @@ export const getUserCompanies = async (userId: string) => {
     .eq('user_id', userId);
 
   if (linksError) {
-    console.error("[company.ts] Error fetching user_companies links:", linksError);
 
     // Gestion des erreurs RLS communes
     if (linksError.code === '42P17' ||
@@ -40,7 +38,7 @@ export const getUserCompanies = async (userId: string) => {
         linksError.message?.includes('500') ||
         linksError.message?.includes('Internal Server Error') ||
         linksError.message?.includes('policy')) {
-      console.warn('[company.ts] RLS/Policy error detected on user_companies, returning empty array for onboarding');
+      
       return [];
     }
 
@@ -48,10 +46,8 @@ export const getUserCompanies = async (userId: string) => {
   }
 
   const companyIds = (links || []).map(l => l.company_id).filter(Boolean);
-  console.log('[company.ts] Found company links for user:', companyIds);
   
   if (companyIds.length === 0) {
-    console.log('[company.ts] No companies found for user, returning empty array');
     return [];
   }
 
@@ -62,7 +58,6 @@ export const getUserCompanies = async (userId: string) => {
     .in('id', companyIds);
 
   if (companiesError) {
-    console.error('Erreur lors de la récupération des entreprises:', companiesError);
 
     // Gestion des erreurs RLS communes
     if (companiesError.code === '42P17' ||
@@ -70,7 +65,7 @@ export const getUserCompanies = async (userId: string) => {
         companiesError.message?.includes('500') ||
         companiesError.message?.includes('Internal Server Error') ||
         companiesError.message?.includes('policy')) {
-      console.warn('🔄 RLS/Policy error detected on companies, returning empty array for onboarding');
+      
       return [];
     }
 
@@ -105,11 +100,10 @@ export const getUserCompanies = async (userId: string) => {
  */
 export const getCompanyDetails = async (companyId: string) => {
   if (!companyId) {
-    console.error('[company.ts] getCompanyDetails called with empty companyId');
+    
     throw new Error("L'ID de l'entreprise est requis.");
   }
 
-  console.log('[company.ts] getCompanyDetails fetching company:', companyId);
   
   const { data, error } = await supabase
     .from('companies')
@@ -117,16 +111,12 @@ export const getCompanyDetails = async (companyId: string) => {
     .eq('id', companyId);
 
   if (error) {
-    console.error("[company.ts] Error fetching company details:", error);
     throw new Error("Impossible de récupérer les détails de l'entreprise.");
   }
 
   if (!data || data.length === 0) {
-    console.error('[company.ts] Company not found for id:', companyId);
     throw new Error("Entreprise non trouvée.");
   }
-
-  console.log('[company.ts] Company details retrieved:', data[0].id, data[0].name);
   return data[0]; // Retourner le premier résultat au lieu d'utiliser .single()
 };
 

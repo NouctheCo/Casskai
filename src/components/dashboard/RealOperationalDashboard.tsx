@@ -66,10 +66,7 @@ export const RealOperationalDashboard: React.FC = () => {
         const maxAge = 10 * 60 * 1000; // 10 minutes = rechargement recommandé
         
         if (ageMs > maxAge) {
-          console.log('[Dashboard] Données trop anciennes, rechargement recommandé');
           handleRefresh();
-        } else {
-          console.log('[Dashboard] Données récentes, pas de rechargement');
         }
       }
     },
@@ -87,7 +84,7 @@ export const RealOperationalDashboard: React.FC = () => {
         // Recharger aussi l'analyse IA avec les nouvelles données
         await loadAIAnalysis(data);
       } catch (error) {
-        console.error('[RealOperationalDashboard] Erreur rafraîchissement KPI:', error);
+        // swallow errors silently in UI; handled by services
       }
     }
   }, [currentCompany?.id]);
@@ -102,29 +99,23 @@ export const RealOperationalDashboard: React.FC = () => {
 
   const loadDashboardData = useCallback(async () => {
     if (!currentCompany?.id) {
-      console.log('[RealOperationalDashboard] No currentCompany.id, skipping load');
       return;
     }
 
     setLoading(true);
-    console.log('[RealOperationalDashboard] Starting data load for company:', currentCompany.id);
     
     try {
       // Charger les KPIs réels
-      console.log('[RealOperationalDashboard] Calling calculateRealKPIs...');
       const data = await realDashboardKpiService.calculateRealKPIs(currentCompany.id);
-      console.log('[RealOperationalDashboard] KPI data loaded:', data);
       
       setKpiData(data);
       setLastUpdate(new Date());
 
       // Charger l'analyse IA en parallèle
-      console.log('[RealOperationalDashboard] Loading AI analysis...');
       loadAIAnalysis(data);
     } catch (error) {
-      console.error('[RealOperationalDashboard] Error loading dashboard data:', error);
+      // swallow errors silently in UI; handled by services
     } finally {
-      console.log('[RealOperationalDashboard] Finished loading');
       setLoading(false);
     }
   }, [currentCompany?.id]);
@@ -149,7 +140,6 @@ export const RealOperationalDashboard: React.FC = () => {
 
   // 🎯 OPTIMISATION: Initialisation unique au changement de compagnie
   useEffect(() => {
-    console.log('[RealOperationalDashboard] useEffect triggered, currentCompany:', currentCompany?.id);
     
     // Cleanup des timers précédents
     if (reloadTimeoutRef.current) {
@@ -160,10 +150,9 @@ export const RealOperationalDashboard: React.FC = () => {
     // Note: Ne pas utiliser hasInitializedRef car cela empêche le rechargement
     // quand l'utilisateur arrive pour la première fois ou change de compagnie
     if (currentCompany?.id) {
-      console.log('[RealOperationalDashboard] Calling loadDashboardData');
       loadDashboardData();
     } else {
-      console.log('[RealOperationalDashboard] No currentCompany, skipping load');
+      // no company available; skip initial load
     }
 
     return () => {
