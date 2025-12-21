@@ -54,8 +54,7 @@ export const RealOperationalDashboard: React.FC = () => {
   const [aiLoading, setAiLoading] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   
-  // Refs pour éviter les rechargements multiples
-  const hasInitializedRef = useRef(false);
+  // Ref pour éviter les rechargements multiples de timers
   const reloadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // 🎯 OPTIMISATION: Détecter quand l'utilisateur revient sur la page
@@ -148,13 +147,10 @@ export const RealOperationalDashboard: React.FC = () => {
       clearTimeout(reloadTimeoutRef.current);
     }
 
-    // Charger les données pour la nouvelle compagnie
-    if (currentCompany?.id && !hasInitializedRef.current) {
-      hasInitializedRef.current = true;
-      loadDashboardData();
-    } else if (currentCompany?.id) {
-      // Compagnie changée - réinitialiser les refs et recharger
-      hasInitializedRef.current = true;
+    // Charger les données pour la compagnie actuelle
+    // Note: Ne pas utiliser hasInitializedRef car cela empêche le rechargement
+    // quand l'utilisateur arrive pour la première fois ou change de compagnie
+    if (currentCompany?.id) {
       loadDashboardData();
     }
 
