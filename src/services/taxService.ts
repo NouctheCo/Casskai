@@ -931,12 +931,43 @@ export const taxService = {
    */
   async createObligation(enterpriseId: string, data: TaxObligationFormData): Promise<{ data: TaxObligation | null; error: Error | null }> {
     try {
+      // Calculate next due date based on frequency
+      const now = new Date();
+      let nextDueDate = new Date(now.getFullYear(), now.getMonth(), data.due_day);
+      
+      // If the due day has passed this month, move to next period
+      if (nextDueDate < now) {
+        switch (data.frequency) {
+          case 'monthly':
+            nextDueDate = new Date(now.getFullYear(), now.getMonth() + 1, data.due_day);
+            break;
+          case 'quarterly':
+            nextDueDate = new Date(now.getFullYear(), now.getMonth() + 3, data.due_day);
+            break;
+          case 'annual':
+            nextDueDate = new Date(now.getFullYear() + 1, now.getMonth(), data.due_day);
+            break;
+          default:
+            // one_time: keep as is
+            break;
+        }
+      }
+
       const { data: obligation, error } = await supabase
         .from('tax_obligations')
         .insert({
-          enterprise_id: enterpriseId,
-          ...data,
+          company_id: enterpriseId,
+          tax_type_id: data.tax_type_id,
+          tax_type_name: data.tax_type_id.toUpperCase(), // Will be improved with lookup
+          frequency: data.frequency,
+          due_day: data.due_day,
+          advance_notice_days: data.advance_notice_days,
+          next_due_date: nextDueDate.toISOString().split('T')[0],
           is_active: true,
+          auto_generate: data.auto_generate,
+          requires_approval: data.requires_approval,
+          email_notifications: data.email_notifications,
+          notification_emails: data.notification_emails || [],
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
@@ -944,7 +975,28 @@ export const taxService = {
         .single();
 
       if (error) throw error;
-      return { data: obligation, error: null };
+      
+      // Transform to match TypeScript interface
+      const result: TaxObligation = {
+        id: obligation.id,
+        tax_type_id: obligation.tax_type_id,
+        tax_type_name: obligation.tax_type_name,
+        enterprise_id: obligation.company_id,
+        frequency: obligation.frequency,
+        due_day: obligation.due_day,
+        advance_notice_days: obligation.advance_notice_days,
+        next_due_date: obligation.next_due_date,
+        next_declaration_id: obligation.next_declaration_id,
+        is_active: obligation.is_active,
+        auto_generate: obligation.auto_generate,
+        requires_approval: obligation.requires_approval,
+        email_notifications: obligation.email_notifications,
+        notification_emails: obligation.notification_emails || [],
+        created_at: obligation.created_at,
+        updated_at: obligation.updated_at
+      };
+      
+      return { data: result, error: null };
     } catch (error) {
       console.error('Error creating obligation:', error);
       return { data: null, error: error as Error };
@@ -956,18 +1008,53 @@ export const taxService = {
    */
   async updateObligation(obligationId: string, data: Partial<TaxObligationFormData>): Promise<{ data: TaxObligation | null; error: Error | null }> {
     try {
+      const updateData: any = {
+        updated_at: new Date().toISOString(),
+      };
+
+      // Only include fields that are provided
+      if (data.tax_type_id !== undefined) {
+        updateData.tax_type_id = data.tax_type_id;
+        updateData.tax_type_name = data.tax_type_id.toUpperCase();
+      }
+      if (data.frequency !== undefined) updateData.frequency = data.frequency;
+      if (data.due_day !== undefined) updateData.due_day = data.due_day;
+      if (data.advance_notice_days !== undefined) updateData.advance_notice_days = data.advance_notice_days;
+      if (data.auto_generate !== undefined) updateData.auto_generate = data.auto_generate;
+      if (data.requires_approval !== undefined) updateData.requires_approval = data.requires_approval;
+      if (data.email_notifications !== undefined) updateData.email_notifications = data.email_notifications;
+      if (data.notification_emails !== undefined) updateData.notification_emails = data.notification_emails;
+
       const { data: obligation, error } = await supabase
         .from('tax_obligations')
-        .update({
-          ...data,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq('id', obligationId)
         .select()
         .single();
 
       if (error) throw error;
-      return { data: obligation, error: null };
+      
+      // Transform to match TypeScript interface
+      const result: TaxObligation = {
+        id: obligation.id,
+        tax_type_id: obligation.tax_type_id,
+        tax_type_name: obligation.tax_type_name,
+        enterprise_id: obligation.company_id,
+        frequency: obligation.frequency,
+        due_day: obligation.due_day,
+        advance_notice_days: obligation.advance_notice_days,
+        next_due_date: obligation.next_due_date,
+        next_declaration_id: obligation.next_declaration_id,
+        is_active: obligation.is_active,
+        auto_generate: obligation.auto_generate,
+        requires_approval: obligation.requires_approval,
+        email_notifications: obligation.email_notifications,
+        notification_emails: obligation.notification_emails || [],
+        created_at: obligation.created_at,
+        updated_at: obligation.updated_at
+      };
+      
+      return { data: result, error: null };
     } catch (error) {
       console.error('Error updating obligation:', error);
       return { data: null, error: error as Error };
