@@ -276,43 +276,75 @@ class BankImportService {
     const lines = qifContent.split('\n');
     
     let currentTransaction: Partial<BankTransaction> = {};
+    let inTransactionBlock = false;
     
     for (const line of lines) {
       const trimmed = line.trim();
-      if (!trimmed) continue;
+      
+      // Ignorer les lignes vides et l'entête
+      if (!trimmed || trimmed.startsWith('!')) {
+        inTransactionBlock = trimmed.startsWith('!Type:');
+        continue;
+      }
       
       const code = trimmed.charAt(0);
-      const value = trimmed.substring(1);
+      const value = trimmed.substring(1).trim();
       
       switch (code) {
         case 'D': // Date
-          currentTransaction.transaction_date = this.parseQIFDate(value);
+          try {
+            currentTransaction.transaction_date = this.parseQIFDate(value);
+          } catch (error) {
+            console.warn(`Erreur parsing date QIF: ${value}`, error);
+          }
           break;
         case 'T': // Amount
         case 'U': // Amount (alternative)
-          currentTransaction.amount = parseFloat(value.replace(',', '.'));
+          try {
+            const cleanValue = value.replace(/[^\d.,\-]/g, '').replace(',', '.');
+            const amount = parseFloat(cleanValue);
+            if (!isNaN(amount)) {
+              currentTransaction.amount = amount;
+            }
+          } catch (error) {
+            console.warn(`Erreur parsing montant QIF: ${value}`, error);
+          }
           break;
         case 'P': // Payee/Description
+          currentTransaction.description = value || currentTransaction.description;
+          break;
+        case 'L': // Category (often payee in some QIF formats)
+          if (!currentTransaction.description) {
+            currentTransaction.description = value;
+          }
+          break;
         case 'M': // Memo
-          currentTransaction.description = `${currentTransaction.description || ''  } ${  value}`;
+          currentTransaction.description = currentTransaction.description 
+            ? `${currentTransaction.description} - ${value}` 
+            : value;
           break;
         case 'N': // Number/Reference
           currentTransaction.reference = value;
           break;
+        case 'C': // Cleared status
+          // C = cleared, * = pending, etc
+          break;
         case '^': // End of transaction
-          if (currentTransaction.transaction_date && currentTransaction.amount !== undefined) {
+          if (currentTransaction.transaction_date && currentTransaction.amount !== undefined && currentTransaction.amount !== 0) {
             transactions.push({
               bank_account_id: accountId,
               company_id: companyId,
               transaction_date: currentTransaction.transaction_date,
               amount: currentTransaction.amount,
               currency: 'EUR',
-              description: (currentTransaction.description || '').trim(),
+              description: (currentTransaction.description || 'Transaction sans description').trim(),
               reference: currentTransaction.reference,
               reconciled: false,
               imported_from: 'qif',
               raw_data: { original: currentTransaction }
             } as BankTransaction);
+          } else if (!currentTransaction.transaction_date || currentTransaction.amount === undefined) {
+            console.warn('Transaction QIF incomplète (date ou montant manquant)', currentTransaction);
           }
           currentTransaction = {};
           break;
@@ -493,22 +525,59 @@ class BankImportService {
   }
 
   private parseQIFDate(qifDate: string): string {
-    // QIF date format: MM/DD/YYYY ou DD/MM/YY
-    const parts = qifDate.split('/');
+    // QIF date formats:
+    // - MM/DD/YYYY (US format)
+    // - DD/MM/YYYY (EU format)
+    // - DD/MM/YY (2-digit year)
+    // - YYYYMMDD
+    
+    const trimmed = qifDate.trim();
+    
+    // Format YYYYMMDD
+    if (/^\d{8}$/.test(trimmed)) {
+      const year = trimmed.substring(0, 4);
+      const month = trimmed.substring(4, 6);
+      const day = trimmed.substring(6, 8);
+      return `${year}-${month}-${day}`;
+    }
+    
+    // Format avec slashes: MM/DD/YYYY ou DD/MM/YYYY ou DD/MM/YY
+    const parts = trimmed.split('/');
     if (parts.length === 3) {
-      const [first, second, yearPart] = parts;
+      let first = parseInt(parts[0], 10);
+      let second = parseInt(parts[1], 10);
+      let yearPart = parts[2];
       
-      // Assume DD/MM format for European banks
-      const day = first.padStart(2, '0');
-      const month = second.padStart(2, '0');
+      // Déterminer format: si le premier nombre > 12, c'est obligatoirement DD
+      // Sinon, on assume DD/MM (format EU par défaut)
+      let day: number;
+      let month: number;
+      
+      if (first > 12) {
+        // C'est DD/MM
+        day = first;
+        month = second;
+      } else if (second > 12) {
+        // C'est MM/DD
+        month = first;
+        day = second;
+      } else {
+        // Ambiguë, on assume DD/MM (format EU, plus courant en Europe)
+        day = first;
+        month = second;
+      }
       
       // Handle 2-digit years
       let year = yearPart;
       if (yearPart.length === 2) {
-        year = parseInt(yearPart) > 50 ? `19${yearPart}` : `20${yearPart}`;
+        const yearNum = parseInt(yearPart, 10);
+        year = yearNum > 50 ? `19${yearPart}` : `20${yearPart}`;
       }
       
-      return `${year}-${month}-${day}`;
+      const monthStr = month.toString().padStart(2, '0');
+      const dayStr = day.toString().padStart(2, '0');
+      
+      return `${year}-${monthStr}-${dayStr}`;
     }
     
     throw new Error(`Format de date QIF invalide: ${qifDate}`);

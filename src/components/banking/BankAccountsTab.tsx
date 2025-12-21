@@ -41,7 +41,10 @@ export const BankAccountsTab: React.FC<BankAccountsTabProps> = ({
         // Update existing account
         const { error } = await supabase
           .from('bank_accounts')
-          .update(formData)
+          .update({
+            ...formData,
+            current_balance: formData.initial_balance || 0
+          })
           .eq('id', editingAccount.id);
 
         if (error) throw error;

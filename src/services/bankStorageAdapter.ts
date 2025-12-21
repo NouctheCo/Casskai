@@ -106,18 +106,52 @@ class BankStorageAdapter {
     companyId: string
   ): Promise<ImportResult> {
     const extension = file.name.split('.').pop()?.toLowerCase();
-
+    const text = await file.text();
+    
     let result: ImportResult;
 
-    switch (extension) {
+    // Détection intelligente du format
+    let detectedFormat = extension;
+    
+    // Si aucune extension, essayer de détecter par contenu
+    if (!detectedFormat || !['csv', 'ofx', 'qif'].includes(detectedFormat)) {
+      if (text.includes('OFXHEADER') || text.includes('<OFX>')) {
+        detectedFormat = 'ofx';
+      } else if (text.includes('!Type:') || text.match(/^[DTM]/m)) {
+        detectedFormat = 'qif';
+      } else if (text.includes(',') || text.includes(';')) {
+        detectedFormat = 'csv';
+      } else {
+        return {
+          success: false,
+          message: 'Format de fichier non reconnu. Formats supportés: CSV, OFX, QIF',
+          imported_count: 0,
+          skipped_count: 0,
+          error_count: 1,
+          transactions: [],
+          errors: ['Format de fichier non reconnu']
+        };
+      }
+    }
+
+    // Créer un blob avec le bon type MIME
+    const mimeTypes: Record<string, string> = {
+      csv: 'text/csv',
+      ofx: 'application/x-ofx',
+      qif: 'text/plain'
+    };
+    
+    const newFile = new File([text], file.name, { type: mimeTypes[detectedFormat] || 'text/plain' });
+
+    switch (detectedFormat) {
       case 'csv':
-        result = await bankImportService.importCSV(file, accountId, companyId);
+        result = await bankImportService.importCSV(newFile, accountId, companyId);
         break;
       case 'ofx':
-        result = await bankImportService.importOFX(file, accountId, companyId);
+        result = await bankImportService.importOFX(newFile, accountId, companyId);
         break;
       case 'qif':
-        result = await bankImportService.importQIF(file, accountId, companyId);
+        result = await bankImportService.importQIF(newFile, accountId, companyId);
         break;
       default:
         result = {

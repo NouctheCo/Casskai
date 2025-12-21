@@ -17,6 +17,7 @@ import { supabase } from '@/lib/supabase';
 import { journalEntriesService } from './journalEntriesService';
 import { JournalType } from './accountingRulesService';
 import AccountMappingService, { UniversalAccountType } from './accountMappingService';
+import { bankAccountBalanceService } from './bankAccountBalanceService';
 import type { JournalEntryPayload } from '@/types/journalEntries.types';
 
 /**
@@ -312,6 +313,10 @@ export async function generateBankTransactionEntry(
     const result = await journalEntriesService.createJournalEntry(payload);
 
     if (result.success && result.data) {
+      // ✅ MISE À JOUR AUTOMATIQUE DU SOLDE BANCAIRE
+      // Dès qu'une écriture banque est créée, on met à jour le solde du compte
+      await bankAccountBalanceService.updateBalancesFromJournalEntry(company_id, result.data.id);
+
       return { success: true, entryId: result.data.id };
     }
 
