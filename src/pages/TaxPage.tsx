@@ -32,13 +32,15 @@ import { FiscalCalendarTab } from '../components/fiscal/FiscalCalendarTab';
 import { AutoVATDeclarationButton } from '../components/fiscal/AutoVATDeclarationButton';
 import { FECExportButton } from '../components/fiscal/FECExportButton';
 import { VATNumberValidator } from '../components/fiscal/VATNumberValidator';
+import { ObligationConfigDialog } from '../components/fiscal/ObligationConfigDialog';
 import {
   TaxDeclaration,
   TaxCalendarEvent,
   TaxAlert,
   TaxObligation,
   TaxDashboardData,
-  TaxFilters
+  TaxFilters,
+  TaxObligationFormData
 } from '../types/tax.types';
 import { 
   FileText, 
@@ -88,6 +90,8 @@ const TaxPage: React.FC = () => {
   const [obligations, setObligations] = useState<TaxObligation[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isObligationDialogOpen, setIsObligationDialogOpen] = useState(false);
+  const [selectedObligation, setSelectedObligation] = useState<TaxObligation | null>(null);
 
   // Animation variants
   const containerVariants = {
@@ -393,8 +397,34 @@ const TaxPage: React.FC = () => {
   };
 
   const handleEditObligation = (obligation: TaxObligation) => {
-    toastUpdated(t('tax.success.editObligation', { name: (obligation as any).name }));
-    // TODO: Open edit modal or navigate to edit form
+    setSelectedObligation(obligation);
+    setIsObligationDialogOpen(true);
+  };
+
+  const handleCreateObligation = () => {
+    setSelectedObligation(null);
+    setIsObligationDialogOpen(true);
+  };
+
+  const handleSaveObligation = async (data: TaxObligationFormData) => {
+    if (!currentEnterprise?.id) return;
+
+    if (selectedObligation) {
+      // Update existing obligation
+      const result = await taxService.updateObligation(selectedObligation.id, data);
+      if (result.error) {
+        throw result.error;
+      }
+    } else {
+      // Create new obligation
+      const result = await taxService.createObligation(currentEnterprise.id, data);
+      if (result.error) {
+        throw result.error;
+      }
+    }
+
+    // Reload obligations
+    await loadObligations();
   };
 
   const handleDeleteObligation = async (obligationId: string, obligationName: string) => {
@@ -404,8 +434,10 @@ const TaxPage: React.FC = () => {
     }
     
     try {
-      // TODO: Implement delete API call
-      // await taxService.deleteObligation(obligationId);
+      const result = await taxService.deleteObligation(obligationId);
+      if (result.error) {
+        throw result.error;
+      }
       await loadObligations();
       toastDeleted('L\'obligation');
     } catch (error) {
@@ -482,7 +514,7 @@ const TaxPage: React.FC = () => {
       >
         <div className="space-y-2">
           <div className="flex items-center space-x-2">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
               {t('tax.title')}
             </h1>
             <Sparkles className="h-6 w-6 text-yellow-500" />
@@ -1075,7 +1107,7 @@ const TaxPage: React.FC = () => {
                   </p>
                   <Button
                     className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                    onClick={() => setActiveTab('dashboard')}
+                    onClick={handleCreateObligation}
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     {t('tax.obligations.setupFirst')}
@@ -1327,6 +1359,14 @@ const TaxPage: React.FC = () => {
           </TabsContent>
         </Tabs>
       </motion.div>
+
+      {/* Obligation Configuration Dialog */}
+      <ObligationConfigDialog
+        open={isObligationDialogOpen}
+        onOpenChange={setIsObligationDialogOpen}
+        obligation={selectedObligation}
+        onSave={handleSaveObligation}
+      />
     </motion.div>
   );
 };

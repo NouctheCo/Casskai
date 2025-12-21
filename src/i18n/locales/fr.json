@@ -3834,7 +3834,34 @@
       "notificationEmails": "Emails de notification",
       "noObligations": "Aucune obligation fiscale configurée",
       "noObligationsDesc": "Configurez vos obligations fiscales pour suivre automatiquement vos échéances TVA, IS, CFE, CVAE, etc.",
-      "setupFirst": "Configurer mes obligations"
+      "setupFirst": "Configurer mes obligations",
+      "create": "Créer une nouvelle obligation fiscale",
+      "edit": "Modifier l'obligation fiscale",
+      "configDesc": "Configurez les obligations fiscales pour suivre automatiquement vos échéances TVA, IS, CFE, CVAE, etc.",
+      "taxType": "Type d'obligation",
+      "selectTaxType": "Sélectionner un type",
+      "dueDayHelp": "Jour du mois où l'obligation est due (1-31)",
+      "advanceNoticeHelp": "Nombre de jours avant l'échéance pour recevoir une alerte",
+      "autoGenerateHelp": "Créer automatiquement les déclarations à venir",
+      "requiresApprovalHelp": "Les déclarations doivent être approuvées avant soumission",
+      "emailNotificationsHelp": "Recevoir des notifications par email",
+      "frequencyTypes": {
+        "monthly": "Mensuelle",
+        "quarterly": "Trimestrielle",
+        "annual": "Annuelle",
+        "oneTime": "Ponctuelle"
+      },
+      "errors": {
+        "selectTaxType": "Veuillez sélectionner un type d'obligation",
+        "invalidDueDay": "Le jour d'échéance doit être entre 1 et 31",
+        "emailExists": "Cet email existe déjà",
+        "invalidEmail": "Email invalide",
+        "saveFailed": "Erreur lors de la sauvegarde de l'obligation"
+      },
+      "success": {
+        "created": "Obligation créée avec succès",
+        "updated": "Obligation mise à jour avec succès"
+      }
     },
     "errors": {
       "loadDashboardData": "Erreur lors du chargement du tableau de bord",

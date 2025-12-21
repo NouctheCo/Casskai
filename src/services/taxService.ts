@@ -927,6 +927,93 @@ export const taxService = {
   getObligations: TaxImpl.getObligations,
 
   /**
+   * Create a new tax obligation
+   */
+  async createObligation(enterpriseId: string, data: TaxObligationFormData): Promise<{ data: TaxObligation | null; error: Error | null }> {
+    try {
+      const { data: obligation, error } = await supabase
+        .from('tax_obligations')
+        .insert({
+          enterprise_id: enterpriseId,
+          ...data,
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { data: obligation, error: null };
+    } catch (error) {
+      console.error('Error creating obligation:', error);
+      return { data: null, error: error as Error };
+    }
+  },
+
+  /**
+   * Update an existing tax obligation
+   */
+  async updateObligation(obligationId: string, data: Partial<TaxObligationFormData>): Promise<{ data: TaxObligation | null; error: Error | null }> {
+    try {
+      const { data: obligation, error } = await supabase
+        .from('tax_obligations')
+        .update({
+          ...data,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', obligationId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { data: obligation, error: null };
+    } catch (error) {
+      console.error('Error updating obligation:', error);
+      return { data: null, error: error as Error };
+    }
+  },
+
+  /**
+   * Delete a tax obligation
+   */
+  async deleteObligation(obligationId: string): Promise<{ success: boolean; error: Error | null }> {
+    try {
+      const { error } = await supabase
+        .from('tax_obligations')
+        .delete()
+        .eq('id', obligationId);
+
+      if (error) throw error;
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('Error deleting obligation:', error);
+      return { success: false, error: error as Error };
+    }
+  },
+
+  /**
+   * Toggle obligation active status
+   */
+  async toggleObligationStatus(obligationId: string, isActive: boolean): Promise<{ success: boolean; error: Error | null }> {
+    try {
+      const { error } = await supabase
+        .from('tax_obligations')
+        .update({
+          is_active: isActive,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', obligationId);
+
+      if (error) throw error;
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('Error toggling obligation status:', error);
+      return { success: false, error: error as Error };
+    }
+  },
+
+  /**
    * Export declarations to CSV format
    */
   exportDeclarationsToCSV(declarations: TaxDeclaration[], filename: string = 'declarations_fiscales'): void {
