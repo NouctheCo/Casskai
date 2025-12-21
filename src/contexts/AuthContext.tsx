@@ -204,22 +204,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 
   const switchCompany = useCallback(async (companyId: string) => {
+    console.log('[AuthContext] switchCompany called with:', companyId);
 
     // Not setting loading here to avoid flicker when switching companies
 
     try {
-
+      console.log('[AuthContext] Fetching company details...');
       const companyDetails = await getCompanyDetails(companyId);
+      console.log('[AuthContext] Company details fetched:', companyDetails);
 
       if (companyDetails) {
-
         setCurrentCompany(companyDetails);
+        console.log('[AuthContext] currentCompany state set to:', companyDetails.id, companyDetails.name);
 
         // Conserver les deux clés locales utilisées par les guards (legacy/new)
         localStorage.setItem('casskai_current_company_id', companyId);
         localStorage.setItem('casskai_current_enterprise', companyId);
-
-
 
         const modules = await getCompanyModules(companyId);
 
@@ -239,7 +239,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     } catch (error) {
 
-      console.error("AuthContext | Erreur lors du changement d'entreprise:", error);
+      console.error("[AuthContext] Error during switchCompany:", error);
 
       // Ne pas lancer une erreur fatale, juste logger
 
@@ -411,13 +411,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         const companyToLoad = companies.find(c => c.id === lastCompanyId) || companies[0];
 
+        console.log('[AuthContext] companyToLoad:', companyToLoad?.id, companyToLoad?.name);
 
 
         if (companyToLoad) {
 
           try {
 
+            console.log('[AuthContext] Calling switchCompany with:', companyToLoad.id);
             await switchCompany(companyToLoad.id);
+            console.log('[AuthContext] switchCompany completed successfully');
 
             // Marquer le check initial comme complété après succès
             // eslint-disable-next-line require-atomic-updates
@@ -433,7 +436,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
               try {
 
+                console.log('[AuthContext] Retrying with first company:', companies[0].id);
                 await switchCompany(companies[0].id);
+                console.log('[AuthContext] Fallback switchCompany succeeded');
 
                 // Marquer le check initial comme complété après succès du fallback
                 // eslint-disable-next-line require-atomic-updates
