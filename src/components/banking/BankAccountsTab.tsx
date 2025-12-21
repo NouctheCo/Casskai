@@ -122,7 +122,7 @@ export const BankAccountsTab: React.FC<BankAccountsTabProps> = ({
           {accounts.length === 0 ? (
             <div className="text-center py-12">
               <CreditCard className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-gray-100 mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                 Aucun compte bancaire
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
@@ -138,7 +138,7 @@ export const BankAccountsTab: React.FC<BankAccountsTabProps> = ({
               {accounts.map((account) => (
                 <div
                   key={account.id}
-                  className="border border-gray-200 dark:border-gray-600 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors dark:bg-gray-900/30"
+                  className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors dark:bg-gray-900/30"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4 flex-1">
@@ -160,13 +160,13 @@ export const BankAccountsTab: React.FC<BankAccountsTabProps> = ({
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
                             <span className="text-gray-500 dark:text-gray-400">IBAN:</span>
-                            <span className="ml-2 font-mono text-gray-900 dark:text-gray-100 dark:text-gray-100">
+                            <span className="ml-2 font-mono text-gray-900 dark:text-gray-100">
                               {formatIBAN(account.iban)}
                             </span>
                           </div>
                           <div>
                             <span className="text-gray-500 dark:text-gray-400">BIC:</span>
-                            <span className="ml-2 font-mono text-gray-900 dark:text-gray-100 dark:text-gray-100">
+                            <span className="ml-2 font-mono text-gray-900 dark:text-gray-100">
                               {account.bic || 'Non renseigné'}
                             </span>
                           </div>
@@ -185,7 +185,7 @@ export const BankAccountsTab: React.FC<BankAccountsTabProps> = ({
                           </div>
                           <div>
                             <span className="text-gray-500 dark:text-gray-400">Devise:</span>
-                            <span className="ml-2 text-gray-900 dark:text-gray-100 dark:text-gray-100">
+                            <span className="ml-2 text-gray-900 dark:text-gray-100">
                               {account.currency || 'EUR'}
                             </span>
                           </div>
