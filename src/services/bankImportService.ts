@@ -28,11 +28,11 @@ export interface BankTransaction {
   description: string;
   reference?: string;
   category?: string;
-  reconciled: boolean;
-  imported_from?: 'csv' | 'ofx' | 'qif' | 'api';
-  raw_data?: any;
+  is_reconciled: boolean;
+  import_source?: 'csv' | 'ofx' | 'qif' | 'api';
   created_at?: string;
   updated_at?: string;
+  status?: 'pending' | 'reconciled' | 'ignored';
 }
 
 export interface BankAccount {
@@ -250,12 +250,12 @@ class BankImportService {
             company_id: companyId,
             transaction_date: this.parseOFXDate(dtPosted),
             amount: parseFloat(trnAmt),
-            currency: 'EUR', // Par défaut, pourrait être extrait du fichier
+            currency: 'EUR',
             description: memo.trim(),
             reference: fitId || undefined,
-            reconciled: false,
-            imported_from: 'ofx',
-            raw_data: { original: match.trim() }
+            is_reconciled: false,
+            import_source: 'ofx',
+            status: 'pending'
           };
           
           transactions.push(transaction);
@@ -267,10 +267,6 @@ class BankImportService {
     
     return transactions;
   }
-
-  /**
-   * Parse les transactions QIF
-   */
   private async parseQIFTransactions(qifContent: string, accountId: string, companyId: string): Promise<BankTransaction[]> {
     const transactions: BankTransaction[] = [];
     const lines = qifContent.split('\n');
@@ -339,9 +335,9 @@ class BankImportService {
               currency: 'EUR',
               description: (currentTransaction.description || 'Transaction sans description').trim(),
               reference: currentTransaction.reference,
-              reconciled: false,
-              imported_from: 'qif',
-              raw_data: { original: currentTransaction }
+              is_reconciled: false,
+              import_source: 'qif',
+              status: 'pending'
             } as BankTransaction);
           } else if (!currentTransaction.transaction_date || currentTransaction.amount === undefined) {
             console.warn('Transaction QIF incomplète (date ou montant manquant)', currentTransaction);
@@ -364,23 +360,38 @@ class BankImportService {
     for (const transaction of transactions) {
       try {
         // Vérifier si la transaction existe déjà
-        const { data: existing } = await supabase
+        const { data: existing, error: checkError } = await supabase
           .from('bank_transactions')
-          .select('id')
+          .select('id', { count: 'exact' })
           .eq('bank_account_id', transaction.bank_account_id)
           .eq('transaction_date', transaction.transaction_date)
           .eq('amount', transaction.amount)
-          .eq('description', transaction.description)
-          .single();
+          .eq('description', transaction.description);
           
-        if (existing) {
+        if (checkError) {
+          console.warn('Erreur vérification doublons:', checkError);
+          // Continuer même si la vérification échoue
+        } else if (existing && existing.length > 0) {
           skipped++;
           continue;
         }
         
         const { error } = await supabase
           .from('bank_transactions')
-          .insert(transaction);
+          .insert([{
+            bank_account_id: transaction.bank_account_id,
+            company_id: transaction.company_id,
+            transaction_date: transaction.transaction_date,
+            amount: transaction.amount,
+            currency: transaction.currency,
+            description: transaction.description,
+            ...(transaction.value_date ? { value_date: transaction.value_date } : {}),
+            ...(transaction.reference ? { reference: transaction.reference } : {}),
+            ...(transaction.category ? { category: transaction.category } : {}),
+            is_reconciled: transaction.is_reconciled || false,
+            import_source: transaction.import_source || 'csv',
+            status: transaction.status || 'pending'
+          }]);
           
         if (error) {
           console.error('Erreur sauvegarde transaction:', error);
@@ -476,8 +487,9 @@ class BankImportService {
         currency: 'EUR',
         description,
         reference,
-        reconciled: false,
-        imported_from: 'csv'
+        is_reconciled: false,
+        import_source: 'csv',
+        status: 'pending'
       };
       
     } catch (error: unknown) {
