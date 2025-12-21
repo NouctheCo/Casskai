@@ -338,7 +338,7 @@ class BankReconciliationService {
       const { error: bankError } = await supabase
         .from('bank_transactions')
         .update({ 
-          reconciled: true,
+          is_reconciled: true,
           updated_at: new Date().toISOString()
         })
         .eq('id', bankTransactionId);
@@ -383,7 +383,7 @@ class BankReconciliationService {
       // Démarquer la transaction bancaire
       await supabase
         .from('bank_transactions')
-        .update({ reconciled: false })
+        .update({ is_reconciled: false })
         .eq('id', bankTransactionId);
 
       // Démarquer l'écriture comptable
@@ -420,7 +420,7 @@ class BankReconciliationService {
       // Requête pour les transactions bancaires
       let bankQuery = supabase
         .from('bank_transactions')
-        .select('id, amount, reconciled')
+        .select('id, amount, is_reconciled')
         .eq('company_id', companyId);
 
       if (accountId) bankQuery = bankQuery.eq('bank_account_id', accountId);
@@ -443,12 +443,12 @@ class BankReconciliationService {
       // Calculs
       const totalBankTx = bankTransactions?.length || 0;
       const totalAccountingEntries = accountingEntries?.length || 0;
-      const matchedTx = bankTransactions?.filter(tx => tx.reconciled).length || 0;
+      const matchedTx = bankTransactions?.filter(tx => tx.is_reconciled).length || 0;
       const matchedAmount = bankTransactions
-        ?.filter(tx => tx.reconciled)
+        ?.filter(tx => tx.is_reconciled)
         .reduce((sum, tx) => sum + Math.abs(tx.amount), 0) || 0;
       const unmatchedAmount = bankTransactions
-        ?.filter(tx => !tx.reconciled)
+        ?.filter(tx => !tx.is_reconciled)
         .reduce((sum, tx) => sum + Math.abs(tx.amount), 0) || 0;
 
       return {
@@ -483,7 +483,7 @@ class BankReconciliationService {
       .select('*')
       .eq('company_id', companyId)
       .eq('bank_account_id', accountId)
-      .eq('reconciled', false);
+      .eq('is_reconciled', false);
 
     if (startDate) query = query.gte('transaction_date', startDate);
     if (endDate) query = query.lte('transaction_date', endDate);
