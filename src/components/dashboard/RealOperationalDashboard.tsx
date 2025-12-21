@@ -106,12 +106,6 @@ export const RealOperationalDashboard: React.FC = () => {
       return;
     }
 
-    // 🎯 OPTIMISATION: Éviter les rechargements multiples simultanés
-    if (loading) {
-      console.log('[RealOperationalDashboard] Already loading, skipping');
-      return;
-    }
-
     setLoading(true);
     console.log('[RealOperationalDashboard] Starting data load for company:', currentCompany.id);
     
@@ -133,7 +127,7 @@ export const RealOperationalDashboard: React.FC = () => {
       console.log('[RealOperationalDashboard] Finished loading');
       setLoading(false);
     }
-  }, [currentCompany?.id, loading]);
+  }, [currentCompany?.id]);
 
   const loadAIAnalysis = async (data: RealKPIData) => {
     if (!currentCompany) return;
