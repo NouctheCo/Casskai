@@ -101,23 +101,36 @@ export const RealOperationalDashboard: React.FC = () => {
   });
 
   const loadDashboardData = useCallback(async () => {
-    if (!currentCompany?.id) return;
+    if (!currentCompany?.id) {
+      console.log('[RealOperationalDashboard] No currentCompany.id, skipping load');
+      return;
+    }
 
     // 🎯 OPTIMISATION: Éviter les rechargements multiples simultanés
-    if (loading) return;
+    if (loading) {
+      console.log('[RealOperationalDashboard] Already loading, skipping');
+      return;
+    }
 
     setLoading(true);
+    console.log('[RealOperationalDashboard] Starting data load for company:', currentCompany.id);
+    
     try {
       // Charger les KPIs réels
+      console.log('[RealOperationalDashboard] Calling calculateRealKPIs...');
       const data = await realDashboardKpiService.calculateRealKPIs(currentCompany.id);
+      console.log('[RealOperationalDashboard] KPI data loaded:', data);
+      
       setKpiData(data);
       setLastUpdate(new Date());
 
       // Charger l'analyse IA en parallèle
+      console.log('[RealOperationalDashboard] Loading AI analysis...');
       loadAIAnalysis(data);
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      console.error('[RealOperationalDashboard] Error loading dashboard data:', error);
     } finally {
+      console.log('[RealOperationalDashboard] Finished loading');
       setLoading(false);
     }
   }, [currentCompany?.id, loading]);
@@ -142,6 +155,8 @@ export const RealOperationalDashboard: React.FC = () => {
 
   // 🎯 OPTIMISATION: Initialisation unique au changement de compagnie
   useEffect(() => {
+    console.log('[RealOperationalDashboard] useEffect triggered, currentCompany:', currentCompany?.id);
+    
     // Cleanup des timers précédents
     if (reloadTimeoutRef.current) {
       clearTimeout(reloadTimeoutRef.current);
@@ -151,7 +166,10 @@ export const RealOperationalDashboard: React.FC = () => {
     // Note: Ne pas utiliser hasInitializedRef car cela empêche le rechargement
     // quand l'utilisateur arrive pour la première fois ou change de compagnie
     if (currentCompany?.id) {
+      console.log('[RealOperationalDashboard] Calling loadDashboardData');
       loadDashboardData();
+    } else {
+      console.log('[RealOperationalDashboard] No currentCompany, skipping load');
     }
 
     return () => {

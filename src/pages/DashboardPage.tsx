@@ -22,6 +22,8 @@ import { Building } from 'lucide-react';
 const DashboardPage = () => {
   const { currentCompany } = useAuth();
 
+  console.log('[DashboardPage] Rendering with currentCompany:', currentCompany?.id, currentCompany?.name);
+
   // Si pas d'entreprise sélectionnée, afficher un message
   if (!currentCompany) {
     return (
