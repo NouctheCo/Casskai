@@ -3563,7 +3563,34 @@
       "notificationEmails": "Notification emails",
       "noObligations": "No tax obligations configured",
       "noObligationsDesc": "Configure your tax obligations to automatically track VAT, Corporate Tax, CFE, CVAE, and other deadlines.",
-      "setupFirst": "Set up my obligations"
+      "setupFirst": "Set up my obligations",
+      "create": "Create a new tax obligation",
+      "edit": "Edit tax obligation",
+      "configDesc": "Configure tax obligations to automatically track your VAT, Corporate Tax, CFE, CVAE, and other deadlines.",
+      "taxType": "Obligation type",
+      "selectTaxType": "Select a type",
+      "dueDayHelp": "Day of the month when the obligation is due (1-31)",
+      "advanceNoticeHelp": "Number of days before the deadline to receive an alert",
+      "autoGenerateHelp": "Automatically create upcoming declarations",
+      "requiresApprovalHelp": "Declarations must be approved before submission",
+      "emailNotificationsHelp": "Receive email notifications",
+      "frequencyTypes": {
+        "monthly": "Monthly",
+        "quarterly": "Quarterly",
+        "annual": "Annual",
+        "oneTime": "One-time"
+      },
+      "errors": {
+        "selectTaxType": "Please select an obligation type",
+        "invalidDueDay": "Due day must be between 1 and 31",
+        "emailExists": "This email already exists",
+        "invalidEmail": "Invalid email",
+        "saveFailed": "Error saving obligation"
+      },
+      "success": {
+        "created": "Obligation created successfully",
+        "updated": "Obligation updated successfully"
+      }
     },
     "errors": {
       "loadDashboardData": "Error loading dashboard",

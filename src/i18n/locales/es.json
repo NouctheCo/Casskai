@@ -3568,7 +3568,34 @@
       "notificationEmails": "Correos de notificación",
       "noObligations": "No hay obligaciones fiscales configuradas",
       "noObligationsDesc": "Configure sus obligaciones fiscales para realizar un seguimiento automático de IVA, Impuesto de Sociedades, CFE, CVAE, etc.",
-      "setupFirst": "Configurar mis obligaciones"
+      "setupFirst": "Configurar mis obligaciones",
+      "create": "Crear una nueva obligación fiscal",
+      "edit": "Modificar obligación fiscal",
+      "configDesc": "Configure las obligaciones fiscales para realizar un seguimiento automático de IVA, Impuesto de Sociedades, CFE, CVAE, etc.",
+      "taxType": "Tipo de obligación",
+      "selectTaxType": "Seleccione un tipo",
+      "dueDayHelp": "Día del mes en que vence la obligación (1-31)",
+      "advanceNoticeHelp": "Número de días antes del vencimiento para recibir una alerta",
+      "autoGenerateHelp": "Crear automáticamente las declaraciones futuras",
+      "requiresApprovalHelp": "Las declaraciones deben aprobarse antes de su envío",
+      "emailNotificationsHelp": "Recibir notificaciones por correo electrónico",
+      "frequencyTypes": {
+        "monthly": "Mensual",
+        "quarterly": "Trimestral",
+        "annual": "Anual",
+        "oneTime": "Una vez"
+      },
+      "errors": {
+        "selectTaxType": "Por favor seleccione un tipo de obligación",
+        "invalidDueDay": "El día de vencimiento debe estar entre 1 y 31",
+        "emailExists": "Este correo electrónico ya existe",
+        "invalidEmail": "Correo electrónico no válido",
+        "saveFailed": "Error al guardar la obligación"
+      },
+      "success": {
+        "created": "Obligación creada con éxito",
+        "updated": "Obligación actualizada con éxito"
+      }
     },
     "errors": {
       "loadDashboardData": "Error al cargar el panel",
