@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface AppConfig {
@@ -65,7 +77,7 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         localStorage.setItem('casskai_config', JSON.stringify(DEFAULT_CONFIG));
       }
     } catch (error) {
-      console.error('❌ Erreur lors du chargement de la configuration:', err);
+      console.error('...', error);
       setError('Erreur lors du chargement de la configuration');
       setConfig(DEFAULT_CONFIG);
     } finally {

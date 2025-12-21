@@ -1,6 +1,18 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 // src/services/accountingService.ts
-import type { AccountPlan, AccountClass, Account, AccountType } from '../types/accounting';
-import { PCG_ACCOUNTS, PCG_CLASSES } from '../data/pcg';
+import type { AccountPlan, Account, AccountType } from '../types/accounting';
+import { PCG_ACCOUNTS, PCG_CLASSES as _PCG_CLASSES } from '../data/pcg';
 import { SYSCOHADA_PLAN } from '../data/syscohada';
 import { supabase } from '../lib/supabase';
 
@@ -223,9 +235,9 @@ export class AccountingService {
       }
       
       return { success: false, accountsCreated: 0, error: 'Standard comptable non supporté' };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur création plan comptable:', error);
-      return { success: false, accountsCreated: 0, error: error.message };
+      return { success: false, accountsCreated: 0, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }
 
@@ -240,24 +252,24 @@ export class AccountingService {
         account_number: account.code,
         account_name: account.name,
         account_type: this.mapPCGTypeToDBType(account.type),
-        account_class: parseInt(account.code.charAt(0)),
+        account_class: parseInt(account.code.charAt(0), 10) || null,
         parent_account_id: null,
         description: account.description || null,
-        is_active: account.isActive || true,
-        normal_balance: this.getAccountNormalBalance(account.type)
+        is_active: account.isActive ?? true,
+        is_detail_account: true
       }));
 
       const { data, error } = await supabase
-        .from('accounts')
+        .from('chart_of_accounts')
         .insert(accountsToCreate)
         .select();
 
       if (error) throw error;
 
       return { success: true, accountsCreated: data?.length || 0 };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur création comptes PCG:', error);
-      return { success: false, accountsCreated: 0, error: error.message };
+      return { success: false, accountsCreated: 0, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }
 
@@ -274,15 +286,13 @@ export class AccountingService {
           accountsToCreate.push({
             company_id: companyId,
             account_number: account.number,
-            name: account.name,
-            type: this.mapSYSCOHADATypeToDBType(account.type),
-            class: parseInt(account.number.charAt(0)),
+            account_name: account.name,
+            account_type: this.mapSYSCOHADATypeToDBType(account.type),
+            account_class: parseInt(account.number.charAt(0), 10) || null,
             parent_account_id: null,
             description: null,
             is_active: true,
-            balance: 0,
-            currency: 'XOF', // Franc CFA par défaut
-            tax_rate: 0
+            is_detail_account: true
           });
 
           // Ajouter les sous-comptes
@@ -291,15 +301,13 @@ export class AccountingService {
               accountsToCreate.push({
                 company_id: companyId,
                 account_number: subAccount.number,
-                name: subAccount.name,
-                type: this.mapSYSCOHADATypeToDBType(subAccount.type),
-                class: parseInt(subAccount.number.charAt(0)),
+                account_name: subAccount.name,
+                account_type: this.mapSYSCOHADATypeToDBType(subAccount.type),
+                account_class: parseInt(subAccount.number.charAt(0), 10) || null,
                 parent_account_id: null, // Sera défini après création du compte parent
                 description: null,
                 is_active: true,
-                balance: 0,
-                currency: 'XOF',
-                tax_rate: 0
+                is_detail_account: true
               });
             }
           }
@@ -307,16 +315,16 @@ export class AccountingService {
       }
 
       const { data, error } = await supabase
-        .from('accounts')
+        .from('chart_of_accounts')
         .insert(accountsToCreate)
         .select();
 
       if (error) throw error;
 
       return { success: true, accountsCreated: data?.length || 0 };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur création comptes SYSCOHADA:', error);
-      return { success: false, accountsCreated: 0, error: error.message };
+      return { success: false, accountsCreated: 0, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }
 

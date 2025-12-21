@@ -258,10 +258,11 @@ export interface EN16931Invoice {
   // Core document information
   // BT-1: Invoice number
   invoice_number: string;
-  
+
   // BT-2: Issue date
   issue_date: string; // ISO date
-  
+  invoice_date?: string; // Alias for DB mapping (same as issue_date)
+
   // BT-3: Invoice type code
   type_code: DocumentTypeCode;
   

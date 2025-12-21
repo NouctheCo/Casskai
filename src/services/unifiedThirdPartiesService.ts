@@ -1,10 +1,22 @@
 /**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
+/**
  * Service Unifié de Gestion des Tiers (Clients & Fournisseurs)
  *
  * Ce service centralise la gestion des tiers en utilisant :
  * - Table `customers` pour les clients
  * - Table `suppliers` pour les fournisseurs
- * - Vue `third_parties_unified` pour lectures unifiées
+ * - Vue `third_parties` pour lectures unifiées
  *
  * Garantit la cohérence entre tous les modules de l'application.
  */
@@ -46,7 +58,7 @@ export interface Supplier extends ThirdPartyBase {
 }
 
 export interface UnifiedThirdParty {
-  party_type: 'customer' | 'supplier';
+  type: 'customer' | 'supplier';
   id: string;
   company_id: string;
   party_number: string;
@@ -55,10 +67,10 @@ export interface UnifiedThirdParty {
   phone: string | null;
   company_name: string | null;
   tax_number: string | null;
-  primary_address_line1: string | null;
-  primary_city: string | null;
-  primary_postal_code: string | null;
-  primary_country: string | null;
+  address_line1: string | null;
+  city: string | null;
+  postal_code: string | null;
+  country: string | null;
   payment_terms: number | null;
   currency: string | null;
   discount_rate: number | null;
@@ -67,6 +79,7 @@ export interface UnifiedThirdParty {
   total_amount: number;
   transaction_count: number;
   balance: number;
+  current_balance?: number; // Alias pour balance (from third_parties view)
   created_at: string;
   updated_at: string;
 }
@@ -371,14 +384,14 @@ class UnifiedThirdPartiesService {
       const activeCompanyId = companyId || await this.getCurrentCompanyId();
 
       let query = supabase
-        .from('third_parties_unified')
+        .from('third_parties')
         .select('*')
         .eq('company_id', activeCompanyId)
         .eq('is_active', true)
         .order('name');
 
       if (type) {
-        query = query.eq('party_type', type);
+        query = query.eq('type', type);
       }
 
       const { data, error } = await query;
@@ -403,13 +416,13 @@ class UnifiedThirdPartiesService {
       const activeCompanyId = companyId || await this.getCurrentCompanyId();
 
       let query = supabase
-        .from('third_parties_unified')
+        .from('third_parties')
         .select('*')
         .eq('company_id', activeCompanyId)
         .eq('is_active', true);
 
       if (type) {
-        query = query.eq('party_type', type);
+        query = query.eq('type', type);
       }
 
       // Recherche sur nom, email, company_name, party_number
@@ -443,8 +456,8 @@ class UnifiedThirdPartiesService {
       const activeCompanyId = companyId || await this.getCurrentCompanyId();
 
       const { data, error } = await supabase
-        .from('third_parties_unified')
-        .select('party_type, balance')
+        .from('third_parties')
+        .select('type, balance')
         .eq('company_id', activeCompanyId)
         .eq('is_active', true);
 
@@ -461,7 +474,7 @@ class UnifiedThirdPartiesService {
       };
 
       (data || []).forEach(item => {
-        if (item.party_type === 'customer') {
+        if (item.type === 'customer') {
           stats.total_customers++;
           stats.active_customers++;
           stats.total_receivables += item.balance || 0;

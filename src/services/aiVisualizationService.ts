@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import * as d3 from 'd3';
 import { sankey, sankeyLinkHorizontal } from 'd3-sankey';
 import { hierarchy, treemap, treemapResquarify } from 'd3-hierarchy';
@@ -27,7 +39,7 @@ class AIVisualizationService {
       
       this.isInitialized = true;
       console.warn('AI Visualization Service initialized successfully');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Failed to initialize AI Visualization Service:', error);
       throw error;
     }
@@ -90,11 +102,11 @@ class AIVisualizationService {
         modelUsed: 'heatmap_generator'
       };
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error generating heatmap data:', error);
       return {
         success: false,
-        error: error.message
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue')
       };
     }
   }
@@ -235,11 +247,11 @@ class AIVisualizationService {
         modelUsed: 'sankey_generator'
       };
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error generating Sankey data:', error);
       return {
         success: false,
-        error: error.message
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue')
       };
     }
   }
@@ -326,11 +338,11 @@ class AIVisualizationService {
         modelUsed: 'treemap_generator'
       };
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error generating treemap data:', error);
       return {
         success: false,
-        error: error.message
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue')
       };
     }
   }
@@ -498,11 +510,11 @@ class AIVisualizationService {
         modelUsed: 'time_series_generator'
       };
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error generating time series data:', error);
       return {
         success: false,
-        error: error.message
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue')
       };
     }
   }

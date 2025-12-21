@@ -34,7 +34,7 @@ const MetricsCard: React.FC<{
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600">{title}</p>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</p>
             <p className={`text-2xl font-bold ${color}`}>
               €{value.toLocaleString('fr-FR')}
             </p>
@@ -44,7 +44,7 @@ const MetricsCard: React.FC<{
         <div className="mt-4 flex items-center text-sm">
           <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
           <span className="text-green-600">{trend}</span>
-          <span className="text-gray-600 ml-2">vs mois dernier</span>
+          <span className="text-gray-600 dark:text-gray-400 ml-2">vs mois dernier</span>
         </div>
       </CardContent>
     </Card>
@@ -82,10 +82,10 @@ const RecentReports: React.FC<{ reports: FinancialReport[] }> = ({ reports }) =>
           {reports?.map((report) => (
             <div key={report.id} className="flex items-center justify-between p-4 border rounded-lg">
               <div className="flex items-center gap-3">
-                <FileText className="h-5 w-5 text-gray-600" />
+                <FileText className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 <div>
                   <p className="font-medium">{report.name}</p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
                     Généré le {new Date(report.created_at).toLocaleDateString('fr-FR')}
                   </p>
                 </div>
@@ -100,7 +100,7 @@ const RecentReports: React.FC<{ reports: FinancialReport[] }> = ({ reports }) =>
               </div>
             </div>
           )) || (
-            <div className="text-center text-gray-500 py-8">
+            <div className="text-center text-gray-500 dark:text-gray-400 py-8">
               Aucun rapport récent
             </div>
           )}
@@ -123,7 +123,7 @@ const FinancialMetrics: React.FC<{ data: ReportsDashboardData | null }> = ({ dat
     <MetricsCard
       title="Dépenses Totales"
       value={data?.key_metrics?.total_expenses_ytd || 0}
-      icon={<TrendingDown className="h-8 w-8 text-red-600" />}
+      icon={<TrendingDown className="h-8 w-8 text-red-600 dark:text-red-400" />}
       trend="+8.2%"
       color="text-red-600"
     />
@@ -145,7 +145,7 @@ const FinancialMetrics: React.FC<{ data: ReportsDashboardData | null }> = ({ dat
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Rapports Générés</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Rapports Générés</p>
               <p className="text-2xl font-bold text-purple-600">
                 {data?.recent_reports?.length || 0}
               </p>
@@ -155,7 +155,7 @@ const FinancialMetrics: React.FC<{ data: ReportsDashboardData | null }> = ({ dat
           <div className="mt-4 flex items-center text-sm">
             <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
             <span className="text-green-600">+5.1%</span>
-            <span className="text-gray-600 ml-2">vs mois dernier</span>
+            <span className="text-gray-600 dark:text-gray-400 ml-2">vs mois dernier</span>
           </div>
         </CardContent>
       </Card>

@@ -9,14 +9,21 @@
     "isolatedModules": true,
     "noEmit": true,
     "allowJs": true,
-    "strict": false,
+    
+    // ⏳ STRICT MODE - Phase 1 (Progressif) - EN COURS
+    // Activé progressivement après correction erreurs syntaxe
+    "strict": true,
+    
+    // 📊 QUALITÉ CODE - Activé
+    "noUnusedLocals": false, // Désactivé temporairement (trop de warnings)
+    "noUnusedParameters": false,
+    "forceConsistentCasingInFileNames": true,
+    
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
     "useDefineForClassFields": true,
     "allowImportingTsExtensions": true,
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },

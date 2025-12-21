@@ -1,9 +1,20 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import React from 'react';
 import { supabase, handleSupabaseError } from '@/lib/supabase';
 import { 
   CompanySettings, 
   CompanyRow, 
-  CompanyUpdate,
   mapRowToSettings, 
   mapSettingsToUpdate,
   DEFAULT_COMPANY_SETTINGS 
@@ -57,7 +68,7 @@ export class CompanySettingsService {
       
       // Si on marque les settings comme complétés
       if (settings.metadata?.settingsCompletedAt) {
-        updateData.settings_completed_at = settings.metadata.settingsCompletedAt.toISOString();
+        (updateData as Record<string, unknown>).onboarding_completed_at = settings.metadata.settingsCompletedAt.toISOString();
       }
 
       const { data, error } = await supabase
@@ -330,7 +341,7 @@ export const useCompanySettings = (companyId: string) => {
       const data = await CompanySettingsService.getCompanySettings(companyId);
       setSettings(data);
     } catch (err: any) {
-      setError(err.message || 'Erreur lors du chargement des paramètres');
+      setError((err as Error).message || 'Erreur lors du chargement des paramètres');
     } finally {
       setLoading(false);
     }
@@ -346,7 +357,7 @@ export const useCompanySettings = (companyId: string) => {
       setSettings(updated);
       return updated;
     } catch (err: any) {
-      setError(err.message || 'Erreur lors de la sauvegarde');
+      setError((err as Error).message || 'Erreur lors de la sauvegarde');
       throw err;
     }
   }, [companyId]);

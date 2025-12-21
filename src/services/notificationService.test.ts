@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NotificationService } from './notificationService';
 import { supabase } from '@/lib/supabase';
@@ -78,11 +90,9 @@ describe('NotificationService', () => {
       vi.mocked(supabase.from).mockReturnValue({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              or: vi.fn().mockResolvedValue({
-                count: 5,
-                error: null,
-              }),
+            eq: vi.fn().mockResolvedValue({
+              count: 5,
+              error: null,
             }),
           }),
         }),
@@ -98,11 +108,9 @@ describe('NotificationService', () => {
       vi.mocked(supabase.from).mockReturnValue({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              or: vi.fn().mockResolvedValue({
-                count: 0,
-                error: null,
-              }),
+            eq: vi.fn().mockResolvedValue({
+              count: 0,
+              error: null,
             }),
           }),
         }),

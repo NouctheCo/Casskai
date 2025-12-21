@@ -1,23 +1,50 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import { supabase } from '@/lib/supabase';
+import { auditService } from './auditService';
+import { logger } from '@/utils/logger';
+import { generateInvoiceJournalEntry } from './invoiceJournalEntryService';
 
 export interface Invoice {
   id: string;
   company_id: string;
   third_party_id: string;
+  journal_entry_id?: string;
+  customer_id?: string;
+  quote_id?: string;
   invoice_number: string;
-  type: 'sale' | 'purchase' | 'credit_note' | 'debit_note';
-  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
-  issue_date: string;
+  invoice_type: 'sale' | 'purchase' | 'credit_note' | 'debit_note';
+  title?: string;
+  invoice_date: string;
   due_date: string;
-  subtotal: number;
-  tax_amount: number;
-  total_amount: number;
+  payment_date?: string;
+  subtotal_excl_tax: number;
+  total_tax_amount: number;
+  total_incl_tax: number;
   paid_amount: number;
+  remaining_amount: number;
+  status: 'draft' | 'sent' | 'viewed' | 'paid' | 'partial' | 'overdue' | 'cancelled';
   currency: string;
   notes?: string;
-  created_by: string;
+  internal_notes?: string;
+  tax_rate?: number;
+  payment_terms?: number;
+  discount_amount?: number;
+  created_by?: string;
   created_at: string;
   updated_at: string;
+  sent_at?: string;
+  paid_at?: string;
 }
 
 export interface InvoiceLine {
@@ -41,7 +68,7 @@ export interface InvoiceWithDetails extends Invoice {
     name: string;
     email?: string;
     phone?: string;
-    address?: string;
+    address_line1?: string;
     city?: string;
     postal_code?: string;
     country?: string;
@@ -52,8 +79,8 @@ export interface InvoiceWithDetails extends Invoice {
 export interface CreateInvoiceData {
   third_party_id: string;
   invoice_number?: string;
-  type?: 'sale' | 'purchase' | 'credit_note' | 'debit_note';
-  issue_date: string;
+  invoice_type?: 'sale' | 'purchase' | 'credit_note' | 'debit_note';
+  invoice_date: string;
   due_date: string;
   currency?: string;
   notes?: string;
@@ -106,7 +133,7 @@ class InvoicingService {
     thirdPartyId?: string;
     limit?: number;
     offset?: number;
-    orderBy?: 'issue_date' | 'due_date' | 'total_amount';
+    orderBy?: 'invoice_date' | 'due_date' | 'total_incl_tax';
     orderDirection?: 'asc' | 'desc';
   }): Promise<InvoiceWithDetails[]> {
     try {
@@ -116,7 +143,7 @@ class InvoicingService {
         .from('invoices')
         .select(`
           *,
-          third_party:third_parties(id, name, email, phone, address, city, postal_code, country),
+          third_party:third_parties(id, name, email, phone, address_line1, city, postal_code, country),
           invoice_lines(id, description, quantity, unit_price, discount_percent, tax_rate, line_total, line_order)
         `)
         .eq('company_id', companyId);
@@ -130,7 +157,7 @@ class InvoicingService {
       }
 
       // Tri
-      const orderBy = options?.orderBy || 'issue_date';
+      const orderBy = options?.orderBy || 'invoice_date';
       const orderDirection = options?.orderDirection || 'desc';
       query = query.order(orderBy, { ascending: orderDirection === 'asc' });
 
@@ -145,8 +172,13 @@ class InvoicingService {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Error fetching invoices:', error);
+        logger.error('InvoicingService: Error fetching invoices:', error);
         throw new Error(`Failed to fetch invoices: ${error.message}`);
+      }
+
+      // Gérer le cas où data est null (base vide)
+      if (!data) {
+        return [];
       }
 
       const enrichedInvoices = data.map(invoice => ({
@@ -157,7 +189,7 @@ class InvoicingService {
 
       return enrichedInvoices;
     } catch (error) {
-      console.error('Error in getInvoices:', error);
+      logger.error('InvoicingService: Error in getInvoices:', error);
       throw error;
     }
   }
@@ -170,7 +202,7 @@ class InvoicingService {
         .from('invoices')
         .select(`
           *,
-          third_party:third_parties(id, name, email, phone, address, city, postal_code, country),
+          third_party:third_parties(id, name, email, phone, address_line1, city, postal_code, country),
           invoice_lines(id, description, quantity, unit_price, discount_percent, tax_rate, line_total, line_order)
         `)
         .eq('id', id)
@@ -190,7 +222,7 @@ class InvoicingService {
         invoice_lines: data.invoice_lines || []
       } as InvoiceWithDetails;
     } catch (error) {
-      console.error('Error in getInvoiceById:', error);
+      logger.error('InvoicingService: Error in getInvoiceById:', error);
       throw error;
     }
   }
@@ -225,14 +257,15 @@ class InvoicingService {
           company_id: companyId,
           third_party_id: invoiceData.third_party_id,
           invoice_number,
-          type: invoiceData.type || 'sale',
+          invoice_type: invoiceData.invoice_type || 'sale',
           status: 'draft',
-          issue_date: invoiceData.issue_date,
+          invoice_date: invoiceData.invoice_date,
           due_date: invoiceData.due_date,
-          subtotal,
-          tax_amount,
-          total_amount,
+          subtotal_excl_tax: subtotal,
+          total_tax_amount: tax_amount,
+          total_incl_tax: total_amount,
           paid_amount: 0,
+          remaining_amount: total_amount,
           currency: invoiceData.currency || 'EUR',
           notes: invoiceData.notes,
           created_by: user.id
@@ -279,9 +312,37 @@ class InvoicingService {
         throw new Error('Failed to retrieve created invoice');
       }
 
+      // 4. Audit trail (fire-and-forget, never blocks)
+      auditService.logAsync({
+        event_type: 'CREATE',
+        table_name: 'invoices',
+        record_id: invoice.id,
+        company_id: companyId,
+        new_values: {
+          invoice_number,
+          invoice_type: invoiceData.invoice_type || 'sale',
+          total_amount,
+          third_party_id: invoiceData.third_party_id,
+          items_count: items.length
+        },
+        security_level: 'standard',
+        compliance_tags: ['SOC2', 'ISO27001']
+      });
+
+      // 5. Générer automatiquement l'écriture comptable (fire-and-forget)
+      // Ne bloque pas la création de la facture si l'écriture échoue
+      try {
+        await generateInvoiceJournalEntry(createdInvoice as any, createdInvoice.invoice_lines || []);
+        logger.info(`InvoicingService: Journal entry created for invoice ${invoice_number}`);
+      } catch (journalError) {
+        // Log l'erreur mais ne bloque pas la création
+        logger.error('InvoicingService: Failed to generate journal entry for invoice:', journalError);
+        // L'utilisateur peut régénérer l'écriture manuellement depuis la compta
+      }
+
       return createdInvoice;
     } catch (error) {
-      console.error('Error in createInvoice:', error);
+      logger.error('InvoicingService: Error in createInvoice:', error);
       throw error;
     }
   }
@@ -305,9 +366,21 @@ class InvoicingService {
         throw new Error('Failed to retrieve updated invoice');
       }
 
+      // Audit trail (fire-and-forget, never blocks)
+      auditService.logAsync({
+        event_type: 'UPDATE',
+        table_name: 'invoices',
+        record_id: id,
+        company_id: companyId,
+        new_values: { status },
+        changed_fields: ['status'],
+        security_level: 'standard',
+        compliance_tags: ['SOC2', 'ISO27001']
+      });
+
       return updatedInvoice;
     } catch (error) {
-      console.error('Error in updateInvoiceStatus:', error);
+      logger.error('InvoicingService: Error in updateInvoiceStatus:', error);
       throw error;
     }
   }
@@ -315,6 +388,9 @@ class InvoicingService {
   async deleteInvoice(id: string): Promise<void> {
     try {
       const companyId = await this.getCurrentCompanyId();
+
+      // Get invoice details before deletion for audit trail
+      const invoiceToDelete = await this.getInvoiceById(id);
 
       const { error } = await supabase
         .from('invoices')
@@ -325,8 +401,28 @@ class InvoicingService {
       if (error) {
         throw new Error(`Failed to delete invoice: ${error.message}`);
       }
+
+      // Audit trail (fire-and-forget, never blocks)
+      // Deletion is HIGH security level as it's irreversible
+      if (invoiceToDelete) {
+        auditService.logAsync({
+          event_type: 'DELETE',
+          table_name: 'invoices',
+          record_id: id,
+          company_id: companyId,
+          old_values: {
+            invoice_number: invoiceToDelete.invoice_number,
+            type: invoiceToDelete.invoice_type,
+            status: invoiceToDelete.status,
+            total_amount: invoiceToDelete.total_incl_tax,
+            third_party_id: invoiceToDelete.third_party_id
+          },
+          security_level: 'high',
+          compliance_tags: ['SOC2', 'ISO27001']
+        });
+      }
     } catch (error) {
-      console.error('Error in deleteInvoice:', error);
+      logger.error('InvoicingService: Error in deleteInvoice:', error);
       throw error;
     }
   }
@@ -372,8 +468,8 @@ class InvoicingService {
 
       const newInvoiceData: CreateInvoiceData = {
         third_party_id: originalInvoice.third_party_id,
-        type: originalInvoice.type,
-        issue_date: new Date().toISOString().split('T')[0],
+        invoice_type: originalInvoice.invoice_type,
+        invoice_date: new Date().toISOString().split('T')[0],
         due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         currency: originalInvoice.currency,
         notes: originalInvoice.notes
@@ -404,8 +500,8 @@ class InvoicingService {
 
       const creditNoteData: CreateInvoiceData = {
         third_party_id: originalInvoice.third_party_id,
-        type: 'credit_note',
-        issue_date: new Date().toISOString().split('T')[0],
+        invoice_type: 'credit_note',
+        invoice_date: new Date().toISOString().split('T')[0],
         due_date: new Date().toISOString().split('T')[0],
         currency: originalInvoice.currency,
         notes: `Avoir pour facture ${originalInvoice.invoice_number}`
@@ -441,12 +537,12 @@ class InvoicingService {
         .from('invoices')
         .select('*')
         .eq('company_id', companyId);
-      
+
       if (params?.periodStart) {
-        invoicesQuery = invoicesQuery.gte('issue_date', params.periodStart);
+        invoicesQuery = invoicesQuery.gte('invoice_date', params.periodStart);
       }
       if (params?.periodEnd) {
-        invoicesQuery = invoicesQuery.lte('issue_date', params.periodEnd);
+        invoicesQuery = invoicesQuery.lte('invoice_date', params.periodEnd);
       }
       
       const { data: invoices, error: invoicesError } = await invoicesQuery;
@@ -457,16 +553,15 @@ class InvoicingService {
         .from('third_parties')
         .select('id')
         .eq('company_id', companyId)
-        .eq('client_type', 'customer');
+        .eq('invoice_type', 'customer');
       if (clientsError) throw clientsError;
       
-      // Get quotes count (assuming quotes are stored in a quotes table or as draft invoices)
+      // Get quotes count from the quotes table
       const { data: quotes, error: quotesError } = await supabase
-        .from('invoices')
+        .from('quotes')
         .select('id')
-        .eq('company_id', companyId)
-        .eq('type', 'quote');
-      if (quotesError) console.warn('Quotes table might not exist:', quotesError);
+        .eq('company_id', companyId);
+      if (quotesError) logger.warn('InvoicingService: Error fetching quotes', { error: quotesError });
       
       const invoicesList = invoices || [];
       const clientsList = clients || [];
@@ -512,6 +607,93 @@ class InvoicingService {
         clientsCount: 0,
         quotesCount: 0,
         averageInvoiceValue: 0
+      };
+    }
+  }
+
+  /**
+   * Calculate trend percentage between two periods
+   */
+  private calculateTrend(current: number, previous: number): number | undefined {
+    if (previous === 0) {
+      // Si la période précédente était à 0 et maintenant on a des données, c'est +100%
+      return current > 0 ? 100 : undefined;
+    }
+    return ((current - previous) / previous) * 100;
+  }
+
+  /**
+   * Get invoicing stats with trends compared to previous period
+   */
+  async getInvoicingStatsWithTrends(params?: {
+    periodStart?: string;
+    periodEnd?: string;
+    companyId?: string;
+  }) {
+    try {
+      const companyId = params?.companyId || await this.getCurrentCompanyId();
+
+      // Get current period stats
+      const currentStats = await this.getInvoicingStats({
+        periodStart: params?.periodStart,
+        periodEnd: params?.periodEnd,
+        companyId
+      });
+
+      // Calculate previous period dates
+      let previousStart: string | undefined;
+      let previousEnd: string | undefined;
+
+      if (params?.periodStart && params?.periodEnd) {
+        const start = new Date(params.periodStart);
+        const end = new Date(params.periodEnd);
+        const periodDuration = end.getTime() - start.getTime();
+
+        previousEnd = new Date(start.getTime() - 1).toISOString().split('T')[0];
+        previousStart = new Date(start.getTime() - periodDuration).toISOString().split('T')[0];
+      }
+
+      // Get previous period stats
+      const previousStats = previousStart && previousEnd
+        ? await this.getInvoicingStats({
+            periodStart: previousStart,
+            periodEnd: previousEnd,
+            companyId
+          })
+        : null;
+
+      // Calculate trends
+      const trends = previousStats ? {
+        totalRevenueTrend: this.calculateTrend(currentStats.totalRevenue, previousStats.totalRevenue),
+        paidInvoicesTrend: this.calculateTrend(currentStats.paidInvoices, previousStats.paidInvoices),
+        pendingInvoicesTrend: this.calculateTrend(currentStats.pendingInvoices, previousStats.pendingInvoices),
+        overdueInvoicesTrend: this.calculateTrend(currentStats.overdueInvoices, previousStats.overdueInvoices)
+      } : {
+        totalRevenueTrend: undefined,
+        paidInvoicesTrend: undefined,
+        pendingInvoicesTrend: undefined,
+        overdueInvoicesTrend: undefined
+      };
+
+      return {
+        ...currentStats,
+        ...trends
+      };
+    } catch (error) {
+      console.error('Error getting invoicing stats with trends:', error);
+      return {
+        totalRevenue: 0,
+        paidInvoices: 0,
+        pendingInvoices: 0,
+        overdueInvoices: 0,
+        invoicesCount: 0,
+        clientsCount: 0,
+        quotesCount: 0,
+        averageInvoiceValue: 0,
+        totalRevenueTrend: undefined,
+        paidInvoicesTrend: undefined,
+        pendingInvoicesTrend: undefined,
+        overdueInvoicesTrend: undefined
       };
     }
   }

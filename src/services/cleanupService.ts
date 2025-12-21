@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import { supabase } from '../lib/supabase';
 
 export class CleanupService {
@@ -31,7 +43,7 @@ export class CleanupService {
 
       // Supprimer les lignes d'écritures
       const { error: itemsError } = await supabase
-        .from('journal_entry_items')
+        .from('journal_entry_lines')
         .delete()
         .in('journal_entry_id', entryIds);
 

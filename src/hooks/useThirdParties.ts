@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
@@ -108,9 +120,9 @@ export function useThirdParties(companyId: string) {
       setThirdParties(data || []);
       return { data: data || [], count: count || 0, error: null };
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch third parties';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to fetch third parties';
       setError(errorMessage);
-      console.error('Error fetching third parties:', err);
+      console.error('...', error);
       return { data: [], count: 0, error: errorMessage };
     } finally {
       setLoading(false);
@@ -141,9 +153,9 @@ export function useThirdParties(companyId: string) {
       setThirdParties(prev => [newThirdParty, ...prev]);
       return newThirdParty;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create third party';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to create third party';
       setError(errorMessage);
-      console.error('Error creating third party:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -177,9 +189,9 @@ export function useThirdParties(companyId: string) {
 
       return updatedThirdParty;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update third party';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to update third party';
       setError(errorMessage);
-      console.error('Error updating third party:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -204,9 +216,9 @@ export function useThirdParties(companyId: string) {
 
       setThirdParties(prev => prev.filter(tp => tp.id !== id));
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete third party';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to delete third party';
       setError(errorMessage);
-      console.error('Error deleting third party:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -227,8 +239,8 @@ export function useThirdParties(companyId: string) {
 
       if (fetchError) throw fetchError;
       return data;
-    } catch (err) {
-      console.error('Error fetching third party by ID:', err);
+    } catch (_err) {
+      console.error('...', error);
       return null;
     }
   }, [user, companyId]);
@@ -272,8 +284,8 @@ export function useThirdParties(companyId: string) {
       });
 
       return stats;
-    } catch (err) {
-      console.error('Error calculating third party statistics:', err);
+    } catch (_err) {
+      console.error('...', error);
       return null;
     }
   }, [user, companyId]);

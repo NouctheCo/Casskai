@@ -10,6 +10,7 @@
 - **Commandes manuelles** :
   - `npm run build` - Build local
   - `npm run type-check` - Vérification TypeScript
+  - `npm run validate:db` - Validation colonnes DB Supabase
   - `npm run deploy` - Déploiement basique (obsolète)
 
 ## État TypeScript

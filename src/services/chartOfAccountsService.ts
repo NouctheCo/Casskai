@@ -1,35 +1,31 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 // src/services/chartOfAccountsService.ts
 import { supabase } from '../lib/supabase';
 import type { Database } from '../types/supabase';
 
-type Account = {
-  id: string;
-  company_id: string;
-  account_number: string;
-  name: string;
-  type: 'asset' | 'liability' | 'equity' | 'revenue' | 'expense';
-  class: number;
-  parent_account_id?: string;
-  description?: string;
-  is_active: boolean;
-  balance: number;
-  currency: string;
-  tax_rate: number;
-  created_at: string;
-  updated_at: string;
-};
+type Account = Database['public']['Tables']['chart_of_accounts']['Row'];
 
 type AccountInsert = {
   company_id: string;
   account_number: string;
-  name: string;
-  type: 'asset' | 'liability' | 'equity' | 'revenue' | 'expense';
-  class?: number;
-  parent_account_id?: string;
-  description?: string;
+  account_name: string;
+  account_type: Account['account_type'];
+  account_class?: number | null;
+  parent_account_id?: string | null;
+  description?: string | null;
   is_active?: boolean;
-  currency?: string;
-  tax_rate?: number;
+  is_detail_account?: boolean;
 };
 
 export class ChartOfAccountsService {
@@ -44,19 +40,19 @@ export class ChartOfAccountsService {
 
   // Récupérer tous les comptes d'une entreprise
   async getAccounts(companyId: string, filters?: {
-    type?: string;
+    type?: Account['account_type'] | 'all';
     isActive?: boolean;
     search?: string;
   }): Promise<Account[]> {
     try {
       let query = supabase
-        .from('accounts')
+        .from('chart_of_accounts')
         .select('*')
         .eq('company_id', companyId)
         .order('account_number', { ascending: true });
 
       if (filters?.type && filters.type !== 'all') {
-        query = query.eq('type', filters.type);
+        query = query.eq('account_type', filters.type);
       }
 
       if (filters?.isActive !== undefined) {
@@ -64,14 +60,15 @@ export class ChartOfAccountsService {
       }
 
       if (filters?.search) {
-        query = query.or(`account_number.ilike.%${filters.search}%,name.ilike.%${filters.search}%`);
+        const searchTerm = filters.search.trim();
+        query = query.or(`account_number.ilike.%${searchTerm}%,account_name.ilike.%${searchTerm}%`);
       }
 
       const { data, error } = await query;
 
       if (error) throw error;
       return data || [];
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur récupération comptes:', error);
       return [];
     }
@@ -84,9 +81,8 @@ export class ChartOfAccountsService {
     error?: string 
   }> {
     try {
-      // Vérifier l'unicité du numéro de compte
       const { data: existing } = await supabase
-        .from('accounts')
+        .from('chart_of_accounts')
         .select('id')
         .eq('company_id', accountData.company_id)
         .eq('account_number', accountData.account_number)
@@ -96,27 +92,33 @@ export class ChartOfAccountsService {
         return { success: false, error: 'Ce numéro de compte existe déjà' };
       }
 
-      // Déterminer la classe automatiquement si pas fournie
-      const accountClass = accountData.class || parseInt(accountData.account_number.charAt(0));
-      
+      const accountClass = accountData.account_class ?? this.inferAccountClass(accountData.account_number);
+
+      const insertPayload = {
+        company_id: accountData.company_id,
+        account_number: accountData.account_number,
+        account_name: accountData.account_name,
+        account_type: accountData.account_type,
+        account_class: accountClass,
+        parent_account_id: accountData.parent_account_id ?? null,
+        description: accountData.description ?? null,
+        is_active: accountData.is_active ?? true,
+        is_detail_account: accountData.is_detail_account ?? true,
+      } satisfies Database['public']['Tables']['chart_of_accounts']['Insert'];
+
       const { data, error } = await supabase
-        .from('accounts')
-        .insert([{
-          ...accountData,
-          class: accountClass,
-          is_active: accountData.is_active ?? true,
-          currency: accountData.currency || 'EUR',
-          tax_rate: accountData.tax_rate || 0
-        }])
+        .from('chart_of_accounts')
+        .insert([insertPayload])
         .select()
         .single();
 
       if (error) throw error;
 
       return { success: true, data };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur création compte:', error);
-      return { success: false, error: error.message };
+      const message = error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : 'Erreur inconnue lors de la création du compte';
+      return { success: false, error: message };
     }
   }
 
@@ -127,17 +129,16 @@ export class ChartOfAccountsService {
     error?: string 
   }> {
     try {
-      // Si le numéro de compte change, vérifier l'unicité
       if (updates.account_number) {
         const { data: existing } = await supabase
-          .from('accounts')
+          .from('chart_of_accounts')
           .select('id, company_id')
           .eq('id', id)
           .single();
 
         if (existing) {
           const { data: duplicate } = await supabase
-            .from('accounts')
+            .from('chart_of_accounts')
             .select('id')
             .eq('company_id', existing.company_id)
             .eq('account_number', updates.account_number)
@@ -149,14 +150,13 @@ export class ChartOfAccountsService {
           }
         }
 
-        // Mettre à jour la classe si le numéro change
-        if (!updates.class) {
-          updates.class = parseInt(updates.account_number.charAt(0));
+        if (updates.account_class === undefined) {
+          updates.account_class = this.inferAccountClass(updates.account_number);
         }
       }
 
       const { data, error } = await supabase
-        .from('accounts')
+        .from('chart_of_accounts')
         .update(updates)
         .eq('id', id)
         .select()
@@ -165,9 +165,10 @@ export class ChartOfAccountsService {
       if (error) throw error;
 
       return { success: true, data };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur modification compte:', error);
-      return { success: false, error: error.message };
+      const message = error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : 'Erreur inconnue lors de la mise à jour du compte';
+      return { success: false, error: message };
     }
   }
 
@@ -186,16 +187,17 @@ export class ChartOfAccountsService {
       }
 
       const { error } = await supabase
-        .from('accounts')
+        .from('chart_of_accounts')
         .delete()
         .eq('id', id);
 
       if (error) throw error;
 
       return { success: true };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur suppression compte:', error);
-      return { success: false, error: error.message };
+      const message = error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : 'Erreur inconnue lors de la suppression du compte';
+      return { success: false, error: message };
     }
   }
 
@@ -208,8 +210,8 @@ export class ChartOfAccountsService {
   }> {
     try {
       const { data, error } = await supabase
-        .from('accounts')
-        .select('type, is_active, balance')
+        .from('chart_of_accounts')
+        .select('account_type, is_active, current_balance')
         .eq('company_id', companyId);
 
       if (error) throw error;
@@ -226,15 +228,15 @@ export class ChartOfAccountsService {
           stats.activeAccounts++;
         }
 
-        // Compter par type
-        stats.accountsByType[account.type] = (stats.accountsByType[account.type] || 0) + 1;
+        const accountType = account.account_type ?? 'unknown';
+        stats.accountsByType[accountType] = (stats.accountsByType[accountType] || 0) + 1;
 
-        // Sommer les soldes par type
-        stats.totalBalance[account.type] = (stats.totalBalance[account.type] || 0) + (account.balance || 0);
+        const balanceValue = Number(account.current_balance) || 0;
+        stats.totalBalance[accountType] = (stats.totalBalance[accountType] || 0) + balanceValue;
       });
 
       return stats;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur stats comptes:', error);
       return {
         totalAccounts: 0,
@@ -257,21 +259,19 @@ export class ChartOfAccountsService {
         'Classe',
         'Description',
         'Actif',
-        'Solde',
-        'Devise',
-        'Taux de TVA'
+        'Compte de détail',
+        'Solde courant'
       ];
 
       const csvRows = accounts.map(account => [
         account.account_number,
-        account.name,
-        account.type,
-        account.class.toString(),
+        account.account_name,
+        account.account_type,
+        (account.account_class ?? '').toString(),
         account.description || '',
         account.is_active ? 'Oui' : 'Non',
-        account.balance.toString(),
-        account.currency,
-        account.tax_rate.toString()
+        account.is_detail_account ? 'Oui' : 'Non',
+        (account.current_balance ?? 0).toString()
       ]);
 
       const csvContent = [
@@ -280,9 +280,9 @@ export class ChartOfAccountsService {
       ].join('\n');
 
       return { success: true, data: csvContent };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur export CSV:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }
 
@@ -316,23 +316,21 @@ export class ChartOfAccountsService {
           const accountData: AccountInsert = {
             company_id: companyId,
             account_number: values[0]?.trim(),
-            name: values[1]?.trim(),
-            type: values[2]?.trim() as any,
-            class: values[3] ? parseInt(values[3]) : undefined,
+            account_name: values[1]?.trim(),
+            account_type: values[2]?.trim() as Account['account_type'],
+            account_class: values[3] ? parseInt(values[3], 10) : undefined,
             description: values[4]?.trim() || undefined,
             is_active: values[5]?.toLowerCase() !== 'non',
-            currency: values[7]?.trim() || 'EUR',
-            tax_rate: values[8] ? parseFloat(values[8]) : 0
+            is_detail_account: values[6]?.toLowerCase() !== 'non'
           };
 
-          // Validation
-          if (!accountData.account_number || !accountData.name) {
+          if (!accountData.account_number || !accountData.account_name) {
             errors.push(`Ligne ${i + 2}: Numéro de compte et nom requis`);
             continue;
           }
 
-          if (!['asset', 'liability', 'equity', 'revenue', 'expense'].includes(accountData.type)) {
-            errors.push(`Ligne ${i + 2}: Type de compte invalide (${accountData.type})`);
+          if (!['asset', 'liability', 'equity', 'revenue', 'expense'].includes(accountData.account_type)) {
+            errors.push(`Ligne ${i + 2}: Type de compte invalide (${accountData.account_type})`);
             continue;
           }
 
@@ -342,8 +340,9 @@ export class ChartOfAccountsService {
           } else {
             errors.push(`Ligne ${i + 2}: ${result.error}`);
           }
-        } catch (error) {
-          errors.push(`Ligne ${i + 2}: Erreur de traitement - ${error.message}`);
+        } catch (error: unknown) {
+          const message = error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : 'Erreur inconnue';
+          errors.push(`Ligne ${i + 2}: Erreur de traitement - ${message}`);
         }
       }
 
@@ -352,35 +351,34 @@ export class ChartOfAccountsService {
         imported, 
         errors 
       };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur import CSV:', error);
+      const message = error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : 'Erreur inconnue lors de l\'import CSV';
       return { 
         success: false, 
         imported, 
-        errors: [...errors, error.message] 
+        errors: [...errors, message] 
       };
     }
   }
 
   // Obtenir un modèle d'import CSV
   getImportTemplate(): string {
-    const headers = [
-      'Numéro de compte',
-      'Nom du compte', 
-      'Type',
-      'Classe',
-      'Description',
-      'Actif',
-      'Solde',
-      'Devise',
-      'Taux de TVA'
-    ];
+      const headers = [
+        'Numéro de compte',
+        'Nom du compte', 
+        'Type',
+        'Classe',
+        'Description',
+        'Actif',
+        'Compte de détail'
+      ];
 
-    const sampleData = [
-      ['411000', 'Clients', 'asset', '4', 'Créances clients', 'Oui', '0', 'EUR', '0'],
-      ['401000', 'Fournisseurs', 'liability', '4', 'Dettes fournisseurs', 'Oui', '0', 'EUR', '0'],
-      ['701000', 'Ventes de produits', 'revenue', '7', 'Chiffre d\'affaires', 'Oui', '0', 'EUR', '20']
-    ];
+      const sampleData = [
+        ['411000', 'Clients', 'asset', '4', 'Créances clients', 'Oui', 'Oui'],
+        ['401000', 'Fournisseurs', 'liability', '4', 'Dettes fournisseurs', 'Oui', 'Oui'],
+        ['701000', 'Ventes de produits', 'revenue', '7', 'Chiffre d\'affaires', 'Oui', 'Oui']
+      ];
 
     return [
       headers.join(','),
@@ -388,38 +386,43 @@ export class ChartOfAccountsService {
     ].join('\n');
   }
 
+  private inferAccountClass(accountNumber: string): number | null {
+    const digit = parseInt(accountNumber.charAt(0), 10);
+    return Number.isNaN(digit) ? null : digit;
+  }
+
   // Calculer le solde d'un compte à une date donnée
   async getAccountBalance(accountId: string, date?: string): Promise<number> {
     try {
+      const selection = date
+        ? `
+            debit_amount,
+            credit_amount,
+            journal_entries!inner(entry_date)
+          `
+        : 'debit_amount, credit_amount';
+
       let query = supabase
         .from('journal_entry_lines')
-        .select('debit, credit')
+        .select(selection)
         .eq('account_id', accountId);
 
       if (date) {
-        // Jointure avec journal_entries pour filtrer par date
-        query = supabase
-          .from('journal_entry_lines')
-          .select(`
-            debit, 
-            credit,
-            journal_entries!inner(date)
-          `)
-          .eq('account_id', accountId)
-          .lte('journal_entries.date', date);
+        query = query.lte('journal_entries.entry_date', date);
       }
 
       const { data, error } = await query;
 
       if (error) throw error;
 
-      let balance = 0;
-      data?.forEach(line => {
-        balance += (line.debit || 0) - (line.credit || 0);
-      });
+      const balance = data?.reduce((acc, line) => {
+        const debit = Number((line as any).debit_amount) || 0;
+        const credit = Number((line as any).credit_amount) || 0;
+        return acc + (debit - credit);
+      }, 0) ?? 0;
 
       return balance;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur calcul solde:', error);
       return 0;
     }

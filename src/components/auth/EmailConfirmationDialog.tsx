@@ -44,7 +44,7 @@ export const EmailConfirmationDialog: React.FC<EmailConfirmationDialogProps> = (
             <Mail className="w-8 h-8 text-blue-600 dark:text-blue-400" />
           </motion.div>
           
-          <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white">
+          <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-white">
             Vérifiez votre adresse email
           </DialogTitle>
           

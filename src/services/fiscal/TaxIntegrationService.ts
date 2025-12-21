@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 // Service d'intégration fiscale avec les autres modules
 import { supabase } from '@/lib/supabase';
 import { frenchTaxComplianceService } from './FrenchTaxComplianceService';
@@ -29,13 +41,13 @@ export class TaxIntegrationService {
             credit_amount,
             tax_code,
             tax_rate,
-            tax_amount,
+            total_tax_amount,
             description
           )
         `)
         .eq('company_id', companyId)
-        .gte('date', `${period}-01-01`)
-        .lte('date', `${period}-12-31`);
+        .gte('entry_date', `${period}-01-01`)
+        .lte('entry_date', `${period}-12-31`);
 
       if (error) throw error;
 
@@ -62,12 +74,11 @@ export class TaxIntegrationService {
    */
   async syncWithInvoicing(companyId: string) {
     try {
-      // Récupérer les factures non synchronisées
+      // Récupérer les factures
       const { data: invoices, error } = await supabase
         .from('invoices')
         .select('*')
-        .eq('company_id', companyId)
-        .is('tax_sync_date', null);
+        .eq('company_id', companyId);
 
       if (error) throw error;
 
@@ -81,9 +92,8 @@ export class TaxIntegrationService {
         const { error: updateError } = await supabase
           .from('invoices')
           .update({
-            tax_amount: taxData.totalTax,
-            tax_breakdown: taxData.breakdown,
-            tax_sync_date: new Date().toISOString()
+            total_tax_amount: taxData.totalTax,
+            tax_breakdown: taxData.breakdown
           })
           .eq('id', invoice.id);
 
@@ -112,7 +122,7 @@ export class TaxIntegrationService {
     try {
       // Récupérer les données de paie
       const { data: payrollData, error } = await supabase
-        .from('payroll_entries')
+        .from('payroll_slips')
         .select('*')
         .eq('company_id', companyId)
         .gte('period', `${period}-01`)

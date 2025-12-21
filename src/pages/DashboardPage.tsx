@@ -1,25 +1,40 @@
-// Dashboard Page pour CassKai - Version Enterprise
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
+// Dashboard Page pour CassKai - Version Opérationnelle
 import React from 'react';
-import { useEnterprise } from '@/contexts/EnterpriseContext';
-import { EnterpriseDashboard } from '@/components/dashboard/EnterpriseDashboard';
+import { useAuth } from '@/contexts/AuthContext';
+import { RealOperationalDashboard } from '@/components/dashboard/RealOperationalDashboard';
 import { DashboardErrorBoundary } from '@/components/dashboard/DashboardErrorBoundary';
+import { WelcomeTourBanner } from '@/components/dashboard/WelcomeTourBanner';
+import { OnboardingTour } from '@/components/dashboard/OnboardingTour';
 import { Building } from 'lucide-react';
 
 const DashboardPage = () => {
-  const { currentEnterprise } = useEnterprise();
+  const { currentCompany } = useAuth();
+
 
   // Si pas d'entreprise sélectionnée, afficher un message
-  if (!currentEnterprise) {
+  if (!currentCompany) {
     return (
       <div className="flex items-center justify-center min-h-96 p-8">
         <div className="text-center max-w-md">
           <div className="mb-6">
             <Building className="h-20 w-20 text-blue-400 mx-auto" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
             Aucune entreprise configurée
           </h2>
-          <p className="text-gray-600 mb-6 leading-relaxed">
+          <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
             Pour accéder au dashboard, vous devez d'abord créer votre entreprise via le processus d'onboarding.
           </p>
           <button
@@ -29,7 +44,7 @@ const DashboardPage = () => {
             <Building className="h-5 w-5 mr-2" />
             Créer mon entreprise
           </button>
-          <p className="text-xs text-gray-500 mt-4">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">
             L'onboarding vous guidera dans la configuration de votre première entreprise
           </p>
         </div>
@@ -40,8 +55,25 @@ const DashboardPage = () => {
   return (
     <>
       <DashboardErrorBoundary>
-        <EnterpriseDashboard />
+        <RealOperationalDashboard />
       </DashboardErrorBoundary>
+
+      {/* Welcome Tour Banner */}
+      <WelcomeTourBanner />
+
+      {/* Onboarding Tour */}
+      <OnboardingTour
+        isNewAccount={(() => {
+          // Considérer comme "nouveau" si l'onboarding a été complété récemment (< 24h)
+          if (currentCompany?.onboarding_completed_at) {
+            const completedDate = new Date(currentCompany.onboarding_completed_at);
+            const hoursSinceCompletion = (Date.now() - completedDate.getTime()) / (1000 * 60 * 60);
+            return hoursSinceCompletion < 24;
+          }
+          return false;
+        })()}
+        companyName={currentCompany?.name || ''}
+      />
     </>
   );
 };

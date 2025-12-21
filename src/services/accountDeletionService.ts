@@ -1,10 +1,23 @@
 /**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
+/**
  * Service de suppression de compte utilisateur
  * Gère la suppression sécurisée avec période de grâce et export des données
  */
 
 import { supabase } from '@/lib/supabase';
 import { fecExportService } from './fecExportService';
+import { encryptData, decryptData, isEncrypted } from './encryptionService';
 
 interface DeletionAnalysis {
   canDelete: boolean;
@@ -224,30 +237,33 @@ export class AccountDeletionService {
       // Générer un export FEC pour chaque entreprise
       const exportPromises = (userCompanies || []).map(async (uc: any) => {
         const currentYear = new Date().getFullYear();
-        const startDate = new Date(currentYear, 0, 1);
-        const endDate = new Date(currentYear, 11, 31);
+        const startDate = new Date(currentYear, 0, 1).toISOString().split('T')[0];
+        const endDate = new Date(currentYear, 11, 31).toISOString().split('T')[0];
 
-        return fecExportService.generateFECExport({
-          companyId: uc.company_id,
-          year: currentYear,
-          startDate,
-          endDate,
-          includeDocuments: true
-        });
+        try {
+          const fecData = await fecExportService.generateFECExport(
+            uc.company_id,
+            startDate,
+            endDate
+          );
+          return { success: true, data: fecData, companyId: uc.company_id };
+        } catch (_err) {
+          return { success: false, data: [], companyId: uc.company_id };
+        }
       });
 
       const exports = await Promise.all(exportPromises);
 
-      // Mettre à jour la demande avec les liens d'export
-      const exportUrls = exports
-        .filter(exp => exp.success)
-        .map(exp => exp.fileUrl)
+      // Mettre à jour la demande avec les liens d'export (IDs des exports)
+      const exportIds = exports
+        .filter(exp => exp.success && exp.data.length > 0)
+        .map(exp => exp.companyId)
         .join(',');
 
       await supabase
         .from('user_deletion_requests')
         .update({
-          export_download_url: exportUrls,
+          export_download_url: exportIds,
           export_generated_at: new Date().toISOString()
         })
         .eq('id', requestId);
@@ -410,25 +426,37 @@ export class AccountDeletionService {
   }
 
   /**
-   * Archive légalement les données d'un utilisateur
+   * Archive légalement les données d'un utilisateur avec chiffrement AES-256-GCM
+   * ✅ Conforme RGPD Article 32 - Sécurité du traitement
    */
   private async archiveUserDataLegally(userId: string): Promise<void> {
-    // Récupérer toutes les données utilisateur
-    const userData = await this.collectUserData(userId);
+    try {
+      // 1. Récupérer toutes les données utilisateur
+      const userData = await this.collectUserData(userId);
 
-    // Créer l'archive légale
-    await supabase
-      .from('legal_archives')
-      .insert({
-        entity_type: 'user',
-        entity_id: userId,
-        original_name: userData.email || `Utilisateur ${userId}`,
-        archived_data: userData,
-        legal_basis: 'RGPD + Code de commerce - Conservation 7 ans',
-        is_encrypted: true
-      });
+      // 2. Chiffrer les données avec AES-256-GCM
+      const encryptedData = await encryptData(userData);
 
-    console.warn(`📚 Données utilisateur ${userId} archivées légalement`);
+      // 3. Créer l'archive légale avec données réellement chiffrées
+      const { error } = await supabase
+        .from('legal_archives')
+        .insert({
+          entity_type: 'user',
+          entity_id: userId,
+          original_name: userData.email || `Utilisateur ${userId}`,
+          archived_data: encryptedData, // ⚠️ Données RÉELLEMENT chiffrées (AES-256-GCM)
+          legal_basis: 'RGPD + Code de commerce - Conservation 7 ans',
+          is_encrypted: true
+        });
+
+      if (error) throw error;
+
+      console.warn(`📚 Données utilisateur ${userId} archivées et chiffrées avec succès (AES-256-GCM)`);
+
+    } catch (error) {
+      console.error(`❌ Erreur archivage chiffré utilisateur ${userId}:`, error);
+      throw error;
+    }
   }
 
   /**
@@ -462,6 +490,123 @@ export class AccountDeletionService {
   private async deleteUserAccount(userId: string): Promise<void> {
     // En production, utiliser l'API admin de Supabase pour supprimer l'utilisateur
     console.warn(`🗑️ Suppression définitive compte ${userId}`);
+  }
+
+  /**
+   * 🔓 ADMIN ONLY - Récupère et déchiffre une archive légale
+   *
+   * ⚠️ Cette fonction doit être réservée aux administrateurs autorisés
+   * Usage: audits légaux, requêtes judiciaires, vérifications de conformité
+   *
+   * @param archiveId - ID de l'archive légale
+   * @returns Données déchiffrées de l'archive
+   *
+   * @example
+   * ```typescript
+   * // Récupérer une archive chiffrée
+   * const archive = await accountDeletionService.getDecryptedArchive('archive-uuid');
+   * console.log(archive.data); // { user_id: '123', email: 'user@example.com', ... }
+   * ```
+   */
+  async getDecryptedArchive(archiveId: string): Promise<{
+    id: string;
+    entity_type: string;
+    entity_id: string;
+    original_name: string;
+    data: any;
+    legal_basis: string;
+    created_at: string;
+    is_encrypted: boolean;
+  }> {
+    try {
+      // 1. Récupérer l'archive depuis la base de données
+      const { data: archive, error } = await supabase
+        .from('legal_archives')
+        .select('*')
+        .eq('id', archiveId)
+        .single();
+
+      if (error) throw error;
+      if (!archive) throw new Error('Archive introuvable');
+
+      // 2. Déchiffrer les données si elles sont chiffrées
+      let decryptedData = archive.archived_data;
+
+      if (archive.is_encrypted) {
+        // Vérifier le format
+        if (isEncrypted(archive.archived_data)) {
+          // Données réellement chiffrées avec AES-256-GCM
+          decryptedData = await decryptData(archive.archived_data);
+          console.warn(`✅ Archive ${archiveId} déchiffrée avec succès`);
+        } else {
+          // Legacy: données non chiffrées malgré le flag is_encrypted: true
+          console.warn(`⚠️ Archive ${archiveId} marquée chiffrée mais données en clair (legacy)`);
+          decryptedData = archive.archived_data;
+        }
+      }
+
+      return {
+        id: archive.id,
+        entity_type: archive.entity_type,
+        entity_id: archive.entity_id,
+        original_name: archive.original_name,
+        data: decryptedData,
+        legal_basis: archive.legal_basis,
+        created_at: archive.created_at,
+        is_encrypted: archive.is_encrypted
+      };
+
+    } catch (error) {
+      console.error(`❌ Erreur récupération archive ${archiveId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 📋 ADMIN ONLY - Liste toutes les archives légales
+   *
+   * @param filters - Filtres optionnels (entity_type, entity_id, etc.)
+   * @returns Liste des archives (données NON déchiffrées)
+   */
+  async listLegalArchives(filters?: {
+    entity_type?: string;
+    entity_id?: string;
+    limit?: number;
+  }): Promise<Array<{
+    id: string;
+    entity_type: string;
+    entity_id: string;
+    original_name: string;
+    legal_basis: string;
+    created_at: string;
+    is_encrypted: boolean;
+  }>> {
+    try {
+      let query = supabase
+        .from('legal_archives')
+        .select('id, entity_type, entity_id, original_name, legal_basis, created_at, is_encrypted')
+        .order('created_at', { ascending: false });
+
+      if (filters?.entity_type) {
+        query = query.eq('entity_type', filters.entity_type);
+      }
+      if (filters?.entity_id) {
+        query = query.eq('entity_id', filters.entity_id);
+      }
+      if (filters?.limit) {
+        query = query.limit(filters.limit);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      return data || [];
+
+    } catch (error) {
+      console.error('❌ Erreur liste archives:', error);
+      throw error;
+    }
   }
 }
 

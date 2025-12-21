@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 // services/tenantService.ts - Version corrigée
 // import { supabase } from '../lib/supabase'; // Commenté pour la compatibilité de build
 import { TenantConfig, TenantFeatures, TenantBranding } from '../types/tenant'; // ✅ CORRECTION: Import ajouté
@@ -57,7 +69,7 @@ export class TenantService {
       if (!response.ok) return null;
       
       return await response.json();
-    } catch (error) {
+    } catch (_error) {
       // Fallback : configuration locale pour le développement
       return this.getLocalTenantConfig(tenantId);
     }

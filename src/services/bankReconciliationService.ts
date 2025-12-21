@@ -1,4 +1,16 @@
 /**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
+/**
  * Service de réconciliation bancaire automatique et manuelle
  * Permet de rapprocher les transactions bancaires avec les écritures comptables
  */
@@ -423,8 +435,8 @@ class BankReconciliationService {
         .select('id, amount, reconciled')
         .eq('company_id', companyId);
 
-      if (startDate) accountingQuery = accountingQuery.gte('date', startDate);
-      if (endDate) accountingQuery = accountingQuery.lte('date', endDate);
+      if (startDate) accountingQuery = accountingQuery.gte('entry_date', startDate);
+      if (endDate) accountingQuery = accountingQuery.lte('entry_date', endDate);
 
       const { data: accountingEntries } = await accountingQuery;
 
@@ -493,8 +505,8 @@ class BankReconciliationService {
       .eq('company_id', companyId)
       .eq('reconciled', false);
 
-    if (startDate) query = query.gte('date', startDate);
-    if (endDate) query = query.lte('date', endDate);
+    if (startDate) query = query.gte('entry_date', startDate);
+    if (endDate) query = query.lte('entry_date', endDate);
 
     const { data, error } = await query;
     if (error) throw error;
@@ -623,5 +635,3 @@ class BankReconciliationService {
 
 export const bankReconciliationService = new BankReconciliationService();
 export default bankReconciliationService;
-
-

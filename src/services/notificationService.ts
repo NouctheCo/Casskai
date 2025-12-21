@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import { supabase } from '@/lib/supabase';
 
 export interface Notification {
@@ -9,7 +21,8 @@ export interface Notification {
   type: 'info' | 'success' | 'warning' | 'error' | 'alert';
   category?: 'system' | 'invoice' | 'payment' | 'expense' | 'approval' | 'reminder' | 'security' | 'billing' | 'feature' | 'general';
   priority?: 'low' | 'normal' | 'high' | 'urgent';
-  is_read: boolean;
+  read: boolean; // Colonne en production
+  is_read?: boolean; // Alias pour compatibilité
   read_at?: string;
   archived?: boolean;
   archived_at?: string;
@@ -216,7 +229,7 @@ export class NotificationService {
 
       // Filtres optionnels
       if (options?.unreadOnly) {
-        query = query.eq('is_read', false);
+        query = query.eq('read', false);
       }
 
       if (options?.category) {
@@ -227,8 +240,8 @@ export class NotificationService {
         query = query.eq('type', options.type);
       }
 
-      // Exclure les notifications expirées
-      query = query.or(`expires_at.is.null,expires_at.gte.${new Date().toISOString()}`);
+      // Exclure les notifications expirées (filtre manuel après récupération)
+      // Note: Supabase OR syntax nécessite une syntaxe spécifique pour les filtres NULL
 
       // Pagination
       if (options?.limit) {
@@ -294,14 +307,14 @@ export class NotificationService {
    */
   async markAllAsRead(userId: string): Promise<NotificationServiceResponse<number>> {
     try {
-      const { data, error, count } = await supabase
+      const { data: _data, error, count } = await supabase
         .from('notifications')
         .update({
           is_read: true,
           read_at: new Date().toISOString()
         })
         .eq('user_id', userId)
-        .eq('is_read', false)
+        .eq('read', false)
         .select();
 
       if (error) throw error;
@@ -355,8 +368,7 @@ export class NotificationService {
         .from('notifications')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', userId)
-        .eq('is_read', false)
-        .or(`expires_at.is.null,expires_at.gte.${new Date().toISOString()}`);
+        .eq('read', false);
 
       if (error) throw error;
 
@@ -377,7 +389,7 @@ export class NotificationService {
    */
   async cleanupExpiredNotifications(): Promise<NotificationServiceResponse<number>> {
     try {
-      const { data, error, count } = await supabase
+      const { data: _data, error, count } = await supabase
         .from('notifications')
         .delete()
         .lt('expires_at', new Date().toISOString())
@@ -436,3 +448,4 @@ export class NotificationService {
 }
 
 export const notificationService = NotificationService.getInstance();
+

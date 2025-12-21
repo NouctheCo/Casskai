@@ -36,7 +36,7 @@ function SubscriptionStatus({ plan }: { plan: ReturnType<typeof useEnterprisePla
         {/* Indicateurs de quota */}
         {plan.quotas && Object.keys(plan.quotas).length > 0 && (
           <div className="space-y-3">
-            <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 dark:text-white">
               Utilisation des ressources
             </h4>
             {Object.keys(plan.quotas).map((quotaKey) => (
@@ -78,7 +78,7 @@ function AvailableFeatures({ capabilities }: { capabilities: Set<PlanCapability>
               key={capability}
               className="flex items-center space-x-2 p-2 bg-green-50 dark:bg-green-950/20 rounded"
             >
-              <div className="w-2 h-2 bg-green-500 rounded-full" />
+              <div className="w-2 h-2 bg-green-500 rounded-full dark:bg-green-900/20" />
               <span className="text-sm capitalize text-green-800 dark:text-green-200">
                 {capability.replace('_', ' ')}
               </span>

@@ -18,9 +18,24 @@ export interface CompanyProfile {
   timezone?: string;
   registrationNumber?: string;
   vatNumber?: string;
-  street?: string;
-  postalCode?: string;
+  // Identifiants et infos légales supplémentaires (utilisées dans OnboardingContextNew)
+  siret?: string;
+  siren?: string;
+  taxNumber?: string;
+  legalForm?: string;
+
+  // Adresse plate (en plus de contact.address pour compatibilité)
+  address?: string;
   city?: string;
+  postalCode?: string;
+
+  // Comptabilité avancée
+  accountingMethod?: string;
+  fiscalYearType?: string;
+  fiscalYearStartMonth?: number;
+  fiscalYearStartDay?: number;
+  street?: string;
+  // postalCode/city déjà présents plus haut pour compatibilité plate
   phone?: string;
   email?: string;
   website?: string;
@@ -142,7 +157,7 @@ export interface OnboardingState {
   progress: number;
 }
 
-export type OnboardingStepId = 'welcome' | 'company' | 'modules' | 'preferences' | 'features' | 'complete';
+export type OnboardingStepId = 'language' | 'welcome' | 'company' | 'modules' | 'preferences' | 'features' | 'complete';
 
 export interface StepValidationResult {
   isValid: boolean;

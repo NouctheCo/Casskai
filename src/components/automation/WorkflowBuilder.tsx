@@ -6,20 +6,17 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
 import { useAutomation } from '@/hooks/useAutomation';
-import { Workflow, WorkflowTrigger, WorkflowAction } from '@/services/automationService';
+import { WorkflowAction, TriggerConfig, TriggerType } from '@/services/automationService';
 import {
   ArrowLeft,
   Plus,
   Trash2,
-  Clock,
   Zap,
   Mail,
   FileText,
   Bell,
   Database,
-  Calendar,
   Settings,
   Play,
   Save
@@ -38,23 +35,18 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
     name: string;
     description: string;
     is_active: boolean;
-    trigger: WorkflowTrigger;
+    trigger_type: TriggerType;
+    trigger_config: TriggerConfig;
     actions: WorkflowAction[];
   }>({
     name: '',
     description: '',
     is_active: true,
-    trigger: {
-      id: 'trigger-1',
-      type: 'schedule',
-      config: {
-        schedule: {
-          frequency: 'daily',
-          time: '09:00',
-          dayOfWeek: 1,
-          dayOfMonth: 1
-        }
-      }
+    trigger_type: 'schedule',
+    trigger_config: {
+      frequency: 'daily',
+      time: '09:00',
+      day: 1
     },
     actions: []
   });
@@ -70,7 +62,8 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
           name: workflow.name,
           description: workflow.description || '',
           is_active: workflow.is_active,
-          trigger: workflow.trigger,
+          trigger_type: workflow.trigger_type,
+          trigger_config: workflow.trigger_config,
           actions: workflow.actions
         });
       }
@@ -84,31 +77,12 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
     }));
   };
 
-  const handleTriggerChange = (field: string, value: any) => {
+  const handleTriggerConfigChange = (field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
-      trigger: {
-        ...prev.trigger,
-        config: {
-          ...prev.trigger.config,
-          [field]: value
-        }
-      }
-    }));
-  };
-
-  const handleScheduleChange = (field: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      trigger: {
-        ...prev.trigger,
-        config: {
-          ...prev.trigger.config,
-          schedule: {
-            ...prev.trigger.config.schedule!,
-            [field]: value
-          }
-        }
+      trigger_config: {
+        ...prev.trigger_config,
+        [field]: value
       }
     }));
   };
@@ -116,14 +90,13 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
   const addAction = () => {
     const newAction: WorkflowAction = {
       id: `action-${Date.now()}`,
-      type: 'email',
+      type: 'send_email',
       config: {
-        email: {
-          to: [],
-          subject: '',
-          template: ''
-        }
-      }
+        recipients: [],
+        subject: '',
+        template: ''
+      },
+      order: formData.actions.length + 1
     };
 
     setFormData(prev => ({
@@ -162,9 +135,20 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
     setIsSaving(true);
 
     try {
+      const workflowData = {
+        ...formData,
+        icon: 'zap',
+        color: 'blue',
+        category: 'custom' as const,
+        is_template: false,
+        created_by: '',
+        last_run_at: null,
+        next_run_at: null
+      };
+
       const success = workflowId
         ? await updateWorkflow(workflowId, formData)
-        : await createWorkflow(formData);
+        : await createWorkflow(workflowData);
 
       if (success) {
         toast.success(workflowId ? 'Workflow mis à jour' : 'Workflow créé avec succès');
@@ -176,7 +160,7 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
   };
 
   const renderTriggerConfig = () => {
-    switch (formData.trigger.type) {
+    switch (formData.trigger_type) {
       case 'schedule':
         return (
           <div className="space-y-4">
@@ -184,8 +168,8 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
               <div>
                 <Label>Fréquence</Label>
                 <Select
-                  value={formData.trigger.config.schedule?.frequency}
-                  onValueChange={(value) => handleScheduleChange('frequency', value)}
+                  value={formData.trigger_config.frequency}
+                  onValueChange={(value) => handleTriggerConfigChange('frequency', value)}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -202,18 +186,18 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
                 <Label>Heure</Label>
                 <Input
                   type="time"
-                  value={formData.trigger.config.schedule?.time}
-                  onChange={(e) => handleScheduleChange('time', e.target.value)}
+                  value={formData.trigger_config.time}
+                  onChange={(e) => handleTriggerConfigChange('time', e.target.value)}
                 />
               </div>
             </div>
 
-            {formData.trigger.config.schedule?.frequency === 'weekly' && (
+            {formData.trigger_config.frequency === 'weekly' && (
               <div>
                 <Label>Jour de la semaine</Label>
                 <Select
-                  value={formData.trigger.config.schedule?.dayOfWeek?.toString()}
-                  onValueChange={(value) => handleScheduleChange('dayOfWeek', parseInt(value))}
+                  value={formData.trigger_config.day?.toString()}
+                  onValueChange={(value) => handleTriggerConfigChange('day', parseInt(value))}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -231,15 +215,15 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
               </div>
             )}
 
-            {formData.trigger.config.schedule?.frequency === 'monthly' && (
+            {formData.trigger_config.frequency === 'monthly' && (
               <div>
                 <Label>Jour du mois</Label>
                 <Input
                   type="number"
                   min="1"
                   max="31"
-                  value={formData.trigger.config.schedule?.dayOfMonth}
-                  onChange={(e) => handleScheduleChange('dayOfMonth', parseInt(e.target.value))}
+                  value={formData.trigger_config.day}
+                  onChange={(e) => handleTriggerConfigChange('day', parseInt(e.target.value))}
                 />
               </div>
             )}
@@ -252,21 +236,18 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
 
   const renderActionConfig = (action: WorkflowAction) => {
     switch (action.type) {
-      case 'email':
+      case 'send_email':
         return (
           <div className="space-y-3">
             <div>
               <Label>Destinataires (séparés par des virgules)</Label>
               <Input
                 placeholder="admin@example.com, manager@example.com"
-                value={action.config.email?.to.join(', ') || ''}
+                value={action.config.recipients?.join(', ') || ''}
                 onChange={(e) => updateAction(action.id, {
                   config: {
                     ...action.config,
-                    email: {
-                      ...action.config.email!,
-                      to: e.target.value.split(',').map(email => email.trim()).filter(Boolean)
-                    }
+                    recipients: e.target.value.split(',').map(email => email.trim()).filter(Boolean)
                   }
                 })}
               />
@@ -274,14 +255,11 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
             <div>
               <Label>Sujet</Label>
               <Input
-                value={action.config.email?.subject || ''}
+                value={action.config.subject || ''}
                 onChange={(e) => updateAction(action.id, {
                   config: {
                     ...action.config,
-                    email: {
-                      ...action.config.email!,
-                      subject: e.target.value
-                    }
+                    subject: e.target.value
                   }
                 })}
               />
@@ -289,14 +267,11 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
             <div>
               <Label>Template</Label>
               <Select
-                value={action.config.email?.template || ''}
+                value={action.config.template || ''}
                 onValueChange={(value) => updateAction(action.id, {
                   config: {
                     ...action.config,
-                    email: {
-                      ...action.config.email!,
-                      template: value
-                    }
+                    template: value
                   }
                 })}
               >
@@ -314,20 +289,17 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
           </div>
         );
 
-      case 'report_generation':
+      case 'generate_report':
         return (
           <div className="space-y-3">
             <div>
               <Label>Type de rapport</Label>
               <Select
-                value={action.config.report?.type || ''}
+                value={action.config.report_type || ''}
                 onValueChange={(value) => updateAction(action.id, {
                   config: {
                     ...action.config,
-                    report: {
-                      ...action.config.report!,
-                      type: value as any
-                    }
+                    report_type: value
                   }
                 })}
               >
@@ -345,14 +317,11 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
             <div>
               <Label>Format</Label>
               <Select
-                value={action.config.report?.format || 'pdf'}
+                value={action.config.format || 'pdf'}
                 onValueChange={(value) => updateAction(action.id, {
                   config: {
                     ...action.config,
-                    report: {
-                      ...action.config.report!,
-                      format: value as 'pdf' | 'excel' | 'csv'
-                    }
+                    format: value as 'pdf' | 'xlsx' | 'csv'
                   }
                 })}
               >
@@ -361,7 +330,7 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="pdf">PDF</SelectItem>
-                  <SelectItem value="excel">Excel</SelectItem>
+                  <SelectItem value="xlsx">Excel</SelectItem>
                   <SelectItem value="csv">CSV</SelectItem>
                 </SelectContent>
               </Select>
@@ -373,46 +342,25 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
         return (
           <div className="space-y-3">
             <div>
-              <Label>Titre</Label>
-              <Input
-                value={action.config.notification?.title || ''}
-                onChange={(e) => updateAction(action.id, {
-                  config: {
-                    ...action.config,
-                    notification: {
-                      ...action.config.notification!,
-                      title: e.target.value
-                    }
-                  }
-                })}
-              />
-            </div>
-            <div>
               <Label>Message</Label>
               <Textarea
-                value={action.config.notification?.message || ''}
+                value={action.config.message || ''}
                 onChange={(e) => updateAction(action.id, {
                   config: {
                     ...action.config,
-                    notification: {
-                      ...action.config.notification!,
-                      message: e.target.value
-                    }
+                    message: e.target.value
                   }
                 })}
               />
             </div>
             <div>
-              <Label>Priorité</Label>
+              <Label>Type de notification</Label>
               <Select
-                value={action.config.notification?.priority || 'medium'}
+                value={action.config.notification_type || 'info'}
                 onValueChange={(value) => updateAction(action.id, {
                   config: {
                     ...action.config,
-                    notification: {
-                      ...action.config.notification!,
-                      priority: value as 'low' | 'medium' | 'high'
-                    }
+                    notification_type: value as 'info' | 'success' | 'warning' | 'error'
                   }
                 })}
               >
@@ -420,9 +368,10 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="low">Faible</SelectItem>
-                  <SelectItem value="medium">Moyenne</SelectItem>
-                  <SelectItem value="high">Haute</SelectItem>
+                  <SelectItem value="info">Info</SelectItem>
+                  <SelectItem value="success">Succès</SelectItem>
+                  <SelectItem value="warning">Avertissement</SelectItem>
+                  <SelectItem value="error">Erreur</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -436,21 +385,21 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
 
   const getActionIcon = (type: string) => {
     switch (type) {
-      case 'email': return Mail;
-      case 'report_generation': return FileText;
+      case 'send_email': return Mail;
+      case 'generate_report': return FileText;
       case 'notification': return Bell;
-      case 'data_update': return Database;
+      case 'update_record': return Database;
       default: return Settings;
     }
   };
 
   const getActionTitle = (type: string) => {
     switch (type) {
-      case 'email': return 'Envoi d\'email';
-      case 'report_generation': return 'Génération de rapport';
+      case 'send_email': return 'Envoi d\'email';
+      case 'generate_report': return 'Génération de rapport';
       case 'notification': return 'Notification';
-      case 'data_update': return 'Mise à jour de données';
-      case 'invoice_creation': return 'Création de facture';
+      case 'update_record': return 'Mise à jour de données';
+      case 'create_invoice': return 'Création de facture';
       default: return 'Action';
     }
   };
@@ -467,7 +416,7 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
             <h1 className="text-2xl font-bold">
               {workflowId ? 'Modifier le Workflow' : 'Nouveau Workflow'}
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600 dark:text-gray-300">
               Configurez les déclencheurs et actions de votre workflow
             </p>
           </div>
@@ -539,13 +488,10 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
               <div>
                 <Label>Type de déclencheur</Label>
                 <Select
-                  value={formData.trigger.type}
+                  value={formData.trigger_type}
                   onValueChange={(value) => setFormData(prev => ({
                     ...prev,
-                    trigger: {
-                      ...prev.trigger,
-                      type: value as any
-                    }
+                    trigger_type: value as TriggerType
                   }))}
                 >
                   <SelectTrigger>
@@ -582,8 +528,8 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
             <CardContent>
               {formData.actions.length === 0 ? (
                 <div className="text-center py-8">
-                  <Play className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <Play className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
+                  <p className="text-gray-600 dark:text-gray-300">
                     Aucune action configurée. Ajoutez une action pour que ce workflow soit fonctionnel.
                   </p>
                 </div>
@@ -601,7 +547,7 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
                               </div>
                               <div>
                                 <h3 className="font-semibold">Action {index + 1}</h3>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                <p className="text-sm text-gray-600 dark:text-gray-300">
                                   {getActionTitle(action.type)}
                                 </p>
                               </div>
@@ -615,11 +561,11 @@ export function WorkflowBuilder({ workflowId, onClose }: WorkflowBuilderProps) {
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="email">Envoi d'email</SelectItem>
-                                  <SelectItem value="report_generation">Génération de rapport</SelectItem>
+                                  <SelectItem value="send_email">Envoi d'email</SelectItem>
+                                  <SelectItem value="generate_report">Génération de rapport</SelectItem>
                                   <SelectItem value="notification">Notification</SelectItem>
-                                  <SelectItem value="data_update" disabled>Mise à jour (Bientôt)</SelectItem>
-                                  <SelectItem value="invoice_creation" disabled>Création facture (Bientôt)</SelectItem>
+                                  <SelectItem value="update_record" disabled>Mise à jour (Bientôt)</SelectItem>
+                                  <SelectItem value="create_invoice" disabled>Création facture (Bientôt)</SelectItem>
                                 </SelectContent>
                               </Select>
                               <Button

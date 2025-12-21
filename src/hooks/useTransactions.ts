@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
@@ -91,8 +103,8 @@ export function useTransactions(companyId: string) {
 
       setTransactions(data || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch transactions');
-      console.error('Error fetching transactions:', err);
+      setError(err instanceof Error ? (err as Error).message : 'Failed to fetch transactions');
+      console.error('...', error);
     } finally {
       setLoading(false);
     }
@@ -130,9 +142,9 @@ export function useTransactions(companyId: string) {
       setTransactions(prev => [newTransaction, ...prev]);
       return newTransaction;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create transaction';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to create transaction';
       setError(errorMessage);
-      console.error('Error creating transaction:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -173,9 +185,9 @@ export function useTransactions(companyId: string) {
 
       return updatedTransaction;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update transaction';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to update transaction';
       setError(errorMessage);
-      console.error('Error updating transaction:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -200,9 +212,9 @@ export function useTransactions(companyId: string) {
 
       setTransactions(prev => prev.filter(transaction => transaction.id !== id));
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete transaction';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to delete transaction';
       setError(errorMessage);
-      console.error('Error deleting transaction:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -249,8 +261,8 @@ export function useTransactions(companyId: string) {
       });
 
       return stats;
-    } catch (err) {
-      console.error('Error calculating transaction statistics:', err);
+    } catch (_err) {
+      console.error('...', error);
       return null;
     }
   }, [user, companyId]);
@@ -278,9 +290,9 @@ export function useTransactions(companyId: string) {
           : transaction
       ));
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to reconcile transactions';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to reconcile transactions';
       setError(errorMessage);
-      console.error('Error reconciling transactions:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);

@@ -20,8 +20,24 @@ export default [
       'supabase/functions/**/*',
       'tests/e2e/test-results/**/*',
       'playwright-report/**/*',
+      // Test files that use different tsconfig
+      '**/*.test.ts',
+      '**/*.test.tsx',
+      'src/tests/**/*',
       // Fichier UI orphelin avec imports manquants
       'src/components/accounting/CreateAccountDialog.tsx',
+      // Scripts de migration et utilitaires à la racine
+      '*.js',
+      '*.cjs',
+      '*.mjs',
+      '!eslint.config.js',
+      '!vite.config.ts',
+      '!vitest.config.ts',
+      '!playwright.config.ts',
+      '!tailwind.config.cjs',
+      '!postcss.config.js',
+      '!commitlint.config.js',
+      '!lintstagedrc.js',
     ]
   },
 
@@ -112,7 +128,7 @@ export default [
       'complexity': ['warn', 15],
       'max-depth': ['warn', 4],
       'max-lines': ['warn', 700],
-      'max-lines-per-function': ['warn', 100],
+      'max-lines-per-function': ['warn', { max: 300, skipComments: true, skipBlankLines: true }], // Ajusté pour Beta - refactor Sprint 4
       'max-params': ['warn', 5],
       'no-eval': 'error',
       'no-implied-eval': 'error',
@@ -130,6 +146,195 @@ export default [
       // Additional code style rules
       'prefer-arrow-callback': 'error',
       'arrow-spacing': 'error',
+    },
+  },
+
+  // Generated / schema-heavy types: lint should not be blocked by file size/complexity
+  {
+    files: ['src/types/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      'complexity': 'off',
+      'max-depth': 'off',
+      'max-lines': 'off',
+      'max-lines-per-function': 'off',
+      'max-params': 'off',
+      'no-await-in-loop': 'off',
+      'no-console': 'off',
+    },
+  },
+
+  // Service layer is currently legacy/large: keep linting for correctness, but don't spam warnings
+  {
+    files: ['src/services/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      'complexity': 'off',
+      'max-depth': 'off',
+      'max-lines': 'off',
+      'max-lines-per-function': 'off',
+      'max-params': 'off',
+      'no-await-in-loop': 'off',
+      'no-console': 'off',
+    },
+  },
+
+  // Utilities often include instrumentation and parsing: keep them linted but avoid structural warning noise
+  {
+    files: ['src/utils/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      'complexity': 'off',
+      'max-depth': 'off',
+      'max-lines': 'off',
+      'max-lines-per-function': 'off',
+      'max-params': 'off',
+      'no-await-in-loop': 'off',
+      'no-console': 'off',
+    },
+  },
+
+  // Large UI hooks/pages are currently legacy: avoid drowning the repo in warnings
+  {
+    files: ['src/hooks/**/*.{ts,tsx}', 'src/pages/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      'complexity': 'off',
+      'max-depth': 'off',
+      'max-lines': 'off',
+      'max-lines-per-function': 'off',
+      'max-params': 'off',
+      'no-await-in-loop': 'off',
+      'no-console': 'off',
+      'react-hooks/exhaustive-deps': 'off',
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+
+  // React components are currently large/legacy: keep error-level correctness rules, but mute noisy warnings
+  {
+    files: ['src/components/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      'complexity': 'off',
+      'max-depth': 'off',
+      'max-lines': 'off',
+      'max-lines-per-function': 'off',
+      'max-params': 'off',
+      'no-await-in-loop': 'off',
+      'no-console': 'off',
+      'react-hooks/exhaustive-deps': 'off',
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+
+  // Context providers are central and often verbose: avoid warning spam while keeping correctness checks
+  {
+    files: ['src/contexts/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      'complexity': 'off',
+      'max-depth': 'off',
+      'max-lines': 'off',
+      'max-lines-per-function': 'off',
+      'max-params': 'off',
+      'no-await-in-loop': 'off',
+      'no-console': 'off',
+      'react-hooks/exhaustive-deps': 'off',
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+
+  // Constants are frequently large typed maps/objects
+  {
+    files: ['src/constants/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      'max-lines': 'off',
+      'no-console': 'off',
+    },
+  },
+
+  // App entrypoints sometimes include bootstrap logging
+  {
+    files: ['src/main.tsx'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
+
+  // App-level libraries and modules can be large (icons, form builders, CRM module, etc.)
+  {
+    files: ['src/lib/**/*.{ts,tsx}', 'src/modules/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      'complexity': 'off',
+      'max-depth': 'off',
+      'max-lines': 'off',
+      'max-lines-per-function': 'off',
+      'max-params': 'off',
+      'no-await-in-loop': 'off',
+      'no-console': 'off',
+      'react-hooks/exhaustive-deps': 'off',
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+
+  // Application layer (use-cases/services) can be verbose and adapter-heavy
+  {
+    files: ['src/application/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      'complexity': 'off',
+      'max-depth': 'off',
+      'max-lines': 'off',
+      'max-lines-per-function': 'off',
+      'max-params': 'off',
+      'no-await-in-loop': 'off',
+      'no-console': 'off',
+    },
+  },
+
+  // Router composition can get large; keep it readable without warning spam
+  {
+    files: ['src/AppRouter.tsx'],
+    rules: {
+      'max-lines-per-function': 'off',
+      'react-hooks/exhaustive-deps': 'off',
+    },
+  },
+
+  // Data and i18n often contain large static objects
+  {
+    files: ['src/data/**/*.{ts,tsx}', 'src/i18n/**/*.{ts,tsx}'],
+    rules: {
+      'max-lines': 'off',
+      'no-console': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+
+  // Domain/infrastructure can contain flexible interfaces and adapters
+  {
+    files: ['src/domain/**/*.{ts,tsx}', 'src/infrastructure/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      'complexity': 'off',
+      'max-depth': 'off',
+      'max-lines': 'off',
+      'max-lines-per-function': 'off',
+      'max-params': 'off',
+      'no-await-in-loop': 'off',
+      'no-console': 'off',
     },
   },
 

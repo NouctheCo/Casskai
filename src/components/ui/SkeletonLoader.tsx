@@ -243,7 +243,7 @@ export const ImportSkeleton: React.FC = () => (
     </div>
     
     {/* Upload area skeleton */}
-    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8">
+    <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8">
       <div className="text-center space-y-4">
         <Skeleton width={48} height={48} className="mx-auto" rounded />
         <Skeleton height={16} width={180} className="mx-auto" />

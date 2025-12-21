@@ -1,67 +1,91 @@
 const fs = require('fs');
 const path = require('path');
 
-const srcPath = './src';
-let totalFiles = 0;
-let correctedFiles = 0;
-let catchBlocksFixed = 0;
+/**
+ * Script de correction automatique des erreurs TS18046 (catch errors)
+ */
 
-function walkDir(dir) {
-  const files = fs.readdirSync(dir);
+// Liste des fichiers à corriger (on les obtient depuis grep)
+const filesToFix = [
+  'src/services/ReportExportService.ts',
+  'src/services/pdfService.ts',
+  'src/services/invoicePdfService.ts',
+  'src/services/reportGenerationService.ts',
+  'src/services/aiReportAnalysisService.ts',
+  'src/services/aiAnalysisService.ts',
+  'src/services/dashboardStatsService.ts',
+  'src/components/accounting/ReportsFinancialDashboard.tsx',
+  'src/services/chartImageService.ts'
+].map(f => path.join(process.cwd(), f));
 
-  files.forEach(file => {
-    const filePath = path.join(dir, file);
-    const stat = fs.statSync(filePath);
+/**
+ * Correction d'un fichier
+ */
+function fixFile(filePath) {
+  if (!fs.existsSync(filePath)) {
+    console.log(`⚠️  Fichier non trouvé: ${filePath}`);
+    return false;
+  }
 
-    if (stat.isDirectory()) {
-      walkDir(filePath);
-    } else if (file.endsWith('.ts') || file.endsWith('.tsx')) {
-      totalFiles++;
+  try {
+    let content = fs.readFileSync(filePath, 'utf8');
+    const original = content;
+    let modified = false;
 
-      let content = fs.readFileSync(filePath, 'utf-8');
-      const originalContent = content;
-
-      // Find all catch blocks with _error pattern and fix them
-      const catchPattern = /catch\s*\(_(?:error|err|_?)\)\s*\{/g;
-      const matches = content.match(catchPattern) || [];
-
-      if (matches.length > 0) {
-        // Replace catch (_error) with catch (error)
-        content = content.replace(catchPattern, 'catch (error) {');
-
-        // Check if error variable is used and add instanceof check if needed
-        if (content.includes('console.error') || content.includes('throw error')) {
-          // For each catch block, ensure error is properly handled
-          content = content.replace(
-            /catch \(error\) \{([\s\S]*?)(?=\n\s*(?:finally|\}|const|let|var|function|if|return))/g,
-            (match) => {
-              // Check if already has error message extraction
-              if (!match.includes('error instanceof Error')) {
-                return match.replace(
-                  /console\.error\((.*?)error([,\)])/g,
-                  `console.error($1error instanceof Error ? error.message : String(error)$2`
-                );
-              }
-              return match;
-            }
-          );
-        }
-
-        if (content !== originalContent) {
-          fs.writeFileSync(filePath, content, 'utf-8');
-          correctedFiles++;
-          catchBlocksFixed += matches.length;
-          console.log(`Fixed: ${filePath}`);
-        }
-      }
+    // Pattern 1: catch (error) -> catch (error: unknown)
+    if (content.includes('catch (error)') && !content.includes('catch (error: unknown)')) {
+      content = content.replace(/catch\s*\(\s*error\s*\)\s*\{/g, 'catch (error: unknown) {');
+      modified = true;
     }
-  });
+
+    // Pattern 2: error.message direct usage
+    const errorMessagePattern = /(\s+)(.*?)(error\.message)/g;
+    if (errorMessagePattern.test(content)) {
+      content = content.replace(
+        /([^.])error\.message([^a-zA-Z_])/g,
+        '$1(error instanceof Error ? error.message : \'Une erreur est survenue\')$2'
+      );
+      modified = true;
+    }
+
+    // Pattern 3: error.stack
+    if (content.includes('error.stack')) {
+      content = content.replace(
+        /([^.])error\.stack([^a-zA-Z_])/g,
+        '$1(error instanceof Error ? error.stack : undefined)$2'
+      );
+      modified = true;
+    }
+
+    // Pattern 4: String(error) dans les catch
+    if (content.includes('String(error)')) {
+      content = content.replace(
+        /String\(error\)/g,
+        '(error instanceof Error ? error.message : String(error))'
+      );
+      modified = true;
+    }
+
+    if (modified && content !== original) {
+      fs.writeFileSync(filePath, content, 'utf8');
+      console.log(`✅ ${path.basename(filePath)}`);
+      return true;
+    } else {
+      console.log(`⏭️  ${path.basename(filePath)} (déjà OK)`);
+      return false;
+    }
+  } catch (err) {
+    console.error(`❌ ${filePath}: ${err instanceof Error ? err.message : String(err)}`);
+    return false;
+  }
 }
 
-console.log('Starting fix for catch blocks...\n');
-walkDir(srcPath);
+// Main
+console.log('🔧 Correction des erreurs TS18046...\n');
+let fixed = 0;
 
-console.log(`\n--- Summary ---`);
-console.log(`Total files processed: ${totalFiles}`);
-console.log(`Files corrected: ${correctedFiles}`);
-console.log(`Catch blocks fixed: ${catchBlocksFixed}`);
+filesToFix.forEach(file => {
+  if (fixFile(file)) fixed++;
+});
+
+console.log(`\n✨ ${fixed} fichiers corrigés`);

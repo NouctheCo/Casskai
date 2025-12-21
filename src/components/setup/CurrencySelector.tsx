@@ -21,12 +21,12 @@ export function CurrencySelector({ value, onValueChange, showAfricanOnly = false
         <SelectValue placeholder="Sélectionner une devise" />
       </SelectTrigger>
       <SelectContent>
-        {currenciesToShow.map(currency => (
+        {currenciesToShow.map((currency: any) => (
           <SelectItem key={currency.code} value={currency.code}>
             <div className="flex items-center gap-2">
               <span className="font-mono text-sm">{currency.symbol}</span>
               <span>{currency.name}</span>
-              <span className="text-gray-500">({currency.code})</span>
+              <span className="text-gray-500 dark:text-gray-400">({currency.code})</span>
             </div>
           </SelectItem>
         ))}
@@ -36,7 +36,7 @@ export function CurrencySelector({ value, onValueChange, showAfricanOnly = false
 }
 
 // Exemple d'utilisation dans un composant
-export function AmountDisplay({ amount, currency }: { amount: number; currency: string }) {
+export function AmountDisplay({ amount, currency: _currency }: { amount: number; currency: string }) {
   const { formatAmount } = useCurrency();
 
   return (

@@ -10,6 +10,7 @@ import { Card, CardContent } from '../ui/card';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Loader2, Upload, X, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { SupplierSelectWithCreate } from './SupplierSelectWithCreate';
 
 interface PurchaseFormProps {
   isOpen: boolean;
@@ -25,7 +26,7 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
   onClose,
   onSubmit,
   purchase,
-  suppliers,
+  suppliers: _suppliers,
   loading
 }) => {
   const { t } = useTranslation();
@@ -195,7 +196,7 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
                 className={errors.invoice_number ? 'border-red-500' : ''}
               />
               {errors.invoice_number && (
-                <p className="text-sm text-red-600">{errors.invoice_number}</p>
+                <p className="text-sm text-red-600 dark:text-red-400">{errors.invoice_number}</p>
               )}
             </div>
 
@@ -212,34 +213,17 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
                 className={errors.purchase_date ? 'border-red-500' : ''}
               />
               {errors.purchase_date && (
-                <p className="text-sm text-red-600">{errors.purchase_date}</p>
+                <p className="text-sm text-red-600 dark:text-red-400">{errors.purchase_date}</p>
               )}
             </div>
 
             {/* Supplier */}
-            <div className="space-y-2">
-              <Label htmlFor="supplier_id">
-                {t('purchases.form.supplier')} *
-              </Label>
-              <Select
-                value={formData.supplier_id}
-                onValueChange={(value) => handleInputChange('supplier_id', value)}
-              >
-                <SelectTrigger className={errors.supplier_id ? 'border-red-500' : ''}>
-                  <SelectValue placeholder={t('purchases.form.selectSupplier')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {suppliers.map((supplier) => (
-                    <SelectItem key={supplier.id} value={supplier.id}>
-                      {supplier.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.supplier_id && (
-                <p className="text-sm text-red-600">{errors.supplier_id}</p>
-              )}
-            </div>
+            <SupplierSelectWithCreate
+              value={formData.supplier_id}
+              onChange={(value) => handleInputChange('supplier_id', value)}
+              error={errors.supplier_id}
+              required={true}
+            />
 
             {/* Due Date */}
             <div className="space-y-2">
@@ -254,7 +238,7 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
                 className={errors.due_date ? 'border-red-500' : ''}
               />
               {errors.due_date && (
-                <p className="text-sm text-red-600">{errors.due_date}</p>
+                <p className="text-sm text-red-600 dark:text-red-400">{errors.due_date}</p>
               )}
             </div>
           </div>
@@ -273,14 +257,14 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
               className={errors.description ? 'border-red-500' : ''}
             />
             {errors.description && (
-              <p className="text-sm text-red-600">{errors.description}</p>
+              <p className="text-sm text-red-600 dark:text-red-400">{errors.description}</p>
             )}
           </div>
 
           {/* Amounts */}
           <Card>
             <CardContent className="p-4 space-y-4">
-              <h4 className="font-medium text-gray-900">{t('purchases.form.amounts')}</h4>
+              <h4 className="font-medium text-gray-900 dark:text-gray-100">{t('purchases.form.amounts')}</h4>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Amount HT */}
@@ -299,7 +283,7 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
                     className={errors.amount_ht ? 'border-red-500' : ''}
                   />
                   {errors.amount_ht && (
-                    <p className="text-sm text-red-600">{errors.amount_ht}</p>
+                    <p className="text-sm text-red-600 dark:text-red-400">{errors.amount_ht}</p>
                   )}
                 </div>
 
@@ -345,9 +329,9 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
           {/* Attachments */}
           <div className="space-y-2">
             <Label>{t('purchases.form.attachments')}</Label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4">
               <div className="text-center">
-                <Upload className="mx-auto h-8 w-8 text-gray-400" />
+                <Upload className="mx-auto h-8 w-8 text-gray-400 dark:text-gray-500" />
                 <div className="mt-2">
                   <label htmlFor="attachments" className="cursor-pointer">
                     <span className="text-sm font-medium text-blue-600 hover:text-blue-500">
@@ -362,7 +346,7 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
                       className="hidden"
                     />
                   </label>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 dark:text-gray-300 mt-1">
                     {t('purchases.form.acceptedFormats')}
                   </p>
                 </div>
@@ -372,11 +356,11 @@ const PurchaseForm: React.FC<PurchaseFormProps> = ({
               {formData.attachments && formData.attachments.length > 0 && (
                 <div className="mt-4 space-y-2">
                   {formData.attachments.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                    <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded dark:bg-gray-900/30">
                       <div className="flex items-center space-x-2">
-                        <FileText className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm text-gray-700">{file.name}</span>
-                        <span className="text-xs text-gray-500">
+                        <FileText className="w-4 h-4 text-gray-500 dark:text-gray-300" />
+                        <span className="text-sm text-gray-700 dark:text-gray-300">{file.name}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-300">
                           ({(file.size / 1024).toFixed(1)} KB)
                         </span>
                       </div>

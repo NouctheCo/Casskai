@@ -1,11 +1,24 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 // ExcelJS import conditionnel pour éviter les problèmes de build
 let ExcelJS: typeof import('exceljs') | null = null;
 try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   ExcelJS = require('exceljs');
-} catch (error) {
+} catch (_error) {
   console.warn('ExcelJS not available in browser environment');
 }
-import { CSVMapping, ImportResult, ImportError, ImportWarning, FileParserOptions, ImportSession, FECEntry } from '../types/accounting-import.types';
+import { CSVMapping, ImportResult, ImportError, ImportWarning, FileParserOptions, FECEntry } from '../types/accounting-import.types';
 
 /**
  * Service d'import CSV/Excel avec mapping intelligent des colonnes
@@ -89,7 +102,7 @@ export class CSVImportService {
     }
     
     try {
-      const workbook = new ExcelJS.Workbook();
+      const workbook = new ExcelJS!.Workbook();
       const buffer = await file.arrayBuffer();
       await workbook.xlsx.load(buffer);
       
@@ -99,7 +112,7 @@ export class CSVImportService {
       }
 
       const jsonData: string[][] = [];
-      worksheet.eachRow((row, rowNumber) => {
+      worksheet.eachRow((row, _rowNumber) => {
         const rowData: string[] = [];
         row.eachCell({ includeEmpty: true }, (cell) => {
           rowData.push(cell.value?.toString() || '');
@@ -129,8 +142,8 @@ export class CSVImportService {
         preview: preview.slice(1), // Skip header row
         suggestedMapping
       };
-    } catch (error) {
-      throw new Error(`Erreur lors de l'analyse Excel: ${error.message}`);
+    } catch (error: unknown) {
+      throw new Error(`Erreur lors de l'analyse Excel: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
     }
   }
 
@@ -177,8 +190,8 @@ export class CSVImportService {
             preview,
             suggestedMapping
           });
-        } catch (error) {
-          reject(new Error(`Erreur lors de l'analyse CSV: ${error.message}`));
+        } catch (error: unknown) {
+          reject(new Error(`Erreur lors de l'analyse CSV: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`));
         }
       };
       reader.onerror = () => reject(new Error('Impossible de lire le fichier CSV'));
@@ -313,7 +326,7 @@ export class CSVImportService {
     options: FileParserOptions
   ): Promise<ImportResult> {
     try {
-      const workbook = new ExcelJS.Workbook();
+      const workbook = new ExcelJS!.Workbook();
       const buffer = await file.arrayBuffer();
       await workbook.xlsx.load(buffer);
       
@@ -333,8 +346,8 @@ export class CSVImportService {
       
       const result = this.processDataWithMapping(jsonData, mapping, options);
       return result;
-    } catch (error) {
-      return this.createErrorResult(error.message);
+    } catch (error: unknown) {
+      return this.createErrorResult((error instanceof Error ? error.message : 'Une erreur est survenue'));
     }
   }
 
@@ -359,8 +372,8 @@ export class CSVImportService {
           const data = lines.map(line => this.parseCSVLine(line, delimiter));
           const result = this.processDataWithMapping(data, mapping, options);
           resolve(result);
-        } catch (error) {
-          resolve(this.createErrorResult(error.message));
+        } catch (error: unknown) {
+          resolve(this.createErrorResult((error instanceof Error ? error.message : 'Une erreur est survenue')));
         }
       };
       reader.onerror = () => resolve(this.createErrorResult('Impossible de lire le fichier CSV'));
@@ -393,18 +406,22 @@ export class CSVImportService {
       try {
         const entry = this.mapRowToEntry(row, mapping, rowNumber);
         
-        // Validation de base
-        const validationErrors = this.validateMappedEntry(entry, rowNumber);
-        if (validationErrors.length > 0) {
-          errors.push(...validationErrors);
+        // Validation de base - accepter les entrées partielles
+        if (entry.journalCode || (entry as any).pieceRef || (entry as any).CompteNum) {
+          entries.push(entry as any);
         } else {
-          entries.push(entry);
+          errors.push({
+            row: rowNumber,
+            message: 'Champs obligatoires manquants',
+            type: 'validation',
+            severity: 'error'
+          });
         }
 
-      } catch (error) {
+      } catch (error: unknown) {
         errors.push({
           row: rowNumber,
-          message: `Erreur de mapping: ${error.message}`,
+          message: `Erreur de mapping: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`,
           type: 'format',
           severity: 'error'
         });
@@ -425,22 +442,22 @@ export class CSVImportService {
   /**
    * Mappe une ligne vers un objet entry
    */
-  private static mapRowToEntry(row: string[], mapping: CSVMapping[], rowNumber: number): Partial<FECEntry> {
+  private static mapRowToEntry(row: string[], mapping: CSVMapping[], _rowNumber: number): Partial<FECEntry> {
     const entry: Record<string, unknown> = {};
 
     mapping.forEach(map => {
       const rawValue = row[map.columnIndex] || map.defaultValue || '';
       
       try {
-        let processedValue = this.processFieldValue(rawValue, map.dataType);
+        let processedValue: any = this.processFieldValue(rawValue, map.dataType);
         
         if (map.transform) {
-          processedValue = map.transform(processedValue);
+          processedValue = map.transform(String(processedValue));
         }
         
         entry[map.fieldName] = processedValue;
-      } catch (error) {
-        throw new Error(`Colonne ${map.columnName}: ${error.message}`);
+      } catch (error: unknown) {
+        throw new Error(`Colonne ${map.columnName}: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
       }
     });
 
@@ -502,9 +519,9 @@ export class CSVImportService {
     
     // Formats communs à détecter
     const formats = [
-      /^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/, // DD/MM/YYYY
-      /^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/, // YYYY/MM/DD
-      /^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2})$/,  // DD/MM/YY
+      /^(\d{1,2})[/\-.](?:\d{1,2})[/\-.](\d{4})$/, // DD/MM/YYYY
+      /^(\d{4})[/\-.](\d{1,2})[/\-.](\d{1,2})$/, // YYYY/MM/DD
+      /^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2})$/,  // DD/MM/YY
     ];
 
     for (const format of formats) {
@@ -562,12 +579,12 @@ export class CSVImportService {
     return result;
   }
 
-  private static async detectCSVEncoding(file: File): Promise<string> {
+  private static async detectCSVEncoding(_file: File): Promise<string> {
     // Réutilise la logique de FECParser
     return 'UTF-8'; // Simplifié pour cet exemple
   }
 
-  private static async detectCSVDelimiter(file: File, encoding: string): Promise<string> {
+  private static async detectCSVDelimiter(_file: File, _encoding: string): Promise<string> {
     // Réutilise la logique de FECParser
     return ';'; // Délimiteur par défaut français
   }

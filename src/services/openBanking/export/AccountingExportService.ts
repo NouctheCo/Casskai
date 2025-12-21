@@ -1,4 +1,15 @@
-/* eslint-disable max-lines */
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import {
   ExportFormat,
   ExportJob,
@@ -44,8 +55,8 @@ export class AccountingExportService {
 
       this.isInitialized = true;
   console.warn(`Accounting export service initialized with ${formats.length} formats`);
-    } catch (error) {
-      throw new Error(`Failed to initialize accounting export service: ${error.message}`);
+    } catch (error: unknown) {
+      throw new Error(`Failed to initialize accounting export service: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
     }
   }
 
@@ -97,13 +108,13 @@ export class AccountingExportService {
         success: true,
         data: job
       };
-    } catch (error) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: {
           code: 'EXPORT_JOB_CREATION_ERROR',
-          message: `Failed to create export job: ${error.message}`,
-          details: error
+          message: `Failed to create export job: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`,
+          details: error instanceof Error ? { message: error.message, stack: error.stack } : { error: String(error) }
         }
       };
     }
@@ -151,8 +162,8 @@ export class AccountingExportService {
       });
 
   console.warn(`Export job ${job.id} completed successfully`);
-    } catch (error) {
-      this.updateJob(job.id, { status: 'failed', errorMessage: error.message });
+    } catch (error: unknown) {
+      this.updateJob(job.id, { status: 'failed', errorMessage: (error instanceof Error ? error.message : 'Une erreur est survenue') });
 
       console.error(`Export job ${job.id} failed:`, error);
     }
@@ -191,7 +202,6 @@ export class AccountingExportService {
   }
 
   // Appliquer une règle de validation
-  // eslint-disable-next-line complexity
   private async applyValidationRule(
     data: unknown,
     rule: ValidationRule
@@ -248,10 +258,10 @@ export class AccountingExportService {
       }
 
       return { valid: true, error: '' };
-    } catch (error) {
+    } catch (error: unknown) {
       return {
         valid: false,
-        error: `Validation error: ${error.message}`
+        error: `Validation error: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`
       };
     }
   }
@@ -300,9 +310,9 @@ export class AccountingExportService {
                 ? value
                 : String(value);
               return [mapping.targetField, normalized] as const;
-            } catch (error) {
+            } catch (error: unknown) {
               if (mapping.required) {
-                throw new Error(`Failed to map required field ${mapping.sourceField}: ${error.message}`);
+                throw new Error(`Failed to map required field ${mapping.sourceField}: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
               }
               return [mapping.targetField, mapping.defaultValue ?? ''] as const;
             }
@@ -317,7 +327,6 @@ export class AccountingExportService {
   }
 
   // Appliquer une transformation de champ
-  // eslint-disable-next-line complexity
   private async applyTransformation(
     value: unknown,
     transformation: FieldMapping['transformation']
@@ -370,7 +379,6 @@ export class AccountingExportService {
 
         case 'lookup': {
           const lookupTable = transformation.parameters.table || {};
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return (lookupTable as Record<string, any>)[String(value)] ?? transformation.parameters.defaultValue ?? value;
         }
 
@@ -379,7 +387,7 @@ export class AccountingExportService {
       }
 
       return value as string | number | boolean | null | undefined;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Transformation error:', error);
       return value as string | number | boolean | null | undefined;
     }
@@ -509,8 +517,8 @@ export class AccountingExportService {
   console.warn(`Export file saved: ${exportedFile.filename}`);
 
       return url;
-    } catch (error) {
-      throw new Error(`Failed to save export file: ${error.message}`);
+    } catch (error: unknown) {
+      throw new Error(`Failed to save export file: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
     }
   }
 

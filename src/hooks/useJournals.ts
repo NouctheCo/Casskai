@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
@@ -81,9 +93,9 @@ export function useJournals(companyId: string) {
       setJournals(data || []);
       return { data: data || [], count: count || 0, error: null };
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch journals';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to fetch journals';
       setError(errorMessage);
-      console.error('Error fetching journals:', err);
+      console.error('...', error);
       return { data: [], count: 0, error: errorMessage };
     } finally {
       setLoading(false);
@@ -134,9 +146,9 @@ export function useJournals(companyId: string) {
       setJournals(prev => [newJournal, ...prev]);
       return newJournal;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create journal';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to create journal';
       setError(errorMessage);
-      console.error('Error creating journal:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -193,9 +205,9 @@ export function useJournals(companyId: string) {
 
       return updatedJournal;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update journal';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to update journal';
       setError(errorMessage);
-      console.error('Error updating journal:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -234,9 +246,9 @@ export function useJournals(companyId: string) {
         setJournals(prev => prev.filter(journal => journal.id !== id));
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete journal';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to delete journal';
       setError(errorMessage);
-      console.error('Error deleting journal:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -257,8 +269,8 @@ export function useJournals(companyId: string) {
 
       if (fetchError) throw fetchError;
       return data;
-    } catch (err) {
-      console.error('Error fetching journal by ID:', err);
+    } catch (_err) {
+      console.error('...', error);
       return null;
     }
   }, [user, companyId]);
@@ -277,8 +289,8 @@ export function useJournals(companyId: string) {
 
       if (fetchError) throw fetchError;
       return data;
-    } catch (err) {
-      console.error('Error fetching journal by code:', err);
+    } catch (_err) {
+      console.error('...', error);
       return null;
     }
   }, [user, companyId]);
@@ -325,9 +337,9 @@ export function useJournals(companyId: string) {
       setJournals(createdJournals || []);
       return createdJournals || [];
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create default journals';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to create default journals';
       setError(errorMessage);
-      console.error('Error creating default journals:', err);
+      console.error('...', error);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -357,8 +369,8 @@ export function useJournals(companyId: string) {
       };
 
       return stats;
-    } catch (err) {
-      console.error('Error calculating journal statistics:', err);
+    } catch (_err) {
+      console.error('...', error);
       return null;
     }
   }, [user, companyId]);

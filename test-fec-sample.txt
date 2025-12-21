@@ -1,0 +1,4 @@
+JournalCode|JournalLib|EcritureNum|EcritureDate|CompteNum|CompteLib|CompAuxNum|CompAuxLib|PieceRef|PieceDate|EcritureLib|Debit|Credit|EcritureLet|DateLet|ValidDate|Montantdevise|Idevise
+RAN|Report à nouveau|1|20240101|101300|Capital souscrit (interne Dougs)|||C1|20240101|À-nouveaux|0,00|1000,00|||20250219 10:25:37||
+RAN|Report à nouveau|1|20240101|119000|Report à nouveau débiteur|||C1|20240101|À-nouveaux|3297,36|0,00|||20250219 10:25:37||
+RAN|Report à nouveau|1|20240101|120000|Résultat|||C1|20240101|À-nouveaux|4903,08|0,00|||20250219 10:25:37||

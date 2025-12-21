@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import { useEffect, useState } from 'react';
 import { devLogger } from '@/utils/devLogger';
 
@@ -56,7 +68,7 @@ export const useServiceWorker = (): [ServiceWorkerState, ServiceWorkerActions] =
         }
       });
 
-      devLogger.log('✅ Service Worker enregistré');
+      devLogger.info('✅ Service Worker enregistré');
     } catch (error) {
       devLogger.error('❌ Erreur enregistrement Service Worker:', error);
     }
@@ -66,7 +78,7 @@ export const useServiceWorker = (): [ServiceWorkerState, ServiceWorkerActions] =
     if (registration) {
       await registration.unregister();
       setState(prev => ({ ...prev, isRegistered: false }));
-      devLogger.log('🗑️ Service Worker désenregistré');
+      devLogger.info('🗑️ Service Worker désenregistré');
     }
   };
 
@@ -96,7 +108,7 @@ export const useServiceWorker = (): [ServiceWorkerState, ServiceWorkerActions] =
       // Mettre à jour la taille du cache
       updateCacheSize();
       
-      devLogger.log(`🧹 Cache ${cacheName || 'tous'} vidé`);
+      devLogger.info(`🧹 Cache ${cacheName || 'tous'} vidé`);
     }
   };
 
@@ -107,7 +119,7 @@ export const useServiceWorker = (): [ServiceWorkerState, ServiceWorkerActions] =
         payload: { urls }
       });
       
-      devLogger.log(`📦 Pré-chargement de ${urls.length} URLs`);
+      devLogger.info(`📦 Pré-chargement de ${urls.length} URLs`);
     }
   };
 
@@ -207,7 +219,7 @@ export const useOfflineStatus = () => {
 
   const syncWhenOnline = async () => {
     if (swState.isOnline && offlineActions.length > 0) {
-      devLogger.log(`🔄 Synchronisation de ${offlineActions.length} actions`);
+      devLogger.info(`🔄 Synchronisation de ${offlineActions.length} actions`);
       
       // Ici vous pouvez implémenter la logique de sync
       // Par exemple, renvoyer les requêtes qui ont échoué
@@ -238,7 +250,7 @@ export const UpdateNotification = () => {
   if (!showNotification) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 bg-blue-500 text-white p-4 rounded-lg shadow-lg z-50 max-w-sm">
+    <div className="fixed bottom-4 right-4 bg-blue-500 text-white p-4 rounded-lg shadow-lg z-50 max-w-sm dark:bg-blue-900/20">
       <div className="flex items-start space-x-3">
         <div className="flex-shrink-0">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -252,14 +264,14 @@ export const UpdateNotification = () => {
             <button
               type="button"
               onClick={acceptUpdate}
-              className="px-3 py-1 bg-white text-blue-500 text-sm rounded hover:bg-opacity-90 transition-colors"
+              className="px-3 py-1 bg-white dark:bg-gray-800 text-blue-500 text-sm rounded hover:bg-opacity-90 transition-colors"
             >
               Mettre à jour
             </button>
             <button
               type="button"
               onClick={dismissUpdate}
-              className="px-3 py-1 text-sm border border-white border-opacity-50 rounded hover:bg-white hover:bg-opacity-10 transition-colors"
+              className="px-3 py-1 text-sm border border-white border-opacity-50 rounded hover:bg-white dark:bg-gray-800 hover:bg-opacity-10 transition-colors"
             >
               Plus tard
             </button>

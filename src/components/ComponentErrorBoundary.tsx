@@ -47,9 +47,9 @@ export class ComponentErrorBoundary extends Component<Props, State> {
 
       // Default minimal error UI
       return (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 dark:bg-red-900/20">
           <div className="flex items-center gap-2 mb-2">
-            <AlertTriangle className="h-4 w-4 text-red-600" />
+            <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
             <h3 className="text-sm font-medium text-red-900">
               {this.props.componentName || 'Component'} Error
             </h3>
@@ -61,18 +61,18 @@ export class ComponentErrorBoundary extends Component<Props, State> {
           
           <button
             onClick={this.handleRetry}
-            className="inline-flex items-center gap-1 text-sm text-red-600 hover:text-red-800 font-medium"
+            className="inline-flex items-center gap-1 text-sm text-red-600 hover:text-red-800 font-medium dark:text-red-400"
           >
             <RefreshCw className="h-3 w-3" />
             Try Again
           </button>
           
           {this.props.showError && process.env.NODE_ENV === 'development' && this.state.error && (
-            <details className="mt-3 p-2 bg-white rounded border text-xs">
-              <summary className="cursor-pointer font-medium text-gray-700">
+            <details className="mt-3 p-2 bg-white dark:bg-gray-800 rounded border text-xs">
+              <summary className="cursor-pointer font-medium text-gray-700 dark:text-gray-300">
                 Error Details
               </summary>
-              <div className="mt-2 text-gray-600">
+              <div className="mt-2 text-gray-600 dark:text-gray-400">
                 <p className="font-semibold">Message:</p>
                 <p className="mb-2">{this.state.error.message}</p>
                 <p className="font-semibold">Stack:</p>

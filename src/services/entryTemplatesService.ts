@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import { EntryTemplate, TemplateAccount, VATRule, TemplateCondition, JournalEntryType } from '../types/accounting-import.types';
 import { supabase } from '../lib/supabase';
 
@@ -275,10 +287,10 @@ export class EntryTemplatesService {
 
     if (templateAccount.accountNumber) {
       const account = await supabase
-        .from('accounts')
+        .from('chart_of_accounts')
         .select('id')
         .eq('company_id', companyId)
-        .eq('number', templateAccount.accountNumber)
+        .eq('account_number', templateAccount.accountNumber)
         .eq('is_active', true)
         .single();
 
@@ -308,8 +320,8 @@ export class EntryTemplatesService {
       // Évaluation sécurisée de l'expression mathématique
       const result = this.evaluateMathExpression(processedFormula);
       return Math.round(result * 100) / 100; // Arrondi à 2 décimales
-    } catch (error) {
-      throw new Error(`Erreur dans la formule "${formula}": ${error.message}`);
+    } catch (error: unknown) {
+      throw new Error(`Erreur dans la formule "${formula}": ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
     }
   }
 
@@ -327,8 +339,9 @@ export class EntryTemplatesService {
 
     try {
       // Utilisation de Function pour éviter eval() direct
+      // eslint-disable-next-line no-new-func
       return new Function(`"use strict"; return (${cleanExpression})`)();
-    } catch (error) {
+    } catch (_error) {
       throw new Error(`Expression invalide: ${cleanExpression}`);
     }
   }
@@ -412,10 +425,10 @@ export class EntryTemplatesService {
         (rule.accountCredit || '445711');
 
       const vatAccount = await supabase
-        .from('accounts')
+        .from('chart_of_accounts')
         .select('id')
         .eq('company_id', companyId)
-        .eq('number', vatAccountNumber)
+        .eq('account_number', vatAccountNumber)
         .single();
 
       if (vatAccount.data) {
@@ -443,8 +456,8 @@ export class EntryTemplatesService {
       .select('entry_number')
       .eq('company_id', companyId)
       .eq('journal_id', journalId)
-      .gte('date', `${year}-01-01`)
-      .lte('date', `${year}-12-31`)
+      .gte('entry_date', `${year}-01-01`)
+      .lte('entry_date', `${year}-12-31`)
       .order('entry_number', { ascending: false })
       .limit(1)
       .single();
@@ -556,8 +569,8 @@ export class EntryTemplatesService {
             processed++;
           }
         }
-      } catch (error) {
-        errors.push(`Template ${template.name}: ${error.message}`);
+      } catch (error: unknown) {
+        errors.push(`Template ${template.name}: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
       }
     }
 
@@ -593,7 +606,7 @@ export class EntryTemplatesService {
       .from('journal_entries')
       .select('id')
       .eq('company_id', companyId)
-      .gte('date', checkDate.toISOString())
+      .gte('entry_date', checkDate.toISOString())
       .like('description', `%${template.name}%`)
       .limit(1);
 
@@ -614,7 +627,8 @@ export class EntryTemplatesService {
 
     // Variables spécifiques par catégorie
     switch (template.category) {
-      case 'other': // Paie par exemple
+      case 'other': {
+        // Paie par exemple
         // Récupération des données de paie depuis les paramètres
         const salaryData = await supabase
           .from('company_settings')
@@ -627,6 +641,7 @@ export class EntryTemplatesService {
           Object.assign(variables, JSON.parse(salaryData.data.value));
         }
         break;
+      }
     }
 
     return variables;
@@ -672,7 +687,7 @@ export class EntryTemplatesService {
       category: data.category,
       isRecurring: data.is_recurring,
       frequency: data.frequency,
-      accounts: data.template_accounts?.map(acc => ({
+      accounts: data.template_accounts?.map((acc: any) => ({
         id: acc.id,
         accountType: acc.account_type,
         accountNumber: acc.account_number,
@@ -682,7 +697,7 @@ export class EntryTemplatesService {
         isVariable: acc.is_variable,
         conditions: acc.conditions,
       })) || [],
-      vatRules: data.template_vat_rules?.map(rule => ({
+      vatRules: data.template_vat_rules?.map((rule: any) => ({
         id: rule.id,
         name: rule.name,
         rate: rule.rate,

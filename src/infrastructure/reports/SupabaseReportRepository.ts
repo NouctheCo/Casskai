@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabase';
 import { IReportRepository } from '../../domain/reports/repositories/IReportRepository';
-import { Report, ReportExecution, ReportParameters, ReportMetadata, ReportCategory, ReportFrequency } from '../../domain/reports/entities/Report';
+import { Report, ReportExecution, ReportParameters, ReportMetadata, ReportCategory, ReportFrequency, ReportStatus } from '../../domain/reports/entities/Report';
 
 export class SupabaseReportRepository implements IReportRepository {
   async findReportById(id: string): Promise<Report | null> {
@@ -199,7 +199,7 @@ export class SupabaseReportRepository implements IReportRepository {
       .from('journal_entries')
       .select(`
         id,
-        date,
+        entry_date,
         reference,
         description,
         account_code,
@@ -209,9 +209,9 @@ export class SupabaseReportRepository implements IReportRepository {
         company_id
       `)
       .eq('company_id', companyId)
-      .gte('date', dateFrom.toISOString())
-      .lte('date', dateTo.toISOString())
-      .order('date', { ascending: true });
+      .gte('entry_date', dateFrom.toISOString())
+      .lte('entry_date', dateTo.toISOString())
+      .order('entry_date', { ascending: true });
 
     if (error) {
       console.error('Error fetching accounting entries:', error);
@@ -226,8 +226,8 @@ export class SupabaseReportRepository implements IReportRepository {
       .from('invoices')
       .select('*')
       .eq('company_id', companyId)
-      .gte('date', dateFrom.toISOString())
-      .lte('date', dateTo.toISOString());
+      .gte('entry_date', dateFrom.toISOString())
+      .lte('entry_date', dateTo.toISOString());
 
     if (error) {
       console.error('Error fetching invoices:', error);
@@ -242,8 +242,8 @@ export class SupabaseReportRepository implements IReportRepository {
       .from('expenses')
       .select('*')
       .eq('company_id', companyId)
-      .gte('date', dateFrom.toISOString())
-      .lte('date', dateTo.toISOString());
+      .gte('entry_date', dateFrom.toISOString())
+      .lte('entry_date', dateTo.toISOString());
 
     if (error) {
       console.error('Error fetching expenses:', error);
@@ -291,15 +291,15 @@ export class SupabaseReportRepository implements IReportRepository {
 
   private mapExecutionFromDB(data: Record<string, unknown>): ReportExecution {
     return {
-      id: data.id,
-      reportId: data.report_id,
-      status: data.status,
-      createdAt: new Date(data.created_at),
-      completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
-      parameters: data.parameters,
-      result: data.result,
-      error: data.error,
-      progress: data.progress || 0
+      id: data.id as string,
+      reportId: data.report_id as string,
+      status: data.status as ReportStatus,
+      createdAt: new Date(data.created_at as string),
+      completedAt: data.completed_at ? new Date(data.completed_at as string) : undefined,
+      parameters: data.parameters as any,
+      result: data.result as any,
+      error: data.error as string | undefined,
+      progress: (data.progress as number) || 0
     };
   }
 

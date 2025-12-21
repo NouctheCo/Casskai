@@ -1,4 +1,15 @@
-/* eslint-disable max-lines */
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import {
   WebhookEvent,
   WebhookConfig,
@@ -675,7 +686,7 @@ export class WebhookMiddleware {
             error: result.error?.message || 'Webhook processing failed'
           });
         }
-      } catch (error) {
+      } catch (_error) {
         console.error('Webhook middleware error');
         res.status(500).json({
           error: 'Internal server error'
@@ -707,7 +718,7 @@ export class WebhookMiddleware {
         }
 
         next();
-      } catch (error) {
+      } catch (_error) {
         res.status(500).json({
           error: 'Validation failed'
         });

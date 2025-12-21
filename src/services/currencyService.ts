@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 // src/services/currencyService.ts - VERSION FINALE
 
 import ConfigService from './configService';
@@ -669,7 +681,7 @@ export class CurrencyService {
       if (error) {
         console.warn('Erreur sauvegarde taux:', error);
       }
-    } catch (error) {
+    } catch (_error) {
       // Ignorer les erreurs de DB si pas de configuration
     }
   }
@@ -793,7 +805,3 @@ export class CurrencyService {
     };
   }
 }
-
-
-
-

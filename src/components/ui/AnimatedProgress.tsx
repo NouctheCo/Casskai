@@ -170,7 +170,7 @@ export const CircularProgress: React.FC<{
           stroke="currentColor"
           strokeWidth={strokeWidth}
           fill="transparent"
-          className="text-gray-200 dark:text-gray-700"
+          className="text-gray-200 dark:text-gray-700 dark:text-gray-300"
         />
         
         {/* Progress circle */}
@@ -266,7 +266,7 @@ export const SteppedProgress: React.FC<{
                 style={{ originX: 0 }}
               >
                 <motion.div
-                  className="absolute inset-0 bg-blue-500"
+                  className="absolute inset-0 bg-blue-500 dark:bg-blue-900/20"
                   initial={{ scaleX: 0 }}
                   animate={{ 
                     scaleX: index < currentStep ? 1 : 0,
@@ -309,7 +309,7 @@ export const PulsingProgress: React.FC<{
       
       {isActive && (
         <motion.div
-          className="absolute inset-0 bg-blue-500 rounded-lg opacity-20 blur-sm"
+          className="absolute inset-0 bg-blue-500 rounded-lg opacity-20 blur-sm dark:bg-blue-900/20"
           animate={{
             scale: [1, 1.1, 1],
             opacity: [0.2, 0.4, 0.2]

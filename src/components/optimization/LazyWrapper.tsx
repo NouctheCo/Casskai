@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 // Wrapper pour le lazy loading intelligent des composants lourds
 import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { useInView } from 'framer-motion';

@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import {
   BankConnection,
   BankAccount,
@@ -96,11 +108,11 @@ export class BridgeProvider extends BankingProvider {
       await this.authenticateClient();
       this.isInitialized = true;
     } catch (error) {
-      const error = _error as Error;
+      const err = error as Error;
       throw new BankingProviderError(
         'INIT_ERROR',
-        `Failed to initialize Bridge provider: ${error.message}`,
-        _error
+        `Failed to initialize Bridge provider: ${err.message}`,
+        error
       );
     }
   }
@@ -109,7 +121,7 @@ export class BridgeProvider extends BankingProvider {
     try {
       const response = await this.makeRequest('GET', '/v2/status') as BridgeStatusResponse;
       return response.status === 'ok';
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -123,7 +135,7 @@ export class BridgeProvider extends BankingProvider {
       }) as BridgeAuthResponse;
 
       this.accessToken = response.access_token;
-    } catch (error) {
+    } catch (_error) {
       throw new AuthenticationError('Failed to authenticate with Bridge API');
     }
   }
@@ -621,11 +633,11 @@ export class BridgeProvider extends BankingProvider {
 
       return result;
     } catch (error) {
-      if (_error instanceof BankingProviderError) {
-        throw _error;
+      if (error instanceof BankingProviderError) {
+        throw error;
       }
-      const error = _error as Error;
-      throw new NetworkError(`Request failed: ${error.message}`, _error);
+      const err = error as Error;
+      throw new NetworkError(`Request failed: ${err.message}`, error);
     }
   }
 
@@ -692,4 +704,3 @@ export class BridgeProvider extends BankingProvider {
     return categoryMap[categoryId] || 'Autre';
   }
 }
-

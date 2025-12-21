@@ -1,16 +1,31 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 // Service d'export de rapports avec génération PDF et Excel
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { chartGenerationService } from './chartGenerationService';
 
 export interface ExportOptions {
   format: 'pdf' | 'excel' | 'csv';
   orientation?: 'portrait' | 'landscape';
   title?: string;
   subtitle?: string;
+  fileName?: string;
   includeCharts?: boolean;
+  charts?: string[]; // Images base64 des graphiques
   watermark?: string;
   companyInfo?: {
     name: string;
@@ -25,7 +40,9 @@ export interface TableData {
   headers: string[];
   rows: any[][];
   title?: string;
-  summary?: Record<string, any>;
+  subtitle?: string;
+  summary?: Record<string, any> | any[][];
+  footer?: string[];
 }
 
 export interface ChartData {
@@ -116,20 +133,21 @@ export class ReportExportService {
           },
           columnStyles: this.getColumnStyles(table.headers),
           margin: { left: 20, right: 20 },
-          didDrawPage: (data) => {
-            // Pied de page
+          didDrawPage: (data: any) => {
+            // Pied de page avec numérotation correcte
+            const pageCount = (pdf.internal as any).getNumberOfPages();
             pdf.setFontSize(8);
             pdf.setFont('helvetica', 'normal');
             pdf.text(
-              `Page ${data.pageNumber} - ${options.companyInfo?.name || 'Rapport'} - ${format(new Date(), 'dd/MM/yyyy')}`,
+              `Page ${data.pageNumber} / ${pageCount} - ${options.companyInfo?.name || 'Rapport'} - ${format(new Date(), 'dd/MM/yyyy')}`,
               20,
               pdf.internal.pageSize.height - 10
             );
           }
-        };
+        } as any;
 
-        pdf.autoTable(tableConfig);
-        currentY = pdf.lastAutoTable?.finalY + 15 || currentY + 50;
+        autoTable(pdf, tableConfig);
+        currentY = (pdf as any).lastAutoTable?.finalY + 15 || currentY + 50;
 
         // Résumé si disponible
         if (table.summary) {
@@ -141,6 +159,35 @@ export class ReportExportService {
         if (i < tables.length - 1) {
           pdf.addPage();
           currentY = 20;
+        }
+      }
+
+      // Ajouter les graphiques si disponibles
+      if (options.includeCharts && options.charts && options.charts.length > 0) {
+        pdf.addPage();
+        currentY = 20;
+
+        pdf.setFontSize(16);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Graphiques et Visualisations', 20, currentY);
+        currentY += 15;
+
+        for (let i = 0; i < options.charts.length; i++) {
+          const chartImage = options.charts[i];
+
+          // Vérifier s'il reste assez d'espace sur la page
+          if (currentY > pdf.internal.pageSize.height - 100) {
+            pdf.addPage();
+            currentY = 20;
+          }
+
+          // Ajouter le graphique
+          try {
+            pdf.addImage(chartImage, 'PNG', 20, currentY, 170, 85);
+            currentY += 95;
+          } catch (error) {
+            console.error('Erreur lors de l\'ajout du graphique:', error);
+          }
         }
       }
 
@@ -265,22 +312,30 @@ export class ReportExportService {
 
   // CSV Export simple et efficace
   exportToCSV(
-    data: TableData,
-    options: ExportOptions = { format: 'csv' }
+    data: TableData | TableData[],
+    _options: ExportOptions = { format: 'csv' }
   ): string {
     try {
-      const csvContent = [
-        data.headers.join(','),
-        ...data.rows.map(row =>
-          row.map(cell =>
-            typeof cell === 'string' && cell.includes(',')
-              ? `"${cell.replace(/"/g, '""')}"`
-              : cell
-          ).join(',')
-        )
-      ].join('\n');
+      const tables = Array.isArray(data) ? data : [data];
+      let csvContent = '';
 
-      const csvBlob = new Blob([`\ufeff${  csvContent}`], {
+      tables.forEach((table, index) => {
+        if (index > 0) csvContent += '\n\n';
+        if (table.title) csvContent += `${table.title}\n`;
+
+        csvContent += [
+          table.headers.join(','),
+          ...table.rows.map(row =>
+            row.map(cell =>
+              typeof cell === 'string' && cell.includes(',')
+                ? `"${cell.replace(/"/g, '""')}"`
+                : cell
+            ).join(',')
+          )
+        ].join('\n');
+      });
+
+      const csvBlob = new Blob([`\ufeff${csvContent}`], {
         type: 'text/csv;charset=utf-8'
       });
 
@@ -308,9 +363,10 @@ export class ReportExportService {
   // Helpers privés
   private async addPDFHeader(pdf: any, companyInfo: any, title?: string, subtitle?: string) {
     // Logo si disponible
-    if (companyInfo.logo) {
+    const logoUrl = companyInfo.logo || '/logo.png';
+    if (logoUrl) {
       try {
-        pdf.addImage(companyInfo.logo, 'PNG', 20, 10, 30, 20);
+        pdf.addImage(logoUrl, 'PNG', 20, 10, 30, 20);
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
         console.warn('Impossible de charger le logo:', errorMsg);
@@ -420,6 +476,226 @@ export class ReportExportService {
     worksheet['B1'].s = headerStyle;
 
     XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+  }
+
+  /**
+   * Export PDF avec tables ET graphiques intégrés
+   * Permet d'ajouter des visualisations graphiques entre les tables
+   */
+  async exportToPDFWithCharts(
+    tables: TableData[],
+    charts: ChartData[],
+    options: ExportOptions = { format: 'pdf' }
+  ): Promise<string> {
+    try {
+      const pdf = new jsPDF({
+        orientation: options.orientation || 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      let currentY = 20;
+
+      // En-tête
+      if (options.companyInfo) {
+        await this.addPDFHeader(pdf, options.companyInfo, options.title, options.subtitle);
+        currentY = 60;
+      } else if (options.title) {
+        pdf.setFontSize(20);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(options.title, 20, currentY);
+        currentY += 15;
+
+        if (options.subtitle) {
+          pdf.setFontSize(12);
+          pdf.setFont('helvetica', 'normal');
+          pdf.text(options.subtitle, 20, currentY);
+          currentY += 10;
+        }
+      }
+
+      // Date de génération
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`Généré le ${format(new Date(), 'dd/MM/yyyy à HH:mm', { locale: fr })}`, 20, currentY);
+      currentY += 15;
+
+      // Tables avec graphiques intercalés
+      for (let i = 0; i < tables.length; i++) {
+        const table = tables[i];
+
+        // Vérifier si on a besoin d'une nouvelle page
+        if (currentY > 250) {
+          pdf.addPage();
+          currentY = 20;
+        }
+
+        // Titre de la table
+        if (table.title) {
+          pdf.setFontSize(14);
+          pdf.setFont('helvetica', 'bold');
+          pdf.text(table.title, 20, currentY);
+          currentY += 10;
+        }
+
+        // Tableau
+        const tableConfig = {
+          startY: currentY,
+          head: [table.headers],
+          body: table.rows,
+          theme: 'grid' as const,
+          headStyles: {
+            fillColor: [41, 128, 185] as [number, number, number],
+            textColor: 255,
+            fontStyle: 'bold' as const
+          },
+          alternateRowStyles: {
+            fillColor: [245, 245, 245] as [number, number, number]
+          },
+          margin: { left: 20, right: 20 }
+        };
+
+        autoTable(pdf, tableConfig);
+        currentY = (pdf as any).lastAutoTable.finalY + 10;
+
+        // Summary si présent
+        if (table.summary) {
+          if (currentY > 260) {
+            pdf.addPage();
+            currentY = 20;
+          }
+
+          const summaryArray = Array.isArray(table.summary)
+            ? table.summary
+            : Object.entries(table.summary).map(([key, value]) => [key, value]);
+
+          autoTable(pdf, {
+            startY: currentY,
+            body: summaryArray,
+            theme: 'plain' as const,
+            styles: {
+              fontStyle: 'bold' as const
+            },
+            margin: { left: 20, right: 20 }
+          });
+
+          currentY = (pdf as any).lastAutoTable.finalY + 15;
+        }
+
+        // Ajouter un graphique après certaines tables si disponible
+        if (options.includeCharts && charts[i]) {
+          const chart = charts[i];
+
+          if (currentY > 180) {
+            pdf.addPage();
+            currentY = 20;
+          }
+
+          try {
+            let chartImageData: string;
+
+            // Générer le graphique selon le type
+            if (chart.type === 'bar') {
+              chartImageData = await chartGenerationService.generateBarChart(
+                chart.labels,
+                chart.data,
+                chart.title
+              );
+            } else if (chart.type === 'line') {
+              chartImageData = await chartGenerationService.generateLineChart(
+                chart.labels,
+                [{ label: chart.title, data: chart.data, color: '#3b82f6' }],
+                chart.title
+              );
+            } else if (chart.type === 'pie') {
+              chartImageData = await chartGenerationService.generatePieChart(
+                chart.labels,
+                chart.data,
+                chart.title
+              );
+            } else {
+              chartImageData = await chartGenerationService.generateBarChart(
+                chart.labels,
+                chart.data,
+                chart.title
+              );
+            }
+
+            // Ajouter l'image du graphique au PDF
+            const imgWidth = 170;
+            const imgHeight = 100;
+            pdf.addImage(chartImageData, 'PNG', 20, currentY, imgWidth, imgHeight);
+            currentY += imgHeight + 15;
+
+          } catch (error) {
+            console.error('Error adding chart to PDF:', error);
+            // Continuer même si le graphique échoue
+          }
+        }
+
+        currentY += 5;
+      }
+
+      // Watermark si présent
+      if (options.watermark) {
+        const pageCount = pdf.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+          pdf.setPage(i);
+          pdf.setFontSize(60);
+          pdf.setTextColor(200, 200, 200);
+          pdf.text(options.watermark, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() / 2, {
+            align: 'center',
+            angle: 45
+          });
+        }
+      }
+
+      // Générer blob URL
+      const pdfBlob = pdf.output('blob');
+      const url = URL.createObjectURL(pdfBlob);
+      return url;
+
+    } catch (error) {
+      console.error('Error in exportToPDFWithCharts:', error);
+      throw new Error('Impossible de générer le PDF avec graphiques');
+    }
+  }
+
+  /**
+   * Méthode helper pour ajouter un graphique simple au rapport d'analyse
+   */
+  async addChartToAnalysisReport(
+    pdf: jsPDF,
+    chartType: 'bar' | 'line' | 'pie',
+    labels: string[],
+    data: number[],
+    title: string,
+    startY: number
+  ): Promise<number> {
+    try {
+      let chartImageData: string;
+
+      if (chartType === 'bar') {
+        chartImageData = await chartGenerationService.generateBarChart(labels, data, title);
+      } else if (chartType === 'line') {
+        chartImageData = await chartGenerationService.generateLineChart(
+          labels,
+          [{ label: title, data, color: '#3b82f6' }],
+          title
+        );
+      } else {
+        chartImageData = await chartGenerationService.generatePieChart(labels, data, title);
+      }
+
+      const imgWidth = 170;
+      const imgHeight = 100;
+      pdf.addImage(chartImageData, 'PNG', 20, startY, imgWidth, imgHeight);
+
+      return startY + imgHeight + 10;
+    } catch (error) {
+      console.error('Error adding chart:', error);
+      return startY;
+    }
   }
 }
 

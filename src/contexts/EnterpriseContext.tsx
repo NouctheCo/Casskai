@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { devLogger } from '@/utils/devLogger';
 import { Enterprise, EnterpriseTaxConfiguration } from '../types/enterprise.types';
@@ -38,7 +50,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const loadEnterprises = async () => {
     // First try to load from Supabase
-    devLogger.log('🏢 Loading enterprises from Supabase...');
+    devLogger.info('🏢 Loading enterprises from Supabase...');
     
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -134,7 +146,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           }
           
           setLoading(false);
-          devLogger.log('✅ Enterprises loaded from Supabase');
+          devLogger.info('✅ Enterprises loaded from Supabase');
           return;
         }
       }
@@ -143,7 +155,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
 
     // Fallback to localStorage
-    devLogger.log('🏢 Falling back to localStorage...');
+    devLogger.info('🏢 Falling back to localStorage...');
     
     const savedEnterprises = localStorage.getItem('casskai_enterprises');
     let enterpriseList: Enterprise[] = [];
@@ -151,7 +163,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     if (savedEnterprises) {
       try {
         enterpriseList = JSON.parse(savedEnterprises);
-        devLogger.log('📦 Enterprises loaded from localStorage:', enterpriseList);
+        devLogger.info('📦 Enterprises loaded from localStorage:', enterpriseList);
       } catch (error) {
         devLogger.error('❌ Error parsing enterprises from localStorage:', error instanceof Error ? error.message : String(error));
       }
@@ -159,7 +171,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     
     // If no enterprises, wait for onboarding to create one
     if (enterpriseList.length === 0) {
-      devLogger.log('🏢 No enterprises found. User needs to complete onboarding.');
+      devLogger.info('🏢 No enterprises found. User needs to complete onboarding.');
 
       // Ne pas utiliser l'entreprise par défaut avec un ID invalide
       // L'utilisateur doit terminer l'onboarding pour créer sa première entreprise
@@ -179,7 +191,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
     
     setLoading(false);
-    devLogger.log('✅ Enterprises loaded from localStorage');
+    devLogger.info('✅ Enterprises loaded from localStorage');
   };
 
   useEffect(() => {
@@ -187,7 +199,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     
     // Listen for custom refresh event
     const handleRefresh = () => {
-      devLogger.log('🔄 Actualisation forcée des entreprises...');
+      devLogger.info('🔄 Actualisation forcée des entreprises...');
       loadEnterprises();
     };
     
@@ -201,7 +213,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const currentEnterprise = enterprises.find(e => e.id === currentEnterpriseId) || null;
 
   const addEnterprise = async (enterpriseData: Omit<Enterprise, 'id' | 'createdAt' | 'updatedAt'>) => {
-    devLogger.log('🏢 Ajout d\'une nouvelle entreprise:', enterpriseData);
+    devLogger.info('🏢 Ajout d\'une nouvelle entreprise:', enterpriseData);
     
     const newEnterprise: Enterprise = {
       ...enterpriseData,
@@ -219,11 +231,11 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       description: `L'entreprise ${newEnterprise.name} a été ajoutée avec succès.`
     });
     
-    devLogger.log('✅ Entreprise ajoutée avec succès');
+    devLogger.info('✅ Entreprise ajoutée avec succès');
   };
 
   const updateEnterprise = async (id: string, data: Partial<Enterprise>) => {
-    devLogger.log('🔄 Mise à jour de l\'entreprise:', id, data);
+    devLogger.info('🔄 Mise à jour de l\'entreprise:', id, data);
 
     const updatedEnterprises = enterprises.map(enterprise =>
       enterprise.id === id
@@ -239,11 +251,11 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       description: 'Les informations de l\'entreprise ont été mises à jour avec succès.'
     });
     
-    devLogger.log('✅ Entreprise mise à jour avec succès');
+    devLogger.info('✅ Entreprise mise à jour avec succès');
   };
 
   const deleteEnterprise = async (id: string) => {
-    devLogger.log('🗑️ Suppression de l\'entreprise:', id);
+    devLogger.info('🗑️ Suppression de l\'entreprise:', id);
     
     const updatedEnterprises = enterprises.filter(enterprise => enterprise.id !== id);
     setEnterprises(updatedEnterprises);
@@ -265,11 +277,11 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       description: 'L\'entreprise a été supprimée avec succès.'
     });
     
-    devLogger.log('✅ Entreprise supprimée avec succès');
+    devLogger.info('✅ Entreprise supprimée avec succès');
   };
 
   const switchEnterprise = (enterpriseId: string) => {
-    devLogger.log('🔄 Changement d\'entreprise:', enterpriseId);
+    devLogger.info('🔄 Changement d\'entreprise:', enterpriseId);
     setCurrentEnterpriseId(enterpriseId);
     localStorage.setItem('casskai_current_enterprise', enterpriseId);
     

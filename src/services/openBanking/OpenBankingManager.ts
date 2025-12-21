@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
  
 import {
   BankConnection,
@@ -526,11 +538,10 @@ export class OpenBankingManager {
 
     for (const [providerId, provider] of this.providers) {
       try {
-        // eslint-disable-next-line no-await-in-loop
         const isHealthy = await provider.isHealthy();
         providerHealth[providerId] = isHealthy;
         if (isHealthy) healthyProviders++;
-      } catch (error) {
+      } catch (_error) {
         providerHealth[providerId] = false;
       }
     }

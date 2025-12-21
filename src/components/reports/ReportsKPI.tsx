@@ -30,7 +30,7 @@ const ReportsKPI: React.FC<ReportsKPIProps> = ({
 
   return (
     <motion.div
-      className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-xl transition-all duration-300"
+      className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700 p-6 hover:shadow-xl transition-all duration-300"
       whileHover={{ scale: 1.02 }}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -47,7 +47,7 @@ const ReportsKPI: React.FC<ReportsKPIProps> = ({
       
       <div className="space-y-2">
         <motion.div 
-          className="text-2xl font-bold text-gray-900 dark:text-white"
+          className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}

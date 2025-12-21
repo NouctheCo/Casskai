@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import { FECEntry, FECEntrySchema, ImportResult, ImportError, ImportWarning, FileParserOptions } from '../types/accounting-import.types';
 
 /**
@@ -79,14 +91,14 @@ export class FECParser {
           const content = event.target?.result;
           const result = this.parseFECContent(content as string, { ...options, delimiter });
           resolve(result as any);
-        } catch (error) {
+        } catch (err) {
           resolve({
             success: false,
             totalRows: 0,
             validRows: 0,
             errors: [{
               row: 0,
-              message: `Erreur de lecture du fichier: ${(error as any).message}`,
+              message: `Erreur de lecture du fichier: ${(err as any).message}`,
               type: 'format',
               severity: 'error'
             }],
@@ -226,10 +238,10 @@ export class FECParser {
         // Validations métier
         this.validateBusinessRules(entry, rowNumber, warnings);
 
-      } catch (error) {
+      } catch (err) {
         errors.push({
           row: rowNumber,
-          message: `Erreur de parsing: ${error.message}`,
+          message: `Erreur de parsing: ${(err as Error).message}`,
           type: 'format',
           severity: 'error'
         });

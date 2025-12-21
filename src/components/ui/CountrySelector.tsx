@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { getAllSupportedCountries, getAfricanCountries, MarketPricing } from '@/services/marketPricingService';
+import { getAllCountryPricing, getCountryGroups, type CountryPricing } from '@/services/pricingMultiCurrency';
 import { useTranslation } from 'react-i18next';
 
 interface CountrySelectorProps {
@@ -16,16 +16,13 @@ export const CountrySelector: React.FC<CountrySelectorProps> = ({
   selectedCountry,
   onCountryChange,
   className = "",
-  showAfricanFirst = true
+  showAfricanFirst: _showAfricanFirst = true
 }) => {
   const { t } = useTranslation();
-  
-  const allCountries = getAllSupportedCountries();
-  const africanCountries = getAfricanCountries();
-  const otherCountries = allCountries.filter(country => 
-    !africanCountries.some(african => african.countryCode === country.countryCode)
-  );
-  
+
+  const allCountries = getAllCountryPricing();
+  const countryGroups = getCountryGroups();
+
   const selectedCountryData = allCountries.find(country => country.countryCode === selectedCountry);
 
   return (
@@ -33,11 +30,11 @@ export const CountrySelector: React.FC<CountrySelectorProps> = ({
       <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
         {t('landing.pricing.selectCountry', 'Sélectionnez votre pays')}
       </label>
-      
+
       <Select value={selectedCountry} onValueChange={onCountryChange}>
         <SelectTrigger className="w-80 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 transition-colors duration-200">
           <SelectValue>
-            <motion.div 
+            <motion.div
               className="flex items-center"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -59,59 +56,28 @@ export const CountrySelector: React.FC<CountrySelectorProps> = ({
             </motion.div>
           </SelectValue>
         </SelectTrigger>
-        
+
         <SelectContent className="max-h-80 overflow-y-auto">
-          {/* Section Afrique */}
-          {showAfricanFirst && africanCountries.length > 0 && (
-            <>
+          {/* Afficher tous les groupes de pays */}
+          {countryGroups.map((group, index) => (
+            <React.Fragment key={group.title}>
               <div className="px-2 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide border-b border-gray-200 dark:border-gray-700">
-                🌍 Afrique
+                {group.icon} {group.title}
               </div>
-              
-              {/* Afrique de l'Ouest francophone */}
-              <div className="px-2 py-1 text-xs text-gray-400">
-                Afrique de l'Ouest francophone
+              <div className="px-2 py-1 text-xs text-gray-400 dark:text-gray-500">
+                {group.description}
               </div>
-              {africanCountries
-                .filter(country => country.region === 'west-africa' && country.language === 'fr')
-                .map((country) => (
+              {group.countries.map((country) => (
                 <CountrySelectItem key={country.countryCode} country={country} />
               ))}
-              
-              {/* Afrique Centrale francophone */}
-              <div className="px-2 py-1 text-xs text-gray-400 mt-2">
-                Afrique Centrale francophone  
-              </div>
-              {africanCountries
-                .filter(country => country.region === 'central-africa' && country.language === 'fr')
-                .map((country) => (
-                <CountrySelectItem key={country.countryCode} country={country} />
-              ))}
-              
-              {/* Afrique anglophone */}
-              <div className="px-2 py-1 text-xs text-gray-400 mt-2">
-                Afrique anglophone
-              </div>
-              {africanCountries
-                .filter(country => country.language === 'en')
-                .map((country) => (
-                <CountrySelectItem key={country.countryCode} country={country} />
-              ))}
-              
-              <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
-            </>
-          )}
-          
-          {/* Section Autres pays */}
-          <div className="px-2 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-            🌐 Autres pays
-          </div>
-          {otherCountries.map((country) => (
-            <CountrySelectItem key={country.countryCode} country={country} />
+              {index < countryGroups.length - 1 && (
+                <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+              )}
+            </React.Fragment>
           ))}
         </SelectContent>
       </Select>
-      
+
       {/* Indication de devise */}
       {selectedCountryData && (
         <motion.div
@@ -120,8 +86,8 @@ export const CountrySelector: React.FC<CountrySelectorProps> = ({
           transition={{ duration: 0.3 }}
           className="mt-3"
         >
-          <Badge 
-            variant="secondary" 
+          <Badge
+            variant="secondary"
             className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700"
           >
             {t('landing.pricing.pricesIn', 'Prix affichés en')} {selectedCountryData.currencySymbol}
@@ -136,13 +102,13 @@ export const CountrySelector: React.FC<CountrySelectorProps> = ({
 };
 
 // Composant pour un élément de pays dans la liste
-const CountrySelectItem: React.FC<{ country: MarketPricing }> = ({ country }) => {
+const CountrySelectItem: React.FC<{ country: CountryPricing }> = ({ country }) => {
   return (
-    <SelectItem 
-      value={country.countryCode} 
-      className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+    <SelectItem
+      value={country.countryCode}
+      className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900/30"
     >
-      <motion.div 
+      <motion.div
         className="flex items-center justify-between w-full"
         whileHover={{ scale: 1.02 }}
         transition={{ type: "spring", stiffness: 400 }}
@@ -158,8 +124,8 @@ const CountrySelectItem: React.FC<{ country: MarketPricing }> = ({ country }) =>
             </span>
           </div>
         </div>
-        <Badge 
-          variant="outline" 
+        <Badge
+          variant="outline"
           className="text-xs px-2 py-0.5 ml-2 bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
         >
           {country.currencySymbol}

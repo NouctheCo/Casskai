@@ -1,4 +1,16 @@
 /**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
+/**
  * Formatting Service
  * Converts EN 16931 invoices to specific formats (Factur-X, UBL, CII)
  */
@@ -26,11 +38,12 @@ export class FormattingService {
       let pdfContent: Buffer | undefined;
 
       switch (format) {
-        case 'FACTURX':
+        case 'FACTURX': {
           const facturXResult = await this.generateFacturX(invoice);
           xmlContent = facturXResult.xml;
           pdfContent = facturXResult.pdf;
           break;
+        }
 
         case 'UBL':
           xmlContent = await this.generateUBL(invoice);
@@ -167,7 +180,7 @@ export class FormattingService {
    */
   private async generatePDFWithEmbeddedXML(
     invoice: EN16931Invoice,
-    xmlContent: string
+    _xmlContent: string
   ): Promise<Buffer> {
     // This is a simplified implementation
     // In production, you would use a proper PDF/A-3 library like pdf-lib

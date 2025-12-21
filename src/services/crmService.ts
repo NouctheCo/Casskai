@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import { supabase } from '@/lib/supabase';
 import {
   Client,
@@ -15,6 +27,7 @@ import {
   CrmServiceResponse,
   CrmDashboardData
 } from '../types/crm.types';
+import { auditService } from './auditService';
 
 class CrmService {
   // Clients - Utilise la table third_parties existante
@@ -57,8 +70,8 @@ class CrmService {
           id: client.id,
           enterprise_id: enterpriseId,
           company_name: client.name,
-          industry: client.industry || null,
-          size: client.size as 'small' | 'medium' | 'large' | null,
+          industry: client.industry || undefined,
+          size: client.size as 'small' | 'medium' | 'large' | undefined,
           address: client.address_street,
           city: client.address_city,
           postal_code: client.address_postal_code,
@@ -137,10 +150,25 @@ class CrmService {
         notes: data.notes,
         status: formData.status,
         total_revenue: 0,
-        last_interaction: null,
+        last_interaction: undefined,
         created_at: data.created_at,
         updated_at: data.updated_at
       };
+
+      // ✅ Audit Log: CREATE client (HIGH - données personnelles)
+      auditService.log({
+        event_type: 'CREATE',
+        table_name: 'third_parties',
+        record_id: data.id,
+        company_id: enterpriseId,
+        new_values: {
+          name: data.name,
+          client_type: data.client_type,
+          industry: data.industry
+        },
+        security_level: 'high', // Données clients = sensible
+        compliance_tags: ['RGPD']
+      }).catch(err => console.error('Audit log failed:', err));
 
       return { success: true, data: newClient };
     } catch (error) {
@@ -155,6 +183,13 @@ class CrmService {
 
   async updateClient(clientId: string, formData: ClientFormData): Promise<CrmServiceResponse<Client>> {
     try {
+      // ✅ Récupérer les anciennes valeurs pour l'audit
+      const { data: oldData } = await supabase
+        .from('third_parties')
+        .select('*')
+        .eq('id', clientId)
+        .single();
+
       const { data, error } = await supabase
         .from('third_parties')
         .update({
@@ -190,10 +225,39 @@ class CrmService {
         notes: data.notes,
         status: formData.status,
         total_revenue: 0,
-        last_interaction: null,
+        last_interaction: undefined,
         created_at: data.created_at,
         updated_at: data.updated_at
       };
+
+      // ✅ Audit Log: UPDATE client (HIGH - données personnelles)
+      if (oldData) {
+        const changedFields: string[] = [];
+        if (oldData.name !== data.name) changedFields.push('name');
+        if (oldData.industry !== data.industry) changedFields.push('industry');
+        if (oldData.client_type !== data.client_type) changedFields.push('client_type');
+
+        auditService.log({
+          event_type: 'UPDATE',
+          table_name: 'third_parties',
+          record_id: clientId,
+          company_id: data.company_id,
+          old_values: {
+            name: oldData.name,
+            client_type: oldData.client_type,
+            industry: oldData.industry
+          },
+          new_values: {
+            name: data.name,
+            client_type: data.client_type,
+            industry: data.industry
+          },
+          changed_fields: changedFields,
+          security_level: 'high',
+          compliance_tags: ['RGPD']
+        }).catch(err => console.error('Audit log failed:', err));
+      }
+
       return { success: true, data: updatedClient };
     } catch (error) {
       console.error('Error updating CRM client:', error instanceof Error ? error.message : String(error));
@@ -207,12 +271,37 @@ class CrmService {
 
   async deleteClient(clientId: string): Promise<CrmServiceResponse<boolean>> {
     try {
+      // ✅ Récupérer les données avant suppression pour l'audit
+      const { data: clientToDelete } = await supabase
+        .from('third_parties')
+        .select('*')
+        .eq('id', clientId)
+        .single();
+
       const { error } = await supabase
         .from('third_parties')
         .delete()
         .eq('id', clientId);
 
       if (error) throw error;
+
+      // ✅ Audit Log: DELETE client (CRITICAL - suppression données personnelles)
+      if (clientToDelete) {
+        auditService.log({
+          event_type: 'DELETE',
+          table_name: 'third_parties',
+          record_id: clientId,
+          company_id: clientToDelete.company_id,
+          old_values: {
+            name: clientToDelete.name,
+            client_type: clientToDelete.client_type,
+            industry: clientToDelete.industry
+          },
+          security_level: 'critical', // ⚠️ Suppression = toujours critical
+          compliance_tags: ['RGPD']
+        }).catch(err => console.error('Audit log failed:', err));
+      }
+
       return { success: true, data: true };
     } catch (error) {
       console.error('Error deleting CRM client:', error instanceof Error ? error.message : String(error));
@@ -220,6 +309,61 @@ class CrmService {
         success: false,
         data: false,
         error: { message: 'Erreur lors de la suppression du client' }
+      };
+    }
+  }
+
+  async createSupplier(enterpriseId: string, formData: ClientFormData): Promise<CrmServiceResponse<Client>> {
+    try {
+      // Créer dans la table third_parties avec client_type = supplier
+      const { data, error } = await supabase
+        .from('third_parties')
+        .insert({
+          company_id: enterpriseId,
+          name: formData.company_name,
+          industry: formData.industry,
+          address_street: formData.address,
+          address_city: formData.city,
+          address_postal_code: formData.postal_code,
+          address_country: formData.country,
+          website: formData.website,
+          notes: formData.notes,
+          client_type: 'supplier',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Transform back to Client format (suppliers use same structure)
+      const newSupplier: Client = {
+        id: data.id,
+        enterprise_id: enterpriseId,
+        company_name: data.name,
+        industry: data.industry,
+        size: formData.size,
+        address: data.address_street,
+        city: data.address_city,
+        postal_code: data.address_postal_code,
+        country: data.address_country,
+        website: data.website,
+        notes: data.notes,
+        status: formData.status || 'active',
+        total_revenue: 0,
+        last_interaction: undefined,
+        created_at: data.created_at,
+        updated_at: data.updated_at
+      };
+
+      return { success: true, data: newSupplier };
+    } catch (error) {
+      console.error('Error creating supplier:', error instanceof Error ? error.message : String(error));
+      return {
+        success: false,
+        data: {} as Client,
+        error: { message: 'Erreur lors de la création du fournisseur' }
       };
     }
   }
@@ -273,6 +417,23 @@ class CrmService {
         .single();
 
       if (error) throw error;
+
+      // ✅ Audit Log: CREATE contact (HIGH - données personnelles)
+      auditService.log({
+        event_type: 'CREATE',
+        table_name: 'crm_contacts',
+        record_id: data.id,
+        company_id: companyId,
+        new_values: {
+          first_name: data.first_name,
+          last_name: data.last_name,
+          email: data.email,
+          position: data.position
+        },
+        security_level: 'high',
+        compliance_tags: ['RGPD']
+      }).catch(err => console.error('Audit log failed:', err));
+
       return { success: true, data };
     } catch (error) {
       console.error('Error creating CRM contact:', error instanceof Error ? error.message : String(error));
@@ -286,6 +447,13 @@ class CrmService {
 
   async updateContact(contactId: string, formData: Partial<ContactFormData>): Promise<CrmServiceResponse<Contact>> {
     try {
+      // ✅ Récupérer les anciennes valeurs pour l'audit
+      const { data: oldData } = await supabase
+        .from('crm_contacts')
+        .select('*')
+        .eq('id', contactId)
+        .single();
+
       const { data, error } = await supabase
         .from('crm_contacts')
         .update(formData)
@@ -294,6 +462,30 @@ class CrmService {
         .single();
 
       if (error) throw error;
+
+      // ✅ Audit Log: UPDATE contact (HIGH - données personnelles)
+      if (oldData) {
+        auditService.log({
+          event_type: 'UPDATE',
+          table_name: 'crm_contacts',
+          record_id: contactId,
+          company_id: data.company_id,
+          old_values: {
+            first_name: oldData.first_name,
+            last_name: oldData.last_name,
+            email: oldData.email
+          },
+          new_values: {
+            first_name: data.first_name,
+            last_name: data.last_name,
+            email: data.email
+          },
+          changed_fields: Object.keys(formData),
+          security_level: 'high',
+          compliance_tags: ['RGPD']
+        }).catch(err => console.error('Audit log failed:', err));
+      }
+
       return { success: true, data };
     } catch (error) {
       console.error('Error updating CRM contact:', error instanceof Error ? error.message : String(error));
@@ -307,12 +499,37 @@ class CrmService {
 
   async deleteContact(contactId: string): Promise<CrmServiceResponse<boolean>> {
     try {
+      // ✅ Récupérer les données avant suppression pour l'audit
+      const { data: contactToDelete } = await supabase
+        .from('crm_contacts')
+        .select('*')
+        .eq('id', contactId)
+        .single();
+
       const { error } = await supabase
         .from('crm_contacts')
         .delete()
         .eq('id', contactId);
 
       if (error) throw error;
+
+      // ✅ Audit Log: DELETE contact (CRITICAL)
+      if (contactToDelete) {
+        auditService.log({
+          event_type: 'DELETE',
+          table_name: 'crm_contacts',
+          record_id: contactId,
+          company_id: contactToDelete.company_id,
+          old_values: {
+            first_name: contactToDelete.first_name,
+            last_name: contactToDelete.last_name,
+            email: contactToDelete.email
+          },
+          security_level: 'critical',
+          compliance_tags: ['RGPD']
+        }).catch(err => console.error('Audit log failed:', err));
+      }
+
       return { success: true, data: true };
     } catch (error) {
       console.error('Error deleting CRM contact:', error instanceof Error ? error.message : String(error));
@@ -671,9 +888,9 @@ class CrmService {
         throw new Error('Erreur lors de la récupération des données CRM');
       }
 
-      const clients = clientsResponse.data;
-      const opportunities = opportunitiesResponse.data;
-      const actions = actionsResponse.data;
+      const clients = clientsResponse.data ?? [];
+      const opportunities = opportunitiesResponse.data ?? [];
+      const actions = actionsResponse.data ?? [];
 
       const wonOpportunities = opportunities.filter(o => o.stage === 'won');
       const totalOpportunityValue = opportunities.reduce((sum, o) => sum + (o.value || 0), 0);
@@ -724,7 +941,7 @@ class CrmService {
       if (opportunitiesResponse.error) {
         throw new Error(typeof opportunitiesResponse.error === 'string' ? opportunitiesResponse.error : opportunitiesResponse.error.message);
       }
-      const opportunities = opportunitiesResponse.data;
+      const opportunities = opportunitiesResponse.data ?? [];
 
       const stages = ['prospecting', 'qualification', 'proposal', 'negotiation', 'closing', 'won', 'lost'];
 
@@ -765,20 +982,20 @@ class CrmService {
         throw new Error('Erreur lors de la récupération des données du tableau de bord');
       }
 
-      const recentOpportunities = opportunitiesResponse.data
+      const recentOpportunities = (opportunitiesResponse.data ?? [])
         .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
         .slice(0, 5);
 
-      const recentActions = actionsResponse.data
+      const recentActions = (actionsResponse.data ?? [])
         .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
         .slice(0, 5);
 
-      const topClients = clientsResponse.data
+      const topClients = (clientsResponse.data ?? [])
         .sort((a, b) => (b.total_revenue || 0) - (a.total_revenue || 0))
         .slice(0, 5);
 
       // Calculer les vraies données de revenus depuis les opportunités gagnées
-      const wonOpportunities = opportunitiesResponse.data.filter(o => o.stage === 'won' && o.actual_close_date);
+      const wonOpportunities = (opportunitiesResponse.data ?? []).filter(o => o.stage === 'won' && o.actual_close_date);
       const revenueData: RevenueData[] = [];
 
       // Générer les données des 6 derniers mois
@@ -799,8 +1016,8 @@ class CrmService {
       }
 
       const dashboardData: CrmDashboardData = {
-        stats: statsResponse.data,
-        pipeline_stats: pipelineResponse.data,
+        stats: statsResponse.data || {} as CrmStats,
+        pipeline_stats: pipelineResponse.data || [],
         revenue_data: revenueData,
         recent_opportunities: recentOpportunities,
         recent_actions: recentActions,
@@ -808,7 +1025,7 @@ class CrmService {
       };
 
       return { success: true, data: dashboardData };
-    } catch (error) {
+    } catch (_error) {
       return {
         success: false,
         data: {} as CrmDashboardData,

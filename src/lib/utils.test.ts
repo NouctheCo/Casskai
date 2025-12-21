@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import { describe, it, expect } from 'vitest';
 import { formatCurrency, formatDate, cn, truncate } from './utils';
 
@@ -79,7 +91,9 @@ describe('Utils', () => {
     });
 
     it('should handle conditional classes', () => {
-      const result = cn('base', true && 'active', false && 'inactive');
+      const isActive = true;
+      const isInactive = false;
+      const result = cn('base', isActive && 'active', isInactive && 'inactive');
       expect(result).toContain('base');
       expect(result).toContain('active');
       expect(result).not.toContain('inactive');

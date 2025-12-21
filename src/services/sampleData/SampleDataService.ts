@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import { supabase } from '@/lib/supabase';
 
 interface ChartOfAccountsConfig {
@@ -177,7 +189,7 @@ export class SampleDataService {
   }
 
   // Données d'exemple pour fournisseurs
-  private getSampleSuppliers(config: ChartOfAccountsConfig) {
+  private getSampleSuppliers(_config: ChartOfAccountsConfig) {
     return [
       {
         name: 'FOURNISSEUR GLOBAL SARL',
@@ -333,18 +345,24 @@ export class SampleDataService {
 
       // 1. Créer le plan comptable
       const accounts = this.getChartOfAccounts(chartConfig);
-      const accountsToInsert = accounts.map(account => ({
+      const accountsToInsert = accounts.map((account: any) => ({
         company_id: this.companyId,
-        account_code: account.code,
+        account_number: account.code,
         account_name: account.name,
         account_type: account.type,
+        account_class: Number(account.code?.charAt(0)) || null,
         level: account.level,
         is_active: true,
-        currency: chartConfig.currency
+        is_detail_account: true,
+        description: `Compte ${account.name} (${account.code}) importé automatiquement`,
+        balance_debit: 0,
+        balance_credit: 0,
+        current_balance: 0,
+        imported_from_fec: false
       }));
 
       const { error: accountsError } = await supabase
-        .from('accounts')
+        .from('chart_of_accounts')
         .insert(accountsToInsert);
 
       if (!accountsError) results.accounts = accountsToInsert.length;
@@ -400,7 +418,7 @@ export class SampleDataService {
 
         for (const transaction of transactions) {
           // Créer l'écriture comptable
-          const { data: journalEntry, error: journalError } = await supabase
+          const { data: journalEntry, error: _journalError } = await supabase
             .from('journal_entries')
             .insert({
               company_id: this.companyId,
@@ -433,9 +451,9 @@ export class SampleDataService {
       }
 
       return { success: true, results };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur génération données d\'exemple:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }
 
@@ -450,7 +468,7 @@ export class SampleDataService {
         'products',
         'suppliers',
         'customers',
-        'accounts'
+        'chart_of_accounts'
       ];
 
       for (const table of tablesToReset) {
@@ -461,9 +479,9 @@ export class SampleDataService {
       }
 
       return { success: true };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur suppression données d\'exemple:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }
 }

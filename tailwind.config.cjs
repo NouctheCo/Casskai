@@ -1,6 +1,20 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
+  safelist: [
+    "bg-blue-100",
+    "bg-green-100",
+    "bg-purple-100",
+    "bg-orange-100",
+    "dark:bg-blue-900/20",
+    "dark:bg-green-900/20",
+    "dark:bg-purple-900/20",
+    "dark:bg-orange-900/20",
+    "text-blue-600",
+    "text-green-600",
+    "text-purple-600",
+    "text-orange-600",
+  ],
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",

@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 // Service de gestion des modules - Architecture modulaire CassKai
 
 import { supabase } from '../lib/supabase';
@@ -58,7 +70,7 @@ export class ModuleManager {
 
       this.isInitialized = true;
       console.warn('[ModuleManager] Initialisé avec succès');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('[ModuleManager] Erreur d\'initialisation:', error);
       throw error;
     }
@@ -136,9 +148,9 @@ export class ModuleManager {
       await this.saveActivation(activation);
 
   console.warn(`[ModuleManager] Module ${moduleId} activé avec succès`);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`[ModuleManager] Erreur lors de l'activation de ${moduleId}:`, error);
-      throw new ModuleError(`Failed to activate module: ${error.message}`, moduleId, 'ACTIVATION_FAILED', error);
+      throw new ModuleError(`Failed to activate module: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`, moduleId, 'ACTIVATION_FAILED', error);
     }
   }
 
@@ -184,9 +196,9 @@ export class ModuleManager {
       await this.saveActivation(activation);
 
   console.warn(`[ModuleManager] Module ${moduleId} désactivé avec succès`);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`[ModuleManager] Erreur lors de la désactivation de ${moduleId}:`, error);
-      throw new ModuleError(`Failed to deactivate module: ${error.message}`, moduleId, 'DEACTIVATION_FAILED', error);
+      throw new ModuleError(`Failed to deactivate module: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`, moduleId, 'DEACTIVATION_FAILED', error);
     }
   }
 
@@ -309,7 +321,7 @@ export class ModuleManager {
       tenantId: 'current-tenant', // À remplacer par le vrai tenantId
       permissions: await this.getUserPermissions(userId),
       config,
-      services: await this.createModuleServices(),
+      services: await this.createModuleServices() as any,
     };
   }
 
@@ -369,7 +381,7 @@ export class ModuleManager {
   }
 
   // Persistence des activations
-  /* eslint-disable max-lines-per-function */
+   
   private async loadActivations(tenantId: string): Promise<void> {
     try {
       // D'abord essayer de charger depuis Supabase si disponible
@@ -416,7 +428,7 @@ export class ModuleManager {
             console.warn('[ModuleManager] Modules synchronized from Supabase to localStorage');
             return;
           } else if (error) {
-            console.warn('[ModuleManager] Error loading from Supabase, falling back to localStorage:', error.message);
+            console.warn('[ModuleManager] Error loading from Supabase, falling back to localStorage:', (error instanceof Error ? error.message : 'Une erreur est survenue'));
           }
         } catch (supabaseError) {
           console.warn('[ModuleManager] Supabase not available, using localStorage fallback:', supabaseError);
@@ -482,7 +494,7 @@ export class ModuleManager {
         // Sauvegarder les modules par défaut
         localStorage.setItem('casskai_modules', JSON.stringify(defaultModules));
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('[ModuleManager] Error loading activations:', error);
 
       // En cas d'erreur, utiliser les modules par défaut
@@ -509,7 +521,6 @@ export class ModuleManager {
   }
 
   private async saveActivation(_activation: ModuleActivation): Promise<void> {
-    /* eslint-disable max-depth */
     try {
       // Sauvegarder en format simple pour compatibilité avec AuthContext
       const allActivations = Array.from(this.activations.values());
@@ -565,11 +576,11 @@ export class ModuleManager {
           console.error('[ModuleManager] Supabase save error:', supabaseError);
         }
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('[ModuleManager] Erreur sauvegarde activation:', error);
     }
   }
-  /* eslint-enable max-lines-per-function */
+   
 
   // Debugging et monitoring
   getDebugInfo(): {

@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 // src/hooks/useReferentials.ts
 import { useState, useEffect, useCallback } from 'react';
 import referentialsService, {
@@ -25,9 +37,9 @@ export function useCountries() {
         setError(null);
         const data = await referentialsService.getCountries();
         setCountries(data);
-      } catch (err) {
+      } catch (error) {
         setError('Erreur lors du chargement des pays');
-        console.error(err);
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -59,9 +71,9 @@ export function useSectors() {
         setError(null);
         const data = await referentialsService.getSectors();
         setSectors(data);
-      } catch (err) {
+      } catch (error) {
         setError('Erreur lors du chargement des secteurs');
-        console.error(err);
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -74,8 +86,8 @@ export function useSectors() {
     try {
       const data = await referentialsService.searchSectors(searchTerm);
       return data;
-    } catch (err) {
-      console.error('Erreur recherche secteurs:', err);
+    } catch (error) {
+      console.error('...', error);
       return sectors;
     }
   }, [sectors]);
@@ -103,9 +115,9 @@ export function useCompanySizes() {
         setError(null);
         const data = await referentialsService.getCompanySizes();
         setCompanySizes(data);
-      } catch (err) {
+      } catch (error) {
         setError('Erreur lors du chargement des tailles d\'entreprise');
-        console.error(err);
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -139,9 +151,9 @@ export function useTimezones(popularOnly = false) {
           ? await referentialsService.getPopularTimezones()
           : await referentialsService.getTimezones();
         setTimezones(data);
-      } catch (err) {
+      } catch (error) {
         setError('Erreur lors du chargement des fuseaux horaires');
-        console.error(err);
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -173,9 +185,9 @@ export function useCurrencies() {
         setError(null);
         const data = await referentialsService.getCurrencies();
         setCurrencies(data);
-      } catch (err) {
+      } catch (error) {
         setError('Erreur lors du chargement des devises');
-        console.error(err);
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -213,9 +225,9 @@ export function useTaxRates(countryCode?: string) {
         setError(null);
         const data = await referentialsService.getTaxRates(countryCode);
         setTaxRates(data);
-      } catch (err) {
+      } catch (error) {
         setError('Erreur lors du chargement des taux de taxes');
-        console.error(err);
+        console.error(error);
       } finally {
         setLoading(false);
       }

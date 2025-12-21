@@ -246,7 +246,7 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
       className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-shadow z-50 flex items-center justify-center"
     >
       <MessageCircle size={24} />
-      <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full animate-pulse"></div>
+      <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full animate-pulse dark:bg-green-900/20"></div>
     </motion.button>
   );
 
@@ -265,7 +265,7 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center dark:bg-gray-800">
                 <Bot size={18} />
               </div>
               <div>
@@ -276,13 +276,13 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsMinimized(!isMinimized)}
-                className="w-8 h-8 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
+                className="w-8 h-8 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors dark:bg-gray-800"
               >
                 {isMinimized ? <Maximize2 size={16} /> : <Minimize2 size={16} />}
               </button>
               <button
                 onClick={() => setIsOpen(false)}
-                className="w-8 h-8 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
+                className="w-8 h-8 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors dark:bg-gray-800"
               >
                 <X size={16} />
               </button>
@@ -301,15 +301,15 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
                       <button
                         key={action.id}
                         onClick={() => handleQuickAction(action)}
-                        className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                        className="p-3 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 transition-colors text-left dark:bg-gray-900/30"
                       >
                         <div className="flex items-center gap-2 mb-1">
                           <div className={`w-6 h-6 ${action.color} rounded-full flex items-center justify-center`}>
                             <IconComponent size={14} className="text-white" />
                           </div>
-                          <span className="text-sm font-medium text-gray-700">{action.label}</span>
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{action.label}</span>
                         </div>
-                        <p className="text-xs text-gray-500 truncate">{action.query}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{action.query}</p>
                       </button>
                     );
                     })}
@@ -359,10 +359,10 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
                     <div className="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center">
                       <Bot size={16} />
                     </div>
-                    <div className="bg-gray-100 p-3 rounded-lg rounded-tl-none">
+                    <div className="bg-gray-100 p-3 rounded-lg rounded-tl-none dark:bg-gray-900/50">
                       <div className="flex items-center gap-2">
                         <Loader2 size={16} className="animate-spin text-purple-600" />
-                        <span className="text-sm text-gray-600">CassKai AI réfléchit...</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">CassKai AI réfléchit...</span>
                       </div>
                     </div>
                   </motion.div>
@@ -372,7 +372,7 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
               </div>
 
               {/* Input */}
-              <div className="border-t border-gray-200 p-4">
+              <div className="border-t border-gray-200 dark:border-gray-600 p-4">
                 <div className="flex items-center gap-2">
                   <div className="flex-1 relative">
                     <input
@@ -382,7 +382,7 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
                       onChange={(e) => setCurrentMessage(e.target.value)}
                       onKeyPress={handleKeyPress}
                       placeholder="Posez votre question..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       disabled={isLoading}
                     />
                     {recognitionRef.current && (
@@ -399,12 +399,12 @@ export const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
                   <button
                     onClick={() => handleSendMessage()}
                     disabled={!currentMessage.trim() || isLoading}
-                    className="w-10 h-10 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                    className="w-10 h-10 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors dark:bg-blue-900/20"
                   >
                     <Send size={16} />
                   </button>
                 </div>
-                <p className="text-xs text-gray-500 mt-2 text-center">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
                   CassKai AI peut faire des erreurs. Vérifiez les informations importantes.
                 </p>
               </div>

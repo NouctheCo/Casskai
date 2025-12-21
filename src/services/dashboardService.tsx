@@ -1,9 +1,21 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 // src/services/dashboardService.js
 import { supabase } from '../lib/supabase';
 
 export const dashboardService = {
   // Obtenir les statistiques principales du dashboard
-  getDashboardStats: async (currentEnterpriseId, options = {}) => {
+  getDashboardStats: async (currentEnterpriseId: string, _options = {}) => {
     if (!currentEnterpriseId) {
       return { data: null, error: new Error('Company ID is required') };
     }
@@ -19,19 +31,19 @@ export const dashboardService = {
       return { data, error: null };
     } catch (error) {
       console.error('Error fetching dashboard stats:', error instanceof Error ? error.message : String(error));
-      
+
       // Fallback : calculer manuellement si la fonction RPC n'est pas disponible
       return await dashboardService.calculateDashboardStatsManually(currentEnterpriseId);
     }
   },
 
   // Calcul manuel des statistiques (fallback)
-  calculateDashboardStatsManually: async (currentEnterpriseId) => {
+  calculateDashboardStatsManually: async (currentEnterpriseId: string) => {
     try {
       // 1. Statistiques des comptes par classe
       const { data: accounts, error: accountsError } = await supabase
-        .from('accounts')
-        .select('class, type, balance, is_active')
+        .from('chart_of_accounts')
+        .select('account_class, account_type, account_number, current_balance, is_active')
         .eq('company_id', currentEnterpriseId);
 
       if (accountsError) throw accountsError;
@@ -68,17 +80,23 @@ export const dashboardService = {
 
       // Calculer les balances par type
       accounts.forEach(account => {
-        const balance = account.balance || 0;
+        const accountClass = account.account_class ?? Number.parseInt(account.account_number?.charAt(0) ?? '', 10);
+
+        if (Number.isNaN(accountClass)) {
+          return;
+        }
+
+        const balance = account.current_balance ?? 0;
         
         // Grouper par classe
-        if (!stats.accounts.by_class[account.class]) {
-          stats.accounts.by_class[account.class] = { count: 0, balance: 0 };
+        if (!stats.accounts.by_class[accountClass]) {
+          stats.accounts.by_class[accountClass] = { count: 0, balance: 0 };
         }
-        stats.accounts.by_class[account.class].count++;
-        stats.accounts.by_class[account.class].balance += balance;
+        stats.accounts.by_class[accountClass].count++;
+        stats.accounts.by_class[accountClass].balance += balance;
 
         // Calculer par type de bilan
-        switch (account.class) {
+        switch (accountClass) {
           case 1:
           case 2:
           case 3:
@@ -105,14 +123,14 @@ export const dashboardService = {
   },
 
   // Obtenir le bilan comptable
-  getBalanceSheet: async (currentEnterpriseId, date = null) => {
+  getBalanceSheet: async (currentEnterpriseId: string, date = null) => {
     if (!currentEnterpriseId) {
       return { data: null, error: new Error('Company ID is required') };
     }
 
     try {
       const targetDate = date || new Date().toISOString().split('T')[0];
-      
+
       const { data, error } = await supabase.rpc('get_balance_sheet', {
         p_company_id: currentEnterpriseId,
         p_date: targetDate
@@ -128,7 +146,7 @@ export const dashboardService = {
   },
 
   // Obtenir le compte de résultat
-  getIncomeStatement: async (currentEnterpriseId, startDate = null, endDate = null) => {
+  getIncomeStatement: async (currentEnterpriseId: string, startDate = null, endDate = null) => {
     if (!currentEnterpriseId) {
       return { data: null, error: new Error('Company ID is required') };
     }
@@ -136,7 +154,7 @@ export const dashboardService = {
     try {
       const start = startDate || new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0];
       const end = endDate || new Date().toISOString().split('T')[0];
-      
+
       const { data, error } = await supabase.rpc('get_income_statement', {
         p_company_id: currentEnterpriseId,
         p_start_date: start,
@@ -153,7 +171,7 @@ export const dashboardService = {
   },
 
   // Obtenir les données de cash-flow
-  getCashFlowData: async (currentEnterpriseId, months = 12) => {
+  getCashFlowData: async (currentEnterpriseId: string, months = 12) => {
     if (!currentEnterpriseId) {
       return { data: [], error: new Error('Company ID is required') };
     }
@@ -169,21 +187,21 @@ export const dashboardService = {
       return { data: data || [], error: null };
     } catch (error) {
       console.error('Error fetching cash flow data:', error instanceof Error ? error.message : String(error));
-      
+
       // Fallback : simuler des données de cash-flow
       return await dashboardService.simulateCashFlowData(currentEnterpriseId, months);
     }
   },
 
   // Simuler des données de cash-flow (fallback)
-  simulateCashFlowData: async (currentEnterpriseId, months) => {
+  simulateCashFlowData: async (currentEnterpriseId: string, months: number) => {
     try {
       // Récupérer les mouvements des comptes de trésorerie (classe 5)
       const { data: accounts, error: accountsError } = await supabase
-        .from('accounts')
-        .select('id, balance')
+        .from('chart_of_accounts')
+        .select('id, current_balance, account_class, account_number')
         .eq('company_id', currentEnterpriseId)
-        .eq('class', 5)
+        .eq('account_class', 5)
         .eq('is_active', true);
 
       if (accountsError) throw accountsError;
@@ -194,7 +212,7 @@ export const dashboardService = {
       
       for (let i = months - 1; i >= 0; i--) {
         const monthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
-        const totalBalance = accounts.reduce((sum, acc) => sum + (acc.balance || 0), 0);
+        const totalBalance = accounts.reduce((sum, acc) => sum + (acc.current_balance || 0), 0);
         
         cashFlowData.push({
           month: monthDate.toISOString().slice(0, 7),
@@ -212,7 +230,7 @@ export const dashboardService = {
   },
 
   // Obtenir les écritures récentes pour le dashboard
-  getRecentJournalEntries: async (currentEnterpriseId, limit = 10) => {
+  getRecentJournalEntries: async (currentEnterpriseId: string, limit = 10) => {
     if (!currentEnterpriseId) {
       return { data: [], error: new Error('Company ID is required') };
     }
@@ -223,7 +241,7 @@ export const dashboardService = {
         .select(`
           id, entry_date, entry_number, description, status,
           journals (code, name),
-          journal_entry_items (debit_amount, credit_amount)
+          journal_entry_lines (debit_amount, credit_amount, account_number, account_name, line_order)
         `)
         .eq('company_id', currentEnterpriseId)
         .order('entry_date', { ascending: false })
@@ -234,7 +252,7 @@ export const dashboardService = {
 
       // Calculer le montant total pour chaque écriture
       const entriesWithAmount = (data || []).map(entry => {
-        const totalAmount = entry.journal_entry_items.reduce(
+        const totalAmount = (entry.journal_entry_lines || []).reduce(
           (sum, item) => sum + (item.debit_amount || 0), 0
         );
         return { ...entry, total_amount: totalAmount };
@@ -248,7 +266,7 @@ export const dashboardService = {
   },
 
   // Obtenir les comptes avec les plus gros mouvements
-  getTopAccountsByActivity: async (currentEnterpriseId, limit = 5, days = 30) => {
+  getTopAccountsByActivity: async (currentEnterpriseId: string, limit = 5, days = 30) => {
     if (!currentEnterpriseId) {
       return { data: [], error: new Error('Company ID is required') };
     }
@@ -257,15 +275,18 @@ export const dashboardService = {
       const dateFrom = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
       
       const { data, error } = await supabase
-        .from('journal_entry_items')
+        .from('journal_entry_lines')
         .select(`
           account_id,
+          account_number,
+          account_name,
+          line_order,
           debit_amount,
           credit_amount,
-          accounts!inner (id, account_number, name, balance),
-          journal_entries!inner (entry_date)
+          chart_of_accounts!inner (id, account_number, account_name, current_balance),
+          journal_entries!inner (entry_date, company_id)
         `)
-        .eq('company_id', currentEnterpriseId)
+        .eq('journal_entries.company_id', currentEnterpriseId)
         .gte('journal_entries.entry_date', dateFrom);
 
       if (error) throw error;
@@ -277,7 +298,7 @@ export const dashboardService = {
         const accountId = item.account_id;
         if (!accountActivity[accountId]) {
           accountActivity[accountId] = {
-            account: item.accounts,
+            account: item.chart_of_accounts,
             total_movement: 0,
             transaction_count: 0
           };
@@ -301,31 +322,31 @@ export const dashboardService = {
   },
 
   // Obtenir les alertes et notifications du dashboard
-  getDashboardAlerts: async (currentEnterpriseId) => {
+  getDashboardAlerts: async (currentEnterpriseId: string) => {
     if (!currentEnterpriseId) {
       return { data: [], error: new Error('Company ID is required') };
     }
 
     try {
-      const alerts = [];
+      const alerts: any[] = [];
 
       // 1. Vérifier les écritures non équilibrées
       const { data: unbalancedEntries, error: balanceError } = await supabase
         .from('journal_entries')
         .select(`
           id, entry_number, description,
-          journal_entry_items (debit_amount, credit_amount)
+          journal_entry_lines (debit_amount, credit_amount, account_number, account_name, line_order)
         `)
         .eq('company_id', currentEnterpriseId)
         .eq('status', 'draft');
 
       if (!balanceError && unbalancedEntries) {
         unbalancedEntries.forEach(entry => {
-          const totalDebit = entry.journal_entry_items.reduce(
-            (sum, item) => sum + (item.debit_amount || 0), 0
+          const totalDebit = (entry.journal_entry_lines || []).reduce(
+            (sum: number, item: any) => sum + (item.debit_amount || 0), 0
           );
-          const totalCredit = entry.journal_entry_items.reduce(
-            (sum, item) => sum + (item.credit_amount || 0), 0
+          const totalCredit = (entry.journal_entry_lines || []).reduce(
+            (sum: number, item: any) => sum + (item.credit_amount || 0), 0
           );
           
           if (Math.abs(totalDebit - totalCredit) > 0.01) {
@@ -342,31 +363,37 @@ export const dashboardService = {
 
       // 2. Vérifier les comptes avec des soldes anormaux
       const { data: accounts, error: accountsError } = await supabase
-        .from('accounts')
-        .select('id, account_number, name, type, class, balance')
+        .from('chart_of_accounts')
+        .select('id, account_number, account_name, account_type, account_class, current_balance')
         .eq('company_id', currentEnterpriseId)
         .eq('is_active', true);
 
       if (!accountsError && accounts) {
         accounts.forEach(account => {
+          const accountClass = account.account_class ?? Number.parseInt(account.account_number?.charAt(0) ?? '', 10);
+
+          if (Number.isNaN(accountClass)) {
+            return;
+          }
+
           // Détecter les soldes anormaux selon le type de compte
-          const isDebitAccount = [1, 2, 3, 5, 6].includes(account.class);
-          const balance = account.balance || 0;
+          const isDebitAccount = [1, 2, 3, 5, 6].includes(accountClass);
+          const balance = account.current_balance || 0;
           
           if (isDebitAccount && balance < 0) {
             alerts.push({
               type: 'info',
               title: 'Solde négatif inhabituel',
-              message: `Le compte ${account.account_number} - ${account.name} a un solde négatif`,
+              message: `Le compte ${account.account_number} - ${account.account_name} a un solde négatif`,
               action: 'view_account',
               data: { accountId: account.id }
             });
-          } else if (!isDebitAccount && balance > 0 && account.class === 4) {
+          } else if (!isDebitAccount && balance > 0 && accountClass === 4) {
             // Comptes de dettes avec solde débiteur
             alerts.push({
               type: 'info',
               title: 'Solde débiteur sur compte de dette',
-              message: `Le compte ${account.account_number} - ${account.name} a un solde débiteur`,
+              message: `Le compte ${account.account_number} - ${account.account_name} a un solde débiteur`,
               action: 'view_account',
               data: { accountId: account.id }
             });
@@ -402,7 +429,7 @@ export const dashboardService = {
   },
 
   // Obtenir les métriques de performance
-  getPerformanceMetrics: async (currentEnterpriseId, period = '12M') => {
+  getPerformanceMetrics: async (currentEnterpriseId: string, period = '12M') => {
     if (!currentEnterpriseId) {
       return { data: null, error: new Error('Company ID is required') };
     }
@@ -450,24 +477,24 @@ export const dashboardService = {
         const produits = incomeStatement.produits || [];
         const charges = incomeStatement.charges || [];
         
-        metrics.revenue = produits.reduce((sum, p) => sum + (p.amount || 0), 0);
-        metrics.expenses = charges.reduce((sum, c) => sum + (c.amount || 0), 0);
+        metrics.revenue = produits.reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+        metrics.expenses = charges.reduce((sum: number, c: any) => sum + (c.amount || 0), 0);
         metrics.profit = metrics.revenue - metrics.expenses;
-        metrics.profit_margin = metrics.revenue > 0 ? 
+        metrics.profit_margin = metrics.revenue > 0 ?
           (metrics.profit / metrics.revenue) * 100 : 0;
       }
 
       if (balanceSheet) {
         const actif = balanceSheet.actif || [];
         const passif = balanceSheet.passif || [];
-        
-        metrics.asset_total = actif.reduce((sum, a) => sum + (a.amount || 0), 0);
+
+        metrics.asset_total = actif.reduce((sum: number, a: any) => sum + (a.amount || 0), 0);
         metrics.liability_total = passif
-          .filter(p => p.category !== 'Capitaux propres')
-          .reduce((sum, p) => sum + (p.amount || 0), 0);
+          .filter((p: any) => p.category !== 'Capitaux propres')
+          .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
         metrics.equity_total = passif
-          .filter(p => p.category === 'Capitaux propres')
-          .reduce((sum, p) => sum + (p.amount || 0), 0);
+          .filter((p: any) => p.category === 'Capitaux propres')
+          .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
       }
 
       return { data: metrics, error: null };

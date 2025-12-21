@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import OpenAI from 'openai';
 import type {
   AIAssistantQuery,
@@ -53,8 +65,8 @@ class AIAssistantService {
       }
 
       this.isInitialized = true;
-    } catch (error) {
-      console.error('Failed to initialize AI Assistant Service:', error instanceof Error ? error.message : String(error));
+    } catch (error: unknown) {
+      console.error('Failed to initialize AI Assistant Service:', error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : (error instanceof Error ? error.message : String(error)));
       this.isInitialized = true; // Continue en mode mock
     }
   }
@@ -121,11 +133,11 @@ class AIAssistantService {
         modelUsed: this.openai ? this.config.model : 'mock_assistant'
       };
 
-    } catch (error) {
-      console.error('Error processing AI assistant query:', error instanceof Error ? error.message : String(error));
+    } catch (error: unknown) {
+      console.error('Error processing AI assistant query:', error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : (error instanceof Error ? error.message : String(error)));
       return {
         success: false,
-        error: error.message
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue')
       };
     }
   }
@@ -191,8 +203,8 @@ class AIAssistantService {
         suggestions: this.generateSuggestions(query, type)
       };
 
-    } catch (error) {
-      console.error('OpenAI API error:', error instanceof Error ? error.message : String(error));
+    } catch (error: unknown) {
+      console.error('OpenAI API error:', error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : (error instanceof Error ? error.message : String(error)));
       throw error;
     }
   }
@@ -332,11 +344,11 @@ class AIAssistantService {
         modelUsed: 'tax_optimization_analyzer'
       };
 
-    } catch (error) {
-      console.error('Error generating tax optimizations:', error instanceof Error ? error.message : String(error));
+    } catch (error: unknown) {
+      console.error('Error generating tax optimizations:', error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : (error instanceof Error ? error.message : String(error)));
       return {
         success: false,
-        error: error.message
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue')
       };
     }
   }
@@ -373,7 +385,7 @@ class AIAssistantService {
           'Documenter l\'utilisation professionnelle'
         ],
         status: 'suggested'
-      });
+      } as TaxOptimization);
     }
 
     return optimizations;
@@ -402,14 +414,14 @@ class AIAssistantService {
           description: 'Anticiper ou reporter certaines dépenses pour optimiser l\'impôt',
           potentialSavings: 2000,
           effort: 'low',
-          deadline: endOfYear,
+          deadline: endOfYear.toISOString(),
           requirements: [
             'Identifier les dépenses à anticiper',
             'Vérifier les règles de déductibilité',
             'Planifier les achats'
           ],
           status: 'suggested'
-        });
+        } as any);
       }
     }
 
@@ -439,7 +451,7 @@ class AIAssistantService {
           'Évaluer les avantages/inconvénients'
         ],
         status: 'suggested'
-      });
+      } as TaxOptimization);
     }
 
     return optimizations;
@@ -464,11 +476,11 @@ class AIAssistantService {
         modelUsed: this.openai ? this.config.model : 'narrative_generator'
       };
 
-    } catch (error) {
-      console.error('Error generating narrative report:', error instanceof Error ? error.message : String(error));
+    } catch (error: unknown) {
+      console.error('Error generating narrative report:', error instanceof Error ? (error instanceof Error ? error.message : 'Une erreur est survenue') : (error instanceof Error ? error.message : String(error)));
       return {
         success: false,
-        error: error.message
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue')
       };
     }
   }
@@ -513,7 +525,7 @@ class AIAssistantService {
         summary = response.summary || this.generateDefaultSummary(balance, income, expenses);
         keyInsights = response.keyInsights || this.generateDefaultInsights(transactions, metrics);
         recommendations = response.recommendations || this.generateDefaultRecommendations(balance, metrics);
-      } catch (error) {
+      } catch (_error) {
         // Fallback vers génération par défaut
         summary = this.generateDefaultSummary(balance, income, expenses);
         keyInsights = this.generateDefaultInsights(transactions, metrics);

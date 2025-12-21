@@ -1,62 +1,72 @@
-# Procédure de Déploiement Rapide - CassKai
+# Procédure de Déploiement - CassKai
 
-## Quand l'utilisateur demande "déploie l'application"
+## Quand l'utilisateur demande "déploie"
 
-### ⚡ Action Immédiate (30 secondes max)
+### ⚡ Action Unique - Script PowerShell
 
-1. **Exécuter directement :**
-   ```bash
-   bash scripts/deploy.sh
-   ```
+```powershell
+.\deploy-vps.ps1
+```
 
-2. **Si échec Windows, utiliser :**
-   ```bash
-   npm run deploy
-   ```
-
-3. **Vérification rapide :**
-   - ✅ Build réussi
-   - ✅ Transfer terminé
-   - ✅ URL accessible
-
-### 🚫 NE PAS FAIRE
-
-- ❌ Lire/analyser les scripts de déploiement
-- ❌ Tester SSH manuellement
-- ❌ Vérifier les permissions
-- ❌ Créer des todos pour le déploiement
-- ❌ Expliquer la procédure
-- ❌ Demander de confirmation
-
-### ✅ RÉPONSE TYPE
-
-**Pendant déploiement :**
-"Déploiement en cours..."
-
-**Après succès :**
-"✅ **DÉPLOIEMENT RÉUSSI !**
-
-🔗 **Application :** https://casskai.app
-🔗 **API :** https://casskai.app/api"
-
-**En cas d'erreur :**
-"❌ Erreur de déploiement : [message d'erreur]"
-
-### 🎯 Objectif
-
-- **Temps total :** < 2 minutes
-- **Actions :** Deploy → Confirmer → URL
-- **Mots :** < 50 mots de réponse
+**C'est tout.** Une seule commande, un seul script.
 
 ---
 
-## Scripts Disponibles
+## Détails Technique
 
-- `npm run deploy` → `./scripts/deploy.sh`
-- Serveur : VPS Hostinger (89.116.111.88)
-- Domaine : https://casskai.app
-- Méthode : SSH/SCP + PM2
+- **Script**: `deploy-vps.ps1` (script principal et unique)
+- **VPS**: 89.116.111.88
+- **User**: root
+- **Path**: /var/www/casskai.app
+- **URL**: https://casskai.app
+
+### Étapes automatiques du script :
+1. ✅ Build production (`npm run build`)
+2. ✅ Backup VPS (timestampé)
+3. ✅ Upload via SCP
+4. ✅ Déploiement atomique
+5. ✅ Permissions www-data
+6. ✅ Reload Nginx
+7. ✅ Tests de santé
 
 ---
 
-*Créé pour éliminer les tergiversations et accélérer les déploiements.*
+## Si deploy-vps.ps1 demande le mot de passe
+
+**Méthode manuelle (2 minutes)** :
+
+```powershell
+# 1. Upload
+scp dist-deploy.zip root@89.116.111.88:/tmp/
+
+# 2. Connexion
+ssh root@89.116.111.88
+
+# 3. Sur le VPS - copier-coller cette ligne :
+cd /tmp && unzip -o dist-deploy.zip -d /tmp/casskai-new && mkdir -p /var/backups/casskai && tar -czf /var/backups/casskai/backup_$(date +%Y%m%d_%H%M%S).tar.gz -C /var/www casskai.app 2>/dev/null || true && rm -rf /var/www/casskai.app/* && cp -r /tmp/casskai-new/* /var/www/casskai.app/ && chown -R www-data:www-data /var/www/casskai.app && chmod -R 755 /var/www/casskai.app && systemctl reload nginx && pm2 restart casskai-api 2>/dev/null || true && rm -rf /tmp/casskai-new /tmp/dist-deploy.zip && echo '✅ DÉPLOIEMENT RÉUSSI!'
+```
+
+---
+
+## Après le déploiement
+
+**Nettoyer le cache navigateur** :
+https://casskai.app/clear-cache.html?auto=1
+
+---
+
+## 🚫 Scripts Obsolètes Supprimés
+
+Tous les autres scripts de déploiement ont été supprimés pour éviter la confusion :
+- ❌ deploy-auto.ps1
+- ❌ deploy-fast.ps1
+- ❌ deploy-simple.cmd
+- ❌ deploy-vps.sh
+- ❌ DEPLOYER.bat
+- ❌ etc.
+
+**Il n'existe plus qu'UN SEUL script** : `deploy-vps.ps1`
+
+---
+
+*Procédure unique et simplifiée - Mise à jour: 2025-01-07*

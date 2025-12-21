@@ -26,7 +26,7 @@ const QuickAction: React.FC<QuickActionProps> = ({
 
   return (
     <motion.div
-      className="group bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-all duration-300 cursor-pointer"
+      className="group bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-600 dark:border-gray-700 p-6 hover:shadow-lg transition-all duration-300 cursor-pointer"
       onClick={onClick}
       {...motionProps}
       data-testid="quick-action"
@@ -44,7 +44,7 @@ const QuickAction: React.FC<QuickActionProps> = ({
         )}
       </div>
       
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{title}</h3>
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">{title}</h3>
       <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
     </motion.div>
   );

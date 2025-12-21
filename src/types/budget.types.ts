@@ -32,6 +32,7 @@ export type BudgetStatus =
 export interface BudgetCategory {
   id: string;
   budget_id: string;
+  account_id?: string; // Lien vers chart_of_accounts
   category: string;
   subcategory?: string;
   category_type: CategoryType;
@@ -88,6 +89,7 @@ export interface BudgetFormData {
 }
 
 export interface BudgetCategoryFormData {
+  account_id?: string; // Lien vers chart_of_accounts (REQUIRED)
   category: string;
   subcategory?: string;
   category_type: CategoryType;

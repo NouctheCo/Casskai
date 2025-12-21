@@ -1,12 +1,24 @@
-/* eslint-disable max-lines */
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 // Service fiscal multi-pays pour CassKai
 import { frenchTaxComplianceService } from './FrenchTaxComplianceService';
+import { getTaxConfiguration } from '../../data/taxConfigurations';
 
 export interface CountryTaxConfig {
   country: string;
   countryName: string;
   currency: string;
-  accountingStandard: 'PCG' | 'SYSCOHADA' | 'IFRS' | 'GAAP' | 'LOCAL';
+  accountingStandard: 'PCG' | 'SYSCOHADA' | 'IFRS' | 'SCF' | 'GAAP' | 'LOCAL';
   vatRates: {
     standard: number;
     reduced: number[];
@@ -90,6 +102,15 @@ export const COUNTRY_TAX_CONFIGS: Record<string, CountryTaxConfig> = {
         forms: ['2050', '2051', '2052', '2053', '2054', '2055', '2056', '2057', '2058', '2059']
       },
       {
+        id: 'IS',
+        name: 'IS - Impôt sur les Sociétés',
+        description: 'Déclaration annuelle d\'impôt sur les sociétés (intégrée à la liasse)',
+        frequency: 'annual',
+        deadline: '15 mai N+1',
+        mandatory: true,
+        forms: ['2065', '2033']
+      },
+      {
         id: 'CVAE',
         name: 'CVAE 1330-CVAE',
         description: 'Cotisation sur la Valeur Ajoutée des Entreprises',
@@ -98,12 +119,33 @@ export const COUNTRY_TAX_CONFIGS: Record<string, CountryTaxConfig> = {
         mandatory: true,
         threshold: 500000,
         forms: ['1330-CVAE']
+      },
+      {
+        id: 'CFE',
+        name: 'CFE 1447-C',
+        description: 'Cotisation Foncière des Entreprises',
+        frequency: 'annual',
+        deadline: '15 décembre',
+        mandatory: true,
+        forms: ['1447-C']
+      },
+      {
+        id: 'DSN',
+        name: 'DSN - Déclaration Sociale Nominative',
+        description: 'Déclaration mensuelle des cotisations sociales',
+        frequency: 'monthly',
+        deadline: '5 ou 15 du mois suivant',
+        mandatory: true,
+        forms: ['DSN']
       }
     ],
     deadlines: {
       CA3: '19th-next-month',
       LIASSE_FISCALE: 'may-15',
-      CVAE: 'may-15'
+      IS: 'may-15',
+      CVAE: 'may-15',
+      CFE: 'december-15',
+      DSN: '5th-or-15th-next-month'
     },
     languages: ['fr-FR']
   },
@@ -594,6 +636,40 @@ export class MultiCountryTaxService {
    * Obtient la configuration fiscale pour un pays
    */
   getTaxConfig(countryCode: string): CountryTaxConfig {
+    // Try to get from new comprehensive tax configurations first
+    const comprehensiveConfig = getTaxConfiguration(countryCode);
+    if (comprehensiveConfig) {
+      // Convert comprehensive config to CountryTaxConfig format
+      return {
+        country: comprehensiveConfig.countryCode,
+        countryName: comprehensiveConfig.countryName,
+        currency: comprehensiveConfig.currency,
+        accountingStandard: comprehensiveConfig.accountingStandard,
+        vatRates: {
+          standard: comprehensiveConfig.vat.standard,
+          reduced: comprehensiveConfig.vat.reduced,
+          exempt: comprehensiveConfig.vat.exemptions.length > 0
+        },
+        corporateTaxRate: comprehensiveConfig.corporateTax.standardRate,
+        fiscalYearEnd: comprehensiveConfig.fiscalYearEnd.replace('/', '-'),
+        declarations: comprehensiveConfig.taxTypes.map(tt => ({
+          id: tt.id,
+          name: tt.name,
+          description: tt.description,
+          frequency: tt.frequency,
+          deadline: tt.deadline,
+          mandatory: tt.mandatory,
+          forms: [tt.id]
+        })),
+        deadlines: comprehensiveConfig.taxTypes.reduce((acc, tt) => {
+          acc[tt.id] = tt.deadline;
+          return acc;
+        }, {} as Record<string, string>),
+        languages: ['fr-FR'] // Default, could be enhanced based on country
+      };
+    }
+
+    // Fallback to old config
     const config = COUNTRY_TAX_CONFIGS[countryCode];
     if (!config) {
       console.warn(`Configuration fiscale non trouvée pour ${countryCode}, utilisation de FR par défaut`);
@@ -754,11 +830,35 @@ export class MultiCountryTaxService {
   private async generateFrenchDeclaration(declarationType: string, companyId: string, period: string) {
     switch (declarationType) {
       case 'CA3':
+      case 'TVA_CA3':
         return await frenchTaxComplianceService.generateCA3Declaration(companyId, period);
+
+      case 'TVA_CA12':
+      case 'CA12':
+        // CA12 utilise la même structure que CA3 mais avec fréquence annuelle
+        return await frenchTaxComplianceService.generateCA3Declaration(companyId, period);
+
+      case 'TVA_CA12E':
+      case 'CA12E':
+        // CA12E (trimestriel) utilise aussi la structure CA3
+        return await frenchTaxComplianceService.generateCA3Declaration(companyId, period);
+
       case 'LIASSE_FISCALE':
         return await frenchTaxComplianceService.generateLiasseFiscale(companyId, period);
+
+      case 'IS':
+        // IS (Impôt sur les Sociétés) fait partie de la liasse fiscale
+        return await frenchTaxComplianceService.generateLiasseFiscale(companyId, period);
+
       case 'CVAE':
         return await frenchTaxComplianceService.generateCVAEDeclaration(companyId, period);
+
+      case 'CFE':
+        return await frenchTaxComplianceService.generateCFEDeclaration(companyId, period);
+
+      case 'DSN':
+        return await frenchTaxComplianceService.generateDSNDeclaration(companyId, period);
+
       default:
         throw new Error(`Type de déclaration ${declarationType} non supporté pour la France`);
     }

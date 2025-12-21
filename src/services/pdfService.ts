@@ -1,4 +1,16 @@
 /**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
+/**
  * Service de génération PDF pour les factures
  * Utilise jsPDF pour créer des factures personnalisées côté client
  */
@@ -40,6 +52,13 @@ export class PDFService {
     // En-tête avec logo et titre
     doc.setFillColor(...primaryColor);
     doc.rect(0, 0, pageWidth, 25, 'F');
+    
+    // Logo CassKai
+    try {
+      doc.addImage('/logo.png', 'PNG', pageWidth - 50, 5, 25, 15);
+    } catch (error) {
+      console.warn('Logo non chargé:', error);
+    }
     
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(20);
@@ -174,9 +193,11 @@ export class PDFService {
 
     // Footer avec numéro de page
     doc.setFontSize(7);
+    const pageCount = (doc.internal as any).getNumberOfPages();
+    const currentPage = (doc.internal as any).getCurrentPageInfo().pageNumber;
     doc.text(
-      `Généré le ${new Date().toLocaleDateString('fr-FR')} - Page 1`, 
-      pageWidth / 2 - 30, 
+      `Généré le ${new Date().toLocaleDateString('fr-FR')} - Page ${currentPage} / ${pageCount}`,
+      pageWidth / 2 - 30,
       doc.internal.pageSize.height - 10
     );
 

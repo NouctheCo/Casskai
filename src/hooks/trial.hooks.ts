@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import { useState, useEffect } from 'react';
 import { trialService, TrialInfo } from '@/services/trialService';
 
@@ -47,9 +59,9 @@ export const useTrial = (): UseTrialReturn => {
     try {
       const info = await trialService.getUserTrialInfo(user.id);
       setTrialInfo(info);
-    } catch (err) {
+    } catch (_err) {
       setError('Erreur lors du chargement des informations d\'essai');
-      console.error('Error loading trial info:', err);
+      console.error('...', error);
     } finally {
       setIsLoading(false);
     }
@@ -61,8 +73,8 @@ export const useTrial = (): UseTrialReturn => {
     try {
       const canCreate = await trialService.canCreateTrial(user.id);
       setCanCreateTrial(canCreate);
-    } catch (err) {
-      console.error('Error checking trial eligibility:', err);
+    } catch (_err) {
+      console.error('...', error);
     }
   };
 
@@ -84,7 +96,7 @@ export const useTrial = (): UseTrialReturn => {
       }
 
       return result;
-    } catch (err) {
+    } catch (_err) {
       const errorMessage = 'Erreur lors de la création de l\'essai';
       setError(errorMessage);
       return { success: false, error: errorMessage };
@@ -120,7 +132,7 @@ export const useTrial = (): UseTrialReturn => {
       }
 
       return result;
-    } catch (err) {
+    } catch (_err) {
       const errorMessage = 'Erreur lors de la conversion de l\'essai';
       setError(errorMessage);
       return { success: false, error: errorMessage };
@@ -147,7 +159,7 @@ export const useTrial = (): UseTrialReturn => {
       }
 
       return result;
-    } catch (err) {
+    } catch (_err) {
       const errorMessage = 'Erreur lors de l\'annulation de l\'essai';
       setError(errorMessage);
       return { success: false, error: errorMessage };
@@ -199,9 +211,9 @@ export const useTrialStatistics = () => {
     try {
       const stats = await trialService.getTrialStatistics();
       setStatistics(stats);
-    } catch (err) {
+    } catch (_err) {
       setError('Erreur lors du chargement des statistiques');
-      console.error('Error loading trial statistics:', err);
+      console.error('...', error);
     } finally {
       setIsLoading(false);
     }
@@ -232,9 +244,9 @@ export const useExpiringTrials = (daysAhead: number = 7) => {
     try {
       const trials = await trialService.getExpiringTrials(daysAhead);
       setExpiringTrials(trials);
-    } catch (err) {
+    } catch (_err) {
       setError('Erreur lors du chargement des essais expirants');
-      console.error('Error loading expiring trials:', err);
+      console.error('...', error);
     } finally {
       setIsLoading(false);
     }

@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 // src/hooks/index.ts
 
 // export { useConfigContext as useConfig } from '@/contexts/ConfigContext'; // Supprimé pour éviter conflit
@@ -17,7 +29,7 @@ export { useCrm } from './useCrm';
 export { useCRMAnalytics } from './useCRMAnalytics';
 
 // Types exports
-type UseConfigReturn = any;
+type _UseConfigReturn = any;
 
 // Hook personnalisé combiné pour faciliter l'usage
 // import { useConfigContext } from '@/contexts/ConfigContext';

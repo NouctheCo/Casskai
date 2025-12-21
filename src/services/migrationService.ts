@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 // src/services/migrationService.ts
 import { supabase } from '../lib/supabase';
 
@@ -51,11 +63,11 @@ class MigrationService {
       const companiesTableExists = tablesData && tablesData.length > 0;
 
       // Vérifier si la fonction get_dashboard_stats existe
-      let functionsData = false;
+      let _functionsData = false;
       let functionsError = null;
       try {
         await supabase.rpc('get_dashboard_stats', { p_company_id: '00000000-0000-0000-0000-000000000000' });
-        functionsData = true;
+        _functionsData = true;
       } catch (error: any) {
         functionsError = error;
       }
@@ -177,12 +189,12 @@ class MigrationService {
     // Cette fonction vérifie si les tables principales existent
     const requiredTables = [
       'companies', 'user_companies', 'roles', 'permissions', 'role_permissions',
-      'accounts', 'journals', 'journal_entries', 'journal_entry_items',
+      'accounts', 'journals', 'journal_entries', 'journal_entry_lines',
       'bank_accounts', 'bank_transactions', 'third_parties', 'currencies', 'exchange_rates'
     ];
 
     for (const tableName of requiredTables) {
-      const { data, error } = await supabase
+      const { data: _data, error } = await supabase
         .from(tableName)
         .select('*')
         .limit(1);

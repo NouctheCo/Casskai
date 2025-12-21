@@ -1,4 +1,16 @@
 /**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
+/**
  * Inbound Service
  * Processes incoming supplier e-invoices
  */
@@ -350,6 +362,7 @@ export class InboundService {
   ): Promise<boolean> {
     try {
       // Generate payload hash for duplicate detection
+      // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
       const crypto = require('crypto');
       const payloadHash = crypto.createHash('sha256').update(payload).digest('hex');
 
@@ -376,7 +389,7 @@ export class InboundService {
 
   private async parseInvoice(
     payload: string,
-    contentType: string
+    _contentType: string
   ): Promise<ParsedInvoiceResult> {
     try {
       // Detect format from payload
@@ -457,7 +470,7 @@ export class InboundService {
     
     return {
       invoice_number: invoice.ID,
-      issue_date: invoice.IssueDate,
+      invoice_date: invoice.IssueDate,
       type_code: invoice.InvoiceTypeCode,
       currency_code: invoice.DocumentCurrencyCode,
       
@@ -519,7 +532,7 @@ export class InboundService {
     
     return {
       invoice_number: exchangedDocument.ID,
-      issue_date: this.parseCIIDate(exchangedDocument.IssueDateTime?.DateTimeString),
+      invoice_date: this.parseCIIDate(exchangedDocument.IssueDateTime?.DateTimeString),
       type_code: exchangedDocument.TypeCode,
       currency_code: transaction?.ApplicableHeaderTradeSettlement?.InvoiceCurrencyCode,
       
@@ -573,7 +586,7 @@ export class InboundService {
       errors.push('Invoice number is required');
     }
 
-    if (!invoice.issue_date) {
+    if (!invoice.invoice_date) {
       errors.push('Issue date is required');
     }
 
@@ -604,8 +617,8 @@ export class InboundService {
       const invoiceData = {
         company_id: companyId,
         invoice_number: parsedInvoice.invoice_number,
-        issue_date: parsedInvoice.issue_date,
-        total_amount: parsedInvoice.totals?.invoice_total_with_vat || 0,
+        invoice_date: parsedInvoice.invoice_date,
+        total_incl_tax: parsedInvoice.totals?.invoice_total_with_vat || 0,
         total_tax: parsedInvoice.totals?.invoice_total_vat_amount || 0,
         total_without_tax: parsedInvoice.totals?.invoice_total_without_vat || 0,
         currency: parsedInvoice.currency_code || 'EUR',

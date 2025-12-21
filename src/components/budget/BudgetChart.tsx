@@ -45,7 +45,7 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({ budget }) => {
                       <span className="font-medium text-gray-700 dark:text-gray-300">
                         {category.category}
                         {category.subcategory && (
-                          <span className="text-gray-500 ml-1">• {category.subcategory}</span>
+                          <span className="text-gray-500 dark:text-gray-300 ml-1">• {category.subcategory}</span>
                         )}
                       </span>
                       <span className="font-semibold text-green-600">
@@ -54,7 +54,7 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({ budget }) => {
                     </div>
                     <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                       <div
-                        className="bg-green-500 h-2 rounded-full transition-all"
+                        className="bg-green-500 h-2 rounded-full transition-all dark:bg-green-900/20"
                         style={{ width: `${percentage}%` }}
                       ></div>
                     </div>
@@ -85,16 +85,16 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({ budget }) => {
                       <span className="font-medium text-gray-700 dark:text-gray-300">
                         {category.category}
                         {category.subcategory && (
-                          <span className="text-gray-500 ml-1">• {category.subcategory}</span>
+                          <span className="text-gray-500 dark:text-gray-300 ml-1">• {category.subcategory}</span>
                         )}
                       </span>
-                      <span className="font-semibold text-red-600">
+                      <span className="font-semibold text-red-600 dark:text-red-400">
                         {formatCurrency(category.annual_amount)} ({percentage}%)
                       </span>
                     </div>
                     <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                       <div
-                        className="bg-red-500 h-2 rounded-full transition-all"
+                        className="bg-red-500 h-2 rounded-full transition-all dark:bg-red-900/20"
                         style={{ width: `${percentage}%` }}
                       ></div>
                     </div>
@@ -115,8 +115,8 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({ budget }) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center text-gray-500 py-8">
-            <BarChart3 className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+          <div className="text-center text-gray-500 dark:text-gray-300 py-8">
+            <BarChart3 className="w-12 h-12 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
             <p>Graphique de répartition mensuelle à venir</p>
             <p className="text-sm mt-2">Visualisation des flux mensuels prévus</p>
           </div>

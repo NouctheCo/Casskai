@@ -1,110 +1,116 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { useLocale } from '@/contexts/LocaleContext';
-import { FECParser } from '@/services/fecParser';
-import { fecImportService } from '@/services/fecImportService';
-import { Loader2, AlertTriangle, CheckCircle, Info } from 'lucide-react';
+import { accountingImportService } from '@/services/accountingImportService';
+import { Loader2, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 import FECImportDropzone from './FECImportDropzone';
-import FECImportSummary from './FECImportSummary';
+import type { ParseResult } from '@/utils/accountingFileParser';
 
-const FECImport = ({ currentEnterpriseId }) => {
+interface FECImportProps {
+  currentEnterpriseId?: string;
+  onImportSuccess?: () => void;
+}
+
+interface ImportResult {
+  success: boolean;
+  summary?: {
+    journalsCreated: number;
+    journalsExisting: number;
+    accountsCreated: number;
+    accountsExisting: number;
+    entriesCreated: number;
+    entriesWithErrors: number;
+    errors: any[];
+    format: string;
+    standard: string | null;
+  };
+  error?: string;
+}
+
+const FECImport: React.FC<FECImportProps> = ({ currentEnterpriseId, onImportSuccess }) => {
   const { t } = useLocale();
   const { toast } = useToast();
-  
-  const [file, setFile] = useState(null);
-  const [parsedData, setParsedData] = useState(null);
+
+  const [file, setFile] = useState<File | null>(null);
+  const [parseResult, setParseResult] = useState<ParseResult | null>(null);
   const [parsing, setParsing] = useState(false);
   const [importing, setImporting] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
-  const [importResult, setImportResult] = useState(null);
-  
-  const handleFileSelected = useCallback(async (selectedFile) => {
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+
+  const handleFileSelected = useCallback(async (selectedFile: File) => {
     setFile(selectedFile);
     setParsing(true);
-    setParsedData(null);
+    setParseResult(null);
     setImportResult(null);
-    
+
     try {
-      const result = await FECParser.parseFEC(selectedFile);
-      
-      if (result.success) {
-        // Transform to old format for compatibility with UI
-        const transformedData = {
-          entries: result.entries,
-          accounts: new Map(),
-          journals: [...new Set(result.entries.map(e => e.journalCode))],
-          summary: {
-            errors: result.errors,
-            warnings: result.warnings,
-            numEntries: result.validRows,
-            numAccounts: [...new Set(result.entries.map(e => e.accountNumber))].length,
-            numJournals: [...new Set(result.entries.map(e => e.journalCode))].length,
-            totalDebit: result.entries.reduce((sum, e) => sum + e.debit, 0).toLocaleString(),
-            totalCredit: result.entries.reduce((sum, e) => sum + e.credit, 0).toLocaleString(),
-            balance: (result.entries.reduce((sum, e) => sum + e.debit, 0) - result.entries.reduce((sum, e) => sum + e.credit, 0)).toFixed(2),
-            unbalancedEntries: []
-          }
-        };
-        
-        setParsedData(transformedData);
-      } else {
-        setParsedData({
-          entries: [],
-          accounts: new Map(),
-          journals: [],
-          summary: {
-            errors: result.errors,
-            numEntries: 0
-          }
+      // Lire le contenu du fichier
+      const content = await accountingImportService.readFileContent(selectedFile);
+
+      // Parser avec le parser universel
+      const result = await import('@/utils/accountingFileParser').then(module =>
+        module.parseAccountingFile(content, {
+          defaultCurrency: 'EUR'
+        })
+      );
+
+      setParseResult(result);
+
+      if (!result.success) {
+        toast({
+          variant: 'destructive',
+          title: t('error'),
+          description: result.errors.length > 0
+            ? result.errors[0].message
+            : t('fecImport.error.parsingFailed', { defaultValue: 'Échec du parsing du fichier' })
         });
       }
+
     } catch (error) {
-      console.error('Error parsing FEC file:', error);
+      console.error('Erreur lors du parsing:', error);
       toast({
         variant: 'destructive',
         title: t('error'),
-        description: error.message || t('fecImport.error.parsingFailed', { defaultValue: 'Failed to parse the FEC file' })
-      });
-      setParsedData({
-        entries: [],
-        accounts: new Map(),
-        journals: [],
-        summary: {
-          errors: [{ message: error.message || 'Unknown parsing error' }],
-          numEntries: 0
-        }
+        description: error instanceof Error ? error.message : t('fecImport.error.parsingFailed', { defaultValue: 'Échec du parsing du fichier' })
       });
     } finally {
       setParsing(false);
     }
   }, [t, toast]);
-  
+
   const handleImport = async () => {
-    if (!parsedData || !currentEnterpriseId) {
+    if (!file || !parseResult || !currentEnterpriseId) {
       toast({
         variant: 'destructive',
         title: t('error'),
-        description: t('fecImport.error.noDataOrCompany', { defaultValue: 'No data to import or no company selected' })
+        description: t('fecImport.error.noDataOrCompany', { defaultValue: 'Aucune donnée à importer ou aucune entreprise sélectionnée' })
       });
       return;
     }
-    
-    if (parsedData.summary.errors && parsedData.summary.errors.length > 0 && parsedData.summary.numEntries === 0) {
+
+    if (!parseResult.success || parseResult.lines.length === 0) {
       toast({
         variant: 'destructive',
         title: t('error'),
-        description: t('fecImport.error.cannotImportWithErrors', { defaultValue: 'Cannot import data with errors and no valid entries' })
+        description: t('fecImport.error.cannotImportWithErrors', { defaultValue: 'Impossible d\'importer des données avec des erreurs et aucune entrée valide' })
       });
       return;
     }
-    
+
+    console.log('🔧 Import pour l\'entreprise:', currentEnterpriseId);
+    console.log('📄 Fichier:', file.name);
+    console.log('📊 Format détecté:', parseResult.format);
+    console.log('📊 Standard:', parseResult.standard);
+
     setImporting(true);
     setImportProgress(10);
-    
+
     try {
       // Simuler une progression
       const progressInterval = setInterval(() => {
@@ -116,46 +122,51 @@ const FECImport = ({ currentEnterpriseId }) => {
           return prev + 10;
         });
       }, 500);
-      
-      // Importer les données en utilisant la nouvelle méthode
-      const result = await fecImportService.parseAndImportFEC(file, currentEnterpriseId);
-      
+
+      // Importer les données avec le nouveau service
+      const result = await accountingImportService.parseAndImportFile(file, currentEnterpriseId, {
+        defaultCurrency: 'EUR'
+      });
+
       clearInterval(progressInterval);
       setImportProgress(100);
-      
-      if (result.success) {
+
+      if (result.success && result.summary) {
         toast({
           title: t('success'),
-          description: t('fecImport.import.success', { 
-            defaultValue: 'FEC data imported successfully',
-            accounts: result.summary.accountsCreated,
-            journals: result.summary.journalsCreated,
-            entries: result.summary.entriesCreated
+          description: t('fecImport.import.success', {
+            defaultValue: `Import réussi: ${result.summary.entriesCreated} écritures, ${result.summary.accountsCreated} comptes, ${result.summary.journalsCreated} journaux créés`
           })
         });
         setImportResult(result);
+
+        // Rafraîchir les données
+        if (onImportSuccess) {
+          setTimeout(() => onImportSuccess(), 1500);
+        }
       } else {
         toast({
           variant: 'destructive',
           title: t('error'),
-          description: result.error || t('fecImport.import.failed', { defaultValue: 'Failed to import FEC data' })
+          description: result.error || t('fecImport.import.failed', { defaultValue: 'Échec de l\'import' })
         });
       }
+
     } catch (error) {
-      console.error('Error importing FEC data:', error);
+      console.error('Erreur lors de l\'import:', error);
       toast({
         variant: 'destructive',
         title: t('error'),
-        description: error.message || t('fecImport.import.failed', { defaultValue: 'Failed to import FEC data' })
+        description: error instanceof Error ? error.message : t('fecImport.import.failed', { defaultValue: 'Échec de l\'import' })
       });
     } finally {
       setImporting(false);
     }
   };
-  
+
   const resetState = () => {
     setFile(null);
-    setParsedData(null);
+    setParseResult(null);
     setImportResult(null);
     setImportProgress(0);
   };
@@ -163,198 +174,116 @@ const FECImport = ({ currentEnterpriseId }) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('fec', { defaultValue: 'FEC' })}</CardTitle>
+        <CardTitle>{t('fec', { defaultValue: 'Import comptable universel' })}</CardTitle>
         <CardDescription>
-          {t('fecImport.description', { defaultValue: 'Import your FEC (Fichier des Écritures Comptables) file to create journal entries, accounts, and journals.' })}
+          {t('fecImport.description', {
+            defaultValue: 'Importez vos fichiers comptables (FEC, SYSCOHADA, IFRS, SCF, QuickBooks, Sage, Xero) pour créer automatiquement les écritures, comptes et journaux.'
+          })}
         </CardDescription>
       </CardHeader>
+
       <CardContent className="space-y-6">
         {!file && (
-          <FECImportDropzone 
-            onFileSelected={handleFileSelected} 
+          <FECImportDropzone
+            onFileSelected={handleFileSelected}
             isProcessing={parsing}
+            parseResult={parseResult}
           />
         )}
-        
+
         {parsing && (
           <div className="flex flex-col items-center justify-center py-8 space-y-4">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <span>{t('fecImport.parsing', { defaultValue: 'Parsing file...' })}</span>
+            <span>{t('fecImport.parsing', { defaultValue: 'Analyse du fichier en cours...' })}</span>
           </div>
         )}
-        
+
         {importing && (
           <div className="flex flex-col items-center justify-center py-8 space-y-4">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <span>{t('fecImport.importing', { defaultValue: 'Importing data...' })}</span>
+            <span>{t('fecImport.importing', { defaultValue: 'Import des données en cours...' })}</span>
             <Progress value={importProgress} className="w-full max-w-md" />
           </div>
         )}
-        
+
         {file && !parsing && !importing && (
           <div className="space-y-4">
             <div className="flex items-center justify-between p-3 border rounded-md bg-muted/30">
               <div className="flex items-center gap-2">
                 <div className="p-2 bg-blue-600/10 rounded-full">
-                  <div className="w-6 h-6 text-primary">{file.name.split('.').pop().toUpperCase()}</div>
+                  <div className="w-6 h-6 text-primary text-xs font-bold flex items-center justify-center">
+                    {file.name.split('.').pop()?.toUpperCase() || 'FILE'}
+                  </div>
                 </div>
                 <div>
                   <p className="font-semibold">{file.name}</p>
                   <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(2)} KB</p>
+                  {parseResult && (
+                    <div className="flex gap-2 mt-1">
+                      <Badge variant="outline" className="text-xs">{parseResult.format}</Badge>
+                      {parseResult.standard && (
+                        <Badge variant="outline" className="text-xs">{parseResult.standard}</Badge>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
               <Button variant="ghost" size="sm" onClick={resetState} disabled={parsing || importing}>
-                {t('fecImport.button.clearFile', { defaultValue: "Clear" })}
+                {t('fecImport.button.clearFile', { defaultValue: "Effacer" })}
               </Button>
             </div>
-            
-            {parsedData && (
-              <>
-                {parsedData.summary.errors && parsedData.summary.errors.length > 0 && (
-                  <Alert variant="destructive">
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertTitle>{t('fecImport.feedback.errors', { defaultValue: 'Parsing Errors' })}</AlertTitle>
-                    <AlertDescription>
-                      <p className="mb-2">{t('fecImport.feedback.errorsFound', { count: parsedData.summary.errors.length, defaultValue: `${parsedData.summary.errors.length} errors found in the file.` })}</p>
-                      <ul className="list-disc pl-5 text-sm space-y-1 max-h-32 overflow-y-auto">
-                        {parsedData.summary.errors.slice(0, 5).map((error, index) => (
-                          <li key={index}>{error.message || error}</li>
-                        ))}
-                        {parsedData.summary.errors.length > 5 && (
-                          <li>... {t('fecImport.feedback.moreErrors', { count: parsedData.summary.errors.length - 5, defaultValue: `and ${parsedData.summary.errors.length - 5} more errors` })}</li>
-                        )}
-                      </ul>
-                    </AlertDescription>
-                  </Alert>
+
+            {parseResult && (
+              <FECImportDropzone
+                onFileSelected={handleFileSelected}
+                isProcessing={false}
+                parseResult={parseResult}
+              />
+            )}
+
+            {parseResult && parseResult.success && parseResult.lines.length > 0 && (
+              <Button
+                onClick={handleImport}
+                disabled={importing}
+                className="w-full"
+                size="lg"
+              >
+                {importing ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    {t('fecImport.button.importing', { defaultValue: "Import en cours..." })}
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="mr-2 h-5 w-5" />
+                    {t('fecImport.button.startImport', { defaultValue: "Démarrer l'import" })}
+                  </>
                 )}
-                
-                {parsedData.summary.unbalancedEntries && parsedData.summary.unbalancedEntries.length > 0 && (
-                  <Alert variant="warning">
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertTitle>{t('fecImport.feedback.unbalancedEntries', { defaultValue: 'Unbalanced Entries' })}</AlertTitle>
-                    <AlertDescription>
-                      <p className="mb-2">{t('fecImport.feedback.unbalancedEntriesFound', { count: parsedData.summary.unbalancedEntries.length, defaultValue: `${parsedData.summary.unbalancedEntries.length} unbalanced entries found.` })}</p>
-                      <ul className="list-disc pl-5 text-sm space-y-1 max-h-32 overflow-y-auto">
-                        {parsedData.summary.unbalancedEntries.slice(0, 3).map((entry, index) => (
-                          <li key={index}>
-                            {t('fecImport.feedback.unbalancedEntry', { 
-                              key: entry.key, 
-                              difference: entry.difference,
-                              defaultValue: `Entry ${entry.key}: Difference of ${entry.difference}`
-                            })}
-                          </li>
-                        ))}
-                        {parsedData.summary.unbalancedEntries.length > 3 && (
-                          <li>... {t('fecImport.feedback.moreUnbalanced', { count: parsedData.summary.unbalancedEntries.length - 3, defaultValue: `and ${parsedData.summary.unbalancedEntries.length - 3} more unbalanced entries` })}</li>
-                        )}
-                      </ul>
-                    </AlertDescription>
-                  </Alert>
-                )}
-                
-                {parsedData.summary.numEntries > 0 && (
-                  <Alert variant={parsedData.summary.errors.length > 0 ? "warning" : "default"}>
-                    {parsedData.summary.errors.length > 0 ? <AlertTriangle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
-                    <AlertTitle>{t('fecImport.feedback.summary', { defaultValue: 'File Summary' })}</AlertTitle>
-                    <AlertDescription>
-                      <div className="grid grid-cols-2 gap-2 mt-2">
-                        <div>
-                          <p className="text-sm font-medium">{t('fecImport.feedback.company', { defaultValue: 'Company' })}</p>
-                          <p className="text-sm">{parsedData.summary.companyName || t('fecImport.data.unavailable')}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">{t('fecImport.feedback.siren', { defaultValue: 'SIREN' })}</p>
-                          <p className="text-sm">{parsedData.summary.siren || t('fecImport.data.unavailable')}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">{t('fecImport.feedback.period', { defaultValue: 'Period' })}</p>
-                          <p className="text-sm">{parsedData.summary.periodStart} - {parsedData.summary.periodEnd}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">{t('fecImport.feedback.entries', { defaultValue: 'Entries' })}</p>
-                          <p className="text-sm">{parsedData.summary.numEntries}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">{t('fecImport.feedback.accounts', { defaultValue: 'Accounts' })}</p>
-                          <p className="text-sm">{parsedData.summary.numAccounts}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">{t('fecImport.feedback.journals', { defaultValue: 'Journals' })}</p>
-                          <p className="text-sm">{parsedData.summary.numJournals}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">{t('fecImport.feedback.totalDebit', { defaultValue: 'Total Debit' })}</p>
-                          <p className="text-sm">{parsedData.summary.totalDebit}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">{t('fecImport.feedback.totalCredit', { defaultValue: 'Total Credit' })}</p>
-                          <p className="text-sm">{parsedData.summary.totalCredit}</p>
-                        </div>
-                      </div>
-                      {Math.abs(parseFloat(parsedData.summary.balance)) > 0.01 && (
-                        <Alert variant="warning" className="mt-2">
-                          <AlertTriangle className="h-4 w-4" />
-                          <AlertTitle>{t('fecImport.feedback.unbalanced', { defaultValue: 'Unbalanced Entries' })}</AlertTitle>
-                          <AlertDescription>
-                            {t('fecImport.feedback.balanceDifference', { balance: parsedData.summary.balance, defaultValue: `The entries are not balanced. Difference: ${parsedData.summary.balance}` })}
-                          </AlertDescription>
-                        </Alert>
-                      )}
-                    </AlertDescription>
-                  </Alert>
-                )}
-                
-                {!parsedData.summary.numEntries && !parsedData.summary.errors.length && (
-                  <Alert>
-                    <Info className="h-4 w-4" />
-                    <AlertTitle>{t('fecImport.feedback.noData', { defaultValue: 'No Data' })}</AlertTitle>
-                    <AlertDescription>
-                      {t('fecImport.feedback.noDataFound', { defaultValue: 'No valid entries were found in the file.' })}
-                    </AlertDescription>
-                  </Alert>
-                )}
-                
-                <Button
-                  onClick={handleImport}
-                  disabled={importing || (parsedData.summary.errors.length > 0 && parsedData.summary.numEntries === 0)}
-                  className="w-full"
-                  size="lg"
-                >
-                  {importing ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      {t('fecImport.button.importing', { defaultValue: "Importing Data..." })}
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="mr-2 h-5 w-5" />
-                      {t('fecImport.button.startImport', { defaultValue: "Start Import" })}
-                    </>
-                  )}
-                </Button>
-              </>
+              </Button>
             )}
           </div>
         )}
-        
+
         {importResult && (
-          <Alert variant={importResult.success ? "success" : "destructive"}>
-            {importResult.success ? <CheckCircle className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
+          <Alert variant={importResult.success ? "default" : "destructive"}>
+            {importResult.success ? <CheckCircle className="h-4 w-4 text-green-600" /> : <AlertTriangle className="h-4 w-4" />}
             <AlertTitle>
-              {importResult.success 
-                ? t('fecImport.import.successTitle', { defaultValue: 'Import Successful' })
-                : t('fecImport.import.errorTitle', { defaultValue: 'Import Failed' })}
+              {importResult.success
+                ? t('fecImport.import.successTitle', { defaultValue: 'Import réussi' })
+                : t('fecImport.import.errorTitle', { defaultValue: 'Échec de l\'import' })}
             </AlertTitle>
             <AlertDescription>
-              {importResult.success ? (
+              {importResult.success && importResult.summary ? (
                 <div className="space-y-2">
-                  <p>{t('fecImport.import.successDescription', { defaultValue: 'The FEC data has been successfully imported.' })}</p>
+                  <p>{t('fecImport.import.successDescription', { defaultValue: 'Les données ont été importées avec succès.' })}</p>
                   <ul className="list-disc pl-5 text-sm space-y-1">
-                    <li>{t('fecImport.import.accountsCreated', { count: importResult.summary.accountsCreated, defaultValue: `${importResult.summary.accountsCreated} accounts created` })}</li>
-                    <li>{t('fecImport.import.journalsCreated', { count: importResult.summary.journalsCreated, defaultValue: `${importResult.summary.journalsCreated} journals created` })}</li>
-                    <li>{t('fecImport.import.entriesCreated', { count: importResult.summary.entriesCreated, defaultValue: `${importResult.summary.entriesCreated} journal entries created` })}</li>
+                    <li>Format: <strong>{importResult.summary.format}</strong></li>
+                    <li>Standard: <strong>{importResult.summary.standard || 'Auto-détecté'}</strong></li>
+                    <li>{importResult.summary.accountsCreated} comptes créés ({importResult.summary.accountsExisting} existants)</li>
+                    <li>{importResult.summary.journalsCreated} journaux créés ({importResult.summary.journalsExisting} existants)</li>
+                    <li>{importResult.summary.entriesCreated} écritures créées</li>
                     {importResult.summary.entriesWithErrors > 0 && (
-                      <li className="text-amber-600">{t('fecImport.import.entriesWithErrors', { count: importResult.summary.entriesWithErrors, defaultValue: `${importResult.summary.entriesWithErrors} entries had errors` })}</li>
+                      <li className="text-amber-600">{importResult.summary.entriesWithErrors} écritures avec erreurs</li>
                     )}
                   </ul>
                 </div>
@@ -364,18 +293,15 @@ const FECImport = ({ currentEnterpriseId }) => {
             </AlertDescription>
           </Alert>
         )}
-        
-        {parsedData && !parsing && !importing && parsedData.summary.numEntries > 0 && (
-          <FECImportSummary parsedData={parsedData} />
-        )}
       </CardContent>
+
       <CardFooter className="flex justify-between">
         <Button variant="outline" onClick={resetState} disabled={parsing || importing}>
-          {t('fecImport.button.reset', { defaultValue: "Reset" })}
+          {t('fecImport.button.reset', { defaultValue: "Réinitialiser" })}
         </Button>
-        {parsedData && !parsing && !importing && !importResult && (
-          <Button onClick={handleImport} disabled={parsedData.summary.numEntries === 0}>
-            {t('fecImport.button.startImport', { defaultValue: "Start Import" })}
+        {parseResult && !parsing && !importing && !importResult && parseResult.lines.length > 0 && (
+          <Button onClick={handleImport}>
+            {t('fecImport.button.startImport', { defaultValue: "Démarrer l'import" })}
           </Button>
         )}
       </CardFooter>

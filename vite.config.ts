@@ -96,32 +96,19 @@ export default defineConfig(({ mode }) => ({
 		rollupOptions: {
 			// Enhanced output configuration
 			output: {
-				// Conservative chunking strategy to avoid loading issues
+				// Simplified chunking strategy to avoid circular dependencies
 				manualChunks(id) {
-					// Keep critical libraries together in vendor
-					if (id.includes('node_modules/react') || 
-						id.includes('node_modules/react-dom') ||
-						id.includes('recharts') || 
-						id.includes('d3-') || 
-						id.includes('chart.js') ||
-						id.includes('framer-motion')) {
-						return 'vendor';
-					}
-					
-					// Large libraries that can be separate
-					if (id.includes('node_modules/@supabase/') || id.includes('node_modules/supabase')) {
-						return 'auth-db';
-					}
-					
-					if (id.includes('node_modules/@radix-ui/') || id.includes('node_modules/lucide-react')) {
-						return 'ui-framework';
-					}
-					
+					// Large document libraries - separate chunk
 					if (id.includes('jspdf') || id.includes('xlsx') || id.includes('exceljs')) {
 						return 'documents';
 					}
-					
-					// Everything else in vendor for safety
+
+					// UI framework - separate chunk
+					if (id.includes('node_modules/@radix-ui/') || id.includes('node_modules/lucide-react')) {
+						return 'ui-framework';
+					}
+
+					// All other node_modules in vendor to avoid circular deps
 					if (id.includes('node_modules/')) {
 						return 'vendor';
 					}

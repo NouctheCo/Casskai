@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { LoadingFallback } from '@/components/ui/LoadingFallback';
+import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,22 +11,23 @@ interface ProtectedRouteProps {
   requireCompany?: boolean;
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
-  children, 
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
   requireAuth = true,
   requireOnboarding = true,
-  requireCompany = true 
+  requireCompany = true
 }) => {
-  const { user, loading: authLoading, currentCompany, onboardingCompleted } = useAuth();
+  const { user, loading: authLoading, currentCompany, isCheckingOnboarding } = useAuth();
   const location = useLocation();
+  const { isExpired, isLoading: subscriptionLoading } = useSubscriptionStatus();
 
   // In E2E mode, bypass auth/onboarding guards to allow smoke navigation
   if (import.meta.env.VITE_E2E_BYPASS_AUTH === 'true') {
     return <>{children}</>;
   }
 
-  // Afficher le loader pendant que l'authentification se charge
-  if (authLoading) {
+  // Afficher le loader pendant que l'authentification, l'abonnement ou le check d'onboarding se charge
+  if (authLoading || subscriptionLoading || isCheckingOnboarding) {
     return <LoadingFallback message="Vérification des autorisations..." />;
   }
 
@@ -36,45 +38,24 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  // FIX: Logique cohérente de vérification d'onboarding
+  // ✅ LOGIQUE SIMPLIFIÉE ET STRICTE : Si tu as une entreprise, tu passes. Sinon onboarding.
   if (requireOnboarding && user) {
-    // Debug logs seulement en mode développement avec debug activé
-    if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_MODE === 'true') {
-      console.warn('📋 ProtectedRoute: Checking onboarding requirement', {
-        requireOnboarding,
-        onboardingCompleted,
-        hasCurrentCompany: !!currentCompany,
-        currentCompanyId: currentCompany?.id,
-        currentPath: location.pathname
-      });
-    }
-
-    // Si l'utilisateur est déjà sur la page d'onboarding, ne pas rediriger
+    // Si l'utilisateur est déjà sur la page d'onboarding, laisser passer
     if (location.pathname === '/onboarding' || location.pathname.startsWith('/onboarding/')) {
-      if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_MODE === 'true') {
-        console.warn('ℹ️ ProtectedRoute: Already on onboarding page - allowing render');
-      }
       return <>{children}</>;
     }
 
-    // Vérifier d'abord s'il y a une entreprise (locale ou remote)
+    // ⚠️ RÈGLE SIMPLE : Si pas d'entreprise → onboarding. Si entreprise → OK.
+    // On ne vérifie PAS onboardingCompleted car c'est source de bugs
     const hasLocalCompany = localStorage.getItem('casskai_current_enterprise');
-    
-    // Si pas d'entreprise du tout, rediriger vers l'onboarding
+
     if (!currentCompany && !hasLocalCompany) {
-      console.warn('🎯 ProtectedRoute: No company found - redirecting to onboarding');
+      console.warn('🎯 ProtectedRoute: No company - redirecting to onboarding');
       return <Navigate to="/onboarding" replace />;
     }
 
-    // Si l'onboarding n'est pas complété selon l'état, mais qu'on a une entreprise,
-    // vérifier la cohérence des données
-    if (!onboardingCompleted && (currentCompany || hasLocalCompany)) {
-      console.warn('⚠️ ProtectedRoute: Onboarding state inconsistent - company exists but onboarding not completed');
-      // Dans ce cas, laisser passer - l'onboarding sera marqué comme complété par AuthContext
-    } else if (!onboardingCompleted) {
-      console.warn('🎯 ProtectedRoute: Onboarding not completed - redirecting to onboarding');
-      return <Navigate to="/onboarding" replace />;
-    }
+    // Si on a une entreprise (locale ou remote), on laisse TOUJOURS passer
+    // Plus de vérification d'onboardingCompleted qui causait les bugs
   }
 
   // Vérification séparée pour l'entreprise (nécessaire même si onboarding est complété)
@@ -104,13 +85,23 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             <p className="text-gray-600 dark:text-gray-400">
               Chargement des données de l'entreprise...
             </p>
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
               Si ce message persiste, veuillez rafraîchir la page.
             </p>
           </div>
         </div>
       );
     }
+  }
+
+  // Vérification de l'abonnement : rediriger vers /billing si expiré
+  // SAUF si l'utilisateur est déjà sur la page de billing
+  const billingPaths = ['/settings/billing', '/billing', '/pricing'];
+  const isOnBillingPage = billingPaths.some(path => location.pathname.startsWith(path));
+
+  if (user && isExpired && !isOnBillingPage) {
+    console.warn('💳 ProtectedRoute: Subscription expired - redirecting to billing');
+    return <Navigate to="/settings/billing" state={{ from: location }} replace />;
   }
 
   // Si l'utilisateur est connecté et que les requirements sont satisfaits,

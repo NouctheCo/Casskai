@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 // import { supabase } from '../lib/supabase'; // Commenté pour la compatibilité de build
 import { MARKET_CONFIGS } from '../data/markets';
 import {
@@ -89,7 +101,7 @@ class OnboardingService {
           }
         },
         featuresExploration: {},
-        currentStepId: 'welcome',
+        currentStepId: 'language',
         completedSteps: [],
         startedAt: new Date().toISOString(),
         lastSavedAt: new Date().toISOString(),
@@ -420,7 +432,7 @@ class OnboardingService {
    * Obtient la prochaine étape dans le parcours
    */
   private getNextStep(currentStep: OnboardingStepId): OnboardingStepId {
-    const steps: OnboardingStepId[] = ['welcome', 'company', 'preferences', 'features', 'complete'];
+    const steps: OnboardingStepId[] = ['language', 'welcome', 'company', 'preferences', 'features', 'complete'];
     const currentIndex = steps.indexOf(currentStep);
     return currentIndex < steps.length - 1 ? steps[currentIndex + 1] : 'complete';
   }
@@ -606,7 +618,7 @@ class OnboardingService {
    * Obtient les formats de date disponibles
    */
   getDateFormats(): Array<{ value: string; label: string; example: string }> {
-    const now = new Date('2024-03-15');
+    const _now = new Date('2024-03-15');
     return [
       { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY (européen)', example: '15/03/2024' },
       { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY (américain)', example: '03/15/2024' },

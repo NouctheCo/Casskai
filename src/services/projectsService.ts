@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 // Service Projets moderne intégré avec Supabase
 import { supabase } from '@/lib/supabase';
 
@@ -395,16 +407,16 @@ export class ProjectsService {
         query = query.eq('user_id', filters.userId);
       }
       if (filters?.dateFrom) {
-        query = query.gte('date', filters.dateFrom);
+        query = query.gte('entry_date', filters.dateFrom);
       }
       if (filters?.dateTo) {
-        query = query.lte('date', filters.dateTo);
+        query = query.lte('entry_date', filters.dateTo);
       }
       if (filters?.billable !== undefined) {
         query = query.eq('billable', filters.billable);
       }
 
-      const { data, error } = await query.order('date', { ascending: false });
+      const { data, error } = await query.order('entry_date', { ascending: false });
 
       if (error) {
         console.error('Error fetching time entries:', error);
@@ -489,7 +501,7 @@ export class ProjectsService {
       }
 
       const projects = projectsResult.data || [];
-      const timeEntries = timeEntriesResult.data || [];
+      const _timeEntries = timeEntriesResult.data || [];
 
       // Calculate basic metrics
       const totalProjects = projects.length;

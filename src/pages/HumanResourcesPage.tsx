@@ -1,37 +1,66 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { useHR } from '@/hooks/useHR';
 import { useHRPayroll } from '@/hooks/useHRPayroll';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/components/ui/use-toast';
+import { toastError, toastSuccess } from '@/lib/toast-helpers';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { BetaBadge } from '@/components/ui/BetaBadge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
+import { EmployeeFormModal } from '@/components/hr/EmployeeFormModal';
+import { LeaveFormModal } from '@/components/hr/LeaveFormModal';
+import { ExpenseFormModal } from '@/components/hr/ExpenseFormModal';
+import { DocumentsManagementTab } from '@/components/hr/DocumentsManagementTab';
+import { DocumentUploadModal } from '@/components/hr/DocumentUploadModal';
+import { ObjectivesTab } from '@/components/hr/ObjectivesTab';
+import { PerformanceReviewsTab } from '@/components/hr/PerformanceReviewsTab';
+import { FeedbackTab } from '@/components/hr/FeedbackTab';
+import { TrainingTab } from '@/components/hr/TrainingTab';
+import { HRAnalyticsDashboard } from '@/components/hr/HRAnalyticsDashboard';
+import { DocumentTemplatesTab } from '@/components/hr/DocumentTemplatesTab';
+import { DocumentGenerationTab } from '@/components/hr/DocumentGenerationTab';
+import { DocumentArchiveTab } from '@/components/hr/DocumentArchiveTab';
+import { hrDocumentsService } from '@/services/hrDocumentsService';
 import {
-  Users,
+  Users, Plus,
   UserPlus,
   Calendar,
   DollarSign,
-  Clock,
-  TrendingUp,
   RefreshCw,
   AlertTriangle,
   Sparkles,
-  Award,
   Target,
   CheckCircle,
   XCircle,
   Download,
-  FileText
+  FileText,
+  MessageSquare,
+  ClipboardCheck,
+  GraduationCap,
+  BarChart3,
+  FileSignature,
+  Archive,
+  FilePlus
 } from 'lucide-react';
 
 export default function HumanResourcesPage() {
   const { t } = useTranslation();
-  const { toast } = useToast();
   const { currentCompany } = useAuth();
 
   // Use the new HR hook
@@ -45,13 +74,16 @@ export default function HumanResourcesPage() {
     employeesLoading,
     leavesLoading,
     expensesLoading,
-    metricsLoading,
+    metricsLoading: _metricsLoading,
     error,
-    fetchEmployees,
-    fetchLeaves,
-    fetchExpenses,
-    fetchMetrics,
-    refreshAll
+    fetchEmployees: _fetchEmployees,
+    fetchLeaves: _fetchLeaves,
+    fetchExpenses: _fetchExpenses,
+    fetchMetrics: _fetchMetrics,
+    refreshAll,
+    createEmployee,
+    createLeave,
+    createExpense
   } = useHR();
 
   // Use payroll and export hook
@@ -60,7 +92,7 @@ export default function HumanResourcesPage() {
     exportEmployeesToExcel,
     exportLeavesToCSV,
     exportExpensesToCSV,
-    exportTimeEntriesToCSV
+    exportTimeEntriesToCSV: _exportTimeEntriesToCSV
   } = useHRPayroll({
     employees,
     leaves,
@@ -70,6 +102,11 @@ export default function HumanResourcesPage() {
 
   // State management
   const [activeTab, setActiveTab] = useState('dashboard');
+  // Modal states
+  const [showEmployeeModal, setShowEmployeeModal] = useState(false);
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [showExpenseModal, setShowExpenseModal] = useState(false);
+  const [showDocumentModal, setShowDocumentModal] = useState(false);
 
   // Animation variants
   const containerVariants = {
@@ -95,6 +132,25 @@ export default function HumanResourcesPage() {
     }
   };
 
+  // Handler for document upload
+  const handleDocumentUpload = async (formData: any) => {
+    if (!currentCompany?.id) return false;
+
+    const response = await hrDocumentsService.uploadDocument(
+      currentCompany.id,
+      currentCompany.owner_id,
+      formData
+    );
+
+    if (response.success) {
+      toastSuccess("Document uploadé avec succès");
+      return true;
+    } else {
+      toastError(response.error || "Impossible d'uploader le document");
+      return false;
+    }
+  };
+
   // Show error if no company
   if (!currentCompany) {
     return (
@@ -110,8 +166,9 @@ export default function HumanResourcesPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
+    <>
+      <div className="container mx-auto p-6 space-y-6">
+        {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -121,9 +178,13 @@ export default function HumanResourcesPage() {
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <Users className="w-8 h-8 text-blue-600" />
             Ressources Humaines
+            <BetaBadge variant="secondary" />
           </h1>
           <p className="text-muted-foreground">
             Gérez vos employés, congés, frais et temps de travail
+            <Badge variant="outline" className="ml-2 text-xs">
+              {t('common.inDevelopment', 'En développement')}
+            </Badge>
           </p>
         </div>
 
@@ -234,96 +295,110 @@ export default function HumanResourcesPage() {
         animate="visible"
       >
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4" />
-              Tableau de bord
+              <BarChart3 className="w-4 h-4" />
+              <span className="hidden lg:inline">Analytics</span>
             </TabsTrigger>
             <TabsTrigger value="employees" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
-              Employés ({employees.length})
+              <span className="hidden lg:inline">Employés</span>
+            </TabsTrigger>
+            <TabsTrigger value="objectives" className="flex items-center gap-2">
+              <Target className="w-4 h-4" />
+              <span className="hidden lg:inline">Objectifs</span>
+            </TabsTrigger>
+            <TabsTrigger value="reviews" className="flex items-center gap-2">
+              <ClipboardCheck className="w-4 h-4" />
+              <span className="hidden lg:inline">Évaluations</span>
+            </TabsTrigger>
+            <TabsTrigger value="feedback" className="flex items-center gap-2">
+              <MessageSquare className="w-4 h-4" />
+              <span className="hidden lg:inline">Feedback</span>
+            </TabsTrigger>
+            <TabsTrigger value="training" className="flex items-center gap-2">
+              <GraduationCap className="w-4 h-4" />
+              <span className="hidden lg:inline">Formations</span>
             </TabsTrigger>
             <TabsTrigger value="leaves" className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />
-              Congés ({leaves.length})
+              <span className="hidden lg:inline">Congés</span>
             </TabsTrigger>
             <TabsTrigger value="expenses" className="flex items-center gap-2">
               <DollarSign className="w-4 h-4" />
-              Frais ({expenses.length})
+              <span className="hidden lg:inline">Frais</span>
+            </TabsTrigger>
+            <TabsTrigger value="documents" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              <span className="hidden lg:inline">Documents</span>
+            </TabsTrigger>
+            <TabsTrigger value="templates" className="flex items-center gap-2">
+              <FileSignature className="w-4 h-4" />
+              <span className="hidden lg:inline">Templates</span>
+            </TabsTrigger>
+            <TabsTrigger value="generation" className="flex items-center gap-2">
+              <FilePlus className="w-4 h-4" />
+              <span className="hidden lg:inline">Génération</span>
+            </TabsTrigger>
+            <TabsTrigger value="archives" className="flex items-center gap-2">
+              <Archive className="w-4 h-4" />
+              <span className="hidden lg:inline">Archives</span>
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard" className="space-y-6">
             <motion.div variants={itemVariants}>
-              <div className="grid gap-6 md:grid-cols-2">
-                {/* Departments Distribution */}
-                {metrics?.departments && metrics.departments.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Répartition par Département</CardTitle>
-                      <CardDescription>
-                        Distribution des employés par département
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {metrics.departments.map((dept, index) => (
-                        <div key={dept.name} className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium">{dept.name}</span>
-                            <span className="text-sm text-muted-foreground">{dept.count}</span>
-                          </div>
-                          <Progress
-                            value={(dept.count / metrics.total_employees) * 100}
-                            className="h-2"
-                          />
-                        </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Quick Stats */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Statistiques Rapides</CardTitle>
-                    <CardDescription>
-                      Aperçu des métriques RH importantes
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">Salaire moyen</span>
-                      </div>
-                      <span className="text-sm font-medium">
-                        {(metrics?.average_salary || 0).toLocaleString()} €
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Target className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">Taux de rotation</span>
-                      </div>
-                      <span className="text-sm font-medium">
-                        {metrics?.turnover_rate || 0}%
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                        <span className="text-sm">Employés actifs</span>
-                      </div>
-                      <span className="text-sm font-medium">
-                        {metrics?.active_employees || 0}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+              {currentCompany?.id && (
+                <HRAnalyticsDashboard
+                  companyId={currentCompany.id}
+                  employees={employees}
+                />
+              )}
             </motion.div>
+          </TabsContent>
+
+          {/* Objectifs Tab */}
+          <TabsContent value="objectives">
+            {currentCompany?.id && (
+              <ObjectivesTab
+                companyId={currentCompany.id}
+                employees={employees}
+                currentUserId={currentCompany.owner_id || ''}
+              />
+            )}
+          </TabsContent>
+
+          {/* Performance Reviews Tab */}
+          <TabsContent value="reviews">
+            {currentCompany?.id && (
+              <PerformanceReviewsTab
+                companyId={currentCompany.id}
+                employees={employees}
+                currentUserId={currentCompany.owner_id || ''}
+              />
+            )}
+          </TabsContent>
+
+          {/* Feedback Tab */}
+          <TabsContent value="feedback">
+            {currentCompany?.id && (
+              <FeedbackTab
+                companyId={currentCompany.id}
+                employees={employees}
+                currentUserId={currentCompany.owner_id || ''}
+              />
+            )}
+          </TabsContent>
+
+          {/* Training Tab */}
+          <TabsContent value="training">
+            {currentCompany?.id && (
+              <TrainingTab
+                companyId={currentCompany.id}
+                employees={employees}
+                currentUserId={currentCompany.owner_id || ''}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="employees" className="space-y-6">
@@ -337,26 +412,35 @@ export default function HumanResourcesPage() {
                         {employeesLoading ? 'Chargement...' : `${employees.length} employés`}
                       </CardDescription>
                     </div>
-                    {employees.length > 0 && (
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={exportEmployeesToCSV}
-                        >
-                          <Download className="w-4 h-4 mr-2" />
-                          CSV
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={exportEmployeesToExcel}
-                        >
-                          <FileText className="w-4 h-4 mr-2" />
-                          Excel
-                        </Button>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {employees.length > 0 && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={exportEmployeesToCSV}
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            CSV
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={exportEmployeesToExcel}
+                          >
+                            <FileText className="w-4 h-4 mr-2" />
+                            Excel
+                          </Button>
+                        </>
+                      )}
+                      <Button
+                        size="sm"
+                        onClick={() => setShowEmployeeModal(true)}
+                      >
+                        <UserPlus className="w-4 h-4 mr-2" />
+                        Ajouter
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -399,7 +483,7 @@ export default function HumanResourcesPage() {
                             Commencez par ajouter vos premiers employés
                           </p>
                         </div>
-                        <Button>
+                        <Button onClick={() => setShowEmployeeModal(true)}>
                           <UserPlus className="w-4 h-4 mr-2" />
                           Ajouter un Employé
                         </Button>
@@ -422,16 +506,25 @@ export default function HumanResourcesPage() {
                         {leavesLoading ? 'Chargement...' : `${leaves.length} demandes de congés`}
                       </CardDescription>
                     </div>
-                    {leaves.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      {leaves.length > 0 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={exportLeavesToCSV}
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Exporter CSV
+                        </Button>
+                      )}
                       <Button
-                        variant="outline"
                         size="sm"
-                        onClick={exportLeavesToCSV}
+                        onClick={() => setShowLeaveModal(true)}
                       >
-                        <Download className="w-4 h-4 mr-2" />
-                        Exporter CSV
+                        <Plus className="w-4 h-4 mr-2" />
+                        Nouvelle Demande
                       </Button>
-                    )}
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -504,16 +597,25 @@ export default function HumanResourcesPage() {
                         {expensesLoading ? 'Chargement...' : `${expenses.length} notes de frais`}
                       </CardDescription>
                     </div>
-                    {expenses.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      {expenses.length > 0 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={exportExpensesToCSV}
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Exporter CSV
+                        </Button>
+                      )}
                       <Button
-                        variant="outline"
                         size="sm"
-                        onClick={exportExpensesToCSV}
+                        onClick={() => setShowExpenseModal(true)}
                       >
-                        <Download className="w-4 h-4 mr-2" />
-                        Exporter CSV
+                        <Plus className="w-4 h-4 mr-2" />
+                        Nouvelle Note de Frais
                       </Button>
-                    )}
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -576,8 +678,75 @@ export default function HumanResourcesPage() {
               </Card>
             </motion.div>
           </TabsContent>
+
+          {/* Documents Tab */}
+          <TabsContent value="documents">
+            {currentCompany?.id && (
+              <DocumentsManagementTab
+                companyId={currentCompany.id}
+                currentUserId={currentCompany.owner_id || ''}
+                employees={employees}
+              />
+            )}
+          </TabsContent>
+
+          {/* Document Templates Tab */}
+          <TabsContent value="templates">
+            {currentCompany?.id && (
+              <DocumentTemplatesTab companyId={currentCompany.id} />
+            )}
+          </TabsContent>
+
+          {/* Document Generation Tab */}
+          <TabsContent value="generation">
+            {currentCompany?.id && (
+              <DocumentGenerationTab
+                companyId={currentCompany.id}
+                employees={employees}
+              />
+            )}
+          </TabsContent>
+
+          {/* Document Archive Tab */}
+          <TabsContent value="archives">
+            {currentCompany?.id && (
+              <DocumentArchiveTab companyId={currentCompany.id} />
+            )}
+          </TabsContent>
         </Tabs>
       </motion.div>
-    </div>
+      </div>
+
+      {/* Real Form Modals */}
+      <EmployeeFormModal
+        isOpen={showEmployeeModal}
+        onClose={() => setShowEmployeeModal(false)}
+        onSubmit={createEmployee}
+        employee={null}
+      />
+
+      <LeaveFormModal
+        isOpen={showLeaveModal}
+        onClose={() => setShowLeaveModal(false)}
+        onSubmit={createLeave}
+        employees={employees}
+        leave={null}
+      />
+
+      <ExpenseFormModal
+        isOpen={showExpenseModal}
+        onClose={() => setShowExpenseModal(false)}
+        onSubmit={createExpense}
+        employees={employees}
+        expense={null}
+      />
+
+      <DocumentUploadModal
+        isOpen={showDocumentModal}
+        onClose={() => setShowDocumentModal(false)}
+        onSubmit={handleDocumentUpload}
+        employees={employees}
+      />
+    </>
   );
 }

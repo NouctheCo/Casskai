@@ -81,7 +81,7 @@ const PurchaseStatsComponent: React.FC<PurchaseStatsProps> = ({ stats, loading }
         return (
           <Card key={index} className="relative overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
                 {stat.title}
               </CardTitle>
               <div className={`${stat.bgColor} p-2 rounded-lg`}>
@@ -94,7 +94,7 @@ const PurchaseStatsComponent: React.FC<PurchaseStatsProps> = ({ stats, loading }
                   <div className={`text-2xl font-bold ${stat.color} mb-1`}>
                     {stat.value}
                   </div>
-                  <p className="text-xs text-gray-500">{stat.description}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{stat.description}</p>
                 </div>
                 {stat.badge && (
                   <div className="ml-2">
@@ -104,7 +104,7 @@ const PurchaseStatsComponent: React.FC<PurchaseStatsProps> = ({ stats, loading }
                       </Badge>
                     )}
                     {stat.badge === 'danger' && (
-                      <Badge variant="outline" className="text-red-700 border-red-300 bg-red-50">
+                      <Badge variant="outline" className="text-red-700 border-red-300 bg-red-50 dark:bg-red-900/20">
                         {t('purchases.stats.urgent')}
                       </Badge>
                     )}

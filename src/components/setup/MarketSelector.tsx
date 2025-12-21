@@ -45,7 +45,7 @@ export function MarketSelector({ value, onValueChange, showRegions = true }: Mar
                 <Badge className={getRegionColor(region)}>
                   {getRegionLabel(region)}
                 </Badge>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-gray-500 dark:text-gray-300">
                   {regionMarkets.length} {regionMarkets.length > 1 ? 'pays' : 'pays'}
                 </span>
               </div>
@@ -64,10 +64,10 @@ export function MarketSelector({ value, onValueChange, showRegions = true }: Mar
                     `}
                   >
                     <div className="font-medium">{market.name}</div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-gray-500 dark:text-gray-300">
                       {market.defaultCurrency} • {market.accountingStandard}
                     </div>
-                    <div className="text-xs text-gray-400 mt-1">
+                    <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                       À partir de {market.pricing.starter} {market.pricing.currency}/mois
                     </div>
                   </div>

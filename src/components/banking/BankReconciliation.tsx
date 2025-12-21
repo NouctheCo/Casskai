@@ -36,12 +36,12 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
   const [selectedPeriod, setSelectedPeriod] = useState('month');
   const [isReconciling, setIsReconciling] = useState(false);
   const [_reconciliationData, _setReconciliationData] = useState(null);
-  const [pendingMatches, setPendingMatches] = useState([]);
-  const [autoMatches, setAutoMatches] = useState([]);
+  const [pendingMatches, setPendingMatches] = useState<any[]>([]);
+  const [autoMatches, setAutoMatches] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [showDetails, setShowDetails] = useState(false);
-  const [reconciliationSummary, setReconciliationSummary] = useState(null);
+  const [reconciliationSummary, setReconciliationSummary] = useState<any>(null);
 
   // Données simulées pour les transactions bancaires et écritures comptables
   const [bankTransactions] = useState([
@@ -243,7 +243,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
   };
 
   // Validation d'une correspondance
-  const validateMatch = async (bankTransactionId, accountingEntryId) => {
+  const validateMatch = async (bankTransactionId: string, accountingEntryId: string) => {
     try {
       // Simulation de validation
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -255,7 +255,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
       });
 
       // Retirer de la liste des matches automatiques
-      setAutoMatches(prev => prev.filter(m => 
+      setAutoMatches(prev => prev.filter(m =>
         m.bank_transaction_id !== bankTransactionId || m.accounting_entry_id !== accountingEntryId
       ));
 
@@ -302,24 +302,24 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
   }, [selectedAccount, selectedPeriod]);
 
   // Formatage des montants
-  const formatAmount = (amount) => {
+  const formatAmount = (amount: number) => {
     const abs = Math.abs(amount);
     const sign = amount >= 0 ? '+' : '-';
     return `${sign}${abs.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
   };
 
   // Couleur selon le statut
-  const getStatusColor = (reconciled, hasMatches = false) => {
+  const getStatusColor = (reconciled: boolean, hasMatches = false) => {
     if (reconciled) return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
     if (hasMatches) return 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400';
     return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
   };
 
   // Icône de confiance
-  const getConfidenceIcon = (confidence) => {
+  const getConfidenceIcon = (confidence: number) => {
     if (confidence >= 0.9) return <CheckCircle className="h-4 w-4 text-green-600" />;
     if (confidence >= 0.7) return <AlertCircle className="h-4 w-4 text-orange-600" />;
-    return <XCircle className="h-4 w-4 text-red-600" />;
+    return <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />;
   };
 
   return (
@@ -330,7 +330,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl">
               <Shuffle className="h-6 w-6 text-purple-600" />
@@ -350,9 +350,9 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
       >
-        <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <CardTitle className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
               <Target className="h-4 w-4 text-blue-600" />
               Taux de réconciliation
             </CardTitle>
@@ -360,7 +360,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
           <CardContent>
             <div className="space-y-2">
               <motion.div 
-                className="text-2xl font-bold text-gray-900 dark:text-white"
+                className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2 }}
@@ -368,16 +368,16 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                 {reconciliationStats.reconciliationRate.toFixed(1)}%
               </motion.div>
               <Progress value={reconciliationStats.reconciliationRate} className="h-2" />
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-gray-500 dark:text-gray-300">
                 {reconciliationStats.reconciledTransactions}/{reconciliationStats.totalBankTransactions} transactions
               </p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <CardTitle className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
               <CheckCircle className="h-4 w-4 text-green-600" />
               Réconciliées
             </CardTitle>
@@ -387,16 +387,16 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
               <div className="text-2xl font-bold text-green-600">
                 {reconciliationStats.reconciledTransactions}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
+              <div className="text-sm text-gray-600 dark:text-gray-300">
                 {formatAmount(reconciliationStats.reconciledAmount)}
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <CardTitle className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
               <Clock className="h-4 w-4 text-orange-600" />
               En attente
             </CardTitle>
@@ -406,16 +406,16 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
               <div className="text-2xl font-bold text-orange-600">
                 {reconciliationStats.pendingTransactions}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
+              <div className="text-sm text-gray-600 dark:text-gray-300">
                 {formatAmount(reconciliationStats.pendingAmount)}
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <CardTitle className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
               <BarChart3 className="h-4 w-4 text-purple-600" />
               Suggestions
             </CardTitle>
@@ -425,7 +425,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
               <div className="text-2xl font-bold text-purple-600">
                 {autoMatches.length}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
+              <div className="text-sm text-gray-600 dark:text-gray-300">
                 Correspondances trouvées
               </div>
             </div>
@@ -439,7 +439,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <CardContent className="p-6">
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="flex-1">
@@ -451,7 +451,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                     <SelectValue placeholder="Sélectionnez un compte" />
                   </SelectTrigger>
                   <SelectContent>
-                    {bankAccounts.map(account => (
+                    {bankAccounts.map((account: any) => (
                       <SelectItem key={account.id} value={account.id}>
                         {account.bank_name} - {account.account_name}
                       </SelectItem>
@@ -561,7 +561,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                         description: `${autoMatches.length} correspondances disponibles`,
                       });
                     }}
-                    className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                    className="border-blue-300 text-blue-700 hover:bg-blue-100 dark:text-blue-400"
                   >
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Recharger détails
@@ -575,7 +575,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
 
       {/* Onglets principaux */}
       <Tabs defaultValue="matches" className="space-y-4">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-2">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700 p-2">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger 
               value="matches" 
@@ -608,7 +608,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+            <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Link className="h-5 w-5 text-purple-600" />
@@ -631,7 +631,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.1 }}
-                          className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 border border-gray-200 dark:border-gray-600"
+                          className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 border border-gray-200 dark:border-gray-600 dark:border-gray-600"
                         >
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center space-x-3">
@@ -644,7 +644,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 dark:bg-red-900/20 dark:text-red-400"
                               >
                                 <XCircle className="h-4 w-4 mr-2" />
                                 Rejeter
@@ -662,56 +662,56 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
 
                           <div className="grid md:grid-cols-2 gap-4">
                             {/* Transaction bancaire */}
-                            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
-                              <h4 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-600 dark:border-gray-600">
+                              <h4 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2 flex items-center gap-2">
                                 <Database className="h-4 w-4 text-blue-600" />
                                 Transaction bancaire
                               </h4>
                               <div className="space-y-2 text-sm">
                                 <div className="flex justify-between">
-                                  <span className="text-gray-600 dark:text-gray-400">Date:</span>
+                                  <span className="text-gray-600 dark:text-gray-300">Date:</span>
                                   <span>{bankTx?.date}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-gray-600 dark:text-gray-400">Montant:</span>
-                                  <span className={`font-medium ${bankTx?.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  <span className="text-gray-600 dark:text-gray-300">Montant:</span>
+                                  <span className={`font-medium ${(bankTx?.amount ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                     {formatAmount(bankTx?.amount || 0)}
                                   </span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-gray-600 dark:text-gray-400">Description:</span>
+                                  <span className="text-gray-600 dark:text-gray-300">Description:</span>
                                   <span className="truncate ml-2">{bankTx?.description}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-gray-600 dark:text-gray-400">Référence:</span>
+                                  <span className="text-gray-600 dark:text-gray-300">Référence:</span>
                                   <span className="font-mono text-xs">{bankTx?.reference}</span>
                                 </div>
                               </div>
                             </div>
 
                             {/* Écriture comptable */}
-                            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
-                              <h4 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-600 dark:border-gray-600">
+                              <h4 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2 flex items-center gap-2">
                                 <FileText className="h-4 w-4 text-green-600" />
                                 Écriture comptable
                               </h4>
                               <div className="space-y-2 text-sm">
                                 <div className="flex justify-between">
-                                  <span className="text-gray-600 dark:text-gray-400">Date:</span>
+                                  <span className="text-gray-600 dark:text-gray-300">Date:</span>
                                   <span>{accountingEntry?.date}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-gray-600 dark:text-gray-400">Montant:</span>
-                                  <span className={`font-medium ${accountingEntry?.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  <span className="text-gray-600 dark:text-gray-300">Montant:</span>
+                                  <span className={`font-medium ${(accountingEntry?.amount ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                     {formatAmount(accountingEntry?.amount || 0)}
                                   </span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-gray-600 dark:text-gray-400">Description:</span>
+                                  <span className="text-gray-600 dark:text-gray-300">Description:</span>
                                   <span className="truncate ml-2">{accountingEntry?.description}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-gray-600 dark:text-gray-400">Compte:</span>
+                                  <span className="text-gray-600 dark:text-gray-300">Compte:</span>
                                   <span className="text-xs">{accountingEntry?.account}</span>
                                 </div>
                               </div>
@@ -736,12 +736,12 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                 ) : (
                   <div className="text-center py-12">
                     <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Link className="h-8 w-8 text-gray-400" />
+                      <Link className="h-8 w-8 text-gray-400 dark:text-gray-500" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
                       Aucune correspondance trouvée
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400">
+                    <p className="text-gray-600 dark:text-gray-300">
                       Lancez une réconciliation automatique pour détecter les correspondances.
                     </p>
                   </div>
@@ -758,7 +758,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+            <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
               <CardHeader>
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
                   <div>
@@ -773,7 +773,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                   
                   <div className="flex space-x-3">
                     <div className="relative">
-                      <Search className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                      <Search className="h-4 w-4 text-gray-400 dark:text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
                       <Input
                         placeholder="Rechercher..."
                         value={searchTerm}
@@ -803,14 +803,14 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
-                      className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                      className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors dark:bg-gray-900/50"
                     >
                       <div className="flex items-center space-x-4 flex-1">
                         <div className={`w-3 h-3 rounded-full ${transaction.reconciled ? 'bg-green-500' : 'bg-orange-500'}`} />
                         
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-1">
-                            <p className="font-medium text-gray-900 dark:text-white truncate">
+                            <p className="font-medium text-gray-900 dark:text-gray-100 dark:text-white truncate">
                               {transaction.description}
                             </p>
                             <span className={`font-bold ${transaction.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -818,7 +818,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                             </span>
                           </div>
                           
-                          <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+                          <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300">
                             <span className="flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
                               {transaction.date}
@@ -829,14 +829,14 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                       </div>
 
                       <div className="flex items-center space-x-3 ml-4">
-                        <Badge className={getStatusColor(transaction.reconciled, transaction.suggested_matches?.length > 0)}>
-                          {transaction.reconciled ? 'Réconciliée' : 
-                           transaction.suggested_matches?.length > 0 ? 'Suggestions' : 'En attente'}
+                        <Badge className={getStatusColor(transaction.reconciled, (transaction.suggested_matches?.length ?? 0) > 0)}>
+                          {transaction.reconciled ? 'Réconciliée' :
+                           (transaction.suggested_matches?.length ?? 0) > 0 ? 'Suggestions' : 'En attente'}
                         </Badge>
-                        
-                        {!transaction.reconciled && transaction.suggested_matches?.length > 0 && (
+
+                        {!transaction.reconciled && (transaction.suggested_matches?.length ?? 0) > 0 && (
                           <Badge variant="secondary" className="text-xs">
-                            {transaction.suggested_matches.length} suggestion{transaction.suggested_matches.length > 1 ? 's' : ''}
+                            {transaction.suggested_matches?.length} suggestion{(transaction.suggested_matches?.length ?? 0) > 1 ? 's' : ''}
                           </Badge>
                         )}
                         
@@ -851,12 +851,12 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                 {filteredTransactions.length === 0 && (
                   <div className="text-center py-12">
                     <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <FileText className="h-8 w-8 text-gray-400" />
+                      <FileText className="h-8 w-8 text-gray-400 dark:text-gray-500" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
                       Aucune transaction trouvée
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400">
+                    <p className="text-gray-600 dark:text-gray-300">
                       Aucune transaction ne correspond aux critères de recherche.
                     </p>
                   </div>
@@ -873,7 +873,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+            <Card className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-600 dark:border-gray-700">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Edit3 className="h-5 w-5 text-orange-600" />
@@ -888,10 +888,10 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                   <div className="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Edit3 className="h-8 w-8 text-orange-600 dark:text-orange-400" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
                     Interface de réconciliation manuelle
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-4">
                     Fonctionnalité en cours de développement
                   </p>
                   <Button variant="outline">

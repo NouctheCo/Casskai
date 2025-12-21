@@ -1,4 +1,16 @@
 /**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
+/**
  * CRM Analytics Service
  * Advanced analytics and forecasting for CRM data
  * Calculates conversion rates, sales cycles, forecasting, and advanced metrics
@@ -352,7 +364,7 @@ class CRMAnalyticsService {
   ): ClientHealthScore[] {
     return clients.map(client => {
       const clientOpportunities = opportunities.filter(o => o.client_id === client.id);
-      const clientActions = actions.filter(a => a.client_id === client.id);
+      const _clientActions = actions.filter(a => a.client_id === client.id);
 
       // Revenue contribution
       const totalRevenue = client.total_revenue || 0;

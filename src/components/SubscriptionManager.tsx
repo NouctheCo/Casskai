@@ -276,7 +276,7 @@ export function SubscriptionManager({ enterpriseId, className }: SubscriptionMan
   return (
     <div className={cn("space-y-6", className)}>
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
           Gestion de l'abonnement
         </h2>
         <p className="text-gray-600 dark:text-gray-400">

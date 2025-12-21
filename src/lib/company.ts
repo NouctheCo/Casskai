@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import { supabase } from './supabase';
 
 /**
@@ -7,8 +19,10 @@ import { supabase } from './supabase';
  */
 export const getUserCompanies = async (userId: string) => {
   if (!userId) {
+    
     throw new Error("L'ID de l'utilisateur est requis.");
   }
+
 
   // Étape 1: récupérer les liaisons (sans join) pour éviter toute récursion RLS
   const { data: links, error: linksError } = await supabase
@@ -17,7 +31,6 @@ export const getUserCompanies = async (userId: string) => {
     .eq('user_id', userId);
 
   if (linksError) {
-    console.error("Erreur lors de la récupération des liaisons user_companies:", linksError);
 
     // Gestion des erreurs RLS communes
     if (linksError.code === '42P17' ||
@@ -25,7 +38,7 @@ export const getUserCompanies = async (userId: string) => {
         linksError.message?.includes('500') ||
         linksError.message?.includes('Internal Server Error') ||
         linksError.message?.includes('policy')) {
-      console.warn('🔄 RLS/Policy error detected on user_companies, returning empty array for onboarding');
+      
       return [];
     }
 
@@ -33,7 +46,10 @@ export const getUserCompanies = async (userId: string) => {
   }
 
   const companyIds = (links || []).map(l => l.company_id).filter(Boolean);
-  if (companyIds.length === 0) return [];
+  
+  if (companyIds.length === 0) {
+    return [];
+  }
 
   // Étape 2: récupérer les entreprises par leurs IDs (RLS sur companies autorise si relation existe)
   const { data: companies, error: companiesError } = await supabase
@@ -42,7 +58,6 @@ export const getUserCompanies = async (userId: string) => {
     .in('id', companyIds);
 
   if (companiesError) {
-    console.error('Erreur lors de la récupération des entreprises:', companiesError);
 
     // Gestion des erreurs RLS communes
     if (companiesError.code === '42P17' ||
@@ -50,7 +65,7 @@ export const getUserCompanies = async (userId: string) => {
         companiesError.message?.includes('500') ||
         companiesError.message?.includes('Internal Server Error') ||
         companiesError.message?.includes('policy')) {
-      console.warn('🔄 RLS/Policy error detected on companies, returning empty array for onboarding');
+      
       return [];
     }
 
@@ -68,11 +83,13 @@ export const getUserCompanies = async (userId: string) => {
     address?: string;
     city?: string;
     postal_code?: string;
+    owner_id?: string;
     phone?: string;
     email?: string;
     website?: string;
     created_at?: string;
     updated_at?: string;
+    onboarding_completed_at?: string | null;
   }>;
 };
 
@@ -83,23 +100,23 @@ export const getUserCompanies = async (userId: string) => {
  */
 export const getCompanyDetails = async (companyId: string) => {
   if (!companyId) {
+    
     throw new Error("L'ID de l'entreprise est requis.");
   }
 
+  
   const { data, error } = await supabase
     .from('companies')
     .select('*')
     .eq('id', companyId);
 
   if (error) {
-    console.error("Erreur lors de la récupération des détails de l'entreprise:", error);
     throw new Error("Impossible de récupérer les détails de l'entreprise.");
   }
 
   if (!data || data.length === 0) {
     throw new Error("Entreprise non trouvée.");
   }
-
   return data[0]; // Retourner le premier résultat au lieu d'utiliser .single()
 };
 

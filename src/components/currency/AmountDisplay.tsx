@@ -34,11 +34,11 @@ export const AmountDisplay: FC<AmountDisplayProps> = ({
       <span className={className}>
         <span className="font-medium">{originalAmount}</span>
         {isLoading ? (
-          <span className="text-sm text-gray-500 ml-2">
+          <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
             <span className="animate-spin">⟳</span>
           </span>
         ) : (
-          <span className="text-sm text-gray-500 ml-2">
+          <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
             (≈ {convertedAmount})
           </span>
         )}

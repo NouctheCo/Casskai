@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import { supabase } from '@/lib/supabase';
 
 export interface Payment {
@@ -21,7 +33,7 @@ export interface PaymentWithDetails extends Payment {
   invoice?: {
     id: string;
     invoice_number: string;
-    total_amount: number;
+    total_incl_tax: number;
   };
   third_party?: {
     id: string;
@@ -77,7 +89,7 @@ class PaymentsService {
         .from('payments')
         .select(`
           *,
-          invoice:invoices(id, invoice_number, total_amount),
+          invoice:invoices(id, invoice_number, total_incl_tax),
           third_party:third_parties(id, name, email)
         `)
         .eq('company_id', companyId);
@@ -87,7 +99,7 @@ class PaymentsService {
         query = query.eq('status', options.status);
       }
       if (options?.type) {
-        query = query.eq('type', options.type);
+        query = query.eq('invoice_type', options.type);
       }
       if (options?.invoiceId) {
         query = query.eq('invoice_id', options.invoiceId);
@@ -131,7 +143,7 @@ class PaymentsService {
         .from('payments')
         .select(`
           *,
-          invoice:invoices(id, invoice_number, total_amount),
+          invoice:invoices(id, invoice_number, total_incl_tax),
           third_party:third_parties(id, name, email)
         `)
         .eq('id', id)
@@ -323,7 +335,7 @@ class PaymentsService {
         .from('payments')
         .select('amount')
         .eq('invoice_id', invoiceId)
-        .eq('type', 'income')
+        .eq('invoice_type', 'income')
         .eq('status', 'completed');
 
       if (error) {

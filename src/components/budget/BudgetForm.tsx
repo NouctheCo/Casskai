@@ -3,12 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { Save, X, Plus, Trash2, Calculator, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
 import { budgetService } from '@/services/budgetService';
+import { AccountSelectDropdown, type AccountOption } from '@/components/budget/AccountSelectDropdown';
 import type {
   BudgetFormData,
   BudgetCategoryFormData,
   BudgetAssumptionFormData,
-  CategoryType,
-  DriverType,
   BudgetValidationResult
 } from '@/types/budget.types';
 
@@ -62,6 +61,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
       setFormData({
         year: data.year,
         categories: data.budget_categories?.map(cat => ({
+          account_id: cat.account_id, // Lien vers chart_of_accounts
           category: cat.category,
           subcategory: cat.subcategory,
           category_type: cat.category_type,
@@ -96,46 +96,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
   };
 
   const initializeNewBudget = () => {
-    // Catégories par défaut pour un nouveau budget
-    const defaultCategories: BudgetCategoryFormData[] = [
-      {
-        category: 'Chiffre d\'affaires',
-        subcategory: 'Ventes produits/services',
-        category_type: 'revenue',
-        account_codes: ['706', '707'],
-        annual_amount: 0,
-        monthly_amounts: Array(12).fill(0),
-        growth_rate: 5,
-        driver_type: 'variable',
-        notes: 'Revenus principaux de l\'activité',
-        responsible_person: ''
-      },
-      {
-        category: 'Charges de personnel',
-        subcategory: 'Salaires et charges sociales',
-        category_type: 'expense',
-        account_codes: ['641', '645'],
-        annual_amount: 0,
-        monthly_amounts: Array(12).fill(0),
-        growth_rate: 3,
-        driver_type: 'fixed',
-        notes: 'Coûts de personnel',
-        responsible_person: ''
-      },
-      {
-        category: 'Charges externes',
-        subcategory: 'Loyers et charges locatives',
-        category_type: 'expense',
-        account_codes: ['613', '614'],
-        annual_amount: 0,
-        monthly_amounts: Array(12).fill(0),
-        growth_rate: 2,
-        driver_type: 'fixed',
-        notes: 'Loyers, assurances, maintenance',
-        responsible_person: ''
-      }
-    ];
-
+    // Budget vide - l'utilisateur devra sélectionner des comptes via le dropdown
     const defaultAssumptions: BudgetAssumptionFormData[] = [
       {
         key: 'croissance_marche',
@@ -159,13 +120,14 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
 
     setFormData({
       year: new Date().getFullYear() + 1,
-      categories: defaultCategories,
+      categories: [], // Vide - utilisateur doit ajouter via "Ajouter une catégorie"
       assumptions: defaultAssumptions
     });
   };
 
   const addCategory = () => {
     const newCategory: BudgetCategoryFormData = {
+      account_id: '', // Required - will be set via dropdown
       category: '',
       subcategory: '',
       category_type: 'expense',
@@ -182,6 +144,36 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
       ...formData,
       categories: [...formData.categories, newCategory]
     });
+  };
+
+  // Callback pour AccountSelectDropdown - auto-remplit category/subcategory depuis le compte
+  const handleAccountSelect = (categoryIndex: number, accountId: string, accountData: AccountOption) => {
+    const updatedCategories = [...formData.categories];
+
+    // Mettre à jour account_id
+    updatedCategories[categoryIndex].account_id = accountId;
+
+    // Auto-remplir category depuis budget_category du compte
+    if (accountData.budget_category) {
+      updatedCategories[categoryIndex].category = accountData.budget_category;
+    }
+
+    // Auto-remplir subcategory depuis account_name du compte
+    updatedCategories[categoryIndex].subcategory = accountData.account_name;
+
+    // Auto-remplir category_type depuis account_class
+    if (accountData.account_class === 7) {
+      updatedCategories[categoryIndex].category_type = 'revenue';
+    } else if (accountData.account_class === 6) {
+      updatedCategories[categoryIndex].category_type = 'expense';
+    } else if (accountData.account_class === 2) {
+      updatedCategories[categoryIndex].category_type = 'capex';
+    }
+
+    // Auto-remplir account_codes
+    updatedCategories[categoryIndex].account_codes = [accountData.account_number];
+
+    setFormData({ ...formData, categories: updatedCategories });
   };
 
   const removeCategory = (index: number) => {
@@ -282,6 +274,15 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
     }
 
     formData.categories.forEach((cat, index) => {
+      // VALIDATION CRITIQUE : account_id est obligatoire
+      if (!cat.account_id || cat.account_id.trim() === '') {
+        errors.push({
+          field: `categories[${index}].account_id`,
+          message: `Catégorie ${index + 1}: Vous devez sélectionner un compte comptable`,
+          severity: 'error'
+        });
+      }
+
       if (!cat.category.trim()) {
         errors.push({
           field: `categories[${index}].category`,
@@ -385,13 +386,13 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
   return (
     <div className="bg-white dark:bg-gray-800">
       {/* Header */}
-      <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+      <div className="border-b border-gray-200 dark:border-gray-600 dark:border-gray-700 px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-gray-100">
               {budgetId ? 'Modifier le budget' : 'Nouveau budget'} {formData.year}
             </h2>
-            <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+            <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 text-sm mt-1">
               Définissez vos objectifs financiers par catégorie et mois
             </p>
           </div>
@@ -399,7 +400,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
           <div className="flex items-center space-x-3">
             <button
               onClick={onCancel}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-100 transition-colors"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-100 transition-colors dark:bg-gray-900/30"
             >
               <X className="h-4 w-4 mr-2 inline" />
               Annuler
@@ -423,7 +424,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
         {validation && (
           <div className="mt-4 space-y-2">
             {validation.errors.map((error, index) => (
-              <div key={index} className="flex items-center space-x-2 text-red-600 text-sm">
+              <div key={index} className="flex items-center space-x-2 text-red-600 text-sm dark:text-red-400">
                 <AlertTriangle className="h-4 w-4" />
                 <span>{error.message}</span>
               </div>
@@ -439,7 +440,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
       </div>
 
       {/* Year Selection */}
-      <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+      <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-600 dark:border-gray-700">
         <div className="flex items-center space-x-4">
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Année budgétaire :
@@ -447,7 +448,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
           <select
             value={formData.year}
             onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
-            className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-gray-100"
+            className="px-3 py-1 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:bg-gray-700 dark:text-gray-100"
           >
             {[2024, 2025, 2026, 2027, 2028].map(year => (
               <option key={year} value={year}>{year}</option>
@@ -457,7 +458,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
+      <div className="border-b border-gray-200 dark:border-gray-600 dark:border-gray-700">
         <nav className="flex space-x-8 px-6">
           {[
             { id: 'categories', label: 'Catégories Budgétaires', icon: Calculator },
@@ -485,7 +486,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
         {activeTab === 'categories' && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">
                 Catégories Budgétaires
               </h3>
               <button
@@ -499,11 +500,11 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
 
             {formData.categories.length === 0 ? (
               <div className="text-center py-12 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                <Calculator className="h-16 w-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                <Calculator className="h-16 w-16 text-gray-400 dark:text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100 mb-2">
                   Aucune catégorie budgétaire
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-4">
                   Commencez par ajouter vos premières catégories de revenus et charges
                 </p>
                 <button
@@ -516,54 +517,75 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
             ) : (
               <div className="space-y-8">
                 {formData.categories.map((category, index) => (
-                  <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 bg-white dark:bg-gray-700/30">
+                  <div key={index} className="border border-gray-200 dark:border-gray-600 dark:border-gray-700 rounded-lg p-6 bg-white dark:bg-gray-800 dark:bg-gray-700/30">
                     <div className="flex items-start justify-between mb-4">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
+                      <div className="grid grid-cols-1 gap-4 flex-1">
+                        {/* Sélection du compte comptable - REMPLACE les champs texte */}
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Catégorie *
+                            Compte comptable * <span className="text-xs text-gray-500 dark:text-gray-400">(auto-remplit catégorie et type)</span>
                           </label>
-                          <input
-                            type="text"
-                            value={category.category}
-                            onChange={(e) => updateCategory(index, 'category', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
-                            placeholder="Ex: Chiffre d'affaires"
+                          <AccountSelectDropdown
+                            value={category.account_id || ''}
+                            companyId={companyId}
+                            onChange={(accountId, accountData) => handleAccountSelect(index, accountId, accountData)}
+                            filterType="all"
+                            placeholder="Sélectionner un compte..."
                           />
                         </div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Sous-catégorie
-                          </label>
-                          <input
-                            type="text"
-                            value={category.subcategory || ''}
-                            onChange={(e) => updateCategory(index, 'subcategory', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
-                            placeholder="Ex: Ventes produits"
-                          />
-                        </div>
+                        {/* Catégorie et sous-catégorie en LECTURE SEULE (auto-remplies) */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                              Catégorie (auto)
+                            </label>
+                            <input
+                              type="text"
+                              value={category.category}
+                              readOnly
+                              disabled
+                              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                              placeholder="Auto-rempli depuis le compte"
+                            />
+                          </div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Type *
-                          </label>
-                          <select
-                            value={category.category_type}
-                            onChange={(e) => updateCategory(index, 'category_type', e.target.value as CategoryType)}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
-                          >
-                            <option value="revenue">Revenus</option>
-                            <option value="expense">Charges</option>
-                            <option value="capex">Investissements</option>
-                          </select>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                              Sous-catégorie (auto)
+                            </label>
+                            <input
+                              type="text"
+                              value={category.subcategory || ''}
+                              readOnly
+                              disabled
+                              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                              placeholder="Auto-rempli depuis le compte"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                              Type (auto)
+                            </label>
+                            <input
+                              type="text"
+                              value={
+                                category.category_type === 'revenue' ? 'Revenus' :
+                                category.category_type === 'expense' ? 'Charges' :
+                                'Investissements'
+                              }
+                              readOnly
+                              disabled
+                              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                            />
+                          </div>
                         </div>
                       </div>
 
                       <button
                         onClick={() => removeCategory(index)}
-                        className="ml-4 p-2 text-gray-400 dark:text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        className="ml-4 p-2 text-gray-400 dark:text-gray-300 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors dark:bg-red-900/20 dark:text-red-400"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -580,12 +602,12 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                             type="number"
                             value={category.annual_amount}
                             onChange={(e) => updateCategory(index, 'annual_amount', parseFloat(e.target.value) || 0)}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
                             placeholder="0"
                           />
                           <button
                             onClick={() => distributeEqually(index)}
-                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400"
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
                             title="Répartir équitablement sur 12 mois"
                           >
                             <Calculator className="h-4 w-4" />
@@ -601,7 +623,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                           type="number"
                           value={category.growth_rate || 0}
                           onChange={(e) => updateCategory(index, 'growth_rate', parseFloat(e.target.value) || 0)}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
                           placeholder="0"
                         />
                       </div>
@@ -615,12 +637,12 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                       <div className="grid grid-cols-4 md:grid-cols-12 gap-2">
                         {monthNames.map((month, monthIndex) => (
                           <div key={month} className="text-center">
-                            <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{month}</div>
+                            <div className="text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-300 mb-1">{month}</div>
                             <input
                               type="number"
                               value={category.monthly_amounts[monthIndex]}
                               onChange={(e) => updateMonthlyAmount(index, monthIndex, parseFloat(e.target.value) || 0)}
-                              className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
+                              className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
                             />
                           </div>
                         ))}
@@ -636,7 +658,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                         value={category.notes || ''}
                         onChange={(e) => updateCategory(index, 'notes', e.target.value)}
                         rows={2}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
                         placeholder="Commentaires ou justifications..."
                       />
                     </div>
@@ -651,10 +673,10 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">
                   Hypothèses Budgétaires
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 text-sm mt-1">
                   Définissez les principales hypothèses qui sous-tendent votre budget
                 </p>
               </div>
@@ -669,7 +691,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
 
             <div className="space-y-4">
               {formData.assumptions.map((assumption, index) => (
-                <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-700/30">
+                <div key={index} className="border border-gray-200 dark:border-gray-600 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800 dark:bg-gray-700/30">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -679,7 +701,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                         type="text"
                         value={assumption.key}
                         onChange={(e) => updateAssumption(index, 'key', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
                         placeholder="Ex: taux_croissance_marche"
                       />
                     </div>
@@ -693,14 +715,14 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                           type="text"
                           value={assumption.value}
                           onChange={(e) => updateAssumption(index, 'value', e.target.value)}
-                          className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-l-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
+                          className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-l-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
                           placeholder="5"
                         />
                         <input
                           type="text"
                           value={assumption.unit || ''}
                           onChange={(e) => updateAssumption(index, 'unit', e.target.value)}
-                          className="w-16 px-2 py-2 border-l-0 border border-gray-300 dark:border-gray-600 rounded-r-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
+                          className="w-16 px-2 py-2 border-l-0 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-r-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
                           placeholder="%"
                         />
                       </div>
@@ -715,7 +737,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                       type="text"
                       value={assumption.description}
                       onChange={(e) => updateAssumption(index, 'description', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
                       placeholder="Ex: Taux de croissance du marché prévu"
                     />
                   </div>
@@ -728,7 +750,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                       <select
                         value={assumption.category}
                         onChange={(e) => updateAssumption(index, 'category', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
                       >
                         <option value="">Sélectionner...</option>
                         <option value="market">Marché</option>
@@ -748,14 +770,14 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                         onChange={(e) => updateAssumption(index, 'confidence_level', parseInt(e.target.value) || 80)}
                         min="0"
                         max="100"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
                       />
                     </div>
 
                     <div className="flex items-end">
                       <button
                         onClick={() => removeAssumption(index)}
-                        className="p-2 text-gray-400 dark:text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        className="p-2 text-gray-400 dark:text-gray-300 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors dark:bg-red-900/20 dark:text-red-400"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -770,7 +792,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                       type="text"
                       value={assumption.source || ''}
                       onChange={(e) => updateAssumption(index, 'source', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100"
                       placeholder="Ex: Étude sectorielle, INSEE, BCE..."
                     />
                   </div>
@@ -779,11 +801,11 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
 
               {formData.assumptions.length === 0 && (
                 <div className="text-center py-12 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  <TrendingUp className="h-16 w-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                  <TrendingUp className="h-16 w-16 text-gray-400 dark:text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100 mb-2">
                     Aucune hypothèse définie
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-4">
                     Les hypothèses permettent de documenter les bases de votre budget
                   </p>
                   <button
@@ -801,7 +823,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
         {activeTab === 'summary' && (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100 mb-4">
                 Résumé du Budget {formData.year}
               </h3>
 
@@ -845,9 +867,9 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
               </div>
 
               {/* Détail par catégorie */}
-              <div className="bg-white dark:bg-gray-700/30 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
-                  <h4 className="font-medium text-gray-900 dark:text-gray-100">
+              <div className="bg-white dark:bg-gray-800 dark:bg-gray-700/30 border border-gray-200 dark:border-gray-600 dark:border-gray-700 rounded-lg overflow-hidden">
+                <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-600 dark:border-gray-700">
+                  <h4 className="font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">
                     Détail par catégorie
                   </h4>
                 </div>
@@ -855,16 +877,16 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                   <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead className="bg-gray-50 dark:bg-gray-700/50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wider">
                           Catégorie
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wider">
                           Type
                         </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wider">
                           Montant Annuel
                         </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wider">
                           % du Total
                         </th>
                       </tr>
@@ -879,11 +901,11 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                           <tr key={index}>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div>
-                                <div className="font-medium text-gray-900 dark:text-gray-100">
+                                <div className="font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">
                                   {category.category}
                                 </div>
                                 {category.subcategory && (
-                                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                                  <div className="text-sm text-gray-500 dark:text-gray-300">
                                     {category.subcategory}
                                   </div>
                                 )}
@@ -899,10 +921,10 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
                                  category.category_type === 'expense' ? 'Charges' : 'Investissements'}
                               </span>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right font-medium text-gray-900 dark:text-gray-100">
+                            <td className="px-6 py-4 whitespace-nowrap text-right font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">
                               {formatCurrency(category.annual_amount)}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-gray-500 dark:text-gray-400">
+                            <td className="px-6 py-4 whitespace-nowrap text-right text-gray-500 dark:text-gray-300">
                               {percentage}%
                             </td>
                           </tr>
@@ -915,23 +937,23 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
 
               {/* Hypothèses résumées */}
               {formData.assumptions.length > 0 && (
-                <div className="bg-white dark:bg-gray-700/30 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                  <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">
+                <div className="bg-white dark:bg-gray-800 dark:bg-gray-700/30 border border-gray-200 dark:border-gray-600 dark:border-gray-700 rounded-lg overflow-hidden">
+                  <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-600 dark:border-gray-700">
+                    <h4 className="font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">
                       Hypothèses clés
                     </h4>
                   </div>
                   <div className="p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {formData.assumptions.map((assumption, index) => (
-                        <div key={index} className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 p-4 rounded-lg">
-                          <div className="font-medium text-gray-900 dark:text-gray-100 mb-1">
+                        <div key={index} className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 dark:border-gray-600 p-4 rounded-lg">
+                          <div className="font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100 mb-1">
                             {assumption.description}
                           </div>
                           <div className="text-lg font-semibold text-blue-600 dark:text-blue-400">
                             {assumption.value} {assumption.unit}
                           </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                          <div className="text-sm text-gray-500 dark:text-gray-300">
                             Confiance: {assumption.confidence_level}%
                           </div>
                         </div>

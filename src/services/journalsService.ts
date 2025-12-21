@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 // src/services/journalsService.ts
 import { supabase } from '../lib/supabase';
 
@@ -36,7 +48,7 @@ export class JournalsService {
 
       if (error) throw error;
       return data || [];
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur récupération journaux:', error);
       return [];
     }
@@ -66,9 +78,9 @@ export class JournalsService {
       if (error) throw error;
 
       return { success: true, data };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur création journal:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }
 
@@ -85,9 +97,9 @@ export class JournalsService {
       if (error) throw error;
 
       return { success: true, data };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur modification journal:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }
 
@@ -113,9 +125,9 @@ export class JournalsService {
       if (error) throw error;
 
       return { success: true };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur suppression journal:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }
 
@@ -143,9 +155,9 @@ export class JournalsService {
       if (error) throw error;
 
       return { success: true, data };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur changement statut journal:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }
 
@@ -157,18 +169,18 @@ export class JournalsService {
     try {
       const { data, error } = await supabase
         .from('journal_entries')
-        .select('id, date')
+        .select('id, entry_date')
         .eq('company_id', companyId)
         .eq('journal_code', journalCode)
-        .order('date', { ascending: false });
+        .order('entry_date', { ascending: false });
 
       if (error) throw error;
 
       return {
         entriesCount: data?.length || 0,
-        lastEntryDate: data?.[0]?.date || null
+        lastEntryDate: data?.[0]?.entry_date || null
       };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur stats journal:', error);
       return { entriesCount: 0, lastEntryDate: null };
     }
@@ -228,9 +240,9 @@ export class JournalsService {
       if (error) throw error;
 
       return { success: true, journalsCreated: data?.length || 0 };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur création journaux par défaut:', error);
-      return { success: false, journalsCreated: 0, error: error.message };
+      return { success: false, journalsCreated: 0, error: (error instanceof Error ? error.message : 'Une erreur est survenue') };
     }
   }
 }

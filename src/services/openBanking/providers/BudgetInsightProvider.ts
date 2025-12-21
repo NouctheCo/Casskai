@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import {
   BankConnection,
   BankAccount,
@@ -32,8 +44,8 @@ export class BudgetInsightProvider extends BankingProvider {
   } catch (error) {
       throw new BankingProviderError(
         'INIT_ERROR',
-    `Failed to initialize Budget Insight provider: ${(_error as { message?: string })?.message}`,
-    _error as { message?: string }
+    `Failed to initialize Budget Insight provider: ${(error as { message?: string })?.message}`,
+    error as { message?: string }
       );
     }
   }
@@ -42,7 +54,7 @@ export class BudgetInsightProvider extends BankingProvider {
     try {
   const response = await this.makeRequest<{ status: string }>('GET', '/2.0/status');
       return response.status === 'OK';
-  } catch (error) {
+  } catch (_error) {
       return false;
     }
   }
@@ -60,7 +72,7 @@ export class BudgetInsightProvider extends BankingProvider {
 
       this.accessToken = response.access_token;
       this.tokenExpiresAt = new Date(Date.now() + response.expires_in * 1000);
-  } catch (error) {
+  } catch (_error) {
       throw new AuthenticationError('Failed to authenticate with Budget Insight API');
     }
   }

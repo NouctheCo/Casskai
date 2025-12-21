@@ -1,4 +1,16 @@
 /**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
+/**
  * Service d'importation des relevés bancaires
  * Supporte les formats CSV, OFX, QIF
  */
@@ -90,8 +102,8 @@ class BankImportService {
           if (transaction) {
             transactions.push(transaction);
           }
-        } catch (error) {
-          errors.push(`Ligne ${i + 2}: ${error.message}`);
+        } catch (error: unknown) {
+          errors.push(`Ligne ${i + 2}: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
         }
       }
 
@@ -110,16 +122,16 @@ class BankImportService {
         errors: errors.length > 0 ? errors : undefined
       };
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur import CSV:', error);
       return {
         success: false,
-        message: `Erreur lors de l'import: ${error.message}`,
+        message: `Erreur lors de l'import: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`,
         imported_count: 0,
         skipped_count: 0,
         error_count: 1,
         transactions: [],
-        errors: [error.message]
+        errors: [(error instanceof Error ? error.message : 'Une erreur est survenue')]
       };
     }
   }
@@ -156,11 +168,11 @@ class BankImportService {
         transactions
       };
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur import OFX:', error);
       return {
         success: false,
-        message: `Erreur lors de l'import OFX: ${error.message}`,
+        message: `Erreur lors de l'import OFX: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`,
         imported_count: 0,
         skipped_count: 0,
         error_count: 1,
@@ -199,11 +211,11 @@ class BankImportService {
         transactions
       };
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur import QIF:', error);
       return {
         success: false,
-        message: `Erreur lors de l'import QIF: ${error.message}`,
+        message: `Erreur lors de l'import QIF: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`,
         imported_count: 0,
         skipped_count: 0,
         error_count: 1,
@@ -226,7 +238,7 @@ class BankImportService {
     
     for (const match of matches) {
       try {
-        const trnType = this.extractOFXTag(match, 'TRNTYPE');
+        const _trnType = this.extractOFXTag(match, 'TRNTYPE');
         const dtPosted = this.extractOFXTag(match, 'DTPOSTED');
         const trnAmt = this.extractOFXTag(match, 'TRNAMT');
         const fitId = this.extractOFXTag(match, 'FITID');
@@ -248,7 +260,7 @@ class BankImportService {
           
           transactions.push(transaction);
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.warn('Erreur parsing transaction OFX:', error);
       }
     }
@@ -345,7 +357,7 @@ class BankImportService {
         
         imported++;
         
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Erreur traitement transaction:', error);
       }
     }
@@ -436,8 +448,8 @@ class BankImportService {
         imported_from: 'csv'
       };
       
-    } catch (error) {
-      throw new Error(`Erreur parsing transaction: ${error.message}`);
+    } catch (error: unknown) {
+      throw new Error(`Erreur parsing transaction: ${(error instanceof Error ? error.message : 'Une erreur est survenue')}`);
     }
   }
 
@@ -484,15 +496,16 @@ class BankImportService {
     // QIF date format: MM/DD/YYYY ou DD/MM/YY
     const parts = qifDate.split('/');
     if (parts.length === 3) {
-      let [first, second, year] = parts;
+      const [first, second, yearPart] = parts;
       
       // Assume DD/MM format for European banks
       const day = first.padStart(2, '0');
       const month = second.padStart(2, '0');
       
       // Handle 2-digit years
-      if (year.length === 2) {
-        year = parseInt(year) > 50 ? `19${year}` : `20${year}`;
+      let year = yearPart;
+      if (yearPart.length === 2) {
+        year = parseInt(yearPart) > 50 ? `19${yearPart}` : `20${yearPart}`;
       }
       
       return `${year}-${month}-${day}`;
@@ -522,7 +535,7 @@ class BankImportService {
       if (error) throw error;
       return data || [];
       
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur récupération comptes bancaires:', error);
       return [];
     }
@@ -542,7 +555,7 @@ class BankImportService {
       if (error) throw error;
       return data;
       
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur création compte bancaire:', error);
       return null;
     }

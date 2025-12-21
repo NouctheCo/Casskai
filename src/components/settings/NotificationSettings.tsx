@@ -467,14 +467,14 @@ export function NotificationSettings() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
+            <div className="text-center p-4 bg-blue-50 rounded-lg dark:bg-blue-900/20">
               <Mail className="h-8 w-8 text-blue-600 mx-auto mb-2" />
               <div className="text-2xl font-bold text-blue-600">
                 {Object.values(settings.email).filter(Boolean).length}
               </div>
               <div className="text-sm text-blue-600">Notifications email</div>
             </div>
-            <div className="text-center p-4 bg-green-50 rounded-lg">
+            <div className="text-center p-4 bg-green-50 rounded-lg dark:bg-green-900/20">
               <Smartphone className="h-8 w-8 text-green-600 mx-auto mb-2" />
               <div className="text-2xl font-bold text-green-600">
                 {Object.values(settings.push).filter(Boolean).length}

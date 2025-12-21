@@ -14,29 +14,29 @@ interface ErrorFallbackProps {
  */
 function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 dark:bg-gray-900/30">
+      <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
         {/* Error Icon */}
         <div className="flex justify-center mb-4">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-            <AlertTriangle className="w-8 h-8 text-red-600" />
+            <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
           </div>
         </div>
 
         {/* Error Title */}
-        <h1 className="text-2xl font-bold text-gray-900 text-center mb-2">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 text-center mb-2">
           Oups ! Une erreur s'est produite
         </h1>
 
         {/* Error Message */}
-        <p className="text-gray-600 text-center mb-4">
+        <p className="text-gray-600 dark:text-gray-400 text-center mb-4">
           Nous sommes désolés, quelque chose ne s'est pas passé comme prévu.
           Notre équipe a été notifiée de ce problème.
         </p>
 
         {/* Error Details (only in development) */}
         {import.meta.env.MODE === 'development' && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md dark:bg-red-900/20">
             <p className="text-sm font-mono text-red-800 break-all">
               {error instanceof Error ? error.message : String(error)}
             </p>
@@ -65,12 +65,12 @@ function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
         </div>
 
         {/* Support Information */}
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <p className="text-sm text-gray-500 text-center">
+        <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
+          <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
             Besoin d'aide ?{' '}
             <a
               href="mailto:support@casskai.app"
-              className="text-blue-600 hover:text-blue-700 underline"
+              className="text-blue-600 hover:text-blue-700 underline dark:text-blue-400"
             >
               Contactez le support
             </a>
@@ -118,9 +118,9 @@ export function PageErrorBoundary({ children }: { children: React.ReactNode }) {
     <ErrorBoundary
       fallback={({ error, resetError }) => (
         <div className="p-6">
-          <div className="max-w-2xl mx-auto bg-red-50 border border-red-200 rounded-lg p-6">
+          <div className="max-w-2xl mx-auto bg-red-50 border border-red-200 rounded-lg p-6 dark:bg-red-900/20">
             <div className="flex items-start gap-4">
-              <AlertTriangle className="w-6 h-6 text-red-600 flex-shrink-0 mt-1" />
+              <AlertTriangle className="w-6 h-6 text-red-600 flex-shrink-0 mt-1 dark:text-red-400" />
               <div className="flex-1">
                 <h2 className="text-lg font-semibold text-red-900 mb-2">
                   Erreur de chargement

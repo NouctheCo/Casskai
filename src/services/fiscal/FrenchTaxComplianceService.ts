@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 // Service de conformité fiscale française
 import { supabase } from '@/lib/supabase';
 
@@ -137,7 +149,7 @@ export class FrenchTaxComplianceService {
           )
         `)
         .eq('company_id', companyId)
-        .gte('date', `${period}-01`)
+        .gte('entry_date', `${period}-01`)
         .lt('date', this.getNextMonthStart(period));
 
       if (error) throw error;
@@ -291,8 +303,8 @@ export class FrenchTaxComplianceService {
           journal_entry_lines (*)
         `)
         .eq('company_id', companyId)
-        .gte('date', `${exercice}-01-01`)
-        .lte('date', `${exercice}-12-31`)
+        .gte('entry_date', `${exercice}-01-01`)
+        .lte('entry_date', `${exercice}-12-31`)
         .order('date');
 
       if (error) throw error;
@@ -566,6 +578,137 @@ export class FrenchTaxComplianceService {
 
   private async generateLiasse2059(companyId: string, exercice: string): Promise<FrenchTaxDeclaration> {
     return this.generateLiasse2050(companyId, exercice);
+  }
+
+  /**
+   * Génère la déclaration CFE (Cotisation Foncière des Entreprises)
+   */
+  async generateCFEDeclaration(companyId: string, exercice: string): Promise<FrenchTaxDeclaration> {
+    try {
+      // Récupérer les informations de l'entreprise
+      const { data: company } = await supabase
+        .from('companies')
+        .select('*')
+        .eq('id', companyId)
+        .single();
+
+      if (!company) {
+        throw new Error('Entreprise non trouvée');
+      }
+
+      // Calculer la valeur locative des biens immobiliers
+      // En pratique, ces données devraient venir d'un module "patrimoine immobilier"
+      const valeurLocative = 0; // À remplacer par vraie valeur
+      const baseMinimum = company.revenue > 100000 ? 224 : 0; // Seuil CA
+
+      const cfeData = {
+        exercice,
+        siren: company.siren || '',
+        raisonSociale: company.name,
+        adresse: company.address || '',
+        valeurLocativeBiens: valeurLocative,
+        baseMinimum,
+        tauxCommune: 0, // À récupérer selon la commune
+        cotisationCalculee: 0,
+        reductionsExonerations: 0,
+        cotisationNette: 0
+      };
+
+      const declaration: FrenchTaxDeclaration = {
+        id: `CFE-${companyId}-${exercice}`,
+        type: 'CFE_1447',
+        period: exercice,
+        dueDate: new Date(`${exercice}-12-15`),
+        status: 'draft',
+        companyId,
+        data: cfeData,
+        validationErrors: [],
+        warnings: [
+          'La valeur locative des biens doit être renseignée manuellement',
+          'Le taux communal doit être vérifié auprès de la mairie'
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      return declaration;
+    } catch (error) {
+      console.error('Erreur génération CFE:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Génère la déclaration DSN (Déclaration Sociale Nominative)
+   */
+  async generateDSNDeclaration(companyId: string, period: string): Promise<FrenchTaxDeclaration> {
+    try {
+      // Récupérer les données RH de la période
+      const { data: employees } = await supabase
+        .from('employees')
+        .select('*')
+        .eq('company_id', companyId)
+        .eq('status', 'active');
+
+      const { data: payrollEntries } = await supabase
+        .from('payroll_slips')
+        .select('*')
+        .eq('company_id', companyId)
+        .gte('period', period)
+        .lt('period', this.getNextMonthStart(period));
+
+      // Calculer les cotisations sociales
+      const totalGrossSalary = payrollEntries?.reduce((sum, entry) => {
+        return sum + (entry.gross_salary || 0);
+      }, 0) || 0;
+
+      // Cotisations patronales approximatives (taux moyens)
+      const cotisationsUrssaf = totalGrossSalary * 0.42; // ~42% charges patronales
+      const cotisationsRetraite = totalGrossSalary * 0.095; // ~9.5% retraite
+      const cotisationsChomage = totalGrossSalary * 0.0405; // 4.05% chômage
+
+      const dsnData = {
+        period,
+        nombreSalaries: employees?.length || 0,
+        masseSalarialeGross: totalGrossSalary,
+        cotisationsUrssaf,
+        cotisationsRetraite,
+        cotisationsChomage,
+        cotisationsTotales: cotisationsUrssaf + cotisationsRetraite + cotisationsChomage,
+        employes: employees?.map(emp => ({
+          nom: emp.last_name,
+          prenom: emp.first_name,
+          numeroSecu: emp.social_security_number || 'N/A',
+          salaireGross: payrollEntries?.find(p => p.employee_id === emp.id)?.gross_salary || 0
+        })) || []
+      };
+
+      const [year, month] = period.split('-').map(Number);
+      const dueDay = month === 12 ? 1 : month + 1;
+      const dueYear = month === 12 ? year + 1 : year;
+
+      const declaration: FrenchTaxDeclaration = {
+        id: `DSN-${companyId}-${period}`,
+        type: 'DSN',
+        period,
+        dueDate: new Date(dueYear, dueDay - 1, 15), // 15 du mois suivant
+        status: 'draft',
+        companyId,
+        data: dsnData,
+        validationErrors: [],
+        warnings: [
+          'Vérifier que tous les employés ont un numéro de sécurité sociale valide',
+          'Les taux de cotisations sont approximatifs et doivent être vérifiés'
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      return declaration;
+    } catch (error) {
+      console.error('Erreur génération DSN:', error);
+      throw error;
+    }
   }
 
   // Méthodes de validation

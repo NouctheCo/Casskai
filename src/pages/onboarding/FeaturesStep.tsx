@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -142,7 +154,7 @@ export default function FeaturesStep() {
               defaultValue: 'Choisissez vos fonctionnalités'
             })}
           </CardTitle>
-          <CardDescription className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <CardDescription className="text-lg text-gray-600 dark:text-gray-400 dark:text-gray-300 max-w-2xl mx-auto">
             {t('onboarding.features.subtitle', {
               defaultValue: 'Sélectionnez les modules qui correspondent à vos besoins. Vous pourrez toujours les modifier plus tard.'
             })}
@@ -198,7 +210,7 @@ export default function FeaturesStep() {
                       <module.icon className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white text-sm">
                         {module.title}
                       </h3>
                       <Badge variant="outline" className="text-xs mt-1">
@@ -210,23 +222,23 @@ export default function FeaturesStep() {
                   <Switch
                     checked={(state.data?.selectedModules || []).includes(module.key)}
                     onCheckedChange={() => toggleModule(module.key)}
-                    className="data-[state=checked]:bg-blue-500"
+                    className="data-[state=checked]:bg-blue-500 dark:bg-blue-900/20"
                   />
                 </div>
                 
-                <p className="text-xs text-gray-600 dark:text-gray-400 mb-3 leading-relaxed">
+                <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-3 leading-relaxed">
                   {module.description}
                 </p>
                 
                 <div className="space-y-1">
                   {module.features.slice(0, 2).map((feature, idx) => (
-                    <div key={idx} className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                    <div key={idx} className="flex items-center text-xs text-gray-500 dark:text-gray-300">
                       <div className="w-1 h-1 bg-gray-400 rounded-full mr-2 flex-shrink-0" />
                       {feature}
                     </div>
                   ))}
                   {module.features.length > 2 && (
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs text-gray-400 dark:text-gray-500">
                       +{module.features.length - 2} autres fonctionnalités
                     </div>
                   )}
@@ -243,7 +255,7 @@ export default function FeaturesStep() {
             className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-4 mb-6 border border-green-200 dark:border-green-800"
           >
             <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0 dark:bg-green-900/20">
                 <Zap className="w-4 h-4 text-white" />
               </div>
               <div>

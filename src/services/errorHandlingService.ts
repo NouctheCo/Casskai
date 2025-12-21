@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 
@@ -131,7 +143,7 @@ export class ErrorHandlingService {
   /**
    * Gestion centralisée des erreurs
    */
-  private handleError<T>(error: Error, context: ErrorContext): never {
+  private handleError<_T>(error: Error, context: ErrorContext): never {
     const apiError = (error as unknown as {statusCode?: string}).statusCode ? (error as unknown as ApiError) : this.createApiError(error, context);
 
     // Log error for monitoring
@@ -243,11 +255,11 @@ export class ErrorHandlingService {
 
     return {
       code: errorCode,
-      message: String(err.message || 'Une erreur inconnue s\'est produite'),
+      message: String((err as unknown as Error).message || 'Une erreur inconnue s\'est produite'),
       details: err.details || error,
       severity,
       userMessage: errorMapping.userMessage || this.getDefaultUserMessage(severity),
-      technicalMessage: `[${context.service}/${context.method}] ${String(err.message)}`,
+      technicalMessage: `[${context.service}/${context.method}] ${String((err as unknown as Error).message)}`,
       retryable: errorMapping.retryable ?? this.isRetryableError(error),
       ...errorMapping,
     };
@@ -305,7 +317,7 @@ export class ErrorHandlingService {
     const err = error as Record<string, unknown>;
 
     // Erreurs réseau temporaires
-    if (err.name === 'NetworkError' || (typeof err.message === 'string' && err.message.includes('fetch'))) {
+    if ((err as unknown as Error).name === 'NetworkError' || (typeof (err as unknown as Error).message === 'string' && (err as unknown as Error).message.includes('fetch'))) {
       return true;
     }
 
@@ -320,7 +332,7 @@ export class ErrorHandlingService {
     }
 
     // Timeout
-    if (err.name === 'TimeoutError') {
+    if ((err as unknown as Error).name === 'TimeoutError') {
       return true;
     }
 
@@ -440,7 +452,7 @@ export class ErrorHandlingService {
         user_id: context.userId,
         company_id: context.companyId,
         details: {
-          ...error.details,
+          ...(error.details as Record<string, any> || {}),
           url: window.location.href,
           userAgent: navigator.userAgent,
           additional: context.additional,
@@ -465,8 +477,8 @@ export class ErrorHandlingService {
     // etc.
     
     // Exemple Sentry:
-    if (typeof window !== 'undefined' && (window as Record<string, unknown>).Sentry) {
-      const Sentry = (window as Record<string, unknown>).Sentry as { captureException: (error: Error, options: Record<string, unknown>) => void };
+    if (typeof window !== 'undefined' && (window as unknown as Record<string, unknown>).Sentry) {
+      const Sentry = (window as unknown as Record<string, unknown>).Sentry as { captureException: (error: Error, options: Record<string, unknown>) => void };
       const error = logData.error as { technicalMessage: string; severity: string };
       const contextData = logData.context as { service?: string; method?: string };
       Sentry.captureException(new Error(error.technicalMessage), {

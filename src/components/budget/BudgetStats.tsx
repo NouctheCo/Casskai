@@ -93,7 +93,7 @@ export const BudgetStats: React.FC<BudgetStatsProps> = ({ budgets }) => {
         const colorClasses = getColorClasses(stat.color);
 
         return (
-          <Card key={index} className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <Card key={index} className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 dark:border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center space-x-3">
                 <div className={`p-2 rounded-lg ${colorClasses}`}>
@@ -103,7 +103,7 @@ export const BudgetStats: React.FC<BudgetStatsProps> = ({ budgets }) => {
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                     {stat.label}
                   </p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-gray-100 mt-1">
+                  <p className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-gray-100 mt-1">
                     {stat.format(stat.value)}
                   </p>
                 </div>

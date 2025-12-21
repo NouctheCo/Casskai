@@ -301,7 +301,7 @@ export class ABTestingFramework {
     if (!this.userAssignments.has(userId)) {
       this.userAssignments.set(userId, new Map());
     }
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+     
     this.userAssignments.get(userId)!.set(testId, variantId);
 
     if (this.config.persistentStorage) {

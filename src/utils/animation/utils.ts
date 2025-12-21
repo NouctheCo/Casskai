@@ -71,4 +71,3 @@ export const performanceUtils = {
       textRendering: 'optimizeLegibility' as const
     }
   };
-  

@@ -1,0 +1,192 @@
+=================================================================
+  COMMANDES DE DÉPLOIEMENT - NOUVEAU DESIGN SYSTEM v2.0
+=================================================================
+
+📋 COPIER-COLLER CES COMMANDES DANS L'ORDRE
+
+=================================================================
+ÉTAPE 1: VÉRIFIER L'ÉTAT (optionnel)
+=================================================================
+
+git status
+git log -1
+
+=================================================================
+ÉTAPE 2: PUSH VERS GIT
+=================================================================
+
+git push origin phase1-clean
+
+=================================================================
+ÉTAPE 3: DÉPLOYER SUR VPS (MÉTHODE AUTOMATIQUE RECOMMANDÉE)
+=================================================================
+
+.\deploy-vps.ps1
+
+=================================================================
+OU SI TU PRÉFÈRES LE DÉPLOIEMENT MANUEL:
+=================================================================
+
+# 1. Build local
+npm run build
+
+# 2. Se connecter au VPS
+ssh root@89.116.111.88
+
+# 3. Sur le VPS, aller dans le dossier
+cd /var/www/casskai.app
+
+# 4. Pull les dernières modifications
+git pull origin phase1-clean
+
+# 5. Installer les dépendances (si nécessaire)
+npm install
+
+# 6. Build sur le serveur
+npm run build
+
+# 7. Redémarrer Nginx
+sudo systemctl restart nginx
+
+# 8. Vérifier que c'est OK
+curl -I https://casskai.app
+
+=================================================================
+ÉTAPE 4: VÉRIFIER LE DÉPLOIEMENT
+=================================================================
+
+# Ouvrir dans le navigateur
+https://casskai.app
+
+# Tu devrais voir:
+✅ Nouvelle sidebar avec emojis 💰🤝⚙️📊
+✅ Design glassmorphism (effet flou)
+✅ Fond dégradé gris clair
+✅ Zones arrondies (rounded-3xl)
+
+=================================================================
+TESTS RAPIDES À FAIRE
+=================================================================
+
+1. Cliquer sur section "Finances" → doit se déplier
+2. Survoler un module → icône pin apparaît
+3. Cliquer sur pin → module dans "Épinglés"
+4. Taper dans recherche → filtrage fonctionne
+5. Cliquer sur "Comptabilité" → page s'ouvre
+6. Réduire fenêtre < 768px → sidebar devient mobile
+
+=================================================================
+SI PROBLÈME: ROLLBACK RAPIDE
+=================================================================
+
+# Revenir à la version précédente
+git reset --hard HEAD~1
+git push origin phase1-clean --force
+
+# Puis redéployer
+.\deploy-vps.ps1
+
+=================================================================
+COMMANDES DE DEBUG (si nécessaire)
+=================================================================
+
+# Voir les logs du serveur
+ssh root@89.116.111.88 "tail -f /var/log/nginx/error.log"
+
+# Vérifier que le build s'est bien passé
+npm run type-check
+
+# Rebuild propre si erreur
+rm -rf dist node_modules/.vite
+npm install
+npm run build
+
+=================================================================
+APRÈS LE DÉPLOIEMENT
+=================================================================
+
+# Créer un tag de version (optionnel)
+git tag -a v2.0.0 -m "Design System v2.0 - Floating Cards Sidebar"
+git push origin v2.0.0
+
+# Documenter dans le changelog
+echo "- feat: Nouveau design system avec Sidebar Floating Cards" >> CHANGELOG.md
+git add CHANGELOG.md
+git commit -m "docs: update changelog for v2.0.0"
+git push
+
+=================================================================
+COMMANDES UTILES POST-DÉPLOIEMENT
+=================================================================
+
+# Voir les stats de build
+npm run build -- --stats
+
+# Analyser la taille des bundles
+npx vite-bundle-visualizer
+
+# Tester les performances
+npm run lighthouse https://casskai.app
+
+=================================================================
+COMMANDES DE MONITORING
+=================================================================
+
+# Vérifier que le site est accessible
+curl -I https://casskai.app
+
+# Tester la vitesse de chargement
+curl -o /dev/null -s -w 'Total: %{time_total}s\n' https://casskai.app
+
+# Vérifier les certificats SSL
+openssl s_client -connect casskai.app:443 -servername casskai.app
+
+=================================================================
+COMMANDES D'OPTIMISATION (optionnel, pour plus tard)
+=================================================================
+
+# Compresser les assets
+npm run build -- --minify
+
+# Générer le service worker
+npm run build:sw
+
+# Optimiser les images
+npx @squoosh/cli --resize '{width:800}' public/**/*.{jpg,png}
+
+=================================================================
+✅ CHECKLIST FINALE
+=================================================================
+
+□ Code pushé vers git
+□ Déployé sur VPS
+□ Site accessible sur https://casskai.app
+□ Sidebar s'affiche correctement
+□ Navigation fonctionne
+□ Favoris fonctionnent
+□ Recherche fonctionne
+□ Responsive mobile OK
+□ Mode sombre OK
+□ Aucune erreur dans la console navigateur
+
+=================================================================
+🎉 SI TOUT EST OK, TU AS TERMINÉ!
+=================================================================
+
+Le nouveau design est maintenant en production!
+
+Prochaines étapes (optionnel):
+- Recueillir feedback utilisateurs
+- Migrer pages vers PageTabs (voir GUIDE_DEPLOIEMENT_NOUVEAU_DESIGN.md)
+- Ajouter raccourcis clavier avancés
+
+=================================================================
+📞 BESOIN D'AIDE?
+=================================================================
+
+Consulter:
+1. DEPLOIEMENT_RAPIDE.md - Checklist visuelle
+2. GUIDE_DEPLOIEMENT_NOUVEAU_DESIGN.md - Guide complet
+3. DESIGN_SYSTEM_EXAMPLE.md - Documentation technique
+
+=================================================================

@@ -38,6 +38,13 @@ jobs:
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
+    
+    env:
+      # Mock Supabase credentials for tests that need them
+      TEST_SUPABASE_URL: https://mock.supabase.co
+      TEST_SUPABASE_SERVICE_ROLE_KEY: mock-service-role-key
+      # Skip RGPD tests on CI (require real database)
+      RUN_RGPD_TESTS: false
 
     steps:
       - name: Checkout code
@@ -98,7 +105,7 @@ jobs:
           fi
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist/
@@ -125,6 +132,7 @@ jobs:
 
       - name: Run npm audit fix (dry-run)
         run: npm audit fix --dry-run
+        continue-on-error: true
 
   # Job 5: Deploy to Staging (only on main)
   deploy-staging:

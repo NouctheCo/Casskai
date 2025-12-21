@@ -1,19 +1,72 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, PlayCircle, BookOpen, Database } from 'lucide-react';
+import { X, PlayCircle, BookOpen, Database, CheckCircle2 } from 'lucide-react';
 import { useProductTour } from '@/hooks/useProductTour';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocation } from 'react-router-dom';
+import { supabase } from '@/lib/supabase';
 
 export const WelcomeTourBanner: React.FC = () => {
-  const { user } = useAuth();
+  const { user, currentCompany, onboardingCompleted } = useAuth();
   const location = useLocation();
   const { startTour, hasCompletedTour } = useProductTour();
   const [isVisible, setIsVisible] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
+  const [onboardingSteps, setOnboardingSteps] = useState({ completed: 0, total: 4 });
+
+  // Charger la vraie progression du onboarding depuis la BDD
+  useEffect(() => {
+    if (!user?.id || !currentCompany?.id) return;
+
+    const loadOnboardingProgress = async () => {
+      try {
+        // Récupérer l'historique du onboarding
+        const { data: history, error } = await supabase
+          .from('onboarding_history')
+          .select('step_name, completion_status')
+          .eq('user_id', user.id)
+          .eq('company_id', currentCompany.id)
+          .eq('completion_status', 'completed');
+
+        if (error) {
+          console.error('Erreur chargement progression onboarding:', error);
+          return;
+        }
+
+        // Compter les étapes uniques complétées
+        const uniqueSteps = new Set(history?.map(h => h.step_name) || []);
+        const completedCount = uniqueSteps.size;
+        const totalSteps = 4; // welcome, company, modules, preferences (sans 'complete' et 'features')
+
+        setOnboardingSteps({ completed: completedCount, total: totalSteps });
+      } catch (err) {
+        console.error('Exception chargement progression:', err);
+      }
+    };
+
+    loadOnboardingProgress();
+  }, [user?.id, currentCompany?.id]);
 
   useEffect(() => {
     if (!user?.id) return;
+
+    // ✅ VÉRIFICATION DOUBLE: BDD + localStorage
+    const localOnboardingCompleted = localStorage.getItem(`onboarding_completed_${user.id}`) === 'true';
+
+    console.log('🔍 WelcomeTourBanner - Vérification onboarding:', {
+      userId: user.id,
+      onboardingCompleted,
+      localOnboardingCompleted,
+      currentCompany: currentCompany?.name,
+      onboarding_completed_at: (currentCompany as any)?.onboarding_completed_at
+    });
+
+    // NE PAS afficher si le onboarding est terminé (onboarding_completed_at défini OU flag localStorage)
+    if (onboardingCompleted || localOnboardingCompleted) {
+      console.log('✅ Onboarding terminé - Banner masqué');
+      setIsVisible(false);
+      return;
+    }
 
     // Vérifier si l'utilisateur vient de terminer l'onboarding
     const isFromOnboarding = location.search.includes('tour=start');
@@ -23,19 +76,22 @@ export const WelcomeTourBanner: React.FC = () => {
 
     // Afficher le banner si:
     // - L'utilisateur vient de l'onboarding OU
-    // - Il n'a pas encore fait le tour ET n'a pas fermé le banner
-    if (isFromOnboarding || (!hasCompletedTour && !wasDismissed)) {
+    // - Il n'a pas encore fait le tour ET n'a pas fermé le banner ET onboarding pas terminé
+    if (isFromOnboarding || (!hasCompletedTour && !wasDismissed && !onboardingCompleted)) {
       setIsVisible(true);
 
       // Si on vient de l'onboarding, démarrer automatiquement le tour après un délai
-      if (isFromOnboarding) {
+      if (isFromOnboarding && !hasCompletedTour) {
+        // Nettoyer l'URL pour éviter de relancer le tour en boucle
+        window.history.replaceState({}, '', '/dashboard');
+
         setTimeout(() => {
           startTour('dashboard');
           setIsVisible(false);
         }, 2000);
       }
     }
-  }, [user?.id, location.search, hasCompletedTour, startTour]);
+  }, [user?.id, location.search, hasCompletedTour, startTour, onboardingCompleted]);
 
   const handleStartTour = () => {
     startTour('dashboard');
@@ -50,9 +106,17 @@ export const WelcomeTourBanner: React.FC = () => {
     }
   };
 
-  if (!isVisible || isDismissed || hasCompletedTour) {
+  // ✅ VÉRIFICATION FINALE: Ne rien afficher si onboarding terminé
+  const localOnboardingCompleted = user?.id ? localStorage.getItem(`onboarding_completed_${user.id}`) === 'true' : false;
+
+  // Ne rien afficher si onboarding terminé (BDD OU localStorage), banner pas visible, ou déjà dismissed
+  if (onboardingCompleted || localOnboardingCompleted || !isVisible || isDismissed || hasCompletedTour) {
     return null;
   }
+
+  // Calculer le message selon la progression
+  const isOnboardingComplete = onboardingSteps.completed >= onboardingSteps.total;
+  const progressPercent = (onboardingSteps.completed / onboardingSteps.total) * 100;
 
   return (
     <AnimatePresence>
@@ -66,47 +130,63 @@ export const WelcomeTourBanner: React.FC = () => {
         <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 rounded-lg p-6 text-white shadow-lg">
           {/* Bouton de fermeture */}
           <button
+            type="button"
             onClick={handleDismiss}
             className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"
+            aria-label="Fermer le bandeau"
           >
             <X size={20} />
           </button>
 
           <div className="flex items-start gap-4">
             {/* Icône */}
-            <div className="flex-shrink-0 w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-              <PlayCircle className="w-6 h-6 text-white" />
+            <div className="flex-shrink-0 w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center dark:bg-gray-800">
+              {isOnboardingComplete ? (
+                <CheckCircle2 className="w-6 h-6 text-white" />
+              ) : (
+                <PlayCircle className="w-6 h-6 text-white" />
+              )}
             </div>
 
             <div className="flex-1">
               <h3 className="text-lg font-semibold mb-2">
-                🎉 Bienvenue dans CassKai !
+                {isOnboardingComplete ? (
+                  '✅ Configuration terminée !'
+                ) : (
+                  '🎉 Bienvenue dans CassKai !'
+                )}
               </h3>
               <p className="text-blue-100 mb-4">
-                Découvrez toutes les fonctionnalités de votre nouvelle plateforme de gestion
-                d'entreprise avec notre guide interactif de 2 minutes.
+                {isOnboardingComplete ? (
+                  `${currentCompany?.name || 'Votre entreprise'} est prêt à démarrer. Découvrez toutes les fonctionnalités avec notre guide interactif.`
+                ) : (
+                  'Nous préparons votre espace de travail personnalisé...'
+                )}
               </p>
 
               <div className="flex flex-wrap gap-3">
                 <button
+                  type="button"
                   onClick={handleStartTour}
-                  className="flex items-center gap-2 bg-white text-blue-600 px-4 py-2 rounded-md font-medium hover:bg-blue-50 transition-colors"
+                  className="flex items-center gap-2 bg-white dark:bg-gray-800 text-blue-600 px-4 py-2 rounded-md font-medium hover:bg-blue-50 transition-colors dark:bg-blue-900/20"
                 >
                   <PlayCircle size={16} />
                   Commencer la visite guidée
                 </button>
 
                 <button
+                  type="button"
                   onClick={() => window.location.href = '/settings/sample-data'}
-                  className="flex items-center gap-2 bg-white/20 text-white px-4 py-2 rounded-md font-medium hover:bg-white/30 transition-colors"
+                  className="flex items-center gap-2 bg-white/20 text-white px-4 py-2 rounded-md font-medium hover:bg-white/30 transition-colors dark:bg-gray-800"
                 >
                   <Database size={16} />
                   Ajouter des données d'exemple
                 </button>
 
                 <button
+                  type="button"
                   onClick={() => window.location.href = '/docs/getting-started'}
-                  className="flex items-center gap-2 bg-white/10 text-white px-4 py-2 rounded-md font-medium hover:bg-white/20 transition-colors"
+                  className="flex items-center gap-2 bg-white/10 text-white px-4 py-2 rounded-md font-medium hover:bg-white/20 transition-colors dark:bg-gray-800"
                 >
                   <BookOpen size={16} />
                   Documentation
@@ -115,14 +195,30 @@ export const WelcomeTourBanner: React.FC = () => {
             </div>
           </div>
 
-          {/* Indicateur de progression */}
-          <div className="mt-4 flex items-center gap-2 text-sm text-blue-100">
-            <div className="flex gap-1">
-              <div className="w-2 h-2 bg-white rounded-full"></div>
-              <div className="w-2 h-2 bg-white/40 rounded-full"></div>
-              <div className="w-2 h-2 bg-white/40 rounded-full"></div>
+          {/* Indicateur de progression RÉEL */}
+          <div className="mt-4">
+            <div className="flex items-center justify-between text-sm text-blue-100 mb-2">
+              <span>
+                {isOnboardingComplete ? (
+                  'Compte créé avec succès'
+                ) : (
+                  'Progression de la configuration'
+                )}
+              </span>
+              <span className="font-semibold">
+                {onboardingSteps.completed}/{onboardingSteps.total} étapes complétées
+              </span>
             </div>
-            <span>Étape 1/3 : Découverte de l'interface</span>
+
+            {/* Barre de progression */}
+            <div className="w-full bg-white/20 rounded-full h-2 overflow-hidden dark:bg-gray-800">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${progressPercent}%` }}
+                transition={{ duration: 0.5 }}
+                className="h-full bg-white dark:bg-gray-800 rounded-full"
+              />
+            </div>
           </div>
         </div>
       </motion.div>

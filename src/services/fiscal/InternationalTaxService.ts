@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import { supabase } from '@/lib/supabase';
 
 interface CountryTaxConfig {
@@ -373,11 +385,11 @@ export class InternationalTaxService {
       await this.createCountrySpecificAccounts(companyId, config);
 
       return { success: true };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erreur configuration fiscale:', error);
       return {
         success: false,
-        error: error.message || 'Erreur lors de la configuration fiscale'
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue') || 'Erreur lors de la configuration fiscale'
       };
     }
   }
@@ -427,17 +439,20 @@ export class InternationalTaxService {
 
     const accountsToInsert = taxAccounts.map(account => ({
       company_id: companyId,
-      currency: config.currency,
+      account_number: account.account_code,
+      account_name: account.account_name,
+      account_type: account.account_type,
+      account_class: Number.parseInt(account.account_code.charAt(0), 10) || null,
       is_active: true,
-      level: account.account_code.length <= 2 ? 1 : 2,
-      ...account
+      is_detail_account: true,
+      level: account.account_code.length <= 2 ? 1 : 2
     }));
 
     // Insérer les comptes en ignorant les doublons
     await supabase
-      .from('accounts')
+      .from('chart_of_accounts')
       .upsert(accountsToInsert, {
-        onConflict: 'company_id,account_code',
+        onConflict: 'company_id,account_number',
         ignoreDuplicates: true
       });
   }

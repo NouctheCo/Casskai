@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import * as tf from '@tensorflow/tfjs';
 import {
   mean,
@@ -8,6 +20,7 @@ import type {
   Transaction,
   AnomalyDetection,
   CashFlowPrediction,
+  PredictionFactor,
   FinancialHealthScore,
   CategoryPrediction,
   ExpenseCategory,
@@ -42,7 +55,7 @@ class AIAnalyticsService {
       
       this.isInitialized = true;
       console.warn('AI Analytics Service initialized successfully');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Failed to initialize AI Analytics Service:', error);
       throw error;
     }
@@ -61,7 +74,7 @@ class AIAnalyticsService {
         // Crée de nouveaux modèles
         await this.createDefaultModels();
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error initializing models:', error);
       // Fallback vers des modèles par défaut
       await this.createDefaultModels();
@@ -199,7 +212,7 @@ class AIAnalyticsService {
             severity,
             timestamp: new Date(),
             resolved: false
-          });
+          } as AnomalyDetection);
         }
       });
 
@@ -215,11 +228,11 @@ class AIAnalyticsService {
         modelUsed: 'anomaly_detection_v1'
       };
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error detecting anomalies:', error);
       return {
         success: false,
-        error: error.message,
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue'),
         processingTime: Date.now() - Date.now()
       };
     }
@@ -265,7 +278,7 @@ class AIAnalyticsService {
   private generateAnomalyReasons(transaction: Transaction, features: number[]): string[] {
     const reasons: string[] = [];
     
-    const [amount, dayOfWeek, hour, isWeekend] = features;
+    const [amount, _dayOfWeek, hour, isWeekend] = features;
     
     if (Math.exp(amount) > 10000) {
       reasons.push('Montant inhabituellement élevé');
@@ -325,7 +338,7 @@ class AIAnalyticsService {
         modelUsed: 'category_classification_v1'
       };
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error categorizing expense:', error);
       return this.ruleBasedCategorization(transaction, categories);
     }
@@ -455,8 +468,8 @@ class AIAnalyticsService {
             predictedExpenses: Math.max(0, Math.abs(predictedValue * 0.9)), // estimation pour dépenses
             predictedBalance: predictedValue,
             confidence: Math.max(0.3, 1 - (i / daysAhead) * 0.5), // confiance décroissante
-            factors: this.generatePredictionFactors(historicalData, i)
-          });
+            factors: this.generatePredictionFactors(historicalData, i) as unknown as PredictionFactor[]
+          } as any);
 
           // Met à jour la séquence pour la prochaine prédiction
           currentSequence = [...currentSequence.slice(1), [predictedValue, i, forecastDate.getDay(), forecastDate.getMonth()]];
@@ -474,7 +487,7 @@ class AIAnalyticsService {
         modelUsed: 'lstm_cash_flow_v1'
       };
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error predicting cash flow:', error);
       return this.statisticalCashFlowPrediction(historicalData, daysAhead);
     }
@@ -529,17 +542,21 @@ class AIAnalyticsService {
         confidence: 0.6,
         factors: [
           {
+            id: 'historical',
+            name: 'Moyenne historique',
             factor: 'Moyenne historique',
             impact: 0.7,
             description: `Basé sur ${data.length} jours de données`
           },
           {
+            id: 'trend',
+            name: 'Tendance linéaire',
             factor: 'Tendance linéaire',
             impact: trend > 0 ? 0.3 : -0.3,
             description: trend > 0 ? 'Tendance positive' : 'Tendance négative'
           }
-        ]
-      });
+        ] as PredictionFactor[]
+      } as CashFlowPrediction);
     }
 
     return {
@@ -614,11 +631,11 @@ class AIAnalyticsService {
         modelUsed: 'health_scoring_v1'
       };
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error calculating health score:', error);
       return {
         success: false,
-        error: error.message
+        error: (error instanceof Error ? error.message : 'Une erreur est survenue')
       };
     }
   }
@@ -737,7 +754,7 @@ class AIAnalyticsService {
       
       localStorage.setItem('ai_models', JSON.stringify(modelMetadata));
       console.warn('Models metadata saved successfully');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error saving models:', error);
     }
   }

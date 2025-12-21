@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -174,7 +186,7 @@ const ModulesSummary: React.FC<{
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay: 0.3, duration: 0.5 }}
   >
-    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 dark:border-gray-700">
       <CardContent className="pt-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-4">
@@ -198,7 +210,7 @@ const ModulesSummary: React.FC<{
               variant="outline"
               size="sm"
               onClick={onSelectAll}
-              className="border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900"
+              className="border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900 dark:bg-blue-900/20"
             >
               Tout sélectionner
             </Button>
@@ -226,9 +238,9 @@ const ModulesList: React.FC<{
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 + index * 0.1, duration: 0.5 }}
       >
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <CardHeader className="pb-4">
-            <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
+            <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-gray-100 dark:text-white">
               {category === 'core' && <Settings className="h-5 w-5 text-orange-600 dark:text-orange-400" />}
               {category === 'finance' && <Calculator className="h-5 w-5 text-green-600 dark:text-green-400" />}
               {category === 'operations' && <Package className="h-5 w-5 text-blue-600 dark:text-blue-400" />}
@@ -239,7 +251,7 @@ const ModulesList: React.FC<{
                 {category === 'operations' && 'Opérations'}
                 {category === 'analytics' && 'Analytique'}
               </span>
-              <Badge variant="outline" className="border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400">
+              <Badge variant="outline" className="border-gray-300 dark:border-gray-600 dark:border-gray-600 text-gray-600 dark:text-gray-400">
                 {modules.length} module{modules.length !== 1 ? 's' : ''}
               </Badge>
             </CardTitle>
@@ -320,7 +332,7 @@ const ModuleCard: React.FC<{
             {module.icon}
           </div>
           <div className="flex items-center space-x-2">
-            <h3 className="font-semibold text-gray-900 dark:text-white">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white">
               {module.name}
             </h3>
             {module.recommended && (
@@ -334,7 +346,7 @@ const ModuleCard: React.FC<{
           {module.description}
         </p>
         <div className="flex items-center justify-between">
-          <Badge variant="outline" className="text-xs border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400">
+          <Badge variant="outline" className="text-xs border-gray-300 dark:border-gray-600 dark:border-gray-600 text-gray-600 dark:text-gray-400">
             ~{module.estimatedSetupTime} min
           </Badge>
           {isSelected && (

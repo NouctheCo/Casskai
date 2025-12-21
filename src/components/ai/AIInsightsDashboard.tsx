@@ -130,16 +130,16 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
         if (result.status === 'fulfilled' && result.value.success) {
           switch (index) {
             case 0:
-              setAnomalies(result.value.data || []);
+              setAnomalies(Array.isArray(result.value.data) ? result.value.data : []);
               break;
             case 1:
-              setHealthScore(result.value.data);
+              setHealthScore(result.value.data || null);
               break;
             case 2:
-              setCashFlowPredictions(result.value.data || []);
+              setCashFlowPredictions(Array.isArray(result.value.data) ? result.value.data : []);
               break;
             case 3:
-              setTaxOptimizations(result.value.data || []);
+              setTaxOptimizations(Array.isArray(result.value.data) ? result.value.data : []);
               break;
           }
         }
@@ -229,7 +229,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
             </motion.div>
             <div className="space-y-2">
               <p className="text-lg font-medium">Initialisation de l'IA financière</p>
-              <p className="text-sm text-gray-500">Analyse des données en cours...</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Analyse des données en cours...</p>
             </div>
           </div>
         </CardContent>
@@ -249,7 +249,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
               </div>
               <div>
                 <CardTitle className="text-xl">Intelligence Artificielle Financière</CardTitle>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   Dernière analyse: {lastAnalysis?.toLocaleTimeString('fr-FR') || 'En cours...'}
                 </p>
               </div>
@@ -282,7 +282,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
               <Shield className="w-8 h-8 text-green-500" />
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Score santé</p>
-                <p className="text-xl font-bold text-gray-900 dark:text-white">
+                <p className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
                   {healthScore?.overall || 0}/100
                 </p>
               </div>
@@ -295,7 +295,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
               <AlertTriangle className="w-8 h-8 text-yellow-500" />
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Anomalies</p>
-                <p className="text-xl font-bold text-gray-900 dark:text-white">
+                <p className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
                   {anomalies.length}
                 </p>
               </div>
@@ -308,7 +308,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
               <TrendingUp className="w-8 h-8 text-blue-500" />
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Prédictions</p>
-                <p className="text-xl font-bold text-gray-900 dark:text-white">
+                <p className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
                   {cashFlowPredictions.length}j
                 </p>
               </div>
@@ -321,7 +321,7 @@ export const AIInsightsDashboard: React.FC<AIInsightsDashboardProps> = ({
               <DollarSign className="w-8 h-8 text-purple-500" />
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Économies pot.</p>
-                <p className="text-xl font-bold text-gray-900 dark:text-white">
+                <p className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
                   {taxOptimizations.reduce((sum, opt) => sum + opt.potentialSavings, 0).toLocaleString('fr-FR')}€
                 </p>
               </div>

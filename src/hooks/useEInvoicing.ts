@@ -1,4 +1,16 @@
 /**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
+/**
  * E-invoicing Hook
  * Custom React hook for e-invoicing functionality
  */
@@ -86,8 +98,8 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
       setCapabilities(data);
       setIsEnabled(data.enabled);
     } catch (err) {
-      console.error('Error loading capabilities:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load capabilities');
+      console.error('...', error);
+      setError(err instanceof Error ? (err as Error).message : 'Failed to load capabilities');
       setIsEnabled(false);
       setCapabilities(null);
     }
@@ -99,8 +111,8 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
     try {
       const data = await apiCall(`/companies/${companyId}/einvoicing/statistics`);
       setStatistics(data);
-    } catch (err) {
-      console.error('Error loading statistics:', err);
+    } catch (_err) {
+      console.error('...', error);
     }
   }, [companyId, isEnabled, apiCall]);
 
@@ -110,8 +122,8 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
     try {
       const data = await apiCall(`/companies/${companyId}/einvoicing/documents?limit=20`);
       setDocuments(data.documents || []);
-    } catch (err) {
-      console.error('Error loading documents:', err);
+    } catch (_err) {
+      console.error('...', error);
     }
   }, [companyId, isEnabled, apiCall]);
 
@@ -126,7 +138,7 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
         loadDocuments()
       ]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to refresh data');
+      setError(err instanceof Error ? (err as Error).message : 'Failed to refresh data');
     } finally {
       setIsLoading(false);
     }
@@ -140,7 +152,7 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
       });
       await refreshData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to enable feature');
+      setError(err instanceof Error ? (err as Error).message : 'Failed to enable feature');
       throw err;
     } finally {
       setIsLoading(false);
@@ -158,7 +170,7 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
       setStatistics(null);
       setDocuments([]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to disable feature');
+      setError(err instanceof Error ? (err as Error).message : 'Failed to disable feature');
       throw err;
     } finally {
       setIsLoading(false);
@@ -185,7 +197,7 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
 
       return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to submit invoice';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Failed to submit invoice';
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {
@@ -205,8 +217,8 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
       ));
       
       return document;
-    } catch (err) {
-      console.error('Error getting document status:', err);
+    } catch (_err) {
+      console.error('...', error);
       return null;
     }
   }, [companyId, apiCall]);
@@ -233,8 +245,8 @@ export const useEInvoicing = (companyId: string): UseEInvoicingReturn => {
           await Promise.all(
             pendingDocuments.map(doc => getDocumentStatus(doc.id))
           );
-        } catch (err) {
-          console.error('Error polling document status:', err);
+        } catch (_err) {
+          console.error('...', error);
         }
       }
     }, 30000); // Poll every 30 seconds

@@ -1,4 +1,16 @@
 /**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
+/**
  * Hook métier pour la gestion des contrats et RFA
  * Suit les patterns existants de l'application CassKai
  */
@@ -71,7 +83,7 @@ export const useContracts = (): UseContractsReturn => {
   const [rfaCalculations, setRFACalculations] = useState<RFACalculation[]>([]);
   const [simulationResults, setSimulationResults] = useState<SimulationResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, _setError] = useState<string | null>(null);
 
   // Filtres
   const [filters, setFilters] = useState<ContractFilters>({});
@@ -82,33 +94,25 @@ export const useContracts = (): UseContractsReturn => {
     if (!currentEnterpriseId) return;
 
     setLoading(true);
-    setError(null);
 
     try {
       const response = await contractsService.getContracts(currentEnterpriseId, filters);
-      
+
       if (response.success && response.data) {
         setContracts(response.data);
       } else {
-        setError(response.error?.message || 'Erreur lors du chargement des contrats');
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger les contrats",
-          variant: "destructive"
-        });
+        // Dont show error - just log and show empty state
+        setContracts([]);
+        console.warn('Contracts data unavailable');
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
-      setError(errorMessage);
-      toast({
-        title: "Erreur",
-        description: errorMessage,
-        variant: "destructive"
-      });
+      // Dont show error - just log and show empty state
+      console.warn('Error loading contracts:', err);
+      setContracts([]);
     } finally {
       setLoading(false);
     }
-  }, [currentEnterpriseId, filters, toast]);
+  }, [currentEnterpriseId, filters]);
 
   // Création d'un contrat
   const createContract = useCallback(async (formData: ContractFormData): Promise<boolean> => {
@@ -136,7 +140,7 @@ export const useContracts = (): UseContractsReturn => {
         return false;
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Erreur inconnue';
       toast({
         title: "Erreur",
         description: errorMessage,
@@ -172,7 +176,7 @@ export const useContracts = (): UseContractsReturn => {
         return false;
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Erreur inconnue';
       toast({
         title: "Erreur",
         description: errorMessage,
@@ -208,7 +212,7 @@ export const useContracts = (): UseContractsReturn => {
         return false;
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Erreur inconnue';
       toast({
         title: "Erreur",
         description: errorMessage,
@@ -225,7 +229,6 @@ export const useContracts = (): UseContractsReturn => {
     if (!currentEnterpriseId) return;
 
     setLoading(true);
-    setError(null);
 
     try {
       const response = await contractsService.getRFACalculations(currentEnterpriseId, rfaFilters);
@@ -233,7 +236,6 @@ export const useContracts = (): UseContractsReturn => {
       if (response.success && response.data) {
         setRFACalculations(response.data);
       } else {
-        setError(response.error?.message || 'Erreur lors du chargement des calculs RFA');
         toast({
           title: "Erreur",
           description: "Impossible de charger les calculs RFA",
@@ -241,8 +243,7 @@ export const useContracts = (): UseContractsReturn => {
         });
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
-      setError(errorMessage);
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Erreur inconnue';
       toast({
         title: "Erreur",
         description: errorMessage,
@@ -279,7 +280,7 @@ export const useContracts = (): UseContractsReturn => {
         return false;
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Erreur inconnue';
       toast({
         title: "Erreur",
         description: errorMessage,
@@ -312,7 +313,7 @@ export const useContracts = (): UseContractsReturn => {
         });
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
+      const errorMessage = err instanceof Error ? (err as Error).message : 'Erreur inconnue';
       toast({
         title: "Erreur",
         description: errorMessage,
@@ -334,11 +335,10 @@ export const useContracts = (): UseContractsReturn => {
       if (response.success && response.data) {
         setDashboardData(response.data);
       } else {
-        setError(response.error?.message || 'Erreur lors du chargement du dashboard');
+        // No dashboard data returned - keep current state
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
-      setError(errorMessage);
+    } catch (_err) {
+      const _errorMessage = _err instanceof Error ? (_err as Error).message : 'Erreur inconnue';
     } finally {
       setLoading(false);
     }
@@ -466,7 +466,7 @@ export const useRFASimulation = (contractId?: string) => {
           variant: "destructive"
         });
       }
-    } catch (err) {
+    } catch (_err) {
       toast({
         title: "Erreur",
         description: "Erreur lors de la simulation",

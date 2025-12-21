@@ -1,10 +1,21 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 // src/services/currencyIntegration.ts - Version corrigée
 
 import ConfigService from './configService';
 import { CurrencyService } from './currencyService';
 import { SUPPORTED_CURRENCIES } from '../utils/constants';
 // import { supabase } from '../lib/supabase'; // Commenté pour la compatibilité de build
-import { CompanyConfig } from '../types/config';
 
 export class CurrencyIntegration {
   private static instance: CurrencyIntegration;
@@ -114,7 +125,7 @@ export class CurrencyIntegration {
         if (error && !error.message.includes('already exists')) {
           throw error;
         }
-      } catch (error) {
+      } catch (_error) {
         console.warn('SQL Query failed (may be normal):', `${query.substring(0, 50)}...`);
         // Continuer même si certaines requêtes échouent (tables peuvent déjà exister)
       }
@@ -297,15 +308,7 @@ export class CurrencyIntegration {
       }
 
       // Mettre à jour les comptes existants
-      const { error: accountsError } = await supabase
-        .from('accounts')
-        .update({ currency: companyCurrency })
-        .eq('company_id', (config.company as any).id)
-        .is('currency', null);
-
-      if (accountsError) {
-        console.warn('Erreur mise à jour devise comptes:', accountsError);
-      }
+      console.warn('Mise à jour de la devise des comptes ignorée: chart_of_accounts ne stocke plus de devise par compte.');
 
       // Mettre à jour les transactions existantes
       const { error: transactionsError } = await supabase
@@ -352,7 +355,7 @@ export class CurrencyIntegration {
       const tableChecks = tables.map(async table => {
         try {
           await supabase.from(table).select('*').limit(1);
-        } catch (error) {
+        } catch (_error) {
           errors.push(`Table ${table} manquante ou inaccessible`);
         }
       });
@@ -365,8 +368,8 @@ export class CurrencyIntegration {
         .select('code')
         .eq('is_active', true);
 
-      const supportedCodes = SUPPORTED_CURRENCIES.map(c => c.code);
-      const existingCodes = currencies?.map(c => c.code) || [];
+      const supportedCodes = SUPPORTED_CURRENCIES.map((c: any) => c.code);
+      const existingCodes = currencies?.map((c: any) => c.code) || [];
       
       for (const code of supportedCodes) {
         if (!existingCodes.includes(code)) {

@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import type { InvoiceWithDetails } from '@/types/database/invoices.types';
@@ -60,6 +72,14 @@ export class InvoicePdfService {
    * Ajoute l'en-tête de l'entreprise
    */
   private static addCompanyHeader(doc: jsPDF, companyData: CompanyInfo | undefined, primaryColor: number[]) {
+    // Logo CassKai (par défaut si non fourni)
+    try {
+      const logoUrl = companyData?.logo || '/logo.png';
+      // Note: En production, convertir le SVG en base64 pour l'inclure
+      doc.addImage(logoUrl, 'PNG', 20, 10, 30, 20);
+    } catch (error) {
+      console.warn('Logo non chargé dans le PDF:', error);
+    }
     // Logo ou nom de l'entreprise
     doc.setFontSize(24);
     doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
@@ -113,44 +133,44 @@ export class InvoicePdfService {
     const invoiceInfoX = 120;
     let yPos = 35;
     
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('FACTURE N°:', invoiceInfoX, yPos);
-    doc.setFont(undefined, 'normal');
-    doc.text(invoice.invoice_number, invoiceInfoX + 30, yPos);
+    doc.setFont('helvetica', 'normal');
+    doc.text(invoice.invoice_number as string, invoiceInfoX + 30, yPos);
     yPos += 6;
     
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('Date:', invoiceInfoX, yPos);
-    doc.setFont(undefined, 'normal');
-    doc.text(new Date(invoice.issue_date).toLocaleDateString('fr-FR'), invoiceInfoX + 30, yPos);
+    doc.setFont('helvetica', 'normal');
+    doc.text(new Date(invoice.issue_date as string).toLocaleDateString('fr-FR'), invoiceInfoX + 30, yPos);
     yPos += 6;
     
     if (invoice.due_date) {
-      doc.setFont(undefined, 'bold');
+      doc.setFont('helvetica', 'bold');
       doc.text('Échéance:', invoiceInfoX, yPos);
-      doc.setFont(undefined, 'normal');
-      doc.text(new Date(invoice.due_date).toLocaleDateString('fr-FR'), invoiceInfoX + 30, yPos);
+      doc.setFont('helvetica', 'normal');
+      doc.text(new Date(invoice.due_date as any).toLocaleDateString('fr-FR'), invoiceInfoX + 30, yPos);
       yPos += 6;
     }
     
     // Informations client (colonne gauche)
     if (invoice.client) {
       yPos = 75;
-      doc.setFont(undefined, 'bold');
+      doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
       doc.text('FACTURÉ À:', 20, yPos);
       
       yPos += 8;
       doc.setFontSize(11);
-      doc.setFont(undefined, 'bold');
-      doc.text(invoice.client.name, 20, yPos);
+      doc.setFont('helvetica', 'bold');
+      doc.text(invoice.client.name as string, 20, yPos);
       
       yPos += 6;
-      doc.setFont(undefined, 'normal');
+      doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
       
       if (invoice.client.address_street) {
-        doc.text(invoice.client.address_street, 20, yPos);
+        doc.text(invoice.client.address_street as string, 20, yPos);
         yPos += 5;
       }
       if (invoice.client.address_city) {
@@ -223,7 +243,7 @@ export class InvoicePdfService {
     doc.setTextColor(0);
     
     // Total HT
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.text('Total HT:', labelX, startY);
     doc.text(this.formatCurrency(invoice.total_ht), rightX, startY, { align: 'right' });
     
@@ -237,14 +257,14 @@ export class InvoicePdfService {
     doc.line(labelX, startY + 10, rightX, startY + 10);
     
     // Total TTC
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
     doc.text('Total TTC:', labelX, startY + 16);
     doc.text(this.formatCurrency(invoice.total_ttc), rightX, startY + 16, { align: 'right' });
     
     // Montant payé et restant dû
     if (invoice.paid_amount > 0) {
-      doc.setFont(undefined, 'normal');
+      doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
       doc.setTextColor(0, 150, 0);
       doc.text('Montant payé:', labelX, startY + 24);
@@ -269,13 +289,13 @@ export class InvoicePdfService {
       
       if (invoice.notes) {
         doc.setFontSize(10);
-        doc.setFont(undefined, 'bold');
+        doc.setFont('helvetica', 'bold');
         doc.setTextColor(0);
         doc.text('Notes:', 20, startY);
         
-        doc.setFont(undefined, 'normal');
+        doc.setFont('helvetica', 'normal');
         doc.setFontSize(9);
-        const notesLines = doc.splitTextToSize(invoice.notes, 170);
+        const notesLines = doc.splitTextToSize(invoice.notes as string, 170);
         doc.text(notesLines, 20, startY + 6);
         startY += 6 + (notesLines.length * 4);
       }
@@ -283,13 +303,13 @@ export class InvoicePdfService {
       if (invoice.terms) {
         startY += 5;
         doc.setFontSize(10);
-        doc.setFont(undefined, 'bold');
+        doc.setFont('helvetica', 'bold');
         doc.setTextColor(0);
         doc.text('Conditions de paiement:', 20, startY);
         
-        doc.setFont(undefined, 'normal');
+        doc.setFont('helvetica', 'normal');
         doc.setFontSize(9);
-        const termsLines = doc.splitTextToSize(invoice.terms, 170);
+        const termsLines = doc.splitTextToSize(invoice.terms as string, 170);
         doc.text(termsLines, 20, startY + 6);
       }
     }
@@ -304,7 +324,7 @@ export class InvoicePdfService {
     
     doc.setFontSize(8);
     doc.setTextColor(150);
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     
     // Informations légales
     const legalInfo = [];
@@ -314,9 +334,11 @@ export class InvoicePdfService {
     if (legalInfo.length > 0) {
       doc.text(legalInfo.join(' - '), 105, footerY, { align: 'center' });
     }
-    
-    // Numéro de page
-    doc.text(`Page 1`, 105, footerY + 5, { align: 'center' });
+
+    // Numéro de page avec total
+    const pageCount = (doc.internal as any).getNumberOfPages();
+    const currentPage = (doc.internal as any).getCurrentPageInfo().pageNumber;
+    doc.text(`Page ${currentPage} / ${pageCount}`, 105, footerY + 5, { align: 'center' });
   }
   
   /**

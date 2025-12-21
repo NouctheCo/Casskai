@@ -1,4 +1,16 @@
 /**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
+/**
  * PPF (Chorus Pro) Provider
  * Handles submission to French government's Chorus Pro platform
  * https://chorus-pro.gouv.fr/
@@ -402,7 +414,7 @@ export class PPFProvider extends ChannelProvider {
     }
   }
 
-  private mapPPFStatusToStandard(ppfStatus: string, codeStatut: number): string {
+  private mapPPFStatusToStandard(ppfStatus: string, _codeStatut: number): string {
     // Map Chorus Pro status codes to standard lifecycle status
     switch (ppfStatus?.toUpperCase()) {
       case 'DEPOSE':

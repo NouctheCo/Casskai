@@ -1,4 +1,16 @@
 /**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
+/**
  * E-invoicing API Service
  * RESTful API interface for e-invoicing functionality
  */
@@ -573,19 +585,19 @@ export class EInvoicingAPI {
     error: any,
     requestId: string,
     endpoint: string,
-    context: any
+    _context: any
   ): APIResponse {
     console.error(`API Error in ${endpoint}:`, error);
 
     let errorMessage = 'Internal server error';
-    let errorCode = 'INTERNAL_ERROR';
+    let _errorCode = 'INTERNAL_ERROR';
 
     if (error instanceof EInvoicingError) {
       errorMessage = error.message;
-      errorCode = error.code;
+      _errorCode = error.code;
     } else if (error instanceof FeatureDisabledError) {
       errorMessage = error.message;
-      errorCode = error.code;
+      _errorCode = error.code;
     } else if (error instanceof Error) {
       errorMessage = error.message;
     }

@@ -13,15 +13,15 @@ export const ThemeTestCard: React.FC = () => {
     <div className="p-6 space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Card avec navigation style */}
-        <Card className="border border-gray-200 dark:border-gray-700">
-          <CardHeader className="border-b border-gray-200 dark:border-gray-700">
+        <Card className="border border-gray-200 dark:border-gray-600 dark:border-gray-700">
+          <CardHeader className="border-b border-gray-200 dark:border-gray-600 dark:border-gray-700">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-600 dark:bg-blue-500 rounded-lg">
+              <div className="p-2 bg-blue-600 dark:bg-blue-500 rounded-lg dark:bg-blue-900/20">
                 <Shield className="w-5 h-5 text-white" />
               </div>
               <div>
-                <CardTitle className="text-gray-900 dark:text-white">Test Thème</CardTitle>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Vérification UI/UX</p>
+                <CardTitle className="text-gray-900 dark:text-gray-100 dark:text-white">Test Thème</CardTitle>
+                <p className="text-xs text-gray-500 dark:text-gray-300">Vérification UI/UX</p>
               </div>
             </div>
           </CardHeader>
@@ -30,12 +30,12 @@ export const ThemeTestCard: React.FC = () => {
             {/* Boutons de navigation */}
             <Button
               variant="ghost"
-              className="w-full justify-start hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+              className="w-full justify-start hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 dark:bg-gray-900/30"
             >
-              <Users className="mr-3 h-4 w-4 text-gray-500 dark:text-gray-400" />
+              <Users className="mr-3 h-4 w-4 text-gray-500 dark:text-gray-300" />
               <div className="flex-1 text-left">
                 <div className="font-medium">Navigation Item</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Description test</div>
+                <div className="text-xs text-gray-500 dark:text-gray-300">Description test</div>
               </div>
               <Badge className="ml-2 text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-700">
                 Test
@@ -60,11 +60,11 @@ export const ThemeTestCard: React.FC = () => {
             {/* Séparateur */}
             <div className="py-3">
               <div className="flex items-center gap-2 px-3">
-                <Settings className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <Settings className="h-4 w-4 text-gray-400 dark:text-gray-500 dark:text-gray-300" />
+                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-300 uppercase tracking-wider">
                   Catégorie Test
                 </span>
-                <div className="flex-1 border-t border-gray-200 dark:border-gray-700"></div>
+                <div className="flex-1 border-t border-gray-200 dark:border-gray-600 dark:border-gray-700"></div>
               </div>
             </div>
 
@@ -87,10 +87,10 @@ export const ThemeTestCard: React.FC = () => {
         </Card>
 
         {/* Status card */}
-        <Card className="border border-gray-200 dark:border-gray-700">
+        <Card className="border border-gray-200 dark:border-gray-600 dark:border-gray-700">
           <CardContent className="p-6">
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-300">
                 <div className="w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full animate-pulse"></div>
                 <span>Système opérationnel</span>
               </div>

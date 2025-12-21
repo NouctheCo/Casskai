@@ -66,7 +66,7 @@ const OnboardingDebugPanel: React.FC = () => {
       case 'SKIP':
         return <Clock className="w-4 h-4 text-yellow-500" />;
       default:
-        return <TestTube className="w-4 h-4 text-gray-500" />;
+        return <TestTube className="w-4 h-4 text-gray-500 dark:text-gray-400" />;
     }
   };
 
@@ -90,7 +90,7 @@ const OnboardingDebugPanel: React.FC = () => {
               <CardTitle className="text-sm">Utilisateur</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-gray-600 dark:text-gray-400">
                 {user ? `${user.email} (${user.id})` : 'Non connecté'}
               </p>
             </CardContent>
@@ -101,7 +101,7 @@ const OnboardingDebugPanel: React.FC = () => {
               <CardTitle className="text-sm">Entreprise Actuelle</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-gray-600 dark:text-gray-400">
                 {currentEnterprise ? `${currentEnterprise.name} (${currentEnterprise.id})` : 'Aucune'}
               </p>
             </CardContent>
@@ -112,7 +112,7 @@ const OnboardingDebugPanel: React.FC = () => {
               <CardTitle className="text-sm">Entreprises Totales</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-gray-600 dark:text-gray-400">
                 {enterprises.length} entreprise(s)
               </p>
             </CardContent>
@@ -181,7 +181,7 @@ const OnboardingDebugPanel: React.FC = () => {
                           {result.status}
                         </Badge>
                       </div>
-                      <p className="text-xs text-gray-600">{result.message}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">{result.message}</p>
                       {result.details && (
                         <pre className="text-xs bg-gray-100 dark:bg-gray-800 p-2 rounded mt-2 overflow-x-auto">
                           {JSON.stringify(result.details, null, 2)}

@@ -1,3 +1,15 @@
+/**
+ * CassKai - Plateforme de gestion financière
+ * Copyright © 2025 NOUTCHE CONSEIL (SIREN 909 672 685)
+ * Tous droits réservés - All rights reserved
+ * 
+ * Ce logiciel est la propriété exclusive de NOUTCHE CONSEIL.
+ * Toute reproduction, distribution ou utilisation non autorisée est interdite.
+ * 
+ * This software is the exclusive property of NOUTCHE CONSEIL.
+ * Any unauthorized reproduction, distribution or use is prohibited.
+ */
+
 import {
   OnboardingData,
   OnboardingStepId,
@@ -44,6 +56,18 @@ type ProgressStep = {
 export class OnboardingProgressService {
   private readonly steps: ProgressStep[] = [
     {
+      id: 'language',
+      name: 'language',
+      title: 'Langue',
+      description: 'Sélectionnez votre langue',
+      completed: false,
+      current: false,
+      locked: false,
+      isRequired: true,
+      order: 1,
+      estimatedTime: 1
+    },
+    {
       id: 'welcome',
       name: 'welcome',
       title: 'Bienvenue',
@@ -52,20 +76,8 @@ export class OnboardingProgressService {
       current: false,
       locked: false,
       isRequired: true,
-      order: 1,
-      estimatedTime: 2
-    },
-    {
-      id: 'preferences',
-      name: 'preferences',
-      title: 'Préférences',
-      description: 'Configuration de votre environnement',
-      completed: false,
-      current: false,
-      locked: false,
-      isRequired: true,
       order: 2,
-      estimatedTime: 3
+      estimatedTime: 2
     },
     {
       id: 'company',
@@ -80,6 +92,18 @@ export class OnboardingProgressService {
       estimatedTime: 5
     },
     {
+      id: 'preferences',
+      name: 'preferences',
+      title: 'Préférences',
+      description: 'Configuration de votre environnement',
+      completed: false,
+      current: false,
+      locked: false,
+      isRequired: true,
+      order: 4,
+      estimatedTime: 3
+    },
+    {
       id: 'modules',
       name: 'modules',
       title: 'Sélection des Modules',
@@ -88,7 +112,7 @@ export class OnboardingProgressService {
       current: false,
       locked: false,
       isRequired: true,
-      order: 4,
+      order: 5,
       estimatedTime: 4
     },
     {
@@ -100,7 +124,7 @@ export class OnboardingProgressService {
       current: false,
       locked: false,
       isRequired: true,
-      order: 5,
+      order: 6,
       estimatedTime: 2
     }
   ];
@@ -166,7 +190,7 @@ export class OnboardingProgressService {
         success: true,
         data: progress
       };
-  } catch (error) {
+  } catch (_error) {
     return {
         success: false,
         error: 'Erreur lors du calcul de la progression'
@@ -239,7 +263,7 @@ export class OnboardingProgressService {
         success: true,
         data: metrics
       };
-  } catch (error) {
+  } catch (_error) {
     return {
         success: false,
         error: 'Erreur lors de la récupération des métriques'
