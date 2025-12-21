@@ -1961,11 +1961,11 @@
       "version": "Version 2.0"
     },
     "hero": {
-      "badge": "🚀 Solution Beta - Gestion d'entreprise moderne",
+      "badge": "🚀 Solución Profesional - Gestión empresarial moderna",
       "cta": {
-        "beta": "Devenir beta testeur",
-        "demo": "Ver la démo",
-        "start": "Essai gratuit 30 jours"
+        "beta": "Comenzar prueba gratuita",
+        "demo": "Ver la demostración",
+        "start": "Prueba gratis 30 días"
       },
       "description": "CassKai simplifie la gestion d'entreprise avec une suite complète : comptabilité, facturation, CRM, projets, RH et bien plus. Tout en un, simple et puissant.",
       "stats": {

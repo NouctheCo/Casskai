@@ -387,7 +387,7 @@ const HeroSection = () => {
 
             {[
 
-              { number: '100+', label: t('landing.hero.stats.companies', 'Entreprises'), icon: Building, color: 'text-blue-600' },
+              { number: '20+', label: t('landing.hero.stats.companies', 'Entreprises'), icon: Building, color: 'text-blue-600' },
 
               { number: '99.9%', label: t('landing.hero.stats.uptime', 'Disponibilité'), icon: Shield, color: 'text-green-600' },
 
