@@ -366,6 +366,9 @@ export const JournalEntryAttachments: React.FC<JournalEntryAttachmentsProps> = (
               <button
                 onClick={() => setShowPreview(false)}
                 className="absolute right-4 top-4"
+                type="button"
+                aria-label="Fermer l’aperçu de la pièce jointe"
+                title="Fermer"
               >
                 <X className="w-4 h-4" />
               </button>

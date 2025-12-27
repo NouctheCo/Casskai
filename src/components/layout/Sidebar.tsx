@@ -271,12 +271,12 @@ export const Sidebar: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t('common.search', 'Rechercher un module...')}
-            className="w-full pl-11 pr-12 py-3 bg-slate-100/80 dark:bg-gray-800/80 border-0 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:bg-gray-800 dark:focus:bg-gray-800 transition-all placeholder-gray-400 dark:placeholder-gray-500 dark:text-white"
+            className="w-full pl-11 pr-12 py-3 bg-slate-100/80 dark:bg-gray-800 border-0 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-gray-800 transition-all placeholder-gray-400 dark:placeholder-gray-500 dark:text-white"
           />
           <Search className="absolute left-4 top-3.5 h-5 w-5 text-gray-400 dark:text-gray-500 group-focus-within:text-indigo-500 transition-colors" />
           <div className="absolute right-3 top-2.5 flex gap-0.5">
-            <kbd className="px-1.5 py-1 bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-xs rounded-md shadow-sm">⌘</kbd>
-            <kbd className="px-1.5 py-1 bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-xs rounded-md shadow-sm">K</kbd>
+            <kbd className="px-1.5 py-1 bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-xs rounded-md shadow-sm">⌘</kbd>
+            <kbd className="px-1.5 py-1 bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-xs rounded-md shadow-sm">K</kbd>
           </div>
         </div>
       </div>

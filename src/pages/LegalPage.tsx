@@ -99,7 +99,7 @@ export default function LegalPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full mb-4">
             <FileText className="w-8 h-8 text-blue-600 dark:text-blue-400" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-4">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Documents Légaux
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-400 dark:text-gray-300 max-w-2xl mx-auto">
@@ -126,7 +126,7 @@ export default function LegalPage() {
               </div>
 
               {/* Title & Description */}
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                 {doc.title}
               </h3>
               <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-4">
@@ -172,7 +172,7 @@ export default function LegalPage() {
               </div>
             </div>
             <div className="flex-1">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-3">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
                 Vos Droits RGPD
               </h2>
               <p className="text-gray-700 dark:text-gray-300 mb-4">
@@ -210,13 +210,13 @@ export default function LegalPage() {
 
         {/* Contact DPO */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
             Contact Délégué à la Protection des Données (DPO)
           </h2>
           
           <div className="grid md:grid-cols-2 gap-8">
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-4">
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
                 Questions sur vos données ?
               </h3>
               <p className="text-gray-600 dark:text-gray-400 dark:text-gray-300 mb-6">
@@ -227,7 +227,7 @@ export default function LegalPage() {
                 <div className="flex items-start gap-3">
                   <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
                   <div>
-                    <div className="font-medium text-gray-900 dark:text-gray-100 dark:text-white">Email</div>
+                    <div className="font-medium text-gray-900 dark:text-white">Email</div>
                     <a href="mailto:dpo@casskai.com" className="text-blue-600 dark:text-blue-400 hover:underline">
                       dpo@casskai.com
                     </a>
@@ -237,7 +237,7 @@ export default function LegalPage() {
                 <div className="flex items-start gap-3">
                   <Phone className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
                   <div>
-                    <div className="font-medium text-gray-900 dark:text-gray-100 dark:text-white">Téléphone</div>
+                    <div className="font-medium text-gray-900 dark:text-white">Téléphone</div>
                     <a href="tel:+33752027198" className="text-blue-600 dark:text-blue-400 hover:underline">
                       +33 7 52 02 71 98
                     </a>
@@ -247,7 +247,7 @@ export default function LegalPage() {
                 <div className="flex items-start gap-3">
                   <MapPin className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
                   <div>
-                    <div className="font-medium text-gray-900 dark:text-gray-100 dark:text-white">Adresse postale</div>
+                    <div className="font-medium text-gray-900 dark:text-white">Adresse postale</div>
                     <address className="not-italic text-gray-600 dark:text-gray-400 dark:text-gray-300">
                       NC NOUTCHE CONSEIL<br />
                       12 rue Jean-Baptiste Charcot<br />
@@ -259,7 +259,7 @@ export default function LegalPage() {
             </div>
 
             <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-6">
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-4">
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
                 Délais de réponse
               </h3>
               <ul className="space-y-3 text-gray-600 dark:text-gray-400 dark:text-gray-300">

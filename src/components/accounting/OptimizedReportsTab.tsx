@@ -1219,7 +1219,7 @@ export default function OptimizedReportsTab() {
 
         <div>
 
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white flex items-center space-x-2">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center space-x-2">
 
             <BarChart3 className="w-7 h-7 text-blue-500" />
 
@@ -1306,7 +1306,7 @@ export default function OptimizedReportsTab() {
 
                 </div>
 
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white">
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
 
                   {stat.isPercentage ? `${stat.value}%` : `${stat.value.toLocaleString('fr-FR')} €`}
 
@@ -1568,7 +1568,7 @@ export default function OptimizedReportsTab() {
 
                   <div className="flex items-center space-x-2">
 
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white text-lg">
+                    <h3 className="font-semibold text-gray-900 dark:text-white text-lg">
 
                       {report.name}
 
@@ -1732,7 +1732,7 @@ export default function OptimizedReportsTab() {
 
               {recentReports.map((report) => (
 
-                <div key={report.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors dark:bg-gray-900/50">
+                <div key={report.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
 
                   <div className="flex items-center space-x-3">
 
@@ -1744,7 +1744,7 @@ export default function OptimizedReportsTab() {
 
                     <div>
 
-                      <h4 className="font-medium text-gray-900 dark:text-gray-100 dark:text-white">{report.name}</h4>
+                      <h4 className="font-medium text-gray-900 dark:text-white">{report.name}</h4>
 
                       <p className="text-sm text-gray-600 dark:text-gray-400">
 
@@ -1922,7 +1922,7 @@ export default function OptimizedReportsTab() {
 
                     <div className="flex items-start justify-between">
 
-                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white">
+                      <h4 className="font-semibold text-gray-900 dark:text-white">
 
                         {template.name}
 

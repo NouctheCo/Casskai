@@ -410,7 +410,7 @@ const SystemStatusPage: React.FC = () => {
 
           >
 
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-6 flex items-center">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
 
               <Server className="w-6 h-6 mr-2 text-blue-600" />
 
@@ -456,7 +456,7 @@ const SystemStatusPage: React.FC = () => {
 
                             <div>
 
-                              <h3 className="font-semibold text-gray-900 dark:text-gray-100 dark:text-white">
+                              <h3 className="font-semibold text-gray-900 dark:text-white">
 
                                 {service.name}
 
@@ -480,7 +480,7 @@ const SystemStatusPage: React.FC = () => {
 
                               <div className="text-right">
 
-                                <div className="text-sm font-medium text-gray-900 dark:text-gray-100 dark:text-white">
+                                <div className="text-sm font-medium text-gray-900 dark:text-white">
 
                                   {service.responseTime}ms
 
@@ -552,7 +552,7 @@ const SystemStatusPage: React.FC = () => {
 
           >
 
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-6 flex items-center">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
 
               <AlertCircle className="w-6 h-6 mr-2 text-orange-600" />
 
@@ -570,7 +570,7 @@ const SystemStatusPage: React.FC = () => {
 
                   <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
 
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
 
                     Aucun incident signalé
 
@@ -632,7 +632,7 @@ const SystemStatusPage: React.FC = () => {
 
               <CardContent className="p-6">
 
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-white mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
 
                   Besoin d'aide ?
 

@@ -147,7 +147,7 @@ export const BankAccountsTab: React.FC<BankAccountsTabProps> = ({
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 dark:text-gray-100">
+                          <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                             {account.account_name || 'Sans nom'}
                           </h4>
                           {account.iban && account.bic && (

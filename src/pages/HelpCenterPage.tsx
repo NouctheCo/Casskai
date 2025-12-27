@@ -534,7 +534,7 @@ const HelpCenterPage = () => {
 
       {/* Statistiques d'aide */}
 
-      <div className="py-12 bg-white dark:bg-gray-800 dark:bg-gray-900">
+      <div className="py-12 bg-white dark:bg-gray-900">
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -568,7 +568,7 @@ const HelpCenterPage = () => {
 
                 <stat.icon className="w-12 h-12 text-blue-600 mx-auto mb-4" />
 
-                <div className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-2">
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
 
                   {stat.number}
 
@@ -600,7 +600,7 @@ const HelpCenterPage = () => {
 
           <div className="text-center mb-12">
 
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
 
               Parcourir par catégorie
 
@@ -720,7 +720,7 @@ const HelpCenterPage = () => {
 
       {/* Articles populaires */}
 
-      <div className="py-16 bg-white dark:bg-gray-800 dark:bg-gray-900">
+      <div className="py-16 bg-white dark:bg-gray-900">
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -734,7 +734,7 @@ const HelpCenterPage = () => {
 
             </Badge>
 
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
 
               Articles les plus consultés
 
@@ -770,7 +770,7 @@ const HelpCenterPage = () => {
 
                       <div className="flex-1">
 
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-white group-hover:text-blue-600 transition-colors mb-2">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors mb-2">
 
                           {article.title}
 
@@ -862,7 +862,7 @@ const HelpCenterPage = () => {
 
           <div className="text-center mb-12">
 
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
 
               Besoin d'aide personnalisée ?
 
@@ -904,7 +904,7 @@ const HelpCenterPage = () => {
 
                     </div>
 
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-3">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
 
                       {option.title}
 
@@ -954,13 +954,13 @@ const HelpCenterPage = () => {
 
       {/* Section ressources supplémentaires */}
 
-      <div className="py-16 bg-white dark:bg-gray-800 dark:bg-gray-900">
+      <div className="py-16 bg-white dark:bg-gray-
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
           <div className="text-center mb-12">
 
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 dark:text-white mb-6">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
 
               Ressources supplémentaires
 
