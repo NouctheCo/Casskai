@@ -379,13 +379,23 @@ const EntryFormDialog: React.FC<EntryFormDialogProps> = ({ open, onClose, entry 
   const [uploadFailures, setUploadFailures] = useState<File[]>([]);
   const [persistedEntryId, setPersistedEntryId] = useState<string | null>(null);
 
+  // ✅ Générer automatiquement une référence si elle n'existe pas
+  const generateAutoReference = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const timestamp = Date.now().toString().slice(-4); // 4 derniers chiffres du timestamp
+    return `${year}${month}${day}-${timestamp}`;
+  };
+
   // ✅ FIX: Réinitialiser le formulaire quand on ferme ou ouvre une nouvelle écriture
   useEffect(() => {
     if (!entry && open) {
-      // Nouveau formulaire: réinitialisation complète
+      // Nouveau formulaire: réinitialisation complète avec référence générée
       setFormData({
         date: new Date().toISOString().split('T')[0],
-        reference: '',
+        reference: generateAutoReference(),
         description: '',
         lines: [
           { account: '', description: '', debit: '', credit: '' },
@@ -393,14 +403,11 @@ const EntryFormDialog: React.FC<EntryFormDialogProps> = ({ open, onClose, entry 
         ]
       });
       setSelectedFiles([]);
+    } else if (entry && open) {
+      // Édition: garder la référence existante
+      setSelectedFiles([]);
     }
   }, [open, entry, setFormData]);
-
-  useEffect(() => {
-    if (entry) {
-      setSelectedFiles([]); // on repart de zéro pour éviter les uploads sur le mauvais enregistrement
-    }
-  }, [entry]);
 
 
 
@@ -627,13 +634,13 @@ const EntryFormDialog: React.FC<EntryFormDialogProps> = ({ open, onClose, entry 
 
             <div className="space-y-2">
 
-              <Label htmlFor="reference">Référence</Label>
+              <Label htmlFor="reference">Référence (auto-générée, modifiable)</Label>
 
               <Input
 
                 id="reference"
 
-                placeholder="Ex: FAC-001"
+                placeholder="Générée automatiquement"
 
                 value={formData.reference}
 
