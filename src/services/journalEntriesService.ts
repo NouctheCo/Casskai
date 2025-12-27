@@ -60,6 +60,23 @@ function coerceNumber(value: unknown): number {
 }
 
 class JournalEntriesService {
+  private async generateReferenceNumber(companyId: string): Promise<string> {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    
+    // Récupérer le nombre d'écritures du jour
+    const { count } = await supabase
+      .from('journal_entries')
+      .select('*', { count: 'exact', head: true })
+      .eq('company_id', companyId)
+      .gte('created_at', `${year}-${month}-${day}T00:00:00`);
+    
+    const sequenceNumber = String((count || 0) + 1).padStart(4, '0');
+    return `${year}${month}${day}-${sequenceNumber}`;
+  }
+
   async createJournalEntry(payload: JournalEntryPayload): Promise<ServiceResult<JournalEntryWithItems>> {
     console.log('[JournalEntriesService] createJournalEntry called with:', payload);
 
@@ -126,12 +143,13 @@ class JournalEntriesService {
       }
 
       const entryNumber = payload.entryNumber ?? (await this.generateEntryNumber(payload.companyId, journalId));
+      const referenceNumber = payload.referenceNumber ?? (await this.generateReferenceNumber(payload.companyId));
 
       const entryInsert: JournalEntryInsert = {
         company_id: payload.companyId,
         entry_date: payload.entryDate,
         description: payload.description,
-        reference_number: payload.referenceNumber ?? null,
+        reference_number: referenceNumber,
         journal_id: journalId,
         status: payload.status ?? 'draft',
         entry_number: entryNumber,
@@ -254,10 +272,12 @@ class JournalEntriesService {
 
       console.warn('🔍 [JournalEntriesService] updateJournalEntry - journalId final:', journalId);
 
+      const referenceNumber = payload.referenceNumber ?? existingEntry.reference_number ?? (await this.generateReferenceNumber(payload.companyId));
+
       const entryUpdate: JournalEntryUpdate = {
         entry_date: payload.entryDate,
         description: payload.description,
-        reference_number: payload.referenceNumber ?? null,
+        reference_number: referenceNumber,
         journal_id: journalId ?? undefined, // Convertir null en undefined pour TypeScript
         status: payload.status ?? existingEntry.status ?? 'draft',
         entry_number: payload.entryNumber ?? existingEntry.entry_number,

@@ -909,10 +909,32 @@ const EntryFormDialog: React.FC<EntryFormDialogProps> = ({ open, onClose, entry 
 // Entry Preview Dialog Component
 
 const EntryPreviewDialog = ({ open, onClose, entry }: { open: boolean; onClose: () => void; entry: any }) => {
+  const [attachments, setAttachments] = useState<any[]>([]);
+  const [loadingAttachments, setLoadingAttachments] = useState(false);
+
+  // Charger les pièces jointes quand le dialogue s'ouvre
+  React.useEffect(() => {
+    if (open && entry?.id) {
+      loadAttachments();
+    }
+  }, [open, entry?.id]);
+
+  const loadAttachments = async () => {
+    if (!entry?.id) return;
+    setLoadingAttachments(true);
+    try {
+      const result = await journalEntryAttachmentService.getAttachments(entry.id);
+      if (result.success) {
+        setAttachments(result.data);
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des PJ:', error);
+    } finally {
+      setLoadingAttachments(false);
+    }
+  };
 
   if (!entry) return null;
-
-
 
   const getStatusBadge = (status: string) => {
 
@@ -1081,6 +1103,48 @@ const EntryPreviewDialog = ({ open, onClose, entry }: { open: boolean; onClose: 
           </div>
 
 
+
+          {/* Attachments Section */}
+          {attachments.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Paperclip className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Pièces jointes</h3>
+                <Badge variant="outline">{attachments.length}</Badge>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {attachments.map((attachment: any) => (
+                  <a
+                    key={attachment.id}
+                    href={attachment.file_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <FileText className="w-5 h-5 text-blue-500 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                        {attachment.file_name}
+                      </p>
+                      {attachment.description && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                          {attachment.description}
+                        </p>
+                      )}
+                    </div>
+                    <Eye className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {loadingAttachments && (
+            <div className="flex items-center justify-center py-4">
+              <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+              <span className="ml-2 text-sm text-gray-500">Chargement des pièces jointes...</span>
+            </div>
+          )}
 
           {/* Totals */}
 
@@ -1626,7 +1690,7 @@ export default function OptimizedJournalEntriesTab() {
         companyId: currentCompany.id,
         entryDate: entry.date,
         description: `${entry.description || ''} (copie)`.trim(),
-        referenceNumber: undefined,
+        referenceNumber: undefined, // Laissez la génération automatique créer une nouvelle référence
         status: 'draft',
         items: (entry.lines || []).map((line: any) => ({
           accountId: line.account,
@@ -1644,7 +1708,7 @@ export default function OptimizedJournalEntriesTab() {
 
       toast({
         title: "Écriture dupliquée",
-        description: "Une copie brouillon a été créée (référence générée automatiquement)."
+        description: `Nouvelle référence générée automatiquement: ${result.data.reference_number || 'générée'}`
       });
 
       await loadEntries();
