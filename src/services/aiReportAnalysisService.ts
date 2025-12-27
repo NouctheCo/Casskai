@@ -10,7 +10,9 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
-import OpenAI from 'openai';
+import type OpenAI from 'openai';
+import { supabase } from '@/lib/supabase';
+import { shouldUseEdgeFunction, getEdgeFunctionName, AI_CONFIG, isAIServiceEnabled } from '@/config/ai.config';
 
 // Types communs pour les analyses IA
 export interface AIAnalysisResult {
@@ -110,15 +112,35 @@ export interface InventoryData {
 class AIReportAnalysisService {
   private static instance: AIReportAnalysisService;
   private openai: OpenAI | null = null;
+  private clientPromise: Promise<OpenAI | null> | null = null;
 
   private constructor() {
+  }
+
+  private async getClient(): Promise<OpenAI | null> {
+    if (this.openai) return this.openai;
+    if (this.clientPromise) return this.clientPromise;
+
     const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    if (apiKey && apiKey !== 'sk-your-openai-api-key') {
-      this.openai = new OpenAI({
-        apiKey,
-        dangerouslyAllowBrowser: true
-      });
+    if (!apiKey || apiKey === 'sk-your-openai-api-key') {
+      console.warn('OpenAI API key not configured. Report AI analysis disabled.');
+      return null;
     }
+
+    this.clientPromise = import('openai')
+      .then(({ default: OpenAIImport }) => {
+        this.openai = new OpenAIImport({
+          apiKey,
+          dangerouslyAllowBrowser: true
+        });
+        return this.openai;
+      })
+      .catch((error) => {
+        console.error('Failed to load OpenAI client:', error);
+        return null;
+      });
+
+    return this.clientPromise;
   }
 
   static getInstance(): AIReportAnalysisService {
@@ -132,12 +154,39 @@ class AIReportAnalysisService {
    * Méthode générique d'analyse avec fallback
    */
   private async analyzeWithAI(prompt: string, reportType: string): Promise<string> {
-    if (!this.openai) {
+    // En production, route via Edge Function sécurisée
+    if (shouldUseEdgeFunction('reportAnalysis')) {
+      const fnName = getEdgeFunctionName('reportAnalysis') || 'ai-report-analysis';
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return '';
+
+        const response = await supabase.functions.invoke(fnName, {
+          body: { prompt, reportType }
+        });
+
+        if (response.error) {
+          console.error('Edge Function reportAnalysis error:', response.error);
+          return '';
+        }
+        return (response.data?.result as string) || '';
+      } catch (error) {
+        console.error('Failed calling Edge Function reportAnalysis:', error);
+        return '';
+      }
+    }
+
+    // En développement, utiliser client OpenAI si clé dispo
+    if (!isAIServiceEnabled('reportAnalysis')) {
+      console.warn('AI Report Analysis disabled.');
       return '';
     }
 
+    const client = await this.getClient();
+    if (!client) return '';
+
     try {
-      const completion = await this.openai.chat.completions.create({
+      const completion = await client.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [
           {
@@ -153,8 +202,8 @@ IMPORTANT: Réponds UNIQUEMENT avec le format structuré demandé, sans texte su
             content: prompt
           }
         ],
-        temperature: 0.7,
-        max_tokens: 1500
+        temperature: AI_CONFIG.openai.temperature,
+        max_tokens: AI_CONFIG.openai.maxTokens
       });
 
       return completion.choices[0]?.message?.content || '';

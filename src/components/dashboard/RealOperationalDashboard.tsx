@@ -180,8 +180,8 @@ export const RealOperationalDashboard: React.FC = () => {
     );
   }
 
-  const metrics = realDashboardKpiService.generateMetrics(kpiData);
-  const charts = realDashboardKpiService.generateCharts(kpiData);
+  const metrics = realDashboardKpiService.generateMetrics(kpiData, t);
+  const charts = realDashboardKpiService.generateCharts(kpiData, t);
 
   return (
     <div className="space-y-6 p-6">

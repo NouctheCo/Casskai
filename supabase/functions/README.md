@@ -10,7 +10,87 @@ supabase/functions/
 │   └── index.ts
 ├── create-portal-session/       # Crée une session du portail client
 │   └── index.ts
+├── ai-assistant/                # 🤖 Assistant IA conversationnel
+│   └── index.ts
+├── ai-kpi-analysis/             # 📊 Analyse IA des KPI financiers
+│   └── index.ts
+├── ai-dashboard-analysis/       # 📈 Analyse IA du tableau de bord
+│   └── index.ts
+├── ai-report-analysis/          # 📑 Analyse IA des rapports spécialisés
+│   └── index.ts
 └── README.md
+```
+
+## 🤖 Edge Functions IA
+
+### Sécurité
+- ✅ **Clé OpenAI sécurisée** : Stockée dans Supabase Secrets, jamais exposée au frontend
+- ✅ **Authentification requise** : Toutes les fonctions IA nécessitent un JWT valide
+- ✅ **Vérification d'accès** : Contrôle que l'utilisateur a accès à la company
+- ✅ **Logging** : Toutes les interactions sont loggées dans `ai_interactions`
+
+### 1. `ai-assistant` - Assistant Conversationnel
+**Modèle**: gpt-4-turbo-preview
+**Usage**: Chat intelligent avec contexte entreprise
+
+**Exemple d'appel**:
+```typescript
+const { data, error } = await supabase.functions.invoke('ai-assistant', {
+  body: {
+    query: "Comment créer une facture?",
+    context_type: "invoicing",
+    company_id: "uuid"
+  }
+});
+```
+
+### 2. `ai-kpi-analysis` - Analyse KPI
+**Modèle**: gpt-4o-mini
+**Usage**: Analyse approfondie des indicateurs financiers
+
+**Exemple d'appel**:
+```typescript
+const { data, error } = await supabase.functions.invoke('ai-kpi-analysis', {
+  body: {
+    kpis: { revenues: 150000, expenses: 120000, ... },
+    periodStart: "2025-01-01",
+    periodEnd: "2025-03-31",
+    company_id: "uuid"
+  }
+});
+```
+
+### 3. `ai-dashboard-analysis` - Analyse Dashboard
+**Modèle**: gpt-4o
+**Usage**: Analyse stratégique complète du dashboard
+
+**Exemple d'appel**:
+```typescript
+const { data, error } = await supabase.functions.invoke('ai-dashboard-analysis', {
+  body: {
+    kpiData: { financial: {...}, liquidity: {...}, ... },
+    companyName: "Ma Société",
+    company_id: "uuid",
+    industryType: "Services"
+  }
+});
+```
+
+### 4. `ai-report-analysis` - Analyse Rapports
+**Modèle**: gpt-4o-mini
+**Usage**: Analyse de rapports spécialisés (trésorerie, créances, etc.)
+
+**Exemple d'appel**:
+```typescript
+const { data, error } = await supabase.functions.invoke('ai-report-analysis', {
+  body: {
+    reportType: "cashflow",
+    reportData: { operatingCashFlow: 50000, ... },
+    company_id: "uuid",
+    periodStart: "2025-01-01",
+    periodEnd: "2025-03-31"
+  }
+});
 ```
 
 ## 🚀 Déploiement

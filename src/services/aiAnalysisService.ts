@@ -10,7 +10,9 @@
  * Any unauthorized reproduction, distribution or use is prohibited.
  */
 
-import OpenAI from 'openai';
+import type OpenAI from 'openai';
+import { isAIServiceEnabled, shouldUseEdgeFunction, getEdgeFunctionName } from '@/config/ai.config';
+import { supabase } from '@/lib/supabase';
 
 interface FinancialKPIs {
   revenues: number;
@@ -42,15 +44,35 @@ interface AIAnalysisResult {
 class AIAnalysisService {
   private static instance: AIAnalysisService;
   private openai: OpenAI | null = null;
+  private clientPromise: Promise<OpenAI | null> | null = null;
 
   private constructor() {
+  }
+
+  private async getClient(): Promise<OpenAI | null> {
+    if (this.openai) return this.openai;
+    if (this.clientPromise) return this.clientPromise;
+
     const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    if (apiKey && apiKey !== 'sk-your-openai-api-key') {
-      this.openai = new OpenAI({
-        apiKey,
-        dangerouslyAllowBrowser: true // Note: En production, appeler depuis le backend
-      });
+    if (!apiKey || apiKey === 'sk-your-openai-api-key') {
+      console.warn('OpenAI API key not configured. Financial KPI AI analysis disabled.');
+      return null;
     }
+
+    this.clientPromise = import('openai')
+      .then(({ default: OpenAIImport }) => {
+        this.openai = new OpenAIImport({
+          apiKey,
+          dangerouslyAllowBrowser: true // Note: En production, appeler depuis le backend
+        });
+        return this.openai;
+      })
+      .catch((error) => {
+        console.error('Failed to load OpenAI client:', error);
+        return null;
+      });
+
+    return this.clientPromise;
   }
 
   static getInstance(): AIAnalysisService {
@@ -63,16 +85,28 @@ class AIAnalysisService {
   /**
    * Génère une analyse IA complète des KPI financiers
    */
-  async analyzeFinancialKPIs(kpis: FinancialKPIs, periodStart: string, periodEnd: string): Promise<AIAnalysisResult> {
-    // Si OpenAI n'est pas configuré, retourner une analyse par défaut
-    if (!this.openai) {
+  async analyzeFinancialKPIs(kpis: FinancialKPIs, periodStart: string, periodEnd: string, companyId?: string): Promise<AIAnalysisResult> {
+    // Vérifier si le service est activé
+    if (!isAIServiceEnabled('kpiAnalysis')) {
+      console.warn('AI KPI Analysis disabled.');
+      return this.generateDefaultAnalysis(kpis);
+    }
+
+    // Utiliser Edge Function en production (sécurisé)
+    if (shouldUseEdgeFunction('kpiAnalysis')) {
+      return this.analyzeViaEdgeFunction(kpis, periodStart, periodEnd, companyId);
+    }
+
+    // En développement, utiliser OpenAI directement
+    const client = await this.getClient();
+    if (!client) {
       return this.generateDefaultAnalysis(kpis);
     }
 
     try {
       const prompt = this.buildAnalysisPrompt(kpis, periodStart, periodEnd);
 
-      const completion = await this.openai.chat.completions.create({
+      const completion = await client.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [
           {
@@ -99,6 +133,68 @@ Tu te concentres sur les aspects critiques et fournis des conseils pratiques.`
       return this.parseAIResponse(response, kpis);
     } catch (error) {
       console.error('Erreur lors de l\'analyse IA:', error);
+      return this.generateDefaultAnalysis(kpis);
+    }
+  }
+
+  /**
+   * Analyse via Edge Function Supabase (production)
+   */
+  private async analyzeViaEdgeFunction(
+    kpis: FinancialKPIs,
+    periodStart: string,
+    periodEnd: string,
+    companyId?: string
+  ): Promise<AIAnalysisResult> {
+    try {
+      const edgeFunctionName = getEdgeFunctionName('kpiAnalysis');
+      if (!edgeFunctionName) {
+        throw new Error('Edge Function not configured');
+      }
+
+      // Récupérer company_id depuis le contexte utilisateur si non fourni
+      if (!companyId) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          throw new Error('User not authenticated');
+        }
+        // Récupérer la première company de l'utilisateur
+        const { data: userCompanies } = await supabase
+          .from('user_companies')
+          .select('company_id')
+          .eq('user_id', user.id)
+          .eq('is_active', true)
+          .limit(1)
+          .single();
+
+        if (!userCompanies) {
+          throw new Error('No active company found');
+        }
+        companyId = userCompanies.company_id;
+      }
+
+      const response = await supabase.functions.invoke(edgeFunctionName, {
+        body: {
+          kpis,
+          periodStart,
+          periodEnd,
+          company_id: companyId
+        }
+      });
+
+      if (response.error) {
+        console.error('Edge Function error:', response.error);
+        throw new Error(response.error.message || 'Edge Function failed');
+      }
+
+      if (!response.data) {
+        throw new Error('Empty response from Edge Function');
+      }
+
+      return response.data as AIAnalysisResult;
+
+    } catch (error) {
+      console.error('Error calling Edge Function:', error);
       return this.generateDefaultAnalysis(kpis);
     }
   }

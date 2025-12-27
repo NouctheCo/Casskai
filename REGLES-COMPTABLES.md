@@ -273,6 +273,26 @@ Les comptes de classe 4 sont **MIXTES** :
 - **43** (Sécurité sociale) : Nature CRÉDITRICE → Dettes sociales
 - **44** (État, TVA) : MIXTE selon le sous-compte
 
+### Comptes « flexibles » (aucun avertissement côté Débit/Crédit)
+Certains comptes sont **couramment mouvementés** au débit comme au crédit selon l'opération. Afin d'éviter des avertissements inutiles, CassKai les traite comme **flexibles** :
+
+- **512** Banque (et sous-comptes)
+- **53** Caisse
+- **411** Clients (auxiliaires)
+- **401** Fournisseurs (auxiliaires)
+- **467** Autres débiteurs/créditeurs
+- **44*** État, TVA et assimilés
+
+Ces comptes ne déclenchent **pas d'avertissement** pour l'utilisation du côté **Débit/Crédit**. Les règles bloquantes continuent de s'appliquer (pas de débit+crédit sur la même ligne, écriture équilibrée, etc.).
+
+#### Personnalisation par standard ou société
+La liste des préfixes « flexibles » est **configurable** côté code si besoin.
+
+- API : `AccountingRulesService.setFlexibleAccountPrefixes([ '512', '411', '401', ... ])`
+- Lecture actuelle (par défaut) : `['512','53','411','401','467','44']`
+
+Cette personnalisation permet d'adapter les règles aux pratiques spécifiques (PCG, SYSCOHADA, conventions internes) **sans modifier la logique de validation**.
+
 ### Conformité FEC
 La numérotation automatique respecte les exigences du FEC :
 - ✅ Numérotation séquentielle

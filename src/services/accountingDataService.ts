@@ -835,11 +835,11 @@ export class AccountingDataService {
       // Get unpaid invoices (clients - accounts receivable)
       const { data: unpaidInvoices } = await supabase
         .from('invoices')
-        .select('total_ttc, due_date')
+        .select('total_incl_tax, due_date')
         .eq('company_id', companyId)
         .neq('status', 'paid');
 
-      const unpaidInvoicesAmount = (unpaidInvoices || []).reduce((sum, inv) => sum + (Number(inv.total_ttc) || 0), 0);
+      const unpaidInvoicesAmount = (unpaidInvoices || []).reduce((sum, inv) => sum + (Number(inv.total_incl_tax) || 0), 0);
       const unpaidInvoicesCount = (unpaidInvoices || []).length;
 
       // Calculate overdue invoices (aging > 0 days)
@@ -850,7 +850,7 @@ export class AccountingDataService {
         return dueDate < today;
       });
       const overdueInvoicesCount = overdueInvoices.length;
-      const overdueAmount = overdueInvoices.reduce((sum, inv) => sum + (Number(inv.total_ttc) || 0), 0);
+      const overdueAmount = overdueInvoices.reduce((sum, inv) => sum + (Number(inv.total_incl_tax) || 0), 0);
 
       // Get unpaid purchases (fournisseurs - accounts payable)
       const { data: unpaidPurchases } = await supabase
@@ -995,12 +995,12 @@ export class AccountingDataService {
     try {
       const companyId = params?.companyId || await this.getCurrentCompanyId();
 
-      // Build query
+      // Build query - Include all active statuses (validated, posted, imported, draft)
       let query = supabase
         .from('journal_entries')
         .select('journal_id, journals(code, name)')
         .eq('company_id', companyId)
-        .in('status', ['posted', 'imported']);
+        .in('status', ['validated', 'posted', 'imported', 'draft', 'pending']);
 
       // Apply period filters if provided
       if (params?.periodStart) {

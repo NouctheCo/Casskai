@@ -837,6 +837,81 @@ export default function AccountingPageOptimized() {
     setShowExportModal(true);
   };
 
+  const handleRefresh = async () => {
+    setIsLoading(true);
+    try {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user?.user?.id) return;
+
+      const { data: companies } = await supabase
+        .from('companies')
+        .select('id')
+        .eq('owner_id', user.user.id)
+        .limit(1);
+
+      if (!companies || companies.length === 0) {
+        setIsLoading(false);
+        return;
+      }
+
+      const companyId = companies[0].id;
+      setCurrentCompanyId(companyId);
+
+      const now = new Date();
+      let periodStart: string;
+      let periodEnd: string;
+
+      switch (selectedPeriod) {
+        case 'current-month':
+          periodStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+          periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+          break;
+        case 'current-quarter': {
+          const currentQuarter = Math.floor(now.getMonth() / 3);
+          periodStart = new Date(now.getFullYear(), currentQuarter * 3, 1).toISOString().split('T')[0];
+          periodEnd = new Date(now.getFullYear(), (currentQuarter + 1) * 3, 0).toISOString().split('T')[0];
+          break;
+        }
+        case 'current-year':
+          periodStart = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
+          periodEnd = new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0];
+          break;
+        case 'custom':
+          periodStart = customStartDate || new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
+          periodEnd = customEndDate || new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+          break;
+        default:
+          periodStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+          periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+      }
+
+      const stats = await accountingDataService.getAccountingStatsWithTrends({
+        periodStart,
+        periodEnd,
+        companyId
+      });
+
+      setAccountingData(stats as AccountingData);
+
+      setJournalDistributionLoading(true);
+      const distribution = await accountingDataService.getJournalDistribution({
+        periodStart,
+        periodEnd,
+        companyId
+      });
+      setJournalDistribution(distribution);
+      setJournalDistributionLoading(false);
+
+      toast.success(t('accounting.refreshSuccess', 'Données actualisées'));
+    } catch (error) {
+      console.error('Erreur actualisation:', error);
+      toast.error(t('accounting.refreshError', 'Erreur lors de l\'actualisation'));
+      setJournalDistributionLoading(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
 
 
   if (isLoading) {
@@ -972,7 +1047,7 @@ export default function AccountingPageOptimized() {
             </div>
           )}
 
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleRefresh}>
 
             <RefreshCw className="w-4 h-4 mr-2" />
 

@@ -179,12 +179,36 @@ class AuditService {
         event_timestamp: new Date().toISOString()
       };
 
-      const { error } = await supabase
-        .from('audit_logs')
-        .insert(enrichedEntry);
+      // En production avec RLS, préférer une Edge Function sécurisée
+      try {
+        // Get current session token for Authorization header
+        const { data: { session } } = await supabase.auth.getSession();
+        const headers: Record<string, string> = {};
+        if (session?.access_token) {
+          headers['Authorization'] = `Bearer ${session.access_token}`;
+        }
 
-      if (error) {
-        logger.error('AuditService: Failed to log audit entry', error, { enrichedEntry });
+        const response = await supabase.functions.invoke('audit-log', {
+          body: enrichedEntry,
+          headers
+        });
+        if (response.error) {
+          // Fallback: tentative directe (si politique autorise) sinon log local
+          const { error } = await supabase
+            .from('audit_logs')
+            .insert(enrichedEntry);
+          if (error) {
+            logger.error('AuditService: Failed to log audit entry via function and direct insert', error, { enrichedEntry });
+          }
+        }
+      } catch (fnErr) {
+        // Fallback: tentative directe (si politique autorise) sinon log local
+        const { error } = await supabase
+          .from('audit_logs')
+          .insert(enrichedEntry);
+        if (error) {
+          logger.error('AuditService: Exception invoking audit function and direct insert failed', fnErr, { enrichedEntry });
+        }
       }
     } catch (error) {
       // Ne jamais bloquer l'opération principale

@@ -66,7 +66,7 @@ export const AgingAnalysisTab: React.FC<AgingAnalysisTabProps> = ({ companyId })
       // Charger les factures clients impayées
       const { data: invoices, error: invError } = await supabase
         .from('invoices')
-        .select('id, invoice_date, due_date, total_ttc, paid_amount, status')
+        .select('id, invoice_date, due_date, total_incl_tax, paid_amount, status')
         .eq('company_id', companyId)
         .eq('invoice_type', 'invoice')
         .neq('status', 'paid');
@@ -76,7 +76,7 @@ export const AgingAnalysisTab: React.FC<AgingAnalysisTabProps> = ({ companyId })
       // Charger les achats impayés
       const { data: purchases, error: purchError } = await supabase
         .from('purchases')
-        .select('id, purchase_date, due_date, total_ttc, paid_amount, status')
+        .select('id, purchase_date, due_date, total_amount, paid_amount, status')
         .eq('company_id', companyId)
         .neq('status', 'paid');
 
@@ -86,7 +86,7 @@ export const AgingAnalysisTab: React.FC<AgingAnalysisTabProps> = ({ companyId })
       const calculatedBuckets: AgingBucket[] = AGING_BUCKETS.map(bucket => {
         // Factures dans ce bucket
         const invoicesInBucket = (invoices || []).filter(inv => {
-          const balance = (inv.total_ttc || 0) - (inv.paid_amount || 0);
+          const balance = (inv.total_incl_tax || 0) - (inv.paid_amount || 0);
           if (balance <= 0) return false;
 
           if (!inv.due_date) return bucket.min === -Infinity;
@@ -101,7 +101,7 @@ export const AgingAnalysisTab: React.FC<AgingAnalysisTabProps> = ({ companyId })
 
         // Achats dans ce bucket
         const purchasesInBucket = (purchases || []).filter(purch => {
-          const balance = (purch.total_ttc || 0) - (purch.paid_amount || 0);
+          const balance = (purch.total_amount || 0) - (purch.paid_amount || 0);
           if (balance <= 0) return false;
 
           if (!purch.due_date) return bucket.min === -Infinity;
@@ -115,12 +115,12 @@ export const AgingAnalysisTab: React.FC<AgingAnalysisTabProps> = ({ companyId })
         });
 
         const receivables = invoicesInBucket.reduce(
-          (sum, inv) => sum + ((inv.total_ttc || 0) - (inv.paid_amount || 0)),
+          (sum, inv) => sum + ((inv.total_incl_tax || 0) - (inv.paid_amount || 0)),
           0
         );
 
         const payables = purchasesInBucket.reduce(
-          (sum, purch) => sum + ((purch.total_ttc || 0) - (purch.paid_amount || 0)),
+          (sum, purch) => sum + ((purch.total_amount || 0) - (purch.paid_amount || 0)),
           0
         );
 

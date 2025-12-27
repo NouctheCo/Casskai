@@ -4,8 +4,10 @@
  * Tous droits réservés - All rights reserved
  */
 
-import OpenAI from 'openai';
+import type OpenAI from 'openai';
 import type { RealKPIData } from './realDashboardKpiService';
+import { supabase } from '@/lib/supabase';
+import { isAIServiceEnabled, shouldUseEdgeFunction, getEdgeFunctionName, AI_CONFIG } from '@/config/ai.config';
 
 export interface AIAnalysisResult {
   executive_summary: string;
@@ -25,17 +27,32 @@ export interface AIAnalysisResult {
  */
 export class AIDashboardAnalysisService {
   private openai: OpenAI | null = null;
+  private clientPromise: Promise<OpenAI | null> | null = null;
 
-  constructor() {
+  private async getClient(): Promise<OpenAI | null> {
+    if (this.openai) return this.openai;
+    if (this.clientPromise) return this.clientPromise;
+
     const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    if (apiKey) {
-      this.openai = new OpenAI({
-        apiKey,
-        dangerouslyAllowBrowser: true, // Pour utilisation côté client
-      });
-    } else {
+    if (!apiKey) {
       console.warn('OpenAI API key not configured. AI analysis will be disabled.');
+      return null;
     }
+
+    this.clientPromise = import('openai')
+      .then(({ default: OpenAIImport }) => {
+        this.openai = new OpenAIImport({
+          apiKey,
+          dangerouslyAllowBrowser: true, // Pour utilisation côté client
+        });
+        return this.openai;
+      })
+      .catch((error) => {
+        console.error('Failed to load OpenAI client:', error);
+        return null;
+      });
+
+    return this.clientPromise;
   }
 
   /**
@@ -46,15 +63,45 @@ export class AIDashboardAnalysisService {
     companyName: string,
     industryType?: string
   ): Promise<AIAnalysisResult> {
-    if (!this.openai) {
+    // En production, utiliser la Edge Function sécurisée
+    if (shouldUseEdgeFunction('dashboardAnalysis')) {
+      const fnName = getEdgeFunctionName('dashboardAnalysis') || 'ai-dashboard-analysis';
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return this.getFallbackAnalysis(kpiData);
+
+        const prompt = this.buildAnalysisPrompt(kpiData, companyName, industryType);
+        const response = await supabase.functions.invoke(fnName, {
+          body: { prompt, companyName, industryType }
+        });
+
+        if (response.error) {
+          console.error('Edge Function dashboardAnalysis error:', response.error);
+          return this.getFallbackAnalysis(kpiData);
+        }
+        return (response.data?.analysis as AIAnalysisResult) || this.getFallbackAnalysis(kpiData);
+      } catch (error) {
+        console.error('Failed calling Edge Function dashboardAnalysis:', error);
+        return this.getFallbackAnalysis(kpiData);
+      }
+    }
+
+    // En développement, utiliser client OpenAI si clé dispo
+    if (!isAIServiceEnabled('dashboardAnalysis')) {
+      console.warn('AI Dashboard Analysis disabled.');
+      return this.getFallbackAnalysis(kpiData);
+    }
+
+    const client = await this.getClient();
+    if (!client) {
       return this.getFallbackAnalysis(kpiData);
     }
 
     try {
       const prompt = this.buildAnalysisPrompt(kpiData, companyName, industryType);
 
-      const completion = await this.openai.chat.completions.create({
-        model: 'gpt-4o', // Utiliser le meilleur modèle disponible
+      const completion = await client.chat.completions.create({
+        model: AI_CONFIG.openai.model,
         messages: [
           {
             role: 'system',
@@ -67,8 +114,8 @@ Tu dois répondre en français et structurer ta réponse au format JSON selon le
             content: prompt,
           },
         ],
-        temperature: 0.7,
-        max_tokens: 2000,
+        temperature: AI_CONFIG.openai.temperature,
+        max_tokens: AI_CONFIG.openai.maxTokens,
         response_format: { type: 'json_object' },
       });
 

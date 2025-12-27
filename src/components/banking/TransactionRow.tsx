@@ -17,9 +17,9 @@ interface BankTransaction {
 interface Account {
   id: string;
   account_number: string;
-  name: string;
-  type: string;
-  class: number;
+  account_name: string;
+  account_type: string;
+  account_class: number;
 }
 
 interface TransactionRowProps {
@@ -110,7 +110,7 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
             <div className="flex items-center gap-1 mt-1">
               <Sparkles className="h-3 w-3 text-yellow-500" />
               <span className="text-xs text-yellow-600 dark:text-yellow-400">
-                Suggestion: {suggestedAccount.account_number} - {suggestedAccount.name}
+                Suggestion: {suggestedAccount.account_number} - {suggestedAccount.account_name}
               </span>
             </div>
           )}
@@ -136,7 +136,7 @@ export const TransactionRow: React.FC<TransactionRowProps> = ({
                 <optgroup key={group} label={group}>
                   {accs.map((acc) => (
                     <option key={acc.id} value={acc.id}>
-                      {acc.account_number} - {acc.name}
+                      {acc.account_number} - {acc.account_name}
                     </option>
                   ))}
                 </optgroup>

@@ -1008,7 +1008,24 @@
     },
     "operational": {
       "title": "Operational Dashboard",
-      "subtitle": "Real-time view of your financial performance"
+      "subtitle": "Real-time view of your financial performance",
+      "metrics": {
+        "revenue_ytd": "Year-to-Date Revenue",
+        "profit_margin": "Profit Margin",
+        "cash_runway": "Cash Runway",
+        "total_invoices": "Invoices Issued",
+        "pending_invoices": "Pending Invoices",
+        "cash_balance": "Cash Balance"
+      },
+      "charts": {
+        "monthly_revenue": "Monthly Revenue Evolution",
+        "top_clients": "Top 5 Clients",
+        "expense_breakdown": "Expense Distribution"
+      },
+      "periods": {
+        "vs_previous_year": "vs previous year",
+        "month": "Month {{month}}"
+      }
     },
     "aiAnalysis": {
       "title": "AI Analysis & Recommendations",
@@ -1804,7 +1821,23 @@
     "total": "Total",
     "unbalanced": "Unbalanced",
     "untitledJournal": "Untitled journal",
-    "update": "Update"
+    "update": "Update",
+    "attachments": "Attachments",
+    "add_attachment": "Add attachment",
+    "upload": "Upload",
+    "download": "Download",
+    "delete_attachment": "Delete",
+    "no_attachments": "No attachments",
+    "attachment_added": "Attachment added successfully",
+    "attachment_deleted": "Attachment deleted",
+    "attachment_error": "Error managing attachment",
+    "file_size": "Size",
+    "file_type": "Type",
+    "file_name": "File name",
+    "uploaded_at": "Uploaded at",
+    "confirm_delete": "Are you sure you want to delete this attachment?",
+    "max_file_size": "Max size: 50 MB",
+    "allowed_formats": "Allowed formats: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, WebP, TXT"
   },
   "journals": {
     "accountingJournals": "Accounting Journals",
@@ -4268,7 +4301,8 @@
         "pending": "Pending"
       },
       "actions": {
-        "reconcile": "Reconcile"
+        "reconcile": "Reconcile",
+        "retry": "Send back to categorization"
       },
       "pagination": "Showing first {{shown}} transactions out of {{total}}"
     }

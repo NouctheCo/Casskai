@@ -22,8 +22,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 
 import { useToast } from '@/components/ui/use-toast';
 import { journalEntriesService } from '@/services/journalEntriesService';
+import { journalEntryAttachmentService } from '@/services/journalEntryAttachmentService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useJournalEntries } from '@/hooks/useJournalEntries';
+import JournalEntryAttachments from '@/components/accounting/JournalEntryAttachments';
 
 import {
 
@@ -49,7 +51,11 @@ import {
 
   Zap,
 
-  RefreshCw
+  RefreshCw,
+  Copy,
+  Paperclip,
+  Upload,
+  Loader2
 
 } from 'lucide-react';
 
@@ -60,6 +66,7 @@ interface EntryLine {
   description: string;
   debit: string;
   credit: string;
+  accountLabel?: string;
 }
 
 interface EntryFormData {
@@ -271,11 +278,17 @@ function EntryLineForm({ line, index, updateLine, removeLine, canRemove, account
 
       </div>
 
-      {/* ✅ Afficher les avertissements comptables */}
+      {/* ✅ Afficher les avertissements ou infos comptables */}
       {validation.warning && (
         <div className="md:col-span-5 text-sm text-yellow-600 dark:text-yellow-400 flex items-start gap-2">
           <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
           <span>{validation.warning}</span>
+        </div>
+      )}
+      {!validation.warning && validation.info && (
+        <div className="md:col-span-5 text-sm text-blue-600 dark:text-blue-400 flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+          <span>{validation.info}</span>
         </div>
       )}
 
@@ -347,11 +360,24 @@ function EntryTotals({ totals }) {
 
 
 
-const EntryFormDialog = ({ open, onClose, entry = null, onSave, accounts }) => {
+interface EntryFormDialogProps {
+  open: boolean;
+  onClose: () => void;
+  entry?: any | null;
+  onSave: (data: any) => Promise<{ success: boolean; entryId?: string; failedFiles?: File[] }>;
+  accounts: any[];
+  companyId: string;
+}
+
+const EntryFormDialog: React.FC<EntryFormDialogProps> = ({ open, onClose, entry = null, onSave, accounts, companyId }) => {
 
   const { toast } = useToast();
 
   const { formData, setFormData } = useEntryFormState(entry);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [uploadFailures, setUploadFailures] = useState<File[]>([]);
+  const [persistedEntryId, setPersistedEntryId] = useState<string | null>(null);
 
   // ✅ FIX: Réinitialiser le formulaire quand on ferme ou ouvre une nouvelle écriture
   useEffect(() => {
@@ -366,8 +392,15 @@ const EntryFormDialog = ({ open, onClose, entry = null, onSave, accounts }) => {
           { account: '', description: '', debit: '', credit: '' }
         ]
       });
+      setSelectedFiles([]);
     }
   }, [open, entry, setFormData]);
+
+  useEffect(() => {
+    if (entry) {
+      setSelectedFiles([]); // on repart de zéro pour éviter les uploads sur le mauvais enregistrement
+    }
+  }, [entry]);
 
 
 
@@ -441,48 +474,113 @@ const EntryFormDialog = ({ open, onClose, entry = null, onSave, accounts }) => {
 
   const totals = calculateTotals();
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    // Validations UX renforcées
+    const filledLines = formData.lines.filter((line) => {
+      const d = parseFloat(line.debit) || 0;
+      const c = parseFloat(line.credit) || 0;
+      return d > 0 || c > 0;
+    });
 
-    if (!totals.isBalanced) {
-
+    if (filledLines.length < 2) {
       toast({
-
-        title: "Écriture non équilibrée",
-
-        description: "Le total des débits doit être égal au total des crédits.",
-
+        title: "Écriture incomplète",
+        description: "Au moins deux lignes avec montants non nuls sont requises.",
         variant: "destructive"
-
       });
-
       return;
-
     }
 
-    onSave({
+    const missingAccount = filledLines.some((line) => !line.account);
+    if (missingAccount) {
+      toast({
+        title: "Compte manquant",
+        description: "Chaque ligne avec un montant doit avoir un compte sélectionné.",
+        variant: "destructive"
+      });
+      return;
+    }
 
-      ...formData,
-
-      id: entry?.id || Date.now(),
-
-      status: 'draft',
-
-      totalDebit: totals.totalDebit,
-
-      totalCredit: totals.totalCredit
-
+    const invalidBothSides = filledLines.some((line) => {
+      const d = parseFloat(line.debit) || 0;
+      const c = parseFloat(line.credit) || 0;
+      return d > 0 && c > 0;
     });
+    if (invalidBothSides) {
+      toast({
+        title: "Ligne invalide",
+        description: "Une ligne ne peut pas avoir simultanément un débit et un crédit.",
+        variant: "destructive"
+      });
+      return;
+    }
 
-    toast({
+    if (!totals.isBalanced) {
+      toast({
+        title: "Écriture non équilibrée",
+        description: "Le total des débits doit être égal au total des crédits.",
+        variant: "destructive"
+      });
+      return;
+    }
 
-      title: entry ? "Écriture modifiée" : "Écriture créée",
+    setSaving(true);
+    try {
+      const result = await onSave({
+        ...formData,
+        totalDebit: totals.totalDebit,
+        totalCredit: totals.totalCredit,
+        selectedFiles
+      });
 
-      description: "L'écriture a été enregistrée avec succès."
+      if (result.success) {
+        setPersistedEntryId(result.entryId ?? null);
+        const failures = result.failedFiles ?? [];
+        if (failures.length > 0) {
+          setUploadFailures(failures);
+          // Ne pas fermer : permettre le retry inline
+        } else {
+          setSelectedFiles([]);
+          onClose();
+        }
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Impossible d'enregistrer l'écriture.";
+      toast({
+        title: "Erreur",
+        description: message,
+        variant: "destructive"
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
 
-    });
-
-    onClose();
-
+  const retryFailedUploads = async () => {
+    if (!persistedEntryId || uploadFailures.length === 0) return;
+    const remaining: File[] = [];
+    for (const file of uploadFailures) {
+      try {
+        await journalEntryAttachmentService.uploadAttachment(persistedEntryId, companyId, file);
+      } catch (e) {
+        remaining.push(file);
+      }
+    }
+    setUploadFailures(remaining);
+    if (remaining.length === 0) {
+      toast({
+        title: 'Pièces jointes téléversées',
+        description: 'Tous les fichiers ont été téléversés avec succès.'
+      });
+      setSelectedFiles([]);
+      onClose();
+    } else {
+      toast({
+        title: 'Certaines pièces ont encore échoué',
+        description: remaining.map(f => f.name).join(', '),
+        variant: 'destructive'
+      });
+    }
   };
 
   return (
@@ -623,6 +721,157 @@ const EntryFormDialog = ({ open, onClose, entry = null, onSave, accounts }) => {
 
           </Card>
 
+          {/* Pièces jointes associées */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Paperclip className="w-4 h-4" />
+                  Pièces jointes
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" title="Taille maximale par fichier">
+                    Max {Math.round(journalEntryAttachmentService.getMaxFileSize() / 1024 / 1024)} Mo
+                  </Badge>
+                  <label
+                    htmlFor="journal-entry-upload"
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md border cursor-pointer hover:bg-muted"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Ajouter
+                  </label>
+                </div>
+                <input
+                  id="journal-entry-upload"
+                  type="file"
+                  multiple
+                  className="hidden"
+                  accept={(function(){
+                    const types = journalEntryAttachmentService.getAllowedTypes();
+                    const extSet = new Set<string>();
+                    types.forEach(t => {
+                      switch (t) {
+                        case 'application/pdf': extSet.add('.pdf'); break;
+                        case 'image/jpeg': extSet.add('.jpg'); extSet.add('.jpeg'); break;
+                        case 'image/png': extSet.add('.png'); break;
+                        case 'image/webp': extSet.add('.webp'); break;
+                        case 'application/msword': extSet.add('.doc'); break;
+                        case 'application/vnd.ms-excel': extSet.add('.xls'); break;
+                        case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': extSet.add('.docx'); break;
+                        case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': extSet.add('.xlsx'); break;
+                        case 'text/plain': extSet.add('.txt'); break;
+                        default: break;
+                      }
+                    });
+                    return Array.from(extSet).join(',');
+                  })()}
+                  onChange={(e) => {
+                    if (e.target.files) {
+                      const newFiles = Array.from(e.target.files);
+                      setSelectedFiles(prev => [...prev, ...newFiles]);
+                      // Reset input pour permettre de re-sélectionner le même fichier
+                      e.target.value = '';
+                    }
+                  }}
+                />
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-xs text-muted-foreground">
+                Les fichiers sont uploadés au moment de l'enregistrement. Taille max {Math.round(journalEntryAttachmentService.getMaxFileSize() / 1024 / 1024)} Mo.
+                Formats autorisés: {(function(){
+                  const types = journalEntryAttachmentService.getAllowedTypes();
+                  const labels = new Set<string>();
+                  types.forEach(t => {
+                    switch (t) {
+                      case 'application/pdf': labels.add('PDF'); break;
+                      case 'image/jpeg': labels.add('JPG/JPEG'); break;
+                      case 'image/png': labels.add('PNG'); break;
+                      case 'image/webp': labels.add('WEBP'); break;
+                      case 'application/msword': labels.add('DOC'); break;
+                      case 'application/vnd.ms-excel': labels.add('XLS'); break;
+                      case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': labels.add('DOCX'); break;
+                      case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': labels.add('XLSX'); break;
+                      case 'text/plain': labels.add('TXT'); break;
+                      default: break;
+                    }
+                  });
+                  return Array.from(labels).join(', ');
+                })()}
+              </p>
+              <div className="text-xs text-muted-foreground">
+                Taille totale sélectionnée: {(
+                  selectedFiles.reduce((s, f) => s + f.size, 0) / 1024 / 1024
+                ).toFixed(2)} Mo
+              </div>
+              {selectedFiles.length === 0 ? (
+                <div className="text-sm text-muted-foreground">Aucun fichier sélectionné.</div>
+              ) : (
+                <div className="space-y-2">
+                  {selectedFiles.map((file, idx) => (
+                    <div key={idx} className="flex items-center justify-between rounded-md border px-3 py-2 text-sm">
+                      <span className="truncate mr-3">{file.name} ({(file.size / 1024 / 1024).toFixed(2)} Mo)</span>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setSelectedFiles(selectedFiles.filter((_, i) => i !== idx))}
+                      >
+                        Supprimer
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Aperçu/gestion des PJ déjà associées (édition) */}
+          {entry?.id && companyId && (
+            <JournalEntryAttachments
+              journalEntryId={entry.id}
+              companyId={companyId}
+              readOnly={false}
+            />
+          )}
+
+          {/* Erreurs de téléversement et action de retry */}
+          {uploadFailures.length > 0 && (
+            <div className="space-y-2 mt-4">
+              <div className="rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">
+                <p className="font-medium mb-2">Certaines pièces n'ont pas été téléversées :</p>
+                <div className="space-y-2">
+                  {uploadFailures.map((f, idx) => (
+                    <div key={`${f.name}-${idx}`} className="flex items-center justify-between rounded-md border px-3 py-2">
+                      <span className="truncate mr-3">{f.name}</span>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          // Retirer ce fichier de la liste des échecs et des sélectionnés
+                          setUploadFailures(prev => prev.filter((_, i) => i !== idx));
+                          setSelectedFiles(prev => prev.filter(sf => sf !== f));
+                        }}
+                        title="Retirer ce fichier de la tentative"
+                      >
+                        Retirer
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={retryFailedUploads}>
+                  Réessayer l'upload
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => setUploadFailures([])}>
+                  Ignorer pour l'instant
+                </Button>
+              </div>
+            </div>
+          )}
+
         </div>
 
         <DialogFooter>
@@ -633,9 +882,13 @@ const EntryFormDialog = ({ open, onClose, entry = null, onSave, accounts }) => {
 
           </Button>
 
-          <Button onClick={handleSave} disabled={!totals.isBalanced}>
+          <Button onClick={handleSave} disabled={!totals.isBalanced || saving}>
 
-            <CheckCircle className="w-4 h-4 mr-2" />
+            {saving ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <CheckCircle className="w-4 h-4 mr-2" />
+            )}
 
             {entry ? 'Modifier' : 'Enregistrer'}
 
@@ -771,7 +1024,7 @@ const EntryPreviewDialog = ({ open, onClose, entry }: { open: boolean; onClose: 
 
           <div className="space-y-4">
 
-            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 dark:text-gray-100">Lignes d'écriture</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Lignes d'écriture</h3>
 
             <div className="rounded-md border">
 
@@ -799,7 +1052,7 @@ const EntryPreviewDialog = ({ open, onClose, entry }: { open: boolean; onClose: 
 
                     <TableRow key={index}>
 
-                      <TableCell className="font-mono">{line.account}</TableCell>
+                      <TableCell className="font-mono">{line.accountLabel || line.account}</TableCell>
 
                       <TableCell>{line.description}</TableCell>
 
@@ -907,7 +1160,7 @@ const EntryPreviewDialog = ({ open, onClose, entry }: { open: boolean; onClose: 
 
 // Entry Row Component
 
-const EntryRow = ({ entry, onEdit, onDelete, onView, onValidate }: { entry: any; onEdit: (entry: any) => void; onDelete: (entry: any) => void; onView: (entry: any) => void; onValidate: (entry: any) => void }) => {
+const EntryRow = ({ entry, onEdit, onDelete, onView, onValidate, onDuplicate }: { entry: any; onEdit: (entry: any) => void; onDelete: (entry: any) => void; onView: (entry: any) => void; onValidate: (entry: any) => void; onDuplicate: (entry: any) => void }) => {
 
   const [expanded, setExpanded] = useState(false);
 
@@ -1034,6 +1287,18 @@ const EntryRow = ({ entry, onEdit, onDelete, onView, onValidate }: { entry: any;
 
             </Button>
 
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => userCanEdit && onDuplicate(entry)}
+              disabled={!userCanEdit}
+              title="Dupliquer l'écriture"
+            >
+
+              <Copy className="w-4 h-4" />
+
+            </Button>
+
             <Button variant="ghost" size="sm" onClick={async () => {
 
               if (!userCanDelete) return;
@@ -1107,7 +1372,7 @@ export default function OptimizedJournalEntriesTab() {
   const { toast } = useToast();
 
   const { currentCompany } = useAuth();
-  const { createJournalEntry, loading: _hookLoading, error: _hookError, getAccountsList } = useJournalEntries(currentCompany?.id || '');
+  const { loading: _hookLoading, error: _hookError, getAccountsList } = useJournalEntries(currentCompany?.id || '');
   const [entries, setEntries] = useState<any[]>([]);
   const [_loading, setLoading] = useState(true);
   const [accounts, setAccounts] = useState<any[]>([]);
@@ -1154,12 +1419,20 @@ export default function OptimizedJournalEntriesTab() {
           totalDebit: (entry.journal_entry_lines || []).reduce((sum, item) => sum + (Number(item.debit_amount) || 0), 0),
           totalCredit: (entry.journal_entry_lines || []).reduce((sum, item) => sum + (Number(item.credit_amount) || 0), 0),
           status: entry.status === 'posted' ? 'validated' : 'draft',
-          lines: (entry.journal_entry_lines || []).map(item => ({
-            account: item.chart_of_accounts?.account_number || '',
-            description: item.description || '',
-            debit: item.debit_amount?.toString() || '',
-            credit: item.credit_amount?.toString() || ''
-          }))
+          lines: (entry.journal_entry_lines || []).map(item => {
+            const accountId = item.account_id || item.chart_of_accounts?.id || '';
+            const accountLabel = item.chart_of_accounts
+              ? `${item.chart_of_accounts.account_number || ''} - ${item.chart_of_accounts.account_name || ''}`.trim()
+              : '';
+
+            return {
+              account: accountId,
+              accountLabel,
+              description: item.description || '',
+              debit: item.debit_amount?.toString() || '',
+              credit: item.credit_amount?.toString() || ''
+            };
+          })
         }));
         setEntries(transformedEntries);
       }
@@ -1248,7 +1521,7 @@ export default function OptimizedJournalEntriesTab() {
 
 
 
-  const handleSaveEntry = async (entryData: any) => {
+  const handleSaveEntry = async (entryData: any): Promise<{ success: boolean; entryId?: string; failedFiles?: File[] }> => {
     console.log('[OptimizedJournalEntriesTab] handleSaveEntry called with:', entryData);
 
     if (!currentCompany?.id) {
@@ -1257,49 +1530,73 @@ export default function OptimizedJournalEntriesTab() {
         description: "Aucune entreprise sélectionnée",
         variant: "destructive"
       });
-      return;
+      return { success: false };
     }
 
     try {
-      // Convertir les données du formulaire au format attendu par le hook
-      const journalEntryData = {
-        date: entryData.date,
+      const payload = {
+        companyId: currentCompany.id,
+        entryDate: entryData.date,
         description: entryData.description,
-        reference: entryData.reference,
+        referenceNumber: entryData.reference,
+        status: 'draft', // Modification repasse toujours en brouillon
         items: entryData.lines.map((line: any) => ({
-          account_id: line.account, // Maintenant line.account contient déjà l'UUID
+          accountId: line.account,
           description: line.description,
-          debit_amount: parseFloat(line.debit) || 0,
-          credit_amount: parseFloat(line.credit) || 0
+          debitAmount: parseFloat(line.debit) || 0,
+          creditAmount: parseFloat(line.credit) || 0
         }))
       };
 
-      console.log('[OptimizedJournalEntriesTab] Calling createJournalEntry with:', journalEntryData);
+      const isEdit = Boolean(editingEntry?.id);
+      const entryId = editingEntry?.id as string | undefined;
 
-      const result = await createJournalEntry(journalEntryData);
+      const result = isEdit && entryId
+        ? await journalEntriesService.updateJournalEntry(entryId, payload)
+        : await journalEntriesService.createJournalEntry(payload);
 
-      if (result) {
-        console.log('[OptimizedJournalEntriesTab] Entry created successfully:', result);
-        toast({
-          title: "Écriture créée",
-          description: "L'écriture a été enregistrée avec succès en base de données."
-        });
-
-        // Recharger les données depuis Supabase
-        await loadEntries();
-
-        setShowEntryForm(false);
-        setEditingEntry(null);
-      } else {
-        throw new Error('Échec de la création de l\'écriture');
+      if (!result.success) {
+        throw new Error('error' in result ? result.error : 'Unknown error');
       }
+
+      const persistedEntryId = isEdit && entryId ? entryId : result.data.id;
+
+      // Upload attachments if any were selected in the dialog
+      const files: File[] = entryData.selectedFiles || [];
+      if (files.length > 0) {
+        const failedFiles: File[] = [];
+        for (const file of files) {
+          try {
+            await journalEntryAttachmentService.uploadAttachment(persistedEntryId, currentCompany.id, file);
+          } catch (uploadError) {
+            console.error('Failed to upload attachment:', uploadError);
+            failedFiles.push(file);
+          }
+        }
+        if (failedFiles.length > 0) {
+          return { success: true, entryId: persistedEntryId, failedFiles };
+        }
+      }
+
+      toast({
+        title: isEdit ? "Écriture mise à jour" : "Écriture créée",
+        description: isEdit
+          ? "L'écriture a été mise à jour sans créer de doublon."
+          : "L'écriture a été enregistrée avec succès."
+      });
+
+      await loadEntries();
+      setShowEntryForm(false);
+      setEditingEntry(null);
+      return { success: true, entryId: persistedEntryId };
     } catch (error) {
-      console.error('[OptimizedJournalEntriesTab] Error creating entry:', error);
+      console.error('[OptimizedJournalEntriesTab] Error saving entry:', error);
       toast({
         title: "Erreur",
-        description: error instanceof Error ? error.message : "Impossible de créer l'écriture",
+        description: error instanceof Error ? error.message : "Impossible d'enregistrer l'écriture",
         variant: "destructive"
       });
+      return { success: false };
     }
   };
 
@@ -1311,6 +1608,54 @@ export default function OptimizedJournalEntriesTab() {
 
     setShowEntryForm(true);
 
+  };
+
+
+  const handleDuplicateEntry = async (entry: any) => {
+    if (!currentCompany?.id) {
+      toast({
+        title: "Erreur",
+        description: "Aucune entreprise sélectionnée",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const payload = {
+        companyId: currentCompany.id,
+        entryDate: entry.date,
+        description: `${entry.description || ''} (copie)`.trim(),
+        referenceNumber: undefined,
+        status: 'draft',
+        items: (entry.lines || []).map((line: any) => ({
+          accountId: line.account,
+          description: line.description,
+          debitAmount: parseFloat(line.debit) || 0,
+          creditAmount: parseFloat(line.credit) || 0
+        }))
+      };
+
+      const result = await journalEntriesService.createJournalEntry(payload);
+
+      if (!result.success) {
+        throw new Error('error' in result ? result.error : 'Unknown error');
+      }
+
+      toast({
+        title: "Écriture dupliquée",
+        description: "Une copie brouillon a été créée (référence générée automatiquement)."
+      });
+
+      await loadEntries();
+    } catch (error) {
+      console.error('[OptimizedJournalEntriesTab] Error duplicating entry:', error);
+      toast({
+        title: "Erreur",
+        description: error instanceof Error ? error.message : "La duplication a échoué",
+        variant: "destructive"
+      });
+    }
   };
 
 
@@ -1669,6 +2014,8 @@ export default function OptimizedJournalEntriesTab() {
 
                     onValidate={handleValidateEntry}
 
+                    onDuplicate={handleDuplicateEntry}
+
                   />
 
                 ))}
@@ -1704,6 +2051,8 @@ export default function OptimizedJournalEntriesTab() {
         onSave={handleSaveEntry}
 
         accounts={accounts}
+
+        companyId={currentCompany?.id || ''}
 
       />
 

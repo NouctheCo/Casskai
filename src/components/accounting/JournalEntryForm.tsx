@@ -48,6 +48,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 
 import { CalendarIcon, AlertCircle, Loader2, PlusCircle, Trash2 } from 'lucide-react';
 
+import JournalEntryAttachments from '@/components/accounting/JournalEntryAttachments';
+
 
 
 import { useAuth } from '@/contexts/AuthContext';
@@ -265,6 +267,10 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
   const [localJournals, setLocalJournals] = useState<MinimalJournal[]>([]);
 
   const [localAccounts, setLocalAccounts] = useState<MinimalAccount[]>([]);
+
+  const [createdEntryId, setCreatedEntryId] = useState<string | null>(null);
+
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
 
 
@@ -560,7 +566,7 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
 
 
 
-        await onSubmit({
+        const entryData = {
 
           id: initialData?.id,
 
@@ -578,9 +584,47 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
 
           items: normalizedItems,
 
-        });
+        };
 
 
+
+        await onSubmit(entryData);
+
+        
+
+        // Get the entry ID (from initialData or newly created)
+        const entryId = initialData?.id || (entryData.id as string);
+
+        // Upload files if any were selected
+        if (selectedFiles.length > 0 && entryId && currentCompanyId) {
+
+          const { uploadAttachment } = await import('@/services/journalEntryAttachmentService');
+
+          for (const file of selectedFiles) {
+
+            try {
+
+              await uploadAttachment(entryId, currentCompanyId, file);
+
+            } catch (uploadError) {
+
+              console.error('Failed to upload attachment:', uploadError);
+
+              // Continue with other files even if one fails
+
+            }
+
+          }
+
+        }
+
+        
+
+        // Clear selected files after successful submission
+
+        setSelectedFiles([]);
+
+        
 
         if (!initialData?.id) {
 
@@ -1150,7 +1194,73 @@ const JournalEntryForm: React.FC<JournalEntryFormProps> = ({ initialData, onSubm
 
         </div>
 
+        {/* File Upload Section */}
+        <div className="space-y-4 border-t pt-6">
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              {t('attachments.attachments', { defaultValue: 'Pièces jointes' })}
+            </label>
+            <p className="text-xs text-gray-500 mb-3">
+              {t('attachments.max_file_size', { defaultValue: 'Taille maximale: 50 MB par fichier. Formats acceptés: PDF, Word, Excel, images' })}
+            </p>
+            <div className="flex items-center gap-2 mb-3">
+              <input
+                type="file"
+                multiple
+                id="file-input"
+                className="hidden"
+                onChange={(e) => {
+                  if (e.target.files) {
+                    setSelectedFiles(Array.from(e.target.files));
+                  }
+                }}
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.webp,.txt"
+              />
+              <label
+                htmlFor="file-input"
+                className="px-4 py-2 bg-blue-600 text-white rounded-md cursor-pointer hover:bg-blue-700 transition-colors text-sm"
+              >
+                {t('attachments.add_attachment', { defaultValue: 'Ajouter une pièce jointe' })}
+              </label>
+            </div>
+            
+            {/* Display selected files */}
+            {selectedFiles.length > 0 && (
+              <div className="border rounded-md p-3 bg-blue-50">
+                <p className="text-sm font-medium mb-2">
+                  {selectedFiles.length} fichier(s) sélectionné(s) - seront uploadés lors de l'enregistrement
+                </p>
+                <ul className="space-y-1">
+                  {selectedFiles.map((file, idx) => (
+                    <li key={idx} className="flex items-center justify-between text-sm">
+                      <span className="text-gray-700">
+                        {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedFiles(selectedFiles.filter((_, i) => i !== idx));
+                        }}
+                        className="text-red-600 hover:text-red-800 text-xs"
+                      >
+                        Supprimer
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
 
+        {/* Attachments Section - Show if entry exists or was just created */}
+        {(initialData?.id || createdEntryId) && (
+          <JournalEntryAttachments
+            journalEntryId={initialData?.id || createdEntryId!}
+            companyId={currentCompanyId || ''}
+            readOnly={false}
+          />
+        )}
 
         <div className="flex justify-end space-x-2">
 

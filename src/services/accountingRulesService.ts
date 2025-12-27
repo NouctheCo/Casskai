@@ -190,6 +190,36 @@ export const JOURNAL_ENTRY_TEMPLATES = {
  */
 export class AccountingRulesService {
   /**
+   * Prefixes for accounts that are commonly flexible (both sides used)
+   * Includes bank, cash, key auxiliaries and state accounts.
+   */
+  private static readonly FLEXIBLE_ACCOUNT_PREFIXES = [
+    '512', // Banque
+    '53',  // Caisse
+    '411', // Clients (auxiliaires)
+    '401', // Fournisseurs (auxiliaires)
+    '467', // Autres comptes débiteurs ou créditeurs
+    '44',  // État, TVA et assimilés (généralement mixtes)
+  ];
+
+  /**
+   * Permet de surcharger la liste des préfixes « flexibles »
+   * (optionnel, pour adapter aux pratiques d'une société ou d'un référentiel)
+   */
+  static setFlexibleAccountPrefixes(prefixes: string[]) {
+    if (Array.isArray(prefixes) && prefixes.every(p => typeof p === 'string')) {
+      // Créer une copie pour éviter les mutations extérieures
+      (this as any).FLEXIBLE_ACCOUNT_PREFIXES = [...prefixes];
+    }
+  }
+
+  /**
+   * Retourne la liste courante des préfixes « flexibles »
+   */
+  static getFlexibleAccountPrefixes(): string[] {
+    return [...(this as any).FLEXIBLE_ACCOUNT_PREFIXES];
+  }
+  /**
    * Récupère la classe d'un compte depuis son numéro
    */
   static getAccountClass(accountNumber: string): AccountClass | null {
@@ -227,7 +257,10 @@ export class AccountingRulesService {
     accountNumber: string,
     debitAmount: number,
     creditAmount: number
-  ): { valid: boolean; warning?: string; suggestion?: string } {
+  ): { valid: boolean; warning?: string; suggestion?: string; info?: string } {
+    // Comptes pour lesquels débit et crédit sont régulièrement utilisés sans avertissement
+    const isFlexibleAccount = this.FLEXIBLE_ACCOUNT_PREFIXES.some(prefix => accountNumber.startsWith(prefix));
+
     const nature = this.getAccountNature(accountNumber);
     const accountClass = this.getAccountClass(accountNumber);
 
@@ -248,6 +281,11 @@ export class AccountingRulesService {
       };
     }
 
+    // Comptes flexibles: accepter sans avertissement côté débit/crédit
+    if (isFlexibleAccount) {
+      return { valid: true };
+    }
+
     // Comptes mixtes : tout est permis
     if (nature === AccountNature.MIXED) {
       return { valid: true };
@@ -259,8 +297,8 @@ export class AccountingRulesService {
         const rule = accountClass ? ACCOUNT_RULES[accountClass] : null;
         return {
           valid: true,
-          warning: `⚠️ Attention: Ce compte est habituellement au DÉBIT (${rule?.description})`,
-          suggestion: `Ce type de compte (classe ${accountClass}) est généralement débité. Vérifiez votre saisie.`,
+          info: `Info: Ce compte est généralement débité (${rule?.description}).`,
+          suggestion: `Ce type de compte (classe ${accountClass}) est habituellement débité. Vérifiez votre saisie.`,
         };
       }
     }
@@ -271,8 +309,8 @@ export class AccountingRulesService {
         const rule = accountClass ? ACCOUNT_RULES[accountClass] : null;
         return {
           valid: true,
-          warning: `⚠️ Attention: Ce compte est habituellement au CRÉDIT (${rule?.description})`,
-          suggestion: `Ce type de compte (classe ${accountClass}) est généralement crédité. Vérifiez votre saisie.`,
+          info: `Info: Ce compte est généralement crédité (${rule?.description}).`,
+          suggestion: `Ce type de compte (classe ${accountClass}) est habituellement crédité. Vérifiez votre saisie.`,
         };
       }
     }

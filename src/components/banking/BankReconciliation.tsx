@@ -42,16 +42,18 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
   const [filterStatus, setFilterStatus] = useState('all');
   const [showDetails, setShowDetails] = useState(false);
   const [reconciliationSummary, setReconciliationSummary] = useState<any>(null);
+  const [reconciliationInProgress, setReconciliationInProgress] = useState<{[key: string]: boolean}>({});
+  const [reconciledTransactions, setReconciledTransactions] = useState<Set<string>>(new Set());
 
   // Données simulées pour les transactions bancaires et écritures comptables
-  const [bankTransactions] = useState([
+  const [bankTransactions, setBankTransactions] = useState([
     {
       id: 'bt_1',
       date: '2024-01-15',
       amount: -1250.00,
       description: 'PAIEMENT CB AMAZON FR',
       reference: 'CB****1234',
-      reconciled: false,
+      is_reconciled: false,
       suggested_matches: ['ae_5', 'ae_12']
     },
     {
@@ -60,7 +62,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
       amount: 2500.00,
       description: 'VIR CLIENT ABC SARL',
       reference: 'VIR240114001',
-      reconciled: false,
+      is_reconciled: false,
       suggested_matches: ['ae_3']
     },
     {
@@ -69,7 +71,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
       amount: -450.75,
       description: 'CHEQUE N°1234567',
       reference: 'CHQ1234567',
-      reconciled: true,
+      is_reconciled: true,
       matched_entry_id: 'ae_8'
     },
     {
@@ -78,7 +80,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
       amount: -89.90,
       description: 'PRLV ELECTRICITE DE FRANCE',
       reference: 'PRLV240112EDF',
-      reconciled: false,
+      is_reconciled: false,
       suggested_matches: ['ae_15']
     }
   ]);
@@ -135,13 +137,13 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
   // Calculs des statistiques
   const reconciliationStats = useMemo(() => {
     const totalBankTransactions = bankTransactions.length;
-    const reconciledTransactions = bankTransactions.filter(t => t.reconciled).length;
+    const reconciledTransactions = bankTransactions.filter(t => t.is_reconciled).length;
     const pendingTransactions = totalBankTransactions - reconciledTransactions;
     const reconciliationRate = totalBankTransactions > 0 ? (reconciledTransactions / totalBankTransactions) * 100 : 0;
 
     const totalAmount = bankTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
     const reconciledAmount = bankTransactions
-      .filter(t => t.reconciled)
+      .filter(t => t.is_reconciled)
       .reduce((sum, t) => sum + Math.abs(t.amount), 0);
     const pendingAmount = totalAmount - reconciledAmount;
 
@@ -155,6 +157,35 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
       pendingAmount
     };
   }, [bankTransactions]);
+
+  const markTransactionAsReconciled = (transactionId: string, matchedEntryId?: string) => {
+    setReconciledTransactions(prev => new Set([...prev, transactionId]));
+    setBankTransactions(prev => prev.map(tx =>
+      tx.id === transactionId
+        ? { ...tx, is_reconciled: true, matched_entry_id: matchedEntryId ?? tx.matched_entry_id }
+        : tx
+    ));
+  };
+
+  const sendToCategorization = (transactionId: string) => {
+    // Remet la transaction dans l'état "En attente" pour la recatégoriser
+    setReconciledTransactions(prev => {
+      const clone = new Set([...prev]);
+      clone.delete(transactionId);
+      return clone;
+    });
+
+    setBankTransactions(prev => prev.map(tx =>
+      tx.id === transactionId
+        ? { ...tx, is_reconciled: false, matched_entry_id: undefined }
+        : tx
+    ));
+
+    toast({
+      title: "Transaction renvoyée en catégorisation",
+      description: "Vous pouvez la recatégoriser dans l'onglet Catégorisation",
+    });
+  };
 
   // Filtrage des transactions
   const filteredTransactions = useMemo(() => {
@@ -170,9 +201,9 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
     if (filterStatus !== 'all') {
       filtered = filtered.filter(t => {
         switch (filterStatus) {
-          case 'reconciled': return t.reconciled;
-          case 'pending': return !t.reconciled;
-          case 'suggested': return !t.reconciled && t.suggested_matches && t.suggested_matches.length > 0;
+          case 'reconciled': return t.is_reconciled;
+          case 'pending': return !t.is_reconciled;
+          case 'suggested': return !t.is_reconciled && t.suggested_matches && t.suggested_matches.length > 0;
           default: return true;
         }
       });
@@ -245,12 +276,17 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
   // Validation d'une correspondance
   const validateMatch = async (bankTransactionId: string, accountingEntryId: string) => {
     try {
-      // Simulation de validation
-      await new Promise(resolve => setTimeout(resolve, 500));
+      setReconciliationInProgress(prev => ({ ...prev, [`${bankTransactionId}-${accountingEntryId}`]: true }));
+      
+      // Simulation d'un appel au service de réconciliation
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Marquer la transaction comme réconciliée (mise à jour des compteurs et des listes)
+      markTransactionAsReconciled(bankTransactionId, accountingEntryId);
 
       toast({
-        title: "Correspondance validée",
-        description: "Transaction réconciliée avec succès",
+        title: "✅ Correspondance validée",
+        description: `Transaction ${bankTransactionId} réconciliée avec l'écriture ${accountingEntryId}`,
         variant: "default"
       });
 
@@ -262,9 +298,48 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
     } catch (error) {
       console.error('Erreur lors de la validation:', error instanceof Error ? error.message : String(error));
       toast({
-        title: "Erreur",
-        description: "Échec de la validation",
+        title: "❌ Erreur",
+        description: "Échec de la réconciliation",
         variant: "destructive"
+      });
+    } finally {
+      setReconciliationInProgress(prev => {
+        const newState = { ...prev };
+        delete newState[`${bankTransactionId}-${accountingEntryId}`];
+        return newState;
+      });
+    }
+  };
+
+  // Réconcilier une transaction spécifique de l'onglet Historique
+  const reconcileTransaction = async (transactionId: string) => {
+    try {
+      setReconciliationInProgress(prev => ({ ...prev, [transactionId]: true }));
+      
+      // Simulation d'un appel au service de réconciliation
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Marquer la transaction comme réconciliée (mise à jour des compteurs et des listes)
+      markTransactionAsReconciled(transactionId);
+
+      toast({
+        title: "✅ Réconciliation réussie",
+        description: `La transaction a été réconciliée avec succès`,
+        variant: "default"
+      });
+
+    } catch (error) {
+      console.error('Erreur lors de la réconciliation:', error instanceof Error ? error.message : String(error));
+      toast({
+        title: "❌ Erreur",
+        description: "Échec de la réconciliation",
+        variant: "destructive"
+      });
+    } finally {
+      setReconciliationInProgress(prev => {
+        const newState = { ...prev };
+        delete newState[transactionId];
+        return newState;
       });
     }
   };
@@ -806,7 +881,7 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                       className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors dark:bg-gray-900/50"
                     >
                       <div className="flex items-center space-x-4 flex-1">
-                        <div className={`w-3 h-3 rounded-full ${transaction.reconciled ? 'bg-green-500' : 'bg-orange-500'}`} />
+                        <div className={`w-3 h-3 rounded-full ${transaction.is_reconciled ? 'bg-green-500' : 'bg-orange-500'}`} />
                         
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-1">
@@ -829,20 +904,58 @@ const BankReconciliation = ({ currentEnterprise: _currentEnterprise, bankAccount
                       </div>
 
                       <div className="flex items-center space-x-3 ml-4">
-                        <Badge className={getStatusColor(transaction.reconciled, (transaction.suggested_matches?.length ?? 0) > 0)}>
-                          {transaction.reconciled ? 'Réconciliée' :
+                        <Badge className={getStatusColor(transaction.is_reconciled, (transaction.suggested_matches?.length ?? 0) > 0)}>
+                          {transaction.is_reconciled ? 'Réconciliée' :
                            (transaction.suggested_matches?.length ?? 0) > 0 ? 'Suggestions' : 'En attente'}
                         </Badge>
 
-                        {!transaction.reconciled && (transaction.suggested_matches?.length ?? 0) > 0 && (
+                        {!transaction.is_reconciled && (transaction.suggested_matches?.length ?? 0) > 0 && (
                           <Badge variant="secondary" className="text-xs">
                             {transaction.suggested_matches?.length} suggestion{(transaction.suggested_matches?.length ?? 0) > 1 ? 's' : ''}
                           </Badge>
                         )}
                         
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
+                        {!reconciledTransactions.has(transaction.id) && !transaction.is_reconciled && (
+                          <Button 
+                            variant="outline"
+                            size="sm"
+                            onClick={() => reconcileTransaction(transaction.id)}
+                            disabled={reconciliationInProgress[transaction.id]}
+                            className="text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20"
+                            title="Réconcilier cette transaction"
+                          >
+                            {reconciliationInProgress[transaction.id] ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Réconciliation...
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle className="h-4 w-4 mr-2" />
+                                Réconcilier
+                              </>
+                            )}
+                          </Button>
+                        )}
+
+                        {(reconciledTransactions.has(transaction.id) || transaction.is_reconciled) && (
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Rapprochée
+                            </Badge>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => sendToCategorization(transaction.id)}
+                              className="text-orange-600 hover:bg-orange-50 dark:text-orange-300 dark:hover:bg-orange-900/20"
+                              title="Renvoyer en catégorisation"
+                            >
+                              <RefreshCw className="h-4 w-4 mr-2" />
+                              Renvoyer
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </motion.div>
                   ))}

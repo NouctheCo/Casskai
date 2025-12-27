@@ -27,9 +27,9 @@ interface BankTransaction {
 interface Account {
   id: string;
   account_number: string;
-  name: string;
-  type: string;
-  class: number;
+  account_name: string;
+  account_type: string;
+  account_class: number;
 }
 
 interface CategorizationRule {
@@ -66,6 +66,9 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
   const [selectedTransactions, setSelectedTransactions] = useState<Set<string>>(new Set());
   const [bulkAccount, setBulkAccount] = useState<string>('');
   const [showRuleModal, setShowRuleModal] = useState(false);
+  const [bankingAccount, setBankingAccount] = useState<Account | null>(null);
+  const [bankingAccountOptions, setBankingAccountOptions] = useState<Account[]>([]);
+  const [selectedBankingAccount, setSelectedBankingAccount] = useState<string>('');
 
   useEffect(() => {
     loadData();
@@ -97,11 +100,30 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
       // Charger les comptes comptables
       const { data: accData, error: accError } = await supabase
         .from('chart_of_accounts')
-        .select('id, account_number, name, type, class')
+        .select('id, account_number, account_name, account_type, account_class')
         .eq('company_id', currentCompany.id)
+        .eq('is_active', true)
         .order('account_number');
       if (accError) throw accError;
       setAccounts(accData || []);
+
+      // 🏦 Charger les comptes 512 (Banque) et chercher ceux auxiliarisés du client
+      if (accData) {
+        const bankingAccounts = accData.filter(
+          (a) => a.account_number?.startsWith('512')
+        );
+        setBankingAccountOptions(bankingAccounts);
+
+        // Si un seul compte 512, le sélectionner automatiquement
+        if (bankingAccounts.length === 1) {
+          setBankingAccount(bankingAccounts[0]);
+          setSelectedBankingAccount(bankingAccounts[0].id);
+        } else if (bankingAccounts.length > 1) {
+          // Chercher un compte auxiliarisé du client si possible
+          // Pour l'instant, laisser l'user choisir
+          console.log('📋 Plusieurs comptes 512 trouvés, l\'utilisateur doit choisir');
+        }
+      }
 
       // Charger les règles de catégorisation
       const { data: rulesData, error: rulesError } = await supabase
@@ -162,6 +184,12 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
   ) => {
     if (!currentCompany?.id) return;
 
+    // Vérifier qu'un compte 512 est sélectionné
+    if (!selectedBankingAccount) {
+      toast.error('Veuillez sélectionner un compte bancaire (512)');
+      return;
+    }
+
     const transaction = transactions.find((t) => t.id === transactionId);
     if (!transaction) return;
 
@@ -169,16 +197,46 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
     if (!account) return;
 
     try {
-      // 1. Créer l'écriture comptable
+      // 1. Récupérer ou créer le journal de banque
+      let { data: bankJournals } = await supabase
+        .from('journals')
+        .select('id')
+        .eq('company_id', currentCompany.id)
+        .eq('type', 'bank')
+        .limit(1);
+
+      let bankJournal;
+
+      if (!bankJournals || bankJournals.length === 0) {
+        // Créer automatiquement un journal de banque
+        const { data: newJournal, error: createError } = await supabase
+          .from('journals')
+          .insert({
+            company_id: currentCompany.id,
+            code: 'BQ',
+            name: 'Banque',
+            type: 'bank',
+            is_active: true
+          })
+          .select('id')
+          .single();
+
+        if (createError || !newJournal) {
+          throw new Error('Impossible de créer le journal de banque');
+        }
+        bankJournal = newJournal;
+      } else {
+        bankJournal = bankJournals[0];
+      }
+
+      // 2. Créer l'écriture comptable
       const journalEntry = {
         company_id: currentCompany.id,
-        date: transaction.transaction_date,
+        journal_id: bankJournal.id,
+        entry_date: transaction.transaction_date,
         description: customDescription || transaction.description,
-        reference: transaction.reference,
-        journal_type: 'BQ', // Journal de banque
-        status: 'validated',
-        source: 'bank_import',
-        source_id: transactionId,
+        reference_number: transaction.reference,
+        status: 'draft',  // 📋 Statut brouillon pour permettre les modifications en comptabilité
       };
 
       const { data: entry, error: entryError } = await supabase
@@ -189,71 +247,110 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
 
       if (entryError) throw entryError;
 
-      // 2. Récupérer l'ID du compte banque
-      const bankAccountDbId = await getAccountIdByNumber(bankAccountNumber);
-      if (!bankAccountDbId) {
-        throw new Error('Compte bancaire comptable non trouvé');
+      console.log('✅ Écriture créée:', entry.id);
+
+      // 3. Récupérer les comptes comptables
+      const selectedAccount = accounts.find(a => a.id === accountId);
+      const bankAccountData = accounts.find(a => a.id === selectedBankingAccount);
+
+      if (!selectedAccount || !bankAccountData) {
+        throw new Error('Compte introuvable dans le plan comptable');
       }
 
-      // 3. Créer les lignes d'écriture
-      const items = [];
+      const lines = [];
 
-      if (transaction.type === 'debit') {
+      // Déterminer si c'est une dépense (montant négatif) ou une recette (montant positif)
+      const absAmount = Math.abs(transaction.amount);
+      const isExpense = transaction.amount < 0;
+
+      if (isExpense) {
         // Dépense : Débit compte charge, Crédit compte banque
-        items.push({
+        lines.push({
           journal_entry_id: entry.id,
+          company_id: currentCompany.id,
           account_id: accountId,
-          debit_amount: transaction.amount,
+          debit_amount: absAmount,
           credit_amount: 0,
           description: transaction.description,
+          line_order: 1,
+          account_number: selectedAccount.account_number,
+          account_name: selectedAccount.account_name,
         });
-        items.push({
+        lines.push({
           journal_entry_id: entry.id,
-          account_id: bankAccountDbId,
+          company_id: currentCompany.id,
+          account_id: selectedBankingAccount,
           debit_amount: 0,
-          credit_amount: transaction.amount,
+          credit_amount: absAmount,
           description: transaction.description,
+          line_order: 2,
+          account_number: bankAccountData.account_number,
+          account_name: bankAccountData.account_name,
         });
       } else {
         // Recette : Débit compte banque, Crédit compte produit
-        items.push({
+        lines.push({
           journal_entry_id: entry.id,
-          account_id: bankAccountDbId,
-          debit_amount: transaction.amount,
+          company_id: currentCompany.id,
+          account_id: selectedBankingAccount,
+          debit_amount: absAmount,
           credit_amount: 0,
           description: transaction.description,
+          line_order: 1,
+          account_number: bankAccountData.account_number,
+          account_name: bankAccountData.account_name,
         });
-        items.push({
+        lines.push({
           journal_entry_id: entry.id,
+          company_id: currentCompany.id,
           account_id: accountId,
           debit_amount: 0,
-          credit_amount: transaction.amount,
+          credit_amount: absAmount,
           description: transaction.description,
+          line_order: 2,
+          account_number: selectedAccount.account_number,
+          account_name: selectedAccount.account_name,
         });
       }
 
-      const { error: itemsError } = await supabase.from('journal_entry_items').insert(items);
-      if (itemsError) throw itemsError;
+      console.log('📝 Insertion des lignes d\'écriture:', lines);
+      const { data: insertedLines, error: linesError } = await supabase
+        .from('journal_entry_lines')
+        .insert(lines)
+        .select();
 
-      // 4. Mettre à jour le statut de la transaction
+      if (linesError) {
+        console.error('❌ Erreur insertion lignes:', linesError);
+        throw new Error(`Erreur insertion lignes: ${linesError.message}`);
+      }
+
+      console.log('✅ Lignes insérées:', insertedLines);
+
+      // 4. Mettre à jour le statut de la transaction (reconciled = catégorisée et validée)
       const { error: updateError } = await supabase
         .from('bank_transactions')
         .update({
-          status: 'categorized',
+          status: 'reconciled',
+          is_reconciled: true,
           matched_entry_id: entry.id,
+          reconciliation_date: new Date().toISOString(),
         })
         .eq('id', transactionId);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('❌ Erreur mise à jour transaction:', updateError);
+        throw updateError;
+      }
 
-      toast.success(t('success.categorized', 'Transaction catégorisée avec succès'));
+      console.log('✅ Transaction mise à jour avec succès');
+      toast.success(t('success.categorized', 'Transaction catégorisée et rapprochée avec succès'));
 
       // Rafraîchir la liste
-      loadData();
+      await loadData();
       onRefresh?.();
-    } catch (error) {
-      console.error('Erreur catégorisation:', error);
-      toast.error(t('errors.categorization', 'Erreur lors de la catégorisation'));
+    } catch (error: any) {
+      console.error('❌ Erreur catégorisation:', error);
+      toast.error(error?.message || t('errors.categorization', 'Erreur lors de la catégorisation'));
     }
   };
 
@@ -267,9 +364,9 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
       .select('id')
       .eq('company_id', currentCompany?.id)
       .eq('account_number', accountNumber)
-      .single();
+      .limit(1);
 
-    return data?.id || null;
+    return (data && data.length > 0) ? data[0].id : null;
   };
 
   // Catégorisation en masse
@@ -348,14 +445,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
     return tx.description.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
-  // Grouper les comptes par classe pour le select
-  const groupedAccounts = accounts.reduce((groups, account) => {
-    const classLabel = getClassLabel(account.class);
-    if (!groups[classLabel]) groups[classLabel] = [];
-    groups[classLabel].push(account);
-    return groups;
-  }, {} as Record<string, Account[]>);
-
+  // Fonction pour obtenir le label d'une classe comptable
   const getClassLabel = (classNum: number): string => {
     const labels: Record<number, string> = {
       1: '1 - Capitaux',
@@ -370,6 +460,14 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
     };
     return labels[classNum] || `Classe ${classNum}`;
   };
+
+  // Grouper les comptes par classe pour le select
+  const groupedAccounts = accounts.reduce((groups, account) => {
+    const classLabel = getClassLabel(account.account_class);
+    if (!groups[classLabel]) groups[classLabel] = [];
+    groups[classLabel].push(account);
+    return groups;
+  }, {} as Record<string, Account[]>);
 
   if (loading) {
     return (
@@ -409,6 +507,35 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
 
       {/* Barre d'outils */}
       <div className="flex items-center justify-between gap-4 bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+        {/* Sélection du compte bancaire 512 */}
+        {bankingAccountOptions.length > 1 && (
+          <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Compte bancaire:</span>
+            <select
+              value={selectedBankingAccount}
+              onChange={(e) => {
+                setSelectedBankingAccount(e.target.value);
+                const selected = bankingAccountOptions.find(a => a.id === e.target.value);
+                setBankingAccount(selected || null);
+              }}
+              className="px-3 py-1 border border-blue-300 dark:border-blue-600 rounded bg-white dark:bg-gray-800 text-sm"
+            >
+              <option value="">Sélectionner...</option>
+              {bankingAccountOptions.map((acc) => (
+                <option key={acc.id} value={acc.id}>
+                  {acc.account_number} - {acc.account_name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {bankingAccountOptions.length === 0 && (
+          <div className="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
+            ⚠️ Aucun compte bancaire (512) trouvé. Créez-en un en comptabilité.
+          </div>
+        )}
+        
         {/* Filtres */}
         <div className="flex gap-2">
           <button
@@ -469,7 +596,7 @@ export const TransactionCategorization: React.FC<TransactionCategorizationProps>
                 <optgroup key={group} label={group}>
                   {accs.map((acc) => (
                     <option key={acc.id} value={acc.id}>
-                      {acc.account_number} - {acc.name}
+                      {acc.account_number} - {acc.account_name}
                     </option>
                   ))}
                 </optgroup>

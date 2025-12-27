@@ -406,22 +406,38 @@ export class RealDashboardKpiService {
 
   /**
    * Génère les métriques pour le dashboard
+   * @param kpiData Données KPI calculées
+   * @param t Fonction de traduction i18next (optionnelle pour backward compatibility)
    */
-  generateMetrics(kpiData: RealKPIData): DashboardMetric[] {
+  generateMetrics(kpiData: RealKPIData, t?: (key: string) => string): DashboardMetric[] {
+    // Fonction par défaut si t n'est pas fourni (fallback en français)
+    const translate = t || ((key: string) => {
+      const fallbacks: Record<string, string> = {
+        'dashboard.operational.metrics.revenue_ytd': 'Chiffre d\'affaires YTD',
+        'dashboard.operational.metrics.profit_margin': 'Marge bénéficiaire',
+        'dashboard.operational.metrics.cash_runway': 'Runway trésorerie',
+        'dashboard.operational.metrics.total_invoices': 'Factures émises',
+        'dashboard.operational.metrics.pending_invoices': 'Factures en attente',
+        'dashboard.operational.metrics.cash_balance': 'Solde de trésorerie',
+        'dashboard.operational.periods.vs_previous_year': 'vs année précédente',
+      };
+      return fallbacks[key] || key;
+    });
+
     return [
       {
         id: 'revenue_ytd',
-        label: 'Chiffre d\'affaires YTD',
+        label: translate('dashboard.operational.metrics.revenue_ytd'),
         value: kpiData.revenue_ytd,
         unit: 'currency',
         trend: kpiData.revenue_growth > 0 ? 'up' : kpiData.revenue_growth < 0 ? 'down' : 'stable',
         change: Math.abs(kpiData.revenue_growth),
-        period: 'vs année précédente',
+        period: translate('dashboard.operational.periods.vs_previous_year'),
         importance: 'high',
       },
       {
         id: 'profit_margin',
-        label: 'Marge bénéficiaire',
+        label: translate('dashboard.operational.metrics.profit_margin'),
         value: kpiData.profit_margin,
         unit: 'percentage',
         trend: kpiData.profit_margin > 15 ? 'up' : kpiData.profit_margin < 5 ? 'down' : 'stable',
@@ -429,7 +445,7 @@ export class RealDashboardKpiService {
       },
       {
         id: 'cash_runway',
-        label: 'Runway trésorerie',
+        label: translate('dashboard.operational.metrics.cash_runway'),
         value: kpiData.cash_runway_days,
         unit: 'days',
         trend: kpiData.cash_runway_days > 90 ? 'up' : kpiData.cash_runway_days < 30 ? 'down' : 'stable',
@@ -437,14 +453,14 @@ export class RealDashboardKpiService {
       },
       {
         id: 'total_invoices',
-        label: 'Factures émises',
+        label: translate('dashboard.operational.metrics.total_invoices'),
         value: kpiData.total_invoices,
         unit: 'number',
         importance: 'medium',
       },
       {
         id: 'pending_invoices',
-        label: 'Factures en attente',
+        label: translate('dashboard.operational.metrics.pending_invoices'),
         value: kpiData.pending_invoices,
         unit: 'number',
         trend: kpiData.pending_invoices > 10 ? 'down' : 'stable',
@@ -452,7 +468,7 @@ export class RealDashboardKpiService {
       },
       {
         id: 'cash_balance',
-        label: 'Solde de trésorerie',
+        label: translate('dashboard.operational.metrics.cash_balance'),
         value: kpiData.cash_balance,
         unit: 'currency',
         importance: 'high',
@@ -462,15 +478,28 @@ export class RealDashboardKpiService {
 
   /**
    * Génère les graphiques pour le dashboard
+   * @param kpiData Données KPI calculées
+   * @param t Fonction de traduction i18next (optionnelle pour backward compatibility)
    */
-  generateCharts(kpiData: RealKPIData): DashboardChart[] {
+  generateCharts(kpiData: RealKPIData, t?: (key: string) => string): DashboardChart[] {
+    // Fonction par défaut si t n'est pas fourni (fallback en français)
+    const translate = t || ((key: string) => {
+      const fallbacks: Record<string, string> = {
+        'dashboard.operational.charts.monthly_revenue': 'Évolution du CA mensuel',
+        'dashboard.operational.charts.top_clients': 'Top 5 clients',
+        'dashboard.operational.charts.expense_breakdown': 'Répartition des dépenses',
+        'dashboard.operational.periods.month': 'Mois',
+      };
+      return fallbacks[key] || key;
+    });
+
     return [
       {
         id: 'monthly_revenue',
         type: 'line',
-        title: 'Évolution du CA mensuel',
+        title: translate('dashboard.operational.charts.monthly_revenue'),
         data: kpiData.monthly_revenue.map((item) => ({
-          label: `Mois ${item.month}`,
+          label: `${translate('dashboard.operational.periods.month')} ${item.month}`,
           value: item.amount,
         })),
         color: '#3b82f6',
@@ -478,7 +507,7 @@ export class RealDashboardKpiService {
       {
         id: 'top_clients',
         type: 'bar',
-        title: 'Top 5 clients',
+        title: translate('dashboard.operational.charts.top_clients'),
         data: kpiData.top_clients.map((client) => ({
           label: client.name,
           value: client.amount,
@@ -488,7 +517,7 @@ export class RealDashboardKpiService {
       {
         id: 'expense_breakdown',
         type: 'pie',
-        title: 'Répartition des dépenses',
+        title: translate('dashboard.operational.charts.expense_breakdown'),
         data: kpiData.expense_breakdown.map((expense) => ({
           label: expense.category,
           value: expense.amount,

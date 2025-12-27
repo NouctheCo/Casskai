@@ -239,7 +239,7 @@ export function useBanking(): UseBankingReturn {
 
       const { error: updateError } = await supabase
         .from('bank_transactions')
-        .update({ reconciled: true })
+        .update({ is_reconciled: true })
         .eq('id', transactionId);
 
       if (updateError) throw updateError;

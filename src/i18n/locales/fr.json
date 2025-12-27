@@ -747,7 +747,8 @@
         "pending": "En attente"
       },
       "actions": {
-        "reconcile": "Réconcilier"
+        "reconcile": "Réconcilier",
+        "retry": "Renvoyer en catégorisation"
       },
       "pagination": "Affichage des {{shown}} premières transactions sur {{total}}"
     }
@@ -1237,7 +1238,24 @@
     "upcomingDeadlinesDescription": "Échéances et obligations à venir",
     "operational": {
       "title": "Dashboard Opérationnel",
-      "subtitle": "Vision en temps réel de votre performance financière"
+      "subtitle": "Vision en temps réel de votre performance financière",
+      "metrics": {
+        "revenue_ytd": "Chiffre d'affaires YTD",
+        "profit_margin": "Marge bénéficiaire",
+        "cash_runway": "Runway trésorerie",
+        "total_invoices": "Factures émises",
+        "pending_invoices": "Factures en attente",
+        "cash_balance": "Solde de trésorerie"
+      },
+      "charts": {
+        "monthly_revenue": "Évolution du CA mensuel",
+        "top_clients": "Top 5 clients",
+        "expense_breakdown": "Répartition des dépenses"
+      },
+      "periods": {
+        "vs_previous_year": "vs année précédente",
+        "month": "Mois {{month}}"
+      }
     },
     "aiAnalysis": {
       "title": "Analyse IA & Recommandations",
@@ -2076,7 +2094,24 @@
     "total": "Total",
     "unbalanced": "Déséquilibré",
     "untitledJournal": "Journal sans titre",
-    "update": "Mettre à jour"
+    "update": "Mettre à jour",
+    "attachments": "Pièces jointes",
+    "add_attachment": "Ajouter une pièce",
+    "upload": "Télécharger",
+    "download": "Télécharger",
+    "delete_attachment": "Supprimer",
+    "no_attachments": "Aucune pièce jointe",
+    "attachment_added": "Pièce jointe ajoutée avec succès",
+    "attachment_deleted": "Pièce jointe supprimée",
+    "attachment_error": "Erreur lors de la gestion de la pièce jointe",
+    "file_size": "Taille",
+    "file_type": "Type",
+    "file_name": "Nom du fichier",
+    "description": "Description",
+    "uploaded_at": "Téléchargé le",
+    "confirm_delete": "Êtes-vous sûr de vouloir supprimer cette pièce jointe ?",
+    "max_file_size": "Taille maximale: 50 MB",
+    "allowed_formats": "Formats acceptés: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, WebP, TXT"
   },
   "journalEntryDeletedSuccess": "Écriture supprimée avec succès",
   "journals": {

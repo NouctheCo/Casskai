@@ -15,7 +15,7 @@
  * Supporte les formats CSV, OFX, QIF
  */
 
-import { supabase } from '@/lib/supabase';
+import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabase';
 
 export interface BankTransaction {
   id?: string;
@@ -78,7 +78,7 @@ class BankImportService {
           message: 'Fichier CSV vide ou invalide',
           imported_count: 0,
           skipped_count: 0,
-          error_count: 1,
+           error_count: 1,
           transactions: [],
           errors: ['Fichier CSV vide ou invalide']
         };
@@ -110,6 +110,7 @@ class BankImportService {
       // Sauvegarde en base
       const saveResult = await this.saveTransactions(transactions);
       
+      const combinedErrors = [...errors, ...saveResult.errors];
       return {
         success: saveResult.success,
         message: saveResult.success 
@@ -117,9 +118,9 @@ class BankImportService {
           : 'Erreur lors de la sauvegarde',
         imported_count: saveResult.imported_count,
         skipped_count: saveResult.skipped_count,
-        error_count: errors.length,
+        error_count: combinedErrors.length,
         transactions,
-        errors: errors.length > 0 ? errors : undefined
+        errors: combinedErrors.length > 0 ? combinedErrors : undefined
       };
 
     } catch (error: unknown) {
@@ -152,7 +153,7 @@ class BankImportService {
           message: 'Aucune transaction trouvée dans le fichier OFX',
           imported_count: 0,
           skipped_count: 0,
-          error_count: 1,
+           error_count: 1,
           transactions: []
         };
       }
@@ -164,8 +165,9 @@ class BankImportService {
         message: `${saveResult.imported_count} transactions OFX importées`,
         imported_count: saveResult.imported_count,
         skipped_count: saveResult.skipped_count,
-        error_count: 0,
-        transactions
+        error_count: saveResult.errors.length,
+        transactions,
+        errors: saveResult.errors.length > 0 ? saveResult.errors : undefined
       };
 
     } catch (error: unknown) {
@@ -207,8 +209,9 @@ class BankImportService {
         message: `${saveResult.imported_count} transactions QIF importées`,
         imported_count: saveResult.imported_count,
         skipped_count: saveResult.skipped_count,
-        error_count: 0,
-        transactions
+        error_count: saveResult.errors.length,
+        transactions,
+        errors: saveResult.errors.length > 0 ? saveResult.errors : undefined
       };
 
     } catch (error: unknown) {
@@ -269,20 +272,30 @@ class BankImportService {
   }
   private async parseQIFTransactions(qifContent: string, accountId: string, companyId: string): Promise<BankTransaction[]> {
     const transactions: BankTransaction[] = [];
-    const lines = qifContent.split('\n');
-    
+    // Normaliser les fins de lignes (gérer CRLF Windows et CR Mac)
+    const content = qifContent.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    const lines = content.split('\n');
+
     let currentTransaction: Partial<BankTransaction> = {};
-    let inTransactionBlock = false;
+    let seenTypeHeader = false;
     
-    for (const line of lines) {
-      const trimmed = line.trim();
-      
-      // Ignorer les lignes vides et l'entête
-      if (!trimmed || trimmed.startsWith('!')) {
-        inTransactionBlock = trimmed.startsWith('!Type:');
+    for (const rawLine of lines) {
+      const trimmed = rawLine.trim();
+      if (!trimmed) continue;
+
+      // Sauter l'entête tant que !Type: n'est pas rencontré
+      if (trimmed.startsWith('!')) {
+        if (trimmed.startsWith('!Type:')) {
+          seenTypeHeader = true;
+        }
         continue;
       }
-      
+
+      if (!seenTypeHeader) {
+        // Ignorer tout avant l'entête QIF
+        continue;
+      }
+
       const code = trimmed.charAt(0);
       const value = trimmed.substring(1).trim();
       
@@ -297,10 +310,11 @@ class BankImportService {
         case 'T': // Amount
         case 'U': // Amount (alternative)
           try {
-            const cleanValue = value.replace(/[^\d.,\-]/g, '').replace(',', '.');
-            const amount = parseFloat(cleanValue);
+            const isParenNegative = /^\(.*\)$/.test(value);
+            const numeric = value.replace(/\(|\)/g, '').replace(/[^\d.,\-]/g, '').replace(',', '.');
+            let amount = parseFloat(numeric);
             if (!isNaN(amount)) {
-              currentTransaction.amount = amount;
+              currentTransaction.amount = isParenNegative ? -Math.abs(amount) : amount;
             }
           } catch (error) {
             console.warn(`Erreur parsing montant QIF: ${value}`, error);
@@ -309,7 +323,7 @@ class BankImportService {
         case 'P': // Payee/Description
           currentTransaction.description = value || currentTransaction.description;
           break;
-        case 'L': // Category (often payee in some QIF formats)
+        case 'L': // Category (souvent le payee dans certains QIF)
           if (!currentTransaction.description) {
             currentTransaction.description = value;
           }
@@ -322,16 +336,15 @@ class BankImportService {
         case 'N': // Number/Reference
           currentTransaction.reference = value;
           break;
-        case 'C': // Cleared status
-          // C = cleared, * = pending, etc
+        case 'C': // Cleared status (ignoré)
           break;
-        case '^': // End of transaction
-          if (currentTransaction.transaction_date && currentTransaction.amount !== undefined && currentTransaction.amount !== 0) {
+        case '^': // Fin de transaction
+          if (currentTransaction.transaction_date && currentTransaction.amount !== undefined) {
             transactions.push({
               bank_account_id: accountId,
               company_id: companyId,
               transaction_date: currentTransaction.transaction_date,
-              amount: currentTransaction.amount,
+              amount: currentTransaction.amount!,
               currency: 'EUR',
               description: (currentTransaction.description || 'Transaction sans description').trim(),
               reference: currentTransaction.reference,
@@ -339,12 +352,28 @@ class BankImportService {
               import_source: 'qif',
               status: 'pending'
             } as BankTransaction);
-          } else if (!currentTransaction.transaction_date || currentTransaction.amount === undefined) {
+          } else {
             console.warn('Transaction QIF incomplète (date ou montant manquant)', currentTransaction);
           }
           currentTransaction = {};
           break;
       }
+    }
+
+    // Flush potentiel si le fichier ne termine pas par '^'
+    if (currentTransaction.transaction_date && currentTransaction.amount !== undefined) {
+      transactions.push({
+        bank_account_id: accountId,
+        company_id: companyId,
+        transaction_date: currentTransaction.transaction_date,
+        amount: currentTransaction.amount!,
+        currency: 'EUR',
+        description: (currentTransaction.description || 'Transaction sans description').trim(),
+        reference: currentTransaction.reference,
+        is_reconciled: false,
+        import_source: 'qif',
+        status: 'pending'
+      } as BankTransaction);
     }
     
     return transactions;
@@ -353,9 +382,10 @@ class BankImportService {
   /**
    * Sauvegarde les transactions en base
    */
-  private async saveTransactions(transactions: BankTransaction[]): Promise<{success: boolean, imported_count: number, skipped_count: number}> {
+  private async saveTransactions(transactions: BankTransaction[]): Promise<{success: boolean, imported_count: number, skipped_count: number, errors: string[]}> {
     let imported = 0;
     let skipped = 0;
+    const errors: string[] = [];
     
     for (const transaction of transactions) {
       try {
@@ -394,8 +424,43 @@ class BankImportService {
           }]);
           
         if (error) {
-          console.error('Erreur sauvegarde transaction:', error);
-          continue;
+          console.warn('Erreur sauvegarde via client, tentative REST fallback:', error);
+          try {
+            const resp = await fetch(`${SUPABASE_URL}/rest/v1/bank_transactions`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                apikey: SUPABASE_ANON_KEY,
+                Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+                Prefer: 'return=representation'
+              },
+              body: JSON.stringify([{ 
+                bank_account_id: transaction.bank_account_id,
+                company_id: transaction.company_id,
+                transaction_date: transaction.transaction_date,
+                amount: transaction.amount,
+                currency: transaction.currency,
+                description: transaction.description,
+                ...(transaction.value_date ? { value_date: transaction.value_date } : {}),
+                ...(transaction.reference ? { reference: transaction.reference } : {}),
+                ...(transaction.category ? { category: transaction.category } : {}),
+                is_reconciled: transaction.is_reconciled || false,
+                import_source: transaction.import_source || 'csv',
+                status: transaction.status || 'pending'
+              }])
+            });
+
+            if (!resp.ok) {
+              const text = await resp.text();
+              console.error('REST fallback insert failed', resp.status, text);
+              errors.push(`REST insert failed: ${resp.status}`);
+              continue;
+            }
+          } catch (fallbackErr) {
+            console.error('Exception during REST fallback insert:', fallbackErr);
+            errors.push('Exception during REST fallback');
+            continue;
+          }
         }
         
         imported++;
@@ -403,12 +468,13 @@ class BankImportService {
       } catch (error: unknown) {
         console.error('Erreur traitement transaction:', error);
       }
-    }
+      }
     
     return {
       success: imported > 0,
       imported_count: imported,
-      skipped_count: skipped
+      skipped_count: skipped,
+      errors
     };
   }
 

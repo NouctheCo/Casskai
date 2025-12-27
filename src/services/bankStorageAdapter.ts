@@ -15,7 +15,7 @@
  * Garde la même interface mais utilise Supabase en arrière-plan
  */
 
-import { supabase } from '@/lib/supabase';
+import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabase';
 import { bankImportService, ImportResult } from './bankImportService';
 
 export interface ImportedFile {
@@ -202,7 +202,7 @@ class BankStorageAdapter {
       balance: 0, // Calculate if needed
       category: t.category,
       type: t.amount >= 0 ? 'credit' : 'debit',
-      status: t.reconciled ? 'reconciled' : 'pending',
+      status: t.is_reconciled ? 'reconciled' : 'pending',
       reference: t.reference,
       accountName: '' // Will be populated from join if needed
     }));
@@ -212,17 +212,76 @@ class BankStorageAdapter {
    * Réconcilie une transaction
    */
   async reconcileTransaction(transactionId: string): Promise<boolean> {
+    // Tentative standard via client Supabase
     const { error } = await supabase
       .from('bank_transactions')
-      .update({ reconciled: true })
+      .update({ is_reconciled: true, status: 'reconciled' })
       .eq('id', transactionId);
 
-    if (error) {
-      console.error('Error reconciling transaction:', error);
+    if (!error) return true;
+
+    console.warn('Fallback reconcile (missing apikey?) -> trying direct fetch', error);
+
+    try {
+      const resp = await fetch(`${SUPABASE_URL}/rest/v1/bank_transactions?id=eq.${transactionId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({ is_reconciled: true, status: 'reconciled' })
+      });
+
+      if (!resp.ok) {
+        const text = await resp.text();
+        console.error('Fallback reconcile failed', resp.status, text);
+        return false;
+      }
+
+      return true;
+    } catch (fetchError) {
+      console.error('Fallback reconcile error:', fetchError);
       return false;
     }
+  }
 
-    return true;
+  /**
+   * Annule la réconciliation d'une transaction (renvoi en catégorisation)
+   */
+  async unreconcileTransaction(transactionId: string): Promise<boolean> {
+    // Tentative standard via client Supabase
+    const { error } = await supabase
+      .from('bank_transactions')
+      .update({ is_reconciled: false, status: 'pending', matched_entry_id: null })
+      .eq('id', transactionId);
+
+    if (!error) return true;
+
+    console.warn('Fallback unreconcile (missing apikey?) -> trying direct fetch', error);
+
+    try {
+      const resp = await fetch(`${SUPABASE_URL}/rest/v1/bank_transactions?id=eq.${transactionId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({ is_reconciled: false, status: 'pending', matched_entry_id: null })
+      });
+
+      if (!resp.ok) {
+        const text = await resp.text();
+        console.error('Fallback unreconcile failed', resp.status, text);
+        return false;
+      }
+
+      return true;
+    } catch (fetchError) {
+      console.error('Fallback unreconcile error:', fetchError);
+      return false;
+    }
   }
 
   /**
@@ -265,7 +324,7 @@ class BankStorageAdapter {
         description: t.description,
         reference: t.reference,
         category: t.category,
-        reconciled: t.status === 'reconciled',
+        is_reconciled: t.status === 'reconciled',
         imported_from: 'csv' as const,
         raw_data: t
       }));

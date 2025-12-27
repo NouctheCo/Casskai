@@ -17,9 +17,9 @@ interface CategorizationRule {
 interface Account {
   id: string;
   account_number: string;
-  name: string;
-  type: string;
-  class: number;
+  account_name: string;
+  account_type: string;
+  account_class: number;
 }
 
 interface RulesModalProps {
@@ -135,7 +135,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
 
   const _getAccountLabel = (accountId: string) => {
     const account = accounts.find((a) => a.id === accountId);
-    return account ? `${account.account_number} - ${account.name}` : 'Compte inconnu';
+    return account ? `${account.account_number} - ${account.account_name}` : 'Compte inconnu';
   };
 
   return (
@@ -260,7 +260,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                             <option value="">Sélectionner...</option>
                             {accounts.map((acc) => (
                               <option key={acc.id} value={acc.id}>
-                                {acc.account_number} - {acc.name}
+                                {acc.account_number} - {acc.account_name}
                               </option>
                             ))}
                           </select>
@@ -349,7 +349,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                         <option value="">Sélectionner...</option>
                         {accounts.map((acc) => (
                           <option key={acc.id} value={acc.id}>
-                            {acc.account_number} - {acc.name}
+                            {acc.account_number} - {acc.account_name}
                           </option>
                         ))}
                       </select>

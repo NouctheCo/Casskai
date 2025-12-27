@@ -14,7 +14,7 @@ Ce dossier regroupe **tous les services applicatifs** de CassKai, c’est-à-dir
   - `accountsService.*` : gestion CRUD des comptes comptables (table `accounts`)
   - `accountingService.*` : logique métier sur le plan comptable, hiérarchie, validation de comptes (pas d’accès DB)
   - `journalsService.*` : gestion CRUD des journaux comptables (table `journals`)
-  - `journalEntryService.*` : gestion CRUD des écritures comptables (table `journal_entries`, `journal_entry_items`)
+  - `journalEntryService.*` : gestion CRUD des écritures comptables (table `journal_entries`, `journal_entry_lines`)
   - `thirdPartiesService.*` : gestion des tiers (clients, fournisseurs)
   - `currencyService.*` et `currencyIntegration.*` : gestion des devises, taux, conversions
   - `configService.*` : gestion de la configuration globale de l’application
@@ -50,7 +50,7 @@ Ce dossier regroupe **tous les services applicatifs** de CassKai, c’est-à-dir
 ```
 ou
 ```js
-// Service de gestion des écritures comptables (table `journal_entries` + `journal_entry_items`)
+// Service de gestion des écritures comptables (table `journal_entries` + `journal_entry_lines`)
 // Création, mise à jour, suppression, duplication, filtres, stats, validation équilibrage
 ```
 

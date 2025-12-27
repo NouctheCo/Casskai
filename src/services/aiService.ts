@@ -53,9 +53,6 @@ export interface AIAction {
 // CONFIGURATION
 // =====================================================
 
-const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
-const OPENAI_MODEL = 'gpt-4-turbo-preview';
-
 const SYSTEM_PROMPT = `Tu es l'assistant IA de CassKai, une plateforme de gestion financière pour PME et indépendants.
 
 Tu peux aider les utilisateurs à :
@@ -155,14 +152,8 @@ class AIService {
 
     const updatedMessages = [...conversation.messages, userMsg];
 
-    // Si clé API OpenAI configurée, appeler OpenAI
-    let aiResponse: AIResponse;
-    if (OPENAI_API_KEY) {
-      aiResponse = await this.callOpenAI(updatedMessages, context);
-    } else {
-      // Sinon réponse simulée
-      aiResponse = this.simulateResponse(userMessage);
-    }
+    // Appeler la Edge Function Supabase qui utilise OpenAI de manière sécurisée
+    const aiResponse = await this.callEdgeFunction(updatedMessages, context);
 
     const assistantMsg: AIMessage = {
       role: 'assistant',
@@ -183,50 +174,53 @@ class AIService {
     return aiResponse;
   }
 
-  private async callOpenAI(
+  private async callEdgeFunction(
     messages: AIMessage[],
     context?: any
   ): Promise<AIResponse> {
-    if (!OPENAI_API_KEY) {
-      throw new Error('Clé API OpenAI non configurée');
+    try {
+      let systemMessage = SYSTEM_PROMPT;
+      if (context?.currentPage) {
+        systemMessage += `\n\nL'utilisateur est sur: ${context.currentPage}`;
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Utilisateur non authentifié');
+      }
+
+      const response = await supabase.functions.invoke('ai-assistant', {
+        body: {
+          messages: messages.map(m => ({
+            role: m.role,
+            content: m.content
+          })),
+          systemMessage,
+          context
+        }
+      });
+
+      if (response.error) {
+        console.error('Erreur Edge Function:', response.error);
+        throw new Error(response.error.message || 'Erreur lors de l\'appel à l\'assistant IA');
+      }
+
+      if (!response.data || !response.data.message) {
+        // Fallback en cas d'erreur
+        return this.simulateResponse(messages[messages.length - 1]?.content || '');
+      }
+
+      return {
+        message: response.data.message,
+        suggestions: response.data.suggestions || [],
+        actions: response.data.actions || []
+      };
+
+    } catch (error: unknown) {
+      console.error('Erreur appel Edge Function:', error);
+      // Fallback sur réponse simulée en cas d'erreur
+      return this.simulateResponse(messages[messages.length - 1]?.content || '');
     }
-
-    let systemMessage = SYSTEM_PROMPT;
-    if (context?.currentPage) {
-      systemMessage += `\n\nL'utilisateur est sur: ${context.currentPage}`;
-    }
-
-    const openAIMessages = [
-      { role: 'system', content: systemMessage },
-      ...messages.map(m => ({
-        role: m.role,
-        content: m.content
-      }))
-    ];
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: OPENAI_MODEL,
-        messages: openAIMessages,
-        temperature: 0.7,
-        max_tokens: 1000
-      })
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error?.message || 'Erreur API OpenAI');
-    }
-
-    const data = await response.json();
-    const content = data.choices[0].message.content;
-
-    return this.parseAIResponse(content);
   }
 
   private simulateResponse(userMessage: string): AIResponse {

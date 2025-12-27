@@ -57,15 +57,18 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     headers: {
 
       'x-application-name': 'CassKai',
-      // Force inclusion of Supabase API headers to avoid 400 "No API key found"
-      apikey: supabaseAnonKey,
-      Authorization: `Bearer ${supabaseAnonKey}`,
+        // Force inclusion of Supabase API key to avoid 400 "No API key found"
+        apikey: supabaseAnonKey,
 
     },
 
   },
 
 });
+
+// Export raw values for services needing explicit headers (fallback fetch)
+export const SUPABASE_URL = supabaseUrl;
+export const SUPABASE_ANON_KEY = supabaseAnonKey;
 
 
 

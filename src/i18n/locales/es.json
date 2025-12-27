@@ -1008,7 +1008,24 @@
     },
     "operational": {
       "title": "Panel Operacional",
-      "subtitle": "Vista en tiempo real de su rendimiento financiero"
+      "subtitle": "Vista en tiempo real de su rendimiento financiero",
+      "metrics": {
+        "revenue_ytd": "Ingresos acumulados del año",
+        "profit_margin": "Margen de beneficio",
+        "cash_runway": "Autonomía de caja",
+        "total_invoices": "Facturas emitidas",
+        "pending_invoices": "Facturas pendientes",
+        "cash_balance": "Saldo de caja"
+      },
+      "charts": {
+        "monthly_revenue": "Evolución de ingresos mensuales",
+        "top_clients": "Top 5 clientes",
+        "expense_breakdown": "Desglose de gastos"
+      },
+      "periods": {
+        "vs_previous_year": "vs año anterior",
+        "month": "Mes {{month}}"
+      }
     },
     "aiAnalysis": {
       "title": "Análisis IA y Recomendaciones",
@@ -1804,7 +1821,23 @@
     "total": "Total",
     "unbalanced": "Desequilibrado",
     "untitledJournal": "Diario sin título",
-    "update": "Actualizar"
+    "update": "Actualizar",
+    "attachments": "Archivos adjuntos",
+    "add_attachment": "Agregar archivo",
+    "upload": "Subir",
+    "download": "Descargar",
+    "delete_attachment": "Eliminar",
+    "no_attachments": "Sin archivos adjuntos",
+    "attachment_added": "Archivo agregado exitosamente",
+    "attachment_deleted": "Archivo eliminado",
+    "attachment_error": "Error al administrar el archivo",
+    "file_size": "Tamaño",
+    "file_type": "Tipo",
+    "file_name": "Nombre del archivo",
+    "uploaded_at": "Subido el",
+    "confirm_delete": "¿Estás seguro de que deseas eliminar este archivo?",
+    "max_file_size": "Tamaño máximo: 50 MB",
+    "allowed_formats": "Formatos permitidos: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, WebP, TXT"
   },
   "journals": {
     "accountingJournals": "Diarios contables",
@@ -4273,7 +4306,8 @@
         "pending": "Pendiente"
       },
       "actions": {
-        "reconcile": "Reconciliar"
+        "reconcile": "Reconciliar",
+        "retry": "Reenviar a categorización"
       },
       "pagination": "Mostrando las primeras {{shown}} transacciones de {{total}}"
     }

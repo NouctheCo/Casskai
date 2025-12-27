@@ -31,7 +31,8 @@ import {
   DollarSign,
   Tag,
   CreditCard,
-  Banknote
+  Banknote,
+  Trash2
 } from 'lucide-react';
 import { BankAccountsTab } from '@/components/banking/BankAccountsTab';
 import { SepaPaymentGenerator } from '@/components/banking/SepaPaymentGenerator';
@@ -159,7 +160,7 @@ const BanksPageNew: React.FC = () => {
         setBankAccounts([account]);
       }
 
-      // Import file
+      // Import file with error handling
       const result = await bankStorageAdapter.importFile(file, accountId, currentCompany.id);
 
       if (result.success) {
@@ -170,11 +171,11 @@ const BanksPageNew: React.FC = () => {
         await loadMetrics();
       } else {
         toastError(result.message + (result.errors ? ` (${result.errors.length} erreurs)` : ''));
+        console.error('Import failed:', result);
       }
     } catch (error) {
       console.error('Import error:', error);
-      toastError(error instanceof Error ? error.message : "Impossible d'importer le fichier"
-     );
+      toastError(error instanceof Error ? error.message : "Impossible d'importer le fichier");
     } finally {
       setUploading(false);
       // eslint-disable-next-line require-atomic-updates
@@ -221,6 +222,43 @@ const BanksPageNew: React.FC = () => {
       console.error('Reconciliation error:', error);
       toastError("Impossible de réconcilier la transaction"
      );
+    }
+  };
+
+  // Unreconcile (send back to categorization)
+  const handleUnreconcile = async (transactionId: string) => {
+    try {
+      const success = await bankStorageAdapter.unreconcileTransaction(transactionId);
+      if (success) {
+        toastSuccess("La transaction a été renvoyée en catégorisation");
+        await loadTransactions();
+        await loadMetrics();
+      }
+    } catch (error) {
+      console.error('Unreconcile error:', error);
+      toastError("Impossible de renvoyer la transaction en catégorisation");
+    }
+  };
+
+  // Purge history for selected account
+  const handlePurgeHistory = async () => {
+    if (!currentCompany?.id) return;
+    const confirm = window.confirm('Confirmez-vous la purge de l\'historique pour ce compte ? Cette action est irréversible.');
+    if (!confirm) return;
+    try {
+      let query = supabase
+        .from('bank_transactions')
+        .delete()
+        .eq('company_id', currentCompany.id);
+      if (selectedAccountId) query = query.eq('bank_account_id', selectedAccountId);
+      const { error } = await query;
+      if (error) throw error;
+      toastSuccess('Historique purgé avec succès');
+      await loadTransactions();
+      await loadMetrics();
+    } catch (error) {
+      console.error('Purge history error:', error);
+      toastError("La purge a échoué. Vérifiez les droits ou contactez le support.");
     }
   };
 
@@ -442,6 +480,16 @@ const BanksPageNew: React.FC = () => {
           <CardDescription>
             {t('banking.history.description')}
           </CardDescription>
+          <div className="mt-2 flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={loadTransactions}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              {t('common.refresh')}
+            </Button>
+            <Button variant="destructive" size="sm" onClick={handlePurgeHistory}>
+              <Trash2 className="h-4 w-4 mr-2" />
+              Purger l'historique
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -506,13 +554,23 @@ const BanksPageNew: React.FC = () => {
                         )}
                       </td>
                       <td className="px-4 py-3 text-center">
-                        {transaction.status !== 'reconciled' && (
+                        {transaction.status !== 'reconciled' ? (
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => handleReconcile(transaction.id)}
+                            title="Réconcilier"
                           >
                             {t('banking.history.actions.reconcile')}
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleUnreconcile(transaction.id)}
+                            title="Renvoyer en catégorisation"
+                          >
+                            {t('banking.history.actions.retry') || 'Renvoyer'}
                           </Button>
                         )}
                       </td>
