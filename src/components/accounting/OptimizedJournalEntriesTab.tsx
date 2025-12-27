@@ -922,7 +922,10 @@ const EntryPreviewDialog = ({ open, onClose, entry }: { open: boolean; onClose: 
   // Charger les pièces jointes quand le dialogue s'ouvre
   React.useEffect(() => {
     if (open && entry?.id) {
+      console.log('[EntryPreviewDialog] Loading attachments for entry:', entry.id);
       loadAttachments();
+    } else {
+      setAttachments([]);
     }
   }, [open, entry?.id]);
 
@@ -930,12 +933,19 @@ const EntryPreviewDialog = ({ open, onClose, entry }: { open: boolean; onClose: 
     if (!entry?.id) return;
     setLoadingAttachments(true);
     try {
+      console.log('[EntryPreviewDialog] Calling getAttachments with ID:', entry.id);
       const result = await journalEntryAttachmentService.getAttachments(entry.id);
+      console.log('[EntryPreviewDialog] Result:', result);
       if (result.success) {
-        setAttachments(result.data);
+        console.log('[EntryPreviewDialog] Setting attachments:', result.data?.length, 'items');
+        setAttachments(result.data || []);
+      } else {
+        console.error('[EntryPreviewDialog] Error from service:', result);
+        setAttachments([]);
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des PJ:', error);
+      console.error('[EntryPreviewDialog] Exception:', error);
+      setAttachments([]);
     } finally {
       setLoadingAttachments(false);
     }
@@ -1146,10 +1156,29 @@ const EntryPreviewDialog = ({ open, onClose, entry }: { open: boolean; onClose: 
             </div>
           )}
 
+          {/* Loading or Empty State for Attachments */}
+          {!loadingAttachments && attachments.length === 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Paperclip className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Pièces jointes</h3>
+              </div>
+              <div className="p-4 text-center bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Aucune pièce jointe</p>
+              </div>
+            </div>
+          )}
+
           {loadingAttachments && (
-            <div className="flex items-center justify-center py-4">
-              <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
-              <span className="ml-2 text-sm text-gray-500">Chargement des pièces jointes...</span>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Paperclip className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Pièces jointes</h3>
+              </div>
+              <div className="flex items-center justify-center py-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+                <span className="ml-2 text-sm text-gray-500">Chargement des pièces jointes...</span>
+              </div>
             </div>
           )}
 
