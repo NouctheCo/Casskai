@@ -933,18 +933,12 @@ const EntryPreviewDialog = ({ open, onClose, entry }: { open: boolean; onClose: 
     if (!entry?.id) return;
     setLoadingAttachments(true);
     try {
-      console.log('[EntryPreviewDialog] Calling getAttachments with ID:', entry.id);
-      const result = await journalEntryAttachmentService.getAttachments(entry.id);
-      console.log('[EntryPreviewDialog] Result:', result);
-      if (result.success) {
-        console.log('[EntryPreviewDialog] Setting attachments:', result.data?.length, 'items');
-        setAttachments(result.data || []);
-      } else {
-        console.error('[EntryPreviewDialog] Error from service:', result);
-        setAttachments([]);
-      }
+      console.log('[EntryPreviewDialog] Loading attachments for entry ID:', entry.id);
+      const data = await journalEntryAttachmentService.getAttachments(entry.id);
+      console.log('[EntryPreviewDialog] Attachments loaded:', data?.length, 'items');
+      setAttachments(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('[EntryPreviewDialog] Exception:', error);
+      console.error('[EntryPreviewDialog] Error loading attachments:', error);
       setAttachments([]);
     } finally {
       setLoadingAttachments(false);
